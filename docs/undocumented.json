@@ -1,0 +1,54 @@
+{
+  "warnings": [
+    {
+      "file": "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/DataCapturingService.swift",
+      "line": 11,
+      "symbol": "DataCapturingService",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/DataCapturingService.swift",
+      "line": 18,
+      "symbol": "DataCapturingService.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/DataCapturingService.swift",
+      "line": 24,
+      "symbol": "DataCapturingService.start()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/DataCapturingService.swift",
+      "line": 29,
+      "symbol": "DataCapturingService.start(with:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/DataCapturingService.swift",
+      "line": 33,
+      "symbol": "DataCapturingService.stop()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/DataCapturingService.swift",
+      "line": 37,
+      "symbol": "DataCapturingService.forceSync()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/DataCapturingService.swift",
+      "line": 41,
+      "symbol": "DataCapturingService.delete(unsynced:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/Users/cyface/Documents/Movebis/DataCapturing"
+}
