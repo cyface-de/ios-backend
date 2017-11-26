@@ -29,6 +29,18 @@ public class Measurement : Equatable {
      */
     public var id : Int64?
     
+    private (set) var accelerations = [AccelerationPoint]()
+    
+    //MARK: Initializers
+    public init(_ id : Int64?) {
+        self.id = id
+    }
+    
+    //MARK: Methods
+    func append(_ acceleration: AccelerationPoint) {
+        accelerations.append(acceleration)
+    }
+    
     //MARK: Equatable
     public static func ==(lhs: Measurement, rhs: Measurement) -> Bool {
         return lhs.id == rhs.id
