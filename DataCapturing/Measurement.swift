@@ -29,7 +29,9 @@ public class Measurement : Equatable {
      */
     public var id : Int64?
     
-    private (set) var accelerations = [AccelerationPoint]()
+    private (set) public var accelerations = [AccelerationPoint]()
+    
+    private (set) public var geoLocations = [GeoLocation]()
     
     //MARK: Initializers
     public init(_ id : Int64?) {
@@ -39,6 +41,10 @@ public class Measurement : Equatable {
     //MARK: Methods
     func append(_ acceleration: AccelerationPoint) {
         accelerations.append(acceleration)
+    }
+    
+    func append(_ geoLocation: GeoLocation) {
+        geoLocations.append(geoLocation)
     }
     
     //MARK: Equatable

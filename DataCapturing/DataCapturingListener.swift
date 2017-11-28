@@ -34,7 +34,7 @@ public protocol DataCapturingListener {
      - parameters:
      - position: The new geo location position.
      */
-    func onNewGpsPositionAcquired(position:GpsPosition)
+    func onNewGpsPositionAcquired(position:GeoLocation)
     /**
      This method is called each time the application runs out of space. How much space is used and how much is available may be retrieved from `allocation`.
      -parameters:

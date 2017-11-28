@@ -10,10 +10,10 @@ import Foundation
 
 public class AccelerationPoint {
     var id: Int64?
-    var ax: Double
-    var ay: Double
-    var az: Double
-    var timestamp: Int64
+    private (set) public var ax: Double
+    private (set) public var ay: Double
+    private (set) public var az: Double
+    private (set) public var timestamp: Int64
     
     public init(id: Int64?, ax: Double, ay: Double, az: Double, timestamp: Int64) {
         self.id = id
