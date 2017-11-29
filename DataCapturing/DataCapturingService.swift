@@ -48,7 +48,17 @@ public class DataCapturingService: NSObject, CLLocationManagerDelegate {
      */
     private let motionManager: CMMotionManager
     
-    private let locationManager: CLLocationManager
+    private lazy var locationManager: CLLocationManager = {
+        let manager = CLLocationManager()
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        manager.allowsBackgroundLocationUpdates = true
+        manager.activityType = .other
+        manager.showsBackgroundLocationIndicator = true
+        manager.distanceFilter = kCLDistanceFilterNone
+        manager.requestAlwaysAuthorization()
+        return manager
+    }()
     
     //MARK: Initializers
     /**
@@ -62,12 +72,7 @@ public class DataCapturingService: NSObject, CLLocationManagerDelegate {
         isRunning = false
         self.motionManager = motionManager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
-        self.locationManager = CLLocationManager()
         super.init()
-        
-        self.locationManager.delegate = self
-        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        
     }
     
     //MARK: Methods
@@ -79,7 +84,6 @@ public class DataCapturingService: NSObject, CLLocationManagerDelegate {
             fatalError("Trying to start DataCapturingService which is already running!")
         }
         
-        self.locationManager.requestAlwaysAuthorization()
         self.locationManager.startUpdatingLocation()
         self.isRunning = true
         let measurement = Measurement(Int64(unsyncedMeasurements.count))
@@ -117,6 +121,7 @@ public class DataCapturingService: NSObject, CLLocationManagerDelegate {
     public func stop() {
         isRunning = false
         motionManager.stopAccelerometerUpdates()
+        locationManager.stopUpdatingLocation()
     }
     
     /**
