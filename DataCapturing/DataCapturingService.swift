@@ -7,6 +7,9 @@
 //
 
 import Foundation
+import CoreMotion
+import CoreLocation
+import os.log
 
 /**
  An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.
@@ -19,30 +22,52 @@ import Foundation
  
  An object of this class is not thread safe and should only be used once per application. Youmay start and stop the service as often as you like and reuse the object.
  */
-public class DataCapturingService {
+public class DataCapturingService: NSObject, CLLocationManagerDelegate {
     //MARK: Properties
     /**
      `true` if data capturing is running; `false` otherwise.
      */
-    private(set) var isRunning:Bool
+    private(set) public var isRunning: Bool
+    
     /**
      A listener that is notified of important events during data capturing.
      */
-    private var listener:DataCapturingListener?
+    private var listener: DataCapturingListener?
+    
     /**
      A poor mans data storage.
      
      This is only in memory and will be replaced by a database on persistent storage during final implementation.
      */
-    private(set) var unsyncedMeasurements:[Measurement]
+    private(set) public var unsyncedMeasurements: [Measurement]
+    
+    private var currentMeasurement: Measurement?
+    
+    /**
+     An instance of `CMMotionManager`. There should be only one instance of this type in your application.
+     */
+    private let motionManager: CMMotionManager
+    
+    private let locationManager: CLLocationManager
     
     //MARK: Initializers
     /**
      Creates a new completely initialized `DataCapturingService`.
+     - parameters:
+     - motionManager: An instance of `CMMotionManager`. There should be only one instance of this type in your application. Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
+     - interval: The accelerometer update interval in Hertz.
      */
-    public init() {
+    public init(withManager motionManager:CMMotionManager, andUpdateInterval interval : Double) {
         unsyncedMeasurements = []
         isRunning = false
+        self.motionManager = motionManager
+        motionManager.accelerometerUpdateInterval = 1.0 / interval
+        self.locationManager = CLLocationManager()
+        super.init()
+        
+        self.locationManager.delegate = self
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        
     }
     
     //MARK: Methods
@@ -50,8 +75,29 @@ public class DataCapturingService {
      Starts the capturing process. This operation is idempotent.
      */
     public func start() {
-        isRunning = true
-        unsyncedMeasurements.append(Measurement())
+        guard !isRunning else {
+            fatalError("Trying to start DataCapturingService which is already running!")
+        }
+        
+        self.locationManager.requestAlwaysAuthorization()
+        self.locationManager.startUpdatingLocation()
+        self.isRunning = true
+        let measurement = Measurement(Int64(unsyncedMeasurements.count))
+        self.currentMeasurement = measurement
+        self.unsyncedMeasurements.append(measurement)
+        
+        if(motionManager.isAccelerometerAvailable) {
+            motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { data, error in
+                guard let myData = data else {
+                    fatalError("No Accelerometer data available!")
+                }
+                
+                let accValues = myData.acceleration
+                //let eventDate = NSDate(timeInterval: myData.timestamp, sinceDate: bootTime)
+                let acc = AccelerationPoint(id: nil, ax: accValues.x,ay: accValues.y, az: accValues.z,timestamp: self.currentTimeInMillisSince1970())
+                measurement.append(acc)
+            }
+        }
     }
     
     /**
@@ -62,6 +108,7 @@ public class DataCapturingService {
      */
     public func start(with listener:DataCapturingListener) {
         self.listener = listener
+        self.start()
     }
     
     /**
@@ -69,6 +116,7 @@ public class DataCapturingService {
      */
     public func stop() {
         isRunning = false
+        motionManager.stopAccelerometerUpdates()
     }
     
     /**
@@ -86,5 +134,31 @@ public class DataCapturingService {
             return
         }
         unsyncedMeasurements.remove(at:index)
+    }
+    
+    /**
+     Provides the current time in milliseconds since january 1st 1970 (UTC).
+     */
+    private func currentTimeInMillisSince1970() -> Int64 {
+        return convertToUtcTimestamp(date: Date())
+    }
+    
+    private func convertToUtcTimestamp(date value: Date) -> Int64 {
+        return Int64(value.timeIntervalSince1970*1000.0)
+    }
+    
+    // MARK: CLLocationManagerDelegate
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
+        guard !locations.isEmpty else {
+            fatalError("No location available for DataCapturingService!")
+        }
+        let location: CLLocation = locations[0]
+        os_log("New location: lat %@, lon %@",type: .info, location.coordinate.latitude.description,location.coordinate.longitude.description)
+        
+        guard let measurement = currentMeasurement else {
+            fatalError("No current measurement to save the location to! Data capturing impossible.")
+        }
+        measurement.append(GeoLocation(lat: location.coordinate.latitude,lon: location.coordinate.longitude,speed: location.speed,accuracy: location.horizontalAccuracy,timestamp: convertToUtcTimestamp(date: location.timestamp)))
     }
 }
