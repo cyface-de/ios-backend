@@ -10,6 +10,7 @@ import Foundation
 import CoreMotion
 import CoreLocation
 import os.log
+import CoreData
 
 /**
  An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.
@@ -34,21 +35,36 @@ public class DataCapturingService: NSObject, CLLocationManagerDelegate {
      */
     private var listener: DataCapturingListener?
     
+    /*
     /**
      A poor mans data storage.
      
      This is only in memory and will be replaced by a database on persistent storage during final implementation.
      */
-    private(set) public var unsyncedMeasurements: [Measurement]
+    private(set) public var unsyncedMeasurements: [MeasurementMO]
+ */
     
-    private var currentMeasurement: Measurement?
+    private var currentMeasurement: MeasurementMO?
     
     /**
      An instance of `CMMotionManager`. There should be only one instance of this type in your application.
      */
     private let motionManager: CMMotionManager
     
-    private let locationManager: CLLocationManager
+    private lazy var locationManager: CLLocationManager = {
+        let manager = CLLocationManager()
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        manager.allowsBackgroundLocationUpdates = true
+        manager.activityType = .other
+        manager.showsBackgroundLocationIndicator = true
+        manager.distanceFilter = kCLDistanceFilterNone
+        manager.requestAlwaysAuthorization()
+        return manager
+    }()
+    
+    private let persistenceLayer: PersistenceLayer
+
     
     //MARK: Initializers
     /**
@@ -57,17 +73,13 @@ public class DataCapturingService: NSObject, CLLocationManagerDelegate {
      - motionManager: An instance of `CMMotionManager`. There should be only one instance of this type in your application. Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
      - interval: The accelerometer update interval in Hertz.
      */
-    public init(withManager motionManager:CMMotionManager, andUpdateInterval interval : Double) {
-        unsyncedMeasurements = []
+    public init(withManager motionManager:CMMotionManager, andUpdateInterval interval : Double, using persistence: PersistenceLayer) {
+        //unsyncedMeasurements = [] // TODO init persistence layer here and load unsynced measurements
+        self.persistenceLayer = persistence
         isRunning = false
         self.motionManager = motionManager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
-        self.locationManager = CLLocationManager()
         super.init()
-        
-        self.locationManager.delegate = self
-        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        
     }
     
     //MARK: Methods
@@ -79,12 +91,12 @@ public class DataCapturingService: NSObject, CLLocationManagerDelegate {
             fatalError("Trying to start DataCapturingService which is already running!")
         }
         
-        self.locationManager.requestAlwaysAuthorization()
         self.locationManager.startUpdatingLocation()
         self.isRunning = true
-        let measurement = Measurement(Int64(unsyncedMeasurements.count))
+        let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
+        // TODO Create persistent measurement here
         self.currentMeasurement = measurement
-        self.unsyncedMeasurements.append(measurement)
+        //self.unsyncedMeasurements.append(measurement)
         
         if(motionManager.isAccelerometerAvailable) {
             motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { data, error in
@@ -94,8 +106,8 @@ public class DataCapturingService: NSObject, CLLocationManagerDelegate {
                 
                 let accValues = myData.acceleration
                 //let eventDate = NSDate(timeInterval: myData.timestamp, sinceDate: bootTime)
-                let acc = AccelerationPoint(id: nil, ax: accValues.x,ay: accValues.y, az: accValues.z,timestamp: self.currentTimeInMillisSince1970())
-                measurement.append(acc)
+                let acc = self.persistenceLayer.createAcceleration(x: accValues.x,y: accValues.y, z: accValues.z,at: self.currentTimeInMillisSince1970())
+                measurement.addToAccelerations(acc)
             }
         }
     }
@@ -117,23 +129,22 @@ public class DataCapturingService: NSObject, CLLocationManagerDelegate {
     public func stop() {
         isRunning = false
         motionManager.stopAccelerometerUpdates()
+        locationManager.stopUpdatingLocation()
     }
     
     /**
      Forces the service to synchronize all Measurements now if a connection is available. If this is not called the service might wait for an opprotune moment to start synchronization.
      */
     public func forceSync() {
-        unsyncedMeasurements.removeAll()
+        // TODO add transmission code.
+        persistenceLayer.deleteMeasurements()
     }
     
     /**
      Deletes an unsynchronized `Measurement` from this device.
      */
-    public func delete(unsynced measurement : Measurement) {
-        guard let index = unsyncedMeasurements.index(of:measurement) else {
-            return
-        }
-        unsyncedMeasurements.remove(at:index)
+    public func delete(unsynced measurement : MeasurementMO) {
+        persistenceLayer.delete(measurement: measurement)
     }
     
     /**
@@ -159,6 +170,10 @@ public class DataCapturingService: NSObject, CLLocationManagerDelegate {
         guard let measurement = currentMeasurement else {
             fatalError("No current measurement to save the location to! Data capturing impossible.")
         }
-        measurement.append(GeoLocation(lat: location.coordinate.latitude,lon: location.coordinate.longitude,speed: location.speed,accuracy: location.horizontalAccuracy,timestamp: convertToUtcTimestamp(date: location.timestamp)))
+        let geoLocation = persistenceLayer.createGeoLocation(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, accuracy: location.horizontalAccuracy, speed: location.speed, at: convertToUtcTimestamp(date: location.timestamp))
+        measurement.addToGeoLocations(geoLocation)
+        
+        
+        persistenceLayer.save()
     }
 }
