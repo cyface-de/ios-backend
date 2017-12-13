@@ -12,11 +12,16 @@
 		3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */; };
 		3D0BDEB21FB1B951004EA25E /* DataCapturing.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0BDEA41FB1B951004EA25E /* DataCapturing.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */; };
-		3D0BDEC21FB1C1AE004EA25E /* GeoLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEBC1FB1C1AE004EA25E /* GeoLocation.swift */; };
-		3D0BDEC31FB1C1AE004EA25E /* Measurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEBD1FB1C1AE004EA25E /* Measurement.swift */; };
 		3D0BDEC51FB1C1AE004EA25E /* DataCapturingListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEBF1FB1C1AE004EA25E /* DataCapturingListener.swift */; };
 		3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */; };
-		3D844B261FC8640C00DAAB91 /* AccelerationPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D844B251FC8640C00DAAB91 /* AccelerationPoint.swift */; };
+		3DE419E21FD19381001282D0 /* CyfaceModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419E01FD19381001282D0 /* CyfaceModel.xcdatamodeld */; };
+		3DE419E51FD5540F001282D0 /* PersistenceLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419E41FD5540F001282D0 /* PersistenceLayer.swift */; };
+		3DE419F81FD5ACFE001282D0 /* GeoLocationMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F21FD5ACFD001282D0 /* GeoLocationMO+CoreDataClass.swift */; };
+		3DE419F91FD5ACFE001282D0 /* AccelerationPointMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F31FD5ACFD001282D0 /* AccelerationPointMO+CoreDataProperties.swift */; };
+		3DE419FA1FD5ACFE001282D0 /* MeasurementMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F41FD5ACFD001282D0 /* MeasurementMO+CoreDataClass.swift */; };
+		3DE419FB1FD5ACFE001282D0 /* MeasurementMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F51FD5ACFD001282D0 /* MeasurementMO+CoreDataProperties.swift */; };
+		3DE419FC1FD5ACFE001282D0 /* GeoLocationMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F61FD5ACFD001282D0 /* GeoLocationMO+CoreDataProperties.swift */; };
+		3DE419FD1FD5ACFE001282D0 /* AccelerationPointMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F71FD5ACFD001282D0 /* AccelerationPointMO+CoreDataClass.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,11 +43,16 @@
 		3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingTests.swift; sourceTree = "<group>"; };
 		3D0BDEB11FB1B951004EA25E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCapturingService.swift; sourceTree = "<group>"; };
-		3D0BDEBC1FB1C1AE004EA25E /* GeoLocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeoLocation.swift; sourceTree = "<group>"; };
-		3D0BDEBD1FB1C1AE004EA25E /* Measurement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Measurement.swift; sourceTree = "<group>"; };
 		3D0BDEBF1FB1C1AE004EA25E /* DataCapturingListener.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCapturingListener.swift; sourceTree = "<group>"; };
 		3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiskConsumption.swift; sourceTree = "<group>"; };
-		3D844B251FC8640C00DAAB91 /* AccelerationPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccelerationPoint.swift; sourceTree = "<group>"; };
+		3DE419E11FD19381001282D0 /* CyfaceModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CyfaceModel.xcdatamodel; sourceTree = "<group>"; };
+		3DE419E41FD5540F001282D0 /* PersistenceLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceLayer.swift; sourceTree = "<group>"; };
+		3DE419F21FD5ACFD001282D0 /* GeoLocationMO+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GeoLocationMO+CoreDataClass.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/GeoLocationMO+CoreDataClass.swift"; sourceTree = "<absolute>"; };
+		3DE419F31FD5ACFD001282D0 /* AccelerationPointMO+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AccelerationPointMO+CoreDataProperties.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/AccelerationPointMO+CoreDataProperties.swift"; sourceTree = "<absolute>"; };
+		3DE419F41FD5ACFD001282D0 /* MeasurementMO+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MeasurementMO+CoreDataClass.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataClass.swift"; sourceTree = "<absolute>"; };
+		3DE419F51FD5ACFD001282D0 /* MeasurementMO+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MeasurementMO+CoreDataProperties.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift"; sourceTree = "<absolute>"; };
+		3DE419F61FD5ACFD001282D0 /* GeoLocationMO+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GeoLocationMO+CoreDataProperties.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/GeoLocationMO+CoreDataProperties.swift"; sourceTree = "<absolute>"; };
+		3DE419F71FD5ACFD001282D0 /* AccelerationPointMO+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AccelerationPointMO+CoreDataClass.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/AccelerationPointMO+CoreDataClass.swift"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,15 +95,13 @@
 		3D0BDEA31FB1B951004EA25E /* DataCapturing */ = {
 			isa = PBXGroup;
 			children = (
+				3DE419E31FD193D7001282D0 /* Model */,
 				3D0BDEBF1FB1C1AE004EA25E /* DataCapturingListener.swift */,
 				3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */,
 				3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */,
-				3D0BDEBC1FB1C1AE004EA25E /* GeoLocation.swift */,
-				3D0BDEBD1FB1C1AE004EA25E /* Measurement.swift */,
 				3D0BDEA41FB1B951004EA25E /* DataCapturing.h */,
 				3D0BDEA51FB1B951004EA25E /* Info.plist */,
-				3D844B251FC8640C00DAAB91 /* AccelerationPoint.swift */,
-				3D0A8B991FE1074B002A5813 /* DataCapturingEvents.swift */,
+                3D0A8B991FE1074B002A5813 /* DataCapturingEvents.swift */,
 			);
 			path = DataCapturing;
 			sourceTree = "<group>";
@@ -105,6 +113,21 @@
 				3D0BDEB11FB1B951004EA25E /* Info.plist */,
 			);
 			path = DataCapturingTests;
+			sourceTree = "<group>";
+		};
+		3DE419E31FD193D7001282D0 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				3DE419F21FD5ACFD001282D0 /* GeoLocationMO+CoreDataClass.swift */,
+				3DE419F61FD5ACFD001282D0 /* GeoLocationMO+CoreDataProperties.swift */,
+				3DE419F71FD5ACFD001282D0 /* AccelerationPointMO+CoreDataClass.swift */,
+				3DE419F31FD5ACFD001282D0 /* AccelerationPointMO+CoreDataProperties.swift */,
+				3DE419F41FD5ACFD001282D0 /* MeasurementMO+CoreDataClass.swift */,
+				3DE419F51FD5ACFD001282D0 /* MeasurementMO+CoreDataProperties.swift */,
+				3DE419E01FD19381001282D0 /* CyfaceModel.xcdatamodeld */,
+				3DE419E41FD5540F001282D0 /* PersistenceLayer.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -221,10 +244,15 @@
 				3D0A8B9A1FE1074B002A5813 /* DataCapturingEvents.swift in Sources */,
 				3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */,
 				3D0BDEC51FB1C1AE004EA25E /* DataCapturingListener.swift in Sources */,
-				3D844B261FC8640C00DAAB91 /* AccelerationPoint.swift in Sources */,
+				3DE419E51FD5540F001282D0 /* PersistenceLayer.swift in Sources */,
+				3DE419FA1FD5ACFE001282D0 /* MeasurementMO+CoreDataClass.swift in Sources */,
+				3DE419FC1FD5ACFE001282D0 /* GeoLocationMO+CoreDataProperties.swift in Sources */,
 				3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */,
-				3D0BDEC21FB1C1AE004EA25E /* GeoLocation.swift in Sources */,
-				3D0BDEC31FB1C1AE004EA25E /* Measurement.swift in Sources */,
+				3DE419F81FD5ACFE001282D0 /* GeoLocationMO+CoreDataClass.swift in Sources */,
+				3DE419E21FD19381001282D0 /* CyfaceModel.xcdatamodeld in Sources */,
+				3DE419F91FD5ACFE001282D0 /* AccelerationPointMO+CoreDataProperties.swift in Sources */,
+				3DE419FB1FD5ACFE001282D0 /* MeasurementMO+CoreDataProperties.swift in Sources */,
+				3DE419FD1FD5ACFE001282D0 /* AccelerationPointMO+CoreDataClass.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -465,6 +493,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		3DE419E01FD19381001282D0 /* CyfaceModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				3DE419E11FD19381001282D0 /* CyfaceModel.xcdatamodel */,
+			);
+			currentVersion = 3DE419E11FD19381001282D0 /* CyfaceModel.xcdatamodel */;
+			path = CyfaceModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 3D0BDE981FB1B951004EA25E /* Project object */;
 }

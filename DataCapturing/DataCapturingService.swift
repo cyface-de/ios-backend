@@ -10,6 +10,7 @@ import Foundation
 import CoreMotion
 import CoreLocation
 import os.log
+import CoreData
 
 /**
  An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.
@@ -31,7 +32,7 @@ public class DataCapturingService: NSObject  {
     private var listener: DataCapturingListener?
     
     /// The currently recorded `Measurement` or nil if there is no active recording.
-    private var currentMeasurement: Measurement?
+    private var currentMeasurement: MeasurementMO?
     
     /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
     private let motionManager: CMMotionManager
@@ -54,6 +55,9 @@ public class DataCapturingService: NSObject  {
         return manager
     }()
     
+    private let persistenceLayer: PersistenceLayer
+
+    
     //MARK: Initializers
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data to a provided endpoint and accessing data a certain amount of times per second.
@@ -62,8 +66,9 @@ public class DataCapturingService: NSObject  {
      - sensorManager: An instance of `CMMotionManager`. There should be only one instance of this type in your application. Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
      - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
      */
-    public init(dataEndpoint endpoint: URL, sensorManager manager:CMMotionManager, updateInterval interval : Double = 100) {
-        unsyncedMeasurements = []
+    public init(dataEndpoint endpoint: URL, sensorManager manager:CMMotionManager, updateInterval interval : Double = 100, using persistence: PersistenceLayer) {
+        //unsyncedMeasurements = [] // TODO init persistence layer here and load unsynced measurements
+        self.persistenceLayer = persistence
         isRunning = false
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
@@ -80,9 +85,10 @@ public class DataCapturingService: NSObject  {
         
         self.locationManager.startUpdatingLocation()
         self.isRunning = true
-        let measurement = Measurement(Int64(unsyncedMeasurements.count))
+        let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
+        // TODO Create persistent measurement here
         self.currentMeasurement = measurement
-        self.unsyncedMeasurements.append(measurement)
+        //self.unsyncedMeasurements.append(measurement)
         
         if(motionManager.isAccelerometerAvailable) {
             motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { data, error in
@@ -92,8 +98,8 @@ public class DataCapturingService: NSObject  {
                 
                 let accValues = myData.acceleration
                 //let eventDate = NSDate(timeInterval: myData.timestamp, sinceDate: bootTime)
-                let acc = AccelerationPoint(id: nil, ax: accValues.x,ay: accValues.y, az: accValues.z,timestamp: self.currentTimeInMillisSince1970())
-                measurement.append(acc)
+                let acc = self.persistenceLayer.createAcceleration(x: accValues.x,y: accValues.y, z: accValues.z,at: self.currentTimeInMillisSince1970())
+                measurement.addToAccelerations(acc)
             }
         }
     }
@@ -119,16 +125,15 @@ public class DataCapturingService: NSObject  {
     
     /// Forces the service to synchronize all Measurements now if a connection is available. If this is not called the service might wait for an opprotune moment to start synchronization.
     public func forceSync() {
-        unsyncedMeasurements.removeAll()
-        let url
+        // TODO add transmission code.
+        persistenceLayer.deleteMeasurements()
     }
     
-    /// Deletes an unsynchronized `Measurement` from this device.
-    public func delete(unsynced measurement : Measurement) {
-        guard let index = unsyncedMeasurements.index(of:measurement) else {
-            return
-        }
-        unsyncedMeasurements.remove(at:index)
+    /**
+     Deletes an unsynchronized `Measurement` from this device.
+     */
+    public func delete(unsynced measurement : MeasurementMO) {
+        persistenceLayer.delete(measurement: measurement)
     }
     
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
@@ -155,7 +160,11 @@ extension DataCapturingService: CLLocationManagerDelegate {
         guard let measurement = currentMeasurement else {
             fatalError("No current measurement to save the location to! Data capturing impossible.")
         }
-        measurement.append(GeoLocation(lat: location.coordinate.latitude,lon: location.coordinate.longitude,speed: location.speed,accuracy: location.horizontalAccuracy,timestamp: convertToUtcTimestamp(date: location.timestamp)))
+        let geoLocation = persistenceLayer.createGeoLocation(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, accuracy: location.horizontalAccuracy, speed: location.speed, at: convertToUtcTimestamp(date: location.timestamp))
+        measurement.addToGeoLocations(geoLocation)
+        
+        
+        persistenceLayer.save()
     }
 }
 // TODO: Maybe move out the data transmission part to its own class. This seems to be mingled up here with the data capturing part.
