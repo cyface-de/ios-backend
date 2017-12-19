@@ -21,7 +21,7 @@
  An instance of a class implementing this protocol should register with a `DataCapturingService` via the method `DataCapturingService.startCapturing(Listener:DataCapturingListener)`.
  */
 public protocol DataCapturingListener {
-    /**
+    /*/**
      Called everytime the capturing service received a geo location fix and thus is able to track its position.
      */
     func onGpsFixAcquire()
@@ -48,5 +48,5 @@ public protocol DataCapturingListener {
     /**
      Invoked if the service has synchronized all pending cached data successfully and delted the local copies.
      */
-    func onSynchronizationSuccessful()
+    func onSynchronizationSuccessful()*/
 }

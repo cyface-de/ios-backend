@@ -37,13 +37,6 @@ public class DataCapturingService: NSObject  {
     /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
     private let motionManager: CMMotionManager
     
-    /// Session object to upload captured data to a Cyface server.
-    private lazy var apiSession: URLSession = {
-        return URLSession()
-    }()
-    
-    /// A `URL` used to upload data to. There should be a server complying to a Cyface REST interface available at that location.
-    private let cyfaceEndpoint: URL
     
     /// Provides access to the devices geo location capturing hardware (such as GPS, GLONASS, GALILEO, etc.) and handles geo location updates in the background.
     private lazy var locationManager: CLLocationManager = {
@@ -61,26 +54,23 @@ public class DataCapturingService: NSObject  {
     /// An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
     private let persistenceLayer: PersistenceLayer
     
-    /// Encoder used to format measurements into processable JSON for a Cyface server.
-    private lazy var uploadMessagesEncoder = JSONEncoder()
-    
+    private let serverConnection: ServerConnection
     
     //MARK: Initializers
     /**
-     Creates a new completely initialized `DataCapturingService` transmitting data to a provided endpoint and accessing data a certain amount of times per second.
+     Creates a new completely initialized `DataCapturingService` transmitting data via the provided server connection and accessing data a certain amount of times per second.
      - Parameters:
-     - dataEndpoint: A `URL` used to upload data to. There should be a server complying to a Cyface REST interface available at that location.
-     - sensorManager: An instance of `CMMotionManager`. There should be only one instance of this type in your application. Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
-     - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
-     - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
+        - serverConnection: An authenticated connection to a Cyface API server.
+        - sensorManager: An instance of `CMMotionManager`. There should be only one instance of this type in your application. Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
+        - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
+        - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
      */
-    public init(dataEndpoint endpoint: URL, sensorManager manager:CMMotionManager, updateInterval interval : Double = 100, persistenceLayer persistence: PersistenceLayer) {
-        //unsyncedMeasurements = [] // TODO init persistence layer here and load unsynced measurements
+    public init(connection serverConnection: ServerConnection, sensorManager manager:CMMotionManager, updateInterval interval : Double = 100, persistenceLayer persistence: PersistenceLayer) {
         self.persistenceLayer = persistence
         isRunning = false
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
-        self.cyfaceEndpoint = endpoint
+        self.serverConnection = serverConnection
         super.init()
     }
     
@@ -100,11 +90,10 @@ public class DataCapturingService: NSObject  {
         if(motionManager.isAccelerometerAvailable) {
             motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { data, error in
                 guard let myData = data else {
-                    fatalError("No Accelerometer data available!")
+                    fatalError("DataCapturingService.start(): No Accelerometer data available!")
                 }
                 
                 let accValues = myData.acceleration
-                //let eventDate = NSDate(timeInterval: myData.timestamp, sinceDate: bootTime)
                 let acc = self.persistenceLayer.createAcceleration(x: accValues.x,y: accValues.y, z: accValues.z,at: self.currentTimeInMillisSince1970())
                 measurement.addToAccelerations(acc)
             }
@@ -132,56 +121,19 @@ public class DataCapturingService: NSObject  {
     /// Forces the service to synchronize all Measurements now if a connection is available. If this is not called the service might wait for an opprotune moment to start synchronization.
     public func forceSync() {
         // TODO: Do we need to do anything here to ensure proper HTTPS data transmission.
-        let authenticationTask = apiSession.dataTask(with: cyfaceEndpoint.appendingPathComponent("login")) { data, response, error in
-            if let error = error {
-                os_log("Unable to authenticate due to %@", error.localizedDescription)
-                return
+        var m = self.persistenceLayer.loadMeasurement(fromPosition: 0)
+        while m != nil {
+            let mUnwrapped = m!
+            if serverConnection.isAuthenticated() {
+                serverConnection.sync(measurement: mUnwrapped)
             }
-            let data = data!
-            
-            guard let unwrappedResponse = response as? HTTPURLResponse, unwrappedResponse.statusCode == 200 else {
-                os_log("Unable to authenticate.")
-                return
-            }
-            
-            if unwrappedResponse.mimeType=="application/json" {
-                let jwtBearer = String (data: data, encoding: .utf8)
-                var request = URLRequest(url: self.cyfaceEndpoint.appendingPathComponent("measurements"))
-                request.httpMethod = "POST"
-                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                request.setValue(jwtBearer,forHTTPHeaderField: "Authorization")
-                
-                var m = self.persistenceLayer.loadMeasurement(fromPosition: 0)
-                while m != nil {
-                    let mUnwrapped = m!
-                    let chunks = self.makeUploadChunks(fromMeasurement: mUnwrapped)
-                    for chunk in chunks {
-                        guard let jsonChunk = try? self.uploadMessagesEncoder.encode(chunk) else {
-                            fatalError("Invalid measurement format.")
-                        }
-                        
-                        let submissionTask = self.apiSession.uploadTask(with: request, from: jsonChunk) { data, response, error in
-                            if let error = error {
-                                os_log("Server Error during upload of measurement %@! Encountered errror %@.", mUnwrapped, error.localizedDescription )
-                                return
-                            }
-                            guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-                                os_log("Client Error during upload of measurement %@!",mUnwrapped)
-                                return
-                            }
-                        }
-                        
-                        submissionTask.resume()
-                    }
-                    // Cleanup
-                    // TODO: This can lead to upload duplicates if a measurements upload is interrupted and needs to restart later.
-                    self.persistenceLayer.delete(measurement: mUnwrapped)
-                    m = self.persistenceLayer.loadMeasurement(fromPosition: 0)
-                }
-                
-            }
+            // Cleanup
+            // TODO: This can lead to upload duplicates if a measurements upload is interrupted and needs to restart later.
+            self.persistenceLayer.delete(measurement: mUnwrapped)
+            m = self.persistenceLayer.loadMeasurement(fromPosition: 0)
         }
-        authenticationTask.resume()
+        
+        
     }
     
     /// Deletes an unsynchronized `Measurement` from this device.
@@ -189,25 +141,12 @@ public class DataCapturingService: NSObject  {
         persistenceLayer.delete(measurement: measurement)
     }
     
-    private func makeUploadChunks(fromMeasurement measurement: MeasurementMO) -> [String:Encodable] {
-        // TODO: Not really chunked yet. Still loads everything into main memory.
-        var geoLocations = [[String:Any]]()
-        if let measurementLocations = measurement.geoLocations {
-            for location in measurementLocations {
-                let location = location as! GeoLocationMO
-                geoLocations.append(["\"lat\"":location.lat,"\"lon\"":location.lon,"\"speed\"":location.speed,"\"timestamp\"":location.timestamp,"\"accuracy\"":location.accuracy])
-            }
-        }
-        
-        var accelerationPoints = [[String:Encodable]]()
-        if let accelerations = measurement.accelerations {
-            for acceleration in accelerations {
-                let acceleration = acceleration as! AccelerationPointMO
-                accelerationPoints.append(["\"ax\"":acceleration.ax,"\"ay\"":acceleration.ay,"\"az\"":acceleration.az,"\"timestamp\"":acceleration.timestamp])
-            }
-        }
-        
-        return ["\"deviceId\"":"\"\(deviceId)\"","\"id\"":measurement.identifier,"\"vehicle\"":"\"BICYCLE\"","\"gpsPoints\"":geoLocations,"\"accelerationPoints\"":accelerationPoints]
+    public func countMeasurements() -> Int {
+        return persistenceLayer.countMeasurements()
+    }
+    
+    public func loadMeasurement(at index: Int) -> MeasurementMO? {
+        return persistenceLayer.loadMeasurement(fromPosition: index)
     }
     
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
@@ -241,6 +180,4 @@ extension DataCapturingService: CLLocationManagerDelegate {
         persistenceLayer.save()
     }
 }
-// TODO: Maybe move out the data transmission part to its own class. This seems to be mingled up here with the data capturing part.
-// TODO: Fill model objects with appropriate identifiers.
 // TODO: Add support for different vehicles

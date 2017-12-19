@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3D0287DA1FE7E36E006E9969 /* ServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0287D91FE7E36E006E9969 /* ServerConnection.swift */; };
 		3D0A8B9A1FE1074B002A5813 /* DataCapturingEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0A8B991FE1074B002A5813 /* DataCapturingEvents.swift */; };
 		3D0BDEAB1FB1B951004EA25E /* DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */; };
 		3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */; };
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3D0287D91FE7E36E006E9969 /* ServerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConnection.swift; sourceTree = "<group>"; };
 		3D0A8B991FE1074B002A5813 /* DataCapturingEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingEvents.swift; sourceTree = "<group>"; };
 		3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D0BDEA41FB1B951004EA25E /* DataCapturing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataCapturing.h; sourceTree = "<group>"; };
@@ -101,7 +103,8 @@
 				3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */,
 				3D0BDEA41FB1B951004EA25E /* DataCapturing.h */,
 				3D0BDEA51FB1B951004EA25E /* Info.plist */,
-                3D0A8B991FE1074B002A5813 /* DataCapturingEvents.swift */,
+				3D0A8B991FE1074B002A5813 /* DataCapturingEvents.swift */,
+				3D0287D91FE7E36E006E9969 /* ServerConnection.swift */,
 			);
 			path = DataCapturing;
 			sourceTree = "<group>";
@@ -187,7 +190,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0910;
-				LastUpgradeCheck = 0910;
+				LastUpgradeCheck = 0920;
 				ORGANIZATIONNAME = "Cyface GmbH";
 				TargetAttributes = {
 					3D0BDEA01FB1B951004EA25E = {
@@ -251,6 +254,7 @@
 				3DE419F81FD5ACFE001282D0 /* GeoLocationMO+CoreDataClass.swift in Sources */,
 				3DE419E21FD19381001282D0 /* CyfaceModel.xcdatamodeld in Sources */,
 				3DE419F91FD5ACFE001282D0 /* AccelerationPointMO+CoreDataProperties.swift in Sources */,
+				3D0287DA1FE7E36E006E9969 /* ServerConnection.swift in Sources */,
 				3DE419FB1FD5ACFE001282D0 /* MeasurementMO+CoreDataProperties.swift in Sources */,
 				3DE419FD1FD5ACFE001282D0 /* AccelerationPointMO+CoreDataClass.swift in Sources */,
 			);
@@ -393,7 +397,7 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = KTRX4PN8UB;
