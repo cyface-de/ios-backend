@@ -55,35 +55,38 @@ public class ServerConnection {
     }
     
     // MARK: Methods
-    public func authenticate(with username: String, and password: String) -> Bool {
+    public func authenticate(with username: String, and password: String, onFinish handler: @escaping (Error?) -> Void) {
         var request = URLRequest(url: apiURL.appendingPathComponent("login"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         guard let body = try? Data(self.uploadMessagesEncoder.encode(["login":username,"password":password])) else {
-            fatalError("ServerConnection.authenticate(\(username),\(password)): Unable to encode username and password into a JSON request.")
+            fatalError("ServerConnection.authenticate(\(username), \(password)): Unable to encode username and password into a JSON request.")
         }
         request.httpBody = body
+        let loginURL = apiURL.appendingPathComponent("login")
         
         if jwtBearer==nil {
-            let authenticationTask = apiSession.dataTask(with: apiURL.appendingPathComponent("login")) { data, response, error in
+            let authenticationTask = apiSession.dataTask(with: loginURL) { data, response, error in
                 if let error = error {
-                    os_log("Unable to authenticate due to %@", error.localizedDescription)
+                    os_log("ServerConnection.authenticate(%@, %@): Unable to authenticate due to %@", username, password, error.localizedDescription)
+                    handler(error)
                     return
                 }
                 let data = data!
                 
                 guard let unwrappedResponse = response as? HTTPURLResponse, unwrappedResponse.statusCode == 200 else {
-                    os_log("Unable to authenticate.")
+                    os_log("ServerConnection.authenticate(%@, %@): Unable to authenticate.")
+                    handler(ServerConnectionError(title: "Authentication Error", description: "There has been a client side error while authenticating with the Cyface API available at \(self.apiURL). The call to \(loginURL) provided the following data: \(data).", code: 1))
                     return
                 }
                 
                 if unwrappedResponse.mimeType=="application/json" {
                     self.jwtBearer = String (data: data, encoding: .utf8)
                 }
+                handler(nil)
             }
             authenticationTask.resume()
         }
-        return isAuthenticated()
     }
     
     public func sync(measurement: MeasurementMO) {
@@ -140,5 +143,21 @@ public class ServerConnection {
         }
         
         return [["\"deviceId\"":"\"\(installationIdentifier)\"","\"id\"":measurement.identifier,"\"vehicle\"":"\"BICYCLE\"","\"gpsPoints\"":geoLocations,"\"accelerationPoints\"":accelerationPoints]]
+    }
+}
+
+public struct ServerConnectionError: LocalizedError {
+    
+    var title: String?
+    var code: Int
+    public var errorDescription: String? { return _description }
+    public var failureReason: String? { return _description }
+    
+    private var _description: String
+    
+    init(title: String?, description: String, code: Int) {
+        self.title = title ?? "Error"
+        self._description = description
+        self.code = code
     }
 }
