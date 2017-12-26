@@ -8,12 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		3D0287DA1FE7E36E006E9969 /* ServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0287D91FE7E36E006E9969 /* ServerConnection.swift */; };
-		3D0A8B9A1FE1074B002A5813 /* DataCapturingEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0A8B991FE1074B002A5813 /* DataCapturingEvents.swift */; };
+		3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */; };
 		3D0BDEAB1FB1B951004EA25E /* DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */; };
 		3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */; };
 		3D0BDEB21FB1B951004EA25E /* DataCapturing.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0BDEA41FB1B951004EA25E /* DataCapturing.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */; };
-		3D0BDEC51FB1C1AE004EA25E /* DataCapturingListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEBF1FB1C1AE004EA25E /* DataCapturingListener.swift */; };
 		3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */; };
 		3DE419E21FD19381001282D0 /* CyfaceModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419E01FD19381001282D0 /* CyfaceModel.xcdatamodeld */; };
 		3DE419E51FD5540F001282D0 /* PersistenceLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419E41FD5540F001282D0 /* PersistenceLayer.swift */; };
@@ -37,7 +36,7 @@
 
 /* Begin PBXFileReference section */
 		3D0287D91FE7E36E006E9969 /* ServerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConnection.swift; sourceTree = "<group>"; };
-		3D0A8B991FE1074B002A5813 /* DataCapturingEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingEvents.swift; sourceTree = "<group>"; };
+		3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingEvent.swift; sourceTree = "<group>"; };
 		3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D0BDEA41FB1B951004EA25E /* DataCapturing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataCapturing.h; sourceTree = "<group>"; };
 		3D0BDEA51FB1B951004EA25E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -45,7 +44,6 @@
 		3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingTests.swift; sourceTree = "<group>"; };
 		3D0BDEB11FB1B951004EA25E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCapturingService.swift; sourceTree = "<group>"; };
-		3D0BDEBF1FB1C1AE004EA25E /* DataCapturingListener.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCapturingListener.swift; sourceTree = "<group>"; };
 		3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiskConsumption.swift; sourceTree = "<group>"; };
 		3DE419E11FD19381001282D0 /* CyfaceModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CyfaceModel.xcdatamodel; sourceTree = "<group>"; };
 		3DE419E41FD5540F001282D0 /* PersistenceLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceLayer.swift; sourceTree = "<group>"; };
@@ -98,12 +96,11 @@
 			isa = PBXGroup;
 			children = (
 				3DE419E31FD193D7001282D0 /* Model */,
-				3D0BDEBF1FB1C1AE004EA25E /* DataCapturingListener.swift */,
 				3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */,
 				3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */,
 				3D0BDEA41FB1B951004EA25E /* DataCapturing.h */,
 				3D0BDEA51FB1B951004EA25E /* Info.plist */,
-				3D0A8B991FE1074B002A5813 /* DataCapturingEvents.swift */,
+				3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */,
 				3D0287D91FE7E36E006E9969 /* ServerConnection.swift */,
 			);
 			path = DataCapturing;
@@ -244,9 +241,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D0A8B9A1FE1074B002A5813 /* DataCapturingEvents.swift in Sources */,
+				3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */,
 				3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */,
-				3D0BDEC51FB1C1AE004EA25E /* DataCapturingListener.swift in Sources */,
 				3DE419E51FD5540F001282D0 /* PersistenceLayer.swift in Sources */,
 				3DE419FA1FD5ACFE001282D0 /* MeasurementMO+CoreDataClass.swift in Sources */,
 				3DE419FC1FD5ACFE001282D0 /* GeoLocationMO+CoreDataProperties.swift in Sources */,

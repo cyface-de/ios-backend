@@ -29,7 +29,7 @@ public class DataCapturingService: NSObject  {
     private(set) public var isRunning: Bool
     
     /// A listener that is notified of important events during data capturing.
-    private var listener: DataCapturingListener?
+    private var handler: ((DataCapturingEvent) -> Void)?
     
     /// The currently recorded `Measurement` or nil if there is no active recording.
     private var currentMeasurement: MeasurementMO?
@@ -103,10 +103,10 @@ public class DataCapturingService: NSObject  {
     /**
      Starts the capturing process with a listener that is notified of important events occuring while the capturing process is running. This operation is idempotent.
      
-     - Parameter listener: A listener that is notified of important events during data capturing.
+     - Parameter handler: A listener that is notified of important events during data capturing.
      */
-    public func start(with listener:DataCapturingListener) {
-        self.listener = listener
+    public func start(withHandler handler:@escaping ((DataCapturingEvent) -> Void)) {
+        self.handler = handler
         self.start()
     }
     
@@ -133,12 +133,13 @@ public class DataCapturingService: NSObject  {
             m = self.persistenceLayer.loadMeasurement(fromPosition: 0)
         }
         
-        
+        notify(of: .synchronizationSuccessful)
     }
     
     /// Deletes an unsynchronized `Measurement` from this device.
     public func delete(unsyncedMeasurement measurement : MeasurementMO) {
         persistenceLayer.delete(measurement: measurement)
+        persistenceLayer.save()
     }
     
     public func countMeasurements() -> Int {
@@ -158,6 +159,14 @@ public class DataCapturingService: NSObject  {
     private func convertToUtcTimestamp(date value: Date) -> Int64 {
         return Int64(value.timeIntervalSince1970*1000.0)
     }
+    
+    private func notify(of event:DataCapturingEvent) {
+        guard let handler = self.handler else {
+            return
+        }
+        
+        handler(event)
+    }
 }
 
 // MARK: CLLocationManagerDelegate
@@ -175,9 +184,10 @@ extension DataCapturingService: CLLocationManagerDelegate {
         }
         let geoLocation = persistenceLayer.createGeoLocation(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, accuracy: location.horizontalAccuracy, speed: location.speed, at: convertToUtcTimestamp(date: location.timestamp))
         measurement.addToGeoLocations(geoLocation)
-        
+        notify(of: .geoLocationAcquired(position: geoLocation))
         
         persistenceLayer.save()
     }
 }
 // TODO: Add support for different vehicles
+// TODO: Transform DataCapturingListener to Closure

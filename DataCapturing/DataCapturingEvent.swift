@@ -17,7 +17,7 @@ import Foundation
  - Version: 1.0.0
  - Since: 1.0.0
  */
-public enum DataCapturingEvents {
+public enum DataCapturingEvent {
     /// Occurs everytime the `DataCapturingService` received a geo location fix and thus is able to track its position.
     case geoLocationFixAcquired
     /// Occurs everytime the `DataCapturingService` loses its geo location fix.

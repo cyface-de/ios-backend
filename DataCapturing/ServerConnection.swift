@@ -55,35 +55,54 @@ public class ServerConnection {
     }
     
     // MARK: Methods
-    public func authenticate(with username: String, and password: String, onFinish handler: @escaping (Error?) -> Void) {
-        var request = URLRequest(url: apiURL.appendingPathComponent("login"))
+    public func authenticate(with username: String, and password: String, onFinish handler: ((Error?) -> Void)?) {
+        let loginURL = apiURL.appendingPathComponent("login")
+        var request = URLRequest(url: loginURL)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        guard let body = try? Data(self.uploadMessagesEncoder.encode(["login":username,"password":password])) else {
+        request.setValue("application/json; charset=UTF-8", forHTTPHeaderField: "Content-Type")
+        guard let body = try? Data(self.uploadMessagesEncoder.encode(["login":"\(username)","password":"\(password)"])) else {
             fatalError("ServerConnection.authenticate(\(username), \(password)): Unable to encode username and password into a JSON request.")
         }
         request.httpBody = body
-        let loginURL = apiURL.appendingPathComponent("login")
+        
         
         if jwtBearer==nil {
-            let authenticationTask = apiSession.dataTask(with: loginURL) { data, response, error in
+            let authenticationTask = apiSession.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    os_log("ServerConnection.authenticate(%@, %@): Unable to authenticate due to %@", username, password, error.localizedDescription)
-                    handler(error)
+                    DispatchQueue.main.async {
+                        os_log("ServerConnection.authenticate(%@, %@): Unable to authenticate due to %@", username, password, error.localizedDescription)
+                    }
+                    if let handler = handler {
+                        handler(error)
+                    }
                     return
                 }
                 let data = data!
                 
-                guard let unwrappedResponse = response as? HTTPURLResponse, unwrappedResponse.statusCode == 200 else {
-                    os_log("ServerConnection.authenticate(%@, %@): Unable to authenticate.")
-                    handler(ServerConnectionError(title: "Authentication Error", description: "There has been a client side error while authenticating with the Cyface API available at \(self.apiURL). The call to \(loginURL) provided the following data: \(data).", code: 1))
+                guard let unwrappedResponse = response as? HTTPURLResponse else {
+                    DispatchQueue.main.async {
+                        os_log("ServerConnection.authenticate(%@, %@): Unable to authenticate due to invalid response!", username, password)
+                    }
+                    if let handler = handler {
+                        handler(ServerConnectionError(title: "Authentication Error", description: "There has been a client side error while authenticating with the Cyface API available at \(self.apiURL). The call to \(loginURL) provided the following data: \(data).", code: 1))
+                    }
                     return
                 }
                 
-                if unwrappedResponse.mimeType=="application/json" {
+                let statusCode = unwrappedResponse.statusCode
+                if statusCode == 200 {
                     self.jwtBearer = String (data: data, encoding: .utf8)
+                    if let handler = handler {
+                        handler(nil)
+                    }
+                } else  {
+                    DispatchQueue.main.async {
+                        os_log("ServerConnection.authenticate(%@, %@): Unexpected response status during authentication!",username, password)
+                    }
+                    if let handler = handler {
+                        handler(ServerConnectionError(title: "Authentication Error", description: "There has been a client side error while authenticating with the Cyface API available at \(self.apiURL). The call to \(loginURL) provided the following data: \(String(data: data, encoding: .utf8)!) and status code \(statusCode).", code: 1))
+                    }
                 }
-                handler(nil)
             }
             authenticationTask.resume()
         }
@@ -107,11 +126,15 @@ public class ServerConnection {
             
             let submissionTask = self.apiSession.uploadTask(with: request, from: jsonChunk) { data, response, error in
                 if let error = error {
-                    os_log("Server Error during upload of measurement %@! Encountered errror %@.", measurement, error.localizedDescription )
+                    DispatchQueue.main.async {
+                        os_log("Server Error during upload of measurement %@! Encountered errror %@.", measurement, error.localizedDescription )
+                    }
                     return
                 }
                 guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-                    os_log("Client Error during upload of measurement %@!",measurement)
+                    DispatchQueue.main.async {
+                        os_log("Client Error during upload of measurement %@!",measurement)
+                    }
                     return
                 }
             }
