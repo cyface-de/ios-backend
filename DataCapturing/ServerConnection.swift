@@ -77,21 +77,32 @@ public class ServerConnection {
                     }
                     return
                 }
-                let data = data!
                 
                 guard let unwrappedResponse = response as? HTTPURLResponse else {
                     DispatchQueue.main.async {
                         os_log("ServerConnection.authenticate(%@, %@): Unable to authenticate due to invalid response!", username, password)
                     }
                     if let handler = handler {
-                        handler(ServerConnectionError(title: "Authentication Error", description: "There has been a client side error while authenticating with the Cyface API available at \(self.apiURL). The call to \(loginURL) provided the following data: \(data).", code: 1))
+                        handler(ServerConnectionError(title: "Authentication Error", description: "There has been a client side error while authenticating with the Cyface API available at \(self.apiURL).", code: 1))
                     }
                     return
                 }
                 
                 let statusCode = unwrappedResponse.statusCode
+                let authenticationToken = unwrappedResponse.allHeaderFields["Authorization"] as? String
+                
+                guard let unwrappedAuthenticationToken = authenticationToken else {
+                    DispatchQueue.main.async {
+                        os_log("ServerConnection.authenticate(%@, %@): Unable to authenticate due to missing Authorization header. Was your request targeted at a valid server?", username, password)
+                    }
+                    if let handler = handler {
+                        handler(ServerConnectionError(title: "Authentication Error", description: "No Authorization token received from Cyface API available at \(self.apiURL).", code: 1))
+                    }
+                    return
+                }
+                
                 if statusCode == 200 {
-                    self.jwtBearer = String (data: data, encoding: .utf8)
+                    self.jwtBearer = unwrappedAuthenticationToken
                     if let handler = handler {
                         handler(nil)
                     }
@@ -100,7 +111,7 @@ public class ServerConnection {
                         os_log("ServerConnection.authenticate(%@, %@): Unexpected response status during authentication!",username, password)
                     }
                     if let handler = handler {
-                        handler(ServerConnectionError(title: "Authentication Error", description: "There has been a client side error while authenticating with the Cyface API available at \(self.apiURL). The call to \(loginURL) provided the following data: \(String(data: data, encoding: .utf8)!) and status code \(statusCode).", code: 1))
+                        handler(ServerConnectionError(title: "Authentication Error", description: "There has been a client side error while authenticating with the Cyface API available at \(self.apiURL). The call to \(loginURL) provided the following status code \(statusCode).", code: 1))
                     }
                 }
             }
@@ -117,10 +128,12 @@ public class ServerConnection {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(jwtBearer,forHTTPHeaderField: "Authorization")
+        //request.setValue("gzip", forHTTPHeaderField: "Content-Encoding")
         
         let chunks = self.makeUploadChunks(fromMeasurement: measurement)
         for chunk in chunks {
-            guard let jsonChunk = try? self.uploadMessagesEncoder.encode(chunk) else {
+            guard let jsonChunk = try? JSONSerialization.data(withJSONObject: chunk, options: .sortedKeys) else {
+            /*guard let jsonChunk = try? self.uploadMessagesEncoder.encode(chunk) else {*/
                 fatalError("Invalid measurement format.")
             }
             
@@ -144,28 +157,28 @@ public class ServerConnection {
     }
     
     public func isAuthenticated() -> Bool {
-        return jwtBearer != nil
+        return jwtBearer != nil || jwtBearer!.isEmpty
     }
     
-    private func makeUploadChunks(fromMeasurement measurement: MeasurementMO) -> [[String:Encodable]] {
+    private func makeUploadChunks(fromMeasurement measurement: MeasurementMO) -> [[String:Any]] {
         // TODO: Not really chunked yet. Still loads everything into main memory.
-        var geoLocations = [[String:Any]]()
+        var geoLocations = [[String:String]]()
         if let measurementLocations = measurement.geoLocations {
             for location in measurementLocations {
                 let location = location as! GeoLocationMO
-                geoLocations.append(["\"lat\"":location.lat,"\"lon\"":location.lon,"\"speed\"":location.speed,"\"timestamp\"":location.timestamp,"\"accuracy\"":location.accuracy])
+                geoLocations.append(["lat":String(location.lat),"lon":String(location.lon),"speed":String(location.speed),"timestamp":String(location.timestamp),"accuracy":String(Int(location.accuracy))])
             }
         }
         
-        var accelerationPoints = [[String:Encodable]]()
+        var accelerationPoints = [[String:String]]()
         if let accelerations = measurement.accelerations {
             for acceleration in accelerations {
                 let acceleration = acceleration as! AccelerationPointMO
-                accelerationPoints.append(["\"ax\"": acceleration.ax,"\"ay\"": acceleration.ay,"\"az\"": acceleration.az,"\"timestamp\"": acceleration.timestamp])
+                accelerationPoints.append(["ax": String(acceleration.ax),"ay": String(acceleration.ay),"az": String(acceleration.az),"timestamp": String(acceleration.timestamp)])
             }
         }
         
-        return [["\"deviceId\"":"\"\(installationIdentifier)\"","\"id\"":measurement.identifier,"\"vehicle\"":"\"BICYCLE\"","\"gpsPoints\"":geoLocations,"\"accelerationPoints\"":accelerationPoints]]
+        return [["deviceId":String(installationIdentifier),"id":String(measurement.identifier),"vehicle":"BICYCLE","gpsPoints":geoLocations,"accelerationPoints":accelerationPoints]]
     }
 }
 
