@@ -15,16 +15,19 @@ import CoreData
 /**
  An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.
  
- To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using `forceSyncU()`.
+ To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using `forceSync(onFinish:)`.
  
- An object of this class is not thread safe and should only be used once per application. Youmay start and stop the service as often as you like and reuse the object.
+ An object of this class is not thread safe and should only be used once per application. You may start and stop the service as often as you like and reuse the object.
  
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 3.0.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject  {
     //MARK: Properties
+    /// Data used to identify log messages created by this component.
+    private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
+    
     /// `true` if data capturing is running; `false` otherwise.
     private(set) public var isRunning: Bool
     
@@ -36,7 +39,6 @@ public class DataCapturingService: NSObject  {
     
     /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
     private let motionManager: CMMotionManager
-    
     
     /// Provides access to the devices geo location capturing hardware (such as GPS, GLONASS, GALILEO, etc.) and handles geo location updates in the background.
     private lazy var locationManager: CLLocationManager = {
@@ -54,6 +56,7 @@ public class DataCapturingService: NSObject  {
     /// An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
     private let persistenceLayer: PersistenceLayer
     
+    /// An API that handles authentication and communication with a Cyface server.
     private let serverConnection: ServerConnection
     
     //MARK: Initializers
@@ -75,10 +78,15 @@ public class DataCapturingService: NSObject  {
     }
     
     //MARK: Methods
-    /// Starts the capturing process. This operation is idempotent.
-    public func start() {
+    /**
+     Starts the capturing process with an optional closure, that is notified of important events during the capturing process. This operation is idempotent.
+     
+      - Parameter handler: A closure that is notified of important events during data capturing.
+     */
+    public func start(withHandler handler:@escaping ((DataCapturingEvent) -> Void) = {_ in }) {
+        self.handler = handler
         guard !isRunning else {
-            os_log("Trying to start DataCapturingService which is already running!")
+            os_log("start(): Trying to start DataCapturingService which is already running!", log: LOG, type: .info)
             return
         }
         
@@ -100,17 +108,7 @@ public class DataCapturingService: NSObject  {
         }
     }
     
-    /**
-     Starts the capturing process with a listener that is notified of important events occuring while the capturing process is running. This operation is idempotent.
-     
-     - Parameter handler: A listener that is notified of important events during data capturing.
-     */
-    public func start(withHandler handler:@escaping ((DataCapturingEvent) -> Void)) {
-        self.handler = handler
-        self.start()
-    }
-    
-    /// Stops the currently running data capturing process or does nothing of the process is not running.
+    /// Stops the currently running data capturing process or does nothing if the process is not running.
     public func stop() {
         isRunning = false
         motionManager.stopAccelerometerUpdates()
@@ -118,14 +116,14 @@ public class DataCapturingService: NSObject  {
         currentMeasurement = nil
     }
     
-    /// Forces the service to synchronize all Measurements now if a connection is available. If this is not called the service might wait for an opprotune moment to start synchronization.
-    public func forceSync() {
-        // TODO: Do we need to do anything here to ensure proper HTTPS data transmission.
+    /// Forces the service to synchronize all Measurements now if a connection is available. If this is not called the service might wait for an opportune moment to start synchronization.
+    public func forceSync(onFinish handler: ((ServerConnectionError?)->())?) {
         var m = self.persistenceLayer.loadMeasurement(fromPosition: 0)
         while m != nil {
             let mUnwrapped = m!
             if serverConnection.isAuthenticated() {
-                serverConnection.sync(measurement: mUnwrapped)
+                let handler = handler ?? {_ in } // In case no handler was provided simply use an empty one.
+                serverConnection.sync(measurement: mUnwrapped, onFinish: handler)
             }
             // Cleanup
             // TODO: This can lead to upload duplicates if a measurements upload is interrupted and needs to restart later.
@@ -136,16 +134,26 @@ public class DataCapturingService: NSObject  {
         notify(of: .synchronizationSuccessful)
     }
     
-    /// Deletes an unsynchronized `Measurement` from this device.
+    /**
+     Deletes an unsynchronized `Measurement` from this device.
+ 
+     - Parameter measurement: The `Measurement` to delete. You can get this for example via `loadMeasurement(index:)`.
+    */
     public func delete(unsyncedMeasurement measurement : MeasurementMO) {
         persistenceLayer.delete(measurement: measurement)
         persistenceLayer.save()
     }
     
+    /// Provides the amount of `Measurements` currently cached by the system.
     public func countMeasurements() -> Int {
         return persistenceLayer.countMeasurements()
     }
     
+    /**
+     Provides the cached `Measurement` at the specified index.
+     
+     - Parameter index: An index into the database from which to load the `Measurement`. `Measurements` are stored in the order they have been captured.
+     */
     public func loadMeasurement(at index: Int) -> MeasurementMO? {
         return persistenceLayer.loadMeasurement(fromPosition: index)
     }
@@ -160,6 +168,11 @@ public class DataCapturingService: NSObject  {
         return Int64(value.timeIntervalSince1970*1000.0)
     }
     
+    /**
+     Calls the event `handler` if there is one. Otherwise the call is ignored silently.
+     
+     - Parameter event: The `event` to notify the `handler` of.
+     */
     private func notify(of event:DataCapturingEvent) {
         guard let handler = self.handler else {
             return
