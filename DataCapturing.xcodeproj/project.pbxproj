@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3D015858200F7575008C065A /* MeasurementMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D015852200F7575008C065A /* MeasurementMO+CoreDataProperties.swift */; };
+		3D015859200F7575008C065A /* AccelerationPointMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D015853200F7575008C065A /* AccelerationPointMO+CoreDataProperties.swift */; };
+		3D01585A200F7575008C065A /* GeoLocationMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D015854200F7575008C065A /* GeoLocationMO+CoreDataClass.swift */; };
+		3D01585B200F7575008C065A /* AccelerationPointMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D015855200F7575008C065A /* AccelerationPointMO+CoreDataClass.swift */; };
+		3D01585C200F7575008C065A /* MeasurementMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D015856200F7575008C065A /* MeasurementMO+CoreDataClass.swift */; };
+		3D01585D200F7575008C065A /* GeoLocationMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D015857200F7575008C065A /* GeoLocationMO+CoreDataProperties.swift */; };
 		3D0287DA1FE7E36E006E9969 /* ServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0287D91FE7E36E006E9969 /* ServerConnection.swift */; };
 		3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */; };
 		3D0BDEAB1FB1B951004EA25E /* DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */; };
@@ -16,12 +22,6 @@
 		3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */; };
 		3DE419E21FD19381001282D0 /* CyfaceModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419E01FD19381001282D0 /* CyfaceModel.xcdatamodeld */; };
 		3DE419E51FD5540F001282D0 /* PersistenceLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419E41FD5540F001282D0 /* PersistenceLayer.swift */; };
-		3DE419F81FD5ACFE001282D0 /* GeoLocationMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F21FD5ACFD001282D0 /* GeoLocationMO+CoreDataClass.swift */; };
-		3DE419F91FD5ACFE001282D0 /* AccelerationPointMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F31FD5ACFD001282D0 /* AccelerationPointMO+CoreDataProperties.swift */; };
-		3DE419FA1FD5ACFE001282D0 /* MeasurementMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F41FD5ACFD001282D0 /* MeasurementMO+CoreDataClass.swift */; };
-		3DE419FB1FD5ACFE001282D0 /* MeasurementMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F51FD5ACFD001282D0 /* MeasurementMO+CoreDataProperties.swift */; };
-		3DE419FC1FD5ACFE001282D0 /* GeoLocationMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F61FD5ACFD001282D0 /* GeoLocationMO+CoreDataProperties.swift */; };
-		3DE419FD1FD5ACFE001282D0 /* AccelerationPointMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419F71FD5ACFD001282D0 /* AccelerationPointMO+CoreDataClass.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,6 +35,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3D015852200F7575008C065A /* MeasurementMO+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MeasurementMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		3D015853200F7575008C065A /* AccelerationPointMO+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AccelerationPointMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		3D015854200F7575008C065A /* GeoLocationMO+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GeoLocationMO+CoreDataClass.swift"; sourceTree = "<group>"; };
+		3D015855200F7575008C065A /* AccelerationPointMO+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AccelerationPointMO+CoreDataClass.swift"; sourceTree = "<group>"; };
+		3D015856200F7575008C065A /* MeasurementMO+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MeasurementMO+CoreDataClass.swift"; sourceTree = "<group>"; };
+		3D015857200F7575008C065A /* GeoLocationMO+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GeoLocationMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3D0287D91FE7E36E006E9969 /* ServerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConnection.swift; sourceTree = "<group>"; };
 		3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingEvent.swift; sourceTree = "<group>"; };
 		3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -47,12 +53,6 @@
 		3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiskConsumption.swift; sourceTree = "<group>"; };
 		3DE419E11FD19381001282D0 /* CyfaceModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CyfaceModel.xcdatamodel; sourceTree = "<group>"; };
 		3DE419E41FD5540F001282D0 /* PersistenceLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceLayer.swift; sourceTree = "<group>"; };
-		3DE419F21FD5ACFD001282D0 /* GeoLocationMO+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GeoLocationMO+CoreDataClass.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/GeoLocationMO+CoreDataClass.swift"; sourceTree = "<absolute>"; };
-		3DE419F31FD5ACFD001282D0 /* AccelerationPointMO+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AccelerationPointMO+CoreDataProperties.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/AccelerationPointMO+CoreDataProperties.swift"; sourceTree = "<absolute>"; };
-		3DE419F41FD5ACFD001282D0 /* MeasurementMO+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MeasurementMO+CoreDataClass.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataClass.swift"; sourceTree = "<absolute>"; };
-		3DE419F51FD5ACFD001282D0 /* MeasurementMO+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MeasurementMO+CoreDataProperties.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift"; sourceTree = "<absolute>"; };
-		3DE419F61FD5ACFD001282D0 /* GeoLocationMO+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "GeoLocationMO+CoreDataProperties.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/GeoLocationMO+CoreDataProperties.swift"; sourceTree = "<absolute>"; };
-		3DE419F71FD5ACFD001282D0 /* AccelerationPointMO+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "AccelerationPointMO+CoreDataClass.swift"; path = "/Users/cyface/Documents/Movebis/DataCapturing/DataCapturing/Model/AccelerationPointMO+CoreDataClass.swift"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,12 +118,12 @@
 		3DE419E31FD193D7001282D0 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				3DE419F21FD5ACFD001282D0 /* GeoLocationMO+CoreDataClass.swift */,
-				3DE419F61FD5ACFD001282D0 /* GeoLocationMO+CoreDataProperties.swift */,
-				3DE419F71FD5ACFD001282D0 /* AccelerationPointMO+CoreDataClass.swift */,
-				3DE419F31FD5ACFD001282D0 /* AccelerationPointMO+CoreDataProperties.swift */,
-				3DE419F41FD5ACFD001282D0 /* MeasurementMO+CoreDataClass.swift */,
-				3DE419F51FD5ACFD001282D0 /* MeasurementMO+CoreDataProperties.swift */,
+				3D015855200F7575008C065A /* AccelerationPointMO+CoreDataClass.swift */,
+				3D015853200F7575008C065A /* AccelerationPointMO+CoreDataProperties.swift */,
+				3D015854200F7575008C065A /* GeoLocationMO+CoreDataClass.swift */,
+				3D015857200F7575008C065A /* GeoLocationMO+CoreDataProperties.swift */,
+				3D015856200F7575008C065A /* MeasurementMO+CoreDataClass.swift */,
+				3D015852200F7575008C065A /* MeasurementMO+CoreDataProperties.swift */,
 				3DE419E01FD19381001282D0 /* CyfaceModel.xcdatamodeld */,
 				3DE419E41FD5540F001282D0 /* PersistenceLayer.swift */,
 			);
@@ -243,16 +243,16 @@
 			files = (
 				3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */,
 				3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */,
+				3D01585B200F7575008C065A /* AccelerationPointMO+CoreDataClass.swift in Sources */,
+				3D015859200F7575008C065A /* AccelerationPointMO+CoreDataProperties.swift in Sources */,
 				3DE419E51FD5540F001282D0 /* PersistenceLayer.swift in Sources */,
-				3DE419FA1FD5ACFE001282D0 /* MeasurementMO+CoreDataClass.swift in Sources */,
-				3DE419FC1FD5ACFE001282D0 /* GeoLocationMO+CoreDataProperties.swift in Sources */,
+				3D01585A200F7575008C065A /* GeoLocationMO+CoreDataClass.swift in Sources */,
 				3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */,
-				3DE419F81FD5ACFE001282D0 /* GeoLocationMO+CoreDataClass.swift in Sources */,
 				3DE419E21FD19381001282D0 /* CyfaceModel.xcdatamodeld in Sources */,
-				3DE419F91FD5ACFE001282D0 /* AccelerationPointMO+CoreDataProperties.swift in Sources */,
+				3D01585D200F7575008C065A /* GeoLocationMO+CoreDataProperties.swift in Sources */,
 				3D0287DA1FE7E36E006E9969 /* ServerConnection.swift in Sources */,
-				3DE419FB1FD5ACFE001282D0 /* MeasurementMO+CoreDataProperties.swift in Sources */,
-				3DE419FD1FD5ACFE001282D0 /* AccelerationPointMO+CoreDataClass.swift in Sources */,
+				3D01585C200F7575008C065A /* MeasurementMO+CoreDataClass.swift in Sources */,
+				3D015858200F7575008C065A /* MeasurementMO+CoreDataProperties.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
