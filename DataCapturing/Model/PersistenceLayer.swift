@@ -18,6 +18,18 @@ public class PersistenceLayer {
     
     let container: NSPersistentContainer
     
+    var lastIdentifier: Int64?
+    
+    var nextIdentifier: Int64 {
+        if let lastIdentifier = lastIdentifier {
+            self.lastIdentifier = lastIdentifier + 1
+            return lastIdentifier + 1
+        } else {
+            lastIdentifier = Int64(countMeasurements())
+            return lastIdentifier!
+        }
+    }
+    
     public init() {
         // The following code is necessary to load the CyfaceModel from the DataCapturing framework. It is only necessary because we are using a framework. Usually this would be much simpler as shown by many tutorials.
         // Details are available from the following StackOverflow Thread: https://stackoverflow.com/questions/42553749/core-data-failed-to-load-model
@@ -32,7 +44,7 @@ public class PersistenceLayer {
         }
         
         container = NSPersistentContainer(name: momdName, managedObjectModel: mom)
-        //container = NSPersistentContainer(name:"CyfaceModel")
+
         container.loadPersistentStores() { description, error in
             if let error = error {
                 fatalError("Unable to load persistent storage \(error)")
@@ -43,9 +55,11 @@ public class PersistenceLayer {
     }
     
     func createMeasurement(at timestamp: Int64) -> MeasurementMO {
+        let identifier = nextIdentifier
         if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
             let measurement = MeasurementMO(entity: description, insertInto: context)
             measurement.timestamp = timestamp
+            measurement.identifier = identifier
             return measurement
         } else {
             fatalError("Unable to create measurement.")

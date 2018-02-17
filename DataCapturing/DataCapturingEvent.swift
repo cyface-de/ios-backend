@@ -17,7 +17,7 @@ import Foundation
  - Version: 1.0.0
  - Since: 1.0.0
  */
-public enum DataCapturingEvents {
+public enum DataCapturingEvent {
     /// Occurs everytime the `DataCapturingService` received a geo location fix and thus is able to track its position.
     case geoLocationFixAcquired
     /// Occurs everytime the `DataCapturingService` loses its geo location fix.
@@ -26,7 +26,7 @@ public enum DataCapturingEvents {
      Occurs each time the `DataCapturingService` receives a new geo location position.
      - position: The new geo location position.
      */
-    case geoLocationAcquired(position: GeoLocation)
+    case geoLocationAcquired(position: GeoLocationMO)
     /**
      Occurs each time the application runs out of space. How much space is used and how much is available may be retrieved from `allocation`.
      - allocation: Information about the applications disk (or rather SD card) space consumption.
