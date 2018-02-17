@@ -59,6 +59,9 @@ public class DataCapturingService: NSObject  {
     /// An API that handles authentication and communication with a Cyface server.
     private let serverConnection: ServerConnection
     
+    /// Handles background synchronization of available `Measurement`s.
+    private let reachabilityManager: ReachabilityManager
+    
     //MARK: Initializers
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data via the provided server connection and accessing data a certain amount of times per second.
@@ -74,6 +77,7 @@ public class DataCapturingService: NSObject  {
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
         self.serverConnection = serverConnection
+        self.reachabilityManager = ReachabilityManager()
         super.init()
     }
     
@@ -114,6 +118,30 @@ public class DataCapturingService: NSObject  {
         motionManager.stopAccelerometerUpdates()
         locationManager.stopUpdatingLocation()
         currentMeasurement = nil
+        
+        // As soon as at least one measurement has been saved I'm interested to start the ReachabilityManager each time the app is capable of uploading data.
+        reachabilityManager.startMonitoring(onNoNetwork: nil, onCellularNetwork: nil, onWiFiNetwork: onWifiAvailable)
+    }
+    
+    /// As soon as Wifi becomes available this method is called and starts synchronisation of all unsynchronised `Measurement` instancess.
+    func onWifiAvailable() {
+        debugPrint("sync measurements \(countMeasurements())")
+        forceSync(onFinish: onSyncFinished)
+    }
+    
+    /// When synchronization has finished this handler is called and stops the `ReachabilityManager`.
+    func onSyncFinished(_ error: ServerConnectionError?) {
+        // Only go on if there was no error
+        guard error==nil else {
+            os_log("Unable to upload data due to %s", type: .error,(error?.code)!)
+            return
+        }
+        
+        debugPrint("Synchronized! Measurements on device \(countMeasurements())")
+        // stop synchronization if everythin has been synchronized.
+        if(countMeasurements()==0) {
+            reachabilityManager.stopMonitoring()
+        }
     }
     
     /// Forces the service to synchronize all Measurements now if a connection is available. If this is not called the service might wait for an opportune moment to start synchronization.
@@ -128,6 +156,7 @@ public class DataCapturingService: NSObject  {
             // Cleanup
             // TODO: This can lead to upload duplicates if a measurements upload is interrupted and needs to restart later.
             self.persistenceLayer.delete(measurement: mUnwrapped)
+            // Load the next measurement, which will be nil of there is none.
             m = self.persistenceLayer.loadMeasurement(fromPosition: 0)
         }
         
@@ -203,4 +232,3 @@ extension DataCapturingService: CLLocationManagerDelegate {
     }
 }
 // TODO: Add support for different vehicles
-// TODO: Transform DataCapturingListener to Closure
