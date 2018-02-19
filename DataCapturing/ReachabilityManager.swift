@@ -44,6 +44,10 @@ public class ReachabilityManager: NSObject {
     }
     
     public func startMonitoring(onNoNetwork noNetworkHandler: (() -> Void)?, onCellularNetwork cellularNetworkHandler: (() -> Void)?, onWiFiNetwork wiFiNetworkHandler: (() -> Void)?) {
+        self.noNetworkHandler = noNetworkHandler
+        self.cellularNetworkHandler = cellularNetworkHandler
+        self.wiFiNetworkHandler = wiFiNetworkHandler
+        
         NotificationCenter.default.addObserver(self,
                                 selector: #selector(self.reachabilityChanged),
                                 name: Notification.Name.reachabilityChanged,
@@ -61,5 +65,8 @@ public class ReachabilityManager: NSObject {
         NotificationCenter.default.removeObserver(self,
                                         name: Notification.Name.reachabilityChanged,
                                         object: reachability)
+        noNetworkHandler = nil
+        cellularNetworkHandler = nil
+        wiFiNetworkHandler = nil
     }
 }

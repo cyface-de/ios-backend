@@ -79,6 +79,8 @@ public class DataCapturingService: NSObject  {
         self.serverConnection = serverConnection
         self.reachabilityManager = ReachabilityManager()
         super.init()
+
+        reachabilityManager.startMonitoring(onNoNetwork: nil, onCellularNetwork: nil, onWiFiNetwork: onWifiAvailable)
     }
     
     //MARK: Methods
@@ -118,9 +120,6 @@ public class DataCapturingService: NSObject  {
         motionManager.stopAccelerometerUpdates()
         locationManager.stopUpdatingLocation()
         currentMeasurement = nil
-        
-        // As soon as at least one measurement has been saved I'm interested to start the ReachabilityManager each time the app is capable of uploading data.
-        reachabilityManager.startMonitoring(onNoNetwork: nil, onCellularNetwork: nil, onWiFiNetwork: onWifiAvailable)
     }
     
     /// As soon as Wifi becomes available this method is called and starts synchronisation of all unsynchronised `Measurement` instancess.
