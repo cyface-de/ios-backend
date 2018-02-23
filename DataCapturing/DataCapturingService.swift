@@ -29,7 +29,11 @@ public class DataCapturingService: NSObject  {
     private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
     
     /// `true` if data capturing is running; `false` otherwise.
-    private(set) public var isRunning: Bool
+    public var isRunning: Bool {
+        get {
+            return currentMeasurement != nil
+        }
+    }
     
     /// A listener that is notified of important events during data capturing.
     private var handler: ((DataCapturingEvent) -> Void)?
@@ -62,6 +66,9 @@ public class DataCapturingService: NSObject  {
     /// Handles background synchronization of available `Measurement`s.
     private let reachabilityManager: ReachabilityManager
     
+    /// A delegate that is informed about successful measurement synchronization. Gets the synchronized measurements identifer as parameter. This can be used to synchronize view elements showing measurements with the corresponding measurement and refresh upon deletion.
+    public var syncDelegate: ((Int64) -> ())?
+    
     //MARK: Initializers
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data via the provided server connection and accessing data a certain amount of times per second.
@@ -73,14 +80,13 @@ public class DataCapturingService: NSObject  {
      */
     public init(connection serverConnection: ServerConnection, sensorManager manager:CMMotionManager, updateInterval interval : Double = 100, persistenceLayer persistence: PersistenceLayer) {
         self.persistenceLayer = persistence
-        isRunning = false
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
         self.serverConnection = serverConnection
         self.reachabilityManager = ReachabilityManager()
         super.init()
 
-        reachabilityManager.startMonitoring(onNoNetwork: nil, onCellularNetwork: nil, onWiFiNetwork: onWifiAvailable)
+        //reachabilityManager.startMonitoring(onNoNetwork: nil, onCellularNetwork: nil, onWiFiNetwork: onWifiAvailable)
     }
     
     //MARK: Methods
@@ -88,16 +94,16 @@ public class DataCapturingService: NSObject  {
      Starts the capturing process with an optional closure, that is notified of important events during the capturing process. This operation is idempotent.
      
       - Parameter handler: A closure that is notified of important events during data capturing.
+      - Return: The measurement created by this call to `start`.
      */
-    public func start(withHandler handler:@escaping ((DataCapturingEvent) -> Void) = {_ in }) {
+    public func start(withHandler handler:@escaping ((DataCapturingEvent) -> Void) = {_ in }) -> MeasurementMO {
         self.handler = handler
         guard !isRunning else {
             os_log("start(): Trying to start DataCapturingService which is already running!", log: LOG, type: .info)
-            return
+            return currentMeasurement!
         }
         
         self.locationManager.startUpdatingLocation()
-        self.isRunning = true
         let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
         self.currentMeasurement = measurement
         
@@ -112,11 +118,11 @@ public class DataCapturingService: NSObject  {
                 measurement.addToAccelerations(acc)
             }
         }
+        return measurement
     }
     
     /// Stops the currently running data capturing process or does nothing if the process is not running.
     public func stop() {
-        isRunning = false
         motionManager.stopAccelerometerUpdates()
         locationManager.stopUpdatingLocation()
         currentMeasurement = nil
@@ -145,18 +151,18 @@ public class DataCapturingService: NSObject  {
     
     /// Forces the service to synchronize all Measurements now if a connection is available. If this is not called the service might wait for an opportune moment to start synchronization.
     public func forceSync(onFinish handler: ((ServerConnectionError?)->())?) {
-        var m = self.persistenceLayer.loadMeasurement(fromPosition: 0)
-        while m != nil {
-            let mUnwrapped = m!
+        for measurement in self.persistenceLayer.loadMeasurements() {
             if serverConnection.isAuthenticated() {
                 let handler = handler ?? {_ in } // In case no handler was provided simply use an empty one.
-                serverConnection.sync(measurement: mUnwrapped, onFinish: handler)
+                serverConnection.sync(measurement: measurement, onFinish: handler)
             }
             // Cleanup
-            // TODO: This can lead to upload duplicates if a measurements upload is interrupted and needs to restart later.
-            self.persistenceLayer.delete(measurement: mUnwrapped)
-            // Load the next measurement, which will be nil of there is none.
-            m = self.persistenceLayer.loadMeasurement(fromPosition: 0)
+            if let syncDelegate = syncDelegate {
+                let currentIdentifier = measurement.identifier
+                syncDelegate(currentIdentifier)
+            }
+            self.persistenceLayer.delete(measurement: measurement)
+            self.persistenceLayer.save()
         }
         
         notify(of: .synchronizationSuccessful)
@@ -180,10 +186,14 @@ public class DataCapturingService: NSObject  {
     /**
      Provides the cached `Measurement` at the specified index.
      
-     - Parameter index: An index into the database from which to load the `Measurement`. `Measurements` are stored in the order they have been captured.
+     - Parameter identifier: A measurement identifier to load the measurement for.
      */
-    public func loadMeasurement(at index: Int) -> MeasurementMO? {
-        return persistenceLayer.loadMeasurement(fromPosition: index)
+    public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementMO? {
+        return persistenceLayer.loadMeasurement(withIdentifier: identifier)
+    }
+    
+    public func loadMeasurements() -> [MeasurementMO] {
+        return persistenceLayer.loadMeasurements()
     }
     
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
@@ -231,3 +241,4 @@ extension DataCapturingService: CLLocationManagerDelegate {
     }
 }
 // TODO: Add support for different vehicles
+// TODO: Why do I need onSyncFinished and a synchronization delegate

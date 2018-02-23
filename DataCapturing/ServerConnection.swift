@@ -115,6 +115,7 @@ public class ServerConnection {
     }
     
     public func sync(measurement: MeasurementMO, onFinish handler: @escaping (ServerConnectionError?) -> ()) {
+        debugPrint("Trying to synchronize measurement \(measurement.identifier)")
         guard isAuthenticated() else {
             fatalError("sync(measurement: \(measurement)): Unable to sync with not authenticated client.")
         }

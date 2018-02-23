@@ -92,6 +92,9 @@ public class PersistenceLayer {
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         do {
             let fetchedMeasurements = try context.fetch(request)
+            for measurement in fetchedMeasurements {
+                debugPrint("PersistenceLayer.loadMeasurements(): Loaded measurement with identifier \(measurement.identifier).")
+            }
             return fetchedMeasurements
         } catch {
             fatalError("Unable to load measurements from data store: \(error).")
@@ -108,26 +111,44 @@ public class PersistenceLayer {
         }
     }
     
-    public func loadMeasurement(fromPosition position: Int) -> MeasurementMO? {
-        let sortDescriptor = NSSortDescriptor(key: "timestamp",ascending: true)
-        let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-        request.sortDescriptors?.append(sortDescriptor)
-        request.fetchLimit = 1
-        request.fetchOffset = position
-        do {
-            return try context.fetch(request).first
-        } catch {
-            fatalError("Unable to load measurements from data store: \(error)")
+    // TODO: this has the potential to load much data into memory. Maybe refactor this if problems occur.
+    public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementMO? {
+
+        for measurement in loadMeasurements() {
+            if measurement.identifier==identifier {
+                return measurement
+            }
         }
         return nil
+        /*
+        let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+
+        debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Preparing to load measurement with identifier \(identifier)")
+        request.predicate = NSPredicate(format: "%K = %@", "identifier", String(identifier))
+        do {
+            debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Loading measurement with identifier \(identifier).")
+            let fetchResult = try context.fetch(request)
+            debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Got \(fetchResult.count) items")
+            if fetchResult.count >= 1 {
+                fatalError("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Identifier occured multiple times")
+            } else {
+                let result = fetchResult.first
+                return result
+            }
+        } catch {
+            fatalError("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Unable to load measurements from data store: \(error)")
+        }
+        return nil*/
     }
     
+    /// Deletes measurements from the persistent data store. Do not forget to call `save()` to commit the changes.
     func deleteMeasurements() {
         loadMeasurements().forEach() { m in
             context.delete(m)
         }
     }
     
+    /// Deletes one specific measurement from the persistent data store. Do not forget to call `save()`to commit the changes.
     func delete(measurement value: MeasurementMO) {
         context.delete(value)
     }
