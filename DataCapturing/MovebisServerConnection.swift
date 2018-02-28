@@ -8,7 +8,7 @@
 import Foundation
 import Alamofire
 
-class MovebisServerConnection {
+public class MovebisServerConnection: ServerConnection {
     
     private var jwtAuthenticationToken: String?
     private lazy var serializer = CyfaceBinaryFormatSerializer()
@@ -17,10 +17,16 @@ class MovebisServerConnection {
     private var onFinishHandler: ((ServerConnectionError?) -> Void)?
     
     var installationIdentifier:String {
-        return "garbage"
+        if let applicationIdentifier = UserDefaults.standard.string(forKey: "de.cyface.identifier") {
+            return applicationIdentifier
+        } else {
+            let applicationIdentifier = UUID.init().uuidString
+            UserDefaults.standard.set(applicationIdentifier, forKey: "de.cyface.identifier")
+            return applicationIdentifier
+        }
     }
     
-    init(apiURL url: URL) {
+    public required init(apiURL url: URL) {
         apiURL = url
         
         guard let urlHost = url.host else {

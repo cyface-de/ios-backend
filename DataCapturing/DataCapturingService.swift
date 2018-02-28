@@ -61,7 +61,7 @@ public class DataCapturingService: NSObject  {
     private let persistenceLayer: PersistenceLayer
     
     /// An API that handles authentication and communication with a Cyface server.
-    private let serverConnection: ServerConnection
+    private let serverConnection: CyfaceServerConnection
     
     /// Handles background synchronization of available `Measurement`s.
     private let reachabilityManager: ReachabilityManager
@@ -78,7 +78,7 @@ public class DataCapturingService: NSObject  {
         - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
         - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
      */
-    public init(connection serverConnection: ServerConnection, sensorManager manager:CMMotionManager, updateInterval interval : Double = 100, persistenceLayer persistence: PersistenceLayer) {
+    public init(connection serverConnection: CyfaceServerConnection, sensorManager manager:CMMotionManager, updateInterval interval : Double = 100, persistenceLayer persistence: PersistenceLayer) {
         self.persistenceLayer = persistence
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
