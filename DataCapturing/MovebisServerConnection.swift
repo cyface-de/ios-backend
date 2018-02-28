@@ -9,7 +9,6 @@ import Foundation
 import Alamofire
 
 public class MovebisServerConnection: ServerConnection {
-    
     private var jwtAuthenticationToken: String?
     private lazy var serializer = CyfaceBinaryFormatSerializer()
     private let sessionManager: SessionManager
@@ -41,6 +40,10 @@ public class MovebisServerConnection: ServerConnection {
         sessionManager = SessionManager(
             serverTrustPolicyManager: ServerTrustPolicyManager(policies: serverTrustPolicies)
         )
+    }
+    
+    public func isAuthenticated() -> Bool {
+        return jwtAuthenticationToken != nil
     }
     
     public func authenticate(withJwtToken token: String) {

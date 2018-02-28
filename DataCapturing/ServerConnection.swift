@@ -9,6 +9,8 @@ import Foundation
 
 public protocol ServerConnection {
     init(apiURL url: URL)
+    
+    func isAuthenticated() -> Bool
 
     func sync(measurement: MeasurementMO, onFinish handler: @escaping (ServerConnectionError?) -> ())
 }
