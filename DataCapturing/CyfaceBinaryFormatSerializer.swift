@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import DataCompression
 
 class CyfaceBinaryFormatSerializer {
     
@@ -20,6 +21,16 @@ class CyfaceBinaryFormatSerializer {
         let ret = value.extractBytes()
         
         return order == .bigEndian ? ret.reversed() : ret
+    }
+    
+    func serializeCompressed(_ measurement: MeasurementMO) -> Data {
+        let res = serialize(measurement)
+        
+        guard let compressed = res.deflate() else {
+            fatalError("CyfaceBinaryFormatSerializer.serializeCompressed(\(measurement.identifier)): Unable to compress data.")
+        }
+        
+        return compressed
     }
     
     func serialize(_ measurement: MeasurementMO) -> Data {

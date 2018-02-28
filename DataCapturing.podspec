@@ -40,6 +40,7 @@ This framework can be included by your App if you are going to capture sensor da
   # s.frameworks = 'UIKit', 'MapKit'
   s.dependency 'ReachabilitySwift', '~> 4.1.0'
   s.dependency 'Alamofire', '~> 4.6'
+  s.dependency 'DataCompression'
 
   s.test_spec 'DataCapturingTests' do |test_spec|
     test_spec.source_files = 'DataCapturingTests/*.swift'
