@@ -23,12 +23,8 @@ class CyfaceBinaryFormatSerializer {
     }
     
     func serialize(_ measurement: MeasurementMO) -> Data {
-        guard let accelerations = measurement.accelerations else {
-            fatalError("CyfaceBinaryFormatSerializer.serialize(\(measurement.identifier)): Invalid measurement. No accelerations.")
-        }
-        guard let geoLocations = measurement.geoLocations else {
-            fatalError("CyfaceBinaryFormatSerializer.serialize(\(measurement.identifier)): Invalid measurement. No geo locations.")
-        }
+        let accelerations = measurement.accelerations == nil ? [] : measurement.accelerations!
+        let geoLocations = measurement.geoLocations == nil ? [] : measurement.geoLocations!
         
         var dataArray = [UInt8]()
         // add header
