@@ -38,8 +38,14 @@ This framework can be included by your App if you are going to capture sensor da
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
+  
+  # The following transitive dependencies are used by this project:
+  # This one checks for WiFi status before uploading data. 
   s.dependency 'ReachabilitySwift', '~> 4.1.0'
+  # This one is used to handle network traffic like multipart requests
+  # TODO: Alamofire is capable of doing the same as ReachabilitySwift and should replace it in the future
   s.dependency 'Alamofire', '~> 4.6'
+  # A wrapper for the complicated ObjectiveC compression API.
   s.dependency 'DataCompression'
 
   s.test_spec 'DataCapturingTests' do |test_spec|
