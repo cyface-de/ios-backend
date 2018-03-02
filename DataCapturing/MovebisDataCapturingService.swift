@@ -53,7 +53,7 @@ public class MovebisDataCapturingService: DataCapturingService {
         - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
         - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
     */
-    public override init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer) {
+    public init(connection serverConnection: MovebisServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer) {
         super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence)
     }
 }
