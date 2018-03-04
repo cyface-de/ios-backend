@@ -17,30 +17,30 @@ import os.log
  - Since: 1.0.0
  */
 public class CyfaceServerConnection: ServerConnection {
-    
+
     // MARK: Properties
-    private let LOG = OSLog(subsystem: "de.cyface",category: "ServerConnection")
-    
+    private let LOG = OSLog(subsystem: "de.cyface", category: "ServerConnection")
+
     /// Session object to upload captured data to a Cyface server.
     private lazy var apiSession: URLSession = {
         return URLSession(configuration: .default)
     }()
-    
+
     /// A `URL` used to upload data to. There should be a server complying to a Cyface REST interface available at that location.
     private let apiURL: URL
-    
+
     /// Authentication token provided by a JWT authentication request. This property is `nil` as long as àuthenticate was not called successfully yet. Otherwise it contains the JWT bearer required as content for the Authorization header.
     private var jwtBearer: String?
-    
+
     private var onAuthenticationFinishedHandler: ((Error?) -> Void)?
-    
+
     private lazy var deviceModelIdentifier: String = {
         if let simulatorModelIdentifier = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] {return simulatorModelIdentifier}
         var sysinfo = utsname()
         uname(&sysinfo) // ignore return value
         return String(bytes: Data(bytes: &sysinfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)!.trimmingCharacters(in: .controlCharacters)
     }()
-    
+
     // MARK: Initializers
     /**
      Creates a new `ServerConnection` to the provided URL.
@@ -50,7 +50,7 @@ public class CyfaceServerConnection: ServerConnection {
     public required init(apiURL url: URL) {
         self.apiURL=url
     }
-    
+
     // MARK: Methods
     public func authenticate(with username: String, and password: String, onFinish handler: ((Error?) -> Void)?) {
         let loginURL = apiURL.appendingPathComponent("login")
@@ -58,24 +58,23 @@ public class CyfaceServerConnection: ServerConnection {
         self.onAuthenticationFinishedHandler = handler
         request.httpMethod = "POST"
         request.setValue("application/json; charset=UTF-8", forHTTPHeaderField: "Content-Type")
-        guard let body = try? JSONSerialization.data(withJSONObject: ["login": "\(username)","password": "\(password)"]) else {
+        guard let body = try? JSONSerialization.data(withJSONObject: ["login": "\(username)", "password": "\(password)"]) else {
             fatalError("authenticate(username: \(username), password: \(password)): Unable to encode username and password into a JSON request.")
         }
         request.httpBody = body
-        
-        
+
         if jwtBearer==nil {
             let authenticationTask = apiSession.dataTask(with: request, completionHandler: onAuthenticationResponse)
             authenticationTask.resume()
         }
     }
-    
+
     public func sync(measurement: MeasurementMO, onFinish handler: @escaping (ServerConnectionError?) -> Void) {
         debugPrint("Trying to synchronize measurement \(measurement.identifier)")
         guard isAuthenticated() else {
             fatalError("sync(measurement: \(measurement)): Unable to sync with not authenticated client.")
         }
-        
+
         installationIdentifier { error, identifier in
             if let error = error {
                 handler(error)
@@ -87,26 +86,25 @@ public class CyfaceServerConnection: ServerConnection {
             }
         }
     }
-    
+
     public func isAuthenticated() -> Bool {
         return jwtBearer != nil || jwtBearer!.isEmpty
     }
-    
+
     private func transmit(measurement: MeasurementMO, forDevice deviceIdentifier: String, onFinish handler: @escaping (ServerConnectionError?) -> Void) {
         var request = URLRequest(url: apiURL.appendingPathComponent("measurements"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(jwtBearer, forHTTPHeaderField: "Authorization")
         //request.setValue("gzip", forHTTPHeaderField: "Content-Encoding")
-        
-        
+
         let chunks = self.makeUploadChunks(fromMeasurement: measurement, forInstallation: deviceIdentifier)
         for chunk in chunks {
             guard let jsonChunk = try? JSONSerialization.data(withJSONObject: chunk, options: .sortedKeys) else {
                 /*guard let jsonChunk = try? self.uploadMessagesEncoder.encode(chunk) else {*/
                 fatalError("ServerConnection.transmit(measurement: \(measurement.debugDescription), forDevice: \(deviceIdentifier)): Invalid measurement format.")
             }
-            
+
             let submissionTask = self.apiSession.uploadTask(with: request, from: jsonChunk) { data, response, error in
                 if let error = error {
                     handler(ServerConnectionError(title: "Data Transmission Error", description: "Error while transmitting data to the server at \(String(describing: request.url))! Error was: \(error)", code: 3))
@@ -116,22 +114,21 @@ public class CyfaceServerConnection: ServerConnection {
                     handler(ServerConnectionError(title: "Data Transmission Error", description: "Received erroneous response from \(String(describing: request.url))!", code: 3))
                     return
                 }
-                
+
                 let statusCode = response.statusCode
                 guard statusCode == 201 else {
                     handler(ServerConnectionError(title: "Invalid Status Code Error", description: "Invalid status code \(statusCode) received from server at \(String(describing: request.url))!", code: 3))
                     return
                 }
-                
+
                 handler(nil)
             }
-            
+
             submissionTask.resume()
         }
     }
-    
+
     private func makeUploadChunks(fromMeasurement measurement: MeasurementMO, forInstallation identifier: String) -> [[String: Any]] {
-        // TODO: Not really chunked yet. Still loads everything into main memory.
         var geoLocations = [[String: String]]()
         if let measurementLocations = measurement.geoLocations {
             for location in measurementLocations {
@@ -139,7 +136,7 @@ public class CyfaceServerConnection: ServerConnection {
                 geoLocations.append(["lat": String(location.lat), "lon": String(location.lon), "speed": String(location.speed), "timestamp": String(location.timestamp), "accuracy": String(Int(location.accuracy))])
             }
         }
-        
+
         var accelerationPoints = [[String: String]]()
         if let accelerations = measurement.accelerations {
             for acceleration in accelerations {
@@ -147,8 +144,8 @@ public class CyfaceServerConnection: ServerConnection {
                 accelerationPoints.append(["ax": String(acceleration.ax), "ay": String(acceleration.ay), "az": String(acceleration.az), "timestamp": String(acceleration.timestamp)])
             }
         }
-        
-        return [["deviceId": identifier, "id": String(measurement.identifier), "vehicle": "BICYCLE", "gpsPoints": geoLocations,"accelerationPoints": accelerationPoints]]
+
+        return [["deviceId": identifier, "id": String(measurement.identifier), "vehicle": "BICYCLE", "gpsPoints": geoLocations, "accelerationPoints": accelerationPoints]]
     }
     
     /**
@@ -240,12 +237,12 @@ public class CyfaceServerConnection: ServerConnection {
         
         deviceRetrievalTask.resume()
     }
-    
+
     private func registerDevice(withIdentifier identifier: String, completionHandler handler: @escaping (ServerConnectionError?, String?) -> Void) {
         guard isAuthenticated() else {
             fatalError("ServerConnection.registerDevice(\(identifier)): Unable to register device for non-authenticated client.")
         }
-        
+
         var request = URLRequest(url: self.apiURL.appendingPathComponent("devices"))
         request.httpMethod = "POST"
         request.setValue(jwtBearer, forHTTPHeaderField: "Authorization")
@@ -256,7 +253,7 @@ public class CyfaceServerConnection: ServerConnection {
         
         let deviceCreationTask = self.apiSession.dataTask(with: request) { data, response, error in
             if let error = error {
-                handler(ServerConnectionError(title: "Device Registration Error", description: "Server error during device registration!, Error \(error)", code: 2),identifier)
+                handler(ServerConnectionError(title: "Device Registration Error", description: "Server error during device registration!, Error \(error)", code: 2), identifier)
                 return
             }
             
@@ -302,7 +299,7 @@ public class CyfaceServerConnection: ServerConnection {
         if statusCode == 200 {
             self.jwtBearer = unwrappedAuthenticationToken
             handler(nil)
-        } else  {
+        } else {
             handler(ServerConnectionError(title: "Authentication Error", description: "There has been a client side error while authenticating with the Cyface API available at \(self.apiURL). The call provided the following status code \(statusCode).", code: 1))
         }
     }
@@ -325,5 +322,5 @@ public struct ServerConnectionError: LocalizedError {
 }
 
 struct Device: Codable {
-    var id: String
+    var identifier: String
 }

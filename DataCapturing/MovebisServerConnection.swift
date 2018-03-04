@@ -14,7 +14,7 @@ public class MovebisServerConnection: ServerConnection {
     private let sessionManager: SessionManager
     private let apiURL: URL
     private var onFinishHandler: ((ServerConnectionError?) -> Void)?
-    
+
     var installationIdentifier:String {
         if let applicationIdentifier = UserDefaults.standard.string(forKey: "de.cyface.identifier") {
             return applicationIdentifier
@@ -24,45 +24,45 @@ public class MovebisServerConnection: ServerConnection {
             return applicationIdentifier
         }
     }
-    
+
     public required init(apiURL url: URL) {
         apiURL = url
-        
+
         guard let urlHost = url.host else {
             fatalError("MovebisServerConnection.init(\(url.absoluteString)): Invalid URL! No host specified!")
         }
-        
+
         // TODO: This ignores any certificate issues and is ugly. Should be changed to check for correct certificate.
         let serverTrustPolicies: [String: ServerTrustPolicy] = [
             urlHost: .disableEvaluation
         ]
-        
+
         sessionManager = SessionManager(
             serverTrustPolicyManager: ServerTrustPolicyManager(policies: serverTrustPolicies)
         )
     }
-    
+
     public func isAuthenticated() -> Bool {
         return jwtAuthenticationToken != nil
     }
-    
+
     public func authenticate(withJwtToken token: String) {
         jwtAuthenticationToken = token
     }
-    
-    public func sync(measurement: MeasurementMO, onFinish handler: @escaping (ServerConnectionError?) -> ()) {
+
+    public func sync(measurement: MeasurementMO, onFinish handler: @escaping (ServerConnectionError?) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
         onFinishHandler = handler
-        
+
         guard let jwtAuthenticationToken = jwtAuthenticationToken else {
             fatalError("MovebisServerConnection.sync(measurement:\(measurement.identifier)): Unable to sync. No authentication information provided.")
         }
-        
+
         let headers: HTTPHeaders = [
             "Authorization": "Bearer \(jwtAuthenticationToken)",
             "Content-type": "multipart/form-data"
         ]
-        
+
         sessionManager.upload(multipartFormData: { (multipartFormData) in
             multipartFormData.append(self.installationIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceId")
             multipartFormData.append(String(measurement.identifier).data(using: String.Encoding.utf8)!, withName: "measurementId")
@@ -71,7 +71,7 @@ public class MovebisServerConnection: ServerConnection {
             multipartFormData.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
         }, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: onEncodingComplete)
     }
-    
+
     func onEncodingComplete(withResult result: SessionManager.MultipartFormDataEncodingResult) {
         switch result {
         case .success(let upload, _, _):
@@ -84,12 +84,12 @@ public class MovebisServerConnection: ServerConnection {
             }
         }
     }
-    
+
     func onResponseReady(_ response: DataResponse<String>) {
         guard let handler = onFinishHandler else {
             return
         }
-        
+
         switch response.result {
         case .failure(let error):
             handler(ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onResponseReady(\(response)): Unable to upload data due to error: \(error)", code: 1))
