@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import DataCompression
 
 class CyfaceBinaryFormatSerializer {
 
@@ -21,7 +22,17 @@ class CyfaceBinaryFormatSerializer {
 
         return order == .bigEndian ? ret.reversed() : ret
     }
-
+    
+    func serializeCompressed(_ measurement: MeasurementMO) -> Data {
+        let res = serialize(measurement)
+        
+        guard let compressed = res.deflate() else {
+            fatalError("CyfaceBinaryFormatSerializer.serializeCompressed(\(measurement.identifier)): Unable to compress data.")
+        }
+        
+        return compressed
+    }
+    
     func serialize(_ measurement: MeasurementMO) -> Data {
         let accelerations = measurement.accelerations == nil ? [] : measurement.accelerations!
         let geoLocations = measurement.geoLocations == nil ? [] : measurement.geoLocations!
@@ -30,8 +41,8 @@ class CyfaceBinaryFormatSerializer {
         // add header
         let version = CyfaceBinaryFormatSerializer.DATA_FORMAT_VERSION
         dataArray.append(contentsOf: convertToBytes(version, inOrder: .bigEndian))
-        dataArray.append(contentsOf: convertToBytes(geoLocations.count, inOrder: .bigEndian))
-        dataArray.append(contentsOf: convertToBytes(accelerations.count, inOrder: .bigEndian))
+        dataArray.append(contentsOf: convertToBytes(UInt32(geoLocations.count), inOrder: .bigEndian))
+        dataArray.append(contentsOf: convertToBytes(UInt32(accelerations.count), inOrder: .bigEndian))
         dataArray.append(contentsOf: convertToBytes(UInt32(0), inOrder: .bigEndian))
         dataArray.append(contentsOf: convertToBytes(UInt32(0), inOrder: .bigEndian))
 
@@ -43,28 +54,39 @@ class CyfaceBinaryFormatSerializer {
         return Data(bytes: dataArray)
     }
 
-    func serialize(geoLocations locations: [GeoLocationMO]) -> [UInt8] {
+    private func serialize(geoLocations locations: [GeoLocationMO]) -> [UInt8] {
         var ret = [UInt8]()
 
         for location in locations {
+            // 8 Bytes
             ret.append(contentsOf: convertToBytes(location.timestamp, inOrder: .bigEndian))
+            // 8 Bytes
             ret.append(contentsOf: convertToBytes(location.lat.bitPattern, inOrder: .bigEndian))
+            // 8 Bytes
             ret.append(contentsOf: convertToBytes(location.lon.bitPattern, inOrder: .bigEndian))
+            // 8 Bytes
             ret.append(contentsOf: convertToBytes(location.speed.bitPattern, inOrder: .bigEndian))
+            // 4 Bytes
             ret.append(contentsOf: convertToBytes(UInt32(location.accuracy*100), inOrder: .bigEndian))
+            // = 36 Bytes
         }
 
         return ret
     }
 
-    func serialize(accelerations: [AccelerationPointMO]) -> [UInt8] {
+    private func serialize(accelerations: [AccelerationPointMO]) -> [UInt8] {
         var ret = [UInt8]()
 
         for acceleration in accelerations {
+            // 8 Bytes
             ret.append(contentsOf: convertToBytes(acceleration.timestamp, inOrder: .bigEndian))
+            // 8 Bytes
             ret.append(contentsOf: convertToBytes(acceleration.ax.bitPattern, inOrder: .bigEndian))
+            // 8 Bytes
             ret.append(contentsOf: convertToBytes(acceleration.ay.bitPattern, inOrder: .bigEndian))
+            // 8 Bytes
             ret.append(contentsOf: convertToBytes(acceleration.az.bitPattern, inOrder: .bigEndian))
+            // 32 Bytes
         }
 
         return ret
