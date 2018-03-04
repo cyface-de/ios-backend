@@ -31,11 +31,16 @@ public class PersistenceLayer {
     }
 
     public init() {
-        // The following code is necessary to load the CyfaceModel from the DataCapturing framework. It is only necessary because we are using a framework. Usually this would be much simpler as shown by many tutorials.
-        // Details are available from the following StackOverflow Thread: https://stackoverflow.com/questions/42553749/core-data-failed-to-load-model
+        /*
+         The following code is necessary to load the CyfaceModel from the DataCapturing framework.
+         It is only necessary because we are using a framework.
+         Usually this would be much simpler as shown by many tutorials.
+         Details are available from the following StackOverflow Thread:
+         https://stackoverflow.com/questions/42553749/core-data-failed-to-load-model
+         */
         let momdName = "CyfaceModel"
 
-        guard let modelURL = Bundle(for: type(of: self)).url(forResource: momdName, withExtension:"momd") else {
+        guard let modelURL = Bundle(for: type(of: self)).url(forResource: momdName, withExtension: "momd") else {
             fatalError("Error loading model from bundle")
         }
 
@@ -45,7 +50,7 @@ public class PersistenceLayer {
 
         container = NSPersistentContainer(name: momdName, managedObjectModel: mom)
 
-        container.loadPersistentStores() { description, error in
+        container.loadPersistentStores { _, error in
             if let error = error {
                 fatalError("Unable to load persistent storage \(error)")
             }
@@ -62,12 +67,14 @@ public class PersistenceLayer {
             measurement.identifier = identifier
             return measurement
         } else {
-            fatalError("Unable to create measurement.")
+            fatalError("Unable to create measurement!")
         }
     }
 
     func createAcceleration(x ax: Double, y ay: Double, z az: Double, at timestamp: Int64) -> AccelerationPointMO {
-        let acceleration = NSEntityDescription.insertNewObject(forEntityName: "Acceleration", into: context) as! AccelerationPointMO
+        guard let acceleration = NSEntityDescription.insertNewObject(forEntityName: "Acceleration", into: context) as? AccelerationPointMO else {
+            fatalError("Unable to create new acceleration in CoreData!")
+        }
         acceleration.ax = ax
         acceleration.ay = ay
         acceleration.az = az
@@ -77,7 +84,9 @@ public class PersistenceLayer {
     }
 
     func createGeoLocation(latitude lat: Double, longitude lon: Double, accuracy acc: Double, speed spd: Double, at timestamp: Int64) -> GeoLocationMO {
-        let location = NSEntityDescription.insertNewObject(forEntityName: "GeoLocation", into: context) as! GeoLocationMO
+        guard let location = NSEntityDescription.insertNewObject(forEntityName: "GeoLocation", into: context) as? GeoLocationMO else {
+            fatalError("Unable to create new location in CoreData!")
+        }
 
         location.accuracy = acc
         location.lat = lat
@@ -111,13 +120,10 @@ public class PersistenceLayer {
         }
     }
 
-    // TODO: this has the potential to load much data into memory. Maybe refactor this if problems occur.
     public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementMO? {
 
-        for measurement in loadMeasurements() {
-            if measurement.identifier==identifier {
-                return measurement
-            }
+        for measurement in loadMeasurements() where measurement.identifier==identifier {
+            return measurement
         }
         return nil
         /*
@@ -143,7 +149,7 @@ public class PersistenceLayer {
 
     /// Deletes measurements from the persistent data store. Do not forget to call `save()` to commit the changes.
     func deleteMeasurements() {
-        loadMeasurements().forEach() { m in
+        loadMeasurements().forEach { m in
             context.delete(m)
         }
     }

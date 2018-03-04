@@ -9,7 +9,6 @@
 import Foundation
 import CoreData
 
-
 extension AccelerationPointMO {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<AccelerationPointMO> {
