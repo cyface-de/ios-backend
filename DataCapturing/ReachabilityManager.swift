@@ -22,7 +22,9 @@ public class ReachabilityManager: NSObject {
     var wiFiNetworkHandler: (() -> Void)?
 
     @objc func reachabilityChanged(notification: Notification) {
-        let reachability = notification.object as! Reachability
+        guard let reachability = notification.object as? Reachability else {
+            fatalError("Unable to get Reachability object")
+        }
 
         switch reachability.connection {
         case.none:
@@ -47,7 +49,7 @@ public class ReachabilityManager: NSObject {
         onNoNetwork noNetworkHandler: (() -> Void)?,
         onCellularNetwork cellularNetworkHandler: (() -> Void)?,
         onWiFiNetwork wiFiNetworkHandler: (() -> Void)?) {
-        
+
         self.noNetworkHandler = noNetworkHandler
         self.cellularNetworkHandler = cellularNetworkHandler
         self.wiFiNetworkHandler = wiFiNetworkHandler

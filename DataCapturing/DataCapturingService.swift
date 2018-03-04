@@ -28,15 +28,13 @@ import CoreData
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject  {
-    //MARK: Properties
+    // MARK: Properties
     /// Data used to identify log messages created by this component.
     private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
 
     /// `true` if data capturing is running; `false` otherwise.
     public var isRunning: Bool {
-        get {
             return currentMeasurement != nil
-        }
     }
 
     /// A listener that is notified of important events during data capturing.
@@ -48,7 +46,10 @@ public class DataCapturingService: NSObject  {
     /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
     private let motionManager: CMMotionManager
 
-    /// Provides access to the devices geo location capturing hardware (such as GPS, GLONASS, GALILEO, etc.) and handles geo location updates in the background.
+    /**
+     Provides access to the devices geo location capturing hardware (such as GPS, GLONASS, GALILEO, etc.)
+     and handles geo location updates in the background.
+     */
     private lazy var locationManager: CLLocationManager = {
         let manager = CLLocationManager()
         manager.delegate = self
@@ -81,7 +82,7 @@ public class DataCapturingService: NSObject  {
      */
     public var syncDelegate: ((Int64) -> ())?
 
-    //MARK: Initializers
+    // MARK: Initializers
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data
      via the provided server connection and accessing data a certain amount of times per second.
@@ -94,7 +95,12 @@ public class DataCapturingService: NSObject  {
         - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
         - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
      */
-    public init(connection serverConnection: ServerConnection, sensorManager manager:CMMotionManager, updateInterval interval: Double = 100, persistenceLayer persistence: PersistenceLayer) {
+    public init(
+        connection serverConnection: ServerConnection,
+        sensorManager manager: CMMotionManager,
+        updateInterval interval: Double = 100,
+        persistenceLayer persistence: PersistenceLayer) {
+
         self.persistenceLayer = persistence
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
@@ -105,7 +111,7 @@ public class DataCapturingService: NSObject  {
         //reachabilityManager.startMonitoring(onNoNetwork: nil, onCellularNetwork: nil, onWiFiNetwork: onWifiAvailable)
     }
 
-    //MARK: Methods
+    // MARK: Methods
     /**
      Starts the capturing process with an optional closure, that is notified of important events
      during the capturing process. This operation is idempotent.
@@ -124,14 +130,18 @@ public class DataCapturingService: NSObject  {
         let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
         self.currentMeasurement = measurement
 
-        if(motionManager.isAccelerometerAvailable) {
+        if motionManager.isAccelerometerAvailable {
             motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { data, error in
                 guard let myData = data else {
                     fatalError("DataCapturingService.start(): No Accelerometer data available!")
                 }
 
                 let accValues = myData.acceleration
-                let acc = self.persistenceLayer.createAcceleration(x: accValues.x, y: accValues.y, z: accValues.z, at: self.currentTimeInMillisSince1970())
+                let acc = self.persistenceLayer.createAcceleration(
+                    x: accValues.x,
+                    y: accValues.y,
+                    z: accValues.z,
+                    at: self.currentTimeInMillisSince1970())
                 measurement.addToAccelerations(acc)
             }
         }
@@ -164,19 +174,22 @@ public class DataCapturingService: NSObject  {
     func onSyncFinished(_ error: ServerConnectionError?) {
         // Only go on if there was no error
         guard error==nil else {
-            os_log("Unable to upload data due to %s", type: .error,(error?.code)!)
+            os_log("Unable to upload data.")
             return
         }
 
         debugPrint("Synchronized! Measurements on device \(countMeasurements())")
         // stop synchronization if everythin has been synchronized.
-        if(countMeasurements()==0) {
+        if countMeasurements()==0 {
             reachabilityManager.stopMonitoring()
         }
     }
 
-    /// Forces the service to synchronize all Measurements now if a connection is available. If this is not called the service might wait for an opportune moment to start synchronization.
-    public func forceSync(onFinish handler: ((ServerConnectionError?)->())?) {
+    /**
+     Forces the service to synchronize all Measurements now if a connection is available.
+     If this is not called the service might wait for an opportune moment to start synchronization.
+     */
+    public func forceSync(onFinish handler: ((ServerConnectionError?) -> Void)?) {
         for measurement in self.persistenceLayer.loadMeasurements() {
             if serverConnection.isAuthenticated() {
                 // In case no handler was provided simply use an empty one.
@@ -200,7 +213,7 @@ public class DataCapturingService: NSObject  {
      - Parameter measurement: The `Measurement` to delete. You can get this for example via
         `loadMeasurement(index:)`.
     */
-    public func delete(unsyncedMeasurement measurement : MeasurementMO) {
+    public func delete(unsyncedMeasurement measurement: MeasurementMO) {
         persistenceLayer.delete(measurement: measurement)
         persistenceLayer.save()
     }
@@ -238,7 +251,7 @@ public class DataCapturingService: NSObject  {
      
      - Parameter event: The `event` to notify the `handler` of.
      */
-    private func notify(of event:DataCapturingEvent) {
+    private func notify(of event: DataCapturingEvent) {
         guard let handler = self.handler else {
             return
         }
@@ -255,17 +268,21 @@ extension DataCapturingService: CLLocationManagerDelegate {
             fatalError("No location available for DataCapturingService!")
         }
         let location: CLLocation = locations[0]
-        os_log("New location: lat %@, lon %@",type: .info, location.coordinate.latitude.description, location.coordinate.longitude.description)
+        os_log("New location: lat %@, lon %@", type: .info, location.coordinate.latitude.description, location.coordinate.longitude.description)
 
         guard let measurement = currentMeasurement else {
             fatalError("No current measurement to save the location to! Data capturing impossible.")
         }
-        let geoLocation = persistenceLayer.createGeoLocation(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, accuracy: location.horizontalAccuracy, speed: location.speed, at: convertToUtcTimestamp(date: location.timestamp))
+        let geoLocation = persistenceLayer.createGeoLocation(
+            latitude: location.coordinate.latitude,
+            longitude: location.coordinate.longitude,
+            accuracy: location.horizontalAccuracy,
+            speed: location.speed,
+            at: convertToUtcTimestamp(date: location.timestamp))
         measurement.addToGeoLocations(geoLocation)
         notify(of: .geoLocationAcquired(position: geoLocation))
 
         persistenceLayer.save()
     }
 }
-// TODO: Add support for different vehicles
 // TODO: Why do I need onSyncFinished and a synchronization delegate

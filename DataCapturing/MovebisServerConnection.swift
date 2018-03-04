@@ -80,7 +80,7 @@ public class MovebisServerConnection: ServerConnection {
         case .failure(let error):
             print("failure")
             if let handler = onFinishHandler {
-                handler(ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onEncodingComplete(\(result)): Unable to upload data \(error.localizedDescription).", code: 1))
+                handler(ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onEncodingComplete(\(result)): Unable to upload data \(error.localizedDescription)."))
             }
         }
     }
@@ -92,7 +92,7 @@ public class MovebisServerConnection: ServerConnection {
 
         switch response.result {
         case .failure(let error):
-            handler(ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onResponseReady(\(response)): Unable to upload data due to error: \(error)", code: 1))
+            handler(ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onResponseReady(\(response)): Unable to upload data due to error: \(error)"))
         case .success(_):
             handler(nil)
         }
