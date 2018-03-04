@@ -9,7 +9,7 @@ import Foundation
 
 class CyfaceBinaryFormatSerializer {
 
-    private static let DATA_FORMAT_VERSION: UInt16 = 1
+    private static let dataFormatVersion: UInt16 = 1
 
     enum ByteOrder {
         case bigEndian
@@ -28,7 +28,7 @@ class CyfaceBinaryFormatSerializer {
 
         var dataArray = [UInt8]()
         // add header
-        let version = CyfaceBinaryFormatSerializer.DATA_FORMAT_VERSION
+        let version = CyfaceBinaryFormatSerializer.dataFormatVersion
         dataArray.append(contentsOf: convertToBytes(version, inOrder: .bigEndian))
         dataArray.append(contentsOf: convertToBytes(geoLocations.count, inOrder: .bigEndian))
         dataArray.append(contentsOf: convertToBytes(accelerations.count, inOrder: .bigEndian))

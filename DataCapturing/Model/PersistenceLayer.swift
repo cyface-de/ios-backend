@@ -35,7 +35,7 @@ public class PersistenceLayer {
         // Details are available from the following StackOverflow Thread: https://stackoverflow.com/questions/42553749/core-data-failed-to-load-model
         let momdName = "CyfaceModel"
 
-        guard let modelURL = Bundle(for: type(of: self)).url(forResource: momdName, withExtension:"momd") else {
+        guard let modelURL = Bundle(for: type(of: self)).url(forResource: momdName, withExtension: "momd") else {
             fatalError("Error loading model from bundle")
         }
 
@@ -45,7 +45,7 @@ public class PersistenceLayer {
 
         container = NSPersistentContainer(name: momdName, managedObjectModel: mom)
 
-        container.loadPersistentStores() { description, error in
+        container.loadPersistentStores { description, error in
             if let error = error {
                 fatalError("Unable to load persistent storage \(error)")
             }
@@ -114,10 +114,8 @@ public class PersistenceLayer {
     // TODO: this has the potential to load much data into memory. Maybe refactor this if problems occur.
     public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementMO? {
 
-        for measurement in loadMeasurements() {
-            if measurement.identifier==identifier {
-                return measurement
-            }
+        for measurement in loadMeasurements() where measurement.identifier==identifier {
+            return measurement
         }
         return nil
         /*
@@ -143,7 +141,7 @@ public class PersistenceLayer {
 
     /// Deletes measurements from the persistent data store. Do not forget to call `save()` to commit the changes.
     func deleteMeasurements() {
-        loadMeasurements().forEach() { m in
+        loadMeasurements().forEach { m in
             context.delete(m)
         }
     }

@@ -132,7 +132,6 @@ public class CyfaceServerConnection: ServerConnection {
         var geoLocations = [[String: String]]()
         if let measurementLocations = measurement.geoLocations {
             for location in measurementLocations {
-                let location = location as! GeoLocationMO
                 geoLocations.append(["lat": String(location.lat), "lon": String(location.lon), "speed": String(location.speed), "timestamp": String(location.timestamp), "accuracy": String(Int(location.accuracy))])
             }
         }
@@ -140,14 +139,13 @@ public class CyfaceServerConnection: ServerConnection {
         var accelerationPoints = [[String: String]]()
         if let accelerations = measurement.accelerations {
             for acceleration in accelerations {
-                let acceleration = acceleration as! AccelerationPointMO
                 accelerationPoints.append(["ax": String(acceleration.ax), "ay": String(acceleration.ay), "az": String(acceleration.az), "timestamp": String(acceleration.timestamp)])
             }
         }
 
         return [["deviceId": identifier, "id": String(measurement.identifier), "vehicle": "BICYCLE", "gpsPoints": geoLocations, "accelerationPoints": accelerationPoints]]
     }
-    
+
     /**
      Used to register this application with the server. The method checks whether an application identifier has been generated. If not it generates one and registers it with the server. If there already is an existing application identifier registered it looks whether the server knows about that identifier and if not registers it.
      
@@ -163,11 +161,11 @@ public class CyfaceServerConnection: ServerConnection {
                 handler(ServerConnectionError(title: "Device Registration Error", description: "Unable to get application identifier", code: 1), nil)
                 return
             }
-            
+
             UserDefaults.standard.set(appIdentifier, forKey: "de.cyface.identifier")
             handler(nil, appIdentifier)
         }
-        
+
         if let applicationIdentifier = UserDefaults.standard.string(forKey: "de.cyface.identifier") {
             // Check if identifier is registered at server.
             checkDevice(withIdentifier: applicationIdentifier) { error, identifierFound in
@@ -183,23 +181,23 @@ public class CyfaceServerConnection: ServerConnection {
                     self.registerDevice(withIdentifier: applicationIdentifier, completionHandler: completionHandler)
                 }
             }
-            
+
         } else {
             // otherwise generate new application identifier
             let applicationIdentifier = UUID.init().uuidString
             registerDevice(withIdentifier: applicationIdentifier, completionHandler: completionHandler)
         }
     }
-    
+
     private func checkDevice(withIdentifier identifier: String, completionHandler handler: @escaping (ServerConnectionError?, Bool) -> Void) {
         guard isAuthenticated() else {
             fatalError("ServerConnection.checkDevice(\(identifier)): Unable to check for registered device for non-authenticated client.")
         }
-        
+
         var request = URLRequest(url: self.apiURL.appendingPathComponent("devices"))
         request.httpMethod = "GET"
         request.setValue(jwtBearer, forHTTPHeaderField: "Authorization")
-        
+
         let deviceRetrievalTask = self.apiSession.dataTask(with: request) { data, response, error in
             if let error = error {
                 DispatchQueue.main.async {
@@ -208,33 +206,33 @@ public class CyfaceServerConnection: ServerConnection {
                 handler(ServerConnectionError(title: "Device Registration Error", description: "Server error while checking if server knows me!, Error \(error)", code: 3), false)
                 return
             }
-            
+
             guard let response = response as? HTTPURLResponse else {
                 handler(ServerConnectionError(title: "Device Registration Error", description: "Invalid reponse received while checking for registered device", code: 4), false)
                 return
             }
-            
+
             guard response.statusCode == 200 else {
                 handler(ServerConnectionError(title: "Device Registration Error", description: "Invalid status code while checking if device exists. Status Code: \(response.statusCode)", code: 5), false)
                 return
             }
-            
+
             guard let data = data else {
                 handler(ServerConnectionError(title: "Device Registration Error", description: "Unable to unwrap server response from checking for existing device.", code: 6), false)
                 return
             }
-            
+
             var foundDevice = false
             if let devices = try? JSONDecoder().decode([Device].self, from: data) {
                 for device in devices {
                     foundDevice = (device.id==identifier) || foundDevice
                 }
             }
-            
+
             handler(nil, foundDevice)
-            
+
         }
-        
+
         deviceRetrievalTask.resume()
     }
 
@@ -247,55 +245,55 @@ public class CyfaceServerConnection: ServerConnection {
         request.httpMethod = "POST"
         request.setValue(jwtBearer, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         let deviceCreationBody = ["id": identifier, "name": deviceModelIdentifier]
         request.httpBody = try? JSONSerialization.data(withJSONObject: deviceCreationBody, options: .sortedKeys)
-        
+
         let deviceCreationTask = self.apiSession.dataTask(with: request) { data, response, error in
             if let error = error {
                 handler(ServerConnectionError(title: "Device Registration Error", description: "Server error during device registration!, Error \(error)", code: 2), identifier)
                 return
             }
-            
+
             guard let response = response as? HTTPURLResponse else {
                 handler(ServerConnectionError(title: "Device Registration Error", description: "Unable to unwrap response received after trying to register device with \(String(describing: request.url)).", code: 2), identifier)
                 return
             }
-            
+
             guard response.statusCode == 201 else {
                 handler(ServerConnectionError(title: "Device Registration Error", description: "Invalid response status code \(response.statusCode) from server \(String(describing: request.url))!", code: 2), identifier)
                 return
             }
-            
+
             handler(nil, identifier)
         }
-        
+
         deviceCreationTask.resume()
     }
-    
+
     private func onAuthenticationResponse(_: Data?, response: URLResponse?, error: Error?) {
         guard let handler = onAuthenticationFinishedHandler else {
             fatalError("No handler for authentication finished event available!")
         }
-        
+
         if let error = error {
             handler(error)
             return
         }
-        
+
         guard let unwrappedResponse = response as? HTTPURLResponse else {
             handler(ServerConnectionError(title: "Authentication Error", description: "There has been a client side error while authenticating with the Cyface API available at \(self.apiURL).", code: 1))
             return
         }
-        
+
         let statusCode = unwrappedResponse.statusCode
         let authenticationToken = unwrappedResponse.allHeaderFields["Authorization"] as? String
-        
+
         guard let unwrappedAuthenticationToken = authenticationToken else {
             handler(ServerConnectionError(title: "Authentication Error", description: "No Authorization token received from Cyface API available at \(self.apiURL).", code: 1))
             return
         }
-        
+
         if statusCode == 200 {
             self.jwtBearer = unwrappedAuthenticationToken
             handler(nil)
@@ -306,14 +304,14 @@ public class CyfaceServerConnection: ServerConnection {
 }
 
 public struct ServerConnectionError: LocalizedError {
-    
+
     var title: String?
     var code: Int
     public var errorDescription: String? { return _description }
     public var failureReason: String? { return _description }
-    
+
     private var _description: String
-    
+
     init(title: String?, description: String, code: Int) {
         self.title = title ?? "Error"
         self._description = description

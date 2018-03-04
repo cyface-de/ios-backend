@@ -28,10 +28,14 @@ public enum DataCapturingEvent {
      */
     case geoLocationAcquired(position: GeoLocationMO)
     /**
-     Occurs each time the application runs out of space. How much space is used and how much is available may be retrieved from `allocation`.
+     Occurs each time the application runs out of space.
+     How much space is used and how much is available may be retrieved from `allocation`.
      - allocation: Information about the applications disk (or rather SD card) space consumption.
      */
     case lowDiskSpace(allocation: DiskConsumption)
-    /// Occurs if the `DataCapturingService` has synchronized all pending cached data successfully and deleted the local copies.
+    /**
+     Occurs if the `DataCapturingService` has synchronized all pending cached data successfully
+     and deleted the local copies.
+     */
     case synchronizationSuccessful
 }
