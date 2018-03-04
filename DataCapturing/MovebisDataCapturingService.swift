@@ -37,7 +37,9 @@ public class MovebisDataCapturingService: DataCapturingService {
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         manager.allowsBackgroundLocationUpdates = false
-        manager.activityType = .otherNavigation // This might shut off updates according to documentation in certain cases. Do we have to start it again?
+        // The following might shut off updates according to documentation in certain cases.
+        // Do we have to start it again?
+        manager.activityType = .otherNavigation
         manager.showsBackgroundLocationIndicator = false
         manager.distanceFilter = kCLDistanceFilterNone
         return manager
@@ -48,11 +50,11 @@ public class MovebisDataCapturingService: DataCapturingService {
     /**
      Creates a new `MovebisDataCapturingService` with the ability capture location when no data capturing runs.
      - Parameters:
-        - serverConnection: An authenticated connection to a Cyface API server.
-        - sensorManager: An instance of `CMMotionManager`. There should be only one instance of this type in your application. Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
-        - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
-        - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
-    */
+     - serverConnection: An authenticated connection to a Cyface API server.
+     - sensorManager: An instance of `CMMotionManager`. There should be only one instance of this type in your application. Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
+     - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
+     - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
+     */
     public init(connection serverConnection: MovebisServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer) {
         super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence)
     }
