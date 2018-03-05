@@ -15,6 +15,13 @@
 		3D01585D200F7575008C065A /* GeoLocationMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D015857200F7575008C065A /* GeoLocationMO+CoreDataProperties.swift */; };
 		3D0287DA1FE7E36E006E9969 /* ServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0287D91FE7E36E006E9969 /* ServerConnection.swift */; };
 		3D0511D5204931C300967898 /* ReachabilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D4204931C300967898 /* ReachabilityManager.swift */; };
+		3D0511D7204D267600967898 /* MovebisDataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D6204D267600967898 /* MovebisDataCapturingService.swift */; };
+		3D0511DA204D268900967898 /* MovebisServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D9204D268900967898 /* MovebisServerConnection.swift */; };
+		3D0511DB204D268900967898 /* MovebisServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D9204D268900967898 /* MovebisServerConnection.swift */; };
+		3D0511E0204D26BC00967898 /* CyfaceServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511DF204D26BC00967898 /* CyfaceServerConnection.swift */; };
+		3D0511E1204D26BC00967898 /* CyfaceServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511DF204D26BC00967898 /* CyfaceServerConnection.swift */; };
+		3D0511E3204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E2204D26C200967898 /* CyfaceBinaryFormatSerializer.swift */; };
+		3D0511E4204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E2204D26C200967898 /* CyfaceBinaryFormatSerializer.swift */; };
 		3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */; };
 		3D0BDEAB1FB1B951004EA25E /* DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */; };
 		3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */; };
@@ -49,6 +56,10 @@
 		3D015857200F7575008C065A /* GeoLocationMO+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GeoLocationMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3D0287D91FE7E36E006E9969 /* ServerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConnection.swift; sourceTree = "<group>"; };
 		3D0511D4204931C300967898 /* ReachabilityManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReachabilityManager.swift; sourceTree = "<group>"; };
+		3D0511D6204D267600967898 /* MovebisDataCapturingService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MovebisDataCapturingService.swift; path = DataCapturing/MovebisDataCapturingService.swift; sourceTree = SOURCE_ROOT; };
+		3D0511D9204D268900967898 /* MovebisServerConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovebisServerConnection.swift; sourceTree = "<group>"; };
+		3D0511DF204D26BC00967898 /* CyfaceServerConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyfaceServerConnection.swift; sourceTree = "<group>"; };
+		3D0511E2204D26C200967898 /* CyfaceBinaryFormatSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyfaceBinaryFormatSerializer.swift; sourceTree = "<group>"; };
 		3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingEvent.swift; sourceTree = "<group>"; };
 		3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D0BDEA41FB1B951004EA25E /* DataCapturing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataCapturing.h; sourceTree = "<group>"; };
@@ -111,12 +122,16 @@
 			children = (
 				3DE419E31FD193D7001282D0 /* Model */,
 				3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */,
+				3D0511D6204D267600967898 /* MovebisDataCapturingService.swift */,
 				3D0511D4204931C300967898 /* ReachabilityManager.swift */,
 				3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */,
 				3D0BDEA41FB1B951004EA25E /* DataCapturing.h */,
 				3D0BDEA51FB1B951004EA25E /* Info.plist */,
 				3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */,
 				3D0287D91FE7E36E006E9969 /* ServerConnection.swift */,
+				3D0511D9204D268900967898 /* MovebisServerConnection.swift */,
+				3D0511DF204D26BC00967898 /* CyfaceServerConnection.swift */,
+				3D0511E2204D26C200967898 /* CyfaceBinaryFormatSerializer.swift */,
 			);
 			path = DataCapturing;
 			sourceTree = "<group>";
@@ -302,10 +317,14 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-DataCapturingTests/Pods-DataCapturingTests-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/DataCompression/DataCompression.framework",
 				"${BUILT_PRODUCTS_DIR}/ReachabilitySwift/Reachability.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DataCompression.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Reachability.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -368,16 +387,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D0511E3204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */,
 				3D0511D5204931C300967898 /* ReachabilityManager.swift in Sources */,
 				3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */,
 				3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */,
+				3D0511D7204D267600967898 /* MovebisDataCapturingService.swift in Sources */,
 				3D01585B200F7575008C065A /* AccelerationPointMO+CoreDataClass.swift in Sources */,
 				3D015859200F7575008C065A /* AccelerationPointMO+CoreDataProperties.swift in Sources */,
 				3DE419E51FD5540F001282D0 /* PersistenceLayer.swift in Sources */,
 				3D01585A200F7575008C065A /* GeoLocationMO+CoreDataClass.swift in Sources */,
+				3D0511E0204D26BC00967898 /* CyfaceServerConnection.swift in Sources */,
 				3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */,
 				3DE419E21FD19381001282D0 /* CyfaceModel.xcdatamodeld in Sources */,
 				3D01585D200F7575008C065A /* GeoLocationMO+CoreDataProperties.swift in Sources */,
+				3D0511DA204D268900967898 /* MovebisServerConnection.swift in Sources */,
 				3D0287DA1FE7E36E006E9969 /* ServerConnection.swift in Sources */,
 				3D01585C200F7575008C065A /* MeasurementMO+CoreDataClass.swift in Sources */,
 				3D015858200F7575008C065A /* MeasurementMO+CoreDataProperties.swift in Sources */,
@@ -388,6 +411,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D0511E4204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */,
+				3D0511E1204D26BC00967898 /* CyfaceServerConnection.swift in Sources */,
+				3D0511DB204D268900967898 /* MovebisServerConnection.swift in Sources */,
 				3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
