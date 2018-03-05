@@ -15,7 +15,7 @@ public class MovebisServerConnection: ServerConnection {
     private let apiURL: URL
     private var onFinishHandler: ((ServerConnectionError?) -> Void)?
 
-    var installationIdentifier:String {
+    var installationIdentifier: String {
         if let applicationIdentifier = UserDefaults.standard.string(forKey: "de.cyface.identifier") {
             return applicationIdentifier
         } else {
@@ -66,7 +66,7 @@ public class MovebisServerConnection: ServerConnection {
         sessionManager.upload(multipartFormData: { (multipartFormData) in
             multipartFormData.append(self.installationIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceId")
             multipartFormData.append(String(measurement.identifier).data(using: String.Encoding.utf8)!, withName: "measurementId")
-            
+
             let payload = self.serializer.serializeCompressed(measurement)
             multipartFormData.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
         }, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: onEncodingComplete)
@@ -93,7 +93,7 @@ public class MovebisServerConnection: ServerConnection {
         switch response.result {
         case .failure(let error):
             handler(ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onResponseReady(\(response)): Unable to upload data due to error: \(error)"))
-        case .success(_):
+        case .success:
             handler(nil)
         }
     }

@@ -9,28 +9,28 @@ import XCTest
 @testable import DataCapturing
 
 class SerializationTest: XCTestCase {
-    
+
     var oocut: CyfaceBinaryFormatSerializer?
-    var pl: PersistenceLayer?
-    
+    var persistenceLayer: PersistenceLayer?
+
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
         oocut = CyfaceBinaryFormatSerializer()
-        pl = PersistenceLayer()
+        persistenceLayer = PersistenceLayer()
     }
-    
+
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         oocut = nil
         super.tearDown()
     }
-    
+
     func testUncompressedSerialization() {
         guard let oocut = oocut else {
             fatalError("Test failed! No object of class under test.")
         }
-        guard let pl = pl else {
+        guard let pl = persistenceLayer else {
             fatalError("Test failed! No persistence layer to create test fixture from.")
         }
         let measurement = pl.createMeasurement(at: 1)
@@ -46,31 +46,27 @@ class SerializationTest: XCTestCase {
         measurement.addToGeoLocations(geo1)
         measurement.addToGeoLocations(geo2)
         measurement.addToGeoLocations(geo3)
-        
+
         let res = oocut.serialize(measurement)
-        
+
         XCTAssertEqual(res.count, 222)
         // Data Format Version
-        XCTAssertEqual(res[0],0)
-        XCTAssertEqual(res[1],1)
+        XCTAssertEqual(res[0], 0)
+        XCTAssertEqual(res[1], 1)
         // Count of Geo Locations
-        XCTAssertEqual(res[2],0)
-        XCTAssertEqual(res[3],0)
-        XCTAssertEqual(res[4],0)
-        XCTAssertEqual(res[5],3)
+        XCTAssertEqual(res[2], 0)
+        XCTAssertEqual(res[3], 0)
+        XCTAssertEqual(res[4], 0)
+        XCTAssertEqual(res[5], 3)
         // Count of Accelerations
-        XCTAssertEqual(res[9],3)
-        
-        /*for i in 0..<res.count {
-            print("Index \(i): ",res[i])
-        }*/
+        XCTAssertEqual(res[9], 3)
     }
-    
+
     func testCompressedSerialization() {
         guard let oocut = oocut else {
             fatalError("Test failed! No object of class under test.")
         }
-        guard let pl = pl else {
+        guard let pl = persistenceLayer else {
             fatalError("Test failed! No persistence layer to create test fixture from.")
         }
         let measurement = pl.createMeasurement(at: 1)
@@ -86,32 +82,29 @@ class SerializationTest: XCTestCase {
         measurement.addToGeoLocations(geo1)
         measurement.addToGeoLocations(geo2)
         measurement.addToGeoLocations(geo3)
-        
+
         let res = oocut.serializeCompressed(measurement)
-        
+
         let uncompressedData = res.inflate()
 
         XCTAssertEqual(uncompressedData?.count, 222)
         // Data Format Version
-        XCTAssertEqual(uncompressedData![0],0)
-        XCTAssertEqual(uncompressedData![1],1)
+        XCTAssertEqual(uncompressedData![0], 0)
+        XCTAssertEqual(uncompressedData![1], 1)
         // Count of Geo Locations
-        XCTAssertEqual(uncompressedData![2],0)
-        XCTAssertEqual(uncompressedData![3],0)
-        XCTAssertEqual(uncompressedData![4],0)
-        XCTAssertEqual(uncompressedData![5],3)
+        XCTAssertEqual(uncompressedData![2], 0)
+        XCTAssertEqual(uncompressedData![3], 0)
+        XCTAssertEqual(uncompressedData![4], 0)
+        XCTAssertEqual(uncompressedData![5], 3)
         // Count of Accelerations
-        XCTAssertEqual(uncompressedData![9],3)
-        /*for i in 0..<uncompressedData!.count {
-            print("Index \(i): ",uncompressedData![i])
-        }*/
+        XCTAssertEqual(uncompressedData![9], 3)
     }
-    
+
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measure {
             // Put the code you want to measure the time of here.
         }
     }
-    
+
 }

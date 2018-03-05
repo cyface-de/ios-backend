@@ -22,6 +22,7 @@
 		3D0511E1204D26BC00967898 /* CyfaceServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511DF204D26BC00967898 /* CyfaceServerConnection.swift */; };
 		3D0511E3204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E2204D26C200967898 /* CyfaceBinaryFormatSerializer.swift */; };
 		3D0511E4204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E2204D26C200967898 /* CyfaceBinaryFormatSerializer.swift */; };
+		3D0511E7204D622700967898 /* SerializationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E5204D622700967898 /* SerializationTest.swift */; };
 		3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */; };
 		3D0BDEAB1FB1B951004EA25E /* DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */; };
 		3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */; };
@@ -60,6 +61,7 @@
 		3D0511D9204D268900967898 /* MovebisServerConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovebisServerConnection.swift; sourceTree = "<group>"; };
 		3D0511DF204D26BC00967898 /* CyfaceServerConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyfaceServerConnection.swift; sourceTree = "<group>"; };
 		3D0511E2204D26C200967898 /* CyfaceBinaryFormatSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyfaceBinaryFormatSerializer.swift; sourceTree = "<group>"; };
+		3D0511E5204D622700967898 /* SerializationTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerializationTest.swift; sourceTree = "<group>"; };
 		3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingEvent.swift; sourceTree = "<group>"; };
 		3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D0BDEA41FB1B951004EA25E /* DataCapturing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataCapturing.h; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */,
+				3D0511E5204D622700967898 /* SerializationTest.swift */,
 				3D0BDEB11FB1B951004EA25E /* Info.plist */,
 			);
 			path = DataCapturingTests;
@@ -411,6 +414,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D0511E7204D622700967898 /* SerializationTest.swift in Sources */,
 				3D0511E4204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */,
 				3D0511E1204D26BC00967898 /* CyfaceServerConnection.swift in Sources */,
 				3D0511DB204D268900967898 /* MovebisServerConnection.swift in Sources */,

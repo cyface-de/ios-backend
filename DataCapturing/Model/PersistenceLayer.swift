@@ -149,8 +149,8 @@ public class PersistenceLayer {
 
     /// Deletes measurements from the persistent data store. Do not forget to call `save()` to commit the changes.
     func deleteMeasurements() {
-        loadMeasurements().forEach { m in
-            context.delete(m)
+        loadMeasurements().forEach { measurement in
+            context.delete(measurement)
         }
     }
 

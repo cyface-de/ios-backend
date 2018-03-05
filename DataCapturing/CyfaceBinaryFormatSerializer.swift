@@ -22,17 +22,17 @@ class CyfaceBinaryFormatSerializer {
 
         return order == .bigEndian ? ret.reversed() : ret
     }
-    
+
     func serializeCompressed(_ measurement: MeasurementMO) -> Data {
         let res = serialize(measurement)
-        
+
         guard let compressed = res.deflate() else {
-            fatalError("CyfaceBinaryFormatSerializer.serializeCompressed(\(measurement.identifier)): Unable to compress data.")
+                fatalError("CyfaceBinaryFormatSerializer.serializeCompressed(\(measurement.identifier)): Unable to compress data.")
         }
-        
+
         return compressed
     }
-    
+
     func serialize(_ measurement: MeasurementMO) -> Data {
         let accelerations = measurement.accelerations == nil ? [] : measurement.accelerations!
         let geoLocations = measurement.geoLocations == nil ? [] : measurement.geoLocations!

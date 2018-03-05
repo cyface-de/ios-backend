@@ -27,7 +27,7 @@ import CoreData
  - Version: 3.0.0
  - Since: 1.0.0
  */
-public class DataCapturingService: NSObject  {
+public class DataCapturingService: NSObject {
     // MARK: Properties
     /// Data used to identify log messages created by this component.
     private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
@@ -80,7 +80,7 @@ public class DataCapturingService: NSObject  {
      This can be used to synchronize view elements showing measurements with the corresponding
      measurement and refresh upon deletion.
      */
-    public var syncDelegate: ((Int64) -> ())?
+    public var syncDelegate: ((Int64) -> Void)?
 
     // MARK: Initializers
     /**
@@ -131,7 +131,7 @@ public class DataCapturingService: NSObject  {
         self.currentMeasurement = measurement
 
         if motionManager.isAccelerometerAvailable {
-            motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { data, error in
+            motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { data, _ in
                 guard let myData = data else {
                     fatalError("DataCapturingService.start(): No Accelerometer data available!")
                 }
