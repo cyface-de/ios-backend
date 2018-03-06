@@ -12,5 +12,5 @@ public protocol ServerConnection {
 
     func isAuthenticated() -> Bool
 
-    func sync(measurement: MeasurementMO, onFinish handler: @escaping (ServerConnectionError?) -> Void)
+    func sync(measurement: MeasurementMO, onFinish handler: @escaping (MeasurementMO, ServerConnectionError?) -> Void)
 }

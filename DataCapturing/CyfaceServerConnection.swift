@@ -71,7 +71,7 @@ public class CyfaceServerConnection: ServerConnection {
         }
     }
 
-    public func sync(measurement: MeasurementMO, onFinish handler: @escaping (ServerConnectionError?) -> Void) {
+    public func sync(measurement: MeasurementMO, onFinish handler: @escaping (MeasurementMO, ServerConnectionError?) -> Void) {
         debugPrint("Trying to synchronize measurement \(measurement.identifier)")
         guard isAuthenticated() else {
             fatalError("sync(measurement: \(measurement)): Unable to sync with not authenticated client.")
@@ -79,7 +79,7 @@ public class CyfaceServerConnection: ServerConnection {
 
         installationIdentifier { error, identifier in
             if let error = error {
-                handler(error)
+                handler(measurement, error)
                 return
             } else if let identifier = identifier {
                 self.transmit(measurement: measurement, forDevice: identifier, onFinish: handler)
@@ -93,10 +93,7 @@ public class CyfaceServerConnection: ServerConnection {
         return jwtBearer != nil || jwtBearer!.isEmpty
     }
 
-    private func transmit(
-        measurement: MeasurementMO,
-        forDevice deviceIdentifier: String,
-        onFinish handler: @escaping (ServerConnectionError?) -> Void) {
+    private func transmit(measurement: MeasurementMO, forDevice deviceIdentifier: String, onFinish handler: @escaping (MeasurementMO, ServerConnectionError?) -> Void) {
 
         var request = URLRequest(url: apiURL.appendingPathComponent("measurements"))
         request.httpMethod = "POST"
@@ -106,21 +103,18 @@ public class CyfaceServerConnection: ServerConnection {
         let chunks = self.makeUploadChunks(fromMeasurement: measurement, forInstallation: deviceIdentifier)
         for chunk in chunks {
             guard let jsonChunk = try? JSONSerialization.data(withJSONObject: chunk, options: .sortedKeys) else {
-                fatalError("""
-                    ServerConnection.transmit(measurement: \(measurement.identifier), forDevice: \(deviceIdentifier)):
-                    Invalid measurement format.
-                    """)
+                fatalError("ServerConnection.transmit(measurement: \(measurement.identifier), forDevice: \(deviceIdentifier)): Invalid measurement format.")
             }
 
             let submissionTask = self.apiSession.uploadTask(with: request, from: jsonChunk) { _, response, error in
                 if let error = error {
-                    handler(ServerConnectionError(
+                    handler(measurement, ServerConnectionError(
                         title: "Data Transmission Error",
                         description: "Error while transmitting data to the server at \(self.apiURL)! Error was: \(error)"))
                     return
                 }
                 guard let response = response as? HTTPURLResponse else {
-                    handler(ServerConnectionError(
+                    handler(measurement, ServerConnectionError(
                         title: "Data Transmission Error",
                         description: "Received erroneous response from \(String(describing: request.url))!"))
                     return
@@ -128,15 +122,13 @@ public class CyfaceServerConnection: ServerConnection {
 
                 let statusCode = response.statusCode
                 guard statusCode == 201 else {
-                    handler(ServerConnectionError(
+                    handler(measurement, ServerConnectionError(
                         title: "Invalid Status Code Error",
-                        description: """
-                        Invalid status code \(statusCode) received from server at \(String(describing: request.url))!
-                        """))
+                        description: "Invalid status code \(statusCode) received from server at \(String(describing: request.url))!"))
                     return
                 }
 
-                handler(nil)
+                handler(measurement, nil)
             }
 
             submissionTask.resume()

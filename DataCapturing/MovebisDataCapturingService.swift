@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import CoreMotion
+import os.log
 
 /**
  A `DataCapturingService` implementation that provides the ability to capture locations
@@ -74,5 +75,28 @@ public class MovebisDataCapturingService: DataCapturingService {
      */
     public init(connection serverConnection: MovebisServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer) {
         super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence)
+    }
+
+    override func onSyncFinished(measurement: MeasurementMO, error: ServerConnectionError?) {
+        // Only go on if there was no error
+        guard error==nil else {
+            os_log("Unable to upload data.")
+            return
+        }
+
+        persistenceLayer.clean(measurement: measurement)
+        measurement.synchronized = true
+
+        // Inform UI if interested
+        if let syncDelegate = syncDelegate {
+            let currentIdentifier = measurement.identifier
+            syncDelegate(currentIdentifier)
+        }
+
+        debugPrint("Synchronized! Measurements on device \(countMeasurements())")
+        // stop synchronization if everything has been synchronized.
+        if countMeasurements()==0 {
+            reachabilityManager.stopMonitoring()
+        }
     }
 }
