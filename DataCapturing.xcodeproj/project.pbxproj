@@ -17,12 +17,11 @@
 		3D0511D5204931C300967898 /* ReachabilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D4204931C300967898 /* ReachabilityManager.swift */; };
 		3D0511D7204D267600967898 /* MovebisDataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D6204D267600967898 /* MovebisDataCapturingService.swift */; };
 		3D0511DA204D268900967898 /* MovebisServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D9204D268900967898 /* MovebisServerConnection.swift */; };
-		3D0511DB204D268900967898 /* MovebisServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D9204D268900967898 /* MovebisServerConnection.swift */; };
 		3D0511E0204D26BC00967898 /* CyfaceServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511DF204D26BC00967898 /* CyfaceServerConnection.swift */; };
-		3D0511E1204D26BC00967898 /* CyfaceServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511DF204D26BC00967898 /* CyfaceServerConnection.swift */; };
 		3D0511E3204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E2204D26C200967898 /* CyfaceBinaryFormatSerializer.swift */; };
-		3D0511E4204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E2204D26C200967898 /* CyfaceBinaryFormatSerializer.swift */; };
 		3D0511E7204D622700967898 /* SerializationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E5204D622700967898 /* SerializationTest.swift */; };
+		3D0511EA204EB88200967898 /* MeasurementLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E9204EB88200967898 /* MeasurementLifecycle.swift */; };
+		3D0511ED204ED0C200967898 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511EC204ED0C200967898 /* PersistenceTests.swift */; };
 		3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */; };
 		3D0BDEAB1FB1B951004EA25E /* DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */; };
 		3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */; };
@@ -62,6 +61,8 @@
 		3D0511DF204D26BC00967898 /* CyfaceServerConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyfaceServerConnection.swift; sourceTree = "<group>"; };
 		3D0511E2204D26C200967898 /* CyfaceBinaryFormatSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyfaceBinaryFormatSerializer.swift; sourceTree = "<group>"; };
 		3D0511E5204D622700967898 /* SerializationTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerializationTest.swift; sourceTree = "<group>"; };
+		3D0511E9204EB88200967898 /* MeasurementLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementLifecycle.swift; sourceTree = "<group>"; };
+		3D0511EC204ED0C200967898 /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
 		3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingEvent.swift; sourceTree = "<group>"; };
 		3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D0BDEA41FB1B951004EA25E /* DataCapturing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataCapturing.h; sourceTree = "<group>"; };
@@ -123,6 +124,7 @@
 			isa = PBXGroup;
 			children = (
 				3DE419E31FD193D7001282D0 /* Model */,
+				3D0511E9204EB88200967898 /* MeasurementLifecycle.swift */,
 				3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */,
 				3D0511D6204D267600967898 /* MovebisDataCapturingService.swift */,
 				3D0511D4204931C300967898 /* ReachabilityManager.swift */,
@@ -144,6 +146,7 @@
 				3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */,
 				3D0511E5204D622700967898 /* SerializationTest.swift */,
 				3D0BDEB11FB1B951004EA25E /* Info.plist */,
+				3D0511EC204ED0C200967898 /* PersistenceTests.swift */,
 			);
 			path = DataCapturingTests;
 			sourceTree = "<group>";
@@ -399,6 +402,7 @@
 				3D015859200F7575008C065A /* AccelerationPointMO+CoreDataProperties.swift in Sources */,
 				3DE419E51FD5540F001282D0 /* PersistenceLayer.swift in Sources */,
 				3D01585A200F7575008C065A /* GeoLocationMO+CoreDataClass.swift in Sources */,
+				3D0511EA204EB88200967898 /* MeasurementLifecycle.swift in Sources */,
 				3D0511E0204D26BC00967898 /* CyfaceServerConnection.swift in Sources */,
 				3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */,
 				3DE419E21FD19381001282D0 /* CyfaceModel.xcdatamodeld in Sources */,
@@ -415,9 +419,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D0511E7204D622700967898 /* SerializationTest.swift in Sources */,
-				3D0511E4204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */,
-				3D0511E1204D26BC00967898 /* CyfaceServerConnection.swift in Sources */,
-				3D0511DB204D268900967898 /* MovebisServerConnection.swift in Sources */,
+				3D0511ED204ED0C200967898 /* PersistenceTests.swift in Sources */,
 				3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

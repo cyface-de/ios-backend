@@ -13,7 +13,7 @@ public class MovebisServerConnection: ServerConnection {
     private lazy var serializer = CyfaceBinaryFormatSerializer()
     private let sessionManager: SessionManager
     private let apiURL: URL
-    private var onFinishHandler: ((ServerConnectionError?) -> Void)?
+    private var onFinishHandler: ((MeasurementMO, ServerConnectionError?) -> Void)?
 
     var installationIdentifier: String {
         if let applicationIdentifier = UserDefaults.standard.string(forKey: "de.cyface.identifier") {
@@ -50,7 +50,7 @@ public class MovebisServerConnection: ServerConnection {
         jwtAuthenticationToken = token
     }
 
-    public func sync(measurement: MeasurementMO, onFinish handler: @escaping (ServerConnectionError?) -> Void) {
+    public func sync(measurement: MeasurementMO, onFinish handler: @escaping (MeasurementMO, ServerConnectionError?) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
         onFinishHandler = handler
 
@@ -69,32 +69,36 @@ public class MovebisServerConnection: ServerConnection {
 
             let payload = self.serializer.serializeCompressed(measurement)
             multipartFormData.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
-        }, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: onEncodingComplete)
+        }, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers) { error in
+            self.onEncodingComplete(forMeasurement: measurement, withResult: error)
+        }
     }
 
-    func onEncodingComplete(withResult result: SessionManager.MultipartFormDataEncodingResult) {
+    func onEncodingComplete(forMeasurement measurement: MeasurementMO, withResult result: SessionManager.MultipartFormDataEncodingResult) {
         switch result {
         case .success(let upload, _, _):
             print("Successfully encoded upload \(upload)")
-            upload.validate().responseString(completionHandler: onResponseReady)
+            upload.validate().responseString { response in
+                self.onResponseReady(forMeasurement: measurement, response)
+            }
         case .failure(let error):
             print("failure")
             if let handler = onFinishHandler {
-                handler(ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onEncodingComplete(\(result)): Unable to upload data \(error.localizedDescription)."))
+                handler(measurement, ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onEncodingComplete(\(result)): Unable to upload data \(error.localizedDescription)."))
             }
         }
     }
 
-    func onResponseReady(_ response: DataResponse<String>) {
+    func onResponseReady(forMeasurement measurement: MeasurementMO, _ response: DataResponse<String>) {
         guard let handler = onFinishHandler else {
             return
         }
 
         switch response.result {
         case .failure(let error):
-            handler(ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onResponseReady(\(response)): Unable to upload data due to error: \(error)"))
+            handler(measurement, ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onResponseReady(\(response)): Unable to upload data due to error: \(error)"))
         case .success:
-            handler(nil)
+            handler(measurement, nil)
         }
     }
 }

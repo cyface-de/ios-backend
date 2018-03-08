@@ -27,7 +27,7 @@ import CoreData
  - Version: 3.0.0
  - Since: 1.0.0
  */
-public class DataCapturingService: NSObject {
+public class DataCapturingService: NSObject, MeasurementLifecycle {
     // MARK: Properties
     /// Data used to identify log messages created by this component.
     private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
@@ -66,13 +66,13 @@ public class DataCapturingService: NSObject {
      An API to store, retrieve and update captured data to the local system until the App
      can transmit it to a server.
      */
-    private let persistenceLayer: PersistenceLayer
+    let persistenceLayer: PersistenceLayer
 
     /// An API that handles authentication and communication with a Cyface server.
     private let serverConnection: ServerConnection
 
     /// Handles background synchronization of available `Measurement`s.
-    private let reachabilityManager: ReachabilityManager
+    let reachabilityManager: ReachabilityManager
 
     /**
      A delegate that is informed about successful measurement synchronization.
@@ -128,6 +128,7 @@ public class DataCapturingService: NSObject {
 
         self.locationManager.startUpdatingLocation()
         let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
+        measurement.synchronized = false
         self.currentMeasurement = measurement
 
         if motionManager.isAccelerometerAvailable {
@@ -171,15 +172,24 @@ public class DataCapturingService: NSObject {
      When synchronization has finished this handler is called and stops the
      `ReachabilityManager`.
      */
-    func onSyncFinished(_ error: ServerConnectionError?) {
+    func onSyncFinished(measurement: MeasurementMO, error: ServerConnectionError?) {
         // Only go on if there was no error
         guard error==nil else {
             os_log("Unable to upload data.")
             return
         }
 
+        // Delete measurement
+        self.persistenceLayer.delete(measurement: measurement)
+
+        // Inform UI if interested
+        if let syncDelegate = syncDelegate {
+            let currentIdentifier = measurement.identifier
+            syncDelegate(currentIdentifier)
+        }
+
         debugPrint("Synchronized! Measurements on device \(countMeasurements())")
-        // stop synchronization if everythin has been synchronized.
+        // stop synchronization if everything has been synchronized.
         if countMeasurements()==0 {
             reachabilityManager.stopMonitoring()
         }
@@ -189,20 +199,13 @@ public class DataCapturingService: NSObject {
      Forces the service to synchronize all Measurements now if a connection is available.
      If this is not called the service might wait for an opportune moment to start synchronization.
      */
-    public func forceSync(onFinish handler: ((ServerConnectionError?) -> Void)?) {
+    public func forceSync(onFinish handler: ((MeasurementMO, ServerConnectionError?) -> Void)?) {
         for measurement in self.persistenceLayer.loadMeasurements() {
             if serverConnection.isAuthenticated() {
                 // In case no handler was provided simply use an empty one.
-                let handler = handler ?? {_ in }
+                let handler = handler ?? {_, _ in }
                 serverConnection.sync(measurement: measurement, onFinish: handler)
             }
-            // Cleanup
-            if let syncDelegate = syncDelegate {
-                let currentIdentifier = measurement.identifier
-                syncDelegate(currentIdentifier)
-            }
-            self.persistenceLayer.delete(measurement: measurement)
-            self.persistenceLayer.save()
         }
         notify(of: .synchronizationSuccessful)
     }
@@ -215,7 +218,6 @@ public class DataCapturingService: NSObject {
     */
     public func delete(unsyncedMeasurement measurement: MeasurementMO) {
         persistenceLayer.delete(measurement: measurement)
-        persistenceLayer.save()
     }
 
     /// Provides the amount of `Measurements` currently cached by the system.

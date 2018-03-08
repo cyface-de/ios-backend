@@ -127,24 +127,24 @@ public class PersistenceLayer {
         }
         return nil
         /*
-        let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
 
-        debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Preparing to load measurement with identifier \(identifier)")
-        request.predicate = NSPredicate(format: "%K = %@", "identifier", String(identifier))
-        do {
-            debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Loading measurement with identifier \(identifier).")
-            let fetchResult = try context.fetch(request)
-            debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Got \(fetchResult.count) items")
-            if fetchResult.count >= 1 {
-                fatalError("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Identifier occured multiple times")
-            } else {
-                let result = fetchResult.first
-                return result
-            }
-        } catch {
-            fatalError("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Unable to load measurements from data store: \(error)")
-        }
-        return nil*/
+         debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Preparing to load measurement with identifier \(identifier)")
+         request.predicate = NSPredicate(format: "%K = %@", "identifier", String(identifier))
+         do {
+         debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Loading measurement with identifier \(identifier).")
+         let fetchResult = try context.fetch(request)
+         debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Got \(fetchResult.count) items")
+         if fetchResult.count >= 1 {
+         fatalError("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Identifier occured multiple times")
+         } else {
+         let result = fetchResult.first
+         return result
+         }
+         } catch {
+         fatalError("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Unable to load measurements from data store: \(error)")
+         }
+         return nil*/
     }
 
     /// Deletes measurements from the persistent data store. Do not forget to call `save()` to commit the changes.
@@ -156,7 +156,21 @@ public class PersistenceLayer {
 
     /// Deletes one specific measurement from the persistent data store. Do not forget to call `save()`to commit the changes.
     func delete(measurement value: MeasurementMO) {
+        if let accelerations = value.accelerations {
+            for acceleration in accelerations {
+                value.removeFromAccelerations(acceleration)
+                context.delete(acceleration)
+            }
+        }
+        if let locations = value.geoLocations {
+            for location in locations {
+                value.removeFromGeoLocations(location)
+                context.delete(location)
+            }
+        }
         context.delete(value)
+
+        save()
     }
 
     func save() {
@@ -165,5 +179,18 @@ public class PersistenceLayer {
         } catch {
             fatalError("Unable to save to persistence context: \(error)")
         }
+    }
+
+    /**
+     Removes all accelerations, rotations and directions from a measurement. This can be used to save space after successful data synchronization, if you would like to keep the geo location tracks.
+     */
+    func clean(measurement: MeasurementMO) {
+        if let accelerations = measurement.accelerations {
+            for acceleration in accelerations {
+                measurement.removeFromAccelerations(acceleration)
+                context.delete(acceleration)
+            }
+        }
+        save()
     }
 }

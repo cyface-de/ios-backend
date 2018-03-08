@@ -37,7 +37,7 @@ class DataCapturingTests: XCTestCase {
         let promise = expectation(description: "No error on synchronization!")
 
         oocut.authenticate(withJwtToken: "replace_me")
-        oocut.sync(measurement: measurement) { error in
+        oocut.sync(measurement: measurement) { _, error in
             if error==nil {
                 promise.fulfill()
             } else {
