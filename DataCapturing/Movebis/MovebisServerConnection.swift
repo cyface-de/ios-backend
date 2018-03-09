@@ -74,6 +74,10 @@ public class MovebisServerConnection: ServerConnection {
         }
     }
 
+    public func getURL() -> URL {
+        return apiURL
+    }
+
     func onEncodingComplete(forMeasurement measurement: MeasurementMO, withResult result: SessionManager.MultipartFormDataEncodingResult) {
         switch result {
         case .success(let upload, _, _):

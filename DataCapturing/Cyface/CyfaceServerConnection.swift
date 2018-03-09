@@ -90,7 +90,11 @@ public class CyfaceServerConnection: ServerConnection {
     }
 
     public func isAuthenticated() -> Bool {
-        return jwtBearer != nil || jwtBearer!.isEmpty
+        return jwtBearer != nil && !jwtBearer!.isEmpty
+    }
+
+    public func getURL() -> URL {
+        return apiURL
     }
 
     private func transmit(measurement: MeasurementMO, forDevice deviceIdentifier: String, onFinish handler: @escaping (MeasurementMO, ServerConnectionError?) -> Void) {

@@ -11,6 +11,7 @@ import CoreMotion
 import CoreLocation
 import os.log
 import CoreData
+import Alamofire
 
 /**
  An object of this class handles the lifecycle of starting and stopping data capturing as well as
@@ -72,7 +73,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     private let serverConnection: ServerConnection
 
     /// Handles background synchronization of available `Measurement`s.
-    let reachabilityManager: ReachabilityManager
+    let reachabilityManager: NetworkReachabilityManager
 
     /**
      A delegate that is informed about successful measurement synchronization.
@@ -105,10 +106,23 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
         self.serverConnection = serverConnection
-        self.reachabilityManager = ReachabilityManager()
+        guard let reachabilityManager = NetworkReachabilityManager(host: serverConnection.getURL().absoluteString) else {
+            fatalError("Unable to initialize reachability manager.")
+        }
+        self.reachabilityManager = reachabilityManager
         super.init()
 
-        //reachabilityManager.startMonitoring(onNoNetwork: nil, onCellularNetwork: nil, onWiFiNetwork: onWifiAvailable)
+        forceSync(onFinish: onSyncFinished)
+        self.reachabilityManager.listener = {
+            status in
+            switch status {
+            case .reachable(.ethernetOrWiFi):
+                self.forceSync(onFinish: self.onSyncFinished)
+            default:
+                os_log("No network connection.")
+            }
+        }
+        self.reachabilityManager.startListening()
     }
 
     // MARK: Methods
@@ -157,6 +171,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         motionManager.stopAccelerometerUpdates()
         locationManager.stopUpdatingLocation()
         currentMeasurement = nil
+        reachabilityManager.startListening()
     }
 
     /**
@@ -171,6 +186,10 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     /**
      When synchronization has finished this handler is called and stops the
      `ReachabilityManager`.
+
+     - Parameters
+        - measurement: The `Measurement` for which synchronization has been finished.
+        - error: An error if one has occured or `nil` if everything went well.
      */
     func onSyncFinished(measurement: MeasurementMO, error: ServerConnectionError?) {
         // Only go on if there was no error
@@ -191,17 +210,19 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         debugPrint("Synchronized! Measurements on device \(countMeasurements())")
         // stop synchronization if everything has been synchronized.
         if countMeasurements()==0 {
-            reachabilityManager.stopMonitoring()
+            reachabilityManager.stopListening()
         }
     }
 
     /**
      Forces the service to synchronize all Measurements now if a connection is available.
      If this is not called the service might wait for an opportune moment to start synchronization.
+
+     - Parameter onFinish: A handler called each time a synchronization has finished.
      */
     public func forceSync(onFinish handler: ((MeasurementMO, ServerConnectionError?) -> Void)?) {
         for measurement in self.persistenceLayer.loadMeasurements() {
-            if serverConnection.isAuthenticated() {
+            if serverConnection.isAuthenticated(), reachabilityManager.isReachableOnEthernetOrWiFi {
                 // In case no handler was provided simply use an empty one.
                 let handler = handler ?? {_, _ in }
                 serverConnection.sync(measurement: measurement, onFinish: handler)
@@ -226,7 +247,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     }
 
     /**
-     Provides the cached `Measurement` at the specified index.
+     Provides the cached `Measurement` with the provided `identifier`.
      
      - Parameter identifier: A measurement identifier to load the measurement for.
      */
@@ -234,6 +255,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         return persistenceLayer.loadMeasurement(withIdentifier: identifier)
     }
 
+    /// Loads all currently cached `Measurement` instances.
     public func loadMeasurements() -> [MeasurementMO] {
         return persistenceLayer.loadMeasurements()
     }
@@ -287,4 +309,3 @@ extension DataCapturingService: CLLocationManagerDelegate {
         persistenceLayer.save()
     }
 }
-// TODO: Why do I need onSyncFinished and a synchronization delegate

@@ -1,18 +1,15 @@
 PODS:
   - Alamofire (4.6.0)
   - DataCompression (2.0.1)
-  - ReachabilitySwift (4.1.0)
 
 DEPENDENCIES:
   - Alamofire (~> 4.6)
   - DataCompression
-  - ReachabilitySwift (~> 4.1.0)
 
 SPEC CHECKSUMS:
   Alamofire: f41a599bd63041760b26d393ec1069d9d7b917f4
   DataCompression: 2ee34bbd53d55c37c529785643b6c208f7c87919
-  ReachabilitySwift: 6849231cd4e06559f3b9ef4a97a0a0f96d41e09f
 
-PODFILE CHECKSUM: 9256e775b6674f1b67d2d855414c533e44ead06a
+PODFILE CHECKSUM: 95674c264740d99539114e59eb0824c875ab8137
 
 COCOAPODS: 1.4.0

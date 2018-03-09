@@ -96,7 +96,7 @@ public class MovebisDataCapturingService: DataCapturingService {
         debugPrint("Synchronized! Measurements on device \(countMeasurements())")
         // stop synchronization if everything has been synchronized.
         if countMeasurements()==0 {
-            reachabilityManager.stopMonitoring()
+            reachabilityManager.stopListening()
         }
     }
 }
