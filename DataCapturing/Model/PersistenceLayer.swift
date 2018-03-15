@@ -147,14 +147,19 @@ public class PersistenceLayer {
          return nil*/
     }
 
-    /// Deletes measurements from the persistent data store. Do not forget to call `save()` to commit the changes.
+    /// Deletes measurements from the persistent data store.
     func deleteMeasurements() {
         loadMeasurements().forEach { measurement in
             context.delete(measurement)
         }
+        save()
     }
 
-    /// Deletes one specific measurement from the persistent data store. Do not forget to call `save()`to commit the changes.
+    /**
+     Deletes one specific measurement from the persistent data store.
+
+     - Parameter measurement: The `MeasurementMO` to delete from the database.
+    */
     func delete(measurement value: MeasurementMO) {
         if let accelerations = value.accelerations {
             for acceleration in accelerations {
@@ -173,6 +178,7 @@ public class PersistenceLayer {
         save()
     }
 
+    /// Commits all stacked changes (updates, deletes, inserts).
     func save() {
         do {
             try context.save()
@@ -183,6 +189,8 @@ public class PersistenceLayer {
 
     /**
      Removes all accelerations, rotations and directions from a measurement. This can be used to save space after successful data synchronization, if you would like to keep the geo location tracks.
+
+     - Parameter measurement: The `MeasurementMO` to clean of all sensor data.
      */
     func clean(measurement: MeasurementMO) {
         if let accelerations = measurement.accelerations {
