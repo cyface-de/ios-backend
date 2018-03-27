@@ -232,12 +232,12 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     }
 
     /**
-     Deletes an unsynchronized `Measurement` from this device.
+     Deletes a `Measurement` from this device.
  
      - Parameter measurement: The `Measurement` to delete. You can get this for example via
         `loadMeasurement(index:)`.
     */
-    public func delete(unsyncedMeasurement measurement: MeasurementMO) {
+    public func delete(measurement measurement: MeasurementMO) {
         persistenceLayer.delete(measurement: measurement)
     }
 

@@ -50,12 +50,17 @@ public class MovebisServerConnection: ServerConnection {
         jwtAuthenticationToken = token
     }
 
+    public func logout() {
+        jwtAuthenticationToken = nil
+    }
+
     public func sync(measurement: MeasurementMO, onFinish handler: @escaping (MeasurementMO, ServerConnectionError?) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
         onFinishHandler = handler
 
-        guard let jwtAuthenticationToken = jwtAuthenticationToken else {
-            fatalError("MovebisServerConnection.sync(measurement:\(measurement.identifier)): Unable to sync. No authentication information provided.")
+        guard isAuthenticated(), let jwtAuthenticationToken = jwtAuthenticationToken else {
+            handler(measurement, ServerConnectionError(title: "Not Authenticated", description: "MovebisServerConnection.sync(measurement:\(measurement.identifier)): Unable to sync. No authentication information provided."))
+            return
         }
 
         let headers: HTTPHeaders = [

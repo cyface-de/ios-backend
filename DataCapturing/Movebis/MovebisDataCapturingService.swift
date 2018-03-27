@@ -54,6 +54,8 @@ public class MovebisDataCapturingService: DataCapturingService {
         manager.activityType = .otherNavigation
         manager.showsBackgroundLocationIndicator = false
         manager.distanceFilter = kCLDistanceFilterNone
+        // Ask the user for its ok with data tracking.
+        manager.requestAlwaysAuthorization()
         return manager
     }()
 
