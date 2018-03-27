@@ -20,5 +20,9 @@
 	<string>1</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>To count your kilometers and provide anonymized information about bike traffic to your community authorities we would like to receive location updates in the background.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>To count your kilometers and provide anonymized information about bike traffic to your community authorities we would like to receive location updates in the background.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>To count your kilometers and provide anonymized information about bike traffic to your community authorities we would like to receive location updates in the background.</string>
 </dict>
 </plist>

@@ -34,9 +34,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
 
     /// `true` if data capturing is running; `false` otherwise.
-    public var isRunning: Bool {
-            return currentMeasurement != nil
-    }
+    public var isRunning: Bool
 
     /// A listener that is notified of important events during data capturing.
     private var handler: ((DataCapturingEvent) -> Void)?
@@ -102,6 +100,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         updateInterval interval: Double = 100,
         persistenceLayer persistence: PersistenceLayer) {
 
+        self.isRunning = false
         self.persistenceLayer = persistence
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
@@ -134,32 +133,11 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
       - Return: The measurement created by this call to `start`.
      */
     public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> MeasurementMO {
-        self.handler = handler
-        guard !isRunning else {
-            os_log("start(): Trying to start DataCapturingService which is already running!", log: LOG, type: .info)
-            return currentMeasurement!
-        }
-
-        self.locationManager.startUpdatingLocation()
         let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
         measurement.synchronized = false
         self.currentMeasurement = measurement
 
-        if motionManager.isAccelerometerAvailable {
-            motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { data, _ in
-                guard let myData = data else {
-                    fatalError("DataCapturingService.start(): No Accelerometer data available!")
-                }
-
-                let accValues = myData.acceleration
-                let acc = self.persistenceLayer.createAcceleration(
-                    x: accValues.x,
-                    y: accValues.y,
-                    z: accValues.z,
-                    at: self.currentTimeInMillisSince1970())
-                measurement.addToAccelerations(acc)
-            }
-        }
+        startCapturing(withHandler:handler)
         return measurement
     }
 
@@ -168,8 +146,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
      running.
      */
     public func stop() {
-        motionManager.stopAccelerometerUpdates()
-        locationManager.stopUpdatingLocation()
+        stopCapturing()
         currentMeasurement = nil
         reachabilityManager.startListening()
     }
@@ -237,7 +214,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
      - Parameter measurement: The `Measurement` to delete. You can get this for example via
         `loadMeasurement(index:)`.
     */
-    public func delete(measurement measurement: MeasurementMO) {
+    public func delete(measurement: MeasurementMO) {
         persistenceLayer.delete(measurement: measurement)
     }
 
@@ -268,6 +245,44 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     /// Converts a `Data` object to a UTC milliseconds timestamp since january 1st 1970.
     private func convertToUtcTimestamp(date value: Date) -> Int64 {
         return Int64(value.timeIntervalSince1970*1000.0)
+    }
+
+    func startCapturing(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
+        // Preconditions
+        guard let currentMeasurement = currentMeasurement else {
+            fatalError("DataCapturingService.startCapturing(): Trying to start data capturing without a measurement.")
+        }
+        guard !isRunning else {
+            os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: LOG, type: .info)
+            return
+        }
+
+        self.handler = handler
+        self.locationManager.startUpdatingLocation()
+
+        if motionManager.isAccelerometerAvailable {
+            motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { data, _ in
+                guard let myData = data else {
+                    fatalError("DataCapturingService.start(): No Accelerometer data available!")
+                }
+
+                let accValues = myData.acceleration
+                let acc = self.persistenceLayer.createAcceleration(
+                    x: accValues.x,
+                    y: accValues.y,
+                    z: accValues.z,
+                    at: self.currentTimeInMillisSince1970())
+                currentMeasurement.addToAccelerations(acc)
+            }
+        }
+
+        isRunning = true
+    }
+
+    func stopCapturing() {
+        motionManager.stopAccelerometerUpdates()
+        locationManager.stopUpdatingLocation()
+        isRunning = false
     }
 
     /**
