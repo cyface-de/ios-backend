@@ -101,4 +101,12 @@ public class MovebisDataCapturingService: DataCapturingService {
             reachabilityManager.stopListening()
         }
     }
+
+    public func pause() {
+        stopCapturing()
+    }
+
+    public func resume() {
+        startCapturing()
+    }
 }
