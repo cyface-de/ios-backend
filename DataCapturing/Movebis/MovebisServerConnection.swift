@@ -8,8 +8,30 @@
 import Foundation
 import Alamofire
 
+/**
+ Realizes a connection to a Movebis data capturing server.
+
+ An object of this class realizes a connection between an iOS app capturing some data and a Movebis server receiving that data.
+ The data is transmitted using HTTPS in chunks of one measurement.
+ The transmission format is compressed Cyface binary format.
+ The cyface binary format is created by a `CyfaceBinaryFormatSerializer`.
+
+ - Author:
+ Klemens Muthmann
+
+ - Version:
+ 1.0.0
+
+ - Since:
+ 1.0.0
+ */
 public class MovebisServerConnection: ServerConnection {
+    /// The current JWT authentication token to use with the Movebis server.
     private var jwtAuthenticationToken: String?
+    /**
+     Serializer creating the Cyface binary format from a measurement.
+     The output is used as payload to transmit to the server.
+     */
     private lazy var serializer = CyfaceBinaryFormatSerializer()
     private let sessionManager: SessionManager
     private let apiURL: URL
@@ -27,19 +49,7 @@ public class MovebisServerConnection: ServerConnection {
 
     public required init(apiURL url: URL) {
         apiURL = url
-
-        guard let urlHost = url.host else {
-            fatalError("MovebisServerConnection.init(\(url.absoluteString)): Invalid URL! No host specified!")
-        }
-
-        // TODO: This ignores any certificate issues and is ugly. Should be changed to check for correct certificate.
-        let serverTrustPolicies: [String: ServerTrustPolicy] = [
-            urlHost: .disableEvaluation
-        ]
-
-        sessionManager = SessionManager(
-            serverTrustPolicyManager: ServerTrustPolicyManager(policies: serverTrustPolicies)
-        )
+        sessionManager = SessionManager()
     }
 
     public func isAuthenticated() -> Bool {
@@ -69,6 +79,8 @@ public class MovebisServerConnection: ServerConnection {
         ]
 
         sessionManager.upload(multipartFormData: { (multipartFormData) in
+
+
             multipartFormData.append(self.installationIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceId")
             multipartFormData.append(String(measurement.identifier).data(using: String.Encoding.utf8)!, withName: "measurementId")
 
