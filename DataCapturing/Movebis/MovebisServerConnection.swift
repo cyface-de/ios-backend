@@ -33,9 +33,21 @@ public class MovebisServerConnection: ServerConnection {
      The output is used as payload to transmit to the server.
      */
     private lazy var serializer = CyfaceBinaryFormatSerializer()
+    /**
+     The Alamofire `SessionManager`, which is used to authenticate and upload data.
+     */
     private let sessionManager: SessionManager
     private let apiURL: URL
     private var onFinishHandler: ((MeasurementMO, ServerConnectionError?) -> Void)?
+    /**
+     A name that tells the system which kind of iOS device this is.
+     */
+    private var modelIdentifier: String {
+        if let simulatorModelIdentifier = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] { return simulatorModelIdentifier }
+        var sysinfo = utsname()
+        uname(&sysinfo) // ignore return value
+        return String(bytes: Data(bytes: &sysinfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)!.trimmingCharacters(in: .controlCharacters)
+    }
 
     var installationIdentifier: String {
         if let applicationIdentifier = UserDefaults.standard.string(forKey: "de.cyface.identifier") {
@@ -78,21 +90,23 @@ public class MovebisServerConnection: ServerConnection {
             "Content-type": "multipart/form-data"
         ]
 
-        sessionManager.upload(multipartFormData: { (multipartFormData) in
-
-
-            multipartFormData.append(self.installationIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceId")
-            multipartFormData.append(String(measurement.identifier).data(using: String.Encoding.utf8)!, withName: "measurementId")
-
-            let payload = self.serializer.serializeCompressed(measurement)
-            multipartFormData.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
-        }, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers) { error in
+        sessionManager.upload(multipartFormData: {[unowned self] data in self.create(request: data, forMeasurement: measurement)}, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers) { [unowned self] error in
             self.onEncodingComplete(forMeasurement: measurement, withResult: error)
         }
     }
 
     public func getURL() -> URL {
         return apiURL
+    }
+
+    func create(request: MultipartFormData, forMeasurement measurement: MeasurementMO) {
+        request.append(installationIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceId")
+        request.append(String(measurement.identifier).data(using: String.Encoding.utf8)!, withName: "measurementId")
+        request.append(modelIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceType:")
+        request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
+
+        let payload = serializer.serializeCompressed(measurement)
+        request.append(payload, withName: "fileToUpload", fileName: "\(installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
     }
 
     func onEncodingComplete(forMeasurement measurement: MeasurementMO, withResult result: SessionManager.MultipartFormDataEncodingResult) {
