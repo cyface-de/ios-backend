@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import CoreMotion
 @testable import DataCapturing
 
 class DataCapturingTests: XCTestCase {
@@ -15,19 +16,15 @@ class DataCapturingTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
         oocut = MovebisServerConnection(apiURL: URL(string: "https://localhost:8080")!)
     }
 
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
         oocut = nil
         super.tearDown()
     }
 
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func testSynchronizationWithMovebisServer() {
         guard let oocut = oocut else {
             fatalError("Test failed!")
         }
@@ -48,11 +45,29 @@ class DataCapturingTests: XCTestCase {
         waitForExpectations(timeout: 10, handler: nil)
     }
 
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    // TODO: This test does not work since we can not test with background location updates in the moment.
+    /*func testCaptureData() {
+        guard let oocut = oocut else {
+            XCTFail("Unable to get server connection object.")
+            return
         }
-    }
+        let persistenceLayer = PersistenceLayer()
+        let sensorManager = CMMotionManager()
+        let dataCapturingService = MovebisDataCapturingService(connection: oocut, sensorManager: sensorManager, updateInterval: 0.0, persistenceLayer: persistenceLayer)
 
+        dataCapturingService.start()
+        XCTAssertTrue(dataCapturingService.isRunning)
+        let prePauseCountOfMeasurements = dataCapturingService.countMeasurements()
+
+        dataCapturingService.pause()
+        XCTAssertFalse(dataCapturingService.isRunning)
+
+        dataCapturingService.resume()
+        XCTAssertTrue(dataCapturingService.isRunning)
+        let postPauseCountOfMeasurements = dataCapturingService.countMeasurements()
+        XCTAssertEqual(prePauseCountOfMeasurements, postPauseCountOfMeasurements)
+
+        dataCapturingService.stop()
+        XCTAssertFalse(dataCapturingService.isRunning)
+    }*/
 }
