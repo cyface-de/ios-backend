@@ -81,6 +81,15 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
      */
     public var syncDelegate: ((Int64) -> Void)?
 
+    /**
+     A flag indicating whether synchronization of data should only happen if the device is connected to a wireless local area network (Wifi).
+
+     If `true` data is only synchronized via Wifi; if `false` data is also synchronized via mobile network.
+     The default setting is `true`.
+     Setting this to `false` might put heavy load on the users device and deplete her or his data plan.
+     */
+    public var syncOnWiFiOnly: Bool
+
     // MARK: Initializers
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data
@@ -105,6 +114,8 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
         self.serverConnection = serverConnection
+
+        self.syncOnWiFiOnly = true
         guard let reachabilityManager = NetworkReachabilityManager(host: serverConnection.getURL().absoluteString) else {
             fatalError("Unable to initialize reachability manager.")
         }
@@ -113,12 +124,11 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
 
         forceSync(onFinish: onSyncFinished)
         self.reachabilityManager.listener = {
-            status in
-            switch status {
-            case .reachable(.ethernetOrWiFi):
+            [unowned self] status in
+            let reachable = self.syncOnWiFiOnly ?  status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) : status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) || status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi)
+
+            if(reachable) {
                 self.forceSync(onFinish: self.onSyncFinished)
-            default:
-                os_log("No network connection.")
             }
         }
         self.reachabilityManager.startListening()
@@ -149,15 +159,6 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         stopCapturing()
         currentMeasurement = nil
         reachabilityManager.startListening()
-    }
-
-    /**
-     As soon as Wifi becomes available this method is called and starts synchronisation of all
-     unsynchronised `Measurement` instancess.
-     */
-    func onWifiAvailable() {
-        debugPrint("sync measurements \(countMeasurements())")
-        forceSync(onFinish: onSyncFinished)
     }
 
     /**
