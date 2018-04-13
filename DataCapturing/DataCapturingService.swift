@@ -36,6 +36,9 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     /// `true` if data capturing is running; `false` otherwise.
     public var isRunning: Bool
 
+    /// `true` if data capturing was running but is currently paused; `false` otherwise.
+    public var isPaused: Bool
+
     /// A listener that is notified of important events during data capturing.
     private var handler: ((DataCapturingEvent) -> Void)?
 
@@ -51,7 +54,6 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
      */
     private lazy var locationManager: CLLocationManager = {
         let manager = CLLocationManager()
-        manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         manager.allowsBackgroundLocationUpdates = true
         manager.activityType = .other
@@ -110,6 +112,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         persistenceLayer persistence: PersistenceLayer) {
 
         self.isRunning = false
+        self.isPaused = false
         self.persistenceLayer = persistence
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
@@ -127,7 +130,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
             [unowned self] status in
             let reachable = self.syncOnWiFiOnly ?  status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) : status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) || status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi)
 
-            if(reachable) {
+            if reachable {
                 self.forceSync(onFinish: self.onSyncFinished)
             }
         }
@@ -143,6 +146,10 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
       - Return: The measurement created by this call to `start`.
      */
     public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> MeasurementMO {
+        guard !isPaused else {
+            fatalError("DataCapturingService.start(): Invalid state! You tried to start the data capturing service in paused state! Please call resume() and stop() before starting the service!")
+        }
+
         let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
         measurement.synchronized = false
         self.currentMeasurement = measurement
@@ -156,9 +163,37 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
      running.
      */
     public func stop() {
+        guard !isPaused else {
+            fatalError("DataCapturingService.stop(): Invalid state! You tried to stop the data capturing service in paused state! Please call resume() prior to stop()!")
+        }
+
         stopCapturing()
         currentMeasurement = nil
         reachabilityManager.startListening()
+    }
+
+    /**
+     Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now. After using `pause()` you must call resume before you can call any other lifecycle method like `stop()`, for example.
+     */
+    public func pause() {
+        guard isRunning, !isPaused else {
+            fatalError("DataCapturingService.pause(): isPaused --> \(isPaused), isRunning --> \(isRunning)")
+        }
+
+        stopCapturing()
+        isPaused = true
+    }
+
+    /**
+     Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
+     */
+    public func resume() {
+        guard isPaused, !isRunning else {
+            fatalError("DataCapturingService.resume(): isPaused --> \(isPaused), isRunning --> \(isRunning)")
+        }
+
+        startCapturing()
+        isPaused = false
     }
 
     /**
@@ -259,6 +294,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         }
 
         self.handler = handler
+        self.locationManager.delegate = self
         self.locationManager.startUpdatingLocation()
 
         if motionManager.isAccelerometerAvailable {
@@ -281,8 +317,14 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     }
 
     func stopCapturing() {
+        guard isRunning else {
+            os_log("Trying to stop a non running service!", log: LOG, type: .info)
+            return
+        }
+
         motionManager.stopAccelerometerUpdates()
         locationManager.stopUpdatingLocation()
+        locationManager.delegate = nil
         isRunning = false
     }
 
