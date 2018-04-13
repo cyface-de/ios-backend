@@ -54,7 +54,6 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
      */
     private lazy var locationManager: CLLocationManager = {
         let manager = CLLocationManager()
-        manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         manager.allowsBackgroundLocationUpdates = true
         manager.activityType = .other
@@ -131,7 +130,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
             [unowned self] status in
             let reachable = self.syncOnWiFiOnly ?  status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) : status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) || status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi)
 
-            if(reachable) {
+            if reachable {
                 self.forceSync(onFinish: self.onSyncFinished)
             }
         }
@@ -295,6 +294,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         }
 
         self.handler = handler
+        self.locationManager.delegate = self
         self.locationManager.startUpdatingLocation()
 
         if motionManager.isAccelerometerAvailable {
@@ -324,6 +324,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
 
         motionManager.stopAccelerometerUpdates()
         locationManager.stopUpdatingLocation()
+        locationManager.delegate = nil
         isRunning = false
     }
 
