@@ -11,25 +11,52 @@ import CoreData
 
 /**
  Read access is public while manipulation of the data stored is restricted to the framework.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 1.0.0
  */
 public class PersistenceLayer {
 
+    /// The context to use for accessing CoreData.
     let context: NSManagedObjectContext
 
+    /// Container for the persistent object model.
     let container: NSPersistentContainer
 
+    /// The identifier that has been assigned the last to a new `Measurement`.
     var lastIdentifier: Int64?
 
+    /// The next identifier to assign to a new `Measurement`.
     var nextIdentifier: Int64 {
-        if let lastIdentifier = lastIdentifier {
-            self.lastIdentifier = lastIdentifier + 1
-            return lastIdentifier + 1
-        } else {
-            lastIdentifier = Int64(countMeasurements())
-            return lastIdentifier!
+        get {
+            let persistentStore = container.persistentStoreCoordinator.persistentStores[0]
+            let coordinator = container.persistentStoreCoordinator
+
+            if lastIdentifier == nil {
+                // identifier is already stored as metadata.
+                if let currentIdentifier = coordinator.metadata(for: persistentStore)["de.cyface.mid"] as! Int64? {
+                    lastIdentifier = currentIdentifier
+                // identifier is not yet stored, create an entry
+                } else {
+                    lastIdentifier = Int64(0)
+                    coordinator.setMetadata(["de.cyface.mid": lastIdentifier as Any], for: persistentStore)
+                }
+            }
+
+            guard let lastIdentifier = lastIdentifier else {
+                fatalError("No identifier available!")
+            }
+
+            let nextIdentifier = lastIdentifier + 1
+            coordinator.setMetadata(["de.cyface.mid":nextIdentifier], for: persistentStore)
+            return nextIdentifier
         }
     }
 
+    /**
+    Creates a new completely initialized `PersistenceLayer`.
+    */
     public init() {
         /*
          The following code is necessary to load the CyfaceModel from the DataCapturing framework.
@@ -59,6 +86,11 @@ public class PersistenceLayer {
         context = container.viewContext
     }
 
+    /**
+     Creates a new measurement with the provided `timestamp`.
+
+     - Parameter timestamp: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
+    */
     func createMeasurement(at timestamp: Int64) -> MeasurementMO {
         let identifier = nextIdentifier
         if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
@@ -71,6 +103,16 @@ public class PersistenceLayer {
         }
     }
 
+    /**
+     Creates a new acceleration in the current data store.
+
+     - Parameters:
+        - x: The acceleration in device x direction
+        - y: The acceleration in device y direction
+        - z: The acceleration in device z direction
+        - at: Timestamp in milliseconds since the first of january 1970 (epoch).
+     - Returns: A new acceleration object, that mirrors the current state of that acceleration in the database.
+    */
     func createAcceleration(x ax: Double, y ay: Double, z az: Double, at timestamp: Int64) -> AccelerationPointMO {
         guard let acceleration = NSEntityDescription.insertNewObject(forEntityName: "Acceleration", into: context) as? AccelerationPointMO else {
             fatalError("Unable to create new acceleration in CoreData!")
@@ -83,6 +125,17 @@ public class PersistenceLayer {
         return acceleration
     }
 
+    /**
+     Creates a new geo location in the current database.
+
+     - Parameters:
+        - latitude: The geographic latitude of the newly created geo location.
+        - longitude: The geographic longitude of the newly created geo location.
+        - accuracy: The accuracy of the captured geo location in meters.
+        - speed: The speed of the capturing device at the moment of capturing the geo location.
+        - at: The timestamp at which the geo location has been captured in milliseconds since the first of january 1970.
+     - Returns: The newly created geo location as it is stored in the data store.
+    */
     func createGeoLocation(latitude lat: Double, longitude lon: Double, accuracy acc: Double, speed spd: Double, at timestamp: Int64) -> GeoLocationMO {
         guard let location = NSEntityDescription.insertNewObject(forEntityName: "GeoLocation", into: context) as? GeoLocationMO else {
             fatalError("Unable to create new location in CoreData!")
@@ -97,6 +150,11 @@ public class PersistenceLayer {
         return location
     }
 
+    /**
+     Loads all measurements from the data store.
+
+     - Returns: The currently stored measurements from the data store.
+    */
     public func loadMeasurements() -> [MeasurementMO] {
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         do {
@@ -110,6 +168,11 @@ public class PersistenceLayer {
         }
     }
 
+    /**
+     Counts the amount of measurements currently stored in the data store.
+
+     - Returns: The count of measurements in the data store.
+    */
     public func countMeasurements() -> Int {
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         do {
@@ -120,6 +183,11 @@ public class PersistenceLayer {
         }
     }
 
+    /**
+     Loads a specific measurement from the data store.
+
+     - Parameter identifier: The database wide unique identifier of the measurement to load.
+    */
     public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementMO? {
 
         for measurement in loadMeasurements() where measurement.identifier==identifier {
