@@ -39,6 +39,32 @@ class PersistenceTests: XCTestCase {
         fixture = nil
         super.tearDown()
     }
+
+    /**
+     Tests if new measurements are created with the correct identifier and if identifiers are increased for each new measurement. This should even work if one measurement is deleted in between.
+    */
+    func testCreateMeasurement() {
+        guard let secondMeasurement = oocut?.createMeasurement(at: 10_001) else {
+            XCTFail()
+            return
+        }
+        guard let firstMeasurement = fixture else {
+            XCTFail()
+            return
+        }
+
+        let secondMeasurementIdentifier = secondMeasurement.identifier
+        XCTAssertEqual(secondMeasurementIdentifier, firstMeasurement.identifier+1)
+
+        oocut?.delete(measurement: secondMeasurement)
+
+        guard let thirdMeasurement = oocut?.createMeasurement(at: 10_002) else {
+            XCTFail()
+            return
+        }
+
+        XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
+    }
     
     func testCleanMeasurement() {
         guard let measurement = fixture else {

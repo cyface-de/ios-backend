@@ -49,6 +49,7 @@ public class PersistenceLayer {
             }
 
             let nextIdentifier = lastIdentifier + 1
+            self.lastIdentifier = nextIdentifier
             coordinator.setMetadata(["de.cyface.mid":nextIdentifier], for: persistentStore)
             return nextIdentifier
         }
