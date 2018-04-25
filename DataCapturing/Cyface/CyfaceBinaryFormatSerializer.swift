@@ -34,8 +34,8 @@ class CyfaceBinaryFormatSerializer {
     }
 
     func serialize(_ measurement: MeasurementMO) -> Data {
-        let accelerations = measurement.accelerations == nil ? [] : measurement.accelerations!
-        let geoLocations = measurement.geoLocations == nil ? [] : measurement.geoLocations!
+        let accelerations = measurement.accelerations ?? []
+        let geoLocations = measurement.geoLocations ?? []
 
         var dataArray = [UInt8]()
         // add header

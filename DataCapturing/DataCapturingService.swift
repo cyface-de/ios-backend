@@ -29,7 +29,7 @@ import Alamofire
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject, MeasurementLifecycle {
-    // MARK: Properties
+    // MARK: - Properties
     /// Data used to identify log messages created by this component.
     private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
 
@@ -187,12 +187,12 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     /**
      Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
      */
-    public func resume() {
+    public func resume(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
         guard isPaused, !isRunning else {
             fatalError("DataCapturingService.resume(): isPaused --> \(isPaused), isRunning --> \(isRunning)")
         }
 
-        startCapturing()
+        startCapturing(withHandler: handler)
         isPaused = false
     }
 
