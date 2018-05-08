@@ -13,6 +13,7 @@ class PersistenceTests: XCTestCase {
 
     var oocut: PersistenceLayer?
     var fixture: MeasurementMO?
+    var fixtureIdentifier: Int64?
     
     override func setUp() {
         super.setUp()
@@ -20,13 +21,15 @@ class PersistenceTests: XCTestCase {
         let oocut = PersistenceLayer()
 
         let fixture = oocut.createMeasurement(at: 10_000)
-        fixture.synchronized = false
+        let fixture2 = oocut.createMeasurement2(at: 10_000)
+        fixtureIdentifier = fixture2.identifier
+        /*fixture.synchronized = false
         fixture.addToGeoLocations(oocut.createGeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, at: 10_000))
         fixture.addToGeoLocations(oocut.createGeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, at: 10_001))
 
         fixture.addToAccelerations(oocut.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_000))
         fixture.addToAccelerations(oocut.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_001))
-        fixture.addToAccelerations(oocut.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_002))
+        fixture.addToAccelerations(oocut.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_002))*/
 
         self.oocut = oocut
         self.fixture = fixture
@@ -53,6 +56,7 @@ class PersistenceTests: XCTestCase {
             return
         }
 
+        let testMeasurement = oocut?.loadMeasurement(withIdentifier: fixtureIdentifier!)
         let secondMeasurementIdentifier = secondMeasurement.identifier
         XCTAssertEqual(secondMeasurementIdentifier, firstMeasurement.identifier+1)
 

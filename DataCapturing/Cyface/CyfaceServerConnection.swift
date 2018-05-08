@@ -303,7 +303,7 @@ public class CyfaceServerConnection: ServerConnection {
         let deviceCreationBody = ["id": identifier, "name": deviceModelIdentifier]
         request.httpBody = try? JSONSerialization.data(withJSONObject: deviceCreationBody, options: .sortedKeys)
 
-        let deviceCreationTask = self.apiSession.dataTask(with: request) { _, response, error in
+        let deviceCreationTask = self.apiSession.dataTask(with: request) { data, response, error in
             if let error = error {
                 handler(ServerConnectionError(
                     title: "Device Registration Error",

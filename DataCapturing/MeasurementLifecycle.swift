@@ -7,5 +7,5 @@
 //
 
 protocol MeasurementLifecycle {
-    func onSyncFinished(measurement: MeasurementMO, error: ServerConnectionError?)
+    func cleanDataAfterSync(for measurement: MeasurementMO)
 }

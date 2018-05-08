@@ -79,26 +79,8 @@ public class MovebisDataCapturingService: DataCapturingService {
         super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence)
     }
 
-    override func onSyncFinished(measurement: MeasurementMO, error: ServerConnectionError?) {
-        // Only go on if there was no error
-        guard error==nil else {
-            os_log("Unable to upload data.")
-            return
-        }
-
+    override func cleanDataAfterSync(for measurement: MeasurementMO) {
         persistenceLayer.clean(measurement: measurement)
         measurement.synchronized = true
-
-        // Inform UI if interested
-        if let syncDelegate = syncDelegate {
-            let currentIdentifier = measurement.identifier
-            syncDelegate(currentIdentifier)
-        }
-
-        debugPrint("Synchronized! Measurements on device \(countMeasurements())")
-        // stop synchronization if everything has been synchronized.
-        if countMeasurements()==0 {
-            reachabilityManager.stopListening()
-        }
     }
 }

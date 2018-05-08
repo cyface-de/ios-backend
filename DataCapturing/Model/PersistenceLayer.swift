@@ -37,7 +37,7 @@ public class PersistenceLayer {
                 // identifier is already stored as metadata.
                 if let currentIdentifier = coordinator.metadata(for: persistentStore)["de.cyface.mid"] as! Int64? {
                     lastIdentifier = currentIdentifier
-                // identifier is not yet stored, create an entry
+                    // identifier is not yet stored, create an entry
                 } else {
                     lastIdentifier = Int64(0)
                     coordinator.setMetadata(["de.cyface.mid": lastIdentifier as Any], for: persistentStore)
@@ -56,8 +56,8 @@ public class PersistenceLayer {
     }
 
     /**
-    Creates a new completely initialized `PersistenceLayer`.
-    */
+     Creates a new completely initialized `PersistenceLayer`.
+     */
     public init() {
         /*
          The following code is necessary to load the CyfaceModel from the DataCapturing framework.
@@ -91,29 +91,51 @@ public class PersistenceLayer {
      Creates a new measurement with the provided `timestamp`.
 
      - Parameter timestamp: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
-    */
+     */
     func createMeasurement(at timestamp: Int64) -> MeasurementMO {
         let identifier = nextIdentifier
         if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
             let measurement = MeasurementMO(entity: description, insertInto: context)
             measurement.timestamp = timestamp
             measurement.identifier = identifier
+            
+            save()
             return measurement
         } else {
             fatalError("Unable to create measurement!")
         }
     }
 
+    public func createMeasurement2(at timestamp: Int64) -> MeasurementEntity {
+        let identifier = nextIdentifier
+        let privateContext = container.newBackgroundContext()
+        var ret: MeasurementEntity?
+        privateContext.performAndWait {
+            if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: privateContext) {
+                let measurement = MeasurementMO(entity: description, insertInto: privateContext)
+                measurement.timestamp = timestamp
+                measurement.identifier = identifier
+                ret = MeasurementEntity(identifier: measurement.identifier)
+            } else {
+                fatalError("Unable to create measurement!")
+            }
+        }
+
+        save(privateContext)
+
+        return ret!
+    }
+
     /**
      Creates a new acceleration in the current data store.
 
      - Parameters:
-        - x: The acceleration in device x direction
-        - y: The acceleration in device y direction
-        - z: The acceleration in device z direction
-        - at: Timestamp in milliseconds since the first of january 1970 (epoch).
+     - x: The acceleration in device x direction
+     - y: The acceleration in device y direction
+     - z: The acceleration in device z direction
+     - at: Timestamp in milliseconds since the first of january 1970 (epoch).
      - Returns: A new acceleration object, that mirrors the current state of that acceleration in the database.
-    */
+     */
     func createAcceleration(x ax: Double, y ay: Double, z az: Double, at timestamp: Int64) -> AccelerationPointMO {
         guard let acceleration = NSEntityDescription.insertNewObject(forEntityName: "Acceleration", into: context) as? AccelerationPointMO else {
             fatalError("Unable to create new acceleration in CoreData!")
@@ -130,13 +152,13 @@ public class PersistenceLayer {
      Creates a new geo location in the current database.
 
      - Parameters:
-        - latitude: The geographic latitude of the newly created geo location.
-        - longitude: The geographic longitude of the newly created geo location.
-        - accuracy: The accuracy of the captured geo location in meters.
-        - speed: The speed of the capturing device at the moment of capturing the geo location.
-        - at: The timestamp at which the geo location has been captured in milliseconds since the first of january 1970.
+     - latitude: The geographic latitude of the newly created geo location.
+     - longitude: The geographic longitude of the newly created geo location.
+     - accuracy: The accuracy of the captured geo location in meters.
+     - speed: The speed of the capturing device at the moment of capturing the geo location.
+     - at: The timestamp at which the geo location has been captured in milliseconds since the first of january 1970.
      - Returns: The newly created geo location as it is stored in the data store.
-    */
+     */
     func createGeoLocation(latitude lat: Double, longitude lon: Double, accuracy acc: Double, speed spd: Double, at timestamp: Int64) -> GeoLocationMO {
         guard let location = NSEntityDescription.insertNewObject(forEntityName: "GeoLocation", into: context) as? GeoLocationMO else {
             fatalError("Unable to create new location in CoreData!")
@@ -155,7 +177,7 @@ public class PersistenceLayer {
      Loads all measurements from the data store.
 
      - Returns: The currently stored measurements from the data store.
-    */
+     */
     public func loadMeasurements() -> [MeasurementMO] {
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         do {
@@ -173,7 +195,7 @@ public class PersistenceLayer {
      Counts the amount of measurements currently stored in the data store.
 
      - Returns: The count of measurements in the data store.
-    */
+     */
     public func countMeasurements() -> Int {
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         do {
@@ -188,7 +210,7 @@ public class PersistenceLayer {
      Loads a specific measurement from the data store.
 
      - Parameter identifier: The database wide unique identifier of the measurement to load.
-    */
+     */
     public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementMO? {
 
         for measurement in loadMeasurements() where measurement.identifier==identifier {
@@ -228,7 +250,7 @@ public class PersistenceLayer {
      Deletes one specific measurement from the persistent data store.
 
      - Parameter measurement: The `MeasurementMO` to delete from the database.
-    */
+     */
     func delete(measurement value: MeasurementMO) {
         if let accelerations = value.accelerations {
             for acceleration in accelerations {
@@ -250,10 +272,23 @@ public class PersistenceLayer {
     /// Commits all stacked changes (updates, deletes, inserts).
     func save() {
         do {
-            try context.save()
+            if context.hasChanges {
+                try context.save()
+            }
         } catch {
-            fatalError("Unable to save to persistence context: \(error)")
+            fatalError("Unable to save to persistence context: \(error)!")
         }
+    }
+
+    func save(_ privateContext: NSManagedObjectContext) {
+        do {
+            if privateContext.hasChanges {
+                try privateContext.save()
+            }
+        } catch {
+            fatalError("Unable to save private persistence context: \(error)!")
+        }
+        save()
     }
 
     /**

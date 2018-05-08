@@ -29,6 +29,7 @@ import Alamofire
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject, MeasurementLifecycle {
+
     // MARK: - Properties
     /// Data used to identify log messages created by this component.
     private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
@@ -125,13 +126,18 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         self.reachabilityManager = reachabilityManager
         super.init()
 
-        forceSync(onFinish: onSyncFinished)
+        // TODO: Do we really need to call forceSync twice here and 6 lines below.
+        forceSync {[unowned self] in
+            self.notify(of: .synchronizationSuccessful)
+        }
         self.reachabilityManager.listener = {
             [unowned self] status in
             let reachable = self.syncOnWiFiOnly ?  status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) : status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) || status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi)
 
             if reachable {
-                self.forceSync(onFinish: self.onSyncFinished)
+                self.forceSync {
+                    self.notify(of: .synchronizationSuccessful)
+                }
             }
         }
         self.reachabilityManager.startListening()
@@ -197,51 +203,55 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     }
 
     /**
-     When synchronization has finished this handler is called and stops the
-     `ReachabilityManager`.
-
-     - Parameters
-        - measurement: The `Measurement` for which synchronization has been finished.
-        - error: An error if one has occured or `nil` if everything went well.
-     */
-    func onSyncFinished(measurement: MeasurementMO, error: ServerConnectionError?) {
-        // Only go on if there was no error
-        guard error==nil else {
-            os_log("Unable to upload data.")
-            return
-        }
-
-        // Delete measurement
-        self.persistenceLayer.delete(measurement: measurement)
-
-        // Inform UI if interested
-        if let syncDelegate = syncDelegate {
-            let currentIdentifier = measurement.identifier
-            syncDelegate(currentIdentifier)
-        }
-
-        debugPrint("Synchronized! Measurements on device \(countMeasurements())")
-        // stop synchronization if everything has been synchronized.
-        if countMeasurements()==0 {
-            reachabilityManager.stopListening()
-        }
-    }
-
-    /**
      Forces the service to synchronize all Measurements now if a connection is available.
      If this is not called the service might wait for an opportune moment to start synchronization.
 
      - Parameter onFinish: A handler called each time a synchronization has finished.
      */
-    public func forceSync(onFinish handler: ((MeasurementMO, ServerConnectionError?) -> Void)?) {
-        for measurement in self.persistenceLayer.loadMeasurements() {
+    public func forceSync(onFinish handler: @escaping (() -> Void)) {
+        let measurements = self.persistenceLayer.loadMeasurements()
+        var countOfMeasurementsToSynchronize = measurements.count
+        for measurement in measurements {
             if serverConnection.isAuthenticated(), reachabilityManager.isReachableOnEthernetOrWiFi {
                 // In case no handler was provided simply use an empty one.
-                let handler = handler ?? {_, _ in }
-                serverConnection.sync(measurement: measurement, onFinish: handler)
+                let syncFinishedHandler: ((MeasurementMO, ServerConnectionError?)->Void) = {[unowned self] measurement, error in
+                    // Only go on if there was no error
+                    guard error==nil else {
+                        os_log("Unable to upload data for measurement: %@!",measurement.identifier)
+                        return
+                    }
+                    self.cleanDataAfterSync(for: measurement)
+
+                    // Inform UI if interested
+                    if let syncDelegate = self.syncDelegate {
+                        let currentIdentifier = measurement.identifier
+                        DispatchQueue.main.async {
+                            syncDelegate(currentIdentifier)
+                        }
+                    }
+
+                    // TODO: synchronize this?
+                    countOfMeasurementsToSynchronize -= 1
+
+                    // Everything synchronized
+                    if countOfMeasurementsToSynchronize == 0 {
+                        handler()
+                        if self.countMeasurements()==0 {
+                            self.reachabilityManager.stopListening()
+                        }
+                    }
+                }
+                serverConnection.sync(measurement: measurement, onFinish: syncFinishedHandler)
             }
         }
-        notify(of: .synchronizationSuccessful)
+        // TODO: Synchronization is not necessarily successful at this point. It might not even be finished.
+
+    }
+
+    func cleanDataAfterSync(for measurement: MeasurementMO) {
+        // Delete measurement
+        // TODO: This runs not on the main thread and requires a different context.
+        self.persistenceLayer.delete(measurement: measurement)
     }
 
     /**
