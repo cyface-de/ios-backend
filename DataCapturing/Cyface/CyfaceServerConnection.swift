@@ -18,7 +18,7 @@ import os.log
  */
 public class CyfaceServerConnection: ServerConnection {
 
-    // MARK: Properties
+    // MARK: - Properties
     private let LOG = OSLog(subsystem: "de.cyface", category: "ServerConnection")
 
     /// Session object to upload captured data to a Cyface server.
@@ -41,17 +41,20 @@ public class CyfaceServerConnection: ServerConnection {
         return String(bytes: Data(bytes: &sysinfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)!.trimmingCharacters(in: .controlCharacters)
     }()
 
-    // MARK: Initializers
+    private let persistenceLayer: PersistenceLayer
+
+    // MARK: - Initializers
     /**
      Creates a new `ServerConnection` to the provided URL.
      - Parameters:
      -  url: A `URL` used to upload data to. There should be a server complying to a Cyface REST interface available at that location.
      */
-    public required init(apiURL url: URL) {
+    public required init(apiURL url: URL, persistenceLayer: PersistenceLayer) {
         self.apiURL=url
+        self.persistenceLayer = persistenceLayer
     }
 
-    // MARK: Methods
+    // MARK: - Methods
     public func authenticate(with username: String, and password: String, onFinish handler: ((Error?) -> Void)?) {
         let loginURL = apiURL.appendingPathComponent("login")
         var request = URLRequest(url: loginURL)
@@ -71,20 +74,21 @@ public class CyfaceServerConnection: ServerConnection {
         }
     }
 
-    public func sync(measurement: MeasurementMO, onFinish handler: @escaping (MeasurementMO, ServerConnectionError?) -> Void) {
-        debugPrint("Trying to synchronize measurement \(measurement.identifier)")
+    public func sync(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (Int64, ServerConnectionError?) -> Void) {
+        debugPrint("Trying to synchronize measurement \(identifier)")
         guard isAuthenticated() else {
-            fatalError("sync(measurement: \(measurement)): Unable to sync with not authenticated client.")
+            fatalError("CyfaceServerConnection.sync(measurementIdentifiedBy: \(identifier)): Unable to sync with not authenticated client.")
         }
 
+        let measurementIdentifier = identifier
         installationIdentifier { error, identifier in
             if let error = error {
-                handler(measurement, error)
+                handler(measurementIdentifier, error)
                 return
             } else if let identifier = identifier {
-                self.transmit(measurement: measurement, forDevice: identifier, onFinish: handler)
+                self.transmit(measurementIdentifiedBy: measurementIdentifier, forDevice: identifier, onFinish: handler)
             } else {
-                fatalError("ServerConnection.sync(measurement: \(measurement)): Neither identifier nor error information available.")
+                fatalError("CyfaceServerConnection.sync(measurement: \(measurementIdentifier)): Neither identifier nor error information available.")
             }
         }
     }
@@ -97,28 +101,28 @@ public class CyfaceServerConnection: ServerConnection {
         return apiURL
     }
 
-    private func transmit(measurement: MeasurementMO, forDevice deviceIdentifier: String, onFinish handler: @escaping (MeasurementMO, ServerConnectionError?) -> Void) {
+    private func transmit(measurementIdentifiedBy identifier: Int64, forDevice deviceIdentifier: String, onFinish handler: @escaping (Int64, ServerConnectionError?) -> Void) {
 
         var request = URLRequest(url: apiURL.appendingPathComponent("measurements"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(jwtBearer, forHTTPHeaderField: "Authorization")
 
-        let chunks = self.makeUploadChunks(fromMeasurement: measurement, forInstallation: deviceIdentifier)
+        let chunks = self.makeUploadChunks(fromMeasurementIdentifiedBy: identifier, forInstallation: deviceIdentifier)
         for chunk in chunks {
             guard let jsonChunk = try? JSONSerialization.data(withJSONObject: chunk, options: .sortedKeys) else {
-                fatalError("ServerConnection.transmit(measurement: \(measurement.identifier), forDevice: \(deviceIdentifier)): Invalid measurement format.")
+                fatalError("ServerConnection.transmit(measurement: \(identifier), forDevice: \(deviceIdentifier)): Invalid measurement format.")
             }
 
             let submissionTask = self.apiSession.uploadTask(with: request, from: jsonChunk) { _, response, error in
                 if let error = error {
-                    handler(measurement, ServerConnectionError(
+                    handler(identifier, ServerConnectionError(
                         title: "Data Transmission Error",
                         description: "Error while transmitting data to the server at \(self.apiURL)! Error was: \(error)"))
                     return
                 }
                 guard let response = response as? HTTPURLResponse else {
-                    handler(measurement, ServerConnectionError(
+                    handler(identifier, ServerConnectionError(
                         title: "Data Transmission Error",
                         description: "Received erroneous response from \(String(describing: request.url))!"))
                     return
@@ -126,13 +130,13 @@ public class CyfaceServerConnection: ServerConnection {
 
                 let statusCode = response.statusCode
                 guard statusCode == 201 else {
-                    handler(measurement, ServerConnectionError(
+                    handler(identifier, ServerConnectionError(
                         title: "Invalid Status Code Error",
                         description: "Invalid status code \(statusCode) received from server at \(String(describing: request.url))!"))
                     return
                 }
 
-                handler(measurement, nil)
+                handler(identifier, nil)
             }
 
             submissionTask.resume()
@@ -140,9 +144,12 @@ public class CyfaceServerConnection: ServerConnection {
     }
 
     private func makeUploadChunks(
-        fromMeasurement measurement: MeasurementMO,
-        forInstallation identifier: String) -> [[String: Any]] {
+        fromMeasurementIdentifiedBy measurementIdentifier: Int64,
+        forInstallation installationIdentifier: String) -> [[String: Any]] {
 
+        guard let measurement = persistenceLayer.loadMeasurement(withIdentifier: measurementIdentifier) else {
+            fatalError("CyfaceServerConnection.makeUploadChunks(fromMeasurementIdentifiedBy: \(measurementIdentifier), forInstallation \(installationIdentifier)): Unable to load measurement.")
+        }
         var geoLocations = [[String: String]]()
         if let measurementLocations = measurement.geoLocations {
             for location in measurementLocations {
@@ -167,7 +174,7 @@ public class CyfaceServerConnection: ServerConnection {
         }
 
         return [[
-            "deviceId": identifier,
+            "deviceId": measurementIdentifier,
             "id": String(measurement.identifier),
             "vehicle": "BICYCLE",
             "gpsPoints": geoLocations,

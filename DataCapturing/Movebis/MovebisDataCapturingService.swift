@@ -79,8 +79,9 @@ public class MovebisDataCapturingService: DataCapturingService {
         super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence)
     }
 
-    override func cleanDataAfterSync(for measurement: MeasurementMO) {
-        persistenceLayer.clean(measurement: measurement)
-        measurement.synchronized = true
+    override func cleanDataAfterSync(for measurementIdentifier: Int64, onFinished handler: @escaping (() -> Void)) {
+        persistenceLayer.privatelyClean(measurementIdentifiedBy: measurementIdentifier) {
+            handler()
+        }
     }
 }

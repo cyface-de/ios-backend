@@ -208,15 +208,15 @@ public class DataCapturingService: NSObject {
      - Parameter onFinish: A handler called each time a synchronization has finished.
      */
     public func forceSync(onFinish handler: @escaping (() -> Void)) {
-        let measurements = self.persistenceLayer.loadMeasurements()
+        self.persistenceLayer.privatelyLoadMeasurements() { [unowned self] measurements in
         var countOfMeasurementsToSynchronize = measurements.count
         for measurement in measurements {
-            if serverConnection.isAuthenticated(), reachabilityManager.isReachableOnEthernetOrWiFi {
+            if self.serverConnection.isAuthenticated(), self.reachabilityManager.isReachableOnEthernetOrWiFi {
 
                 let syncFinishedHandler: ((Int64, ServerConnectionError?)->Void) = {[unowned self] measurementIdentifier, error in
                     // Only go on if there was no error
                     guard error==nil else {
-                        os_log("Unable to upload data for measurement: %@!",measurement.identifier)
+                        os_log("Unable to upload data for measurement: %@!", measurementIdentifier)
                         return
                     }
                     self.cleanDataAfterSync(for: measurementIdentifier) {
@@ -239,8 +239,9 @@ public class DataCapturingService: NSObject {
                         }
                     }
                 }
-                serverConnection.sync(measurement: measurement.identifier, onFinish: syncFinishedHandler)
+                self.serverConnection.sync(measurementIdentifiedBy: measurement.identifier, onFinishedCall: syncFinishedHandler)
             }
+        }
         }
     }
 
@@ -320,6 +321,7 @@ public class DataCapturingService: NSObject {
                     y: accValues.y,
                     z: accValues.z,
                     at: self.currentTimeInMillisSince1970())
+                // TODO: Make a cache with accelerations
                 currentMeasurement.addToAccelerations(acc)
             }
         }
@@ -372,6 +374,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
             accuracy: location.horizontalAccuracy,
             speed: location.speed,
             at: convertToUtcTimestamp(date: location.timestamp))
+        // TODO: Write to cache
         measurement.addToGeoLocations(geoLocation)
         notify(of: .geoLocationAcquired(position: geoLocation))
 

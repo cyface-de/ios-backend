@@ -222,19 +222,9 @@ public class PersistenceLayer {
 
     func privatelyDelete(measurement identifier: Int64, onFinishedCall handler: @escaping (() -> Void)) {
         let privateContext = newPrivateQueueContext()
-        privateContext.perform {
-            let fetchRequest: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "identifier==%@",identifier)
-
-            if let results = try? privateContext.fetch(fetchRequest) {
-                if results.count == 1 {
-                    let measurement = results[0]
-                    privateContext.delete(measurement)
-                } else {
-                    fatalError("PersistenceLayer.privatelyDelete(measurement: \(identifier)): Unable to delete measurement since there was a wrong count of results: \(results.count).")
-                }
-            }
-
+        privateContext.perform { [unowned self] in
+            let measurement = self.load(identifier, from: privateContext)
+            privateContext.delete(measurement)
             privateContext.saveRecursively()
             handler()
         }
@@ -246,6 +236,7 @@ public class PersistenceLayer {
 
      - Parameter measurement: The `MeasurementMO` to clean of all sensor data.
      */
+    @available(*, deprecated)
     func clean(measurement: MeasurementMO) {
         if let accelerations = measurement.accelerations {
             for acceleration in accelerations {
@@ -256,12 +247,65 @@ public class PersistenceLayer {
         save()
     }
 
+    func privatelyClean(measurementIdentifiedBy identifier: Int64, whenFinishedCall finishedHandler: @escaping () -> Void) {
+        let context = newPrivateQueueContext()
+        context.perform { [unowned self] in
+            let measurement = self.load(identifier, from: context)
+            measurement.synchronized = true
+            if let accelerations = measurement.accelerations {
+                for acceleration in accelerations {
+                    measurement.removeFromAccelerations(acceleration)
+                    context.delete(acceleration)
+                }
+            }
+
+            context.saveRecursively()
+            finishedHandler()
+        }
+    }
+
     // MARK: - Database Read Only Methods
+
+    private func load(_ measurementIdentifier: Int64, from context: NSManagedObjectContext) -> MeasurementMO {
+        let fetchRequest: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "identifier==%@", measurementIdentifier)
+
+        if let results = try? context.fetch(fetchRequest) {
+            if results.count == 1 {
+                return results[0]
+            } else {
+                fatalError("PersistenceLayer.load(measurementIdentifier: \(measurementIdentifier)): Wrong count of results: \(results.count).")
+            }
+        } else {
+            fatalError("PersistenceLayer.load(measurementIdentifier: \(measurementIdentifier)): Unable to fetch any results.")
+        }
+    }
+
+    public func privatelyLoad(measurementIdentifiedBy identifier: Int64, andCallWhenFinished handler: @escaping (MeasurementMO) -> Void) {
+        let context = newPrivateQueueContext()
+        context.perform { [unowned self] in
+            let measurement = self.load(identifier, from: context)
+            handler(measurement)
+        }
+    }
+
+    public func privatelyLoadMeasurements(onFinished handler: @escaping ([MeasurementMO]) -> Void) {
+        let context = newPrivateQueueContext()
+        context.perform {
+            let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+            let fetchResult = try? context.fetch(request)
+            if let fetchResult = fetchResult {
+                handler(fetchResult)
+            }
+        }
+    }
+
     /**
      Loads all measurements from the data store.
 
      - Returns: The currently stored measurements from the data store.
      */
+    @available(*, deprecated)
     public func loadMeasurements() -> [MeasurementMO] {
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         do {
