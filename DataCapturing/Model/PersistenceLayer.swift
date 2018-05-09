@@ -18,11 +18,41 @@ import CoreData
  */
 public class PersistenceLayer {
 
+    // MARK: - Properties
     /// The context to use for accessing CoreData.
-    let context: NSManagedObjectContext
+    private lazy var context: NSManagedObjectContext = {
+        return container.viewContext
+    }()
 
     /// Container for the persistent object model.
-    let container: NSPersistentContainer
+    private lazy var container: NSPersistentContainer = {
+        /*
+         The following code is necessary to load the CyfaceModel from the DataCapturing framework.
+         It is only necessary because we are using a framework.
+         Usually this would be much simpler as shown by many tutorials.
+         Details are available from the following StackOverflow Thread:
+         https://stackoverflow.com/questions/42553749/core-data-failed-to-load-model
+         */
+        let momdName = "CyfaceModel"
+
+        guard let modelURL = Bundle(for: type(of: self)).url(forResource: momdName, withExtension: "momd") else {
+            fatalError("Error loading model from bundle")
+        }
+
+        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("Error initializing mom from: \(modelURL)")
+        }
+
+        let container = NSPersistentContainer(name: momdName, managedObjectModel: mom)
+
+        container.loadPersistentStores { _, error in
+            if let error = error {
+                fatalError("Unable to load persistent storage \(error)")
+            }
+        }
+
+        return container
+    }()
 
     /// The identifier that has been assigned the last to a new `Measurement`.
     var lastIdentifier: Int64?
@@ -55,52 +85,37 @@ public class PersistenceLayer {
         }
     }
 
-    /**
-     Creates a new completely initialized `PersistenceLayer`.
-     */
-    public init() {
-        /*
-         The following code is necessary to load the CyfaceModel from the DataCapturing framework.
-         It is only necessary because we are using a framework.
-         Usually this would be much simpler as shown by many tutorials.
-         Details are available from the following StackOverflow Thread:
-         https://stackoverflow.com/questions/42553749/core-data-failed-to-load-model
-         */
-        let momdName = "CyfaceModel"
+    private lazy var backgroundContext: NSManagedObjectContext = {
+        return container.newBackgroundContext()
+    }()
 
-        guard let modelURL = Bundle(for: type(of: self)).url(forResource: momdName, withExtension: "momd") else {
-            fatalError("Error loading model from bundle")
-        }
+    private lazy var mainThreadContext: NSManagedObjectContext = {
+        var mainQueueContext =
+            NSManagedObjectContext(concurrencyType:
+                .mainQueueConcurrencyType)
+        mainQueueContext.parent = backgroundContext
+        mainQueueContext.mergePolicy =
+        NSMergeByPropertyObjectTrumpMergePolicy
+        return mainQueueContext
+    }()
 
-        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
-            fatalError("Error initializing mom from: \(modelURL)")
-        }
-
-        container = NSPersistentContainer(name: momdName, managedObjectModel: mom)
-
-        container.loadPersistentStores { _, error in
-            if let error = error {
-                fatalError("Unable to load persistent storage \(error)")
-            }
-        }
-
-        context = container.viewContext
-    }
+    // MARK: - Database Writing Methods
 
     /**
      Creates a new measurement with the provided `timestamp`.
 
      - Parameter timestamp: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
      */
-    func createMeasurement(at timestamp: Int64) -> MeasurementMO {
+    func createMeasurement(at timestamp: Int64) -> Int64 {
         let identifier = nextIdentifier
         if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
             let measurement = MeasurementMO(entity: description, insertInto: context)
             measurement.timestamp = timestamp
             measurement.identifier = identifier
+            measurement.synchronized = false
             
             save()
-            return measurement
+            return identifier
         } else {
             fatalError("Unable to create measurement!")
         }
@@ -173,6 +188,75 @@ public class PersistenceLayer {
         return location
     }
 
+    /// Deletes measurements from the persistent data store.
+    func deleteMeasurements() {
+        loadMeasurements().forEach { measurement in
+            context.delete(measurement)
+        }
+        save()
+    }
+
+    /**
+     Deletes one specific measurement from the persistent data store.
+
+     - Parameter measurement: The `MeasurementMO` to delete from the database.
+     */
+    @available(*, deprecated)
+    func delete(measurement value: MeasurementMO) {
+        if let accelerations = value.accelerations {
+            for acceleration in accelerations {
+                value.removeFromAccelerations(acceleration)
+                context.delete(acceleration)
+            }
+        }
+        if let locations = value.geoLocations {
+            for location in locations {
+                value.removeFromGeoLocations(location)
+                context.delete(location)
+            }
+        }
+        context.delete(value)
+
+        save()
+    }
+
+    func privatelyDelete(measurement identifier: Int64, onFinishedCall handler: @escaping (() -> Void)) {
+        let privateContext = newPrivateQueueContext()
+        privateContext.perform {
+            let fetchRequest: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "identifier==%@",identifier)
+
+            if let results = try? privateContext.fetch(fetchRequest) {
+                if results.count == 1 {
+                    let measurement = results[0]
+                    privateContext.delete(measurement)
+                } else {
+                    fatalError("PersistenceLayer.privatelyDelete(measurement: \(identifier)): Unable to delete measurement since there was a wrong count of results: \(results.count).")
+                }
+            }
+
+            privateContext.saveRecursively()
+            handler()
+        }
+
+    }
+
+    /**
+     Removes all accelerations, rotations and directions from a measurement. This can be used to save space after successful data synchronization, if you would like to keep the geo location tracks.
+
+     - Parameter measurement: The `MeasurementMO` to clean of all sensor data.
+     */
+    func clean(measurement: MeasurementMO) {
+        if let accelerations = measurement.accelerations {
+            for acceleration in accelerations {
+                measurement.removeFromAccelerations(acceleration)
+                context.delete(acceleration)
+            }
+        }
+        save()
+    }
+
+    // MARK: - Database Read Only Methods
     /**
      Loads all measurements from the data store.
 
@@ -238,36 +322,7 @@ public class PersistenceLayer {
          return nil*/
     }
 
-    /// Deletes measurements from the persistent data store.
-    func deleteMeasurements() {
-        loadMeasurements().forEach { measurement in
-            context.delete(measurement)
-        }
-        save()
-    }
-
-    /**
-     Deletes one specific measurement from the persistent data store.
-
-     - Parameter measurement: The `MeasurementMO` to delete from the database.
-     */
-    func delete(measurement value: MeasurementMO) {
-        if let accelerations = value.accelerations {
-            for acceleration in accelerations {
-                value.removeFromAccelerations(acceleration)
-                context.delete(acceleration)
-            }
-        }
-        if let locations = value.geoLocations {
-            for location in locations {
-                value.removeFromGeoLocations(location)
-                context.delete(location)
-            }
-        }
-        context.delete(value)
-
-        save()
-    }
+    // MARK: - Support Methods
 
     /// Commits all stacked changes (updates, deletes, inserts).
     func save() {
@@ -291,18 +346,28 @@ public class PersistenceLayer {
         save()
     }
 
-    /**
-     Removes all accelerations, rotations and directions from a measurement. This can be used to save space after successful data synchronization, if you would like to keep the geo location tracks.
+    func newPrivateQueueContext() -> NSManagedObjectContext {
+        let privateContext = container.newBackgroundContext()
+        privateContext.parent = mainThreadContext
+        return privateContext
+    }
+}
 
-     - Parameter measurement: The `MeasurementMO` to clean of all sensor data.
-     */
-    func clean(measurement: MeasurementMO) {
-        if let accelerations = measurement.accelerations {
-            for acceleration in accelerations {
-                measurement.removeFromAccelerations(acceleration)
-                context.delete(acceleration)
+extension NSManagedObjectContext {
+    func saveRecursively() {
+        performAndWait {
+            if self.hasChanges {
+                self.saveThisAndParentContexts()
             }
         }
-        save()
+    }
+
+    func saveThisAndParentContexts() {
+        do {
+            try save()
+            parent?.saveRecursively()
+        } catch {
+            print("Error: \(error.localizedDescription)")
+        }
     }
 }

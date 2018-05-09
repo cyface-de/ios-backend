@@ -28,7 +28,7 @@ import Alamofire
  - Version: 3.0.0
  - Since: 1.0.0
  */
-public class DataCapturingService: NSObject, MeasurementLifecycle {
+public class DataCapturingService: NSObject {
 
     // MARK: - Properties
     /// Data used to identify log messages created by this component.
@@ -44,7 +44,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     private var handler: ((DataCapturingEvent) -> Void)?
 
     /// The currently recorded `Measurement` or nil if there is no active recording.
-    private var currentMeasurement: MeasurementMO?
+    private var currentMeasurement: Int64?
 
     /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
     private let motionManager: CMMotionManager
@@ -93,7 +93,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
      */
     public var syncOnWiFiOnly: Bool
 
-    // MARK: Initializers
+    // MARK: - Initializers
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data
      via the provided server connection and accessing data a certain amount of times per second.
@@ -143,21 +143,20 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         self.reachabilityManager.startListening()
     }
 
-    // MARK: Methods
+    // MARK: - Methods
     /**
      Starts the capturing process with an optional closure, that is notified of important events
      during the capturing process. This operation is idempotent.
      
       - Parameter handler: A closure that is notified of important events during data capturing.
-      - Return: The measurement created by this call to `start`.
+      - Return: The device wide unique identifier of the measurement created by this call to `start`.
      */
-    public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> MeasurementMO {
+    public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> Int64 {
         guard !isPaused else {
             fatalError("DataCapturingService.start(): Invalid state! You tried to start the data capturing service in paused state! Please call resume() and stop() before starting the service!")
         }
 
         let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
-        measurement.synchronized = false
         self.currentMeasurement = measurement
 
         startCapturing(withHandler:handler)
@@ -213,45 +212,47 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         var countOfMeasurementsToSynchronize = measurements.count
         for measurement in measurements {
             if serverConnection.isAuthenticated(), reachabilityManager.isReachableOnEthernetOrWiFi {
-                // In case no handler was provided simply use an empty one.
-                let syncFinishedHandler: ((MeasurementMO, ServerConnectionError?)->Void) = {[unowned self] measurement, error in
+
+                let syncFinishedHandler: ((Int64, ServerConnectionError?)->Void) = {[unowned self] measurementIdentifier, error in
                     // Only go on if there was no error
                     guard error==nil else {
                         os_log("Unable to upload data for measurement: %@!",measurement.identifier)
                         return
                     }
-                    self.cleanDataAfterSync(for: measurement)
-
-                    // Inform UI if interested
-                    if let syncDelegate = self.syncDelegate {
-                        let currentIdentifier = measurement.identifier
-                        DispatchQueue.main.async {
-                            syncDelegate(currentIdentifier)
+                    self.cleanDataAfterSync(for: measurementIdentifier) {
+                        // Inform UI if interested
+                        if let syncDelegate = self.syncDelegate {
+                            DispatchQueue.main.async {
+                                syncDelegate(measurementIdentifier)
+                            }
                         }
-                    }
 
-                    // TODO: synchronize this?
-                    countOfMeasurementsToSynchronize -= 1
+                        // TODO: synchronize this?
+                        countOfMeasurementsToSynchronize -= 1
 
-                    // Everything synchronized
-                    if countOfMeasurementsToSynchronize == 0 {
-                        handler()
-                        if self.countMeasurements()==0 {
-                            self.reachabilityManager.stopListening()
+                        // Everything uploaded?
+                        if countOfMeasurementsToSynchronize == 0 {
+                            handler()
+                            if self.countMeasurements()==0 {
+                                self.reachabilityManager.stopListening()
+                            }
                         }
                     }
                 }
-                serverConnection.sync(measurement: measurement, onFinish: syncFinishedHandler)
+                serverConnection.sync(measurement: measurement.identifier, onFinish: syncFinishedHandler)
             }
         }
-        // TODO: Synchronization is not necessarily successful at this point. It might not even be finished.
-
     }
 
-    func cleanDataAfterSync(for measurement: MeasurementMO) {
-        // Delete measurement
-        // TODO: This runs not on the main thread and requires a different context.
-        self.persistenceLayer.delete(measurement: measurement)
+    /**
+    Cleans the database after a measurement has been synchronized.
+
+     - Parameters:
+        - measurementIdentifier: The device wide unique identifier of the measurement to delete.
+        - handler: Called as soon as deletion has finished.
+    */
+    func cleanDataAfterSync(for measurementIdentifier: Int64, onFinished handler: @escaping (() -> Void)) {
+        persistenceLayer.privatelyDelete(measurement: measurementIdentifier, onFinishedCall: handler)
     }
 
     /**
@@ -260,8 +261,8 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
      - Parameter measurement: The `Measurement` to delete. You can get this for example via
         `loadMeasurement(index:)`.
     */
-    public func delete(measurement: MeasurementMO) {
-        persistenceLayer.delete(measurement: measurement)
+    public func delete(measurement: MeasurementMO, andCallWhenFinished finishedHandler: @escaping () -> Void) {
+        persistenceLayer.privatelyDelete(measurement: measurement.identifier, onFinishedCall: finishedHandler)
     }
 
     /// Provides the amount of `Measurements` currently cached by the system.
