@@ -26,7 +26,7 @@ public enum DataCapturingEvent {
      Occurs each time the `DataCapturingService` receives a new geo location position.
      - position: The new geo location position.
      */
-    case geoLocationAcquired(position: GeoLocationMO)
+    case geoLocationAcquired(position: GeoLocation)
     /**
      Occurs each time the application runs out of space.
      How much space is used and how much is available may be retrieved from `allocation`.

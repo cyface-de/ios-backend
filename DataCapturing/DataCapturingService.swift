@@ -93,6 +93,10 @@ public class DataCapturingService: NSObject {
      */
     public var syncOnWiFiOnly: Bool
 
+    private var accelerationsCache = [Acceleration]()
+
+    private let capturingQueue = DispatchQueue.global(qos: .userInitiated)
+
     // MARK: - Initializers
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data
@@ -156,7 +160,7 @@ public class DataCapturingService: NSObject {
             fatalError("DataCapturingService.start(): Invalid state! You tried to start the data capturing service in paused state! Please call resume() and stop() before starting the service!")
         }
 
-        let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
+        let measurement = persistenceLayer.createMeasurement2(at: currentTimeInMillisSince1970())
         self.currentMeasurement = measurement
 
         startCapturing(withHandler:handler)
@@ -216,7 +220,7 @@ public class DataCapturingService: NSObject {
                 let syncFinishedHandler: ((Int64, ServerConnectionError?)->Void) = {[unowned self] measurementIdentifier, error in
                     // Only go on if there was no error
                     guard error==nil else {
-                        os_log("Unable to upload data for measurement: %@!", measurementIdentifier)
+                        os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurementIdentifier))
                         return
                     }
                     self.cleanDataAfterSync(for: measurementIdentifier) {
@@ -262,27 +266,82 @@ public class DataCapturingService: NSObject {
      - Parameter measurement: The `Measurement` to delete. You can get this for example via
         `loadMeasurement(index:)`.
     */
-    public func delete(measurement: MeasurementMO, andCallWhenFinished finishedHandler: @escaping () -> Void) {
+    public func delete(measurement: MeasurementEntity, andCallWhenFinished finishedHandler: @escaping () -> Void) {
         persistenceLayer.privatelyDelete(measurement: measurement.identifier, onFinishedCall: finishedHandler)
     }
 
     /// Provides the amount of `Measurements` currently cached by the system.
     public func countMeasurements() -> Int {
-        return persistenceLayer.countMeasurements()
+        var ret: Int?
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        persistenceLayer.privatelyCountMeasurements { count in
+            ret = count
+            syncGroup.leave()
+        }
+        syncGroup.wait(timeout: DispatchTime.now() + .seconds(2))
+        return ret!
     }
 
     /**
      Provides the cached `Measurement` with the provided `identifier`.
      
      - Parameter identifier: A measurement identifier to load the measurement for.
+     - Returns:
      */
-    public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementMO? {
-        return persistenceLayer.loadMeasurement(withIdentifier: identifier)
+    public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementEntity? {
+        var ret: MeasurementEntity?
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        persistenceLayer.privatelyLoad(measurementIdentifiedBy: identifier) { measurement in
+            ret = MeasurementEntity(identifier: measurement.identifier)
+            syncGroup.leave()
+        }
+        syncGroup.wait(timeout: DispatchTime.now() + .seconds(2))
+        return ret
     }
 
     /// Loads all currently cached `Measurement` instances.
-    public func loadMeasurements() -> [MeasurementMO] {
-        return persistenceLayer.loadMeasurements()
+    public func loadMeasurements() -> [MeasurementEntity] {
+        var ret = [MeasurementEntity]()
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        persistenceLayer.privatelyLoadMeasurements { measurements in
+            measurements.forEach({ (measurement) in
+                ret.append(MeasurementEntity(identifier: measurement.identifier))
+            })
+            syncGroup.leave()
+        }
+        syncGroup.wait(timeout: DispatchTime.now() + .seconds(2))
+        return ret
+    }
+
+    public func loadGeoLocations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([GeoLocation]) -> Void) {
+        persistenceLayer.privatelyLoad(measurementIdentifiedBy: measurement.identifier) { measurement in
+            guard let locations = measurement.geoLocations else {
+                fatalError("DataCapturingService.loadGeoLocations(belongingTo: \(measurement.identifier)): Unable to get collection of geo locations.")
+            }
+
+            var ret = [GeoLocation]()
+            locations.forEach({ (location) in
+                ret.append(GeoLocation(latitude: location.lat, longitude: location.lon, accuracy: location.accuracy, speed: location.speed, timestamp: location.timestamp))
+            })
+            handler(ret)
+        }
+    }
+
+    public func loadAccelerations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([Acceleration]) -> Void) {
+        persistenceLayer.privatelyLoad(measurementIdentifiedBy: measurement.identifier) { (measurement) in
+            guard let accelerations = measurement.accelerations else {
+                fatalError("DataCapturingService.loadAccelerations(belongingTo: \(measurement.identifier)): Unable to get collection of accelerations")
+            }
+
+            var ret = [Acceleration]()
+            accelerations.forEach({ (acceleration) in
+                ret.append(Acceleration(timestamp: acceleration.timestamp, x: acceleration.ax, y: acceleration.ay, z: acceleration.az))
+            })
+            handler(ret)
+        }
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
@@ -297,9 +356,6 @@ public class DataCapturingService: NSObject {
 
     func startCapturing(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
         // Preconditions
-        guard let currentMeasurement = currentMeasurement else {
-            fatalError("DataCapturingService.startCapturing(): Trying to start data capturing without a measurement.")
-        }
         guard !isRunning else {
             os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: LOG, type: .info)
             return
@@ -309,20 +365,21 @@ public class DataCapturingService: NSObject {
         self.locationManager.delegate = self
         self.locationManager.startUpdatingLocation()
 
+        let queue = OperationQueue()
+        queue.qualityOfService = QualityOfService.userInitiated
+        queue.underlyingQueue = capturingQueue
         if motionManager.isAccelerometerAvailable {
-            motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { data, _ in
+            motionManager.startAccelerometerUpdates(to: queue) { [unowned self] data, _ in
                 guard let myData = data else {
                     fatalError("DataCapturingService.start(): No Accelerometer data available!")
                 }
 
                 let accValues = myData.acceleration
-                let acc = self.persistenceLayer.createAcceleration(
+                let acc = Acceleration(timestamp: self.currentTimeInMillisSince1970(),
                     x: accValues.x,
                     y: accValues.y,
-                    z: accValues.z,
-                    at: self.currentTimeInMillisSince1970())
-                // TODO: Make a cache with accelerations
-                currentMeasurement.addToAccelerations(acc)
+                    z: accValues.z)
+                self.accelerationsCache.append(acc)
             }
         }
 
@@ -368,16 +425,20 @@ extension DataCapturingService: CLLocationManagerDelegate {
         guard let measurement = currentMeasurement else {
             fatalError("No current measurement to save the location to! Data capturing impossible.")
         }
-        let geoLocation = persistenceLayer.createGeoLocation(
+        let geoLocation = GeoLocation(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
             accuracy: location.horizontalAccuracy,
             speed: location.speed,
-            at: convertToUtcTimestamp(date: location.timestamp))
-        // TODO: Write to cache
-        measurement.addToGeoLocations(geoLocation)
-        notify(of: .geoLocationAcquired(position: geoLocation))
-
-        persistenceLayer.save()
+            timestamp: convertToUtcTimestamp(date: location.timestamp))
+        
+        persistenceLayer.privatelySave(toMeasurementIdentifiedBy: measurement, location: geoLocation, accelerations: accelerationsCache) { [unowned self] in
+            self.capturingQueue.async() {
+                self.accelerationsCache.removeAll()
+                DispatchQueue.main.async {
+                    self.notify(of: .geoLocationAcquired(position: geoLocation))
+                }
+            }
+        }
     }
 }
