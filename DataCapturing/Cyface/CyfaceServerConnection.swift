@@ -74,19 +74,19 @@ public class CyfaceServerConnection: ServerConnection {
         }
     }
 
-    public func sync(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (Int64, ServerConnectionError?) -> Void) {
-        debugPrint("Trying to synchronize measurement \(identifier)")
+    public func sync(measurement: MeasurementEntity, onFinishedCall handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
+        debugPrint("Trying to synchronize measurement \(measurement.identifier)")
         guard isAuthenticated() else {
-            fatalError("CyfaceServerConnection.sync(measurementIdentifiedBy: \(identifier)): Unable to sync with not authenticated client.")
+            fatalError("CyfaceServerConnection.sync(measurementIdentifiedBy: \(measurement.identifier)): Unable to sync with not authenticated client.")
         }
 
-        let measurementIdentifier = identifier
-        installationIdentifier { error, identifier in
+        let measurementIdentifier = measurement.identifier
+        installationIdentifier { error, deviceIdentifier in
             if let error = error {
-                handler(measurementIdentifier, error)
+                handler(measurement, error)
                 return
-            } else if let identifier = identifier {
-                self.transmit(measurementIdentifiedBy: measurementIdentifier, forDevice: identifier, onFinish: handler)
+            } else if let identifier = deviceIdentifier {
+                self.transmit(measurement: measurement, forDevice: identifier, onFinish: handler)
             } else {
                 fatalError("CyfaceServerConnection.sync(measurement: \(measurementIdentifier)): Neither identifier nor error information available.")
             }
@@ -101,28 +101,27 @@ public class CyfaceServerConnection: ServerConnection {
         return apiURL
     }
 
-    private func transmit(measurementIdentifiedBy identifier: Int64, forDevice deviceIdentifier: String, onFinish handler: @escaping (Int64, ServerConnectionError?) -> Void) {
+    private func transmit(measurement: MeasurementEntity, forDevice deviceIdentifier: String, onFinish handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
 
         var request = URLRequest(url: apiURL.appendingPathComponent("measurements"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(jwtBearer, forHTTPHeaderField: "Authorization")
 
-        let chunks = self.makeUploadChunks(fromMeasurementIdentifiedBy: identifier, forInstallation: deviceIdentifier)
-        for chunk in chunks {
+        makeUploadChunks(fromMeasurement: measurement, forInstallation: deviceIdentifier) { chunk in
             guard let jsonChunk = try? JSONSerialization.data(withJSONObject: chunk, options: .sortedKeys) else {
-                fatalError("ServerConnection.transmit(measurement: \(identifier), forDevice: \(deviceIdentifier)): Invalid measurement format.")
+                fatalError("ServerConnection.transmit(measurement: \(measurement.identifier), forDevice: \(deviceIdentifier)): Invalid measurement format.")
             }
 
             let submissionTask = self.apiSession.uploadTask(with: request, from: jsonChunk) { _, response, error in
                 if let error = error {
-                    handler(identifier, ServerConnectionError(
+                    handler(measurement, ServerConnectionError(
                         title: "Data Transmission Error",
                         description: "Error while transmitting data to the server at \(self.apiURL)! Error was: \(error)"))
                     return
                 }
                 guard let response = response as? HTTPURLResponse else {
-                    handler(identifier, ServerConnectionError(
+                    handler(measurement, ServerConnectionError(
                         title: "Data Transmission Error",
                         description: "Received erroneous response from \(String(describing: request.url))!"))
                     return
@@ -130,55 +129,54 @@ public class CyfaceServerConnection: ServerConnection {
 
                 let statusCode = response.statusCode
                 guard statusCode == 201 else {
-                    handler(identifier, ServerConnectionError(
+                    handler(measurement, ServerConnectionError(
                         title: "Invalid Status Code Error",
                         description: "Invalid status code \(statusCode) received from server at \(String(describing: request.url))!"))
                     return
                 }
 
-                handler(identifier, nil)
+                handler(measurement, nil)
             }
-
             submissionTask.resume()
         }
     }
 
     private func makeUploadChunks(
-        fromMeasurementIdentifiedBy measurementIdentifier: Int64,
-        forInstallation installationIdentifier: String) -> [[String: Any]] {
+        fromMeasurement measurement: MeasurementEntity,
+        forInstallation installationIdentifier: String, onChunkFinishedCall handler: @escaping ([String: Any]) -> Void) {
 
-        guard let measurement = persistenceLayer.loadMeasurement(withIdentifier: measurementIdentifier) else {
-            fatalError("CyfaceServerConnection.makeUploadChunks(fromMeasurementIdentifiedBy: \(measurementIdentifier), forInstallation \(installationIdentifier)): Unable to load measurement.")
-        }
-        var geoLocations = [[String: String]]()
-        if let measurementLocations = measurement.geoLocations {
-            for location in measurementLocations {
-                geoLocations.append([
-                    "lat": String(location.lat),
-                    "lon": String(location.lon),
-                    "speed": String(location.speed),
-                    "timestamp": String(location.timestamp),
-                    "accuracy": String(Int(location.accuracy))])
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
+
+            var geoLocations = [[String: String]]()
+            if let measurementLocations = measurement.geoLocations {
+                for location in measurementLocations {
+                    geoLocations.append([
+                        "lat": String(location.lat),
+                        "lon": String(location.lon),
+                        "speed": String(location.speed),
+                        "timestamp": String(location.timestamp),
+                        "accuracy": String(Int(location.accuracy))])
+                }
             }
-        }
 
-        var accelerationPoints = [[String: String]]()
-        if let accelerations = measurement.accelerations {
-            for acceleration in accelerations {
-                accelerationPoints.append([
-                    "ax": String(acceleration.ax),
-                    "ay": String(acceleration.ay),
-                    "az": String(acceleration.az),
-                    "timestamp": String(acceleration.timestamp)])
+            var accelerationPoints = [[String: String]]()
+            if let accelerations = measurement.accelerations {
+                for acceleration in accelerations {
+                    accelerationPoints.append([
+                        "ax": String(acceleration.ax),
+                        "ay": String(acceleration.ay),
+                        "az": String(acceleration.az),
+                        "timestamp": String(acceleration.timestamp)])
+                }
             }
-        }
 
-        return [[
-            "deviceId": measurementIdentifier,
-            "id": String(measurement.identifier),
-            "vehicle": "BICYCLE",
-            "gpsPoints": geoLocations,
-            "accelerationPoints": accelerationPoints]]
+            handler([
+                "deviceId": installationIdentifier,
+                "id": String(measurement.identifier),
+                "vehicle": "BICYCLE",
+                "gpsPoints": geoLocations,
+                "accelerationPoints": accelerationPoints])
+        }
     }
 
     /**

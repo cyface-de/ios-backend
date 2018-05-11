@@ -16,14 +16,9 @@ import Alamofire
  The transmission format is compressed Cyface binary format.
  The cyface binary format is created by a `CyfaceBinaryFormatSerializer`.
 
- - Author:
- Klemens Muthmann
-
- - Version:
- 1.0.0
-
- - Since:
- 1.0.0
+ - Author: Klemens Muthmann
+ - Version: 2.0.0
+ - Since: 1.0.0
  */
 public class MovebisServerConnection: ServerConnection {
     /// The current JWT authentication token to use with the Movebis server.
@@ -38,7 +33,7 @@ public class MovebisServerConnection: ServerConnection {
      */
     private let sessionManager: SessionManager
     private let apiURL: URL
-    private var onFinishHandler: ((Int64, ServerConnectionError?) -> Void)?
+    private var onFinishHandler: ((MeasurementEntity, ServerConnectionError?) -> Void)?
     private let persistenceLayer: PersistenceLayer
     /**
      A name that tells the system which kind of iOS device this is.
@@ -78,12 +73,12 @@ public class MovebisServerConnection: ServerConnection {
         jwtAuthenticationToken = nil
     }
 
-    public func sync(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (Int64, ServerConnectionError?) -> Void) {
+    public func sync(measurement: MeasurementEntity, onFinishedCall handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
         onFinishHandler = handler
 
         guard isAuthenticated(), let jwtAuthenticationToken = jwtAuthenticationToken else {
-            handler(identifier, ServerConnectionError(title: "Not Authenticated", description: "MovebisServerConnection.sync(measurement:\(identifier)): Unable to sync. No authentication information provided."))
+            handler(measurement, ServerConnectionError(title: "Not Authenticated", description: "MovebisServerConnection.sync(measurement:\(measurement.identifier)): Unable to sync. No authentication information provided."))
             return
         }
 
@@ -92,8 +87,8 @@ public class MovebisServerConnection: ServerConnection {
             "Content-type": "multipart/form-data"
         ]
 
-        sessionManager.upload(multipartFormData: {[unowned self] data in self.create(request: data, forMeasurementIdentifiedBy: identifier)}, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers) { [unowned self] error in
-            self.onEncodingComplete(forMeasurementIdentifiedBy: identifier, withResult: error)
+        sessionManager.upload(multipartFormData: {[unowned self] data in self.create(request: data, forMeasurement: measurement)}, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers) { [unowned self] error in
+            self.onEncodingComplete(forMeasurement: measurement, withResult: error)
         }
     }
 
@@ -101,43 +96,43 @@ public class MovebisServerConnection: ServerConnection {
         return apiURL
     }
 
-    func create(request: MultipartFormData, forMeasurementIdentifiedBy identifier: Int64) {
+    func create(request: MultipartFormData, forMeasurement measurement: MeasurementEntity) {
         request.append(installationIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceId")
-        request.append(String(identifier).data(using: String.Encoding.utf8)!, withName: "measurementId")
+        request.append(String(measurement.identifier).data(using: String.Encoding.utf8)!, withName: "measurementId")
         request.append(modelIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceType:")
         request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
 
-        persistenceLayer.privatelyLoad(measurementIdentifiedBy: identifier) { [unowned self] measurement in
-        let payload = self.serializer.serializeCompressed(measurement)
-        request.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(identifier).cyf", mimeType: "application/octet-stream")
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { [unowned self] measurement in
+                let payload = self.serializer.serializeCompressed(measurement)
+                request.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
         }
     }
 
-    func onEncodingComplete(forMeasurementIdentifiedBy identifier: Int64, withResult result: SessionManager.MultipartFormDataEncodingResult) {
+    func onEncodingComplete(forMeasurement measurement: MeasurementEntity, withResult result: SessionManager.MultipartFormDataEncodingResult) {
         switch result {
         case .success(let upload, _, _):
             print("Successfully encoded upload \(upload)")
             upload.validate().responseString { response in
-                self.onResponseReady(forMeasurementIdentifiedBy: identifier, response)
+                self.onResponseReady(forMeasurement: measurement, response)
             }
         case .failure(let error):
             print("failure")
             if let handler = onFinishHandler {
-                handler(identifier, ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onEncodingComplete(\(result)): Unable to upload data \(error.localizedDescription)."))
+                handler(measurement, ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onEncodingComplete(\(result)): Unable to upload data \(error.localizedDescription)."))
             }
         }
     }
 
-    func onResponseReady(forMeasurementIdentifiedBy identifier: Int64, _ response: DataResponse<String>) {
+    func onResponseReady(forMeasurement measurement: MeasurementEntity, _ response: DataResponse<String>) {
         guard let handler = onFinishHandler else {
             return
         }
 
         switch response.result {
         case .failure(let error):
-            handler(identifier, ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onResponseReady(\(response)): Unable to upload data due to error: \(error)"))
+            handler(measurement, ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onResponseReady(\(response)): Unable to upload data due to error: \(error)"))
         case .success:
-            handler(identifier, nil)
+            handler(measurement, nil)
         }
     }
 }

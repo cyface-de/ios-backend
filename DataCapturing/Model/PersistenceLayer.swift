@@ -10,19 +10,19 @@ import Foundation
 import CoreData
 
 /**
+ An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and accelerations. Most functions are asynchronous and provide a handler to react when they are finished.
+
+ All entities have two representations. They are either represented as a subclass of `NSManagedObject` or as a custom entity class. The former are `MeasurementMO`, `AccelerationPointMO` and `GeoLocationMO`, while the latter are `MeasurementEntity`, `Acceleration` and `GeoLocation`. You should always try to the second costum classes, because the subclasses of `NSManagedObject` are not thread safe and should never be used outside of the handler they are provided to as parameter.
+
  Read access is public while manipulation of the data stored is restricted to the framework.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
 
     // MARK: - Properties
-    /// The context to use for accessing CoreData.
-    private lazy var context: NSManagedObjectContext = {
-        return container.viewContext
-    }()
 
     /// Container for the persistent object model.
     private lazy var container: NSPersistentContainer = {
@@ -85,20 +85,6 @@ public class PersistenceLayer {
         }
     }
 
-    private lazy var backgroundContext: NSManagedObjectContext = {
-        return container.newBackgroundContext()
-    }()
-
-    private lazy var mainThreadContext: NSManagedObjectContext = {
-        var mainQueueContext =
-            NSManagedObjectContext(concurrencyType:
-                .mainQueueConcurrencyType)
-        mainQueueContext.parent = backgroundContext
-        mainQueueContext.mergePolicy =
-        NSMergeByPropertyObjectTrumpMergePolicy
-        return mainQueueContext
-    }()
-
     // MARK: - Initializers
 
     /// Public constructor usable by external callers.
@@ -111,25 +97,9 @@ public class PersistenceLayer {
 
      - Parameter timestamp: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
      */
-    @available(*, deprecated)
-    func createMeasurement(at timestamp: Int64) -> Int64 {
+    public func createMeasurement(at timestamp: Int64) -> MeasurementEntity {
         let identifier = nextIdentifier
-        if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
-            let measurement = MeasurementMO(entity: description, insertInto: context)
-            measurement.timestamp = timestamp
-            measurement.identifier = identifier
-            measurement.synchronized = false
-            
-            save()
-            return identifier
-        } else {
-            fatalError("Unable to create measurement!")
-        }
-    }
-
-    public func createMeasurement2(at timestamp: Int64) -> Int64 {
-        let identifier = nextIdentifier
-        var ret: Int64?
+        var ret: MeasurementEntity?
         let syncGroup = DispatchGroup()
         syncGroup.enter()
         container.performBackgroundTask { (context) in
@@ -137,129 +107,98 @@ public class PersistenceLayer {
                 let measurement = MeasurementMO(entity: description, insertInto: context)
                 measurement.timestamp = timestamp
                 measurement.identifier = identifier
-                ret = measurement.identifier
+                measurement.synchronized = false
+                ret = MeasurementEntity(identifier: measurement.identifier)
             } else {
-                fatalError("Unable to create measurement!")
+                fatalError("PersistenceLayer.createMeasurement(at: \(timestamp)): Unable to create measurement!")
             }
 
             context.saveRecursively()
             syncGroup.leave()
         }
 
-        syncGroup.wait(timeout: DispatchTime.now() + .seconds(2))
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("PersistenceLayer.createMeasurement(at: \(timestamp)): Unable to create measurement!")
+        }
         return ret!
     }
 
     /**
-     Creates a new acceleration in the current data store.
+     Deletes the measurement from the data storage on a background thread. Calls the provided handler when deletion has been completed.
 
      - Parameters:
-     - x: The acceleration in device x direction
-     - y: The acceleration in device y direction
-     - z: The acceleration in device z direction
-     - at: Timestamp in milliseconds since the first of january 1970 (epoch).
-     - Returns: A new acceleration object, that mirrors the current state of that acceleration in the database.
-     */
-    @available(*, deprecated)
-    func createAcceleration(x ax: Double, y ay: Double, z az: Double, at timestamp: Int64) -> AccelerationPointMO {
-        guard let acceleration = NSEntityDescription.insertNewObject(forEntityName: "Acceleration", into: context) as? AccelerationPointMO else {
-            fatalError("Unable to create new acceleration in CoreData!")
-        }
-        acceleration.ax = ax
-        acceleration.ay = ay
-        acceleration.az = az
-        acceleration.timestamp = timestamp
-
-        return acceleration
-    }
-
-    /**
-     Creates a new geo location in the current database.
-
-     - Parameters:
-     - latitude: The geographic latitude of the newly created geo location.
-     - longitude: The geographic longitude of the newly created geo location.
-     - accuracy: The accuracy of the captured geo location in meters.
-     - speed: The speed of the capturing device at the moment of capturing the geo location.
-     - at: The timestamp at which the geo location has been captured in milliseconds since the first of january 1970.
-     - Returns: The newly created geo location as it is stored in the data store.
-     */
-    @available(*, deprecated)
-    func createGeoLocation(latitude lat: Double, longitude lon: Double, accuracy acc: Double, speed spd: Double, at timestamp: Int64) -> GeoLocationMO {
-        guard let location = NSEntityDescription.insertNewObject(forEntityName: "GeoLocation", into: context) as? GeoLocationMO else {
-            fatalError("Unable to create new location in CoreData!")
-        }
-
-        location.accuracy = acc
-        location.lat = lat
-        location.lon = lon
-        location.speed = spd
-        location.timestamp = timestamp
-
-        return location
-    }
-
-    /// Deletes measurements from the persistent data store.
-    @available(*, deprecated)
-    func deleteMeasurements() {
-        loadMeasurements().forEach { measurement in
-            context.delete(measurement)
-        }
-        save()
-    }
-
-    /**
-     Deletes one specific measurement from the persistent data store.
-
-     - Parameter measurement: The `MeasurementMO` to delete from the database.
-     */
-    @available(*, deprecated)
-    func delete(measurement value: MeasurementMO) {
-        if let accelerations = value.accelerations {
-            for acceleration in accelerations {
-                value.removeFromAccelerations(acceleration)
-                context.delete(acceleration)
-            }
-        }
-        if let locations = value.geoLocations {
-            for location in locations {
-                value.removeFromGeoLocations(location)
-                context.delete(location)
-            }
-        }
-        context.delete(value)
-
-        save()
-    }
-
-    func privatelyDelete(measurement identifier: Int64, onFinishedCall handler: @escaping (() -> Void)) {
+        - measurement: The measurement to delete from the data storage.
+        - onFinishedCall: The handler to call, when deletion has completed.
+    */
+    func delete(measurement: MeasurementEntity, onFinishedCall handler: @escaping (() -> Void)) {
         container.performBackgroundTask { [unowned self] context in
-            let measurement = self.load(identifier, from: context)
+            let measurement = self.load(measurementIdentifiedBy: measurement.identifier, from: context)
             context.delete(measurement)
             context.saveRecursively()
             handler()
         }
     }
 
-    /**
-     Removes all accelerations, rotations and directions from a measurement. This can be used to save space after successful data synchronization, if you would like to keep the geo location tracks.
-
-     - Parameter measurement: The `MeasurementMO` to clean of all sensor data.
-     */
-    @available(*, deprecated)
-    func clean(measurement: MeasurementMO) {
-        if let accelerations = measurement.accelerations {
-            for acceleration in accelerations {
-                measurement.removeFromAccelerations(acceleration)
-                context.delete(acceleration)
-            }
+    func syncDelete(measurement: MeasurementEntity) {
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        delete(measurement: measurement) {
+            syncGroup.leave()
         }
-        save()
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("PersistenceLayer.syncDelete(measurement: \(measurement.identifier)): Unable to delete measurements from data storage!")
+        }
     }
 
-    func privatelyClean(measurementIdentifiedBy identifier: Int64, whenFinishedCall finishedHandler: @escaping () -> Void) {
+    /**
+     Deletes everything from the data storage.
+
+     - Parameter onFinishedCall: A handler called after deletion is complete.
+    */
+    func delete(onFinishedCall handler: @escaping () -> Void) {
         container.performBackgroundTask { [unowned self] (context) in
-            let measurement = self.load(identifier, from: context)
+            let syncGroup = DispatchGroup()
+            syncGroup.enter()
+            self.loadMeasurements(onFinishedCall: { (measurements) in
+                measurements.forEach({ (measurement) in
+                    debugPrint("Deleting measurement: \(measurement.identifier).")
+                    do {
+                        let object = try context.existingObject(with: measurement.objectID)
+                        context.delete(object)
+                    } catch {
+                        fatalError("PersistenceLayer.delete(): Unable to delete measurements!")
+                    }
+                })
+                syncGroup.leave()
+            })
+            guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+                fatalError("PersistenceLayer.delete(): Asynchronous delete was not successful.")
+            }
+            context.saveRecursively()
+            handler()
+        }
+    }
+
+    func syncDelete() {
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        delete {
+            syncGroup.leave()
+        }
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("PersistenceLayer.syncDelete(): Unable to delete measurements from data storage!")
+        }
+    }
+
+    /**
+     Strips the provided measurement of all accelerations.
+
+     - Parameters:
+        - measurement: The measurement to strip of accelerations
+    */
+    func clean(measurement: MeasurementEntity, whenFinishedCall finishedHandler: @escaping () -> Void) {
+        container.performBackgroundTask { [unowned self] (context) in
+            let measurement = self.load(measurementIdentifiedBy: measurement.identifier, from: context)
             measurement.synchronized = true
             if let accelerations = measurement.accelerations {
                 for acceleration in accelerations {
@@ -273,57 +212,97 @@ public class PersistenceLayer {
         }
     }
 
-    func privatelySave(toMeasurementIdentifiedBy identifier: Int64, location: GeoLocation, accelerations: [Acceleration], onFinished handler: @escaping () -> Void) {
+    /**
+     Stores the provided `location` and `accelerations` to the provided measurement.
+
+     - Parameters:
+        - measurement: The measurement to store the `location` and `accelerations` to.
+        - location: An array of `GeoLocation` instances to store.
+        - accelerations: An array of `Acceleration` instances to store.
+    */
+    func save(toMeasurement measurement: MeasurementEntity, location: GeoLocation, accelerations: [Acceleration], onFinished handler: @escaping () -> Void) {
         container.performBackgroundTask { [unowned self] (context) in
-            let measurement = self.load(identifier, from: context)
-            let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
-            dbLocation.lat = location.latitude
-            dbLocation.lon = location.longitude
-            dbLocation.speed = location.speed
-            dbLocation.timestamp = location.timestamp
-            dbLocation.accuracy = location.accuracy
-            measurement.addToGeoLocations(dbLocation)
+                let measurement = self.load(measurementIdentifiedBy: measurement.identifier, from: context)
 
-            accelerations.forEach { acceleration in
-                let dbAcceleration = AccelerationPointMO.init(entity: AccelerationPointMO.entity(), insertInto: context)
-                dbAcceleration.ax = acceleration.x
-                dbAcceleration.ay = acceleration.y
-                dbAcceleration.az = acceleration.z
-                dbAcceleration.timestamp = acceleration.timestamp
-                measurement.addToAccelerations(dbAcceleration)
+                let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
+                dbLocation.lat = location.latitude
+                dbLocation.lon = location.longitude
+                dbLocation.speed = location.speed
+                dbLocation.timestamp = location.timestamp
+                dbLocation.accuracy = location.accuracy
+                measurement.addToGeoLocations(dbLocation)
+
+                accelerations.forEach { acceleration in
+                    let dbAcceleration = AccelerationPointMO.init(entity: AccelerationPointMO.entity(), insertInto: context)
+                    dbAcceleration.ax = acceleration.x
+                    dbAcceleration.ay = acceleration.y
+                    dbAcceleration.az = acceleration.z
+                    dbAcceleration.timestamp = acceleration.timestamp
+                    measurement.addToAccelerations(dbAcceleration)
+                }
+
+                context.saveRecursively()
+                handler()
             }
+    }
 
-            context.saveRecursively()
-            handler()
+    func syncSave(toMeasurement measurement: MeasurementEntity, location: GeoLocation, accelerations: [Acceleration]) {
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        save(toMeasurement: measurement, location: location, accelerations: accelerations) {
+            syncGroup.leave()
+        }
+
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError()
         }
     }
 
     // MARK: - Database Read Only Methods
+    /**
+     Internal load method, loading the provided `measurement` on the provided `context`.
 
-    private func load(_ measurementIdentifier: Int64, from context: NSManagedObjectContext) -> MeasurementMO {
+     - Parameters:
+        - measurement: The `measurement` to load.
+        - from: The CoreData `context` to load the `measurement` from.
+    */
+    private func load(measurementIdentifiedBy identifier: Int64, from context: NSManagedObjectContext) -> MeasurementMO {
         let fetchRequest: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         // The following needs to use an Objective-C number. That is why `measurementIdentifier` is wrapped in `NSNumber`
-        fetchRequest.predicate = NSPredicate(format: "identifier==%@", NSNumber(value: measurementIdentifier))
+        fetchRequest.predicate = NSPredicate(format: "identifier==%@", NSNumber(value: identifier))
 
         if let results = try? context.fetch(fetchRequest) {
             if results.count == 1 {
                 return results[0]
             } else {
-                fatalError("PersistenceLayer.load(measurementIdentifier: \(measurementIdentifier)): Wrong count of results: \(results.count).")
+                fatalError("PersistenceLayer.load(measurementIdentifier: \(identifier)): Wrong count of results: \(results.count).")
             }
         } else {
-            fatalError("PersistenceLayer.load(measurementIdentifier: \(measurementIdentifier)): Unable to fetch any results.")
+            fatalError("PersistenceLayer.load(measurementIdentifier: \(identifier)): Unable to fetch any results.")
         }
     }
 
-    public func privatelyLoad(measurementIdentifiedBy identifier: Int64, andCallWhenFinished handler: @escaping (MeasurementMO) -> Void) {
+    /**
+     Loads the data belonging to the provided `measurement` in the background an calls `onFinishedCall` with the data storage representation of that `measurement`. Using that represenation is not thread safe. Do not use it outside of the handler.
+
+     - Parameters:
+       - measurement: The `measurement` to load.
+       - onFinishedCall: The handler to call when loading the `measurement` has finished
+    */
+    public func load(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (MeasurementMO) -> Void) {
         container.performBackgroundTask { [unowned self] (context) in
-            let measurement = self.load(identifier, from: context)
+            let measurement = self.load(measurementIdentifiedBy: identifier, from: context)
             handler(measurement)
         }
     }
 
-    public func privatelyLoadMeasurements(onFinished handler: @escaping ([MeasurementMO]) -> Void) {
+    /**
+     Loads all the measurements from the data storage. Runs asynchronously in the background and calls a handler after loading has been completed. You should never use the objects in the provided array outside of the handler, since they are not thread safe and lose all data if transfered outside.
+
+     - Parameters:
+        - handler: The handler to call after loading the measurements has finished.
+    */
+    public func loadMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]) -> Void) {
         container.performBackgroundTask { (context) in
             let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
             do {
@@ -335,42 +314,13 @@ public class PersistenceLayer {
         }
     }
 
-    /**
-     Loads all measurements from the data store.
-
-     - Returns: The currently stored measurements from the data store.
-     */
-    @available(*, deprecated)
-    public func loadMeasurements() -> [MeasurementMO] {
-        let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-        do {
-            let fetchedMeasurements = try context.fetch(request)
-            for measurement in fetchedMeasurements {
-                debugPrint("PersistenceLayer.loadMeasurements(): Loaded measurement with identifier \(measurement.identifier).")
-            }
-            return fetchedMeasurements
-        } catch {
-            fatalError("Unable to load measurements from data store: \(error).")
-        }
-    }
 
     /**
-     Counts the amount of measurements currently stored in the data store.
+     Counts the amount of measurements currently stored in the data store, asynchronously in the background.
 
-     - Returns: The count of measurements in the data store.
+     - Parameter handler: The handler called after counting has finished. This handler receives the result as a parameter.
      */
-    @available(*, deprecated)
-    public func countMeasurements() -> Int {
-        let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-        do {
-            let count = try context.count(for: request)
-            return count
-        } catch {
-            fatalError("Unable to load measurements from data store: \(error).")
-        }
-    }
-
-    public func privatelyCountMeasurements(onFinished handler: @escaping (Int) -> Void) {
+    public func countMeasurements(onFinishedCall handler: @escaping (Int) -> Void) {
         container.performBackgroundTask { (context) in
             let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
             let count = try? context.count(for: request)
@@ -378,73 +328,29 @@ public class PersistenceLayer {
         }
     }
 
-    /**
-     Loads a specific measurement from the data store.
-
-     - Parameter identifier: The database wide unique identifier of the measurement to load.
-     */
-    @available(*, deprecated)
-    public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementMO? {
-
-        for measurement in loadMeasurements() where measurement.identifier==identifier {
-            return measurement
+    public func syncCountMeasurements() -> Int {
+        let syncGroup = DispatchGroup()
+        var ret: Int?
+        syncGroup.enter()
+        countMeasurements { count in
+            ret = count
+            syncGroup.leave()
         }
-        return nil
-        /*
-         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-
-         debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Preparing to load measurement with identifier \(identifier)")
-         request.predicate = NSPredicate(format: "%K = %@", "identifier", String(identifier))
-         do {
-         debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Loading measurement with identifier \(identifier).")
-         let fetchResult = try context.fetch(request)
-         debugPrint("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Got \(fetchResult.count) items")
-         if fetchResult.count >= 1 {
-         fatalError("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Identifier occured multiple times")
-         } else {
-         let result = fetchResult.first
-         return result
-         }
-         } catch {
-         fatalError("PersistenceLayer.loadMeasurement(withIdentifier: \(identifier)): Unable to load measurements from data store: \(error)")
-         }
-         return nil*/
-    }
-
-    // MARK: - Support Methods
-
-    /// Commits all stacked changes (updates, deletes, inserts).
-    @available(*, deprecated)
-    func save() {
-        do {
-            if context.hasChanges {
-                try context.save()
-            }
-        } catch {
-            fatalError("Unable to save to persistence context: \(error)!")
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("PersistenceLayer.syncDelete(): Unable to delete measurements from data storage!")
         }
-    }
-
-    func save(_ privateContext: NSManagedObjectContext) {
-        do {
-            if privateContext.hasChanges {
-                try privateContext.save()
-            }
-        } catch {
-            fatalError("Unable to save private persistence context: \(error)!")
-        }
-        save()
-    }
-
-    func newPrivateQueueContext() -> NSManagedObjectContext {
-        let privateContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-        privateContext.mergePolicy = NSMergeByPropertyStoreTrumpMergePolicy
-        privateContext.parent = mainThreadContext
-        return privateContext
+        return ret!
     }
 }
 
+/**
+ Adds functions to save a context and all parent contexts up to the `NSPersistentContainer`.
+ */
 extension NSManagedObjectContext {
+
+    /**
+     Saves this context and all parent contexts if there are changes.
+    */
     func saveRecursively() {
         performAndWait {
             if self.hasChanges {
@@ -453,6 +359,9 @@ extension NSManagedObjectContext {
         }
     }
 
+    /**
+     Saves this context and its parent.
+    */
     func saveThisAndParentContexts() {
         do {
             try save()

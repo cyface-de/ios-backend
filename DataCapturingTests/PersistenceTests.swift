@@ -12,8 +12,7 @@ import XCTest
 class PersistenceTests: XCTestCase {
 
     var oocut: PersistenceLayer?
-    var fixture: MeasurementMO?
-    var fixtureIdentifier: Int64?
+    var fixture: MeasurementEntity?
     
     override func setUp() {
         super.setUp()
@@ -21,23 +20,15 @@ class PersistenceTests: XCTestCase {
         let oocut = PersistenceLayer()
 
         let fixture = oocut.createMeasurement(at: 10_000)
-        let fixture2 = oocut.createMeasurement2(at: 10_000)
-        fixtureIdentifier = fixture2.identifier
-        /*fixture.synchronized = false
-        fixture.addToGeoLocations(oocut.createGeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, at: 10_000))
-        fixture.addToGeoLocations(oocut.createGeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, at: 10_001))
+        oocut.syncSave(toMeasurement: fixture, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000), accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0)])
+        oocut.syncSave(toMeasurement: fixture, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_001), accelerations: [Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)])
 
-        fixture.addToAccelerations(oocut.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_000))
-        fixture.addToAccelerations(oocut.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_001))
-        fixture.addToAccelerations(oocut.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_002))*/
-
-        self.oocut = oocut
-        self.fixture = fixture
+            self.oocut = oocut
+            self.fixture = fixture
     }
     
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        oocut?.deleteMeasurements()
+        oocut?.syncDelete()
         oocut = nil
         fixture = nil
         super.tearDown()
@@ -45,26 +36,22 @@ class PersistenceTests: XCTestCase {
 
     /**
      Tests if new measurements are created with the correct identifier and if identifiers are increased for each new measurement. This should even work if one measurement is deleted in between.
-    */
+     */
     func testCreateMeasurement() {
         guard let secondMeasurement = oocut?.createMeasurement(at: 10_001) else {
-            XCTFail()
-            return
+            fatalError()
         }
         guard let firstMeasurement = fixture else {
-            XCTFail()
-            return
+            fatalError()
         }
 
-        let testMeasurement = oocut?.loadMeasurement(withIdentifier: fixtureIdentifier!)
         let secondMeasurementIdentifier = secondMeasurement.identifier
         XCTAssertEqual(secondMeasurementIdentifier, firstMeasurement.identifier+1)
 
-        oocut?.delete(measurement: secondMeasurement)
+        oocut!.syncDelete(measurement: secondMeasurement)
 
         guard let thirdMeasurement = oocut?.createMeasurement(at: 10_002) else {
-            XCTFail()
-            return
+            fatalError()
         }
 
         XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
@@ -81,31 +68,66 @@ class PersistenceTests: XCTestCase {
             return
         }
 
-        XCTAssertEqual(measurement.accelerations?.count, 3)
-        XCTAssertEqual(measurement.geoLocations?.count, 2)
+        var accelerationCount: Int?
+        var geoLocationCount: Int?
 
-        oocut.clean(measurement: measurement)
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        oocut.load(measurementIdentifiedBy: measurement.identifier) { (measurementMo) in
+            accelerationCount = measurementMo.accelerations!.count
+            geoLocationCount = measurementMo.geoLocations!.count
+            syncGroup.leave()
+        }
 
-        let loadedMeasurement = oocut.loadMeasurement(withIdentifier: measurement.identifier)
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError()
+        }
 
-        XCTAssertTrue((measurement.accelerations?.isEmpty)!)
-        XCTAssertTrue((loadedMeasurement?.accelerations?.isEmpty)!)
+        XCTAssertEqual(accelerationCount!, 3)
+        XCTAssertEqual(geoLocationCount!, 2)
+
+        syncGroup.enter()
+        oocut.clean(measurement: measurement) {
+            syncGroup.leave()
+        }
+
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError()
+        }
+
+        var accelerationsIsEmpty = false
+        var geoLocationsIsEmpty = false
+
+        syncGroup.enter()
+        let loadedMeasurement = oocut.load(measurementIdentifiedBy: measurement.identifier) { measurementMo in
+            accelerationsIsEmpty = measurementMo.accelerations!.isEmpty
+            geoLocationsIsEmpty = measurementMo.geoLocations!.isEmpty
+            syncGroup.leave()
+        }
+
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError()
+        }
+
+        XCTAssertTrue(accelerationsIsEmpty, "Accelerations have not been empty after cleaning!")
+        XCTAssertTrue(!geoLocationsIsEmpty, "Geo Locations was empty after cleaning!")
     }
 
     func testDeleteMeasurement() {
         guard let fixture = fixture else {
-            XCTFail("Unable to unwrap test fixture!")
-            return
+            fatalError("PersistenceTests.testDeleteMeasurement(): Unable to unwrap test fixture!")
         }
 
         guard let oocut = oocut else {
-            XCTFail("Unable to unwrap object of class under test!")
-            return
+            fatalError("PersistenceTests.testDeleteMeasurement(): Unable to unwrap object of class under test!")
         }
-        XCTAssertEqual(oocut.countMeasurements(), 1)
 
-        oocut.delete(measurement: fixture)
+        let countOfMeasurementsBeforeDeletion = oocut.syncCountMeasurements()
+        XCTAssertEqual(countOfMeasurementsBeforeDeletion, 1, "There should be one measurement before deleting it! There have been \(countOfMeasurementsBeforeDeletion).")
 
-        XCTAssertEqual(oocut.countMeasurements(), 0)
+        oocut.syncDelete(measurement: fixture)
+
+        let countOfMeasurementsAfterDeletion = oocut.syncCountMeasurements()
+        XCTAssertEqual(countOfMeasurementsAfterDeletion, 0, "There should be no measurement after deleting it! There where \(countOfMeasurementsAfterDeletion).")
     }
 }

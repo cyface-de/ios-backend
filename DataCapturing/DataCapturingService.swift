@@ -44,7 +44,7 @@ public class DataCapturingService: NSObject {
     private var handler: ((DataCapturingEvent) -> Void)?
 
     /// The currently recorded `Measurement` or nil if there is no active recording.
-    private var currentMeasurement: Int64?
+    private var currentMeasurement: MeasurementEntity?
 
     /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
     private let motionManager: CMMotionManager
@@ -93,8 +93,10 @@ public class DataCapturingService: NSObject {
      */
     public var syncOnWiFiOnly: Bool
 
+    /// An in memory storage for accelerations, before they are written to disk.
     private var accelerationsCache = [Acceleration]()
 
+    /// The background queue used to capture data.
     private let capturingQueue = DispatchQueue.global(qos: .userInitiated)
 
     // MARK: - Initializers
@@ -130,10 +132,6 @@ public class DataCapturingService: NSObject {
         self.reachabilityManager = reachabilityManager
         super.init()
 
-        // TODO: Do we really need to call forceSync twice here and 6 lines below.
-        forceSync {[unowned self] in
-            self.notify(of: .synchronizationSuccessful)
-        }
         self.reachabilityManager.listener = {
             [unowned self] status in
             let reachable = self.syncOnWiFiOnly ?  status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) : status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) || status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi)
@@ -155,12 +153,12 @@ public class DataCapturingService: NSObject {
       - Parameter handler: A closure that is notified of important events during data capturing.
       - Return: The device wide unique identifier of the measurement created by this call to `start`.
      */
-    public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> Int64 {
+    public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> MeasurementEntity {
         guard !isPaused else {
             fatalError("DataCapturingService.start(): Invalid state! You tried to start the data capturing service in paused state! Please call resume() and stop() before starting the service!")
         }
 
-        let measurement = persistenceLayer.createMeasurement2(at: currentTimeInMillisSince1970())
+        let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
         self.currentMeasurement = measurement
 
         startCapturing(withHandler:handler)
@@ -195,6 +193,8 @@ public class DataCapturingService: NSObject {
 
     /**
      Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
+
+     - Parameter handler: The handler receiving `DataCapturingEvent` instances from the resumed capturing.
      */
     public func resume(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
         guard isPaused, !isRunning else {
@@ -212,22 +212,22 @@ public class DataCapturingService: NSObject {
      - Parameter onFinish: A handler called each time a synchronization has finished.
      */
     public func forceSync(onFinish handler: @escaping (() -> Void)) {
-        self.persistenceLayer.privatelyLoadMeasurements() { [unowned self] measurements in
+        self.persistenceLayer.loadMeasurements() { [unowned self] measurements in
         var countOfMeasurementsToSynchronize = measurements.count
         for measurement in measurements {
             if self.serverConnection.isAuthenticated(), self.reachabilityManager.isReachableOnEthernetOrWiFi {
 
-                let syncFinishedHandler: ((Int64, ServerConnectionError?)->Void) = {[unowned self] measurementIdentifier, error in
+                let synchronizationFinishedHandler: (MeasurementEntity, ServerConnectionError?) -> Void = { [unowned self] measurement, error in
                     // Only go on if there was no error
                     guard error==nil else {
-                        os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurementIdentifier))
+                        os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
                         return
                     }
-                    self.cleanDataAfterSync(for: measurementIdentifier) {
+                    self.cleanDataAfterSync(for: measurement) {
                         // Inform UI if interested
                         if let syncDelegate = self.syncDelegate {
                             DispatchQueue.main.async {
-                                syncDelegate(measurementIdentifier)
+                                syncDelegate(measurement.identifier)
                             }
                         }
 
@@ -243,7 +243,8 @@ public class DataCapturingService: NSObject {
                         }
                     }
                 }
-                self.serverConnection.sync(measurementIdentifiedBy: measurement.identifier, onFinishedCall: syncFinishedHandler)
+
+                self.serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier), onFinishedCall: synchronizationFinishedHandler)
             }
         }
         }
@@ -256,8 +257,8 @@ public class DataCapturingService: NSObject {
         - measurementIdentifier: The device wide unique identifier of the measurement to delete.
         - handler: Called as soon as deletion has finished.
     */
-    func cleanDataAfterSync(for measurementIdentifier: Int64, onFinished handler: @escaping (() -> Void)) {
-        persistenceLayer.privatelyDelete(measurement: measurementIdentifier, onFinishedCall: handler)
+    func cleanDataAfterSync(for measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void)) {
+        persistenceLayer.delete(measurement: measurement, onFinishedCall: handler)
     }
 
     /**
@@ -267,7 +268,7 @@ public class DataCapturingService: NSObject {
         `loadMeasurement(index:)`.
     */
     public func delete(measurement: MeasurementEntity, andCallWhenFinished finishedHandler: @escaping () -> Void) {
-        persistenceLayer.privatelyDelete(measurement: measurement.identifier, onFinishedCall: finishedHandler)
+        persistenceLayer.delete(measurement: measurement, onFinishedCall: finishedHandler)
     }
 
     /// Provides the amount of `Measurements` currently cached by the system.
@@ -275,7 +276,7 @@ public class DataCapturingService: NSObject {
         var ret: Int?
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        persistenceLayer.privatelyCountMeasurements { count in
+        persistenceLayer.countMeasurements { count in
             ret = count
             syncGroup.leave()
         }
@@ -284,16 +285,16 @@ public class DataCapturingService: NSObject {
     }
 
     /**
-     Provides the cached `Measurement` with the provided `identifier`.
+     Provides the cached `Measurement` with the provided `identifier`. This operation is synchronous.
      
      - Parameter identifier: A measurement identifier to load the measurement for.
-     - Returns:
+     - Returns: The loaded `MeasurementEntity`
      */
     public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementEntity? {
         var ret: MeasurementEntity?
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        persistenceLayer.privatelyLoad(measurementIdentifiedBy: identifier) { measurement in
+        persistenceLayer.load(measurementIdentifiedBy: identifier) { measurement in
             ret = MeasurementEntity(identifier: measurement.identifier)
             syncGroup.leave()
         }
@@ -306,7 +307,7 @@ public class DataCapturingService: NSObject {
         var ret = [MeasurementEntity]()
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        persistenceLayer.privatelyLoadMeasurements { measurements in
+        persistenceLayer.loadMeasurements { measurements in
             measurements.forEach({ (measurement) in
                 ret.append(MeasurementEntity(identifier: measurement.identifier))
             })
@@ -317,7 +318,7 @@ public class DataCapturingService: NSObject {
     }
 
     public func loadGeoLocations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([GeoLocation]) -> Void) {
-        persistenceLayer.privatelyLoad(measurementIdentifiedBy: measurement.identifier) { measurement in
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
             guard let locations = measurement.geoLocations else {
                 fatalError("DataCapturingService.loadGeoLocations(belongingTo: \(measurement.identifier)): Unable to get collection of geo locations.")
             }
@@ -331,7 +332,7 @@ public class DataCapturingService: NSObject {
     }
 
     public func loadAccelerations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([Acceleration]) -> Void) {
-        persistenceLayer.privatelyLoad(measurementIdentifiedBy: measurement.identifier) { (measurement) in
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { (measurement) in
             guard let accelerations = measurement.accelerations else {
                 fatalError("DataCapturingService.loadAccelerations(belongingTo: \(measurement.identifier)): Unable to get collection of accelerations")
             }
@@ -432,7 +433,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
             speed: location.speed,
             timestamp: convertToUtcTimestamp(date: location.timestamp))
         
-        persistenceLayer.privatelySave(toMeasurementIdentifiedBy: measurement, location: geoLocation, accelerations: accelerationsCache) { [unowned self] in
+        persistenceLayer.save(toMeasurement: measurement, location: geoLocation, accelerations: accelerationsCache) { [unowned self] in
             self.capturingQueue.async() {
                 self.accelerationsCache.removeAll()
                 DispatchQueue.main.async {

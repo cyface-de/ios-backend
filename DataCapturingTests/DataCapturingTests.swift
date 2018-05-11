@@ -13,10 +13,12 @@ import CoreMotion
 class DataCapturingTests: XCTestCase {
 
     var oocut: MovebisServerConnection?
+    var persistenceLayer: PersistenceLayer?
 
     override func setUp() {
         super.setUp()
-        oocut = MovebisServerConnection(apiURL: URL(string: "https://localhost:8080")!)
+        persistenceLayer = PersistenceLayer()
+        oocut = MovebisServerConnection(apiURL: URL(string: "https://localhost:8080")!, persistenceLayer: persistenceLayer!)
     }
 
     override func tearDown() {

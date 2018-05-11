@@ -12,7 +12,7 @@ public protocol ServerConnection {
 
     func isAuthenticated() -> Bool
 
-    func sync(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (Int64, ServerConnectionError?) -> Void)
+    func sync(measurement: MeasurementEntity, onFinishedCall handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void)
 
     func getURL() -> URL
 }
