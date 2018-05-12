@@ -161,7 +161,7 @@ public class DataCapturingService: NSObject {
         let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
         self.currentMeasurement = measurement
 
-        startCapturing(withHandler:handler)
+        startCapturing(withHandler: handler)
         return measurement
     }
 
@@ -212,7 +212,7 @@ public class DataCapturingService: NSObject {
      - Parameter onFinish: A handler called each time a synchronization has finished.
      */
     public func forceSync(onFinish handler: @escaping (() -> Void)) {
-        self.persistenceLayer.loadMeasurements() { [unowned self] measurements in
+        self.persistenceLayer.loadMeasurements { [unowned self] measurements in
         var countOfMeasurementsToSynchronize = measurements.count
         for measurement in measurements {
             if self.serverConnection.isAuthenticated(), self.reachabilityManager.isReachableOnEthernetOrWiFi {
@@ -475,9 +475,9 @@ extension DataCapturingService: CLLocationManagerDelegate {
             accuracy: location.horizontalAccuracy,
             speed: location.speed,
             timestamp: convertToUtcTimestamp(date: location.timestamp))
-        
+
         persistenceLayer.save(toMeasurement: measurement, location: geoLocation, accelerations: accelerationsCache) { [unowned self] in
-            self.capturingQueue.async() {
+            self.capturingQueue.async {
                 self.accelerationsCache.removeAll()
                 DispatchQueue.main.async {
                     self.notify(of: .geoLocationAcquired(position: geoLocation))

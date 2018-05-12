@@ -34,7 +34,7 @@ class SerializationTest: XCTestCase {
         guard let oocut = oocut else {
             fatalError("SerializationTest.testUncompressedSerialization(): Test failed! No object of class under test.")
         }
-        guard let pl = persistenceLayer else {
+        guard let persistenceLayer = persistenceLayer else {
             fatalError("SerializationTest.testUncompressedSerialization(): Test failed! No persistence layer to create test fixture from.")
         }
 
@@ -45,7 +45,7 @@ class SerializationTest: XCTestCase {
         var resCache: Data?
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        pl.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
+        persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
             debugPrint("===================================================")
             debugPrint("Geo Locations: \(measurement.geoLocations?.count).")
             debugPrint("Accelerations: \(measurement.accelerations?.count).")
@@ -79,7 +79,7 @@ class SerializationTest: XCTestCase {
         guard let oocut = oocut else {
             fatalError("erializationTest.testCompressedSerialization(): Test failed! No object of class under test.")
         }
-        guard let pl = persistenceLayer else {
+        guard let persistenceLayer = persistenceLayer else {
             fatalError("erializationTest.testCompressedSerialization(): Test failed! No persistence layer to create test fixture from.")
         }
 
@@ -90,7 +90,7 @@ class SerializationTest: XCTestCase {
         var resCache: Data?
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        pl.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
+        persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
             resCache = oocut.serializeCompressed(measurement)
             syncGroup.leave()
         }

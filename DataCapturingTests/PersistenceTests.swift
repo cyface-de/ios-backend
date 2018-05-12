@@ -13,7 +13,7 @@ class PersistenceTests: XCTestCase {
 
     var oocut: PersistenceLayer?
     var fixture: MeasurementEntity?
-    
+
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -26,7 +26,7 @@ class PersistenceTests: XCTestCase {
             self.oocut = oocut
             self.fixture = fixture
     }
-    
+
     override func tearDown() {
         oocut?.syncDelete()
         oocut = nil
@@ -56,7 +56,7 @@ class PersistenceTests: XCTestCase {
 
         XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
     }
-    
+
     func testCleanMeasurement() {
         guard let measurement = fixture else {
             XCTFail("Unable to unwrap test fixture!")

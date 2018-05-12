@@ -15,6 +15,7 @@ excluded: # paths to ignore during linting. Takes precedence over `included`.
   - Pods
   - Source/ExcludedFolder
   - Source/ExcludedFile.swift
+  - Pods/Alamofire
 
 # configurable rules can be customized from this configuration file
 # binary rules can set their severity level
@@ -50,4 +51,7 @@ identifier_name:
     - ax
     - ay
     - az
+    - x
+    - y
+    - z
 reporter: "xcode" # reporter type (xcode, json, csv, checkstyle, junit, html, emoji)

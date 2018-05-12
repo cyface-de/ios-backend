@@ -31,8 +31,8 @@ class DataCapturingTests: XCTestCase {
             fatalError("Test failed!")
         }
 
-        let pl = PersistenceLayer()
-        let measurement = pl.createMeasurement(at: 2)
+        let persistenceLayer = PersistenceLayer()
+        let measurement = persistenceLayer.createMeasurement(at: 2)
         let promise = expectation(description: "No error on synchronization!")
 
         oocut.authenticate(withJwtToken: "replace me")

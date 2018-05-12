@@ -59,30 +59,28 @@ public class PersistenceLayer {
 
     /// The next identifier to assign to a new `Measurement`.
     var nextIdentifier: Int64 {
-        get {
-            let persistentStore = container.persistentStoreCoordinator.persistentStores[0]
-            let coordinator = container.persistentStoreCoordinator
+        let persistentStore = container.persistentStoreCoordinator.persistentStores[0]
+        let coordinator = container.persistentStoreCoordinator
 
-            if lastIdentifier == nil {
-                // identifier is already stored as metadata.
-                if let currentIdentifier = coordinator.metadata(for: persistentStore)["de.cyface.mid"] as! Int64? {
-                    lastIdentifier = currentIdentifier
-                    // identifier is not yet stored, create an entry
-                } else {
-                    lastIdentifier = Int64(0)
-                    coordinator.setMetadata(["de.cyface.mid": lastIdentifier as Any], for: persistentStore)
-                }
+        if lastIdentifier == nil {
+            // identifier is already stored as metadata.
+            if let currentIdentifier = coordinator.metadata(for: persistentStore)["de.cyface.mid"] as? Int64? {
+                lastIdentifier = currentIdentifier
+                // identifier is not yet stored, create an entry
+            } else {
+                lastIdentifier = Int64(0)
+                coordinator.setMetadata(["de.cyface.mid": lastIdentifier as Any], for: persistentStore)
             }
-
-            guard let lastIdentifier = lastIdentifier else {
-                fatalError("No identifier available!")
-            }
-
-            let nextIdentifier = lastIdentifier + 1
-            self.lastIdentifier = nextIdentifier
-            coordinator.setMetadata(["de.cyface.mid":nextIdentifier], for: persistentStore)
-            return nextIdentifier
         }
+
+        guard let lastIdentifier = lastIdentifier else {
+            fatalError("No identifier available!")
+        }
+
+        let nextIdentifier = lastIdentifier + 1
+        self.lastIdentifier = nextIdentifier
+        coordinator.setMetadata(["de.cyface.mid": nextIdentifier], for: persistentStore)
+        return nextIdentifier
     }
 
     // MARK: - Initializers
@@ -127,9 +125,9 @@ public class PersistenceLayer {
      Deletes the measurement from the data storage on a background thread. Calls the provided handler when deletion has been completed.
 
      - Parameters:
-        - measurement: The measurement to delete from the data storage.
-        - onFinishedCall: The handler to call, when deletion has completed.
-    */
+     - measurement: The measurement to delete from the data storage.
+     - onFinishedCall: The handler to call, when deletion has completed.
+     */
     func delete(measurement: MeasurementEntity, onFinishedCall handler: @escaping (() -> Void)) {
         container.performBackgroundTask { [unowned self] context in
             let measurement = self.load(measurementIdentifiedBy: measurement.identifier, from: context)
@@ -154,7 +152,7 @@ public class PersistenceLayer {
      Deletes everything from the data storage.
 
      - Parameter onFinishedCall: A handler called after deletion is complete.
-    */
+     */
     func delete(onFinishedCall handler: @escaping () -> Void) {
         container.performBackgroundTask { [unowned self] (context) in
             let syncGroup = DispatchGroup()
@@ -194,8 +192,8 @@ public class PersistenceLayer {
      Strips the provided measurement of all accelerations.
 
      - Parameters:
-        - measurement: The measurement to strip of accelerations
-    */
+     - measurement: The measurement to strip of accelerations
+     */
     func clean(measurement: MeasurementEntity, whenFinishedCall finishedHandler: @escaping () -> Void) {
         container.performBackgroundTask { [unowned self] (context) in
             let measurement = self.load(measurementIdentifiedBy: measurement.identifier, from: context)
@@ -216,34 +214,34 @@ public class PersistenceLayer {
      Stores the provided `location` and `accelerations` to the provided measurement.
 
      - Parameters:
-        - measurement: The measurement to store the `location` and `accelerations` to.
-        - location: An array of `GeoLocation` instances to store.
-        - accelerations: An array of `Acceleration` instances to store.
-    */
+     - measurement: The measurement to store the `location` and `accelerations` to.
+     - location: An array of `GeoLocation` instances to store.
+     - accelerations: An array of `Acceleration` instances to store.
+     */
     func save(toMeasurement measurement: MeasurementEntity, location: GeoLocation, accelerations: [Acceleration], onFinished handler: @escaping () -> Void) {
         container.performBackgroundTask { [unowned self] (context) in
-                let measurement = self.load(measurementIdentifiedBy: measurement.identifier, from: context)
+            let measurement = self.load(measurementIdentifiedBy: measurement.identifier, from: context)
 
-                let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
-                dbLocation.lat = location.latitude
-                dbLocation.lon = location.longitude
-                dbLocation.speed = location.speed
-                dbLocation.timestamp = location.timestamp
-                dbLocation.accuracy = location.accuracy
-                measurement.addToGeoLocations(dbLocation)
+            let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
+            dbLocation.lat = location.latitude
+            dbLocation.lon = location.longitude
+            dbLocation.speed = location.speed
+            dbLocation.timestamp = location.timestamp
+            dbLocation.accuracy = location.accuracy
+            measurement.addToGeoLocations(dbLocation)
 
-                accelerations.forEach { acceleration in
-                    let dbAcceleration = AccelerationPointMO.init(entity: AccelerationPointMO.entity(), insertInto: context)
-                    dbAcceleration.ax = acceleration.x
-                    dbAcceleration.ay = acceleration.y
-                    dbAcceleration.az = acceleration.z
-                    dbAcceleration.timestamp = acceleration.timestamp
-                    measurement.addToAccelerations(dbAcceleration)
-                }
-
-                context.saveRecursively()
-                handler()
+            accelerations.forEach { acceleration in
+                let dbAcceleration = AccelerationPointMO.init(entity: AccelerationPointMO.entity(), insertInto: context)
+                dbAcceleration.ax = acceleration.x
+                dbAcceleration.ay = acceleration.y
+                dbAcceleration.az = acceleration.z
+                dbAcceleration.timestamp = acceleration.timestamp
+                measurement.addToAccelerations(dbAcceleration)
             }
+
+            context.saveRecursively()
+            handler()
+        }
     }
 
     func syncSave(toMeasurement measurement: MeasurementEntity, location: GeoLocation, accelerations: [Acceleration]) {
@@ -263,9 +261,9 @@ public class PersistenceLayer {
      Internal load method, loading the provided `measurement` on the provided `context`.
 
      - Parameters:
-        - measurement: The `measurement` to load.
-        - from: The CoreData `context` to load the `measurement` from.
-    */
+     - measurement: The `measurement` to load.
+     - from: The CoreData `context` to load the `measurement` from.
+     */
     private func load(measurementIdentifiedBy identifier: Int64, from context: NSManagedObjectContext) -> MeasurementMO {
         let fetchRequest: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         // The following needs to use an Objective-C number. That is why `measurementIdentifier` is wrapped in `NSNumber`
@@ -286,9 +284,9 @@ public class PersistenceLayer {
      Loads the data belonging to the provided `measurement` in the background an calls `onFinishedCall` with the data storage representation of that `measurement`. Using that represenation is not thread safe. Do not use it outside of the handler.
 
      - Parameters:
-       - measurement: The `measurement` to load.
-       - onFinishedCall: The handler to call when loading the `measurement` has finished
-    */
+     - measurement: The `measurement` to load.
+     - onFinishedCall: The handler to call when loading the `measurement` has finished
+     */
     public func load(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (MeasurementMO) -> Void) {
         container.performBackgroundTask { [unowned self] (context) in
             let measurement = self.load(measurementIdentifiedBy: identifier, from: context)
@@ -300,8 +298,8 @@ public class PersistenceLayer {
      Loads all the measurements from the data storage. Runs asynchronously in the background and calls a handler after loading has been completed. You should never use the objects in the provided array outside of the handler, since they are not thread safe and lose all data if transfered outside.
 
      - Parameters:
-        - handler: The handler to call after loading the measurements has finished.
-    */
+     - handler: The handler to call after loading the measurements has finished.
+     */
     public func loadMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]) -> Void) {
         container.performBackgroundTask { (context) in
             let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
@@ -313,7 +311,6 @@ public class PersistenceLayer {
             }
         }
     }
-
 
     /**
      Counts the amount of measurements currently stored in the data store, asynchronously in the background.
@@ -350,7 +347,7 @@ extension NSManagedObjectContext {
 
     /**
      Saves this context and all parent contexts if there are changes.
-    */
+     */
     func saveRecursively() {
         performAndWait {
             if self.hasChanges {
@@ -361,7 +358,7 @@ extension NSManagedObjectContext {
 
     /**
      Saves this context and its parent.
-    */
+     */
     func saveThisAndParentContexts() {
         do {
             try save()
