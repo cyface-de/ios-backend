@@ -11,14 +11,9 @@ import Foundation
 /**
  Objects of this class represent the current disk (or rather SD card) space used and available.
  
- - Author:
- Klemens Muthmann
- 
- - Version:
- 1.0.0
- 
- - Since:
- 1.0.0
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+  - Since: 1.0.0
  
  This space is mostly filled with unsynchronized `Measurement`s.
  To avoid filling up the users SD card it is advisable to delte `Measurement`s as soon as they use up too much space.
@@ -36,9 +31,9 @@ public class DiskConsumption {
     /**
      Creates a new completely initialized `DiskConsumption` object.
      
-     - parameters:
-     - consumedBytes: The amount of bytes currently used by the `DataCapturingService`.
-     - availableBytes: The amount of bytes still available for the `DataCapturingService`.
+     - Parameters:
+        - consumedBytes: The amount of bytes currently used by the `DataCapturingService`.
+        - availableBytes: The amount of bytes still available for the `DataCapturingService`.
      */
     public init(consumedBytes: Int, availableBytes: Int) {
         guard consumedBytes>=0 else {

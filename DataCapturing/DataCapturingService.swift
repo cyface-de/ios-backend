@@ -151,7 +151,7 @@ public class DataCapturingService: NSObject {
      during the capturing process. This operation is idempotent.
      
       - Parameter handler: A closure that is notified of important events during data capturing.
-      - Return: The device wide unique identifier of the measurement created by this call to `start`.
+      - Return: A `MeasurementEntity` as representation of the measurement created by this call to `start`.
      */
     public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> MeasurementEntity {
         guard !isPaused else {
@@ -254,7 +254,7 @@ public class DataCapturingService: NSObject {
     Cleans the database after a measurement has been synchronized.
 
      - Parameters:
-        - measurementIdentifier: The device wide unique identifier of the measurement to delete.
+        - measurement: The measurement to clean.
         - handler: Called as soon as deletion has finished.
     */
     func cleanDataAfterSync(for measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void)) {
@@ -280,12 +280,14 @@ public class DataCapturingService: NSObject {
             ret = count
             syncGroup.leave()
         }
-        syncGroup.wait(timeout: DispatchTime.now() + .seconds(2))
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("DataCapturingService.countMeasurements(): Unable to count measurements.")
+        }
         return ret!
     }
 
     /**
-     Provides the cached `Measurement` with the provided `identifier`. This operation is synchronous.
+     Provides the cached `Measurement` with the provided `identifier`.
      
      - Parameter identifier: A measurement identifier to load the measurement for.
      - Returns: The loaded `MeasurementEntity`
@@ -298,11 +300,17 @@ public class DataCapturingService: NSObject {
             ret = MeasurementEntity(identifier: measurement.identifier)
             syncGroup.leave()
         }
-        syncGroup.wait(timeout: DispatchTime.now() + .seconds(2))
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("DataCapturingService.loadMeasurement(withIdentifier: \(identifier)): Unable to load measurement!")
+        }
         return ret
     }
 
-    /// Loads all currently cached `Measurement` instances.
+    /**
+     Loads all currently cached `Measurement` instances.
+
+     - Returns: The array of loaded `MeasurementEntity` objects.
+     */
     public func loadMeasurements() -> [MeasurementEntity] {
         var ret = [MeasurementEntity]()
         let syncGroup = DispatchGroup()
@@ -313,10 +321,19 @@ public class DataCapturingService: NSObject {
             })
             syncGroup.leave()
         }
-        syncGroup.wait(timeout: DispatchTime.now() + .seconds(2))
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("DataCapturingService.loadMeasurements(): Unable to load measurements!")
+        }
         return ret
     }
 
+    /**
+     Loads all the geo locations belonging to a certain measurement.
+
+     - Parameters:
+     - belongingTo: The measurement the geo locations are to be loaded for.
+     - onFinished: The handler called after finishing loading the geo locations. The loaded locations are provided as an array to this handler.
+    */
     public func loadGeoLocations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([GeoLocation]) -> Void) {
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
             guard let locations = measurement.geoLocations else {
@@ -331,6 +348,13 @@ public class DataCapturingService: NSObject {
         }
     }
 
+    /**
+     Loads all the accelerations belonging to a certain measurement.
+
+     - Parameters:
+     - belongingTo: The measurement the accelerations are to be loaded for.
+     - onFinished: The handler called after finishing loading the accelerations. The loaded accelerations are provided as an array to this handler.
+    */
     public func loadAccelerations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([Acceleration]) -> Void) {
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { (measurement) in
             guard let accelerations = measurement.accelerations else {
@@ -355,6 +379,11 @@ public class DataCapturingService: NSObject {
         return Int64(value.timeIntervalSince1970*1000.0)
     }
 
+    /**
+     Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
+
+     - Parameter withHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
+    */
     func startCapturing(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
         // Preconditions
         guard !isRunning else {
@@ -387,6 +416,9 @@ public class DataCapturingService: NSObject {
         isRunning = true
     }
 
+    /**
+     An internal helper method for stopping the capturing process.
+    */
     func stopCapturing() {
         guard isRunning else {
             os_log("Trying to stop a non running service!", log: LOG, type: .info)
@@ -402,7 +434,7 @@ public class DataCapturingService: NSObject {
     /**
      Calls the event `handler` if there is one. Otherwise the call is ignored silently.
      
-     - Parameter event: The `event` to notify the `handler` of.
+     - Parameter of: The `event` to notify the `handler` of.
      */
     private func notify(of event: DataCapturingEvent) {
         guard let handler = self.handler else {
@@ -413,8 +445,19 @@ public class DataCapturingService: NSObject {
     }
 }
 
-// MARK: CLLocationManagerDelegate
+// MARK: - CLLocationManagerDelegate
+/**
+ Extension making a `CLLocationManagerDelegate` out of the `DataCapturingService`. This adds the capability of listining for geo location changes.
+ */
 extension DataCapturingService: CLLocationManagerDelegate {
+
+    /**
+     The listener method that is informed about new geo locations.
+
+     - Parameters:
+        - manager: The location manager used.
+        - didUpdateLocation: An array of the updated locations.
+    */
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 
         guard !locations.isEmpty else {
