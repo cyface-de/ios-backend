@@ -28,7 +28,8 @@ import Alamofire
  - Version: 3.0.0
  - Since: 1.0.0
  */
-public class DataCapturingService: NSObject, MeasurementLifecycle {
+public class DataCapturingService: NSObject {
+
     // MARK: - Properties
     /// Data used to identify log messages created by this component.
     private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
@@ -43,7 +44,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     private var handler: ((DataCapturingEvent) -> Void)?
 
     /// The currently recorded `Measurement` or nil if there is no active recording.
-    private var currentMeasurement: MeasurementMO?
+    private var currentMeasurement: MeasurementEntity?
 
     /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
     private let motionManager: CMMotionManager
@@ -92,7 +93,13 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
      */
     public var syncOnWiFiOnly: Bool
 
-    // MARK: Initializers
+    /// An in memory storage for accelerations, before they are written to disk.
+    private var accelerationsCache = [Acceleration]()
+
+    /// The background queue used to capture data.
+    private let capturingQueue = DispatchQueue.global(qos: .userInitiated)
+
+    // MARK: - Initializers
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data
      via the provided server connection and accessing data a certain amount of times per second.
@@ -125,36 +132,36 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         self.reachabilityManager = reachabilityManager
         super.init()
 
-        forceSync(onFinish: onSyncFinished)
         self.reachabilityManager.listener = {
             [unowned self] status in
             let reachable = self.syncOnWiFiOnly ?  status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) : status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) || status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi)
 
             if reachable {
-                self.forceSync(onFinish: self.onSyncFinished)
+                self.forceSync {
+                    self.notify(of: .synchronizationSuccessful)
+                }
             }
         }
         self.reachabilityManager.startListening()
     }
 
-    // MARK: Methods
+    // MARK: - Methods
     /**
      Starts the capturing process with an optional closure, that is notified of important events
      during the capturing process. This operation is idempotent.
      
       - Parameter handler: A closure that is notified of important events during data capturing.
-      - Return: The measurement created by this call to `start`.
+      - Return: A `MeasurementEntity` as representation of the measurement created by this call to `start`.
      */
-    public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> MeasurementMO {
+    public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> MeasurementEntity {
         guard !isPaused else {
             fatalError("DataCapturingService.start(): Invalid state! You tried to start the data capturing service in paused state! Please call resume() and stop() before starting the service!")
         }
 
         let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970())
-        measurement.synchronized = false
         self.currentMeasurement = measurement
 
-        startCapturing(withHandler:handler)
+        startCapturing(withHandler: handler)
         return measurement
     }
 
@@ -186,6 +193,8 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
 
     /**
      Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
+
+     - Parameter handler: The handler receiving `DataCapturingEvent` instances from the resumed capturing.
      */
     public func resume(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
         guard isPaused, !isRunning else {
@@ -197,51 +206,59 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     }
 
     /**
-     When synchronization has finished this handler is called and stops the
-     `ReachabilityManager`.
-
-     - Parameters
-        - measurement: The `Measurement` for which synchronization has been finished.
-        - error: An error if one has occured or `nil` if everything went well.
-     */
-    func onSyncFinished(measurement: MeasurementMO, error: ServerConnectionError?) {
-        // Only go on if there was no error
-        guard error==nil else {
-            os_log("Unable to upload data.")
-            return
-        }
-
-        // Delete measurement
-        self.persistenceLayer.delete(measurement: measurement)
-
-        // Inform UI if interested
-        if let syncDelegate = syncDelegate {
-            let currentIdentifier = measurement.identifier
-            syncDelegate(currentIdentifier)
-        }
-
-        debugPrint("Synchronized! Measurements on device \(countMeasurements())")
-        // stop synchronization if everything has been synchronized.
-        if countMeasurements()==0 {
-            reachabilityManager.stopListening()
-        }
-    }
-
-    /**
      Forces the service to synchronize all Measurements now if a connection is available.
      If this is not called the service might wait for an opportune moment to start synchronization.
 
      - Parameter onFinish: A handler called each time a synchronization has finished.
      */
-    public func forceSync(onFinish handler: ((MeasurementMO, ServerConnectionError?) -> Void)?) {
-        for measurement in self.persistenceLayer.loadMeasurements() {
-            if serverConnection.isAuthenticated(), reachabilityManager.isReachableOnEthernetOrWiFi {
-                // In case no handler was provided simply use an empty one.
-                let handler = handler ?? {_, _ in }
-                serverConnection.sync(measurement: measurement, onFinish: handler)
+    public func forceSync(onFinish handler: @escaping (() -> Void)) {
+        self.persistenceLayer.loadMeasurements { [unowned self] measurements in
+        var countOfMeasurementsToSynchronize = measurements.count
+        for measurement in measurements {
+            if self.serverConnection.isAuthenticated(), self.reachabilityManager.isReachableOnEthernetOrWiFi {
+
+                let synchronizationFinishedHandler: (MeasurementEntity, ServerConnectionError?) -> Void = { [unowned self] measurement, error in
+                    // Only go on if there was no error
+                    guard error==nil else {
+                        os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
+                        return
+                    }
+                    self.cleanDataAfterSync(for: measurement) {
+                        // Inform UI if interested
+                        if let syncDelegate = self.syncDelegate {
+                            DispatchQueue.main.async {
+                                syncDelegate(measurement.identifier)
+                            }
+                        }
+
+                        // TODO: synchronize this?
+                        countOfMeasurementsToSynchronize -= 1
+
+                        // Everything uploaded?
+                        if countOfMeasurementsToSynchronize == 0 {
+                            handler()
+                            if self.countMeasurements()==0 {
+                                self.reachabilityManager.stopListening()
+                            }
+                        }
+                    }
+                }
+
+                self.serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier), onFinishedCall: synchronizationFinishedHandler)
             }
         }
-        notify(of: .synchronizationSuccessful)
+        }
+    }
+
+    /**
+    Cleans the database after a measurement has been synchronized.
+
+     - Parameters:
+        - measurement: The measurement to clean.
+        - handler: Called as soon as deletion has finished.
+    */
+    func cleanDataAfterSync(for measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void)) {
+        persistenceLayer.delete(measurement: measurement, onFinishedCall: handler)
     }
 
     /**
@@ -250,27 +267,106 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
      - Parameter measurement: The `Measurement` to delete. You can get this for example via
         `loadMeasurement(index:)`.
     */
-    public func delete(measurement: MeasurementMO) {
-        persistenceLayer.delete(measurement: measurement)
+    public func delete(measurement: MeasurementEntity, andCallWhenFinished finishedHandler: @escaping () -> Void) {
+        persistenceLayer.delete(measurement: measurement, onFinishedCall: finishedHandler)
     }
 
     /// Provides the amount of `Measurements` currently cached by the system.
     public func countMeasurements() -> Int {
-        return persistenceLayer.countMeasurements()
+        var ret: Int?
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        persistenceLayer.countMeasurements { count in
+            ret = count
+            syncGroup.leave()
+        }
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("DataCapturingService.countMeasurements(): Unable to count measurements.")
+        }
+        return ret!
     }
 
     /**
      Provides the cached `Measurement` with the provided `identifier`.
      
      - Parameter identifier: A measurement identifier to load the measurement for.
+     - Returns: The loaded `MeasurementEntity`
      */
-    public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementMO? {
-        return persistenceLayer.loadMeasurement(withIdentifier: identifier)
+    public func loadMeasurement(withIdentifier identifier: Int64) -> MeasurementEntity? {
+        var ret: MeasurementEntity?
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        persistenceLayer.load(measurementIdentifiedBy: identifier) { measurement in
+            ret = MeasurementEntity(identifier: measurement.identifier)
+            syncGroup.leave()
+        }
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("DataCapturingService.loadMeasurement(withIdentifier: \(identifier)): Unable to load measurement!")
+        }
+        return ret
     }
 
-    /// Loads all currently cached `Measurement` instances.
-    public func loadMeasurements() -> [MeasurementMO] {
-        return persistenceLayer.loadMeasurements()
+    /**
+     Loads all currently cached `Measurement` instances.
+
+     - Returns: The array of loaded `MeasurementEntity` objects.
+     */
+    public func loadMeasurements() -> [MeasurementEntity] {
+        var ret = [MeasurementEntity]()
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        persistenceLayer.loadMeasurements { measurements in
+            measurements.forEach({ (measurement) in
+                ret.append(MeasurementEntity(identifier: measurement.identifier))
+            })
+            syncGroup.leave()
+        }
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("DataCapturingService.loadMeasurements(): Unable to load measurements!")
+        }
+        return ret
+    }
+
+    /**
+     Loads all the geo locations belonging to a certain measurement.
+
+     - Parameters:
+     - belongingTo: The measurement the geo locations are to be loaded for.
+     - onFinished: The handler called after finishing loading the geo locations. The loaded locations are provided as an array to this handler.
+    */
+    public func loadGeoLocations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([GeoLocation]) -> Void) {
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
+            guard let locations = measurement.geoLocations else {
+                fatalError("DataCapturingService.loadGeoLocations(belongingTo: \(measurement.identifier)): Unable to get collection of geo locations.")
+            }
+
+            var ret = [GeoLocation]()
+            locations.forEach({ (location) in
+                ret.append(GeoLocation(latitude: location.lat, longitude: location.lon, accuracy: location.accuracy, speed: location.speed, timestamp: location.timestamp))
+            })
+            handler(ret)
+        }
+    }
+
+    /**
+     Loads all the accelerations belonging to a certain measurement.
+
+     - Parameters:
+     - belongingTo: The measurement the accelerations are to be loaded for.
+     - onFinished: The handler called after finishing loading the accelerations. The loaded accelerations are provided as an array to this handler.
+    */
+    public func loadAccelerations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([Acceleration]) -> Void) {
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { (measurement) in
+            guard let accelerations = measurement.accelerations else {
+                fatalError("DataCapturingService.loadAccelerations(belongingTo: \(measurement.identifier)): Unable to get collection of accelerations")
+            }
+
+            var ret = [Acceleration]()
+            accelerations.forEach({ (acceleration) in
+                ret.append(Acceleration(timestamp: acceleration.timestamp, x: acceleration.ax, y: acceleration.ay, z: acceleration.az))
+            })
+            handler(ret)
+        }
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
@@ -283,11 +379,13 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         return Int64(value.timeIntervalSince1970*1000.0)
     }
 
+    /**
+     Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
+
+     - Parameter withHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
+    */
     func startCapturing(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
         // Preconditions
-        guard let currentMeasurement = currentMeasurement else {
-            fatalError("DataCapturingService.startCapturing(): Trying to start data capturing without a measurement.")
-        }
         guard !isRunning else {
             os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: LOG, type: .info)
             return
@@ -297,25 +395,30 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
         self.locationManager.delegate = self
         self.locationManager.startUpdatingLocation()
 
+        let queue = OperationQueue()
+        queue.qualityOfService = QualityOfService.userInitiated
+        queue.underlyingQueue = capturingQueue
         if motionManager.isAccelerometerAvailable {
-            motionManager.startAccelerometerUpdates(to: OperationQueue.current!) { data, _ in
+            motionManager.startAccelerometerUpdates(to: queue) { [unowned self] data, _ in
                 guard let myData = data else {
                     fatalError("DataCapturingService.start(): No Accelerometer data available!")
                 }
 
                 let accValues = myData.acceleration
-                let acc = self.persistenceLayer.createAcceleration(
+                let acc = Acceleration(timestamp: self.currentTimeInMillisSince1970(),
                     x: accValues.x,
                     y: accValues.y,
-                    z: accValues.z,
-                    at: self.currentTimeInMillisSince1970())
-                currentMeasurement.addToAccelerations(acc)
+                    z: accValues.z)
+                self.accelerationsCache.append(acc)
             }
         }
 
         isRunning = true
     }
 
+    /**
+     An internal helper method for stopping the capturing process.
+    */
     func stopCapturing() {
         guard isRunning else {
             os_log("Trying to stop a non running service!", log: LOG, type: .info)
@@ -331,7 +434,7 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     /**
      Calls the event `handler` if there is one. Otherwise the call is ignored silently.
      
-     - Parameter event: The `event` to notify the `handler` of.
+     - Parameter of: The `event` to notify the `handler` of.
      */
     private func notify(of event: DataCapturingEvent) {
         guard let handler = self.handler else {
@@ -342,8 +445,19 @@ public class DataCapturingService: NSObject, MeasurementLifecycle {
     }
 }
 
-// MARK: CLLocationManagerDelegate
+// MARK: - CLLocationManagerDelegate
+/**
+ Extension making a `CLLocationManagerDelegate` out of the `DataCapturingService`. This adds the capability of listining for geo location changes.
+ */
 extension DataCapturingService: CLLocationManagerDelegate {
+
+    /**
+     The listener method that is informed about new geo locations.
+
+     - Parameters:
+        - manager: The location manager used.
+        - didUpdateLocation: An array of the updated locations.
+    */
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 
         guard !locations.isEmpty else {
@@ -355,15 +469,20 @@ extension DataCapturingService: CLLocationManagerDelegate {
         guard let measurement = currentMeasurement else {
             fatalError("No current measurement to save the location to! Data capturing impossible.")
         }
-        let geoLocation = persistenceLayer.createGeoLocation(
+        let geoLocation = GeoLocation(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
             accuracy: location.horizontalAccuracy,
             speed: location.speed,
-            at: convertToUtcTimestamp(date: location.timestamp))
-        measurement.addToGeoLocations(geoLocation)
-        notify(of: .geoLocationAcquired(position: geoLocation))
+            timestamp: convertToUtcTimestamp(date: location.timestamp))
 
-        persistenceLayer.save()
+        persistenceLayer.save(toMeasurement: measurement, location: geoLocation, accelerations: accelerationsCache) { [unowned self] in
+            self.capturingQueue.async {
+                self.accelerationsCache.removeAll()
+                DispatchQueue.main.async {
+                    self.notify(of: .geoLocationAcquired(position: geoLocation))
+                }
+            }
+        }
     }
 }

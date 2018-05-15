@@ -13,10 +13,12 @@ import CoreMotion
 class DataCapturingTests: XCTestCase {
 
     var oocut: MovebisServerConnection?
+    var persistenceLayer: PersistenceLayer?
 
     override func setUp() {
         super.setUp()
-        oocut = MovebisServerConnection(apiURL: URL(string: "https://localhost:8080")!)
+        persistenceLayer = PersistenceLayer()
+        oocut = MovebisServerConnection(apiURL: URL(string: "https://localhost:8080")!, persistenceLayer: persistenceLayer!)
     }
 
     override func tearDown() {
@@ -29,8 +31,8 @@ class DataCapturingTests: XCTestCase {
             fatalError("Test failed!")
         }
 
-        let pl = PersistenceLayer()
-        let measurement = pl.createMeasurement(at: 2)
+        let persistenceLayer = PersistenceLayer()
+        let measurement = persistenceLayer.createMeasurement(at: 2)
         let promise = expectation(description: "No error on synchronization!")
 
         oocut.authenticate(withJwtToken: "replace me")

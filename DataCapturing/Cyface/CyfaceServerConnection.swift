@@ -9,16 +9,21 @@
 import Foundation
 import os.log
 
+// TODO: The parameter for the finished handlers is called differently all the time
+// TODO: Parameter order in the finished handler is not the same always (error is sometimes the first and sometimes the last parameter
+// TODO: Maybe create an error handler to remove `nil` parameters
+// TODO: Terminology: There is identifier, deviceIdentifier, appIdentifier and installationIdentifier which refers to the same thing always
 /**
- Instances of this class represent connections to a Cyface server API.
+ Instances of this class represent connections to a Cyface server API. They upload data in the form of JSON chunks.
  
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 1.0.0
  */
 public class CyfaceServerConnection: ServerConnection {
 
-    // MARK: Properties
+    // MARK: - Properties
+    /// The log system used to log messages to the terminal.
     private let LOG = OSLog(subsystem: "de.cyface", category: "ServerConnection")
 
     /// Session object to upload captured data to a Cyface server.
@@ -29,11 +34,17 @@ public class CyfaceServerConnection: ServerConnection {
     /// A `URL` used to upload data to. There should be a server complying to a Cyface REST interface available at that location.
     private let apiURL: URL
 
-    /// Authentication token provided by a JWT authentication request. This property is `nil` as long as àuthenticate was not called successfully yet. Otherwise it contains the JWT bearer required as content for the Authorization header.
+    /// Authentication token provided by a JWT authentication request. This property is `nil` as long as authenticate was not called successfully yet. Otherwise it contains the JWT bearer required as content for the Authorization header.
     private var jwtBearer: String?
 
+    /**
+     The handler to call after authentication has been finished. If an error occurs the error property of this handler contains further details. This property is `nil` after successful authentication.
+    */
     private var onAuthenticationFinishedHandler: ((Error?) -> Void)?
 
+    /**
+     The world wide unique identifier of this app installation. The name is a bit misleading. It is used to identify multiple uploads from the same device, for example to create reusable machine learning models for one or only some devices. If the app is uninstalled and reinstalled, this identifier is reset to a new value. It is generated and registered with the server on the first upload.
+    */
     private lazy var deviceModelIdentifier: String = {
         if let simulatorModelIdentifier = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] {return simulatorModelIdentifier}
         var sysinfo = utsname()
@@ -41,17 +52,32 @@ public class CyfaceServerConnection: ServerConnection {
         return String(bytes: Data(bytes: &sysinfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)!.trimmingCharacters(in: .controlCharacters)
     }()
 
-    // MARK: Initializers
+    /// The `PersistenceLayer` used to load the data to upload from.
+    private let persistenceLayer: PersistenceLayer
+
+    // MARK: - Initializers
     /**
      Creates a new `ServerConnection` to the provided URL.
+
      - Parameters:
-     -  url: A `URL` used to upload data to. There should be a server complying to a Cyface REST interface available at that location.
+        - apiURL: A `URL` used to upload data to. There should be a server complying to a Cyface REST interface available at that location.
+        - persistenceLayer: The `PersistenceLayer` used to load the data to upload from.
      */
-    public required init(apiURL url: URL) {
+    public required init(apiURL url: URL, persistenceLayer: PersistenceLayer) {
         self.apiURL=url
+        self.persistenceLayer = persistenceLayer
     }
 
-    // MARK: Methods
+    // MARK: - Methods
+
+    /**
+     Authenticates this client against the API via `username` and `password` and calls the provided handler upon completion.
+
+     - Parameters:
+        - with: The name of the user to authenticate.
+        - and: The password of the user to authenticate.
+        - onFinish: A handler called after authentication has been finished. If an error occured, the provided parameter contains further details. If authentication was successful, that parameter is `nil`.
+    */
     public func authenticate(with username: String, and password: String, onFinish handler: ((Error?) -> Void)?) {
         let loginURL = apiURL.appendingPathComponent("login")
         var request = URLRequest(url: loginURL)
@@ -71,41 +97,56 @@ public class CyfaceServerConnection: ServerConnection {
         }
     }
 
-    public func sync(measurement: MeasurementMO, onFinish handler: @escaping (MeasurementMO, ServerConnectionError?) -> Void) {
+    /**
+     If this client is authenticated, this method uploads the provided measurement as JSON chunks to the endpoint used with this client.
+
+     - SeeAlso: `ServerConnection.sync(measurement:onFinishedCall:)`
+    */
+    public func sync(measurement: MeasurementEntity, onFinishedCall handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
         debugPrint("Trying to synchronize measurement \(measurement.identifier)")
         guard isAuthenticated() else {
-            fatalError("sync(measurement: \(measurement)): Unable to sync with not authenticated client.")
+            fatalError("CyfaceServerConnection.sync(measurementIdentifiedBy: \(measurement.identifier)): Unable to sync with not authenticated client.")
         }
 
-        installationIdentifier { error, identifier in
+        let measurementIdentifier = measurement.identifier
+        installationIdentifier { error, deviceIdentifier in
             if let error = error {
                 handler(measurement, error)
                 return
-            } else if let identifier = identifier {
+            } else if let identifier = deviceIdentifier {
                 self.transmit(measurement: measurement, forDevice: identifier, onFinish: handler)
             } else {
-                fatalError("ServerConnection.sync(measurement: \(measurement)): Neither identifier nor error information available.")
+                fatalError("CyfaceServerConnection.sync(measurement: \(measurementIdentifier)): Neither identifier nor error information available.")
             }
         }
     }
 
+    /// - SeeAlso: `ServerConnection.isAuthenticated()
     public func isAuthenticated() -> Bool {
         return jwtBearer != nil && !jwtBearer!.isEmpty
     }
 
+    /// - SeeAlso: `ServerConnection.getURL()`
     public func getURL() -> URL {
         return apiURL
     }
 
-    private func transmit(measurement: MeasurementMO, forDevice deviceIdentifier: String, onFinish handler: @escaping (MeasurementMO, ServerConnectionError?) -> Void) {
+    /**
+     Transmits the provided `measurement` from the device identified by `forDevice` to the API endpoint URL used by this client and calls `onFinish` when done.
+
+     - Parameters:
+        - measurement: The `measurement` to transmit.
+        - forDevice: The identifier of this device used to identify the data on the server side.
+        - onFinish: Called upon upload completion. This handler is provided with the uploaded `MeasurementEntity` and either some error information if there was an error, or `nil` if upload has been successful.
+    */
+    private func transmit(measurement: MeasurementEntity, forDevice deviceIdentifier: String, onFinish handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
 
         var request = URLRequest(url: apiURL.appendingPathComponent("measurements"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(jwtBearer, forHTTPHeaderField: "Authorization")
 
-        let chunks = self.makeUploadChunks(fromMeasurement: measurement, forInstallation: deviceIdentifier)
-        for chunk in chunks {
+        makeUploadChunks(fromMeasurement: measurement, forInstallation: deviceIdentifier) { chunk in
             guard let jsonChunk = try? JSONSerialization.data(withJSONObject: chunk, options: .sortedKeys) else {
                 fatalError("ServerConnection.transmit(measurement: \(measurement.identifier), forDevice: \(deviceIdentifier)): Invalid measurement format.")
             }
@@ -134,44 +175,56 @@ public class CyfaceServerConnection: ServerConnection {
 
                 handler(measurement, nil)
             }
-
             submissionTask.resume()
         }
     }
 
+    /**
+     This function chunks the data into smaller packets of JSON data to upload.
+
+     - Todo: Currently this method produces only one large chunk. A future implementation should implement the actual chunking as it is on Android
+
+     - Parameters:
+        - measurement: The measurement to create chunks from
+        - installationIdentifier: The world wide unique device identifier identifying this app installation.
+        - onChunkFinishedCall: A handler to call when a chunk is finished. This handler is provided with the finished chunk as a parameter.
+    */
     private func makeUploadChunks(
-        fromMeasurement measurement: MeasurementMO,
-        forInstallation identifier: String) -> [[String: Any]] {
+        fromMeasurement measurement: MeasurementEntity,
+        forInstallation installationIdentifier: String, onChunkFinishedCall handler: @escaping ([String: Any]) -> Void) {
 
-        var geoLocations = [[String: String]]()
-        if let measurementLocations = measurement.geoLocations {
-            for location in measurementLocations {
-                geoLocations.append([
-                    "lat": String(location.lat),
-                    "lon": String(location.lon),
-                    "speed": String(location.speed),
-                    "timestamp": String(location.timestamp),
-                    "accuracy": String(Int(location.accuracy))])
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
+
+            var geoLocations = [[String: String]]()
+            if let measurementLocations = measurement.geoLocations {
+                for location in measurementLocations {
+                    geoLocations.append([
+                        "lat": String(location.lat),
+                        "lon": String(location.lon),
+                        "speed": String(location.speed),
+                        "timestamp": String(location.timestamp),
+                        "accuracy": String(Int(location.accuracy))])
+                }
             }
-        }
 
-        var accelerationPoints = [[String: String]]()
-        if let accelerations = measurement.accelerations {
-            for acceleration in accelerations {
-                accelerationPoints.append([
-                    "ax": String(acceleration.ax),
-                    "ay": String(acceleration.ay),
-                    "az": String(acceleration.az),
-                    "timestamp": String(acceleration.timestamp)])
+            var accelerationPoints = [[String: String]]()
+            if let accelerations = measurement.accelerations {
+                for acceleration in accelerations {
+                    accelerationPoints.append([
+                        "ax": String(acceleration.ax),
+                        "ay": String(acceleration.ay),
+                        "az": String(acceleration.az),
+                        "timestamp": String(acceleration.timestamp)])
+                }
             }
-        }
 
-        return [[
-            "deviceId": identifier,
-            "id": String(measurement.identifier),
-            "vehicle": "BICYCLE",
-            "gpsPoints": geoLocations,
-            "accelerationPoints": accelerationPoints]]
+            handler([
+                "deviceId": installationIdentifier,
+                "id": String(measurement.identifier),
+                "vehicle": "BICYCLE",
+                "gpsPoints": geoLocations,
+                "accelerationPoints": accelerationPoints])
+        }
     }
 
     /**
@@ -181,7 +234,7 @@ public class CyfaceServerConnection: ServerConnection {
      If there already is an existing application identifier registered it looks whether the server
      knows about that identifier and if not registers it.
      
-     - Parameter handler: Handler called when registration with the server has been completed.
+     - Parameter handler: Handler called when registration with the server has been completed. This handler is provided with the identifier and some error information if an error occured. If retrieving or generating the identifier was successful the error information is `nil`.
      */
     private func installationIdentifier(
         withCompletionHandler handler: @escaping (ServerConnectionError?, String?) -> Void) {
@@ -225,6 +278,14 @@ public class CyfaceServerConnection: ServerConnection {
         }
     }
 
+    // TODO: From the name of the function it is not clear, what the boolean value means.
+    /**
+     Checks whether a given device exists on the server or not. If this is a new device it should not exist and need to be registered. If the device exists it should not be registered again.
+
+     - Parameters:
+        - withIdentifier: The device identifier to check.
+        - completionHandler: The handler to call when the check has finished. This is provided with some error information, which is `nil` if checking was successful. The result of the check is provided as a `Bool` value that is `true` if the device exists and `false` otherwise.
+    */
     private func checkDevice(
         withIdentifier identifier: String,
         completionHandler handler: @escaping (ServerConnectionError?, Bool) -> Void) {
@@ -285,6 +346,15 @@ public class CyfaceServerConnection: ServerConnection {
         deviceRetrievalTask.resume()
     }
 
+    /**
+     Registers a device with the provided identifier on the server.
+
+     - Parameters:
+        - withIdentifier: The world wide unique identifier of the device to register.
+        - completionHandler: A handler called after device registration has completed. This is provided with some error information, which is `nil` if registration was successful. The registered device identifier is always provided as a parameter. This should be the same as the one provided to this method call.
+
+     - SeeAlso: Property `installationIdentifier`
+     */
     private func registerDevice(
         withIdentifier identifier: String,
         completionHandler handler: @escaping (ServerConnectionError?, String?) -> Void) {
@@ -335,6 +405,15 @@ public class CyfaceServerConnection: ServerConnection {
         deviceCreationTask.resume()
     }
 
+    /**
+     A Handler called when a request for authentication returns.
+
+     - Parameters:
+        - response: The response received as reaction to the request.
+        - error: An optional error parameter that is `nil` if the response was successful.
+
+     - SeeAlso `authenticate(with:and:onFinish)`
+    */
     private func onAuthenticationResponse(_: Data?, response: URLResponse?, error: Error?) {
         guard let handler = onAuthenticationFinishedHandler else {
             fatalError("No handler for authentication finished event available!")
@@ -379,20 +458,18 @@ public class CyfaceServerConnection: ServerConnection {
     }
 }
 
-public struct ServerConnectionError: LocalizedError {
+// MARK: - Support Classes
 
-    var title: String?
-    public var errorDescription: String? { return _description }
-    public var failureReason: String? { return _description }
+/**
+ Struct representing a JSON answer to a GET request for devices.
 
-    private var _description: String
+ - SeeAlso: CyfaceServerConnection.checkDevice(withIdentifier:completionHandler:)
 
-    init(title: String?, description: String) {
-        self.title = title ?? "Error"
-        self._description = description
-    }
-}
-
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.0.0
+ */
 struct Device: Codable {
+    /// The world wide unique identifier of the device.
     var identifier: String
 }

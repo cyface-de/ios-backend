@@ -24,13 +24,13 @@ public enum DataCapturingEvent {
     case geoLocationFixLost
     /**
      Occurs each time the `DataCapturingService` receives a new geo location position.
-     - position: The new geo location position.
+     - Parameter position: The new geo location position.
      */
-    case geoLocationAcquired(position: GeoLocationMO)
+    case geoLocationAcquired(position: GeoLocation)
     /**
      Occurs each time the application runs out of space.
      How much space is used and how much is available may be retrieved from `allocation`.
-     - allocation: Information about the applications disk (or rather SD card) space consumption.
+     - Parameter allocation: Information about the applications disk (or rather SD card) space consumption.
      */
     case lowDiskSpace(allocation: DiskConsumption)
     /**

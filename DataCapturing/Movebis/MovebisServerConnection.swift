@@ -16,14 +16,9 @@ import Alamofire
  The transmission format is compressed Cyface binary format.
  The cyface binary format is created by a `CyfaceBinaryFormatSerializer`.
 
- - Author:
- Klemens Muthmann
-
- - Version:
- 1.0.0
-
- - Since:
- 1.0.0
+ - Author: Klemens Muthmann
+ - Version: 2.0.0
+ - Since: 1.0.0
  */
 public class MovebisServerConnection: ServerConnection {
     /// The current JWT authentication token to use with the Movebis server.
@@ -38,7 +33,8 @@ public class MovebisServerConnection: ServerConnection {
      */
     private let sessionManager: SessionManager
     private let apiURL: URL
-    private var onFinishHandler: ((MeasurementMO, ServerConnectionError?) -> Void)?
+    private var onFinishHandler: ((MeasurementEntity, ServerConnectionError?) -> Void)?
+    private let persistenceLayer: PersistenceLayer
     /**
      A name that tells the system which kind of iOS device this is.
      */
@@ -59,9 +55,10 @@ public class MovebisServerConnection: ServerConnection {
         }
     }
 
-    public required init(apiURL url: URL) {
+    public required init(apiURL url: URL, persistenceLayer: PersistenceLayer) {
         apiURL = url
         sessionManager = SessionManager()
+        self.persistenceLayer = persistenceLayer
     }
 
     public func isAuthenticated() -> Bool {
@@ -76,7 +73,7 @@ public class MovebisServerConnection: ServerConnection {
         jwtAuthenticationToken = nil
     }
 
-    public func sync(measurement: MeasurementMO, onFinish handler: @escaping (MeasurementMO, ServerConnectionError?) -> Void) {
+    public func sync(measurement: MeasurementEntity, onFinishedCall handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
         onFinishHandler = handler
 
@@ -90,26 +87,26 @@ public class MovebisServerConnection: ServerConnection {
             "Content-type": "multipart/form-data"
         ]
 
-        sessionManager.upload(multipartFormData: {[unowned self] data in self.create(request: data, forMeasurement: measurement)}, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers) { [unowned self] error in
-            self.onEncodingComplete(forMeasurement: measurement, withResult: error)
-        }
+        sessionManager.upload(multipartFormData: {[unowned self] data in self.create(request: data, forMeasurement: measurement)}, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: { [unowned self] error in self.onEncodingComplete(forMeasurement: measurement, withResult: error)})
     }
 
     public func getURL() -> URL {
         return apiURL
     }
 
-    func create(request: MultipartFormData, forMeasurement measurement: MeasurementMO) {
+    func create(request: MultipartFormData, forMeasurement measurement: MeasurementEntity) {
         request.append(installationIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceId")
         request.append(String(measurement.identifier).data(using: String.Encoding.utf8)!, withName: "measurementId")
         request.append(modelIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceType:")
         request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
 
-        let payload = serializer.serializeCompressed(measurement)
-        request.append(payload, withName: "fileToUpload", fileName: "\(installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { [unowned self] measurement in
+                let payload = self.serializer.serializeCompressed(measurement)
+                request.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+        }
     }
 
-    func onEncodingComplete(forMeasurement measurement: MeasurementMO, withResult result: SessionManager.MultipartFormDataEncodingResult) {
+    func onEncodingComplete(forMeasurement measurement: MeasurementEntity, withResult result: SessionManager.MultipartFormDataEncodingResult) {
         switch result {
         case .success(let upload, _, _):
             print("Successfully encoded upload \(upload)")
@@ -124,7 +121,7 @@ public class MovebisServerConnection: ServerConnection {
         }
     }
 
-    func onResponseReady(forMeasurement measurement: MeasurementMO, _ response: DataResponse<String>) {
+    func onResponseReady(forMeasurement measurement: MeasurementEntity, _ response: DataResponse<String>) {
         guard let handler = onFinishHandler else {
             return
         }

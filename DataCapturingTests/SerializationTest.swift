@@ -12,42 +12,55 @@ class SerializationTest: XCTestCase {
 
     var oocut: CyfaceBinaryFormatSerializer?
     var persistenceLayer: PersistenceLayer?
+    var fixture: MeasurementEntity?
 
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
         oocut = CyfaceBinaryFormatSerializer()
         persistenceLayer = PersistenceLayer()
+
+        fixture = persistenceLayer!.createMeasurement(at: 1)
+        persistenceLayer!.syncSave(toMeasurement: fixture!, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000), accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0)])
+        persistenceLayer!.syncSave(toMeasurement: fixture!, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), accelerations: [Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)])
+        persistenceLayer!.syncSave(toMeasurement: fixture!, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), accelerations: [Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)])
     }
 
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
         oocut = nil
         super.tearDown()
     }
 
     func testUncompressedSerialization() {
         guard let oocut = oocut else {
-            fatalError("Test failed! No object of class under test.")
+            fatalError("SerializationTest.testUncompressedSerialization(): Test failed! No object of class under test.")
         }
-        guard let pl = persistenceLayer else {
-            fatalError("Test failed! No persistence layer to create test fixture from.")
+        guard let persistenceLayer = persistenceLayer else {
+            fatalError("SerializationTest.testUncompressedSerialization(): Test failed! No persistence layer to create test fixture from.")
         }
-        let measurement = pl.createMeasurement(at: 1)
-        let acc1 = pl.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_000)
-        let acc2 = pl.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_100)
-        let acc3 = pl.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_200)
-        measurement.addToAccelerations(acc1)
-        measurement.addToAccelerations(acc2)
-        measurement.addToAccelerations(acc3)
-        let geo1 = pl.createGeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, at: 10_000)
-        let geo2 = pl.createGeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, at: 10_100)
-        let geo3 = pl.createGeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, at: 10_200)
-        measurement.addToGeoLocations(geo1)
-        measurement.addToGeoLocations(geo2)
-        measurement.addToGeoLocations(geo3)
 
-        let res = oocut.serialize(measurement)
+        guard let fixture = fixture else {
+            fatalError("SerializationTest.testUncompressedSerialization(): Test failed! No test fixture!")
+        }
+
+        var resCache: Data?
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
+            debugPrint("===================================================")
+            debugPrint("Geo Locations: \(measurement.geoLocations?.count).")
+            debugPrint("Accelerations: \(measurement.accelerations?.count).")
+            debugPrint("===================================================")
+            resCache = oocut.serialize(measurement)
+            syncGroup.leave()
+        }
+
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("SerializationTest.testUncompressedSerialization(): Unable to serialize fixture!")
+        }
+
+        guard let res = resCache else {
+            fatalError("SerializationTest.testUncompressedSerialization(): Unable to get result of serialization!")
+        }
 
         XCTAssertEqual(res.count, 222)
         // Data Format Version
@@ -64,26 +77,30 @@ class SerializationTest: XCTestCase {
 
     func testCompressedSerialization() {
         guard let oocut = oocut else {
-            fatalError("Test failed! No object of class under test.")
+            fatalError("erializationTest.testCompressedSerialization(): Test failed! No object of class under test.")
         }
-        guard let pl = persistenceLayer else {
-            fatalError("Test failed! No persistence layer to create test fixture from.")
+        guard let persistenceLayer = persistenceLayer else {
+            fatalError("erializationTest.testCompressedSerialization(): Test failed! No persistence layer to create test fixture from.")
         }
-        let measurement = pl.createMeasurement(at: 1)
-        let acc1 = pl.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_000)
-        let acc2 = pl.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_100)
-        let acc3 = pl.createAcceleration(x: 1.0, y: 1.0, z: 1.0, at: 10_200)
-        measurement.addToAccelerations(acc1)
-        measurement.addToAccelerations(acc2)
-        measurement.addToAccelerations(acc3)
-        let geo1 = pl.createGeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, at: 10_000)
-        let geo2 = pl.createGeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, at: 10_100)
-        let geo3 = pl.createGeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, at: 10_200)
-        measurement.addToGeoLocations(geo1)
-        measurement.addToGeoLocations(geo2)
-        measurement.addToGeoLocations(geo3)
 
-        let res = oocut.serializeCompressed(measurement)
+        guard let fixture = fixture else {
+            fatalError("SerializationTest.testCompressedSerialization(): Test failed! No test fixture!")
+        }
+
+        var resCache: Data?
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
+            resCache = oocut.serializeCompressed(measurement)
+            syncGroup.leave()
+        }
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("SerializationTest.testCompressedSerialization(): Unable to get result of serialization!")
+        }
+
+        guard let res = resCache else {
+            fatalError("SerializationTest.testCompressedSerialization(): Unable to get result of serialization!")
+        }
 
         let uncompressedData = res.inflate()
 
@@ -99,12 +116,4 @@ class SerializationTest: XCTestCase {
         // Count of Accelerations
         XCTAssertEqual(uncompressedData![9], 3)
     }
-
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
 }
