@@ -87,7 +87,7 @@ public class MovebisServerConnection: ServerConnection {
             "Content-type": "multipart/form-data"
         ]
 
-        sessionManager.upload(multipartFormData: {[unowned self] data in self.create(request: data, forMeasurement: measurement)}, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: { [unowned self] error in self.onEncodingComplete(forMeasurement: measurement, withResult: error)})
+        /*sessionManager.upload(multipartFormData: {[unowned self] data in self.create(request: data, forMeasurement: measurement)}, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: { [unowned self] error in self.onEncodingComplete(forMeasurement: measurement, withResult: error)})*/
     }
 
     public func getURL() -> URL {
