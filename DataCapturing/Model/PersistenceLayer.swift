@@ -64,7 +64,7 @@ public class PersistenceLayer {
 
         if lastIdentifier == nil {
             // identifier is already stored as metadata.
-            if let currentIdentifier = coordinator.metadata(for: persistentStore)["de.cyface.mid"] as? Int64? {
+            if let currentIdentifier = coordinator.metadata(for: persistentStore)["de.cyface.mid"] as? Int64 {
                 lastIdentifier = currentIdentifier
                 // identifier is not yet stored, create an entry
             } else {
