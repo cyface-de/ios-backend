@@ -316,8 +316,10 @@ public class DataCapturingService: NSObject {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
         persistenceLayer.loadMeasurements { measurements in
-            measurements.forEach({ (measurement) in
-                ret.append(MeasurementEntity(identifier: measurement.identifier))
+            measurements.forEach({ [unowned self] (measurement) in
+                if measurement.identifier != self.currentMeasurement?.identifier {
+                    ret.append(MeasurementEntity(identifier: measurement.identifier))
+                }
             })
             syncGroup.leave()
         }
