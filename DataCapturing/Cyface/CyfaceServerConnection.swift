@@ -103,7 +103,7 @@ public class CyfaceServerConnection: ServerConnection {
      - SeeAlso: `ServerConnection.sync(measurement:onFinishedCall:)`
     */
     public func sync(measurement: MeasurementEntity, onFinishedCall handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
-        debugPrint("Trying to synchronize measurement \(measurement.identifier)")
+        // debugPrint("Trying to synchronize measurement \(measurement.identifier)")
         guard isAuthenticated() else {
             fatalError("CyfaceServerConnection.sync(measurementIdentifiedBy: \(measurement.identifier)): Unable to sync with not authenticated client.")
         }

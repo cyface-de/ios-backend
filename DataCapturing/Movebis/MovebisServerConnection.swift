@@ -109,12 +109,12 @@ public class MovebisServerConnection: ServerConnection {
     func onEncodingComplete(forMeasurement measurement: MeasurementEntity, withResult result: SessionManager.MultipartFormDataEncodingResult) {
         switch result {
         case .success(let upload, _, _):
-            print("Successfully encoded upload \(upload)")
+            // print("Successfully encoded upload \(upload)")
             upload.validate().responseString { response in
                 self.onResponseReady(forMeasurement: measurement, response)
             }
         case .failure(let error):
-            print("failure")
+            // print("failure")
             if let handler = onFinishHandler {
                 handler(measurement, ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onEncodingComplete(\(result)): Unable to upload data \(error.localizedDescription)."))
             }

@@ -46,10 +46,10 @@ class SerializationTest: XCTestCase {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
         persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
-            debugPrint("===================================================")
+            /* debugPrint("===================================================")
             debugPrint("Geo Locations: \(measurement.geoLocations?.count).")
             debugPrint("Accelerations: \(measurement.accelerations?.count).")
-            debugPrint("===================================================")
+            debugPrint("===================================================") */
             resCache = oocut.serialize(measurement)
             syncGroup.leave()
         }

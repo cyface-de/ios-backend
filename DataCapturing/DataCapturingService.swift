@@ -478,6 +478,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
             speed: location.speed,
             timestamp: convertToUtcTimestamp(date: location.timestamp))
 
+        // debugPrint("Saving \(accelerationsCache.count) accelerations")
         persistenceLayer.save(toMeasurement: measurement, location: geoLocation, accelerations: accelerationsCache) { [unowned self] in
             self.capturingQueue.async {
                 self.accelerationsCache.removeAll()
