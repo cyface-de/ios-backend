@@ -18,7 +18,7 @@ public class Acceleration {
 
     // MARK: - Initializers
 
-    init(timestamp: Int64, x: Double, y: Double, z: Double) {
+    public init(timestamp: Int64, x: Double, y: Double, z: Double) {
         self.timestamp = timestamp
         self.x = x
         self.y = y

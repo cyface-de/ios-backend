@@ -10,7 +10,7 @@ import Foundation
 public class MeasurementEntity {
     public let identifier: Int64
 
-    init(identifier: Int64) {
+    public init(identifier: Int64) {
         self.identifier = identifier
     }
 }

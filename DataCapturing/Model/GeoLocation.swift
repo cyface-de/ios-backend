@@ -19,7 +19,7 @@ public class GeoLocation {
 
     // MARK: - Initializers
 
-    init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: Int64) {
+    public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: Int64) {
         self.latitude = latitude
         self.longitude = longitude
         self.accuracy = accuracy
