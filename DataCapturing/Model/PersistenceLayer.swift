@@ -43,7 +43,7 @@ public class PersistenceLayer {
             fatalError("Error initializing mom from: \(modelURL)")
         }
 
-        let container = NSPersistentContainer(name: momdName, managedObjectModel: mom)
+        let container: NSPersistentContainer = NSPersistentContainer(name: momdName, managedObjectModel: mom)
 
         container.loadPersistentStores { _, error in
             if let error = error {
@@ -159,7 +159,7 @@ public class PersistenceLayer {
             syncGroup.enter()
             self.loadMeasurements(onFinishedCall: { (measurements) in
                 measurements.forEach({ (measurement) in
-                    debugPrint("Deleting measurement: \(measurement.identifier).")
+                    // debugPrint("Deleting measurement: \(measurement.identifier).")
                     do {
                         let object = try context.existingObject(with: measurement.objectID)
                         context.delete(object)
@@ -239,6 +239,8 @@ public class PersistenceLayer {
                 measurement.addToAccelerations(dbAcceleration)
             }
 
+            // debugPrint("Saved measurement with \(measurement.accelerations?.count ?? 0)")
+            context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
             context.saveRecursively()
             handler()
         }

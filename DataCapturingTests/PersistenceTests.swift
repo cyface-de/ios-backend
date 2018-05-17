@@ -130,4 +130,42 @@ class PersistenceTests: XCTestCase {
         let countOfMeasurementsAfterDeletion = oocut.syncCountMeasurements()
         XCTAssertEqual(countOfMeasurementsAfterDeletion, 0, "There should be no measurement after deleting it! There where \(countOfMeasurementsAfterDeletion).")
     }
+
+    func testMergeDataToExistingMeasurement() {
+        guard let fixture = fixture else {
+            fatalError("PersistenceTests.testMergeDataToExistingMeasurement(): Unable to unwrap test fixture!")
+        }
+
+        guard let oocut = oocut else {
+            fatalError("PersistenceTests.testMergeDataToExistingMeasurement(): Unable to unwrap object of class under test!")
+        }
+
+        let additionalLocation = GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 800, speed: 5.0, timestamp: 10_005)
+        let additionalAccelerations = [
+            Acceleration(timestamp: 10_005, x: 1.0, y: 1.0, z: 1.0),
+            Acceleration(timestamp: 10_006, x: 1.0, y: 1.0, z: 1.0),
+            Acceleration(timestamp: 10_007, x: 1.0, y: 1.0, z: 1.0)
+        ]
+
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        oocut.save(toMeasurement: fixture, location: additionalLocation, accelerations: additionalAccelerations) {
+            syncGroup.leave()
+        }
+
+        XCTAssertEqual(syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)), .success)
+        var locationsCount = 0
+        var accelerationsCount = 0
+
+        syncGroup.enter()
+        oocut.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
+            locationsCount = measurement.geoLocations?.count ?? 0
+            accelerationsCount = measurement.accelerations?.count ?? 0
+            syncGroup.leave()
+        }
+
+        XCTAssertEqual(syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)), .success)
+        XCTAssertEqual(locationsCount,3)
+        XCTAssertEqual(accelerationsCount, 6)
+    }
 }
