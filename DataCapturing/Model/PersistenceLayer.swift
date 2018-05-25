@@ -95,7 +95,7 @@ public class PersistenceLayer {
 
      - Parameter timestamp: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
      */
-    public func createMeasurement(at timestamp: Int64) -> MeasurementEntity {
+    public func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext) -> MeasurementEntity {
         let identifier = nextIdentifier
         var ret: MeasurementEntity?
         let syncGroup = DispatchGroup()
@@ -106,7 +106,8 @@ public class PersistenceLayer {
                 measurement.timestamp = timestamp
                 measurement.identifier = identifier
                 measurement.synchronized = false
-                ret = MeasurementEntity(identifier: measurement.identifier)
+                measurement.context = mContext.rawValue
+                ret = MeasurementEntity(identifier: measurement.identifier, context: mContext)
             } else {
                 fatalError("PersistenceLayer.createMeasurement(at: \(timestamp)): Unable to create measurement!")
             }
@@ -198,11 +199,9 @@ public class PersistenceLayer {
         container.performBackgroundTask { [unowned self] (context) in
             let measurement = self.load(measurementIdentifiedBy: measurement.identifier, from: context)
             measurement.synchronized = true
-            if let accelerations = measurement.accelerations {
-                for acceleration in accelerations {
-                    measurement.removeFromAccelerations(acceleration)
-                    context.delete(acceleration)
-                }
+            for acceleration in measurement.accelerations {
+                measurement.removeFromAccelerations(acceleration)
+                context.delete(acceleration)
             }
 
             context.saveRecursively()
@@ -271,14 +270,15 @@ public class PersistenceLayer {
         // The following needs to use an Objective-C number. That is why `measurementIdentifier` is wrapped in `NSNumber`
         fetchRequest.predicate = NSPredicate(format: "identifier==%@", NSNumber(value: identifier))
 
-        if let results = try? context.fetch(fetchRequest) {
+        do {
+            let results = try context.fetch(fetchRequest)
             if results.count == 1 {
                 return results[0]
             } else {
                 fatalError("PersistenceLayer.load(measurementIdentifier: \(identifier)): Wrong count of results: \(results.count).")
             }
-        } else {
-            fatalError("PersistenceLayer.load(measurementIdentifier: \(identifier)): Unable to fetch any results.")
+        } catch {
+            fatalError("PersistenceLayer.load(measurementIdentifier: \(identifier)): Unable to fetch any results due to \(error)")
         }
     }
 
