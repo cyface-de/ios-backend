@@ -57,6 +57,7 @@ public class DataCapturingService: NSObject {
         let manager = CLLocationManager()
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         manager.allowsBackgroundLocationUpdates = true
+        manager.pausesLocationUpdatesAutomatically = false
         manager.activityType = .other
         manager.showsBackgroundLocationIndicator = true
         manager.distanceFilter = kCLDistanceFilterNone
@@ -479,7 +480,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
             timestamp: convertToUtcTimestamp(date: location.timestamp))
 
         // debugPrint("Saving \(accelerationsCache.count) accelerations")
-        persistenceLayer.save(toMeasurement: measurement, location: geoLocation, accelerations: accelerationsCache) { [unowned self] in
+        persistenceLayer.save(toMeasurement: measurement, location: geoLocation, accelerations: accelerationsCache) {
             self.capturingQueue.async {
                 self.accelerationsCache.removeAll()
                 DispatchQueue.main.async {
