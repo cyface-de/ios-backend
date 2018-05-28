@@ -220,30 +220,34 @@ public class DataCapturingService: NSObject {
 
         self.persistenceLayer.loadMeasurements { [unowned self] measurements in
             var countOfMeasurementsToSynchronize = measurements.count
+            guard countOfMeasurementsToSynchronize>0 else {
+                handler()
+                return;
+            }
+
             for measurement in measurements {
                 let synchronizationFinishedHandler: (MeasurementEntity, ServerConnectionError?) -> Void = { [unowned self] measurement, error in
                     // Only go on if there was no error
-                    guard error==nil else {
-                        os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
-                        return
-                    }
-                    self.cleanDataAfterSync(for: measurement) {
-                        // Inform UI if interested
-                        if let syncDelegate = self.syncDelegate {
-                            DispatchQueue.main.async {
-                                syncDelegate(measurement.identifier)
+                    if error == nil {
+                        self.cleanDataAfterSync(for: measurement) {
+                            // Inform UI if interested
+                            if let syncDelegate = self.syncDelegate {
+                                DispatchQueue.main.async {
+                                    syncDelegate(measurement.identifier)
+                                }
                             }
                         }
+                    } else {
+                        os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
+                    }
+                    // TODO: synchronize this?
+                    countOfMeasurementsToSynchronize -= 1
 
-                        // TODO: synchronize this?
-                        countOfMeasurementsToSynchronize -= 1
-
-                        // Everything uploaded?
-                        if countOfMeasurementsToSynchronize == 0 {
-                            handler()
-                            if self.countMeasurements()==0 {
-                                self.reachabilityManager.stopListening()
-                            }
+                    // Everything uploaded?
+                    if countOfMeasurementsToSynchronize == 0 {
+                        handler()
+                        if self.countMeasurements()==0 {
+                            self.reachabilityManager.stopListening()
                         }
                     }
                 }
@@ -478,7 +482,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
 
         // debugPrint("Saving \(accelerationsCache.count) accelerations")
         persistenceLayer.save(toMeasurement: measurement, location: geoLocation, accelerations: accelerationsCache) {
-            self.capturingQueue.async {
+            self.capturingQueue.sync {
                 self.accelerationsCache.removeAll()
                 DispatchQueue.main.async {
                     self.notify(of: .geoLocationAcquired(position: geoLocation))
