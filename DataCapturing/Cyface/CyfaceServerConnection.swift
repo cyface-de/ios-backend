@@ -38,6 +38,7 @@ public class CyfaceServerConnection: ServerConnection {
     /// Authentication token provided by a JWT authentication request. This property is `nil` as long as authenticate was not called successfully yet. Otherwise it contains the JWT bearer required as content for the Authorization header.
     private var jwtBearer: String?
 
+    /// The Alamofire session manager used to transmit data to and receive responses from a Cyface server.
     private lazy var sessionManager: SessionManager = {
         // Remove Accept-Encoding from the default headers.
         var defaultHeaders = Alamofire.SessionManager.defaultHTTPHeaders
@@ -388,6 +389,7 @@ struct Device: Codable {
     var identifier: String
 }
 
+/// Extension to an Alamofire request that allows to print out the request to the console.
 extension Request {
     public func debugLog() -> Self {
         #if DEBUG
