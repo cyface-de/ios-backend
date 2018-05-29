@@ -114,7 +114,7 @@ public class PersistenceLayer {
                 measurement.context = mContext.rawValue
                 ret = MeasurementEntity(identifier: measurement.identifier, context: mContext)
             } else {
-                fatalError("PersistenceLayer.createMeasurement(at: \(timestamp)): Unable to create measurement!")
+                fatalError("PersistenceLayer.createMeasurement(at: \(timestamp), withContext: \(mContext.rawValue): Unable to create measurement!")
             }
             
             context.saveRecursively()
@@ -122,7 +122,7 @@ public class PersistenceLayer {
         }
         
         guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError("PersistenceLayer.createMeasurement(at: \(timestamp)): Unable to create measurement!")
+            fatalError("PersistenceLayer.createMeasurement(at: \(timestamp), withContext: \(mContext.rawValue)): Unable to create measurement!")
         }
         return ret!
     }
