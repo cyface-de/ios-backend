@@ -21,9 +21,9 @@ import CoreData
  - Since: 1.0.0
  */
 public class PersistenceLayer {
-    
+
     // MARK: - Properties
-    
+
     /// Container for the persistent object model.
     private lazy var container: NSPersistentContainer = {
         /*
@@ -34,34 +34,34 @@ public class PersistenceLayer {
          https://stackoverflow.com/questions/42553749/core-data-failed-to-load-model
          */
         let momdName = "CyfaceModel"
-        
+
         guard let modelURL = Bundle(for: type(of: self)).url(forResource: momdName, withExtension: "momd") else {
             fatalError("Error loading model from bundle")
         }
-        
+
         guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
             fatalError("Error initializing mom from: \(modelURL)")
         }
-        
+
         let container: NSPersistentContainer = NSPersistentContainer(name: momdName, managedObjectModel: mom)
-        
+
         container.loadPersistentStores { _, error in
             if let error = error {
                 fatalError("Unable to load persistent storage \(error)")
             }
         }
-        
+
         return container
     }()
-    
+
     /// The identifier that has been assigned the last to a new `Measurement`.
     var lastIdentifier: Int64?
-    
+
     /// The next identifier to assign to a new `Measurement`.
     var nextIdentifier: Int64 {
         let persistentStore = container.persistentStoreCoordinator.persistentStores[0]
         let coordinator = container.persistentStoreCoordinator
-        
+
         if lastIdentifier == nil {
             // identifier is already stored as metadata.
             if let currentIdentifier = coordinator.metadata(for: persistentStore)["de.cyface.mid"] as? Int64 {
@@ -72,24 +72,24 @@ public class PersistenceLayer {
                 coordinator.setMetadata(["de.cyface.mid": lastIdentifier as Any], for: persistentStore)
             }
         }
-        
+
         guard let lastIdentifier = lastIdentifier else {
             fatalError("No identifier available!")
         }
-        
+
         let nextIdentifier = lastIdentifier + 1
         self.lastIdentifier = nextIdentifier
         coordinator.setMetadata(["de.cyface.mid": nextIdentifier], for: persistentStore)
         return nextIdentifier
     }
-    
+
     // MARK: - Initializers
-    
+
     /// Public constructor usable by external callers.
     public init() {}
-    
+
     // MARK: - Database Writing Methods
-    
+
     /**
      Creates a new measurement with the provided `timestamp`.
      
@@ -105,7 +105,7 @@ public class PersistenceLayer {
             while(self.load(measurementIdentifiedBy: identifier, from: context) != nil) {
                 identifier = self.nextIdentifier
             }
-            
+
             if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
                 let measurement = MeasurementMO(entity: description, insertInto: context)
                 measurement.timestamp = timestamp
@@ -114,19 +114,19 @@ public class PersistenceLayer {
                 measurement.context = mContext.rawValue
                 ret = MeasurementEntity(identifier: measurement.identifier, context: mContext)
             } else {
-                fatalError("PersistenceLayer.createMeasurement(at: \(timestamp)): Unable to create measurement!")
+                fatalError("PersistenceLayer.createMeasurement(at: \(timestamp), withContext: \(mContext.rawValue): Unable to create measurement!")
             }
-            
+
             context.saveRecursively()
             syncGroup.leave()
         }
-        
+
         guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError("PersistenceLayer.createMeasurement(at: \(timestamp)): Unable to create measurement!")
+            fatalError("PersistenceLayer.createMeasurement(at: \(timestamp), withContext: \(mContext.rawValue)): Unable to create measurement!")
         }
         return ret!
     }
-    
+
     /**
      Deletes the measurement from the data storage on a background thread. Calls the provided handler when deletion has been completed.
      
@@ -145,7 +145,7 @@ public class PersistenceLayer {
             handler()
         }
     }
-    
+
     func syncDelete(measurement: MeasurementEntity) {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
@@ -156,7 +156,7 @@ public class PersistenceLayer {
             fatalError("PersistenceLayer.syncDelete(measurement: \(measurement.identifier)): Unable to delete measurements from data storage!")
         }
     }
-    
+
     /**
      Deletes everything from the data storage.
      
@@ -185,7 +185,7 @@ public class PersistenceLayer {
             handler()
         }
     }
-    
+
     func syncDelete() {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
@@ -196,7 +196,7 @@ public class PersistenceLayer {
             fatalError("PersistenceLayer.syncDelete(): Unable to delete measurements from data storage!")
         }
     }
-    
+
     /**
      Strips the provided measurement of all accelerations.
      
@@ -209,18 +209,18 @@ public class PersistenceLayer {
             guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
                 fatalError("PersistenceLayer.clean(measurement: \(measurementIdentifier)): Unable to load measurement!")
             }
-            
+
             measurement.synchronized = true
             for acceleration in measurement.accelerations {
                 measurement.removeFromAccelerations(acceleration)
                 context.delete(acceleration)
             }
-            
+
             context.saveRecursively()
             finishedHandler()
         }
     }
-    
+
     /**
      Stores the provided `location` and `accelerations` to the provided measurement.
      
@@ -235,7 +235,7 @@ public class PersistenceLayer {
             guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
                 fatalError("PersistenceLayer.save(measurement: \(measurementIdentifier), location: \(location.latitude), \(location.longitude), accelerations: \(accelerations.count)): Unable to load measurement!")
             }
-            
+
             let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
             dbLocation.lat = location.latitude
             dbLocation.lon = location.longitude
@@ -243,7 +243,7 @@ public class PersistenceLayer {
             dbLocation.timestamp = location.timestamp
             dbLocation.accuracy = location.accuracy
             measurement.addToGeoLocations(dbLocation)
-            
+
             accelerations.forEach { acceleration in
                 let dbAcceleration = AccelerationPointMO.init(entity: AccelerationPointMO.entity(), insertInto: context)
                 dbAcceleration.ax = acceleration.x
@@ -252,26 +252,26 @@ public class PersistenceLayer {
                 dbAcceleration.timestamp = acceleration.timestamp
                 measurement.addToAccelerations(dbAcceleration)
             }
-            
+
             // debugPrint("Saved measurement with \(measurement.accelerations?.count ?? 0)")
             context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
             context.saveRecursively()
             handler()
         }
     }
-    
+
     func syncSave(toMeasurement measurement: MeasurementEntity, location: GeoLocation, accelerations: [Acceleration]) {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
         save(toMeasurement: measurement, location: location, accelerations: accelerations) {
             syncGroup.leave()
         }
-        
+
         guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
             fatalError()
         }
     }
-    
+
     // MARK: - Database Read Only Methods
     /**
      Internal load method, loading the provided `measurement` on the provided `context`.
@@ -286,7 +286,7 @@ public class PersistenceLayer {
         let fetchRequest: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         // The following needs to use an Objective-C number. That is why `measurementIdentifier` is wrapped in `NSNumber`
         fetchRequest.predicate = NSPredicate(format: "identifier==%@", NSNumber(value: identifier))
-        
+
         do {
             let results = try context.fetch(fetchRequest)
             if results.count == 1 {
@@ -298,7 +298,7 @@ public class PersistenceLayer {
             fatalError("PersistenceLayer.load(measurementIdentifier: \(identifier)): Unable to fetch any results due to \(error)")
         }
     }
-    
+
     /**
      Loads the data belonging to the provided `measurement` in the background an calls `onFinishedCall` with the data storage representation of that `measurement`. Using that represenation is not thread safe. Do not use it outside of the handler.
      
@@ -315,7 +315,7 @@ public class PersistenceLayer {
             }
         }
     }
-    
+
     /**
      Loads all the measurements from the data storage. Runs asynchronously in the background and calls a handler after loading has been completed. You should never use the objects in the provided array outside of the handler, since they are not thread safe and lose all data if transfered outside.
      
@@ -333,7 +333,7 @@ public class PersistenceLayer {
             }
         }
     }
-    
+
     /**
      Counts the amount of measurements currently stored in the data store, asynchronously in the background.
      
@@ -346,7 +346,7 @@ public class PersistenceLayer {
             handler(count ?? 0)
         }
     }
-    
+
     public func syncCountMeasurements() -> Int {
         let syncGroup = DispatchGroup()
         var ret: Int?
@@ -366,7 +366,7 @@ public class PersistenceLayer {
  Adds functions to save a context and all parent contexts up to the `NSPersistentContainer`.
  */
 extension NSManagedObjectContext {
-    
+
     /**
      Saves this context and all parent contexts if there are changes.
      */
@@ -377,7 +377,7 @@ extension NSManagedObjectContext {
             }
         }
     }
-    
+
     /**
      Saves this context and its parent.
      */

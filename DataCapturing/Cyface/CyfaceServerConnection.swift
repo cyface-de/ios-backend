@@ -38,10 +38,17 @@ public class CyfaceServerConnection: ServerConnection {
     /// Authentication token provided by a JWT authentication request. This property is `nil` as long as authenticate was not called successfully yet. Otherwise it contains the JWT bearer required as content for the Authorization header.
     private var jwtBearer: String?
 
-    /**
-     The handler to call after authentication has been finished. If an error occurs the error property of this handler contains further details. This property is `nil` after successful authentication.
-     */
-    //private var onAuthenticationFinishedHandler: ((Error?) -> Void)?
+    /// The Alamofire session manager used to transmit data to and receive responses from a Cyface server.
+    private lazy var sessionManager: SessionManager = {
+        // Remove Accept-Encoding from the default headers.
+        var defaultHeaders = Alamofire.SessionManager.defaultHTTPHeaders
+        defaultHeaders.removeValue(forKey: "Accept-Encoding")
+
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = defaultHeaders
+
+        return Alamofire.SessionManager(configuration: configuration)
+    }()
 
     /**
      The world wide unique identifier of this app installation. The name is a bit misleading. It is used to identify multiple uploads from the same device, for example to create reusable machine learning models for one or only some devices. If the app is uninstalled and reinstalled, this identifier is reset to a new value. It is generated and registered with the server on the first upload.
@@ -86,7 +93,7 @@ public class CyfaceServerConnection: ServerConnection {
                 "login": "\(username)",
                 "password": "\(password)"]
 
-            Alamofire.request(apiURL.appendingPathComponent("login"), method: .post, parameters: body, encoding: JSONEncoding.default).validate(statusCode: [200]).response { (response) in
+            sessionManager.request(apiURL.appendingPathComponent("login"), method: .post, parameters: body, encoding: JSONEncoding.default).validate(statusCode: [200]).response { (response) in
                 if let handler = handler {
                     if let error = response.error {
                         handler(error)
@@ -146,7 +153,6 @@ public class CyfaceServerConnection: ServerConnection {
      - onFinish: Called upon upload completion. This handler is provided with the uploaded `MeasurementEntity` and either some error information if there was an error, or `nil` if upload has been successful.
      */
     private func transmit(measurement: MeasurementEntity, forDevice deviceIdentifier: String, onFinish handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
-
         makeUploadChunks(fromMeasurement: measurement, forInstallation: deviceIdentifier) { [unowned self] chunk in
             guard let jsonChunk = try? JSONSerialization.data(withJSONObject: chunk, options: .sortedKeys) else {
                 fatalError("ServerConnection.transmit(measurement: \(measurement.identifier), forDevice: \(deviceIdentifier)): Invalid measurement format.")
@@ -159,14 +165,18 @@ public class CyfaceServerConnection: ServerConnection {
             let headers: HTTPHeaders = [
                 "Authorization": jwtBearer,
                 "Content-Type": "application/json"]
-            Alamofire.upload(jsonChunk, to: self.apiURL.appendingPathComponent("measurements").absoluteString, method: .post, headers: headers).validate(statusCode: [201]).response { (response) in
+            DispatchQueue.global(qos: .background).async(flags: .barrier) {
+                self.sessionManager.upload(jsonChunk, to: self.apiURL.appendingPathComponent("measurements").absoluteString, method: .post, headers: headers).debugLog().validate(statusCode: [201]).response { (response) in
 
-                if let error = response.error {
-                    handler(measurement, ServerConnectionError(
-                        title: "Data Transmission Error",
-                        description: "Error while transmitting data to the server at \(self.apiURL)! Error was: \(error)"))
-                } else {
-                    handler(measurement, nil)
+                    if let error = response.error {
+                        let connectionError = ServerConnectionError(
+                            title: "Data Transmission Error",
+                            description: "Error while transmitting data to the server at \(self.apiURL)! Error was: \(error). \n HTTP Status Code: \(String(describing: response.response?.statusCode))")
+                        handler(measurement, connectionError)
+                        debugPrint("\(String(describing: connectionError.title)): \(String(describing: connectionError.errorDescription))")
+                    } else {
+                        handler(measurement, nil)
+                    }
                 }
             }
         }
@@ -210,7 +220,7 @@ public class CyfaceServerConnection: ServerConnection {
             handler([
                 "deviceId": installationIdentifier,
                 "id": String(measurement.identifier),
-                "vehicle": "BICYCLE",
+                "vehicle": measurement.context,
                 "gpsPoints": geoLocations,
                 "accelerationPoints": accelerationPoints])
         }
@@ -287,7 +297,7 @@ public class CyfaceServerConnection: ServerConnection {
         }
 
         let headers: HTTPHeaders = ["Authorization": jwtBearer!]
-        Alamofire.request(self.apiURL.appendingPathComponent("devices"), headers: headers).validate(statusCode: [200]).responseJSON { (response) in
+        sessionManager.request(self.apiURL.appendingPathComponent("devices"), headers: headers).validate(statusCode: [200]).responseJSON { (response) in
             if let error = response.error {
                 handler(ServerConnectionError(
                     title: "Device Registration Error",
@@ -305,12 +315,20 @@ public class CyfaceServerConnection: ServerConnection {
             }
 
             for device in data {
-                if let jsonDevice = device as? [String: Any], let jsonIdentifier = jsonDevice["id"] as? String, jsonIdentifier==identifier {
+                // Parsing JSON response
+                guard let jsonDevice = device as? [String: Any] else {
+                    handler(ServerConnectionError(title: "Device Registration Error", description: "Unable to parse response as JSON."),false)
+                    return
+                }
+
+                // Extracting device information from parsed response.
+                if let jsonIdentifier = jsonDevice["id"] as? String, jsonIdentifier==identifier {
                     handler(nil, true)
-                    break
+                    return
                 }
             }
-
+            // Device was not found.
+            handler(nil,false)
 
         }
     }
@@ -343,7 +361,7 @@ public class CyfaceServerConnection: ServerConnection {
             "name": deviceModelIdentifier
         ]
 
-        Alamofire.request(self.apiURL.appendingPathComponent("devices"), method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).validate(statusCode: [201]).response { (response) in
+        sessionManager.request(self.apiURL.appendingPathComponent("devices"), method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).validate(statusCode: [201]).response { (response) in
             if let error = response.error {
                 handler(ServerConnectionError(
                     title: "Device Registration Error",
@@ -369,4 +387,16 @@ public class CyfaceServerConnection: ServerConnection {
 struct Device: Codable {
     /// The world wide unique identifier of the device.
     var identifier: String
+}
+
+/// Extension to an Alamofire request that allows to print out the request to the console.
+extension Request {
+    public func debugLog() -> Self {
+        #if DEBUG
+        debugPrint("=======================================")
+        debugPrint(self)
+        debugPrint("=======================================")
+        #endif
+        return self
+    }
 }

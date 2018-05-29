@@ -26,13 +26,16 @@ class DataCapturingTests: XCTestCase {
         super.tearDown()
     }
 
-    func testSynchronizationWithMovebisServer() {
+    /**
+     This test tests the actual upload of data to a Movebis server. Since we can not assume there is one such server in each and every test environment (especially under CI conditions), the test is skipped by default. Enable it to selectively test data upload in isolation. The test should also not run on an arbitrary server, since most servers will reject the transmitted data on the second run, because of data duplication.
+    */
+    func skipped_testSynchronizationWithMovebisServer() {
         guard let oocut = oocut else {
             fatalError("Test failed!")
         }
 
         let persistenceLayer = PersistenceLayer()
-        let measurement = persistenceLayer.createMeasurement(at: 2)
+        let measurement = persistenceLayer.createMeasurement(at: 2, withContext: .bike)
         let promise = expectation(description: "No error on synchronization!")
 
         oocut.authenticate(withJwtToken: "replace me")
