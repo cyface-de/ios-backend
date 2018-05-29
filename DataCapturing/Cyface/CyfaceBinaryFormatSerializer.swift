@@ -71,8 +71,8 @@ class CyfaceBinaryFormatSerializer {
      - Returns: The serialized measurement in Cyface binary format.
      */
     func serialize(_ measurement: MeasurementMO) -> Data {
-        let accelerations = measurement.accelerations ?? []
-        let geoLocations = measurement.geoLocations ?? []
+        let accelerations = measurement.accelerations
+        let geoLocations = measurement.geoLocations
 
         var dataArray = [UInt8]()
         // add header
