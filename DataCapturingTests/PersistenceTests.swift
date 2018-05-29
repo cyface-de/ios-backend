@@ -19,7 +19,7 @@ class PersistenceTests: XCTestCase {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         let oocut = PersistenceLayer()
 
-        let fixture = oocut.createMeasurement(at: 10_000)
+        let fixture = oocut.createMeasurement(at: 10_000, withContext: .bike)
         oocut.syncSave(toMeasurement: fixture, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000), accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0)])
         oocut.syncSave(toMeasurement: fixture, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_001), accelerations: [Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)])
 
@@ -38,7 +38,7 @@ class PersistenceTests: XCTestCase {
      Tests if new measurements are created with the correct identifier and if identifiers are increased for each new measurement. This should even work if one measurement is deleted in between.
      */
     func testCreateMeasurement() {
-        guard let secondMeasurement = oocut?.createMeasurement(at: 10_001) else {
+        guard let secondMeasurement = oocut?.createMeasurement(at: 10_001, withContext: .bike) else {
             fatalError()
         }
         guard let firstMeasurement = fixture else {
@@ -50,7 +50,7 @@ class PersistenceTests: XCTestCase {
 
         oocut!.syncDelete(measurement: secondMeasurement)
 
-        guard let thirdMeasurement = oocut?.createMeasurement(at: 10_002) else {
+        guard let thirdMeasurement = oocut?.createMeasurement(at: 10_002, withContext: .bike) else {
             fatalError()
         }
 
@@ -74,8 +74,8 @@ class PersistenceTests: XCTestCase {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
         oocut.load(measurementIdentifiedBy: measurement.identifier) { (measurementMo) in
-            accelerationCount = measurementMo.accelerations!.count
-            geoLocationCount = measurementMo.geoLocations!.count
+            accelerationCount = measurementMo.accelerations.count
+            geoLocationCount = measurementMo.geoLocations.count
             syncGroup.leave()
         }
 
@@ -83,8 +83,8 @@ class PersistenceTests: XCTestCase {
             fatalError()
         }
 
-        XCTAssertEqual(accelerationCount!, 3)
-        XCTAssertEqual(geoLocationCount!, 2)
+        XCTAssertEqual(accelerationCount, 3)
+        XCTAssertEqual(geoLocationCount, 2)
 
         syncGroup.enter()
         oocut.clean(measurement: measurement) {
@@ -99,9 +99,9 @@ class PersistenceTests: XCTestCase {
         var geoLocationsIsEmpty = false
 
         syncGroup.enter()
-        let loadedMeasurement = oocut.load(measurementIdentifiedBy: measurement.identifier) { measurementMo in
-            accelerationsIsEmpty = measurementMo.accelerations!.isEmpty
-            geoLocationsIsEmpty = measurementMo.geoLocations!.isEmpty
+        oocut.load(measurementIdentifiedBy: measurement.identifier) { measurementMo in
+            accelerationsIsEmpty = measurementMo.accelerations.isEmpty
+            geoLocationsIsEmpty = measurementMo.geoLocations.isEmpty
             syncGroup.leave()
         }
 
@@ -159,8 +159,8 @@ class PersistenceTests: XCTestCase {
 
         syncGroup.enter()
         oocut.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
-            locationsCount = measurement.geoLocations?.count ?? 0
-            accelerationsCount = measurement.accelerations?.count ?? 0
+            locationsCount = measurement.geoLocations.count
+            accelerationsCount = measurement.accelerations.count
             syncGroup.leave()
         }
 

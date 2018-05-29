@@ -222,7 +222,7 @@ public class DataCapturingService: NSObject {
             var countOfMeasurementsToSynchronize = measurements.count
             guard countOfMeasurementsToSynchronize>0 else {
                 handler()
-                return;
+                return
             }
 
             for measurement in measurements {
