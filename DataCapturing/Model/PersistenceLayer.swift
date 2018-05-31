@@ -99,7 +99,7 @@ public class PersistenceLayer {
         var ret: MeasurementEntity?
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        container.performBackgroundTask { [unowned self] (context) in
+        container.performBackgroundTask { context in
             // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
             var identifier = self.nextIdentifier
             while(self.load(measurementIdentifiedBy: identifier, from: context) != nil) {
@@ -135,7 +135,7 @@ public class PersistenceLayer {
      - onFinishedCall: The handler to call, when deletion has completed.
      */
     func delete(measurement: MeasurementEntity, onFinishedCall handler: @escaping (() -> Void)) {
-        container.performBackgroundTask { [unowned self] context in
+        container.performBackgroundTask { context in
             let measurementIdentifier = measurement.identifier
             guard let measurement = self.load(measurementIdentifiedBy: measurement.identifier, from: context) else {
                 fatalError("PersistenceLayer.delete(measurement: \(measurementIdentifier): Unable to load measurement!")
@@ -163,7 +163,7 @@ public class PersistenceLayer {
      - Parameter onFinishedCall: A handler called after deletion is complete.
      */
     func delete(onFinishedCall handler: @escaping () -> Void) {
-        container.performBackgroundTask { [unowned self] (context) in
+        container.performBackgroundTask { context in
             let syncGroup = DispatchGroup()
             syncGroup.enter()
             self.loadMeasurements(onFinishedCall: { (measurements) in
@@ -204,7 +204,7 @@ public class PersistenceLayer {
      - measurement: The measurement to strip of accelerations
      */
     func clean(measurement: MeasurementEntity, whenFinishedCall finishedHandler: @escaping () -> Void) {
-        container.performBackgroundTask { [unowned self] (context) in
+        container.performBackgroundTask { context in
             let measurementIdentifier = measurement.identifier
             guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
                 fatalError("PersistenceLayer.clean(measurement: \(measurementIdentifier)): Unable to load measurement!")
@@ -230,7 +230,7 @@ public class PersistenceLayer {
      - accelerations: An array of `Acceleration` instances to store.
      */
     func save(toMeasurement measurement: MeasurementEntity, location: GeoLocation, accelerations: [Acceleration], onFinished handler: @escaping () -> Void) {
-        container.performBackgroundTask { [unowned self] (context) in
+        container.performBackgroundTask { context in
             let measurementIdentifier = measurement.identifier
             guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
                 fatalError("PersistenceLayer.save(measurement: \(measurementIdentifier), location: \(location.latitude), \(location.longitude), accelerations: \(accelerations.count)): Unable to load measurement!")
@@ -307,7 +307,7 @@ public class PersistenceLayer {
      - onFinishedCall: The handler to call when loading the `measurement` has finished
      */
     public func load(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (MeasurementMO) -> Void) {
-        container.performBackgroundTask { [unowned self] (context) in
+        container.performBackgroundTask { context in
             if let measurement = self.load(measurementIdentifiedBy: identifier, from: context) {
                 handler(measurement)
             } else {

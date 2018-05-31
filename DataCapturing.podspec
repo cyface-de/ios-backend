@@ -28,7 +28,7 @@ This framework can be included by your App if you are going to capture sensor da
   s.source           = { :git => 'https://github.com/cyface-de/ios-backend.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/CyfaceDE'
 
-  s.platform	     = :ios, '11.2'
+  s.platform	     = :ios, '10.3'
 
   s.source_files = 'DataCapturing/*.swift','DataCapturing/Model/*.swift'
   
