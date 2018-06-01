@@ -9,7 +9,7 @@ target 'DataCapturing' do
   # Used for network traffic
   pod 'Alamofire', '~> 4.6'
   # A wrapper for the complicated ObjectiveC compression API.
-  pod 'DataCompression'
+  pod 'DataCompression', '~> 2.0.1'
 
   target 'DataCapturingTests' do
     inherit! :search_paths

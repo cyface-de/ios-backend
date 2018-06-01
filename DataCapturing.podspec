@@ -43,7 +43,7 @@ This framework can be included by your App if you are going to capture sensor da
   # This one is used to handle network traffic like multipart requests
   s.dependency 'Alamofire', '~> 4.6'
   # A wrapper for the complicated ObjectiveC compression API.
-  s.dependency 'DataCompression'
+  s.dependency 'DataCompression', '~> 2.0.1'
 
   s.test_spec 'DataCapturingTests' do |test_spec|
     test_spec.source_files = 'DataCapturingTests/*.swift'
