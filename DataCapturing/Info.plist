@@ -15,14 +15,14 @@
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.0	</string>
+	<string>1.0.2</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>NSPrincipalClass</key>
-	<string></string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs to capture locations even while being in the background to measure your distance travelled and report anonymized statistics to your local authorities. The authorities are supposed to make decisions based on the received data on how to improve traffic infrastructure.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs to capture locations even while being in the background to measure your distance travelled and report anonymized statistics to your local authorities. The authorities are supposed to make decisions based on the received data on how to improve traffic infrastructure.</string>
+	<key>NSPrincipalClass</key>
+	<string></string>
 </dict>
 </plist>
