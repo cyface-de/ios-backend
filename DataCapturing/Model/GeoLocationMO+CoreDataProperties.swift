@@ -9,7 +9,6 @@
 import Foundation
 import CoreData
 
-
 extension GeoLocationMO {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<GeoLocationMO> {
