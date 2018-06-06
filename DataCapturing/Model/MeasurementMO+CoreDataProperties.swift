@@ -9,7 +9,6 @@
 import Foundation
 import CoreData
 
-
 extension MeasurementMO {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<MeasurementMO> {

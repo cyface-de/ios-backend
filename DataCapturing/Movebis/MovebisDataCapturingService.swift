@@ -76,7 +76,7 @@ public class MovebisDataCapturingService: DataCapturingService {
      until the App can transmit it to a server.
      */
     public init(connection serverConnection: MovebisServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer) {
-        super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence)
+        super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence, dataSynchronizationIsActive: true)
     }
 
     public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> MeasurementEntity {
