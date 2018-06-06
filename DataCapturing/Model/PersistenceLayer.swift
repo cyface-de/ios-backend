@@ -289,6 +289,14 @@ public class PersistenceLayer {
         }
     }
 
+    /**
+     Saves the provided locations and accelerations to the measurement synchronously. This can be a very long running operation and should never execute on the main thread.
+
+     - Parameters:
+     - locations: The `GeoLocation` objects to save.
+     - accelerations: The `Acceleration` objects to save.
+     - toMeasurement: The measurement to save the provided ojects to.
+    */
     func syncSave(locations: [GeoLocation], accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity) {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
@@ -380,6 +388,11 @@ public class PersistenceLayer {
         }
     }
 
+    /**
+     Counts all the measurements currently saved in the database.
+
+     - Returns: The number of measurements in the database.
+    */
     public func syncCountMeasurements() -> Int {
         let syncGroup = DispatchGroup()
         var ret: Int?

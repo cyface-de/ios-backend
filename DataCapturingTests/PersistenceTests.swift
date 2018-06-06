@@ -27,8 +27,8 @@ class PersistenceTests: XCTestCase {
         }
 
         let fixture = oocut.createMeasurement(at: 10_000, withContext: .bike)
-        oocut.syncSave(toMeasurement: fixture, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000), accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0)])
-        oocut.syncSave(toMeasurement: fixture, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_001), accelerations: [Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)])
+        oocut.syncSave(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000)], accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: fixture)
+        oocut.syncSave(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], accelerations: [Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: fixture)
 
             self.oocut = oocut
             self.fixture = fixture
@@ -156,7 +156,11 @@ class PersistenceTests: XCTestCase {
 
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        oocut.save(toMeasurement: fixture, location: additionalLocation, accelerations: additionalAccelerations) {
+        oocut.save(locations: [additionalLocation], toMeasurement: fixture) {
+            syncGroup.leave()
+        }
+        syncGroup.enter()
+        oocut.save(accelerations: additionalAccelerations, toMeasurement: fixture) {
             syncGroup.leave()
         }
 

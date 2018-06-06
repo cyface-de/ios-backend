@@ -109,9 +109,12 @@ public class DataCapturingService: NSObject {
         }
     }
 
+    // TODO: The following is ugly code duplication with accelerationsCache, locationsCache and the two synchronization queues. This should probably moved to some external class and abstracted to one shared implementation.
+
     /// An in memory storage for accelerations, before they are written to disk.
     private var accelerationsCache = [Acceleration]()
 
+    /// An in memory storage for geo locations, before they are written to disk.
     private var locationsCache = [GeoLocation]()
 
     /// The background queue used to capture data.
@@ -120,6 +123,7 @@ public class DataCapturingService: NSObject {
     /// Synchronizes read and write operations on the `accelerationsCache`.
     private let accelerationsCacheSynchronizationQueue = DispatchQueue(label: "accelerationsCacheSynchronization", attributes: .concurrent)
 
+    /// Synchronizes read and write operations on the `locationsCache`.
     private let locationsCacheSynchronizationQueue = DispatchQueue(label: "locationsCacheSynchronization", attributes: .concurrent)
 
     /// A timer called in regular intervals to save the captured data to the underlying database.
@@ -488,6 +492,9 @@ public class DataCapturingService: NSObject {
         handler(event)
     }
 
+    /**
+     Method called by the `backgroundSynchronizationTimer` on each invocation. This method saves all data from `accelerationsCache` and from `locationsCache` to the underlying database and cleans both caches.
+    */
     func saveCapturedData(timer: Timer) {
         guard let measurement = currentMeasurement else {
             fatalError("No current measurement to save the location to! Data capturing impossible.")

@@ -27,9 +27,9 @@ class SerializationTest: XCTestCase {
         }
 
         fixture = persistenceLayer!.createMeasurement(at: 1, withContext: .bike)
-        persistenceLayer!.syncSave(toMeasurement: fixture!, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000), accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0)])
-        persistenceLayer!.syncSave(toMeasurement: fixture!, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), accelerations: [Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)])
-        persistenceLayer!.syncSave(toMeasurement: fixture!, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), accelerations: [Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)])
+        persistenceLayer!.syncSave(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000)], accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: fixture!)
+        persistenceLayer!.syncSave(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100)], accelerations: [Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: fixture!)
+        persistenceLayer!.syncSave(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100)], accelerations: [Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: fixture!)
     }
 
     override func tearDown() {
