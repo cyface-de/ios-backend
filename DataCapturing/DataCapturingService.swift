@@ -94,11 +94,36 @@ public class DataCapturingService: NSObject {
      */
     public var syncOnWiFiOnly: Bool
 
+    /// A flag telling the system, whether it should synchronize data or not. If this is `true` data will be synchronized; if it is `false`, no data will be synchronized.
+    public var dataSynchronizationIsActive: Bool? {
+        didSet {
+            guard let dataSynchronizationIsActive = dataSynchronizationIsActive else {
+                return
+            }
+
+            if dataSynchronizationIsActive {
+                reachabilityManager.startListening()
+            } else {
+                reachabilityManager.stopListening()
+            }
+        }
+    }
+
     /// An in memory storage for accelerations, before they are written to disk.
     private var accelerationsCache = [Acceleration]()
 
+    private var locationsCache = [GeoLocation]()
+
     /// The background queue used to capture data.
     private let capturingQueue = DispatchQueue.global(qos: .userInitiated)
+
+    /// Synchronizes read and write operations on the `accelerationsCache`.
+    private let accelerationsCacheSynchronizationQueue = DispatchQueue(label: "accelerationsCacheSynchronization", attributes: .concurrent)
+
+    private let locationsCacheSynchronizationQueue = DispatchQueue(label: "locationsCacheSynchronization", attributes: .concurrent)
+
+    /// A timer called in regular intervals to save the captured data to the underlying database.
+    private var backgroundSynchronizationTimer: Timer!
 
     // MARK: - Initializers
     /**
@@ -112,12 +137,14 @@ public class DataCapturingService: NSObject {
      you have to provide it via this parameter.
      - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
      - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
+     - dataSynchronizationIsActive: A flag telling the system, whether it should synchronize data or not. If this is `true` data will be synchronized; if it is `false`, no data will be synchronized.
      */
     public init(
         connection serverConnection: ServerConnection,
         sensorManager manager: CMMotionManager,
         updateInterval interval: Double = 100,
-        persistenceLayer persistence: PersistenceLayer) {
+        persistenceLayer persistence: PersistenceLayer,
+        dataSynchronizationIsActive: Bool) {
 
         self.isRunning = false
         self.isPaused = false
@@ -143,7 +170,9 @@ public class DataCapturingService: NSObject {
                 }
             }
         }
-        self.reachabilityManager.startListening()
+        self.dataSynchronizationIsActive = dataSynchronizationIsActive
+
+
     }
 
     // MARK: - Methods
@@ -177,7 +206,9 @@ public class DataCapturingService: NSObject {
 
         stopCapturing()
         currentMeasurement = nil
-        reachabilityManager.startListening()
+        if let dataSynchronizationIsActive = self.dataSynchronizationIsActive, dataSynchronizationIsActive {
+            reachabilityManager.startListening()
+        }
     }
 
     /**
@@ -403,7 +434,7 @@ public class DataCapturingService: NSObject {
         queue.qualityOfService = QualityOfService.userInitiated
         queue.underlyingQueue = capturingQueue
         if motionManager.isAccelerometerAvailable {
-            motionManager.startAccelerometerUpdates(to: queue) { [unowned self] data, _ in
+            motionManager.startAccelerometerUpdates(to: queue) { data, _ in
                 guard let myData = data else {
                     fatalError("DataCapturingService.start(): No Accelerometer data available!")
                 }
@@ -413,9 +444,15 @@ public class DataCapturingService: NSObject {
                                        x: accValues.x,
                                        y: accValues.y,
                                        z: accValues.z)
-                self.accelerationsCache.append(acc)
+                // Synchronize this write operation.
+                self.accelerationsCacheSynchronizationQueue.async(flags: .barrier) {
+                    self.accelerationsCache.append(acc)
+                }
             }
         }
+
+        // Run data saving every 30 seconds
+        backgroundSynchronizationTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true, block: saveCapturedData)
 
         isRunning = true
     }
@@ -432,7 +469,10 @@ public class DataCapturingService: NSObject {
         motionManager.stopAccelerometerUpdates()
         locationManager.stopUpdatingLocation()
         locationManager.delegate = nil
+        backgroundSynchronizationTimer.fire()
+        backgroundSynchronizationTimer.invalidate()
         isRunning = false
+
     }
 
     /**
@@ -446,6 +486,23 @@ public class DataCapturingService: NSObject {
         }
 
         handler(event)
+    }
+
+    func saveCapturedData(timer: Timer) {
+        guard let measurement = currentMeasurement else {
+            fatalError("No current measurement to save the location to! Data capturing impossible.")
+        }
+
+         accelerationsCacheSynchronizationQueue.async(flags: .barrier) {
+            self.persistenceLayer.save(accelerations: self.accelerationsCache, toMeasurement: measurement) {
+                self.accelerationsCache.removeAll()
+            }
+         }
+        locationsCacheSynchronizationQueue.async(flags: .barrier) {
+            self.persistenceLayer.save(locations: self.locationsCache, toMeasurement: measurement) {
+                self.locationsCache.removeAll()
+            }
+         }
     }
 }
 
@@ -464,29 +521,24 @@ extension DataCapturingService: CLLocationManagerDelegate {
      */
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 
-        guard !locations.isEmpty else {
-            fatalError("No location available for DataCapturingService!")
-        }
-        let location: CLLocation = locations[0]
-        // os_log("New location: lat %@, lon %@", type: .info, location.coordinate.latitude.description, location.coordinate.longitude.description)
+        for location in locations {
+            // Smooth the way by removing outlier coordinates.
+            let howRecent = location.timestamp.timeIntervalSinceNow
+            guard location.horizontalAccuracy < 20 && abs(howRecent) < 10 else { continue }
 
-        guard let measurement = currentMeasurement else {
-            fatalError("No current measurement to save the location to! Data capturing impossible.")
-        }
-        let geoLocation = GeoLocation(
-            latitude: location.coordinate.latitude,
-            longitude: location.coordinate.longitude,
-            accuracy: location.horizontalAccuracy,
-            speed: location.speed,
-            timestamp: convertToUtcTimestamp(date: location.timestamp))
+            let geoLocation = GeoLocation(
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude,
+                accuracy: location.horizontalAccuracy,
+                speed: location.speed,
+                timestamp: convertToUtcTimestamp(date: location.timestamp))
 
-        // debugPrint("Saving \(accelerationsCache.count) accelerations")
-        persistenceLayer.save(toMeasurement: measurement, location: geoLocation, accelerations: accelerationsCache) {
-            self.capturingQueue.sync {
-                self.accelerationsCache.removeAll()
-                DispatchQueue.main.async {
-                    self.notify(of: .geoLocationAcquired(position: geoLocation))
-                }
+            locationsCacheSynchronizationQueue.async(flags: .barrier) {
+                self.locationsCache.append(geoLocation)
+            }
+
+            DispatchQueue.main.async {
+                self.notify(of: .geoLocationAcquired(position: geoLocation))
             }
         }
     }

@@ -317,7 +317,7 @@ public class CyfaceServerConnection: ServerConnection {
             for device in data {
                 // Parsing JSON response
                 guard let jsonDevice = device as? [String: Any] else {
-                    handler(ServerConnectionError(title: "Device Registration Error", description: "Unable to parse response as JSON."),false)
+                    handler(ServerConnectionError(title: "Device Registration Error", description: "Unable to parse response as JSON."), false)
                     return
                 }
 
@@ -328,7 +328,7 @@ public class CyfaceServerConnection: ServerConnection {
                 }
             }
             // Device was not found.
-            handler(nil,false)
+            handler(nil, false)
 
         }
     }

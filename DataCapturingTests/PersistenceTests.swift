@@ -17,7 +17,14 @@ class PersistenceTests: XCTestCase {
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        let oocut = PersistenceLayer()
+        let syncGroup = DispatchGroup()
+        syncGroup.enter()
+        let oocut = PersistenceLayer {
+            syncGroup.leave()
+        }
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("Intialization of persistence layer timed out!")
+        }
 
         let fixture = oocut.createMeasurement(at: 10_000, withContext: .bike)
         oocut.syncSave(toMeasurement: fixture, location: GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000), accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0)])
@@ -165,7 +172,7 @@ class PersistenceTests: XCTestCase {
         }
 
         XCTAssertEqual(syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)), .success)
-        XCTAssertEqual(locationsCount,3)
+        XCTAssertEqual(locationsCount, 3)
         XCTAssertEqual(accelerationsCount, 6)
     }
 }

@@ -25,34 +25,7 @@ public class PersistenceLayer {
     // MARK: - Properties
 
     /// Container for the persistent object model.
-    private lazy var container: NSPersistentContainer = {
-        /*
-         The following code is necessary to load the CyfaceModel from the DataCapturing framework.
-         It is only necessary because we are using a framework.
-         Usually this would be much simpler as shown by many tutorials.
-         Details are available from the following StackOverflow Thread:
-         https://stackoverflow.com/questions/42553749/core-data-failed-to-load-model
-         */
-        let momdName = "CyfaceModel"
-
-        guard let modelURL = Bundle(for: type(of: self)).url(forResource: momdName, withExtension: "momd") else {
-            fatalError("Error loading model from bundle")
-        }
-
-        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
-            fatalError("Error initializing mom from: \(modelURL)")
-        }
-
-        let container: NSPersistentContainer = NSPersistentContainer(name: momdName, managedObjectModel: mom)
-
-        container.loadPersistentStores { _, error in
-            if let error = error {
-                fatalError("Unable to load persistent storage \(error)")
-            }
-        }
-
-        return container
-    }()
+    private let container: NSPersistentContainer
 
     /// The identifier that has been assigned the last to a new `Measurement`.
     var lastIdentifier: Int64?
@@ -85,8 +58,40 @@ public class PersistenceLayer {
 
     // MARK: - Initializers
 
-    /// Public constructor usable by external callers.
-    public init() {}
+    /**
+    Public constructor usable by external callers.
+
+     - Parameter onCompletionHandler: Called when the persistence layer has successfully finished initialization.
+    */
+    public init(onCompletionHandler: @escaping () -> Void) {
+        /*
+         The following code is necessary to load the CyfaceModel from the DataCapturing framework.
+         It is only necessary because we are using a framework.
+         Usually this would be much simpler as shown by many tutorials.
+         Details are available from the following StackOverflow Thread:
+         https://stackoverflow.com/questions/42553749/core-data-failed-to-load-model
+         */
+        let momdName = "CyfaceModel"
+
+        let bundle = Bundle(for: type(of: self))
+        guard let modelURL = bundle.url(forResource: momdName, withExtension: "momd") else {
+            fatalError("Error loading model from bundle \(bundle.bundleURL).")
+        }
+
+        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("Error initializing mom from: \(modelURL)")
+        }
+
+        container = NSPersistentContainer(name: momdName, managedObjectModel: mom)
+
+        container.loadPersistentStores { _, error in
+            if let error = error {
+                fatalError("Unable to load persistent storage \(error).")
+            } else {
+                onCompletionHandler()
+            }
+        }
+    }
 
     // MARK: - Database Writing Methods
 
@@ -225,24 +230,48 @@ public class PersistenceLayer {
      Stores the provided `location` and `accelerations` to the provided measurement.
      
      - Parameters:
-     - measurement: The measurement to store the `location` and `accelerations` to.
-     - location: An array of `GeoLocation` instances to store.
-     - accelerations: An array of `Acceleration` instances to store.
+     - locations: An array of `GeoLocation` instances to store.
+     - toMeasurement: The measurement to store the `location` and `accelerations` to.
+     - onFinished: The handler to call as soon as the database operation has finished.
      */
-    func save(toMeasurement measurement: MeasurementEntity, location: GeoLocation, accelerations: [Acceleration], onFinished handler: @escaping () -> Void) {
+    func save(locations: [GeoLocation], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping () -> Void) {
         container.performBackgroundTask { context in
             let measurementIdentifier = measurement.identifier
             guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
-                fatalError("PersistenceLayer.save(measurement: \(measurementIdentifier), location: \(location.latitude), \(location.longitude), accelerations: \(accelerations.count)): Unable to load measurement!")
+                fatalError("PersistenceLayer.save(locations: \(locations.count), toMeasurement: \(measurementIdentifier)): Unable to load measurement!")
             }
 
-            let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
-            dbLocation.lat = location.latitude
-            dbLocation.lon = location.longitude
-            dbLocation.speed = location.speed
-            dbLocation.timestamp = location.timestamp
-            dbLocation.accuracy = location.accuracy
-            measurement.addToGeoLocations(dbLocation)
+            locations.forEach{ location in
+                let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
+                dbLocation.lat = location.latitude
+                dbLocation.lon = location.longitude
+                dbLocation.speed = location.speed
+                dbLocation.timestamp = location.timestamp
+                dbLocation.accuracy = location.accuracy
+                measurement.addToGeoLocations(dbLocation)
+            }
+
+            // debugPrint("Saved measurement with \(measurement.accelerations?.count ?? 0)")
+            context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+            context.saveRecursively()
+            handler()
+        }
+    }
+
+    /**
+     Stores the provided `location` and `accelerations` to the provided measurement.
+
+     - Parameters:
+     - accelerations: An array of `Acceleration` instances to store.
+     - toMeasurement: The measurement to store the `location` and `accelerations` to.
+     - onFinished: The handler to call as soon as the database operation has finished.
+     */
+    func save(accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping () -> Void) {
+        container.performBackgroundTask { context in
+            let measurementIdentifier = measurement.identifier
+            guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
+                fatalError("PersistenceLayer.save(accelerations: \(accelerations.count), toMeasurement: \(measurementIdentifier)): Unable to load measurement!")
+            }
 
             accelerations.forEach { acceleration in
                 let dbAcceleration = AccelerationPointMO.init(entity: AccelerationPointMO.entity(), insertInto: context)
@@ -260,15 +289,19 @@ public class PersistenceLayer {
         }
     }
 
-    func syncSave(toMeasurement measurement: MeasurementEntity, location: GeoLocation, accelerations: [Acceleration]) {
+    func syncSave(locations: [GeoLocation], accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity) {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        save(toMeasurement: measurement, location: location, accelerations: accelerations) {
+        save(locations: locations, toMeasurement: measurement) {
+            syncGroup.leave()
+        }
+        syncGroup.enter()
+        save(accelerations: accelerations, toMeasurement: measurement) {
             syncGroup.leave()
         }
 
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError()
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(4)) == .success else {
+            fatalError("PersistenceLayer.syncSave(locations: \(locations.count), accelerations: \(accelerations.count), toMeasurement: \(measurement.identifier)): Connection to database timed out.")
         }
     }
 
