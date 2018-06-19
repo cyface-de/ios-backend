@@ -165,12 +165,16 @@ public class DataCapturingService: NSObject {
         super.init()
 
         self.reachabilityManager.listener = {
-            [unowned self] status in
-            let reachable = self.syncOnWiFiOnly ?  status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) : status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) || status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi)
+            [weak self] status in
+            guard let mySelf = self else {
+                return
+            }
+
+            let reachable = mySelf.syncOnWiFiOnly ?  status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) : status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) || status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi)
 
             if reachable {
-                self.forceSync {
-                    self.notify(of: .synchronizationSuccessful)
+                mySelf.forceSync {
+                    mySelf.notify(of: .synchronizationSuccessful)
                 }
             }
         }
@@ -253,7 +257,12 @@ public class DataCapturingService: NSObject {
             handler()
         }
 
-        self.persistenceLayer.loadMeasurements { [unowned self] measurements in
+        self.persistenceLayer.loadMeasurements { [weak self] measurements in
+            guard let myself = self else {
+                handler()
+                return
+            }
+
             var countOfMeasurementsToSynchronize = measurements.count
             guard countOfMeasurementsToSynchronize>0 else {
                 handler()
@@ -261,12 +270,12 @@ public class DataCapturingService: NSObject {
             }
 
             for measurement in measurements {
-                let synchronizationFinishedHandler: (MeasurementEntity, ServerConnectionError?) -> Void = { [unowned self] measurement, error in
+                let synchronizationFinishedHandler: (MeasurementEntity, ServerConnectionError?) -> Void = { measurement, error in
                     // Only go on if there was no error
                     if error == nil {
-                        self.cleanDataAfterSync(for: measurement) {
+                        myself.cleanDataAfterSync(for: measurement) {
                             // Inform UI if interested
-                            if let syncDelegate = self.syncDelegate {
+                            if let syncDelegate = myself.syncDelegate {
                                 DispatchQueue.main.async {
                                     syncDelegate(measurement.identifier)
                                 }
@@ -281,13 +290,13 @@ public class DataCapturingService: NSObject {
                     // Everything uploaded?
                     if countOfMeasurementsToSynchronize == 0 {
                         handler()
-                        if self.countMeasurements()==0 {
-                            self.reachabilityManager.stopListening()
+                        if myself.countMeasurements()==0 {
+                            myself.reachabilityManager.stopListening()
                         }
                     }
                 }
                 if let measurementContext = MeasurementContext(rawValue: measurement.context) {
-                    self.serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier, context: measurementContext), onFinishedCall: synchronizationFinishedHandler)
+                    myself.serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier, context: measurementContext), onFinishedCall: synchronizationFinishedHandler)
                 }
             }
         }
