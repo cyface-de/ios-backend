@@ -446,7 +446,7 @@ public class DataCapturingService: NSObject {
         let queue = OperationQueue()
         queue.qualityOfService = QualityOfService.userInitiated
         queue.underlyingQueue = capturingQueue
-        if motionManager.isAccelerometerAvailable {
+        /*if motionManager.isAccelerometerAvailable {
             motionManager.startAccelerometerUpdates(to: queue) { data, _ in
                 guard let myData = data else {
                     fatalError("DataCapturingService.start(): No Accelerometer data available!")
@@ -462,7 +462,7 @@ public class DataCapturingService: NSObject {
                     self.accelerationsCache.append(acc)
                 }
             }
-        }
+        }*/
 
         // Run data saving every 30 seconds
         backgroundSynchronizationTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true, block: saveCapturedData)
@@ -479,7 +479,7 @@ public class DataCapturingService: NSObject {
             return
         }
 
-        motionManager.stopAccelerometerUpdates()
+        /*motionManager.stopAccelerometerUpdates()*/
         locationManager.stopUpdatingLocation()
         locationManager.delegate = nil
         backgroundSynchronizationTimer.fire()
@@ -509,11 +509,11 @@ public class DataCapturingService: NSObject {
             fatalError("No current measurement to save the location to! Data capturing impossible.")
         }
 
-         accelerationsCacheSynchronizationQueue.async(flags: .barrier) {
+         /*accelerationsCacheSynchronizationQueue.async(flags: .barrier) {
             self.persistenceLayer.save(accelerations: self.accelerationsCache, toMeasurement: measurement) {
                 self.accelerationsCache.removeAll()
             }
-         }
+         }*/
         locationsCacheSynchronizationQueue.async(flags: .barrier) {
             self.persistenceLayer.save(locations: self.locationsCache, toMeasurement: measurement) {
                 self.locationsCache.removeAll()
