@@ -17,7 +17,7 @@ import Alamofire
  The cyface binary format is created by a `CyfaceBinaryFormatSerializer`.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.0.1
  - Since: 1.0.0
  */
 public class MovebisServerConnection: ServerConnection {
@@ -87,7 +87,7 @@ public class MovebisServerConnection: ServerConnection {
             "Content-type": "multipart/form-data"
         ]
 
-        /*sessionManager.upload(multipartFormData: {[unowned self] data in self.create(request: data, forMeasurement: measurement)}, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: { [unowned self] error in self.onEncodingComplete(forMeasurement: measurement, withResult: error)})*/
+        sessionManager.upload(multipartFormData: {data in self.create(request: data, forMeasurement: measurement)}, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: {error in self.onEncodingComplete(forMeasurement: measurement, withResult: error)})
     }
 
     public func getURL() -> URL {
@@ -100,7 +100,7 @@ public class MovebisServerConnection: ServerConnection {
         request.append(modelIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceType:")
         request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
 
-        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { [unowned self] measurement in
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
                 let payload = self.serializer.serializeCompressed(measurement)
                 request.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
         }
