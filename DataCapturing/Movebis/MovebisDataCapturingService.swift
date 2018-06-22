@@ -23,7 +23,7 @@ import os.log
  */
 public class MovebisDataCapturingService: DataCapturingService {
 
-    // MARK: Properties
+    // MARK: - Properties
 
     /**
      The delegate that gets informed about location updates.
@@ -59,7 +59,7 @@ public class MovebisDataCapturingService: DataCapturingService {
         return manager
     }()
 
-    // MARK: Initializers
+    // MARK: - Initializers
 
     /**
      Creates a new `MovebisDataCapturingService` with the ability capture location
