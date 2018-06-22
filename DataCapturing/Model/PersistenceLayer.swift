@@ -241,7 +241,7 @@ public class PersistenceLayer {
                 fatalError("PersistenceLayer.save(locations: \(locations.count), toMeasurement: \(measurementIdentifier)): Unable to load measurement!")
             }
 
-            locations.forEach{ location in
+            locations.forEach { location in
                 let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
                 dbLocation.lat = location.latitude
                 dbLocation.lon = location.longitude
