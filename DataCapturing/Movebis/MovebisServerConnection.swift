@@ -95,26 +95,48 @@ public class MovebisServerConnection: ServerConnection {
     }
 
     func create(request: MultipartFormData, forMeasurement measurement: MeasurementEntity) {
-        request.append(installationIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceId")
-        request.append(String(measurement.identifier).data(using: String.Encoding.utf8)!, withName: "measurementId")
-        request.append(modelIdentifier.data(using: String.Encoding.utf8)!, withName: "deviceType:")
+        debugPrint("create")
+        guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
+            fatalError("Unable to provide device identifier to upload request!")
+        }
+        guard let measurementIdData = String(measurement.identifier).data(using: String.Encoding.utf8) else {
+            fatalError("Unable to provide measurement identifier to upload request!")
+        }
+        guard let deviceTypeData = modelIdentifier.data(using: String.Encoding.utf8) else {
+            fatalError("Unable to provide device type to upload request!")
+        }
+
+        request.append(deviceIdData, withName: "deviceId")
+        request.append(measurementIdData, withName: "measurementId")
+        request.append(deviceTypeData, withName: "deviceType")
         request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
 
+        // Load and serialize measurement synchronously.
+        let loadMeasurementGroup = DispatchGroup()
+        loadMeasurementGroup.enter()
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
-                let payload = self.serializer.serializeCompressed(measurement)
-                request.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+            debugPrint("loaded measurement \(measurement.identifier)")
+            let payload = self.serializer.serializeCompressed(measurement)
+            request.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+            loadMeasurementGroup.leave()
+        }
+
+        guard loadMeasurementGroup.wait(timeout: DispatchTime.now() + .seconds(20)) == DispatchTimeoutResult.success else {
+            fatalError("Unable to load measurement \(measurement.identifier) from database.")
         }
     }
 
     func onEncodingComplete(forMeasurement measurement: MeasurementEntity, withResult result: SessionManager.MultipartFormDataEncodingResult) {
+        debugPrint("onEncodingComplete")
         switch result {
         case .success(let upload, _, _):
-            // print("Successfully encoded upload \(upload)")
+            debugPrint("Uploading!")
             upload.validate().responseString { response in
+                debugPrint("Got Response")
                 self.onResponseReady(forMeasurement: measurement, response)
             }
         case .failure(let error):
-            // print("failure")
+            debugPrint("failure")
             if let handler = onFinishHandler {
                 handler(measurement, ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onEncodingComplete(\(result)): Unable to upload data \(error.localizedDescription)."))
             }
@@ -122,6 +144,7 @@ public class MovebisServerConnection: ServerConnection {
     }
 
     func onResponseReady(forMeasurement measurement: MeasurementEntity, _ response: DataResponse<String>) {
+        debugPrint("onResponseReady")
         guard let handler = onFinishHandler else {
             return
         }
