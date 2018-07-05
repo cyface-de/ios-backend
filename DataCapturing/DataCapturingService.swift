@@ -273,7 +273,8 @@ public class DataCapturingService: NSObject {
                 let synchronizationFinishedHandler: (MeasurementEntity, ServerConnectionError?) -> Void = { measurement, error in
                     // Only go on if there was no error
                     if let error = error {
-                        os_log("Unable to upload data for measurement: %@ due to %@!", NSNumber(value: measurement.identifier), error.errorDescription ?? "No error specified!")
+                        os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
+                        os_log("Error: %@\n Description: %@", error.title ?? "No Title", error.errorDescription ?? "No Description")
                     } else {
                         myself.cleanDataAfterSync(for: measurement) {
                             // Inform UI if interested
