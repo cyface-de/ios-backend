@@ -272,7 +272,10 @@ public class DataCapturingService: NSObject {
             for measurement in measurements {
                 let synchronizationFinishedHandler: (MeasurementEntity, ServerConnectionError?) -> Void = { measurement, error in
                     // Only go on if there was no error
-                    if error == nil {
+                    if let error = error {
+                        os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
+                        os_log("Error: %@\n Description: %@", error.title ?? "No Title", error.errorDescription ?? "No Description")
+                    } else {
                         myself.cleanDataAfterSync(for: measurement) {
                             // Inform UI if interested
                             if let syncDelegate = myself.syncDelegate {
@@ -281,8 +284,6 @@ public class DataCapturingService: NSObject {
                                 }
                             }
                         }
-                    } else {
-                        os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
                     }
                     // TODO: synchronize this?
                     countOfMeasurementsToSynchronize -= 1
