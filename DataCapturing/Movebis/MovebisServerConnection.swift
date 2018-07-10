@@ -131,7 +131,8 @@ public class MovebisServerConnection: ServerConnection {
         switch result {
         case .success(let upload, _, _):
             debugPrint("Uploading!")
-            upload.validate().responseString { response in
+            // Two status codes are acceptable. A 201 is a successful upload, while a 409 is a conflict. In both cases the measurement should be marked as uploaded successfully.
+            upload.validate(statusCode: [201, 409]).responseString { response in
                 debugPrint("Got Response")
                 self.onResponseReady(forMeasurement: measurement, response)
             }
