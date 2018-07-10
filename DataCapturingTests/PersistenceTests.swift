@@ -173,4 +173,34 @@ class PersistenceTests: XCTestCase {
         XCTAssert(resultGeoLocationsCount == 2)
         XCTAssert(resultAccelerationsCount == 3)
     }
+
+    func testLoadSynchronizableMeasurements() {
+        let promisePriorClean = expectation(description: "Error while loading measurements!")
+        var countOfLoadedMeasurementsPriorClean = 0
+        oocut.loadSynchronizableMeasurements { (measurements) in
+            countOfLoadedMeasurementsPriorClean += measurements.count
+            promisePriorClean.fulfill()
+        }
+
+        waitForExpectations(timeout: 10, handler: nil)
+
+        let promiseClean = expectation(description: "Error while cleaning fixture measurement!")
+        oocut.clean(measurement: fixture) {
+            promiseClean.fulfill()
+        }
+
+        waitForExpectations(timeout: 10, handler: nil)
+
+        let promisePostClean = expectation(description: "Error while loading measurements!")
+        var countOfLoadedMeasurementsPostClean = 0
+        oocut.loadSynchronizableMeasurements { (measurements) in
+            countOfLoadedMeasurementsPostClean += measurements.count
+            promisePostClean.fulfill()
+        }
+
+        waitForExpectations(timeout: 10, handler: nil)
+        XCTAssertEqual(countOfLoadedMeasurementsPriorClean, 1)
+        XCTAssertEqual(countOfLoadedMeasurementsPostClean, 0)
+        print("test")
+    }
 }

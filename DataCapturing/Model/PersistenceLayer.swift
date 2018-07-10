@@ -370,7 +370,21 @@ public class PersistenceLayer {
                 let fetchResult = try context.fetch(request)
                 handler(fetchResult)
             } catch {
-                fatalError("PersistenceLayer.privatelyLoadMeasurements(): Unable to load due to: \(error.localizedDescription)")
+                fatalError("PersistenceLayer.loadMeasurements(): Unable to load due to: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    public func loadSynchronizableMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]) -> Void) {
+        container.performBackgroundTask { (context) in
+            let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+            // Fetch only not synchronized measurements
+            request.predicate = NSPredicate(format: "synchronized == %@", NSNumber(value: false))
+            do {
+                let fetchResult = try context.fetch(request)
+                handler(fetchResult)
+            } catch {
+                fatalError("PersistenceLayer.loadSynchronizableMeasurements(): Unable to load due to \(error.localizedDescription)")
             }
         }
     }

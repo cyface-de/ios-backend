@@ -257,14 +257,14 @@ public class DataCapturingService: NSObject {
             handler()
         }
 
-        self.persistenceLayer.loadMeasurements { [weak self] measurements in
+        self.persistenceLayer.loadSynchronizableMeasurements { [weak self] measurements in
             guard let myself = self else {
                 handler()
                 return
             }
 
             var countOfMeasurementsToSynchronize = measurements.count
-            guard countOfMeasurementsToSynchronize>0 else {
+            guard countOfMeasurementsToSynchronize > 0 else {
                 handler()
                 return
             }
