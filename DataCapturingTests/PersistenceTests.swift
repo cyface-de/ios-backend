@@ -11,8 +11,8 @@ import XCTest
 
 class PersistenceTests: XCTestCase {
 
-    var oocut: PersistenceLayer?
-    var fixture: MeasurementEntity?
+    var oocut: PersistenceLayer!
+    var fixture: MeasurementEntity!
 
     override func setUp() {
         super.setUp()
@@ -27,15 +27,14 @@ class PersistenceTests: XCTestCase {
         }
 
         let fixture = oocut.createMeasurement(at: 10_000, withContext: .bike)
-        oocut.syncSave(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000)], accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: fixture)
-        oocut.syncSave(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], accelerations: [Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: fixture)
+        oocut.syncSave(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: fixture)
 
             self.oocut = oocut
             self.fixture = fixture
     }
 
     override func tearDown() {
-        oocut?.syncDelete()
+        oocut.syncDelete()
         oocut = nil
         fixture = nil
         super.tearDown()
@@ -65,22 +64,12 @@ class PersistenceTests: XCTestCase {
     }
 
     func testCleanMeasurement() {
-        guard let measurement = fixture else {
-            XCTFail("Unable to unwrap test fixture!")
-            return
-        }
-
-        guard let oocut = oocut else {
-            XCTFail("Unable to unwrap object of class under test!")
-            return
-        }
-
         var accelerationCount: Int?
         var geoLocationCount: Int?
 
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        oocut.load(measurementIdentifiedBy: measurement.identifier) { (measurementMo) in
+        oocut.load(measurementIdentifiedBy: fixture.identifier) { (measurementMo) in
             accelerationCount = measurementMo.accelerations.count
             geoLocationCount = measurementMo.geoLocations.count
             syncGroup.leave()
@@ -94,7 +83,7 @@ class PersistenceTests: XCTestCase {
         XCTAssertEqual(geoLocationCount, 2)
 
         syncGroup.enter()
-        oocut.clean(measurement: measurement) {
+        oocut.clean(measurement: fixture) {
             syncGroup.leave()
         }
 
@@ -106,7 +95,7 @@ class PersistenceTests: XCTestCase {
         var geoLocationsIsEmpty = false
 
         syncGroup.enter()
-        oocut.load(measurementIdentifiedBy: measurement.identifier) { measurementMo in
+        oocut.load(measurementIdentifiedBy: fixture.identifier) { measurementMo in
             accelerationsIsEmpty = measurementMo.accelerations.isEmpty
             geoLocationsIsEmpty = measurementMo.geoLocations.isEmpty
             syncGroup.leave()
@@ -121,14 +110,6 @@ class PersistenceTests: XCTestCase {
     }
 
     func testDeleteMeasurement() {
-        guard let fixture = fixture else {
-            fatalError("PersistenceTests.testDeleteMeasurement(): Unable to unwrap test fixture!")
-        }
-
-        guard let oocut = oocut else {
-            fatalError("PersistenceTests.testDeleteMeasurement(): Unable to unwrap object of class under test!")
-        }
-
         let countOfMeasurementsBeforeDeletion = oocut.syncCountMeasurements()
         XCTAssertEqual(countOfMeasurementsBeforeDeletion, 1, "There should be one measurement before deleting it! There have been \(countOfMeasurementsBeforeDeletion).")
 
@@ -139,14 +120,6 @@ class PersistenceTests: XCTestCase {
     }
 
     func testMergeDataToExistingMeasurement() {
-        guard let fixture = fixture else {
-            fatalError("PersistenceTests.testMergeDataToExistingMeasurement(): Unable to unwrap test fixture!")
-        }
-
-        guard let oocut = oocut else {
-            fatalError("PersistenceTests.testMergeDataToExistingMeasurement(): Unable to unwrap object of class under test!")
-        }
-
         let additionalLocation = GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 800, speed: 5.0, timestamp: 10_005)
         let additionalAccelerations = [
             Acceleration(timestamp: 10_005, x: 1.0, y: 1.0, z: 1.0),
@@ -178,5 +151,56 @@ class PersistenceTests: XCTestCase {
         XCTAssertEqual(syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)), .success)
         XCTAssertEqual(locationsCount, 3)
         XCTAssertEqual(accelerationsCount, 6)
+    }
+
+    func testLoadMeasurement() {
+        let promise = expectation(description: "Error while loading measurements!")
+        var resultIdentifier: Int64?
+        var resultContext: String?
+        var resultGeoLocationsCount: Int?
+        var resultAccelerationsCount: Int?
+        oocut.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
+            resultIdentifier = measurement.identifier
+            resultContext = measurement.context
+            resultGeoLocationsCount = measurement.geoLocations.count
+            resultAccelerationsCount = measurement.accelerations.count
+            promise.fulfill()
+        }
+
+        waitForExpectations(timeout: 10, handler: nil)
+        XCTAssert(resultIdentifier == fixture.identifier)
+        XCTAssert(resultContext == "BICYCLE")
+        XCTAssert(resultGeoLocationsCount == 2)
+        XCTAssert(resultAccelerationsCount == 3)
+    }
+
+    func testLoadSynchronizableMeasurements() {
+        let promisePriorClean = expectation(description: "Error while loading measurements!")
+        var countOfLoadedMeasurementsPriorClean = 0
+        oocut.loadSynchronizableMeasurements { (measurements) in
+            countOfLoadedMeasurementsPriorClean += measurements.count
+            promisePriorClean.fulfill()
+        }
+
+        waitForExpectations(timeout: 10, handler: nil)
+
+        let promiseClean = expectation(description: "Error while cleaning fixture measurement!")
+        oocut.clean(measurement: fixture) {
+            promiseClean.fulfill()
+        }
+
+        waitForExpectations(timeout: 10, handler: nil)
+
+        let promisePostClean = expectation(description: "Error while loading measurements!")
+        var countOfLoadedMeasurementsPostClean = 0
+        oocut.loadSynchronizableMeasurements { (measurements) in
+            countOfLoadedMeasurementsPostClean += measurements.count
+            promisePostClean.fulfill()
+        }
+
+        waitForExpectations(timeout: 10, handler: nil)
+        XCTAssertEqual(countOfLoadedMeasurementsPriorClean, 1)
+        XCTAssertEqual(countOfLoadedMeasurementsPostClean, 0)
+        print("test")
     }
 }
