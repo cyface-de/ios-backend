@@ -145,7 +145,7 @@ public class MovebisServerConnection: ServerConnection {
             loadMeasurementGroup.leave()
         }
 
-        guard loadMeasurementGroup.wait(timeout: DispatchTime.now() + .seconds(20)) == DispatchTimeoutResult.success else {
+        guard loadMeasurementGroup.wait(timeout: DispatchTime.now() + .seconds(120)) == DispatchTimeoutResult.success else {
             throw DataSynchronizationError.serializationTimeout
         }
     }
