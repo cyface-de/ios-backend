@@ -25,7 +25,7 @@ import Alamofire
  start and stop the service as often as you like and reuse the object.
  
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 4.0.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -179,8 +179,6 @@ public class DataCapturingService: NSObject {
             }
         }
         self.dataSynchronizationIsActive = dataSynchronizationIsActive
-
-
     }
 
     // MARK: - Methods
@@ -189,18 +187,18 @@ public class DataCapturingService: NSObject {
      during the capturing process. This operation is idempotent.
      
      - Parameter handler: A closure that is notified of important events during data capturing.
-     - Return: A `MeasurementEntity` as representation of the measurement created by this call to `start`.
      */
-    public func start(inContext context: MeasurementContext, withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> MeasurementEntity {
+    public func start(inContext context: MeasurementContext, withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
         guard !isPaused else {
             fatalError("DataCapturingService.start(): Invalid state! You tried to start the data capturing service in paused state! Please call resume() and stop() before starting the service!")
         }
 
-        let measurement = persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970(), withContext: context)
-        self.currentMeasurement = measurement
-
-        startCapturing(withHandler: handler)
-        return measurement
+        persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970(), withContext: context) { measurement in
+            let entity = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context)!)
+            self.currentMeasurement = entity
+            self.startCapturing(withHandler: handler)
+            handler(DataCapturingEvent.serviceStarted(measurement: entity))
+        }
     }
 
     /**
