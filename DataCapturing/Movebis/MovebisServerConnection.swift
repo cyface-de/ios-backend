@@ -99,14 +99,17 @@ public class MovebisServerConnection: ServerConnection {
 
         // TODO: - This needs to be implemented as background upload from a file!!!
         var encodingError: DataSynchronizationError?
-        sessionManager.upload(multipartFormData: {data in
+        let encode: ((MultipartFormData) -> Void) = {data in
             do {
                 try self.create(request: data, forMeasurement: measurement)
             } catch DataSynchronizationError.serializationTimeout {
                 encodingError = DataSynchronizationError.serializationTimeout
+            } catch {
+                fatalError("MovebisServerConnection.sync(measurement: \(measurement.identifier)): Unexpected Exception during upload data encoding!")
             }
-            }, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
-                if let encodingError = encodingError {
+        }
+        sessionManager.upload(multipartFormData: encode, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
+            if encodingError != nil {
                     os_log("Aborting upload because serialization timed out!")
                 } else {
                     self.onEncodingComplete(forMeasurement: measurement, withResult: encodingResult)
