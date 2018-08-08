@@ -14,7 +14,7 @@ import Foundation
  These events may be received by a closure provided to the `DataCapturingService` on calling start.
  
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 1.0.0
  */
 public enum DataCapturingEvent {
@@ -38,4 +38,8 @@ public enum DataCapturingEvent {
      and deleted the local copies.
      */
     case synchronizationSuccessful
+    /**
+     Used to notify the client application of a successful start of the `DataCapturingService`.
+     */
+    case serviceStarted(measurement: MeasurementEntity)
 }

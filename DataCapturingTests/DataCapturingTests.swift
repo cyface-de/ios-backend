@@ -19,7 +19,7 @@ class DataCapturingTests: XCTestCase {
         super.setUp()
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        persistenceLayer = PersistenceLayer() {
+        persistenceLayer = PersistenceLayer {
             syncGroup.leave()
         }
         guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {

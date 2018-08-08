@@ -18,7 +18,7 @@ import os.log
  The instance you provide will receive the updates.
  
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 4.0.0
  - Since: 1.0.0
  */
 public class MovebisDataCapturingService: DataCapturingService {
@@ -79,7 +79,14 @@ public class MovebisDataCapturingService: DataCapturingService {
         super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence, dataSynchronizationIsActive: true)
     }
 
-    public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) -> MeasurementEntity {
+    /**
+     Starts the capturing process, notifying the provided handler of important events.
+
+     This is a long running asynchronous operation.
+     The provided handler is notified of its completion by receiving the event `DataCapturingEvent.serviceStarted`.
+     If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.
+     */
+    public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
         return start(inContext: .bike, withHandler: handler)
     }
 
