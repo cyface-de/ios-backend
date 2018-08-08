@@ -96,14 +96,36 @@ public class PersistenceLayer {
     // MARK: - Database Writing Methods
 
     /**
-     Creates a new measurement with the provided `timestamp`.
-     
-     - Parameter timestamp: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
+     * Creates a new measurement with the provided `timestamp`.
+     *
+     * - Parameters:
+     *     - timestamp: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
+     *     - withContext: The measurement context the new measurement is created in.
      */
     public func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext) -> MeasurementEntity {
         var ret: MeasurementEntity?
         let syncGroup = DispatchGroup()
         syncGroup.enter()
+        createMeasurement(at: timestamp, withContext: mContext) { measurement in
+            ret = MeasurementEntity(identifier: measurement.identifier, context: mContext)
+            syncGroup.leave()
+        }
+
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+            fatalError("PersistenceLayer.createMeasurement(at: \(timestamp), withContext: \(mContext.rawValue)): Unable to create measurement!")
+        }
+        return ret!
+    }
+
+    /**
+     * Creates a new `measurement` asynchronuously and informs the caller when finished.
+     *
+     * - Parameters:
+     *    - at: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
+     *    - withContext: The measurement context the new measurement is created in.
+     *    - onFinishedCall: Handler that is called with the new measurement as parameter when the measurement has been stored in the database.
+     */
+    public func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext, onFinishedCall handler: @escaping ((MeasurementMO) -> Void)) {
         container.performBackgroundTask { context in
             // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
             var identifier = self.nextIdentifier
@@ -117,19 +139,13 @@ public class PersistenceLayer {
                 measurement.identifier = identifier
                 measurement.synchronized = false
                 measurement.context = mContext.rawValue
-                ret = MeasurementEntity(identifier: measurement.identifier, context: mContext)
+                context.saveRecursively()
+
+                handler(measurement)
             } else {
                 fatalError("PersistenceLayer.createMeasurement(at: \(timestamp), withContext: \(mContext.rawValue): Unable to create measurement!")
             }
-
-            context.saveRecursively()
-            syncGroup.leave()
         }
-
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError("PersistenceLayer.createMeasurement(at: \(timestamp), withContext: \(mContext.rawValue)): Unable to create measurement!")
-        }
-        return ret!
     }
 
     /**
@@ -370,7 +386,21 @@ public class PersistenceLayer {
                 let fetchResult = try context.fetch(request)
                 handler(fetchResult)
             } catch {
-                fatalError("PersistenceLayer.privatelyLoadMeasurements(): Unable to load due to: \(error.localizedDescription)")
+                fatalError("PersistenceLayer.loadMeasurements(): Unable to load due to: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    public func loadSynchronizableMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]) -> Void) {
+        container.performBackgroundTask { (context) in
+            let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+            // Fetch only not synchronized measurements
+            request.predicate = NSPredicate(format: "synchronized == %@", NSNumber(value: false))
+            do {
+                let fetchResult = try context.fetch(request)
+                handler(fetchResult)
+            } catch {
+                fatalError("PersistenceLayer.loadSynchronizableMeasurements(): Unable to load due to \(error.localizedDescription)")
             }
         }
     }

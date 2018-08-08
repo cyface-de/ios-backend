@@ -102,20 +102,25 @@ class CyfaceBinaryFormatSerializer {
      - Parameter geoLocations: The array of locations to serialize.
      - Returns: An array of serialized bytes.
      */
-    private func serialize(geoLocations locations: [GeoLocationMO]) -> [UInt8] {
+    func serialize(geoLocations locations: [GeoLocationMO]) -> [UInt8] {
         var ret = [UInt8]()
 
         for location in locations {
             // 8 Bytes
-            ret.append(contentsOf: convertToBytes(location.timestamp, inOrder: .bigEndian))
+            let timestamp = location.timestamp
+            ret.append(contentsOf: convertToBytes(timestamp, inOrder: .bigEndian))
             // 8 Bytes
-            ret.append(contentsOf: convertToBytes(location.lat.bitPattern, inOrder: .bigEndian))
+            let latBitPattern = location.lat.bitPattern
+            ret.append(contentsOf: convertToBytes(latBitPattern, inOrder: .bigEndian))
             // 8 Bytes
-            ret.append(contentsOf: convertToBytes(location.lon.bitPattern, inOrder: .bigEndian))
+            let lonBitPattern = location.lon.bitPattern
+            ret.append(contentsOf: convertToBytes(lonBitPattern, inOrder: .bigEndian))
             // 8 Bytes
-            ret.append(contentsOf: convertToBytes(location.speed.bitPattern, inOrder: .bigEndian))
+            let speedBitPattern = location.speed.bitPattern
+            ret.append(contentsOf: convertToBytes(speedBitPattern, inOrder: .bigEndian))
             // 4 Bytes
-            ret.append(contentsOf: convertToBytes(UInt32(location.accuracy*100), inOrder: .bigEndian))
+            let accuracy = UInt32(location.accuracy*100)
+            ret.append(contentsOf: convertToBytes(accuracy, inOrder: .bigEndian))
             // = 36 Bytes
         }
 
@@ -166,7 +171,7 @@ extension BinaryInteger {
         for _ in 0..<(self.bitWidth/8) {
             let byteValue = UInt8(truncatingIfNeeded: buffer)
             ret.append(byteValue)
-            buffer = buffer >> 7
+            buffer = buffer >> 8
         }
 
         return ret

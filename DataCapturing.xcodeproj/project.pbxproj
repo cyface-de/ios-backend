@@ -26,6 +26,7 @@
 		3D0BDEB21FB1B951004EA25E /* DataCapturing.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0BDEA41FB1B951004EA25E /* DataCapturing.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */; };
 		3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */; };
+		3D63EC322115B54200BF33EA /* DataSynchronizationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D63EC312115B54200BF33EA /* DataSynchronizationError.swift */; };
 		3D8CC22020A6D89A0095CCD4 /* GeoLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */; };
 		3D8CC22120A6D89A0095CCD4 /* Measurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */; };
 		3D8CC22220A6D89A0095CCD4 /* Acceleration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21F20A6D89A0095CCD4 /* Acceleration.swift */; };
@@ -72,6 +73,7 @@
 		3D0BDEB11FB1B951004EA25E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCapturingService.swift; sourceTree = "<group>"; };
 		3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiskConsumption.swift; sourceTree = "<group>"; };
+		3D63EC312115B54200BF33EA /* DataSynchronizationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSynchronizationError.swift; sourceTree = "<group>"; };
 		3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeoLocation.swift; sourceTree = "<group>"; };
 		3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Measurement.swift; sourceTree = "<group>"; };
 		3D8CC21F20A6D89A0095CCD4 /* Acceleration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Acceleration.swift; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 			children = (
 				3D0511D6204D267600967898 /* MovebisDataCapturingService.swift */,
 				3D0511D9204D268900967898 /* MovebisServerConnection.swift */,
+				3D63EC312115B54200BF33EA /* DataSynchronizationError.swift */,
 			);
 			path = Movebis;
 			sourceTree = "<group>";
@@ -232,7 +235,6 @@
 				3D0BDE9D1FB1B951004EA25E /* Frameworks */,
 				3D0BDE9E1FB1B951004EA25E /* Headers */,
 				3D0BDE9F1FB1B951004EA25E /* Resources */,
-				C413ACF3E77537BAD955F0E9 /* [CP] Copy Pods Resources */,
 				3D8CC22320A6D8D00095CCD4 /* ShellScript */,
 			);
 			buildRules = (
@@ -253,7 +255,6 @@
 				3D0BDEA71FB1B951004EA25E /* Frameworks */,
 				3D0BDEA81FB1B951004EA25E /* Resources */,
 				7CC4935A45A05D2EA7C43B6C /* [CP] Embed Pods Frameworks */,
-				B1193C1DFEC95D72578C53BD /* [CP] Copy Pods Resources */,
 				3D8CC21C20A6D84F0095CCD4 /* ShellScript */,
 			);
 			buildRules = (
@@ -405,36 +406,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		B1193C1DFEC95D72578C53BD /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DataCapturingTests/Pods-DataCapturingTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		C413ACF3E77537BAD955F0E9 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DataCapturing/Pods-DataCapturing-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -453,6 +424,7 @@
 				3D01585A200F7575008C065A /* GeoLocationMO+CoreDataClass.swift in Sources */,
 				3D0511E0204D26BC00967898 /* CyfaceServerConnection.swift in Sources */,
 				3D8CC22020A6D89A0095CCD4 /* GeoLocation.swift in Sources */,
+				3D63EC322115B54200BF33EA /* DataSynchronizationError.swift in Sources */,
 				3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */,
 				3D01585D200F7575008C065A /* GeoLocationMO+CoreDataProperties.swift in Sources */,
 				3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */,
