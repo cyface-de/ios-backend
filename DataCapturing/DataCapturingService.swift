@@ -543,7 +543,6 @@ extension DataCapturingService: CLLocationManagerDelegate {
             let howRecent = location.timestamp.timeIntervalSinceNow
             guard location.horizontalAccuracy < 20 && abs(howRecent) < 10 else { continue }
 
-            debugPrint("###### Captured location: \(location.coordinate.latitude), \(location.coordinate.longitude)")
             let geoLocation = GeoLocation(
                 latitude: location.coordinate.latitude,
                 longitude: location.coordinate.longitude,
