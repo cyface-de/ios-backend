@@ -7,6 +7,7 @@
 
 import Foundation
 import Alamofire
+import os.log
 
 /**
  Realizes a connection to a Movebis data capturing server.
@@ -17,7 +18,7 @@ import Alamofire
  The cyface binary format is created by a `CyfaceBinaryFormatSerializer`.
 
  - Author: Klemens Muthmann
- - Version: 2.0.1
+ - Version: 2.0.2
  - Since: 1.0.0
  */
 public class MovebisServerConnection: ServerConnection {
@@ -73,12 +74,20 @@ public class MovebisServerConnection: ServerConnection {
         jwtAuthenticationToken = nil
     }
 
+    /**
+     * Synchronizes a `mesurement` with a Movebis server.
+     * The Movebis server must run at the endpoint provided to the constructor of this class, as `apiUrl`.
+     *
+     * - Parameters:
+     *     - measurement: The `MeasurementEntity` to synchronize
+     *     - onFinishedCall: Callback to call as soon as transmission has finished.
+     */
     public func sync(measurement: MeasurementEntity, onFinishedCall handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
         onFinishHandler = handler
 
         guard isAuthenticated(), let jwtAuthenticationToken = jwtAuthenticationToken else {
-            handler(measurement, ServerConnectionError(title: "Not Authenticated", description: "MovebisServerConnection.sync(measurement:\(measurement.identifier)): Unable to sync. No authentication information provided."))
+            handler(measurement, ServerConnectionError(title: "Not Authenticated", description: "MovebisServerConnection.sync(measurement:\(measurement.identifier)): No authentication information provided."))
             return
         }
 
@@ -87,14 +96,32 @@ public class MovebisServerConnection: ServerConnection {
             "Content-type": "multipart/form-data"
         ]
 
-        sessionManager.upload(multipartFormData: {data in self.create(request: data, forMeasurement: measurement)}, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: {error in self.onEncodingComplete(forMeasurement: measurement, withResult: error)})
+
+        // TODO: - This needs to be implemented as background upload from a file!!!
+        var encodingError: DataSynchronizationError?
+        let encode: ((MultipartFormData) -> Void) = {data in
+            do {
+                try self.create(request: data, forMeasurement: measurement)
+            } catch DataSynchronizationError.serializationTimeout {
+                encodingError = DataSynchronizationError.serializationTimeout
+            } catch {
+                fatalError("MovebisServerConnection.sync(measurement: \(measurement.identifier)): Unexpected Exception during upload data encoding!")
+            }
+        }
+        sessionManager.upload(multipartFormData: encode, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
+            if encodingError != nil {
+                    os_log("Aborting upload because serialization timed out!")
+                } else {
+                    self.onEncodingComplete(forMeasurement: measurement, withResult: encodingResult)
+                }
+            })
     }
 
     public func getURL() -> URL {
         return apiURL
     }
 
-    func create(request: MultipartFormData, forMeasurement measurement: MeasurementEntity) {
+    func create(request: MultipartFormData, forMeasurement measurement: MeasurementEntity) throws {
         debugPrint("create")
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
             fatalError("Unable to provide device identifier to upload request!")
@@ -121,8 +148,8 @@ public class MovebisServerConnection: ServerConnection {
             loadMeasurementGroup.leave()
         }
 
-        guard loadMeasurementGroup.wait(timeout: DispatchTime.now() + .seconds(20)) == DispatchTimeoutResult.success else {
-            fatalError("Unable to load measurement \(measurement.identifier) from database.")
+        guard loadMeasurementGroup.wait(timeout: DispatchTime.now() + .seconds(120)) == DispatchTimeoutResult.success else {
+            throw DataSynchronizationError.serializationTimeout
         }
     }
 
@@ -157,4 +184,9 @@ public class MovebisServerConnection: ServerConnection {
             handler(measurement, nil)
         }
     }
+}
+
+enum EncodingResult {
+    case success
+    case failure(error: DataSynchronizationError)
 }
