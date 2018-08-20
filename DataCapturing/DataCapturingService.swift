@@ -187,10 +187,8 @@ public class DataCapturingService: NSObject {
         persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970(), withContext: context) { measurement in
             let entity = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context)!)
             self.currentMeasurement = entity
-            DispatchQueue.main.async { [unowned self] in
-                self.startCapturing()
-                self.handler(DataCapturingEvent.serviceStarted(measurement: entity))
-            }
+            self.startCapturing()
+            self.handler(DataCapturingEvent.serviceStarted(measurement: entity))
         }
     }
 
@@ -372,8 +370,8 @@ public class DataCapturingService: NSObject {
      Loads all the geo locations belonging to a certain measurement.
 
      - Parameters:
-     - belongingTo: The measurement the geo locations are to be loaded for.
-     - onFinished: The handler called after finishing loading the geo locations. The loaded locations are provided as an array to this handler.
+       - belongingTo: The measurement the geo locations are to be loaded for.
+       - onFinished: The handler called after finishing loading the geo locations. The loaded locations are provided as an array to this handler.
      */
     public func loadGeoLocations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([GeoLocation]) -> Void) {
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
@@ -389,8 +387,8 @@ public class DataCapturingService: NSObject {
      Loads all the accelerations belonging to a certain measurement.
 
      - Parameters:
-     - belongingTo: The measurement the accelerations are to be loaded for.
-     - onFinished: The handler called after finishing loading the accelerations. The loaded accelerations are provided as an array to this handler.
+       - belongingTo: The measurement the accelerations are to be loaded for.
+       - onFinished: The handler called after finishing loading the accelerations. The loaded accelerations are provided as an array to this handler.
      */
     public func loadAccelerations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([Acceleration]) -> Void) {
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { (measurement) in
@@ -422,8 +420,10 @@ public class DataCapturingService: NSObject {
             return
         }
 
-        self.locationManager.delegate = self
-        self.locationManager.startUpdatingLocation()
+        DispatchQueue.main.async {
+            self.locationManager.delegate = self
+            self.locationManager.startUpdatingLocation()
+        }
 
         let queue = OperationQueue()
         queue.qualityOfService = QualityOfService.userInitiated
