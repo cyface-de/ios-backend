@@ -74,9 +74,10 @@ public class MovebisDataCapturingService: DataCapturingService {
      By default this is set to the supported maximum of 100 Hz.
      - persistenceLayer: An API to store, retrieve and update captured data to the local system
      until the App can transmit it to a server.
+     - eventHandler: A handler for events occuring during data capturing.
      */
-    public init(connection serverConnection: MovebisServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer) {
-        super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence, dataSynchronizationIsActive: true)
+    public init(connection serverConnection: MovebisServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent) -> Void)) {
+        super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence, dataSynchronizationIsActive: true, eventHandler: eventHandler)
     }
 
     /**
@@ -86,8 +87,8 @@ public class MovebisDataCapturingService: DataCapturingService {
      The provided handler is notified of its completion by receiving the event `DataCapturingEvent.serviceStarted`.
      If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.
      */
-    public func start(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
-        return start(inContext: .bike, withHandler: handler)
+    public func start() {
+        return start(inContext: .bike)
     }
 
     override func cleanDataAfterSync(for measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void)) {

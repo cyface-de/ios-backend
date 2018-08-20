@@ -24,22 +24,51 @@ public enum DataCapturingEvent {
     case geoLocationFixLost
     /**
      Occurs each time the `DataCapturingService` receives a new geo location position.
+
      - Parameter position: The new geo location position.
      */
     case geoLocationAcquired(position: GeoLocation)
     /**
      Occurs each time the application runs out of space.
      How much space is used and how much is available may be retrieved from `allocation`.
+
      - Parameter allocation: Information about the applications disk (or rather SD card) space consumption.
      */
     case lowDiskSpace(allocation: DiskConsumption)
     /**
-     Occurs if the `DataCapturingService` has synchronized all pending cached data successfully
-     and deleted the local copies.
+     Occurs if the `DataCapturingService` has synchronized a measurement successfully
+     and cleaned the local copies.
+
+     - Parameter measurement: The measurement which finished synchronization.
+     - Parameter status: Whether synchronization was a success or a failure.
      */
-    case synchronizationSuccessful
+    case synchronizationFinished(measurement: MeasurementEntity, status: SynchronizationStatus)
+    /**
+     Occurs when the synchronization of a measurement has started.
+
+     - Parameter measurement: The measurement the gets synchronized.
+    */
+    case synchronizationStarted(measurement: MeasurementEntity)
     /**
      Used to notify the client application of a successful start of the `DataCapturingService`.
      */
     case serviceStarted(measurement: MeasurementEntity)
+}
+
+/**
+ Provides information on whether a synchronization was successful or not.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.0.0
+ */
+public enum SynchronizationStatus {
+    /**
+    Data synchronization complete succefully.
+    */
+    case success
+    /**
+     Data synchronization failed.s
+    */
+    case failure
 }

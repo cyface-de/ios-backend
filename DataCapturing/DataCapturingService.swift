@@ -41,10 +41,10 @@ public class DataCapturingService: NSObject {
     public var isPaused: Bool
 
     /// A listener that is notified of important events during data capturing.
-    private var handler: ((DataCapturingEvent) -> Void)?
+    private var handler: ((DataCapturingEvent) -> Void)
 
     /// The currently recorded `Measurement` or nil if there is no active recording.
-    private var currentMeasurement: MeasurementEntity?
+    public var currentMeasurement: MeasurementEntity?
 
     /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
     private let motionManager: CMMotionManager
@@ -76,14 +76,6 @@ public class DataCapturingService: NSObject {
 
     /// Handles background synchronization of available `Measurement`s.
     let reachabilityManager: NetworkReachabilityManager
-
-    /**
-     A delegate that is informed about successful measurement synchronization.
-     Gets the synchronized measurements identifer as parameter.
-     This can be used to synchronize view elements showing measurements with the corresponding
-     measurement and refresh upon deletion.
-     */
-    public var syncDelegate: ((Int64) -> Void)?
 
     /**
      A flag indicating whether synchronization of data should only happen if the device is connected to a wireless local area network (Wifi).
@@ -121,10 +113,10 @@ public class DataCapturingService: NSObject {
     private let capturingQueue = DispatchQueue.global(qos: .userInitiated)
 
     /// Synchronizes read and write operations on the `accelerationsCache`.
-    private let accelerationsCacheSynchronizationQueue = DispatchQueue(label: "accelerationsCacheSynchronization", attributes: .concurrent)
+    /*private let accelerationsCacheSynchronizationQueue = DispatchQueue(label: "accelerationsCacheSynchronization", attributes: .concurrent)*/
 
-    /// Synchronizes read and write operations on the `locationsCache`.
-    private let locationsCacheSynchronizationQueue = DispatchQueue(label: "locationsCacheSynchronization", attributes: .concurrent)
+    /// Synchronizes read and write operations on the `locationsCache` and the `accelerationsCache`.
+    private let cacheSynchronizationQueue = DispatchQueue(label: "cacheSynchronization", attributes: .concurrent)
 
     /// A timer called in regular intervals to save the captured data to the underlying database.
     private var backgroundSynchronizationTimer: Timer!
@@ -142,13 +134,15 @@ public class DataCapturingService: NSObject {
      - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
      - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
      - dataSynchronizationIsActive: A flag telling the system, whether it should synchronize data or not. If this is `true` data will be synchronized; if it is `false`, no data will be synchronized.
+     - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
      */
     public init(
         connection serverConnection: ServerConnection,
         sensorManager manager: CMMotionManager,
         updateInterval interval: Double = 100,
         persistenceLayer persistence: PersistenceLayer,
-        dataSynchronizationIsActive: Bool) {
+        dataSynchronizationIsActive: Bool,
+        eventHandler: @escaping ((DataCapturingEvent) -> Void)) {
 
         self.isRunning = false
         self.isPaused = false
@@ -156,6 +150,7 @@ public class DataCapturingService: NSObject {
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
         self.serverConnection = serverConnection
+        self.handler = eventHandler
 
         self.syncOnWiFiOnly = true
         guard let reachabilityManager = NetworkReachabilityManager(host: serverConnection.getURL().absoluteString) else {
@@ -173,9 +168,7 @@ public class DataCapturingService: NSObject {
             let reachable = mySelf.syncOnWiFiOnly ?  status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) : status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) || status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi)
 
             if reachable {
-                mySelf.forceSync {
-                    mySelf.notify(of: .synchronizationSuccessful)
-                }
+                mySelf.forceSync()
             }
         }
         self.dataSynchronizationIsActive = dataSynchronizationIsActive
@@ -185,10 +178,8 @@ public class DataCapturingService: NSObject {
     /**
      Starts the capturing process with an optional closure, that is notified of important events
      during the capturing process. This operation is idempotent.
-     
-     - Parameter handler: A closure that is notified of important events during data capturing.
      */
-    public func start(inContext context: MeasurementContext, withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
+    public func start(inContext context: MeasurementContext) {
         guard !isPaused else {
             fatalError("DataCapturingService.start(): Invalid state! You tried to start the data capturing service in paused state! Please call resume() and stop() before starting the service!")
         }
@@ -196,9 +187,9 @@ public class DataCapturingService: NSObject {
         persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970(), withContext: context) { measurement in
             let entity = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context)!)
             self.currentMeasurement = entity
-            DispatchQueue.main.async {
-                self.startCapturing(withHandler: handler)
-                handler(DataCapturingEvent.serviceStarted(measurement: entity))
+            DispatchQueue.main.async { [unowned self] in
+                self.startCapturing()
+                self.handler(DataCapturingEvent.serviceStarted(measurement: entity))
             }
         }
     }
@@ -233,56 +224,52 @@ public class DataCapturingService: NSObject {
 
     /**
      Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
-
-     - Parameter handler: The handler receiving `DataCapturingEvent` instances from the resumed capturing.
      */
-    public func resume(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
+    public func resume() {
         guard isPaused, !isRunning else {
             fatalError("DataCapturingService.resume(): isPaused --> \(isPaused), isRunning --> \(isRunning)")
         }
 
-        startCapturing(withHandler: handler)
+        startCapturing()
         isPaused = false
     }
 
     /**
      Forces the service to synchronize all Measurements now if a connection is available.
      If this is not called the service might wait for an opportune moment to start synchronization.
-
-     - Parameter onFinish: A handler called each time a synchronization has finished.
      */
-    public func forceSync(onFinish handler: @escaping (() -> Void)) {
+    public func forceSync() {
         if !self.serverConnection.isAuthenticated() || !self.reachabilityManager.isReachableOnEthernetOrWiFi {
             // Quit directly.
-            handler()
+            return
         }
 
         self.persistenceLayer.loadSynchronizableMeasurements { [weak self] measurements in
             guard let myself = self else {
-                handler()
                 return
             }
 
             var countOfMeasurementsToSynchronize = measurements.count
             guard countOfMeasurementsToSynchronize > 0 else {
-                handler()
                 return
             }
 
             for measurement in measurements {
+                guard let measurementContext = MeasurementContext(rawValue: measurement.context) else {
+                    fatalError("Invalid measurement context: \(measurement.context) in database.")
+                }
+                let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: measurementContext)
+
                 let synchronizationFinishedHandler: (MeasurementEntity, ServerConnectionError?) -> Void = { measurement, error in
                     // Only go on if there was no error
                     if let error = error {
                         os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
                         os_log("Error: %@\n Description: %@", error.title ?? "No Title", error.errorDescription ?? "No Description")
+                        myself.handler(.synchronizationFinished(measurement: measurementEntity, status: .failure))
                     } else {
                         myself.cleanDataAfterSync(for: measurement) {
-                            // Inform UI if interested
-                            if let syncDelegate = myself.syncDelegate {
-                                DispatchQueue.main.async {
-                                    syncDelegate(measurement.identifier)
-                                }
-                            }
+                            // Inform UI
+                            myself.handler(.synchronizationFinished(measurement: measurementEntity, status: .success))
                         }
                     }
                     // TODO: synchronize this?
@@ -290,15 +277,12 @@ public class DataCapturingService: NSObject {
 
                     // Everything uploaded?
                     if countOfMeasurementsToSynchronize == 0 {
-                        handler()
-                        if myself.countMeasurements()==0 {
-                            myself.reachabilityManager.stopListening()
-                        }
+                        myself.reachabilityManager.stopListening()
                     }
                 }
-                if let measurementContext = MeasurementContext(rawValue: measurement.context) {
-                    myself.serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier, context: measurementContext), onFinishedCall: synchronizationFinishedHandler)
-                }
+
+                myself.handler(.synchronizationStarted(measurement: measurementEntity))
+                myself.serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier, context: measurementContext), onFinishedCall: synchronizationFinishedHandler)
             }
         }
     }
@@ -430,24 +414,21 @@ public class DataCapturingService: NSObject {
 
     /**
      Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
-
-     - Parameter withHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
      */
-    func startCapturing(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
+    func startCapturing() {
         // Preconditions
         guard !isRunning else {
             os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: LOG, type: .info)
             return
         }
 
-        self.handler = handler
         self.locationManager.delegate = self
         self.locationManager.startUpdatingLocation()
 
         let queue = OperationQueue()
         queue.qualityOfService = QualityOfService.userInitiated
         queue.underlyingQueue = capturingQueue
-        /*if motionManager.isAccelerometerAvailable {
+        if motionManager.isAccelerometerAvailable {
             motionManager.startAccelerometerUpdates(to: queue) { data, _ in
                 guard let myData = data else {
                     fatalError("DataCapturingService.start(): No Accelerometer data available!")
@@ -459,11 +440,11 @@ public class DataCapturingService: NSObject {
                                        y: accValues.y,
                                        z: accValues.z)
                 // Synchronize this write operation.
-                self.accelerationsCacheSynchronizationQueue.async(flags: .barrier) {
+                self.cacheSynchronizationQueue.async(flags: .barrier) {
                     self.accelerationsCache.append(acc)
                 }
             }
-        }*/
+        }
 
         // Run data saving every 30 seconds
         backgroundSynchronizationTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true, block: saveCapturedData)
@@ -480,7 +461,7 @@ public class DataCapturingService: NSObject {
             return
         }
 
-        /*motionManager.stopAccelerometerUpdates()*/
+        motionManager.stopAccelerometerUpdates()
         locationManager.stopUpdatingLocation()
         locationManager.delegate = nil
         backgroundSynchronizationTimer.fire()
@@ -490,36 +471,18 @@ public class DataCapturingService: NSObject {
     }
 
     /**
-     Calls the event `handler` if there is one. Otherwise the call is ignored silently.
-     
-     - Parameter of: The `event` to notify the `handler` of.
-     */
-    private func notify(of event: DataCapturingEvent) {
-        guard let handler = self.handler else {
-            return
-        }
-
-        handler(event)
-    }
-
-    /**
      Method called by the `backgroundSynchronizationTimer` on each invocation. This method saves all data from `accelerationsCache` and from `locationsCache` to the underlying database and cleans both caches.
-    */
+     */
     func saveCapturedData(timer: Timer) {
         guard let measurement = currentMeasurement else {
             fatalError("No current measurement to save the location to! Data capturing impossible.")
         }
 
-         /*accelerationsCacheSynchronizationQueue.async(flags: .barrier) {
-            self.persistenceLayer.save(accelerations: self.accelerationsCache, toMeasurement: measurement) {
-                self.accelerationsCache.removeAll()
-            }
-         }*/
-        locationsCacheSynchronizationQueue.async(flags: .barrier) {
-            self.persistenceLayer.save(locations: self.locationsCache, toMeasurement: measurement) {
-                self.locationsCache.removeAll()
-            }
-         }
+        cacheSynchronizationQueue.async(flags: .barrier) {
+            self.persistenceLayer.syncSave(locations: self.locationsCache, accelerations: self.accelerationsCache, toMeasurement: measurement)
+            self.accelerationsCache.removeAll()
+            self.locationsCache.removeAll()
+        }
     }
 }
 
@@ -550,12 +513,12 @@ extension DataCapturingService: CLLocationManagerDelegate {
                 speed: location.speed,
                 timestamp: convertToUtcTimestamp(date: location.timestamp))
 
-            locationsCacheSynchronizationQueue.async(flags: .barrier) {
+            cacheSynchronizationQueue.async(flags: .barrier) {
                 self.locationsCache.append(geoLocation)
             }
-
+            
             DispatchQueue.main.async {
-                self.notify(of: .geoLocationAcquired(position: geoLocation))
+                self.handler(.geoLocationAcquired(position: geoLocation))
             }
         }
     }
