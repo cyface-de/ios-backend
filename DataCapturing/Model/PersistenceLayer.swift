@@ -266,7 +266,6 @@ public class PersistenceLayer {
     }
 
     private func internalSave(locations: [GeoLocation], toMeasurement measurement: MeasurementMO, onContext context: NSManagedObjectContext) {
-        debugPrint("Saving \(locations.count) geo locations to a measurement with \(measurement.geoLocations.count) geo locations and \(measurement.accelerations.count) accelerations.")
         locations.forEach { location in
             let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
             dbLocation.lat = location.latitude
@@ -305,7 +304,6 @@ public class PersistenceLayer {
     }
 
     private func internalSave(accelerations: [Acceleration], toMeasurement measurement: MeasurementMO, onContext context: NSManagedObjectContext) {
-        debugPrint("Saving \(accelerations.count) accelerations to a measurement with \(measurement.accelerations.count) accelerations and \(measurement.geoLocations.count) geo locations.")
         accelerations.forEach { acceleration in
             let dbAcceleration = AccelerationPointMO.init(entity: AccelerationPointMO.entity(), insertInto: context)
             dbAcceleration.ax = acceleration.x
