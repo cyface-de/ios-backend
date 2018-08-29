@@ -355,7 +355,7 @@ public class DataCapturingService: NSObject {
             }
             syncGroup.leave()
         }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(10)) == .success else {
             fatalError("DataCapturingService.loadMeasurement(withIdentifier: \(identifier)): Unable to load measurement!")
         }
         return ret
