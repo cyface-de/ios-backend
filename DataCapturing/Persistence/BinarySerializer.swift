@@ -1,5 +1,5 @@
 //
-//  CyfaceBinaryFormatSerializer.swift
+//  BinarySerializer.swift
 //  DataCapturing
 //
 //  Created by Team Cyface on 27.02.18.
@@ -39,8 +39,23 @@ enum ByteOrder {
     }
 }
 
+/**
+ Protocol that must be fullfilled by a serializer to transform an object into the Cyface binary format.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.0.0
+ */
 protocol BinarySerializer {
+    /// The type of the item to serialize.
     associatedtype Serializable
+
+    /**
+     Serializes the provided serializable into a Cyface binary format representation. This only works for supported object types such as `MeasurementMO`, ÀccelerationPointMO` and `GeoLocationMO`.
+
+     - Parameter serializable: The object to serialize.
+     - Returns: A binary format representation of the provided object.
+     */
     func serialize(serializable: Serializable) -> Data
     /**
      Serializes the provided `measurement` and compresses the returned data.
@@ -53,7 +68,12 @@ protocol BinarySerializer {
 }
 
 extension BinarySerializer {
+    /**
+     Serializes and compresses the provided serializable and returns the serialized variant.
 
+     - Parameter serializable:
+     - Returns: A compressed variant of the serialized data.
+    */
     func serializeCompressed(serializable: Serializable) -> Data {
         let res = serialize(serializable: serializable)
 
@@ -65,9 +85,27 @@ extension BinarySerializer {
     }
 }
 
+/**
+ A serializer for measurements into the Cyface binary format represenation.
+
+ - Author: Klemens Muthmann
+ - Since: 2.0.0
+ - Version: 1.0.0
+ */
 class MeasurementSerializer: BinarySerializer {
+    /// Binds the Serializeable from the `BinarySerializer` protocoll to a measurement.
     typealias Serializable = MeasurementMO
 
+    /**
+     Serializes the provided `measurement` into its Cyface Binary Format specification in the form:
+     - 2 Bytes: Version of the file format.
+     - 4 Bytes: Count of geo locations
+     - 4 Bytes: Count of accelerations
+     - 4 Bytes: Count of rotations (not used on iOS yet)
+     - 4 Bytes: Count of directions (not used on iOS yet)
+
+     - Parameter measurement: The measurement to serialize.
+     */
     func serialize(serializable measurement: MeasurementMO) -> Data {
         let accelerations = measurement.accelerations
         let geoLocations = measurement.geoLocations
@@ -81,18 +119,31 @@ class MeasurementSerializer: BinarySerializer {
         dataArray.append(contentsOf: byteOrder.convertToBytes(UInt32(0)))
         dataArray.append(contentsOf: byteOrder.convertToBytes(UInt32(0)))
 
-        /*let serializedGeoLocations = serialize(geoLocations: geoLocations)
-        dataArray.append(contentsOf: serializedGeoLocations)
-        let serializedAccelerations = serialize(accelerations: accelerations)
-        dataArray.append(contentsOf: serializedAccelerations)*/
-
         return Data(bytes: dataArray)
     }
 }
 
+/**
+ A serializer for accelerations into the Cyface binary format representation
+
+ - Author: Klemens Muthmann
+ - Since: 2.0.0
+ - Version: 1.0.0
+ */
 class AccelerationSerializer: BinarySerializer {
+    /// Binds the Serializeable from the `BinarySerializer` protocoll to an array of acceleration points.
     typealias Serializable = [AccelerationPointMO]
 
+    /**
+     Serializes an array of accelerations into binary format of the form:
+     - 8 Bytes: timestamp as long
+     - 8 Bytes: x as double
+     - 8 Bytes: y as double
+     - 8 Bytes: z as double
+
+     - Parameter accelerations: The array of accelerations to serialize.
+     - Returns: An array of serialized bytes.
+     */
     func serialize(serializable accelerations: [AccelerationPointMO]) -> Data{
         var ret = [UInt8]()
         let byteOrder = ByteOrder.bigEndian
@@ -113,9 +164,28 @@ class AccelerationSerializer: BinarySerializer {
     }
 }
 
+/**
+ A serializer for geo locations into the Cyface binary format representation
+
+ - Author: Klemens Muthmann
+ - Since: 2.0.0
+ - Version: 1.0.0
+ */
 class GeoLocationSerializer: BinarySerializer {
+    /// Binds the `Serializeble from the `BinarySerializer` protocoll to an array of geo locations.
     typealias Serializable = [GeoLocationMO]
 
+    /**
+     Serializes an array of geo locations into binary format of the form:
+     - 8 Bytes: timestamp as long
+     - 8 Bytes: latitude as double
+     - 8 Bytes: longitude as double
+     - 8 Bytes: speed as double
+     - 4 Bytes: accuracy as int
+
+     - Parameter geoLocations: The array of locations to serialize.
+     - Returns: An array of serialized bytes.
+     */
     func serialize(serializable locations: [GeoLocationMO]) -> Data {
         var ret = [UInt8]()
         let byteOrder = ByteOrder.bigEndian
@@ -151,9 +221,11 @@ class GeoLocationSerializer: BinarySerializer {
  - Since: 1.0.0
  */
 class CyfaceBinaryFormatSerializer {
-
+    /// Serializer to transform measurement objects
     let measurementSerializer = MeasurementSerializer()
+    /// Serializer to transform acceleration objects
     let accelerationsSerializer = AccelerationSerializer()
+    /// Serializer to transform geo location objects
     let geoLocationsSerializer = GeoLocationSerializer()
     /**
      Serializes the provided `measurement` and compresses the returned data.
@@ -161,6 +233,7 @@ class CyfaceBinaryFormatSerializer {
      - Parameters:
      - measurement: The `measurement` to serialize.
      - Returns: The serialized measurement in the compressed Cyface binary format
+     - Throws: `SerializationError.compressionFailed` if compression was not successful.
      */
     func serializeCompressed(_ measurement: MeasurementMO) throws -> Data {
         let res = serialize(measurement)
@@ -190,75 +263,10 @@ class CyfaceBinaryFormatSerializer {
 
         return ret
     }
-/*
-    /**
-     Serializes an array of geo locations into binary format of the form:
-     - 8 Bytes: timestamp as long
-     - 8 Bytes: latitude as double
-     - 8 Bytes: longitude as double
-     - 8 Bytes: speed as double
-     - 4 Bytes: accuracy as int
-
-     - Parameter geoLocations: The array of locations to serialize.
-     - Returns: An array of serialized bytes.
-     */
-    func serialize(geoLocations locations: [GeoLocationMO]) -> [UInt8] {
-        var ret = [UInt8]()
-
-        for location in locations {
-            // 8 Bytes
-            let timestamp = location.timestamp
-            ret.append(contentsOf: convertToBytes(timestamp, inOrder: .bigEndian))
-            // 8 Bytes
-            let latBitPattern = location.lat.bitPattern
-            ret.append(contentsOf: convertToBytes(latBitPattern, inOrder: .bigEndian))
-            // 8 Bytes
-            let lonBitPattern = location.lon.bitPattern
-            ret.append(contentsOf: convertToBytes(lonBitPattern, inOrder: .bigEndian))
-            // 8 Bytes
-            let speedBitPattern = location.speed.bitPattern
-            ret.append(contentsOf: convertToBytes(speedBitPattern, inOrder: .bigEndian))
-            // 4 Bytes
-            let accuracy = UInt32(location.accuracy*100)
-            ret.append(contentsOf: convertToBytes(accuracy, inOrder: .bigEndian))
-            // = 36 Bytes
-        }
-
-        return ret
-    }
-
-    /**
-     Serializes an array of accelerations into binary format of the form:
-     - 8 Bytes: timestamp as long
-     - 8 Bytes: x as double
-     - 8 Bytes: y as double
-     - 8 Bytes: z as double
-
-     - Parameter accelerations: The array of accelerations to serialize.
-     - Returns: An array of serialized bytes.
-     */
-    private func serialize(accelerations: [AccelerationPointMO]) -> [UInt8] {
-        var ret = [UInt8]()
-
-        for acceleration in accelerations {
-            // 8 Bytes
-            ret.append(contentsOf: convertToBytes(acceleration.timestamp, inOrder: .bigEndian))
-            // 8 Bytes
-            ret.append(contentsOf: convertToBytes(acceleration.ax.bitPattern, inOrder: .bigEndian))
-            // 8 Bytes
-            ret.append(contentsOf: convertToBytes(acceleration.ay.bitPattern, inOrder: .bigEndian))
-            // 8 Bytes
-            ret.append(contentsOf: convertToBytes(acceleration.az.bitPattern, inOrder: .bigEndian))
-            // 32 Bytes
-        }
-
-        return ret
-    }*/
 }
 
 /// Extension to the `BinaryInteger` class providing the functionality to extract some bytes.
 extension BinaryInteger {
-
     /**
      Extracts bytes from this object.
 
@@ -278,6 +286,14 @@ extension BinaryInteger {
     }
 }
 
+/**
+ An enumeration of all the possible errors thrown during serialization.
+
+ ````
+ case compressionFailed
+ ````
+ */
 enum SerializationError: Error {
+    /// Thrown if compression of serialized data was not successful.
     case compressionFailed
 }
