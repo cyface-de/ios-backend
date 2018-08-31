@@ -73,7 +73,7 @@ extension BinarySerializer {
 
      - Parameter serializable:
      - Returns: A compressed variant of the serialized data.
-    */
+     */
     func serializeCompressed(serializable: Serializable) -> Data {
         let res = serialize(serializable: serializable)
 
@@ -84,6 +84,11 @@ extension BinarySerializer {
         return compressed
     }
 }
+
+// MARK: - Protocol implementations
+/*
+ In contrast to Apples proposals, these are not implemented as structs but classes. The reason is that none of the implementations contain a state and I see absolutely no reason to copy stateless instances around all the time. Probably slows down everything.
+ */
 
 /**
  A serializer for measurements into the Cyface binary format represenation.
