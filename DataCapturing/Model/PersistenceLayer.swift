@@ -257,21 +257,26 @@ public class PersistenceLayer {
                 fatalError("PersistenceLayer.save(locations: \(locations.count), toMeasurement: \(measurementIdentifier)): Unable to load measurement!")
             }
 
-            locations.forEach { location in
-                let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
-                dbLocation.lat = location.latitude
-                dbLocation.lon = location.longitude
-                dbLocation.speed = location.speed
-                dbLocation.timestamp = location.timestamp
-                dbLocation.accuracy = location.accuracy
-                measurement.addToGeoLocations(dbLocation)
-            }
-
-            // debugPrint("Saved measurement with \(measurement.accelerations?.count ?? 0)")
+            self.internalSave(locations: locations, toMeasurement: measurement, onContext: context)
             context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
             context.saveRecursively()
+            context.refresh(measurement, mergeChanges: true)
             handler()
         }
+    }
+
+    private func internalSave(locations: [GeoLocation], toMeasurement measurement: MeasurementMO, onContext context: NSManagedObjectContext) {
+        locations.forEach { location in
+            let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
+            dbLocation.lat = location.latitude
+            dbLocation.lon = location.longitude
+            dbLocation.speed = location.speed
+            dbLocation.timestamp = location.timestamp
+            dbLocation.accuracy = location.accuracy
+            measurement.addToGeoLocations(dbLocation)
+        }
+
+        // debugPrint("Saved measurement with \(measurement.accelerations?.count ?? 0)")
     }
 
     /**
@@ -289,20 +294,27 @@ public class PersistenceLayer {
                 fatalError("PersistenceLayer.save(accelerations: \(accelerations.count), toMeasurement: \(measurementIdentifier)): Unable to load measurement!")
             }
 
-            accelerations.forEach { acceleration in
-                let dbAcceleration = AccelerationPointMO.init(entity: AccelerationPointMO.entity(), insertInto: context)
-                dbAcceleration.ax = acceleration.x
-                dbAcceleration.ay = acceleration.y
-                dbAcceleration.az = acceleration.z
-                dbAcceleration.timestamp = acceleration.timestamp
-                measurement.addToAccelerations(dbAcceleration)
-            }
+            self.internalSave(accelerations: accelerations, toMeasurement: measurement, onContext: context)
 
-            // debugPrint("Saved measurement with \(measurement.accelerations?.count ?? 0)")
             context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
             context.saveRecursively()
+            context.refresh(measurement, mergeChanges: true)
             handler()
         }
+    }
+
+    private func internalSave(accelerations: [Acceleration], toMeasurement measurement: MeasurementMO, onContext context: NSManagedObjectContext) {
+        accelerations.forEach { acceleration in
+            let dbAcceleration = AccelerationPointMO.init(entity: AccelerationPointMO.entity(), insertInto: context)
+            dbAcceleration.ax = acceleration.x
+            dbAcceleration.ay = acceleration.y
+            dbAcceleration.az = acceleration.z
+            dbAcceleration.timestamp = acceleration.timestamp
+            measurement.addToAccelerations(dbAcceleration)
+        }
+
+        // debugPrint("Saved measurement with \(measurement.accelerations?.count ?? 0)")
+
     }
 
     /**
@@ -314,17 +326,25 @@ public class PersistenceLayer {
      - toMeasurement: The measurement to save the provided ojects to.
     */
     func syncSave(locations: [GeoLocation], accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity) {
+        // FIXME: this does not work. Most likely because the first save call changes the measurement in the database but does not refresh it as an object, thus the second call to save fails.
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        save(locations: locations, toMeasurement: measurement) {
-            syncGroup.leave()
-        }
-        syncGroup.enter()
-        save(accelerations: accelerations, toMeasurement: measurement) {
+        container.performBackgroundTask { (context) in
+            let measurementIdentifier = measurement.identifier
+            guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
+                fatalError("PersistenceLayer.save(accelerations: \(accelerations.count), toMeasurement: \(measurementIdentifier)): Unable to load measurement!")
+            }
+            self.internalSave(locations: locations, toMeasurement: measurement, onContext: context)
+            self.internalSave(accelerations: accelerations, toMeasurement: measurement, onContext: context)
+
+            context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+            context.saveRecursively()
+            context.refresh(measurement, mergeChanges: true)
+
             syncGroup.leave()
         }
 
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(4)) == .success else {
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(10)) == .success else {
             fatalError("PersistenceLayer.syncSave(locations: \(locations.count), accelerations: \(accelerations.count), toMeasurement: \(measurement.identifier)): Connection to database timed out.")
         }
     }
