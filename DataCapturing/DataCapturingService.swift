@@ -480,6 +480,15 @@ public class DataCapturingService: NSObject {
 
         cacheSynchronizationQueue.async(flags: .barrier) {
             self.persistenceLayer.syncSave(locations: self.locationsCache, accelerations: self.accelerationsCache, toMeasurement: measurement)
+            self.persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { (measurement) in
+                let accelerationsFile = AccelerationsFile()
+                do {
+                    debugPrint("Writing \(measurement.accelerations.count) accelerations to file.")
+                    try accelerationsFile.append(accelerations: measurement.accelerations, to: measurement.identifier)
+                } catch {
+                    fatalError("Unable to write data to file due to \(error).")
+                }
+            }
             self.accelerationsCache.removeAll()
             self.locationsCache.removeAll()
         }
