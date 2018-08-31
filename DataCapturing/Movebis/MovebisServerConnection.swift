@@ -75,7 +75,7 @@ public class MovebisServerConnection: ServerConnection {
     }
 
     /**
-     * Synchronizes a `mesurement` with a Movebis server.
+     * Synchronizes a `measurement` with a Movebis server.
      * The Movebis server must run at the endpoint provided to the constructor of this class, as `apiUrl`.
      *
      * - Parameters:
