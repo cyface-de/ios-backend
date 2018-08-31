@@ -93,7 +93,7 @@ extension BinarySerializer {
  - Version: 1.0.0
  */
 class MeasurementSerializer: BinarySerializer {
-    /// Binds the Serializeable from the `BinarySerializer` protocoll to a measurement.
+    /// Binds the Serializeable from the `BinarySerializer` protocol to a measurement.
     typealias Serializable = MeasurementMO
 
     /**
@@ -131,7 +131,7 @@ class MeasurementSerializer: BinarySerializer {
  - Version: 1.0.0
  */
 class AccelerationSerializer: BinarySerializer {
-    /// Binds the Serializeable from the `BinarySerializer` protocoll to an array of acceleration points.
+    /// Binds the Serializeable from the `BinarySerializer` protocol to an array of acceleration points.
     typealias Serializable = [AccelerationPointMO]
 
     /**
@@ -172,7 +172,7 @@ class AccelerationSerializer: BinarySerializer {
  - Version: 1.0.0
  */
 class GeoLocationSerializer: BinarySerializer {
-    /// Binds the `Serializeble from the `BinarySerializer` protocoll to an array of geo locations.
+    /// Binds the `Serializeble from the `BinarySerializer` protocol to an array of geo locations.
     typealias Serializable = [GeoLocationMO]
 
     /**
