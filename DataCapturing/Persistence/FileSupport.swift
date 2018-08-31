@@ -7,9 +7,36 @@
 
 import Foundation
 
+/**
+ The protocol for writing accelerations to a file.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.0.0
+ */
 protocol FileSupport {
+    /**
+     Creates the path to a file containing acceleration points in the Cyface binary format.
+
+     - Parameter for: The measurement to create the path to the acceleration file for.
+     - Returns: The path to the file as an URL.
+     - Throws: On failure of creating the file at the required path.
+    */
     func path(for measurement: Int64) throws -> URL
+    /**
+     Appends acceleration points to a file for a certain measurement.
+
+     - Parameters:
+        - accelerations: The accelerations to append.
+        - to: The measurement to append the accelerations to.
+     */
     func append(accelerations: [AccelerationPointMO], to measurement: Int64) throws
+    /**
+     Creates a data representation from an array of accelerations.
+
+     - Parameter from: An array of `AccelerationPointMO` objects to create a data representation for.
+     - Returns: The acceleration points in the Cyface binary format.
+     */
     func data(from acceleration: [AccelerationPointMO]) -> Data?
 }
 
@@ -52,6 +79,13 @@ extension FileSupport {
     }
 }
 
+/**
+ Struct implementing the `FileSupport` protocol.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.0.0
+ */
 struct AccelerationsFile: FileSupport {
 
 }
