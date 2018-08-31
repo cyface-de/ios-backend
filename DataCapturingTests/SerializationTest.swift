@@ -136,15 +136,6 @@ class SerializationTest: XCTestCase {
         //print("test")
     }
 
-    func testFileWriting() {
-        let file = AccelerationsFile()
-        do {
-            try file.append(acceleration: Acceleration(timestamp: Int64(1), x: 1.0, y: 1.0, z: 1.0), to: Int64(1))
-        } catch {
-            fatalError("test error: \(error)")
-        }
-    }
-
     func dataToUInt32(data: [UInt8]) -> UInt32 {
         var value: UInt32 = 0
         for byte in data {
