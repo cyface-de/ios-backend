@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1F4E4DE75747F8184D9F4BF6 /* Pods_DataCapturingTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B06BA058986DE1E01E94EFD /* Pods_DataCapturingTests.framework */; };
+		271249A8FC916AB74932155B /* Pods_DataCapturingTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B00301D742BAD4EED404EA2 /* Pods_DataCapturingTests.framework */; };
 		3D015858200F7575008C065A /* MeasurementMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D015852200F7575008C065A /* MeasurementMO+CoreDataProperties.swift */; };
 		3D015859200F7575008C065A /* AccelerationPointMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D015853200F7575008C065A /* AccelerationPointMO+CoreDataProperties.swift */; };
 		3D01585A200F7575008C065A /* GeoLocationMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D015854200F7575008C065A /* GeoLocationMO+CoreDataClass.swift */; };
@@ -18,7 +18,6 @@
 		3D0511D7204D267600967898 /* MovebisDataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D6204D267600967898 /* MovebisDataCapturingService.swift */; };
 		3D0511DA204D268900967898 /* MovebisServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D9204D268900967898 /* MovebisServerConnection.swift */; };
 		3D0511E0204D26BC00967898 /* CyfaceServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511DF204D26BC00967898 /* CyfaceServerConnection.swift */; };
-		3D0511E3204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E2204D26C200967898 /* CyfaceBinaryFormatSerializer.swift */; };
 		3D0511E7204D622700967898 /* SerializationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E5204D622700967898 /* SerializationTest.swift */; };
 		3D0511ED204ED0C200967898 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511EC204ED0C200967898 /* PersistenceTests.swift */; };
 		3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */; };
@@ -27,14 +26,16 @@
 		3D0BDEB21FB1B951004EA25E /* DataCapturing.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0BDEA41FB1B951004EA25E /* DataCapturing.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */; };
 		3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */; };
+		3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79D2136F045003F53C9 /* BinarySerializer.swift */; };
+		3D58B7A02136F046003F53C9 /* FileSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79E2136F045003F53C9 /* FileSupport.swift */; };
 		3D63EC322115B54200BF33EA /* DataSynchronizationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D63EC312115B54200BF33EA /* DataSynchronizationError.swift */; };
 		3D8CC22020A6D89A0095CCD4 /* GeoLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */; };
 		3D8CC22120A6D89A0095CCD4 /* Measurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */; };
 		3D8CC22220A6D89A0095CCD4 /* Acceleration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21F20A6D89A0095CCD4 /* Acceleration.swift */; };
 		3DE419E51FD5540F001282D0 /* PersistenceLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE419E41FD5540F001282D0 /* PersistenceLayer.swift */; };
 		3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */; };
+		5F1F3F879FA3AC17973D07C3 /* Pods_DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF240C2909BC340EB199FB9D /* Pods_DataCapturing.framework */; };
 		6C4797B920C1C0E0003C453D /* CyfaceModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 6C4797B620C1C0DF003C453D /* CyfaceModel.xcdatamodeld */; };
-		775C0B0D123040D58FB6EEFA /* Pods_DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C03D83FEDCE99A463EF7F4A /* Pods_DataCapturing.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,8 +49,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0C1A6DEFF5D35B15F7AA2725 /* Pods-DataCapturingTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturingTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DataCapturingTests/Pods-DataCapturingTests.debug.xcconfig"; sourceTree = "<group>"; };
-		1B06BA058986DE1E01E94EFD /* Pods_DataCapturingTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataCapturingTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D015852200F7575008C065A /* MeasurementMO+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MeasurementMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3D015853200F7575008C065A /* AccelerationPointMO+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AccelerationPointMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3D015854200F7575008C065A /* GeoLocationMO+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GeoLocationMO+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -72,6 +71,8 @@
 		3D0BDEB11FB1B951004EA25E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCapturingService.swift; sourceTree = "<group>"; };
 		3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiskConsumption.swift; sourceTree = "<group>"; };
+		3D58B79D2136F045003F53C9 /* BinarySerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinarySerializer.swift; sourceTree = "<group>"; };
+		3D58B79E2136F045003F53C9 /* FileSupport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileSupport.swift; sourceTree = "<group>"; };
 		3D63EC312115B54200BF33EA /* DataSynchronizationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSynchronizationError.swift; sourceTree = "<group>"; };
 		3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeoLocation.swift; sourceTree = "<group>"; };
 		3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Measurement.swift; sourceTree = "<group>"; };
@@ -80,10 +81,12 @@
 		3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeasurementContext.swift; sourceTree = "<group>"; };
 		6C4797B720C1C0DF003C453D /* CyfaceModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CyfaceModel.xcdatamodel; sourceTree = "<group>"; };
 		6C4797B820C1C0DF003C453D /* 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 2.xcdatamodel; sourceTree = "<group>"; };
-		7C03D83FEDCE99A463EF7F4A /* Pods_DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		9074CF429CED0E39BF3D0ADD /* Pods-DataCapturing.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DataCapturing/Pods-DataCapturing.debug.xcconfig"; sourceTree = "<group>"; };
-		C92DE53A4E918F1AFB9317D6 /* Pods-DataCapturing.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.release.xcconfig"; path = "Pods/Target Support Files/Pods-DataCapturing/Pods-DataCapturing.release.xcconfig"; sourceTree = "<group>"; };
-		DD3281624BDED24237D04281 /* Pods-DataCapturingTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturingTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-DataCapturingTests/Pods-DataCapturingTests.release.xcconfig"; sourceTree = "<group>"; };
+		80D342E2EFB47CE0538C837D /* Pods-DataCapturing.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.release.xcconfig"; path = "Pods/Target Support Files/Pods-DataCapturing/Pods-DataCapturing.release.xcconfig"; sourceTree = "<group>"; };
+		9B00301D742BAD4EED404EA2 /* Pods_DataCapturingTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataCapturingTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9B5465811608ED3D586E440 /* Pods-DataCapturing.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DataCapturing/Pods-DataCapturing.debug.xcconfig"; sourceTree = "<group>"; };
+		BF240C2909BC340EB199FB9D /* Pods_DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E5097BFE3EB5A13778FA61DC /* Pods-DataCapturingTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturingTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-DataCapturingTests/Pods-DataCapturingTests.release.xcconfig"; sourceTree = "<group>"; };
+		ECAED9EFFE9F450E818D7A06 /* Pods-DataCapturingTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturingTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DataCapturingTests/Pods-DataCapturingTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,7 +94,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				775C0B0D123040D58FB6EEFA /* Pods_DataCapturing.framework in Frameworks */,
+				5F1F3F879FA3AC17973D07C3 /* Pods_DataCapturing.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,21 +103,30 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D0BDEAB1FB1B951004EA25E /* DataCapturing.framework in Frameworks */,
-				1F4E4DE75747F8184D9F4BF6 /* Pods_DataCapturingTests.framework in Frameworks */,
+				271249A8FC916AB74932155B /* Pods_DataCapturingTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2EB6BC196E7929809DD0A337 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BF240C2909BC340EB199FB9D /* Pods_DataCapturing.framework */,
+				9B00301D742BAD4EED404EA2 /* Pods_DataCapturingTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		3D0BDE971FB1B951004EA25E = {
 			isa = PBXGroup;
 			children = (
 				3D0BDEA31FB1B951004EA25E /* DataCapturing */,
 				3D0BDEAE1FB1B951004EA25E /* DataCapturingTests */,
 				3D0BDEA21FB1B951004EA25E /* Products */,
-				982FC3B9FBF7303AF461C1BE /* Pods */,
-				BE5550D81ECF1375B7D4B0B0 /* Frameworks */,
+				826D7B71895207C77B3B86DE /* Pods */,
+				2EB6BC196E7929809DD0A337 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -130,6 +142,7 @@
 		3D0BDEA31FB1B951004EA25E /* DataCapturing */ = {
 			isa = PBXGroup;
 			children = (
+				3D58B79A2136EEA5003F53C9 /* Persistence */,
 				3DC6A7192052F14900E7CB84 /* Movebis */,
 				3DC6A7182052F14000E7CB84 /* Cyface */,
 				3DE419E31FD193D7001282D0 /* Model */,
@@ -152,6 +165,15 @@
 				3D0511EC204ED0C200967898 /* PersistenceTests.swift */,
 			);
 			path = DataCapturingTests;
+			sourceTree = "<group>";
+		};
+		3D58B79A2136EEA5003F53C9 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				3D58B79D2136F045003F53C9 /* BinarySerializer.swift */,
+				3D58B79E2136F045003F53C9 /* FileSupport.swift */,
+			);
+			path = Persistence;
 			sourceTree = "<group>";
 		};
 		3DC6A7182052F14000E7CB84 /* Cyface */ = {
@@ -192,24 +214,15 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
-		982FC3B9FBF7303AF461C1BE /* Pods */ = {
+		826D7B71895207C77B3B86DE /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				9074CF429CED0E39BF3D0ADD /* Pods-DataCapturing.debug.xcconfig */,
-				C92DE53A4E918F1AFB9317D6 /* Pods-DataCapturing.release.xcconfig */,
-				0C1A6DEFF5D35B15F7AA2725 /* Pods-DataCapturingTests.debug.xcconfig */,
-				DD3281624BDED24237D04281 /* Pods-DataCapturingTests.release.xcconfig */,
+				A9B5465811608ED3D586E440 /* Pods-DataCapturing.debug.xcconfig */,
+				80D342E2EFB47CE0538C837D /* Pods-DataCapturing.release.xcconfig */,
+				ECAED9EFFE9F450E818D7A06 /* Pods-DataCapturingTests.debug.xcconfig */,
+				E5097BFE3EB5A13778FA61DC /* Pods-DataCapturingTests.release.xcconfig */,
 			);
 			name = Pods;
-			sourceTree = "<group>";
-		};
-		BE5550D81ECF1375B7D4B0B0 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				7C03D83FEDCE99A463EF7F4A /* Pods_DataCapturing.framework */,
-				1B06BA058986DE1E01E94EFD /* Pods_DataCapturingTests.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -230,7 +243,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3D0BDEB51FB1B951004EA25E /* Build configuration list for PBXNativeTarget "DataCapturing" */;
 			buildPhases = (
-				8DEA97FDB1C588F25FDEA0D9 /* [CP] Check Pods Manifest.lock */,
+				223463A5D6291709D195CAF4 /* [CP] Check Pods Manifest.lock */,
 				3D0BDE9C1FB1B951004EA25E /* Sources */,
 				3D0BDE9D1FB1B951004EA25E /* Frameworks */,
 				3D0BDE9E1FB1B951004EA25E /* Headers */,
@@ -250,12 +263,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3D0BDEB81FB1B951004EA25E /* Build configuration list for PBXNativeTarget "DataCapturingTests" */;
 			buildPhases = (
-				F8919B989CD05846E076FCF4 /* [CP] Check Pods Manifest.lock */,
+				C7C5443357E8F9F201DF15D4 /* [CP] Check Pods Manifest.lock */,
 				3D0BDEA61FB1B951004EA25E /* Sources */,
 				3D0BDEA71FB1B951004EA25E /* Frameworks */,
 				3D0BDEA81FB1B951004EA25E /* Resources */,
 				3D8CC21C20A6D84F0095CCD4 /* ShellScript */,
-				CFA56EE1382330952F4270F0 /* [CP] Embed Pods Frameworks */,
+				64A8ADEE63DA02243B6F848C /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -324,6 +337,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		223463A5D6291709D195CAF4 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-DataCapturing-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		3D8CC21C20A6D84F0095CCD4 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -350,25 +381,7 @@
 			shellPath = /bin/sh;
 			shellScript = "if which swiftlint >/dev/null; then\n    swiftlint\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi";
 		};
-		8DEA97FDB1C588F25FDEA0D9 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-DataCapturing-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		CFA56EE1382330952F4270F0 /* [CP] Embed Pods Frameworks */ = {
+		64A8ADEE63DA02243B6F848C /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -388,7 +401,7 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DataCapturingTests/Pods-DataCapturingTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		F8919B989CD05846E076FCF4 /* [CP] Check Pods Manifest.lock */ = {
+		C7C5443357E8F9F201DF15D4 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -413,15 +426,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D0511E3204D26C200967898 /* CyfaceBinaryFormatSerializer.swift in Sources */,
 				3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */,
 				3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */,
 				3D0511D7204D267600967898 /* MovebisDataCapturingService.swift in Sources */,
+				3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */,
 				3D01585B200F7575008C065A /* AccelerationPointMO+CoreDataClass.swift in Sources */,
 				3D8CC22220A6D89A0095CCD4 /* Acceleration.swift in Sources */,
 				3D015859200F7575008C065A /* AccelerationPointMO+CoreDataProperties.swift in Sources */,
 				3DE419E51FD5540F001282D0 /* PersistenceLayer.swift in Sources */,
 				3D01585A200F7575008C065A /* GeoLocationMO+CoreDataClass.swift in Sources */,
+				3D58B7A02136F046003F53C9 /* FileSupport.swift in Sources */,
 				3D0511E0204D26BC00967898 /* CyfaceServerConnection.swift in Sources */,
 				3D8CC22020A6D89A0095CCD4 /* GeoLocation.swift in Sources */,
 				3D63EC322115B54200BF33EA /* DataSynchronizationError.swift in Sources */,
@@ -577,7 +591,7 @@
 		};
 		3D0BDEB61FB1B951004EA25E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9074CF429CED0E39BF3D0ADD /* Pods-DataCapturing.debug.xcconfig */;
+			baseConfigurationReference = A9B5465811608ED3D586E440 /* Pods-DataCapturing.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
@@ -604,7 +618,7 @@
 		};
 		3D0BDEB71FB1B951004EA25E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C92DE53A4E918F1AFB9317D6 /* Pods-DataCapturing.release.xcconfig */;
+			baseConfigurationReference = 80D342E2EFB47CE0538C837D /* Pods-DataCapturing.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
@@ -628,7 +642,7 @@
 		};
 		3D0BDEB91FB1B951004EA25E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0C1A6DEFF5D35B15F7AA2725 /* Pods-DataCapturingTests.debug.xcconfig */;
+			baseConfigurationReference = ECAED9EFFE9F450E818D7A06 /* Pods-DataCapturingTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_STYLE = Automatic;
@@ -644,7 +658,7 @@
 		};
 		3D0BDEBA1FB1B951004EA25E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DD3281624BDED24237D04281 /* Pods-DataCapturingTests.release.xcconfig */;
+			baseConfigurationReference = E5097BFE3EB5A13778FA61DC /* Pods-DataCapturingTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_STYLE = Automatic;

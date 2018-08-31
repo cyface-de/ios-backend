@@ -143,9 +143,13 @@ public class MovebisServerConnection: ServerConnection {
         loadMeasurementGroup.enter()
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
             debugPrint("loaded measurement \(measurement.identifier)")
-            let payload = self.serializer.serializeCompressed(measurement)
-            request.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
-            loadMeasurementGroup.leave()
+            do {
+                let payload = try self.serializer.serializeCompressed(measurement)
+                request.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+                loadMeasurementGroup.leave()
+            } catch {
+                fatalError("Unable to serialize measurement \(measurement.identifier). Error \(error).")
+            }
         }
 
         guard loadMeasurementGroup.wait(timeout: DispatchTime.now() + .seconds(120)) == DispatchTimeoutResult.success else {
