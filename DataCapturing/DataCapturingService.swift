@@ -538,9 +538,8 @@ public class DataCapturingService: NSObject {
             }
          }*/
         locationsCacheSynchronizationQueue.async(flags: .barrier) {
-            self.persistenceLayer.save(locations: self.locationsCache, toMeasurement: measurement) {
-                self.locationsCache.removeAll()
-            }
+            self.persistenceLayer.save(locations: self.locationsCache, toMeasurement: measurement)
+            self.locationsCache = [GeoLocation]()
          }
     }
 }
