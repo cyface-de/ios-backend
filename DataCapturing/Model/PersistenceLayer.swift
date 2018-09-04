@@ -250,7 +250,7 @@ public class PersistenceLayer {
      - toMeasurement: The measurement to store the `location` and `accelerations` to.
      - onFinished: The handler to call as soon as the database operation has finished.
      */
-    func save(locations: [GeoLocation], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping () -> Void) {
+    func save(locations: [GeoLocation], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping () -> Void = {}) {
         container.performBackgroundTask { context in
             let measurementIdentifier = measurement.identifier
             guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
