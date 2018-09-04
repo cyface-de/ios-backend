@@ -25,7 +25,7 @@ import Alamofire
  start and stop the service as often as you like and reuse the object.
  
  - Author: Klemens Muthmann
- - Version: 4.0.1
+ - Version: 5.0.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -190,10 +190,12 @@ public class DataCapturingService: NSObject {
      during the capturing process. This operation is idempotent.
      
      - Parameter handler: A closure that is notified of important events during data capturing.
+     - Throws:
+     - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
-    public func start(inContext context: MeasurementContext, withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
+    public func start(inContext context: MeasurementContext, withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) throws {
         guard !isPaused else {
-            fatalError("DataCapturingService.start(): Invalid state! You tried to start the data capturing service in paused state! Please call resume() and stop() before starting the service!")
+            throw DataCapturingError.isPaused
         }
 
         persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970(), withContext: context) { measurement in
@@ -209,10 +211,13 @@ public class DataCapturingService: NSObject {
     /**
      Stops the currently running data capturing process or does nothing if the process is not
      running.
+
+     - Throws:
+        - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
      */
-    public func stop() {
+    public func stop() throws {
         guard !isPaused else {
-            fatalError("DataCapturingService.stop(): Invalid state! You tried to stop the data capturing service in paused state! Please call resume() prior to stop()!")
+            throw DataCapturingError.isPaused
         }
 
         stopCapturing()
@@ -224,10 +229,18 @@ public class DataCapturingService: NSObject {
 
     /**
      Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now. After using `pause()` you must call resume before you can call any other lifecycle method like `stop()`, for example.
+
+     - Throws:
+        - `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.
+        - `DataCapturingError.isPaused` if the service was already paused and pausing it again makes no sense.
      */
-    public func pause() {
-        guard isRunning, !isPaused else {
-            fatalError("DataCapturingService.pause(): isPaused --> \(isPaused), isRunning --> \(isRunning)")
+    public func pause() throws {
+        guard isRunning else {
+            throw DataCapturingError.notRunning
+        }
+
+        guard !isPaused else {
+            throw DataCapturingError.isPaused
         }
 
         stopCapturing()
@@ -238,10 +251,16 @@ public class DataCapturingService: NSObject {
      Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
 
      - Parameter handler: The handler receiving `DataCapturingEvent` instances from the resumed capturing.
+     - Throws:
+        - `DataCapturingError.notPaused` if the service was not paused and thus resuming it makes no sense.
+        - `DataCapturingError.isRunning` if the service was running and thus resuming it makes no sense.
      */
-    public func resume(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) {
-        guard isPaused, !isRunning else {
-            fatalError("DataCapturingService.resume(): isPaused --> \(isPaused), isRunning --> \(isRunning)")
+    public func resume(withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) throws {
+        guard isPaused else {
+            throw DataCapturingError.notPaused
+        }
+        guard !isRunning else {
+            throw DataCapturingError.isRunning
         }
 
         startCapturing(withHandler: handler)
