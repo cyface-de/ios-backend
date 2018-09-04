@@ -24,10 +24,10 @@ import Foundation
 public enum DataCapturingError: Error {
     /// Thrown if the service was paused when it should not have been.
     case isPaused
-    /// Thrown if the service was no paused when it should have been.
+    /// Thrown if the service was not paused when it should have been.
     case notPaused
     /// Thrown if the service was running when it should not have been.
     case isRunning
-    /// Thrown if the service was no running when it should have been.
+    /// Thrown if the service was not running when it should have been.
     case notRunning
 }
