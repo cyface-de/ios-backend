@@ -25,7 +25,7 @@ import Alamofire
  start and stop the service as often as you like and reuse the object.
  
  - Author: Klemens Muthmann
- - Version: 4.0.0
+ - Version: 4.0.1
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -33,6 +33,9 @@ public class DataCapturingService: NSObject {
     // MARK: - Properties
     /// Data used to identify log messages created by this component.
     private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
+
+    /// The time to wait for the persistence layer, before a timeout is thrown. This value is in seconds.
+    private static let databaseTimeout = 10
 
     /// `true` if data capturing is running; `false` otherwise.
     public var isRunning: Bool
@@ -333,7 +336,7 @@ public class DataCapturingService: NSObject {
             ret = count
             syncGroup.leave()
         }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(DataCapturingService.databaseTimeout)) == .success else {
             fatalError("DataCapturingService.countMeasurements(): Unable to count measurements.")
         }
         return ret!
@@ -355,7 +358,7 @@ public class DataCapturingService: NSObject {
             }
             syncGroup.leave()
         }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(10)) == .success else {
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(DataCapturingService.databaseTimeout)) == .success else {
             fatalError("DataCapturingService.loadMeasurement(withIdentifier: \(identifier)): Unable to load measurement!")
         }
         return ret
@@ -378,7 +381,7 @@ public class DataCapturingService: NSObject {
             })
             syncGroup.leave()
         }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(DataCapturingService.databaseTimeout)) == .success else {
             fatalError("DataCapturingService.loadMeasurements(): Unable to load measurements!")
         }
         return ret
