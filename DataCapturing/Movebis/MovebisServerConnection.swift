@@ -144,6 +144,7 @@ public class MovebisServerConnection: ServerConnection {
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
             debugPrint("loaded measurement \(measurement.identifier)")
             do {
+                self.write(measurement)
                 let payload = try self.serializer.serializeCompressed(measurement)
                 request.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
                 loadMeasurementGroup.leave()
@@ -187,6 +188,15 @@ public class MovebisServerConnection: ServerConnection {
         case .success:
             handler(measurement, nil)
         }
+    }
+
+    /**
+     Write the provided `measurement` to a file for background synchronization
+
+     - Parameter measurement: The measurement to serialize as a file.
+     */
+    private func write(_ measurement: MeasurementMO) {
+
     }
 }
 

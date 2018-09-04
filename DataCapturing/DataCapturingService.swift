@@ -243,7 +243,7 @@ public class DataCapturingService: NSObject {
 
      - Throws:
         - `DataCapturingError.notPaused` if the service was not paused and thus resuming it makes no sense.
-        - `DataCapturingError.isRunning` if the service was not running and thus resuming it makes no sense.
+        - `DataCapturingError.isRunning` if the service was running and thus resuming it makes no sense.
      */
     public func resume() throws {
         guard isPaused else {
