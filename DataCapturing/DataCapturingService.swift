@@ -182,11 +182,11 @@ public class DataCapturingService: NSObject {
      Starts the capturing process with an optional closure, that is notified of important events
      during the capturing process. This operation is idempotent.
      
-     - Parameter handler: A closure that is notified of important events during data capturing.
+     - Parameter context: The `MeasurementContext` to use for the newly created measurement.
      - Throws:
      - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
-    public func start(inContext context: MeasurementContext, withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) throws {
+    public func start(inContext context: MeasurementContext) throws {
         guard !isPaused else {
             throw DataCapturingError.isPaused
         }
@@ -240,10 +240,18 @@ public class DataCapturingService: NSObject {
 
     /**
      Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
+
+     - Throws:
+        - `DataCapturingError.notPaused` if the service was not paused and thus resuming it makes no sense.
+        - `DataCapturingError.isRunning` if the service was not running and thus resuming it makes no sense.
      */
-    public func resume() {
-        guard isPaused, !isRunning else {
-            fatalError("DataCapturingService.resume(): isPaused --> \(isPaused), isRunning --> \(isRunning)")
+    public func resume() throws {
+        guard isPaused else {
+            throw DataCapturingError.notPaused
+        }
+
+        guard !isRunning else {
+            throw DataCapturingError.isRunning
         }
 
         startCapturing()
@@ -507,8 +515,8 @@ public class DataCapturingService: NSObject {
                     fatalError("Unable to write data to file due to \(error).")
                 }
             }
-            self.accelerationsCache.removeAll()
-            self.locationsCache.removeAll()
+            self.accelerationsCache = [Acceleration]()
+            self.locationsCache = [GeoLocation]()
         }
     }
 }

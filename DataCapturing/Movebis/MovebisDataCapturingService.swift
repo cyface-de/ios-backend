@@ -86,9 +86,12 @@ public class MovebisDataCapturingService: DataCapturingService {
      This is a long running asynchronous operation.
      The provided handler is notified of its completion by receiving the event `DataCapturingEvent.serviceStarted`.
      If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.
+
+     - Throws:
+        - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()`if you want to continue.
      */
-    public func start() {
-        return start(inContext: .bike)
+    public func start() throws {
+        return try start(inContext: .bike)
     }
 
     override func cleanDataAfterSync(for measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void)) {
