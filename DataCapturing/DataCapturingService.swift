@@ -25,7 +25,7 @@ import Alamofire
  start and stop the service as often as you like and reuse the object.
  
  - Author: Klemens Muthmann
- - Version: 4.0.0
+ - Version: 5.0.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -33,6 +33,9 @@ public class DataCapturingService: NSObject {
     // MARK: - Properties
     /// Data used to identify log messages created by this component.
     private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
+
+    /// The time to wait for the persistence layer, before a timeout is thrown. This value is in seconds.
+    private static let databaseTimeout = 10
 
     /// `true` if data capturing is running; `false` otherwise.
     public var isRunning: Bool
@@ -178,10 +181,14 @@ public class DataCapturingService: NSObject {
     /**
      Starts the capturing process with an optional closure, that is notified of important events
      during the capturing process. This operation is idempotent.
+     
+     - Parameter handler: A closure that is notified of important events during data capturing.
+     - Throws:
+     - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
-    public func start(inContext context: MeasurementContext) {
+    public func start(inContext context: MeasurementContext, withHandler handler: @escaping ((DataCapturingEvent) -> Void) = {_ in }) throws {
         guard !isPaused else {
-            fatalError("DataCapturingService.start(): Invalid state! You tried to start the data capturing service in paused state! Please call resume() and stop() before starting the service!")
+            throw DataCapturingError.isPaused
         }
 
         persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970(), withContext: context) { measurement in
@@ -195,10 +202,13 @@ public class DataCapturingService: NSObject {
     /**
      Stops the currently running data capturing process or does nothing if the process is not
      running.
+
+     - Throws:
+        - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
      */
-    public func stop() {
+    public func stop() throws {
         guard !isPaused else {
-            fatalError("DataCapturingService.stop(): Invalid state! You tried to stop the data capturing service in paused state! Please call resume() prior to stop()!")
+            throw DataCapturingError.isPaused
         }
 
         stopCapturing()
@@ -210,10 +220,18 @@ public class DataCapturingService: NSObject {
 
     /**
      Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now. After using `pause()` you must call resume before you can call any other lifecycle method like `stop()`, for example.
+
+     - Throws:
+        - `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.
+        - `DataCapturingError.isPaused` if the service was already paused and pausing it again makes no sense.
      */
-    public func pause() {
-        guard isRunning, !isPaused else {
-            fatalError("DataCapturingService.pause(): isPaused --> \(isPaused), isRunning --> \(isRunning)")
+    public func pause() throws {
+        guard isRunning else {
+            throw DataCapturingError.notRunning
+        }
+
+        guard !isPaused else {
+            throw DataCapturingError.isPaused
         }
 
         stopCapturing()
@@ -315,7 +333,7 @@ public class DataCapturingService: NSObject {
             ret = count
             syncGroup.leave()
         }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(DataCapturingService.databaseTimeout)) == .success else {
             fatalError("DataCapturingService.countMeasurements(): Unable to count measurements.")
         }
         return ret!
@@ -337,7 +355,7 @@ public class DataCapturingService: NSObject {
             }
             syncGroup.leave()
         }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(10)) == .success else {
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(DataCapturingService.databaseTimeout)) == .success else {
             fatalError("DataCapturingService.loadMeasurement(withIdentifier: \(identifier)): Unable to load measurement!")
         }
         return ret
@@ -360,7 +378,7 @@ public class DataCapturingService: NSObject {
             })
             syncGroup.leave()
         }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(DataCapturingService.databaseTimeout)) == .success else {
             fatalError("DataCapturingService.loadMeasurements(): Unable to load measurements!")
         }
         return ret
