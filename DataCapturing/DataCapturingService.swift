@@ -510,7 +510,7 @@ public class DataCapturingService: NSObject {
                 let accelerationsFile = AccelerationsFile()
                 do {
                     debugPrint("Writing \(measurement.accelerations.count) accelerations to file.")
-                    try accelerationsFile.append(accelerations: measurement.accelerations, to: measurement.identifier)
+                    try accelerationsFile.append(serializable: measurement.accelerations, to: measurement.identifier)
                 } catch {
                     fatalError("Unable to write data to file due to \(error).")
                 }
