@@ -18,7 +18,7 @@ import os.log
  The cyface binary format is created by a `CyfaceBinaryFormatSerializer`.
 
  - Author: Klemens Muthmann
- - Version: 2.0.2
+ - Version: 2.0.3
  - Since: 1.0.0
  */
 public class MovebisServerConnection: ServerConnection {

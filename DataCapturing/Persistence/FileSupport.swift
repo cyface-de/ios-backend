@@ -11,36 +11,39 @@ import Foundation
  The protocol for writing accelerations to a file.
  
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 2.0.0
  */
 protocol FileSupport {
-    
+
+    /// The generic type of the data to store to a file.
     associatedtype Serializable
-    
+
+    /// The name of the file to store.
     var fileName: String { get }
+    /// The file extension of the file to store.
     var fileExtension: String { get }
     /**
-     Creates the path to a file containing acceleration points in the Cyface binary format.
+     Creates the path to a file containing data in the Cyface binary format.
      
-     - Parameter for: The measurement to create the path to the acceleration file for.
+     - Parameter for: The measurement to create the path to the data file for.
      - Returns: The path to the file as an URL.
      - Throws: On failure of creating the file at the required path.
      */
     func path(for measurement: Int64) throws -> URL
     /**
-     Appends acceleration points to a file for a certain measurement.
+     Appends data to a file for a certain measurement.
      
      - Parameters:
-     - accelerations: The accelerations to append.
-     - to: The measurement to append the accelerations to.
+        - serializable: The data to append.
+        - to: The measurement to append the data to.
      */
     func append(serializable: Serializable, to measurement: Int64) throws
     /**
-     Creates a data representation from an array of accelerations.
+     Creates a data representation from some serializable object.
      
-     - Parameter from: An array of `AccelerationPointMO` objects to create a data representation for.
-     - Returns: The acceleration points in the Cyface binary format.
+     - Parameter from: A valid object to create a data in Cyface binary format representation for.
+     - Returns: The data in the Cyface binary format.
      */
     func data(from serializable: Serializable) -> Data?
 }
@@ -65,13 +68,14 @@ extension FileSupport {
 }
 
 /**
- Struct implementing the `FileSupport` protocol.
+ Struct implementing the `FileSupport` protocol to store accelerations to a file in Cyface binary format.
  
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 2.0.0
  */
 struct AccelerationsFile: FileSupport {
+
     var fileName: String {
         return "accel";
     }
@@ -99,6 +103,13 @@ struct AccelerationsFile: FileSupport {
     }
 }
 
+/**
+Struct implementing the `FileSupport` protocol to serialize whole measurements to a file in Cyface binary format.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.0.0
+ */
 struct MeasurementFile: FileSupport {
     
     var fileName: String {
