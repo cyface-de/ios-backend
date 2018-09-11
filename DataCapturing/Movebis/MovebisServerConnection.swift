@@ -33,8 +33,8 @@ public class MovebisServerConnection: ServerConnection {
      The Alamofire `SessionManager`, which is used to authenticate and upload data.
      */
     private let sessionManager: SessionManager
-    private let apiURL: URL
-    private var onFinishHandler: ((MeasurementEntity, ServerConnectionError?) -> Void)?
+
+    let apiURL: URL
     private let persistenceLayer: PersistenceLayer
     /**
      A name that tells the system which kind of iOS device this is.
@@ -58,7 +58,6 @@ public class MovebisServerConnection: ServerConnection {
 
     public required init(apiURL url: URL, persistenceLayer: PersistenceLayer) {
         apiURL = url
-        sessionManager = SessionManager()
         self.persistenceLayer = persistenceLayer
     }
 
@@ -73,21 +72,12 @@ public class MovebisServerConnection: ServerConnection {
     public func logout() {
         jwtAuthenticationToken = nil
     }
-
-    /**
-     * Synchronizes a `measurement` with a Movebis server.
-     * The Movebis server must run at the endpoint provided to the constructor of this class, as `apiUrl`.
-     *
-     * - Parameters:
-     *     - measurement: The `MeasurementEntity` to synchronize
-     *     - onFinishedCall: Callback to call as soon as transmission has finished.
-     */
-    public func sync(measurement: MeasurementEntity, onFinishedCall handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
+    
+    public func sync(measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void)?, onFailure failure: @escaping (MeasurementEntity, Error) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
-        onFinishHandler = handler
 
         guard isAuthenticated(), let jwtAuthenticationToken = jwtAuthenticationToken else {
-            handler(measurement, ServerConnectionError(title: "Not Authenticated", description: "MovebisServerConnection.sync(measurement:\(measurement.identifier)): No authentication information provided."))
+            failure(measurement, ServerConnectionError.notAuthenticated)
             return
         }
 
@@ -96,19 +86,14 @@ public class MovebisServerConnection: ServerConnection {
             "Content-type": "multipart/form-data"
         ]
 
-
-        // TODO: - This needs to be implemented as background upload from a file!!!
-        var encodingError: DataSynchronizationError?
         let encode: ((MultipartFormData) -> Void) = {data in
             do {
                 try self.create(request: data, forMeasurement: measurement)
-            } catch DataSynchronizationError.serializationTimeout {
-                encodingError = DataSynchronizationError.serializationTimeout
             } catch {
-                fatalError("MovebisServerConnection.sync(measurement: \(measurement.identifier)): Unexpected Exception during upload data encoding!")
+                failure(measurement, error)
             }
         }
-        sessionManager.upload(multipartFormData: encode, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
+        Networking.sharedInstance.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
             if encodingError != nil {
                     os_log("Aborting upload because serialization timed out!")
                 } else {
@@ -117,20 +102,15 @@ public class MovebisServerConnection: ServerConnection {
             })
     }
 
-    public func getURL() -> URL {
-        return apiURL
-    }
-
     func create(request: MultipartFormData, forMeasurement measurement: MeasurementEntity) throws {
-        debugPrint("create")
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
-            fatalError("Unable to provide device identifier to upload request!")
+            throw ServerConnectionError.missingInstallationIdentifier
         }
         guard let measurementIdData = String(measurement.identifier).data(using: String.Encoding.utf8) else {
-            fatalError("Unable to provide measurement identifier to upload request!")
+            throw ServerConnectionError.missingMeasurementIdentifier
         }
         guard let deviceTypeData = modelIdentifier.data(using: String.Encoding.utf8) else {
-            fatalError("Unable to provide device type to upload request!")
+            throw ServerConnectionError.missingDeviceType
         }
 
         request.append(deviceIdData, withName: "deviceId")
@@ -142,7 +122,6 @@ public class MovebisServerConnection: ServerConnection {
         let loadMeasurementGroup = DispatchGroup()
         loadMeasurementGroup.enter()
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
-            debugPrint("loaded measurement \(measurement.identifier)")
             do {
                 try self.write(measurement)
                 let payload = try self.serializer.serializeCompressed(measurement)
@@ -154,39 +133,28 @@ public class MovebisServerConnection: ServerConnection {
         }
 
         guard loadMeasurementGroup.wait(timeout: DispatchTime.now() + .seconds(120)) == DispatchTimeoutResult.success else {
-            throw DataSynchronizationError.serializationTimeout
+            throw ServerConnectionError.serializationTimeout
         }
     }
 
-    func onEncodingComplete(forMeasurement measurement: MeasurementEntity, withResult result: SessionManager.MultipartFormDataEncodingResult) {
-        debugPrint("onEncodingComplete")
+    func onEncodingComplete(forMeasurement measurement: MeasurementEntity, withResult result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: ((MeasurementEntity) -> Void)) throws {
         switch result {
         case .success(let upload, _, _):
-            debugPrint("Uploading!")
             // Two status codes are acceptable. A 201 is a successful upload, while a 409 is a conflict. In both cases the measurement should be marked as uploaded successfully.
             upload.validate(statusCode: [201, 409]).responseString { response in
-                debugPrint("Got Response")
-                self.onResponseReady(forMeasurement: measurement, response)
+                try self.onResponseReady(forMeasurement: measurement, onSuccess: success, response)
             }
         case .failure(let error):
-            debugPrint("failure")
-            if let handler = onFinishHandler {
-                handler(measurement, ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onEncodingComplete(\(result)): Unable to upload data \(error.localizedDescription)."))
-            }
+            throw error
         }
     }
 
-    func onResponseReady(forMeasurement measurement: MeasurementEntity, _ response: DataResponse<String>) {
-        debugPrint("onResponseReady")
-        guard let handler = onFinishHandler else {
-            return
-        }
-
+    func onResponseReady(forMeasurement measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void),_ response: DataResponse<String>) throws {
         switch response.result {
-        case .failure(let error):
-            handler(measurement, ServerConnectionError(title: "Upload error", description: "MovebisServerConnection.onResponseReady(\(response)): Unable to upload data due to error: \(error)"))
         case .success:
-            handler(measurement, nil)
+            success(measurement)
+        case .failure(let error):
+            throw error
         }
     }
 
@@ -204,4 +172,22 @@ public class MovebisServerConnection: ServerConnection {
 enum EncodingResult {
     case success
     case failure(error: DataSynchronizationError)
+}
+
+class Networking {
+    static let sharedInstance = Networking()
+    public var sessionManager: Alamofire.SessionManager
+    public var backgroundSessionManager: Alamofire.SessionManager
+
+    private init() {
+        self.sessionManager = Alamofire.SessionManager(configuration: URLSessionConfiguration.default)
+
+        // TODO: - Change the identifier used for background uploads
+        let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: "org.movebis")
+        // TODO: - Remove wifi check. It is not necessary if this property is set to true.
+        sessionConfiguration.isDiscretionary = true // Let the system decide when it is convenient.
+        sessionConfiguration.sessionSendsLaunchEvents = false // System should not wake up the app after finishing an upload
+
+        self.backgroundSessionManager = Alamofire.SessionManager(configuration: sessionConfiguration)
+    }
 }
