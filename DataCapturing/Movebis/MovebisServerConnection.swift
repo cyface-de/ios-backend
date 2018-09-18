@@ -17,11 +17,14 @@ import os.log
  The transmission format is compressed Cyface binary format.
  The cyface binary format is created by a `CyfaceBinaryFormatSerializer`.
 
+ This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
+
  - Author: Klemens Muthmann
  - Version: 2.0.3
  - Since: 1.0.0
  */
 public class MovebisServerConnection: ServerConnection {
+
     /// The current JWT authentication token to use with the Movebis server.
     private var jwtAuthenticationToken: String?
     /**
@@ -29,12 +32,8 @@ public class MovebisServerConnection: ServerConnection {
      The output is used as payload to transmit to the server.
      */
     private lazy var serializer = CyfaceBinaryFormatSerializer()
-    /**
-     The Alamofire `SessionManager`, which is used to authenticate and upload data.
-     */
-    private let sessionManager: SessionManager
 
-    let apiURL: URL
+    public var apiURL: URL
     private let persistenceLayer: PersistenceLayer
     /**
      A name that tells the system which kind of iOS device this is.
@@ -72,8 +71,8 @@ public class MovebisServerConnection: ServerConnection {
     public func logout() {
         jwtAuthenticationToken = nil
     }
-    
-    public func sync(measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void)?, onFailure failure: @escaping (MeasurementEntity, Error) -> Void) {
+
+    public func sync(measurement: MeasurementEntity, onSuccess success: @escaping ((MeasurementEntity) -> Void) = {_ in }, onFailure failure: @escaping ((MeasurementEntity, Error) -> Void) = {_, _ in }) {
         let url = apiURL.appendingPathComponent("measurements")
 
         guard isAuthenticated(), let jwtAuthenticationToken = jwtAuthenticationToken else {
@@ -88,21 +87,21 @@ public class MovebisServerConnection: ServerConnection {
 
         let encode: ((MultipartFormData) -> Void) = {data in
             do {
-                try self.create(request: data, forMeasurement: measurement)
+                try self.create(request: data, forMeasurement: measurement, onFailure: failure)
             } catch {
                 failure(measurement, error)
             }
         }
-        Networking.sharedInstance.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: UInt64.init(), to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
-            if encodingError != nil {
-                    os_log("Aborting upload because serialization timed out!")
-                } else {
-                    self.onEncodingComplete(forMeasurement: measurement, withResult: encodingResult)
-                }
-            })
+        Networking.sharedInstance.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
+            do {
+                try self.onEncodingComplete(forMeasurement: measurement, withResult: encodingResult, onSuccess: success, onFailure: failure)
+            } catch {
+                failure(measurement, error)
+            }
+        })
     }
 
-    func create(request: MultipartFormData, forMeasurement measurement: MeasurementEntity) throws {
+    func create(request: MultipartFormData, forMeasurement measurement: MeasurementEntity, onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
             throw ServerConnectionError.missingInstallationIdentifier
         }
@@ -121,14 +120,14 @@ public class MovebisServerConnection: ServerConnection {
         // Load and serialize measurement synchronously.
         let loadMeasurementGroup = DispatchGroup()
         loadMeasurementGroup.enter()
-        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurementModel in
             do {
-                try self.write(measurement)
-                let payload = try self.serializer.serializeCompressed(measurement)
-                request.append(payload, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+                let payloadUrl = try self.write(measurementModel)
+                //let payload = try self.serializer.serializeCompressed(measurement)
+                request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
                 loadMeasurementGroup.leave()
             } catch {
-                fatalError("Unable to serialize measurement \(measurement.identifier). Error \(error).")
+                failure(measurement, error)
             }
         }
 
@@ -137,19 +136,23 @@ public class MovebisServerConnection: ServerConnection {
         }
     }
 
-    func onEncodingComplete(forMeasurement measurement: MeasurementEntity, withResult result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: ((MeasurementEntity) -> Void)) throws {
+    func onEncodingComplete(forMeasurement measurement: MeasurementEntity, withResult result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
         switch result {
         case .success(let upload, _, _):
             // Two status codes are acceptable. A 201 is a successful upload, while a 409 is a conflict. In both cases the measurement should be marked as uploaded successfully.
             upload.validate(statusCode: [201, 409]).responseString { response in
-                try self.onResponseReady(forMeasurement: measurement, onSuccess: success, response)
+                do {
+                    try self.onResponseReady(forMeasurement: measurement, onSuccess: success, response)
+                } catch {
+                    failure(measurement, error)
+                }
             }
         case .failure(let error):
             throw error
         }
     }
 
-    func onResponseReady(forMeasurement measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void),_ response: DataResponse<String>) throws {
+    func onResponseReady(forMeasurement measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void), _ response: DataResponse<String>) throws {
         switch response.result {
         case .success:
             success(measurement)
@@ -162,16 +165,12 @@ public class MovebisServerConnection: ServerConnection {
      Write the provided `measurement` to a file for background synchronization
 
      - Parameter measurement: The measurement to serialize as a file.
+     - Returns: The url of the file containing the measurement data.
      */
-    private func write(_ measurement: MeasurementMO) throws {
+    private func write(_ measurement: MeasurementMO) throws -> URL {
         let measurementFile = MeasurementFile()
-        try measurementFile.append(serializable: measurement, to: measurement.identifier)
+        return try measurementFile.write(serializable: measurement, to: measurement.identifier)
     }
-}
-
-enum EncodingResult {
-    case success
-    case failure(error: DataSynchronizationError)
 }
 
 class Networking {
@@ -186,7 +185,6 @@ class Networking {
         let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: "org.movebis")
         // TODO: - Remove wifi check. It is not necessary if this property is set to true.
         sessionConfiguration.isDiscretionary = true // Let the system decide when it is convenient.
-        sessionConfiguration.sessionSendsLaunchEvents = false // System should not wake up the app after finishing an upload
 
         self.backgroundSessionManager = Alamofire.SessionManager(configuration: sessionConfiguration)
     }

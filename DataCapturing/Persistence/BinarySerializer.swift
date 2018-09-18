@@ -149,7 +149,7 @@ class AccelerationSerializer: BinarySerializer {
      - Parameter accelerations: The array of accelerations to serialize.
      - Returns: An array of serialized bytes.
      */
-    func serialize(serializable accelerations: [AccelerationPointMO]) -> Data{
+    func serialize(serializable accelerations: [AccelerationPointMO]) -> Data {
         var ret = [UInt8]()
         let byteOrder = ByteOrder.bigEndian
 

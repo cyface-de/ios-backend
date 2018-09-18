@@ -46,13 +46,15 @@ class DataCapturingTests: XCTestCase {
         let promise = expectation(description: "No error on synchronization!")
 
         oocut.authenticate(withJwtToken: "replace me")
-        oocut.sync(measurement: measurement) { _, error in
-            if error==nil {
-                promise.fulfill()
-            } else {
-                XCTFail("Synchronization produced an error!")
-            }
+
+        let successHandler: ((MeasurementEntity) -> Void) = { measurement in
+            promise.fulfill()
         }
+        let failureHandler: ((MeasurementEntity, Error) -> Void) = { measurement, error in
+            XCTFail("Synchronization produced an error!")
+        }
+
+        oocut.sync(measurement: measurement, onSuccess: successHandler, onFailure: failureHandler)
 
         waitForExpectations(timeout: 10, handler: nil)
     }

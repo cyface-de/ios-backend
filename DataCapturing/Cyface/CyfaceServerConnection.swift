@@ -32,8 +32,7 @@ public class CyfaceServerConnection: ServerConnection {
         return URLSession(configuration: .default)
     }()
 
-    /// A `URL` used to upload data to. There should be a server complying to a Cyface REST interface available at that location.
-    private let apiURL: URL
+    public var apiURL: URL
 
     /// Authentication token provided by a JWT authentication request. This property is `nil` as long as authenticate was not called successfully yet. Otherwise it contains the JWT bearer required as content for the Authorization header.
     private var jwtBearer: String?
@@ -101,33 +100,27 @@ public class CyfaceServerConnection: ServerConnection {
                         self.jwtBearer = jwtBearer
                         handler(nil)
                     } else {
-                        handler(ServerConnectionError(
-                            title: "Authentication Error",
-                            description: "No Authorization token received from Cyface API available at \(self.apiURL)."))
+                        handler(ServerConnectionError.authenticationNotSuccessful)
                     }
                 }
             }
         }
     }
 
-    /**
-     If this client is authenticated, this method uploads the provided measurement as JSON chunks to the endpoint used with this client.
-
-     - SeeAlso: `ServerConnection.sync(measurement:onFinishedCall:)`
-     */
-    public func sync(measurement: MeasurementEntity, onFinishedCall handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
+    public func sync(measurement: MeasurementEntity, onSuccess success: @escaping ((MeasurementEntity) -> Void) = {_ in }, onFailure failure: @escaping (MeasurementEntity, Error) -> Void) {
         // debugPrint("Trying to synchronize measurement \(measurement.identifier)")
         guard isAuthenticated() else {
-            fatalError("CyfaceServerConnection.sync(measurementIdentifiedBy: \(measurement.identifier)): Unable to sync with not authenticated client.")
+            failure(measurement, ServerConnectionError.notAuthenticated)
+            return
         }
 
         let measurementIdentifier = measurement.identifier
         installationIdentifier { error, deviceIdentifier in
             if let error = error {
-                handler(measurement, error)
+                failure(measurement, error)
                 return
             } else if let identifier = deviceIdentifier {
-                self.transmit(measurement: measurement, forDevice: identifier, onFinish: handler)
+                self.transmit(measurement: measurement, forDevice: identifier, onSuccess: success, onFailure: failure)
             } else {
                 fatalError("CyfaceServerConnection.sync(measurement: \(measurementIdentifier)): Neither identifier nor error information available.")
             }
@@ -152,7 +145,7 @@ public class CyfaceServerConnection: ServerConnection {
      - forDevice: The identifier of this device used to identify the data on the server side.
      - onFinish: Called upon upload completion. This handler is provided with the uploaded `MeasurementEntity` and either some error information if there was an error, or `nil` if upload has been successful.
      */
-    private func transmit(measurement: MeasurementEntity, forDevice deviceIdentifier: String, onFinish handler: @escaping (MeasurementEntity, ServerConnectionError?) -> Void) {
+    private func transmit(measurement: MeasurementEntity, forDevice deviceIdentifier: String, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping (MeasurementEntity, Error) -> Void) {
         makeUploadChunks(fromMeasurement: measurement, forInstallation: deviceIdentifier) { [unowned self] chunk in
             guard let jsonChunk = try? JSONSerialization.data(withJSONObject: chunk, options: .sortedKeys) else {
                 fatalError("ServerConnection.transmit(measurement: \(measurement.identifier), forDevice: \(deviceIdentifier)): Invalid measurement format.")
@@ -169,13 +162,10 @@ public class CyfaceServerConnection: ServerConnection {
                 self.sessionManager.upload(jsonChunk, to: self.apiURL.appendingPathComponent("measurements").absoluteString, method: .post, headers: headers).debugLog().validate(statusCode: [201]).response { (response) in
 
                     if let error = response.error {
-                        let connectionError = ServerConnectionError(
-                            title: "Data Transmission Error",
-                            description: "Error while transmitting data to the server at \(self.apiURL)! Error was: \(error). \n HTTP Status Code: \(String(describing: response.response?.statusCode))")
-                        handler(measurement, connectionError)
-                        debugPrint("\(String(describing: connectionError.title)): \(String(describing: connectionError.errorDescription))")
+                        debugPrint("Error during transmission: \(error)")
+                        failure(measurement, error)
                     } else {
-                        handler(measurement, nil)
+                        success(measurement)
                     }
                 }
             }
@@ -244,9 +234,7 @@ public class CyfaceServerConnection: ServerConnection {
                 return
             }
             guard let appIdentifier = appIdentifier else {
-                handler(ServerConnectionError(
-                    title: "Device Registration Error",
-                    description: "Unable to get application identifier"), nil)
+                handler(ServerConnectionError.missingInstallationIdentifier, nil)
                 return
             }
 
@@ -298,26 +286,22 @@ public class CyfaceServerConnection: ServerConnection {
 
         let headers: HTTPHeaders = ["Authorization": jwtBearer!]
         sessionManager.request(self.apiURL.appendingPathComponent("devices"), headers: headers).validate(statusCode: [200]).responseJSON { (response) in
-            if let error = response.error {
-                handler(ServerConnectionError(
-                    title: "Device Registration Error",
-                    description: "Server error while checking if server knows me!, Error \(error)"), false)
+            if response.error != nil {
+                handler(ServerConnectionError.deviceNotRegistered, false)
                 return
             }
 
             // debugPrint("Response received while checking for devices: \n \(response.value ?? "none")")
 
             guard let data = response.value as? [Any] else {
-                handler(ServerConnectionError(
-                    title: "Device Registration Error",
-                    description: "Unable to unwrap server response from checking for existing device."), false)
+                handler(ServerConnectionError.invalidResponse, false)
                 return
             }
 
             for device in data {
                 // Parsing JSON response
                 guard let jsonDevice = device as? [String: Any] else {
-                    handler(ServerConnectionError(title: "Device Registration Error", description: "Unable to parse response as JSON."), false)
+                    handler(ServerConnectionError.invalidResponse, false)
                     return
                 }
 
@@ -362,10 +346,8 @@ public class CyfaceServerConnection: ServerConnection {
         ]
 
         sessionManager.request(self.apiURL.appendingPathComponent("devices"), method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).validate(statusCode: [201]).response { (response) in
-            if let error = response.error {
-                handler(ServerConnectionError(
-                    title: "Device Registration Error",
-                    description: "Error during device registration!, Error \(error)"), identifier)
+            if response.error != nil {
+                handler(ServerConnectionError.invalidResponse, identifier)
             } else {
                 handler(nil, identifier)
             }

@@ -156,7 +156,7 @@ public class DataCapturingService: NSObject {
         self.handler = eventHandler
 
         self.syncOnWiFiOnly = true
-        guard let reachabilityManager = NetworkReachabilityManager(host: serverConnection.getURL().absoluteString) else {
+        guard let reachabilityManager = NetworkReachabilityManager(host: serverConnection.apiURL.absoluteString) else {
             fatalError("Unable to initialize reachability manager.")
         }
         self.reachabilityManager = reachabilityManager
@@ -273,7 +273,7 @@ public class DataCapturingService: NSObject {
                 return
             }
 
-            var countOfMeasurementsToSynchronize = measurements.count
+            let countOfMeasurementsToSynchronize = measurements.count
             guard countOfMeasurementsToSynchronize > 0 else {
                 return
             }
@@ -284,29 +284,21 @@ public class DataCapturingService: NSObject {
                 }
                 let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: measurementContext)
 
-                let synchronizationFinishedHandler: (MeasurementEntity, ServerConnectionError?) -> Void = { measurement, error in
-                    // Only go on if there was no error
-                    if let error = error {
+                let successHandler: ((MeasurementEntity) -> Void) = {measurement in
+                    myself.cleanDataAfterSync(for: measurement) {
+                        // Inform UI
+                        myself.handler(.synchronizationFinished(measurement: measurementEntity, status: .success))
+                    }
+                }
+                let failureHandler: (MeasurementEntity, Error) -> Void = { measurement, error in
                         os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
-                        os_log("Error: %@\n Description: %@", error.title ?? "No Title", error.errorDescription ?? "No Description")
+                        os_log("Error: %@", error.localizedDescription)
                         myself.handler(.synchronizationFinished(measurement: measurementEntity, status: .failure))
-                    } else {
-                        myself.cleanDataAfterSync(for: measurement) {
-                            // Inform UI
-                            myself.handler(.synchronizationFinished(measurement: measurementEntity, status: .success))
-                        }
-                    }
-                    // TODO: synchronize this?
-                    countOfMeasurementsToSynchronize -= 1
-
-                    // Everything uploaded?
-                    if countOfMeasurementsToSynchronize == 0 {
-                        myself.reachabilityManager.stopListening()
-                    }
                 }
 
                 myself.handler(.synchronizationStarted(measurement: measurementEntity))
-                myself.serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier, context: measurementContext), onFinishedCall: synchronizationFinishedHandler)
+                myself.serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier, context: measurementContext), onSuccess: successHandler, onFailure: failureHandler)
+                myself.reachabilityManager.stopListening()
             }
         }
     }
@@ -510,7 +502,7 @@ public class DataCapturingService: NSObject {
                 let accelerationsFile = AccelerationsFile()
                 do {
                     debugPrint("Writing \(measurement.accelerations.count) accelerations to file.")
-                    try accelerationsFile.append(serializable: measurement.accelerations, to: measurement.identifier)
+                    try accelerationsFile.write(serializable: measurement.accelerations, to: measurement.identifier)
                 } catch {
                     fatalError("Unable to write data to file due to \(error).")
                 }
@@ -551,7 +543,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
             cacheSynchronizationQueue.async(flags: .barrier) {
                 self.locationsCache.append(geoLocation)
             }
-            
+
             DispatchQueue.main.async {
                 self.handler(.geoLocationAcquired(position: geoLocation))
             }
