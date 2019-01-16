@@ -46,7 +46,7 @@ public class DataCapturingService: NSObject {
     /// A listener that is notified of important events during data capturing.
     private var handler: ((DataCapturingEvent) -> Void)
 
-    /// The currently recorded `Measurement` or nil if there is no active recording.
+    /// The currently recorded `Measurement` or `nil` if there is no active recording.
     public var currentMeasurement: MeasurementEntity?
 
     /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
@@ -115,9 +115,6 @@ public class DataCapturingService: NSObject {
     /// The background queue used to capture data.
     private let capturingQueue = DispatchQueue.global(qos: .userInitiated)
 
-    /// Synchronizes read and write operations on the `accelerationsCache`.
-    /*private let accelerationsCacheSynchronizationQueue = DispatchQueue(label: "accelerationsCacheSynchronization", attributes: .concurrent)*/
-
     /// Synchronizes read and write operations on the `locationsCache` and the `accelerationsCache`.
     private let cacheSynchronizationQueue = DispatchQueue(label: "cacheSynchronization", attributes: .concurrent)
 
@@ -178,6 +175,7 @@ public class DataCapturingService: NSObject {
     }
 
     // MARK: - Methods
+    // TODO: Add a queue that runs all the lifecycle methods
     /**
      Starts the capturing process with an optional closure, that is notified of important events
      during the capturing process. This operation is idempotent.
@@ -192,13 +190,17 @@ public class DataCapturingService: NSObject {
         }
 
         persistenceLayer.createMeasurement(at: currentTimeInMillisSince1970(), withContext: context) { measurement in
-            let entity = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context)!)
+            guard let measurementContext = measurement.context else {
+                fatalError("Unable to load measurement context for measurement \(measurement.identifier).")
+            }
+            let entity = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurementContext)!)
             self.currentMeasurement = entity
             self.startCapturing()
             self.handler(DataCapturingEvent.serviceStarted(measurement: entity))
         }
     }
 
+    // TODO: Add a queue that runs all the lifecycle methods
     /**
      Stops the currently running data capturing process or does nothing if the process is not
      running.
@@ -218,6 +220,7 @@ public class DataCapturingService: NSObject {
         }
     }
 
+    // TODO: Add a queue that runs all the lifecylce methods
     /**
      Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now. After using `pause()` you must call resume before you can call any other lifecycle method like `stop()`, for example.
 
@@ -238,6 +241,7 @@ public class DataCapturingService: NSObject {
         isPaused = true
     }
 
+    // TODO: Add a queue that runs all the lifecycle methdos
     /**
      Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
 
@@ -263,10 +267,6 @@ public class DataCapturingService: NSObject {
      If this is not called the service might wait for an opportune moment to start synchronization.
      */
     public func forceSync() {
-        if !self.serverConnection.isAuthenticated() || !self.reachabilityManager.isReachableOnEthernetOrWiFi {
-            // Quit directly.
-            return
-        }
 
         self.persistenceLayer.loadSynchronizableMeasurements { [weak self] measurements in
             guard let myself = self else {
@@ -279,9 +279,13 @@ public class DataCapturingService: NSObject {
             }
 
             for measurement in measurements {
-                guard let measurementContext = MeasurementContext(rawValue: measurement.context) else {
-                    fatalError("Invalid measurement context: \(measurement.context) in database.")
+                guard let measurementContextString = measurement.context else {
+                    fatalError("Unable to load measurement context from measurement \(measurement.identifier).")
                 }
+                guard let measurementContext = MeasurementContext(rawValue: measurementContextString) else {
+                    fatalError("Invalid measurement context: \(measurementContextString) in database.")
+                }
+
                 let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: measurementContext)
 
                 let successHandler: ((MeasurementEntity) -> Void) = {measurement in
@@ -324,6 +328,7 @@ public class DataCapturingService: NSObject {
         persistenceLayer.delete(measurement: measurement, onFinishedCall: finishedHandler)
     }
 
+    // TODO: Add handler providing the count asynchronously
     /// Provides the amount of `Measurements` currently cached by the system.
     public func countMeasurements() -> Int {
         var ret: Int?
@@ -339,6 +344,7 @@ public class DataCapturingService: NSObject {
         return ret!
     }
 
+    // TODO: Add handler providing the loaded measurement
     /**
      Provides the cached `Measurement` with the provided `identifier`.
      
@@ -350,7 +356,11 @@ public class DataCapturingService: NSObject {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
         persistenceLayer.load(measurementIdentifiedBy: identifier) { measurement in
-            if let measurementContext = MeasurementContext(rawValue: measurement.context) {
+            guard let measurementContext = measurement.context else {
+                fatalError("Unable to load measurement context for measurement \(measurement.identifier).")
+            }
+
+            if let measurementContext = MeasurementContext(rawValue: measurementContext) {
                 ret = MeasurementEntity(identifier: measurement.identifier, context: measurementContext)
             }
             syncGroup.leave()
@@ -361,6 +371,7 @@ public class DataCapturingService: NSObject {
         return ret
     }
 
+    // TODO: Add handler providing the measurements loaded asynchronously.
     /**
      Loads all currently cached `Measurement` instances.
 
@@ -371,8 +382,17 @@ public class DataCapturingService: NSObject {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
         persistenceLayer.loadMeasurements { measurements in
-            measurements.forEach({ [unowned self] (measurement) in
-                if measurement.identifier != self.currentMeasurement?.identifier, let measurementContext = MeasurementContext(rawValue: measurement.context) {
+            measurements.forEach({ [weak self] (measurement) in
+                guard let mySelf = self else {
+                    syncGroup.leave()
+                    return
+                }
+
+                guard let measurementContext = measurement.context else {
+                    fatalError("Unable to load measurement context for measurement \(measurement.identifier).")
+                }
+
+                if measurement.identifier != mySelf.currentMeasurement?.identifier, let measurementContext = MeasurementContext(rawValue: measurementContext) {
                     ret.append(MeasurementEntity(identifier: measurement.identifier, context: measurementContext))
                 }
             })
@@ -394,7 +414,11 @@ public class DataCapturingService: NSObject {
     public func loadGeoLocations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([GeoLocation]) -> Void) {
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
             var ret = [GeoLocation]()
-            measurement.geoLocations.forEach({ (location) in
+            guard let geoLocations = measurement.geoLocations?.array as! [GeoLocationMO]? else {
+                fatalError("Unable to load geo locations from measurement \(measurement.identifier).")
+            }
+
+            geoLocations.forEach({ (location) in
                 ret.append(GeoLocation(latitude: location.lat, longitude: location.lon, accuracy: location.accuracy, speed: location.speed, timestamp: location.timestamp))
             })
             handler(ret)
@@ -403,18 +427,20 @@ public class DataCapturingService: NSObject {
 
     /**
      Loads all the accelerations belonging to a certain measurement.
-
      - Parameters:
-       - belongingTo: The measurement the accelerations are to be loaded for.
-       - onFinished: The handler called after finishing loading the accelerations. The loaded accelerations are provided as an array to this handler.
+     - belongingTo: The measurement the accelerations are to be loaded for.
+     - onFinished: The handler called after finishing loading the accelerations. The loaded accelerations are provided as an array to this handler.
      */
     public func loadAccelerations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([Acceleration]) -> Void) {
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { (measurement) in
-            var ret = [Acceleration]()
-            measurement.accelerations.forEach({ (acceleration) in
-                ret.append(Acceleration(timestamp: acceleration.timestamp, x: acceleration.ax, y: acceleration.ay, z: acceleration.az))
-            })
-            handler(ret)
+
+            let accelerationsFile = AccelerationsFile()
+            do {
+                let ret = try accelerationsFile.load(from: measurement)
+                handler(ret)
+            } catch let error {
+                fatalError("Unable to load accelerations due to \(error)!")
+            }
         }
     }
 
@@ -428,6 +454,7 @@ public class DataCapturingService: NSObject {
         return Int64(value.timeIntervalSince1970*1000.0)
     }
 
+    // TODO: Saving interval should be a parameter.
     /**
      Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
      */
@@ -489,7 +516,7 @@ public class DataCapturingService: NSObject {
     }
 
     /**
-     Method called by the `backgroundSynchronizationTimer` on each invocation. This method saves all data from `accelerationsCache` and from `locationsCache` to the underlying database and cleans both caches.
+     Method called by the `backgroundSynchronizationTimer` on each invocation. This method saves all data from `accelerationsCache` and from `locationsCache` to the underlying data storage (database and file system) and cleans both caches.
      */
     func saveCapturedData(timer: Timer) {
         guard let measurement = currentMeasurement else {
@@ -497,14 +524,15 @@ public class DataCapturingService: NSObject {
         }
 
         cacheSynchronizationQueue.async(flags: .barrier) {
-            self.persistenceLayer.syncSave(locations: self.locationsCache, accelerations: self.accelerationsCache, toMeasurement: measurement)
-            self.persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { (measurement) in
-                let accelerationsFile = AccelerationsFile()
+            let localAccelerationsCache = self.accelerationsCache
+            let localLocationsCache = self.locationsCache
+
+            // These calls are nested to make sure, that not two operations are writing via different contexts to the database.
+            self.persistenceLayer.save(locations: localLocationsCache, toMeasurement: measurement) {_ in 
                 do {
-                    debugPrint("Writing \(measurement.accelerations.count) accelerations to file.")
-                    try accelerationsFile.write(serializable: measurement.accelerations, to: measurement.identifier)
-                } catch {
-                    fatalError("Unable to write data to file due to \(error).")
+                    try self.persistenceLayer.save(accelerations: localAccelerationsCache, toMeasurement: measurement)
+                } catch let error {
+                    fatalError("Unable to write acceleration data to file due to \(error).")
                 }
             }
             self.accelerationsCache = [Acceleration]()

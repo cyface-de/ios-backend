@@ -71,7 +71,11 @@ class SerializationTest: XCTestCase {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
         persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
-            resCache = self.oocut.serializeCompressed(measurement)
+            do {
+                resCache = try self.oocut.serializeCompressed(measurement)
+            } catch {
+                fatalError()
+            }
             syncGroup.leave()
         }
         guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
@@ -105,7 +109,7 @@ class SerializationTest: XCTestCase {
         var accuracy: [UInt16] = []
         persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier) { (measurement) in
             let locations = measurement.geoLocations
-            let serializedData = self.oocut.serialize(geoLocations: locations)
+            let serializedData = self.oocut.serialize(measurement)
 
             for index in 0..<locations.count {
                 let indexOffset = index * 36 // width of one geo location

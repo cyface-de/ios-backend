@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os.log
 
 /**
  The protocol for writing accelerations to a file.
@@ -18,40 +19,34 @@ protocol FileSupport {
 
     /// The generic type of the data to store to a file.
     associatedtype Serializable
-
     /// The name of the file to store.
     var fileName: String { get }
     /// The file extension of the file to store.
     var fileExtension: String { get }
-    /**
-     Creates the path to a file containing data in the Cyface binary format.
-     
-     - Parameter for: The measurement to create the path to the data file for.
-     - Returns: The path to the file as an URL.
-     - Throws: On failure of creating the file at the required path.
-     */
-    func path(for measurement: Int64) throws -> URL
+
     /**
      Appends data to a file for a certain measurement.
      
      - Parameters:
-        - serializable: The data to append.
-        - to: The measurement to append the data to.
-     - Returns:
+     - serializable: The data to append.
+     - to: The measurement to append the data to.
+     - Throws: If accessing the data file has not been successful.
+     - Returns: The local URL identifying the file to write to.
      */
     func write(serializable: Serializable, to measurement: Int64) throws -> URL
-    /**
-     Creates a data representation from some serializable object.
-     
-     - Parameter from: A valid object to create a data in Cyface binary format representation for.
-     - Returns: The data in the Cyface binary format.
-     */
-    func data(from serializable: Serializable) -> Data?
+    func remove(from measurement: MeasurementMO) throws
 }
 
 extension FileSupport {
 
-    func path(for measurement: Int64) throws -> URL {
+    /**
+     Creates the path to a file containing data in the Cyface binary format.
+
+     - Parameter for: The measurement to create the path to the data file for.
+     - Returns: The path to the file as an URL.
+     - Throws: On failure of creating the file at the required path.
+     */
+    fileprivate func path(for measurement: Int64) throws -> URL {
         let measurementIdentifier = measurement
         let root = "Application support"
         let measurementDirectory = "measurements"
@@ -66,6 +61,21 @@ extension FileSupport {
 
         return filePath
     }
+
+    func remove(from measurement: MeasurementMO) throws {
+        let filePath = try path(for: measurement.identifier)
+        let parent = filePath.deletingLastPathComponent()
+
+        try FileManager.default.removeItem(at: filePath)
+
+        // Remove the measurement folder if it is empty now.
+        if parent.hasDirectoryPath {
+            let contents = try FileManager.default.contentsOfDirectory(at: parent, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+            if contents.isEmpty {
+                try FileManager.default.removeItem(at: parent)
+            }
+        }
+    }
 }
 
 /**
@@ -77,6 +87,8 @@ extension FileSupport {
  */
 struct AccelerationsFile: FileSupport {
 
+    let serializer = AccelerationSerializer()
+
     var fileName: String {
         return "accel"
     }
@@ -85,34 +97,51 @@ struct AccelerationsFile: FileSupport {
         return "cyfa"
     }
 
-    func write(serializable: [AccelerationPointMO], to measurement: Int64) throws -> URL {
-        let accelerationData = data(from: serializable)
+    func write(serializable: [Acceleration], to measurement: Int64) throws -> URL {
+        let accelerationData = try serializer.serialize(serializable: serializable)
         let accelerationFilePath = try path(for: measurement)
 
-        if let accelerationData = accelerationData {
-            let fileHandle = try FileHandle(forWritingTo: accelerationFilePath)
-            defer { fileHandle.closeFile()}
-            fileHandle.seekToEndOfFile()
-            fileHandle.write(accelerationData)
-        }
+        let fileHandle = try FileHandle(forWritingTo: accelerationFilePath)
+        defer { fileHandle.closeFile()}
+        fileHandle.seekToEndOfFile()
+        fileHandle.write(accelerationData)
+
         return accelerationFilePath
     }
 
-    func data(from accelerations: [AccelerationPointMO]) -> Data? {
-        let serializer = AccelerationSerializer()
-        let serializedAcceleration = serializer.serialize(serializable: accelerations)
-        return serializedAcceleration
+    func load(from measurement: MeasurementMO) throws -> [Acceleration] {
+        do {
+            let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
+            defer {fileHandle.closeFile()}
+            let data = fileHandle.readDataToEndOfFile()
+            return try serializer.deserialize(data: data, count: UInt32(measurement.accelerationsCount))
+        } catch let error {
+            throw FileSupportError.notReadable(cause: error)
+        }
+    }
+
+    func data(for measurement: MeasurementMO) throws -> Data {
+        do {
+            let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
+            defer {fileHandle.closeFile()}
+            return fileHandle.readDataToEndOfFile()
+        } catch let error {
+            throw FileSupportError.notReadable(cause: error)
+        }
     }
 }
 
 /**
-Struct implementing the `FileSupport` protocol to serialize whole measurements to a file in Cyface binary format.
+ Struct implementing the `FileSupport` protocol to serialize whole measurements to a file in Cyface binary format.
 
  - Author: Klemens Muthmann
  - Version: 2.0.0
  - Since: 2.0.0
  */
 struct MeasurementFile: FileSupport {
+
+
+    private static let logger = OSLog(subsystem: "de.cyface", category: "SDK")
 
     var fileName: String {
         return "m"
@@ -123,7 +152,7 @@ struct MeasurementFile: FileSupport {
     }
 
     func write(serializable: MeasurementMO, to measurement: Int64) throws -> URL {
-        let measurementData = data(from: serializable)
+        let measurementData = try data(from: serializable)
         let measurementFilePath = try path(for: measurement)
 
         if let measurementData = measurementData {
@@ -135,17 +164,20 @@ struct MeasurementFile: FileSupport {
         return measurementFilePath
     }
 
-    func data(from serializable: MeasurementMO) -> Data? {
-        let serializer = MeasurementSerializer()
-        let geoLocationsSerializer = GeoLocationSerializer()
-        let accelerationsSerializer = AccelerationSerializer()
+    /**
+     Creates a data representation from some `MeasurementMO` object.
 
-        var serializedMeasurement = serializer.serialize(serializable: serializable)
-        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: serializable.geoLocations)
-        let serializedAccelerations = accelerationsSerializer.serialize(serializable: serializable.accelerations)
-        serializedMeasurement.append(serializedGeoLocations)
-        serializedMeasurement.append(serializedAccelerations)
+     - Parameter from: A valid object to create a data in Cyface binary format representation for.
+     - Throws: If part of the required information was not accessible.
+     - Returns: The data in the Cyface binary format.
+     */
+    func data(from serializable: MeasurementMO) throws -> Data? {
+        let serializer = CyfaceBinaryFormatSerializer()
 
-        return serializedMeasurement
+        return try serializer.serialize(serializable)
     }
+}
+
+public enum FileSupportError: Error {
+    case notReadable(cause: Error)
 }

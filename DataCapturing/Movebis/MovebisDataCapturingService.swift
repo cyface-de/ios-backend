@@ -22,13 +22,13 @@ import os.log
  - Since: 1.0.0
  */
 public class MovebisDataCapturingService: DataCapturingService {
-
+    
     // MARK: - Properties
-
+    
     /**
      The delegate that gets informed about location updates.
      You may set this to `nil` if you would like to deactive location updates.
-    */
+     */
     public var preCapturingLocationDelegate: CLLocationManagerDelegate? {
         didSet {
             preCapturingLocationManager.delegate = preCapturingLocationDelegate
@@ -41,9 +41,9 @@ public class MovebisDataCapturingService: DataCapturingService {
             }
         }
     }
-
+    
     /** `CLLocationManager` that provides location updates to the UI,
-    even when no data capturing is running.
+     even when no data capturing is running.
      */
     private lazy var preCapturingLocationManager: CLLocationManager = {
         let manager = CLLocationManager()
@@ -58,42 +58,42 @@ public class MovebisDataCapturingService: DataCapturingService {
         manager.requestAlwaysAuthorization()
         return manager
     }()
-
+    
     // MARK: - Initializers
-
+    
     /**
      Creates a new `MovebisDataCapturingService` with the ability capture location
      when no data capturing runs.
      - Parameters:
-        - serverConnection: An authenticated connection to a Cyface API server.
-        - sensorManager: An instance of `CMMotionManager`.
-        There should be only one instance of this type in your application.
-        Since it seems to be impossible to create that instance inside a framework at the moment,
-        you have to provide it via this parameter.
-        - updateInterval: The accelerometer update interval in Hertz.
-        By default this is set to the supported maximum of 100 Hz.
-        - persistenceLayer: An API to store, retrieve and update captured data to the local system
-        until the App can transmit it to a server.
-        - eventHandler: A handler for events occuring during data capturing.
+     - serverConnection: A connection to a Cyface API server.
+     - sensorManager: An instance of `CMMotionManager`.
+     There should be only one instance of this type in your application.
+     Since it seems to be impossible to create that instance inside a framework at the moment,
+     you have to provide it via this parameter.
+     - updateInterval: The accelerometer update interval in Hertz.
+     By default this is set to the supported maximum of 100 Hz.
+     - persistenceLayer: An API to store, retrieve and update captured data to the local system
+     until the App can transmit it to a server.
+     - eventHandler: A handler for events occuring during data capturing.
      */
-    public init(connection serverConnection: MovebisServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent) -> Void)) {
+    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent) -> Void)) {
         super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence, dataSynchronizationIsActive: true, eventHandler: eventHandler)
     }
-
+    
     /**
      Starts the capturing process, notifying the provided handler of important events.
-
+     
      This is a long running asynchronous operation.
      The provided handler is notified of its completion by receiving the event `DataCapturingEvent.serviceStarted`.
      If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.
-
+     
      - Throws:
-        - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()`if you want to continue.
+     - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()`if you want to continue.
      */
     public func start() throws {
         return try start(inContext: .bike)
     }
-
+    
     override func cleanDataAfterSync(for measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void)) {
         persistenceLayer.clean(measurement: measurement) {
             handler()

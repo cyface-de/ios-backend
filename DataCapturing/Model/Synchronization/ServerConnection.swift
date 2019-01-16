@@ -10,7 +10,7 @@ import Alamofire
 import os.log
 
 /**
- Realizes a connection to a Movebis data capturing server.
+ Realizes a connection to a data capturing server.
 
  An object of this class realizes a connection between an iOS app capturing some data and a Movebis server receiving that data.
  The data is transmitted using HTTPS in chunks of one measurement.
@@ -23,18 +23,17 @@ import os.log
  - Version: 2.0.3
  - Since: 1.0.0
  */
-public class MovebisServerConnection: ServerConnection {
+public class ServerConnection {
 
-    /// The current JWT authentication token to use with the Movebis server.
-    private var jwtAuthenticationToken: String?
-    /**
-     Serializer creating the Cyface binary format from a measurement.
-     The output is used as payload to transmit to the server.
-     */
-    private lazy var serializer = CyfaceBinaryFormatSerializer()
+    // MARK: - Properties
 
+    private static let osLog = OSLog(subsystem: "de.cyface", category: "ServerConnection")
+
+    /// A `URL` used to upload data to. There should be a server available at that location.
     public var apiURL: URL
     private let persistenceLayer: PersistenceLayer
+    private let networking = Networking(with: "de.cyface")
+    private let authenticator: Authenticator
     /**
      A name that tells the system which kind of iOS device this is.
      */
@@ -55,48 +54,62 @@ public class MovebisServerConnection: ServerConnection {
         }
     }
 
-    public required init(apiURL url: URL, persistenceLayer: PersistenceLayer) {
-        apiURL = url
+    // MARK: - Initializers
+
+    /**
+     Creates a new server connection to a certain endpoint, loading data from the provided `persistenceLayer`.
+
+     - Parameters:
+     - url: The URL endpoint to upload data to.
+     - persistenceLayer: The layer used to load the data to upload from.
+     */
+    public required init(apiURL url: URL, persistenceLayer: PersistenceLayer, authenticator: Authenticator) {
+        self.apiURL = url
         self.persistenceLayer = persistenceLayer
+        self.authenticator = authenticator
     }
 
-    public func isAuthenticated() -> Bool {
-        return jwtAuthenticationToken != nil
-    }
+    // MARK: - Methods
 
-    public func authenticate(withJwtToken token: String) {
-        jwtAuthenticationToken = token
-    }
+    /**
+     Synchronizes the provided `measurement` with a remote server and calls either a `success` or `failure` handler when finished.
 
-    public func logout() {
-        jwtAuthenticationToken = nil
-    }
-
+     - Parameters:
+     - measurement: The measurement to synchronize.
+     - success: The handler to call, when synchronization has succeeded. This handler is provided with the synchronized `MeasurementEntity`.
+     - failure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The `MeasurementEntity` is the same as the one provided as parameter to this method.
+     */
     public func sync(measurement: MeasurementEntity, onSuccess success: @escaping ((MeasurementEntity) -> Void) = {_ in }, onFailure failure: @escaping ((MeasurementEntity, Error) -> Void) = {_, _ in }) {
+
+        authenticator.authenticate(onSuccess: {
+            jwtToken in
+            self.onAuthenticated(token: jwtToken, measurement: measurement, onSuccess: success, onFailure: failure)
+        }, onFailure: { error in
+            failure(measurement,error)
+        })
+
+
+    }
+
+    func onAuthenticated(token: String, measurement: MeasurementEntity, onSuccess: @escaping (MeasurementEntity) -> Void, onFailure: @escaping (MeasurementEntity, Error) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
-
-        guard isAuthenticated(), let jwtAuthenticationToken = jwtAuthenticationToken else {
-            failure(measurement, ServerConnectionError.notAuthenticated)
-            return
-        }
-
         let headers: HTTPHeaders = [
-            "Authorization": "Bearer \(jwtAuthenticationToken)",
+            "Authorization": "Bearer \(token)",
             "Content-type": "multipart/form-data"
         ]
 
         let encode: ((MultipartFormData) -> Void) = {data in
             do {
-                try self.create(request: data, forMeasurement: measurement, onFailure: failure)
+                try self.create(request: data, forMeasurement: measurement, onFailure: onFailure)
             } catch {
-                failure(measurement, error)
+                onFailure(measurement, error)
             }
         }
-        Networking.sharedInstance.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
+        networking.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
             do {
-                try self.onEncodingComplete(forMeasurement: measurement, withResult: encodingResult, onSuccess: success, onFailure: failure)
+                try self.onEncodingComplete(forMeasurement: measurement, withResult: encodingResult, onSuccess: onSuccess, onFailure: onFailure)
             } catch {
-                failure(measurement, error)
+                onFailure(measurement, error)
             }
         })
     }
@@ -173,19 +186,35 @@ public class MovebisServerConnection: ServerConnection {
     }
 }
 
-class Networking {
-    static let sharedInstance = Networking()
-    public var sessionManager: Alamofire.SessionManager
-    public var backgroundSessionManager: Alamofire.SessionManager
+/**
+ A struct encapsulating errors used by this server connection to communicate to all the error handlers.
+ ````
+ case authenticationNotSuccessful
+ case notAuthenticated
+ case serializationTimeout
+ case missingInstallationIdentifier
+ case missingMeasurementIdentifier
+ case missingDeviceType
+ case deviceNotRegistered
+ case invalidResponse
+ case unexpectedError
+ ````
 
-    private init() {
-        self.sessionManager = Alamofire.SessionManager(configuration: URLSessionConfiguration.default)
-
-        // TODO: - Change the identifier used for background uploads
-        let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: "org.movebis")
-        // TODO: - Remove wifi check. It is not necessary if this property is set to true.
-        sessionConfiguration.isDiscretionary = true // Let the system decide when it is convenient.
-
-        self.backgroundSessionManager = Alamofire.SessionManager(configuration: sessionConfiguration)
-    }
+ - Author: Klemens Muthmann
+ - Version: 2.0.0
+ - Since: 1.0.0
+ */
+public enum ServerConnectionError: Error {
+    case authenticationNotSuccessful
+    /// Error occuring if this client tried to communicate with the server without proper authentication.
+    case notAuthenticated
+    /// If data serialization for upload took too long.
+    case serializationTimeout
+    case missingInstallationIdentifier
+    case missingMeasurementIdentifier
+    case missingDeviceType
+    case deviceNotRegistered
+    case invalidResponse
+    /// Used for all unexpected errors, that should not occur during normal operation.
+    case unexpectedError
 }
