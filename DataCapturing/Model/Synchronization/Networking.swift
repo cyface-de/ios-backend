@@ -1,9 +1,21 @@
-//
-//  File.swift
-//  DataCapturing
-//
-//  Created by Team Cyface on 09.10.18.
-//
+/*
+ * Copyright 2018 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import Alamofire
@@ -19,8 +31,14 @@ class Networking {
 
     /// The Alamofire session manager used to transmit data to and receive responses from a Cyface server.
     public var sessionManager: Alamofire.SessionManager
+    /// An Alamofire session manaager used for background data transmission.
     public var backgroundSessionManager: Alamofire.SessionManager
 
+    /**
+     Creates a completely initialized object of this class.
+
+     - Parameter identifier: The background session identifier. Using the same identifier retrieves your previous session after app shutdown.
+    */
     init(with identifier: String) {
         // Remove Accept-Encoding from the default headers.
         var defaultHeaders = Alamofire.SessionManager.defaultHTTPHeaders
@@ -32,7 +50,6 @@ class Networking {
         self.sessionManager = Alamofire.SessionManager(configuration: configuration)
 
         let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
-        // TODO: - Remove wifi check. It is not necessary if this property is set to true.
         sessionConfiguration.isDiscretionary = true // Let the system decide when it is convenient.
 
         self.backgroundSessionManager = Alamofire.SessionManager(configuration: sessionConfiguration)

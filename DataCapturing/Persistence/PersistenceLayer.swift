@@ -1,10 +1,21 @@
-//
-//  PersistenceLayer.swift
-//  DataCapturing
-//
-//  Created by Team Cyface on 04.12.17.
-//  Copyright © 2017 Cyface GmbH. All rights reserved.
-//
+/*
+ * Copyright 2017 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import CoreData
@@ -279,6 +290,14 @@ public class PersistenceLayer {
         }
     }
 
+    /**
+     Saves the provided `GeoLocation` instances to the data storage. This is an internal save method that should only run on a `PersistenceContainer` background thread.
+
+     - Parameters:
+     - locations: The `GeoLocation` instances to save.
+     - toMeasurement: The measurement to save to.
+     - onContext: The `NSManagedObjectContext` to save the data to.
+     */
     private func internalSave(locations: [GeoLocation], toMeasurement measurement: MeasurementMO, onContext context: NSManagedObjectContext) {
         locations.forEach { location in
             let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
@@ -289,8 +308,6 @@ public class PersistenceLayer {
             dbLocation.accuracy = location.accuracy
             measurement.addToGeoLocations(dbLocation)
         }
-
-        // debugPrint("Saved measurement with \(measurement.accelerations?.count ?? 0)")
     }
 
     /**
@@ -300,6 +317,7 @@ public class PersistenceLayer {
      - accelerations: An array of `Acceleration` instances to store.
      - toMeasurement: The measurement to store the `location` and `accelerations` to.
      - onFinished: The optional handler to call as soon as the database operation has finished.
+     - Throws: If accessing the local file system failes for some reason and thus the `Acceleration` instances can not be saved.
      */
     func save(accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void) = {}) throws {
         container.performBackgroundTask { context in
@@ -322,6 +340,14 @@ public class PersistenceLayer {
         }
     }
 
+    /**
+     Saves the provided `Acceleration` instances to the data storage. This is an internal save method that should only run on a `PersistenceContainer` background thread.
+
+     - Parameters:
+     - accelerations: The `GeoLocation` instances to save.
+     - toMeasurement: The measurement to save to.
+     - Throws: If accessing the local file system failes for some reason and thus the `Acceleration` instances can not be saved.
+     */
     private func internalSave(accelerations: [Acceleration], toMeasurement measurement: MeasurementMO) throws {
         let accelerationsFile = AccelerationsFile()
         let _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
@@ -332,7 +358,7 @@ public class PersistenceLayer {
      Internal load method, loading the provided `measurement` on the provided `context`.
      
      - Parameters:
-     - measurement: The `measurement` to load.
+     - measurementIdentifiedBy: The `measurement` to load.
      - from: The CoreData `context` to load the `measurement` from.
      - Returns:
      - The `MeasurementMO` object for the provided identifier or `nil` if no such mesurement exists.
@@ -389,6 +415,11 @@ public class PersistenceLayer {
         }
     }
 
+    /**
+     Loads only those measurements that have not been synchronized to a Cyface database yet.
+
+     - Parameter onFinishedCall: Handler called when loading the not synchronized measurements has finished. This provides the loaded measurements as an array, which will be empty if there are no such measurements.
+    */
     public func loadSynchronizableMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]) -> Void) {
         container.performBackgroundTask { (context) in
             let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()

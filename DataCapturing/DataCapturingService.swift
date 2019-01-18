@@ -1,10 +1,21 @@
-//
-//  DataCapturingService.swift
-//  DataCapturingServices
-//
-//  Created by Team Cyface on 02.11.17.
-//  Copyright © 2017 Cyface GmbH. All rights reserved.
-//
+/*
+ * Copyright 2017 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import CoreMotion
@@ -14,18 +25,15 @@ import CoreData
 import Alamofire
 
 /**
- An object of this class handles the lifecycle of starting and stopping data capturing as well as
- transmitting results to an appropriate server.
+ An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.
  
- To avoid using the users traffic or incurring costs, the service waits for Wifi access before
- transmitting any data. You may however force synchronization if required, using
+ To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using
  `forceSync(onFinish:)`.
  
- An object of this class is not thread safe and should only be used once per application. You may
- start and stop the service as often as you like and reuse the object.
+ An object of this class is not thread safe and should only be used once per application. You may start and stop the service as often as you like and reuse the object.
  
  - Author: Klemens Muthmann
- - Version: 5.0.0
+ - Version: 5.1.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -177,8 +185,7 @@ public class DataCapturingService: NSObject {
     // MARK: - Methods
     // TODO: Add a queue that runs all the lifecycle methods
     /**
-     Starts the capturing process with an optional closure, that is notified of important events
-     during the capturing process. This operation is idempotent.
+     Starts the capturing process with an optional closure, that is notified of important events during the capturing process. This operation is idempotent.
      
      - Parameter context: The `MeasurementContext` to use for the newly created measurement.
      - Throws:
@@ -517,6 +524,8 @@ public class DataCapturingService: NSObject {
 
     /**
      Method called by the `backgroundSynchronizationTimer` on each invocation. This method saves all data from `accelerationsCache` and from `locationsCache` to the underlying data storage (database and file system) and cleans both caches.
+
+     - Parameter timer: The timer used to call this method.
      */
     func saveCapturedData(timer: Timer) {
         guard let measurement = currentMeasurement else {

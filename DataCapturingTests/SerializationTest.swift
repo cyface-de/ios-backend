@@ -1,17 +1,39 @@
-//
-//  SerializationTest.swift
-//  DataCapturing-Unit-Tests
-//
-//  Created by Team Cyface on 01.03.18.
-//
+/*
+ * Copyright 2018 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import XCTest
 @testable import DataCapturing
 
+/**
+ Tests whether serialization and deserialization into and from the Cyface Binary Format works as expected
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.1
+ - Since: 1.0.0
+ */
 class SerializationTest: XCTestCase {
 
+    /// The object of the class under test
     var oocut: CyfaceBinaryFormatSerializer!
+    /// A `PersistenceLayer` instance used to load and store data for testing purposes.
     var persistenceLayer: PersistenceLayer!
+    /// A `MeasurementEntity` holding a test measurement to serialize and deserialize.
     var fixture: MeasurementEntity!
 
     override func setUp() {
@@ -35,14 +57,13 @@ class SerializationTest: XCTestCase {
         super.tearDown()
     }
 
+    /**
+     Tests if serialization works for uncompressed data.
+     */
     func testUncompressedSerialization() {
         var resCache: Data?
         let promise = expectation(description: "Unable to load measurement to serialize!")
         persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
-            /* debugPrint("===================================================")
-            debugPrint("Geo Locations: \(measurement.geoLocations?.count).")
-            debugPrint("Accelerations: \(measurement.accelerations?.count).")
-            debugPrint("===================================================") */
             resCache = self.oocut.serialize(measurement)
             promise.fulfill()
         }
@@ -66,6 +87,9 @@ class SerializationTest: XCTestCase {
         XCTAssertEqual(res[9], 3)
     }
 
+    /**
+     Tests if serialization works for compressed data.
+     */
     func testCompressedSerialization() {
         var resCache: Data?
         let syncGroup = DispatchGroup()
@@ -101,6 +125,9 @@ class SerializationTest: XCTestCase {
         XCTAssertEqual(uncompressedData![9], 3)
     }
 
+    /**
+     Tests that geo location serialization works as expected for `GeoLocation` instances. This test runs isolated from all other serializations.
+     */
     func testSerializeGeoLocations() {
         let measurementIdentifier = fixture.identifier
         let promise = expectation(description: "Unable to load measurement for serialization!")
@@ -140,6 +167,12 @@ class SerializationTest: XCTestCase {
         //print("test")
     }
 
+    /**
+     Converts some byte data to an `UInt32` value. This is used to deserialize and thus test the success of serialization.
+
+     - Parameter data: The data to convert.
+     - Returns: The provided data interpreted as `UInt32`.
+     */
     func dataToUInt32(data: [UInt8]) -> UInt32 {
         var value: UInt32 = 0
         for byte in data {
@@ -149,6 +182,12 @@ class SerializationTest: XCTestCase {
         return value
     }
 
+    /**
+     Converts some byte data to an `UInt16` value. This is used to deserialize and thus test the success of serialization.
+
+     - Parameter data: The data to convert.
+     - Returns: The provided data interpreted as `UInt16`.
+     */
     func dataToUInt16(data: [UInt8]) -> UInt16 {
         var value: UInt16 = 0
         for byte in data {
