@@ -36,7 +36,7 @@ enum ByteOrder {
     case bigEndian
     /// little endian byte order. The byte with the lowest order is the first.
     case littleEndian
-    
+
     /**
      Converts the provided value into a byte representation.
      
@@ -50,7 +50,6 @@ enum ByteOrder {
         return self == .bigEndian ? ret.reversed() : ret
     }
 
-
     func convertToInt64(_ data: Data) throws -> Int64 {
         guard data.count == 8 else {
             throw SerializationError.invalidData
@@ -58,9 +57,9 @@ enum ByteOrder {
 
         switch self {
         case .bigEndian:
-            return Int64(bigEndian: data.withUnsafeBytes{$0.pointee})
+            return Int64(bigEndian: data.withUnsafeBytes {$0.pointee})
         case .littleEndian:
-            return Int64(bigEndian: data.withUnsafeBytes{$0.pointee})
+            return Int64(bigEndian: data.withUnsafeBytes {$0.pointee})
         }
     }
 
@@ -71,9 +70,9 @@ enum ByteOrder {
 
         switch self {
         case .bigEndian:
-            return Double(bitPattern: UInt64(bigEndian: data.withUnsafeBytes{$0.pointee}))
+            return Double(bitPattern: UInt64(bigEndian: data.withUnsafeBytes {$0.pointee}))
         case .littleEndian:
-            return Double(bitPattern: UInt64(littleEndian: data.withUnsafeBytes{$0.pointee}))
+            return Double(bitPattern: UInt64(littleEndian: data.withUnsafeBytes {$0.pointee}))
         }
     }
 }
@@ -88,7 +87,7 @@ enum ByteOrder {
 protocol BinarySerializer {
     /// The type of the item to serialize.
     associatedtype Serializable
-    
+
     /**
      Serializes the provided serializable into a Cyface binary format representation. This only works for supported object types such as `MeasurementMO`, ÀccelerationPointMO` and `GeoLocationMO`.
      
@@ -118,11 +117,11 @@ extension BinarySerializer {
      */
     func serializeCompressed(serializable: Serializable) throws -> Data {
         let res = try serialize(serializable: serializable)
-        
+
         guard let compressed = res.deflate() else {
             fatalError("CyfaceBinaryFormatSerializer.serializeCompressed(\(serializable)): Unable to compress data.")
         }
-        
+
         return compressed
     }
 }
@@ -143,7 +142,7 @@ class MeasurementSerializer: BinarySerializer {
     /// Binds the Serializeable from the `BinarySerializer` protocol to a measurement.
     typealias Serializable = MeasurementMO
     static let byteOrder = ByteOrder.bigEndian
-    
+
     /**
      Serializes the provided `measurement` into its Cyface Binary Format specification in the form:
      - 2 Bytes: Version of the file format.
@@ -158,7 +157,7 @@ class MeasurementSerializer: BinarySerializer {
         guard let geoLocations = measurement.geoLocations else {
             throw SerializationError.missingData
         }
-        
+
         var dataArray = [UInt8]()
         // add header
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(dataFormatVersion))
@@ -166,7 +165,7 @@ class MeasurementSerializer: BinarySerializer {
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(measurement.accelerationsCount)))
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(0)))
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(0)))
-        
+
         return Data(bytes: dataArray)
     }
 }
@@ -181,7 +180,7 @@ class MeasurementSerializer: BinarySerializer {
 class AccelerationSerializer: BinarySerializer {
     /// Binds the Serializeable from the `BinarySerializer` protocol to an array of acceleration points.
     typealias Serializable = [Acceleration]
-    
+
     /**
      Serializes an array of accelerations into binary format of the form:
      - 8 Bytes: timestamp as long
@@ -195,7 +194,7 @@ class AccelerationSerializer: BinarySerializer {
     func serialize(serializable accelerations: [Acceleration]) throws -> Data {
         var ret = [UInt8]()
         let byteOrder = ByteOrder.bigEndian
-        
+
         for acceleration in accelerations {
             // 8 Bytes
             ret.append(contentsOf: byteOrder.convertToBytes(acceleration.timestamp))
@@ -207,7 +206,7 @@ class AccelerationSerializer: BinarySerializer {
             ret.append(contentsOf: byteOrder.convertToBytes(acceleration.z.bitPattern))
             // 32 Bytes
         }
-        
+
         return Data(bytes: ret)
     }
 
@@ -251,7 +250,7 @@ class AccelerationSerializer: BinarySerializer {
 class GeoLocationSerializer: BinarySerializer {
     /// Binds the `Serializeble from the `BinarySerializer` protocol to an array of geo locations.
     typealias Serializable = [GeoLocationMO]
-    
+
     /**
      Serializes an array of geo locations into binary format of the form:
      - 8 Bytes: timestamp as long
@@ -266,7 +265,7 @@ class GeoLocationSerializer: BinarySerializer {
     func serialize(serializable locations: [GeoLocationMO]) -> Data {
         var ret = [UInt8]()
         let byteOrder = ByteOrder.bigEndian
-        
+
         for location in locations {
             // 8 Bytes
             let timestamp = location.timestamp
@@ -285,7 +284,7 @@ class GeoLocationSerializer: BinarySerializer {
             ret.append(contentsOf: byteOrder.convertToBytes(accuracy))
             // = 36 Bytes
         }
-        
+
         return Data(bytes: ret)
     }
 }
@@ -314,14 +313,14 @@ class CyfaceBinaryFormatSerializer {
      */
     func serializeCompressed(_ measurement: MeasurementMO) throws -> Data {
         let res = try serialize(measurement)
-        
+
         guard let compressed = res.deflate() else {
             throw SerializationError.compressionFailed
         }
-        
+
         return compressed
     }
-    
+
     /**
      Serializes the provided measurement into the Cyface binary format.
      
@@ -333,12 +332,12 @@ class CyfaceBinaryFormatSerializer {
         let serializedMeasurement = try measurementSerializer.serialize(serializable: measurement)
         let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: measurement.geoLocations?.array as! [GeoLocationMO])
         let serializedAccelerations = try accelerationsFile.data(for: measurement)
-        
+
         var ret = Data()
         ret.append(serializedMeasurement)
         ret.append(serializedGeoLocations)
         ret.append(serializedAccelerations)
-        
+
         return ret
     }
 }
@@ -352,14 +351,14 @@ extension BinaryInteger {
      */
     func extractBytes() -> [UInt8] {
         var ret = [UInt8]()
-        
+
         var buffer = self
         for _ in 0..<(self.bitWidth/8) {
             let byteValue = UInt8(truncatingIfNeeded: buffer)
             ret.append(byteValue)
             buffer = buffer >> 8
         }
-        
+
         return ret
     }
 }

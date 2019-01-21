@@ -537,7 +537,7 @@ public class DataCapturingService: NSObject {
             let localLocationsCache = self.locationsCache
 
             // These calls are nested to make sure, that not two operations are writing via different contexts to the database.
-            self.persistenceLayer.save(locations: localLocationsCache, toMeasurement: measurement) {_ in 
+            self.persistenceLayer.save(locations: localLocationsCache, toMeasurement: measurement) {_ in
                 do {
                     try self.persistenceLayer.save(accelerations: localAccelerationsCache, toMeasurement: measurement)
                 } catch let error {

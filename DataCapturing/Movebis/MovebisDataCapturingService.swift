@@ -34,9 +34,9 @@ import os.log
  - Since: 1.0.0
  */
 public class MovebisDataCapturingService: DataCapturingService {
-    
+
     // MARK: - Properties
-    
+
     /**
      The delegate that gets informed about location updates.
      You may set this to `nil` if you would like to deactive location updates.
@@ -53,7 +53,7 @@ public class MovebisDataCapturingService: DataCapturingService {
             }
         }
     }
-    
+
     /** `CLLocationManager` that provides location updates to the UI,
      even when no data capturing is running.
      */
@@ -70,9 +70,9 @@ public class MovebisDataCapturingService: DataCapturingService {
         manager.requestAlwaysAuthorization()
         return manager
     }()
-    
+
     // MARK: - Initializers
-    
+
     /**
      Creates a new `MovebisDataCapturingService` with the ability capture location
      when no data capturing runs.
@@ -91,7 +91,7 @@ public class MovebisDataCapturingService: DataCapturingService {
     public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent) -> Void)) {
         super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence, dataSynchronizationIsActive: true, eventHandler: eventHandler)
     }
-    
+
     /**
      Starts the capturing process, notifying the provided handler of important events.
      
@@ -105,7 +105,7 @@ public class MovebisDataCapturingService: DataCapturingService {
     public func start() throws {
         return try start(inContext: .bike)
     }
-    
+
     override func cleanDataAfterSync(for measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void)) {
         persistenceLayer.clean(measurement: measurement) {
             handler()

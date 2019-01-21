@@ -101,13 +101,11 @@ public class ServerConnection {
      */
     public func sync(measurement: MeasurementEntity, onSuccess success: @escaping ((MeasurementEntity) -> Void) = {_ in }, onFailure failure: @escaping ((MeasurementEntity, Error) -> Void) = {_, _ in }) {
 
-        authenticator.authenticate(onSuccess: {
-            jwtToken in
+        authenticator.authenticate(onSuccess: {jwtToken in
             self.onAuthenticated(token: jwtToken, measurement: measurement, onSuccess: success, onFailure: failure)
         }, onFailure: { error in
-            failure(measurement,error)
+            failure(measurement, error)
         })
-
 
     }
 

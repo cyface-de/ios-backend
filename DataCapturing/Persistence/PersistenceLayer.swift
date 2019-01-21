@@ -141,7 +141,7 @@ public class PersistenceLayer {
         container.performBackgroundTask { context in
             // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
             var identifier = self.nextIdentifier
-            while(self.load(measurementIdentifiedBy: identifier, from: context) != nil) {
+            while self.load(measurementIdentifiedBy: identifier, from: context) != nil {
                 identifier = self.nextIdentifier
             }
 
@@ -350,7 +350,7 @@ public class PersistenceLayer {
      */
     private func internalSave(accelerations: [Acceleration], toMeasurement measurement: MeasurementMO) throws {
         let accelerationsFile = AccelerationsFile()
-        let _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
+        _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
     }
 
     // MARK: - Database Read Only Methods

@@ -56,7 +56,7 @@ public class CredentialsAuthenticator: Authenticator {
     public func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
         // This is hardcoded JSON. It should not fail so we may use try!
         // Does this have the potential for some kind of injection attack?
-        let jsonCredentials = try! JSONSerialization.data(withJSONObject: ["username":username,"password":password])
+        let jsonCredentials = try! JSONSerialization.data(withJSONObject: ["username": username, "password": password])
         let url = authenticationEndpoint.appendingPathComponent("login")
 
         Alamofire.upload(jsonCredentials, to: url, method: .post, headers: nil).response { response in
