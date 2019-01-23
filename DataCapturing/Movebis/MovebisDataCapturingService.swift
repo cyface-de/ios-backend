@@ -1,9 +1,21 @@
-//
-//  MovebisDataCapturingService.swift
-//  DataCapturing
-//
-//  Created by Team Cyface on 17.02.18.
-//
+/*
+ * Copyright 2018 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import CoreLocation
@@ -28,7 +40,7 @@ public class MovebisDataCapturingService: DataCapturingService {
     /**
      The delegate that gets informed about location updates.
      You may set this to `nil` if you would like to deactive location updates.
-    */
+     */
     public var preCapturingLocationDelegate: CLLocationManagerDelegate? {
         didSet {
             preCapturingLocationManager.delegate = preCapturingLocationDelegate
@@ -43,7 +55,7 @@ public class MovebisDataCapturingService: DataCapturingService {
     }
 
     /** `CLLocationManager` that provides location updates to the UI,
-    even when no data capturing is running.
+     even when no data capturing is running.
      */
     private lazy var preCapturingLocationManager: CLLocationManager = {
         let manager = CLLocationManager()
@@ -65,30 +77,30 @@ public class MovebisDataCapturingService: DataCapturingService {
      Creates a new `MovebisDataCapturingService` with the ability capture location
      when no data capturing runs.
      - Parameters:
-        - serverConnection: An authenticated connection to a Cyface API server.
-        - sensorManager: An instance of `CMMotionManager`.
-        There should be only one instance of this type in your application.
-        Since it seems to be impossible to create that instance inside a framework at the moment,
-        you have to provide it via this parameter.
-        - updateInterval: The accelerometer update interval in Hertz.
-        By default this is set to the supported maximum of 100 Hz.
-        - persistenceLayer: An API to store, retrieve and update captured data to the local system
-        until the App can transmit it to a server.
-        - eventHandler: A handler for events occuring during data capturing.
+     - serverConnection: A connection to a Cyface API server.
+     - sensorManager: An instance of `CMMotionManager`.
+     There should be only one instance of this type in your application.
+     Since it seems to be impossible to create that instance inside a framework at the moment,
+     you have to provide it via this parameter.
+     - updateInterval: The accelerometer update interval in Hertz.
+     By default this is set to the supported maximum of 100 Hz.
+     - persistenceLayer: An API to store, retrieve and update captured data to the local system
+     until the App can transmit it to a server.
+     - eventHandler: A handler for events occuring during data capturing.
      */
-    public init(connection serverConnection: MovebisServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent) -> Void)) {
+    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent) -> Void)) {
         super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence, dataSynchronizationIsActive: true, eventHandler: eventHandler)
     }
 
     /**
      Starts the capturing process, notifying the provided handler of important events.
-
+     
      This is a long running asynchronous operation.
      The provided handler is notified of its completion by receiving the event `DataCapturingEvent.serviceStarted`.
      If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.
-
+     
      - Throws:
-        - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()`if you want to continue.
+     - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()`if you want to continue.
      */
     public func start() throws {
         return try start(inContext: .bike)

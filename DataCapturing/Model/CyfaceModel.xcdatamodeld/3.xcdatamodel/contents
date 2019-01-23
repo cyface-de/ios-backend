@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14460.32" systemVersion="18C54" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="GeoLocation" representedClassName="GeoLocationMO" syncable="YES" codeGenerationType="class">
+        <attribute name="accuracy" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="lat" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="lon" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="speed" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="timestamp" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+    </entity>
+    <entity name="Measurement" representedClassName="MeasurementMO" syncable="YES" codeGenerationType="class">
+        <attribute name="accelerationsCount" attributeType="Integer 32" minValueString="0" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="context" attributeType="String" defaultValueString="BICYCLE" syncable="YES"/>
+        <attribute name="identifier" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="synchronized" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="timestamp" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="geoLocations" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="GeoLocation" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="GeoLocation" positionX="-54" positionY="-9" width="128" height="120"/>
+        <element name="Measurement" positionX="-443" positionY="-72" width="128" height="135"/>
+    </elements>
+</model>
