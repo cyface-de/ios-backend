@@ -126,6 +126,12 @@ public class DataCapturingService: NSObject {
     /// Synchronizes read and write operations on the `locationsCache` and the `accelerationsCache`.
     private let cacheSynchronizationQueue = DispatchQueue(label: "cacheSynchronization", attributes: .concurrent)
 
+    /// A queue to run synchronization on. This prevents the same measurement to be transmitted multiple times.
+    private let serverSynchronizationQueue = DispatchQueue(label: "de.cyface.synchronization", qos: DispatchQoS.background)
+
+    /// Whether there is a data synchronization in progress or not.
+    private var synchronizationInProgress = false
+
     /// A timer called in regular intervals to save the captured data to the underlying database.
     private var backgroundSynchronizationTimer: Timer!
 
@@ -213,7 +219,7 @@ public class DataCapturingService: NSObject {
      running.
 
      - Throws:
-        - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
+     - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
      */
     public func stop() throws {
         guard !isPaused else {
@@ -232,8 +238,8 @@ public class DataCapturingService: NSObject {
      Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now. After using `pause()` you must call resume before you can call any other lifecycle method like `stop()`, for example.
 
      - Throws:
-        - `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.
-        - `DataCapturingError.isPaused` if the service was already paused and pausing it again makes no sense.
+     - `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.
+     - `DataCapturingError.isPaused` if the service was already paused and pausing it again makes no sense.
      */
     public func pause() throws {
         guard isRunning else {
@@ -253,8 +259,8 @@ public class DataCapturingService: NSObject {
      Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
 
      - Throws:
-        - `DataCapturingError.notPaused` if the service was not paused and thus resuming it makes no sense.
-        - `DataCapturingError.isRunning` if the service was running and thus resuming it makes no sense.
+     - `DataCapturingError.notPaused` if the service was not paused and thus resuming it makes no sense.
+     - `DataCapturingError.isRunning` if the service was running and thus resuming it makes no sense.
      */
     public func resume() throws {
         guard isPaused else {
@@ -270,46 +276,82 @@ public class DataCapturingService: NSObject {
     }
 
     /**
-     Forces the service to synchronize all Measurements now if a connection is available.
+     Forces the service to synchronize all measurements now if a connection is available.
+     
      If this is not called the service might wait for an opportune moment to start synchronization.
+     The call is asynchronous, meaning it returns almost immediately, while the synchronization continues running inside its own thread.
+
+     You may call this method multiple times in short succession.
+     However only one synchronization can be active at a given time.
+     If you call this during an active synchronization it is going to return without doing anything.
      */
     public func forceSync() {
-
-        self.persistenceLayer.loadSynchronizableMeasurements { [weak self] measurements in
-            guard let myself = self else {
+        // Run this on the serverSynchronizationQueue to prevent execution of multiple synchronizations in parallel.
+        serverSynchronizationQueue.async { [weak self] in
+            guard let self = self else {
                 return
             }
 
-            let countOfMeasurementsToSynchronize = measurements.count
-            guard countOfMeasurementsToSynchronize > 0 else {
+            if self.synchronizationInProgress {
                 return
+            } else {
+                self.synchronizationInProgress = true
             }
 
-            for measurement in measurements {
-                guard let measurementContextString = measurement.context else {
-                    fatalError("Unable to load measurement context from measurement \(measurement.identifier).")
-                }
-                guard let measurementContext = MeasurementContext(rawValue: measurementContextString) else {
-                    fatalError("Invalid measurement context: \(measurementContextString) in database.")
+            self.persistenceLayer.loadSynchronizableMeasurements { [weak self] measurements in
+                guard let myself = self else {
+                    return
                 }
 
-                let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: measurementContext)
+                var countOfMeasurementsToSynchronize = measurements.count
+                // If this is 0 initially, there have been no measurements for synchronization in the data storage. So we just stop processing
+                guard countOfMeasurementsToSynchronize > 0 else {
+                    myself.reachabilityManager.stopListening()
+                    myself.synchronizationInProgress = false
+                    return
+                }
 
-                let successHandler: ((MeasurementEntity) -> Void) = {measurement in
-                    myself.cleanDataAfterSync(for: measurement) {
-                        // Inform UI
-                        myself.handler(.synchronizationFinished(measurement: measurementEntity, status: .success))
+                for measurement in measurements {
+                    guard let measurementContextString = measurement.context else {
+                        fatalError("Unable to load measurement context from measurement \(measurement.identifier).")
                     }
-                }
-                let failureHandler: (MeasurementEntity, Error) -> Void = { measurement, error in
+                    guard let measurementContext = MeasurementContext(rawValue: measurementContextString) else {
+                        fatalError("Invalid measurement context: \(measurementContextString) in database.")
+                    }
+
+                    let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: measurementContext)
+
+                    // This closure makes sure that synchronization is possible again after each measurement was tried once.
+                    let synchronizationFinishedHandler: ()->Void = { [weak self] in
+                        guard let self = self else {
+                            return
+                        }
+
+                        countOfMeasurementsToSynchronize -= 1
+                        if countOfMeasurementsToSynchronize==0 {
+                            self.serverSynchronizationQueue.async {
+                                self.synchronizationInProgress = false
+                            }
+                        }
+                    }
+
+                    let successHandler: ((MeasurementEntity) -> Void) = {measurement in
+                        myself.cleanDataAfterSync(for: measurement) {
+                            // Inform UI
+                            myself.handler(.synchronizationFinished(measurement: measurementEntity, status: .success))
+                        }
+                        synchronizationFinishedHandler()
+                    }
+                    let failureHandler: (MeasurementEntity, Error) -> Void = { measurement, error in
                         os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
                         os_log("Error: %@", error.localizedDescription)
                         myself.handler(.synchronizationFinished(measurement: measurementEntity, status: .failure))
-                }
+                        synchronizationFinishedHandler()
+                    }
 
-                myself.handler(.synchronizationStarted(measurement: measurementEntity))
-                myself.serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier, context: measurementContext), onSuccess: successHandler, onFailure: failureHandler)
-                myself.reachabilityManager.stopListening()
+                    myself.handler(.synchronizationStarted(measurement: measurementEntity))
+                    myself.serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier, context: measurementContext), onSuccess: successHandler, onFailure: failureHandler)
+                }
             }
         }
     }
@@ -389,9 +431,10 @@ public class DataCapturingService: NSObject {
         let syncGroup = DispatchGroup()
         syncGroup.enter()
         persistenceLayer.loadMeasurements { measurements in
+            defer {syncGroup.leave()}
+
             measurements.forEach({ [weak self] (measurement) in
                 guard let mySelf = self else {
-                    syncGroup.leave()
                     return
                 }
 
@@ -403,7 +446,6 @@ public class DataCapturingService: NSObject {
                     ret.append(MeasurementEntity(identifier: measurement.identifier, context: measurementContext))
                 }
             })
-            syncGroup.leave()
         }
         guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(DataCapturingService.databaseTimeout)) == .success else {
             fatalError("DataCapturingService.loadMeasurements(): Unable to load measurements!")
@@ -415,8 +457,8 @@ public class DataCapturingService: NSObject {
      Loads all the geo locations belonging to a certain measurement.
 
      - Parameters:
-       - belongingTo: The measurement the geo locations are to be loaded for.
-       - onFinished: The handler called after finishing loading the geo locations. The loaded locations are provided as an array to this handler.
+     - belongingTo: The measurement the geo locations are to be loaded for.
+     - onFinished: The handler called after finishing loading the geo locations. The loaded locations are provided as an array to this handler.
      */
     public func loadGeoLocations(belongingTo measurement: MeasurementEntity, onFinished handler: @escaping ([GeoLocation]) -> Void) {
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurement in
