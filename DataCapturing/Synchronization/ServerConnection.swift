@@ -170,11 +170,10 @@ public class ServerConnection {
         let loadMeasurementGroup = DispatchGroup()
         loadMeasurementGroup.enter()
         persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurementModel in
+            defer {loadMeasurementGroup.leave()}
             do {
                 let payloadUrl = try self.write(measurementModel)
-                //let payload = try self.serializer.serializeCompressed(measurement)
                 request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
-                loadMeasurementGroup.leave()
             } catch {
                 failure(measurement, error)
             }
@@ -186,7 +185,7 @@ public class ServerConnection {
     }
 
     /**
-     Called when encoding the request by Alamofire was finished.
+     Called by Alamofire when encoding the request by Alamofire was finished.
      Starts the actual data transmission if encoding was successful.
 
      - Parameters:
