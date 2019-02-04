@@ -60,15 +60,18 @@ extension FileSupport {
      */
     fileprivate func path(for measurement: Int64) throws -> URL {
         let measurementIdentifier = measurement
-        let root = "Application support"
+        let root = "Application Support"
         let measurementDirectory = "measurements"
+        let fileManager = FileManager.default
+        let libraryDirectory = FileManager.SearchPathDirectory.libraryDirectory
+        let libraryDirectoryUrl = try fileManager.url(for: libraryDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
 
-        let measurementDirectoryPath = try FileManager.default.url(for: FileManager.SearchPathDirectory.libraryDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent(root).appendingPathComponent(measurementDirectory).appendingPathComponent(String(measurementIdentifier))
-        try FileManager.default.createDirectory(at: measurementDirectoryPath, withIntermediateDirectories: true)
+        let measurementDirectoryPath = libraryDirectoryUrl.appendingPathComponent(root).appendingPathComponent(measurementDirectory).appendingPathComponent(String(measurementIdentifier))
+        try fileManager.createDirectory(at: measurementDirectoryPath, withIntermediateDirectories: true)
 
         let filePath = measurementDirectoryPath.appendingPathComponent(fileName).appendingPathExtension(fileExtension)
-        if !FileManager.default.fileExists(atPath: filePath.path) {
-            FileManager.default.createFile(atPath: filePath.path, contents: nil)
+        if !fileManager.fileExists(atPath: filePath.path) {
+            fileManager.createFile(atPath: filePath.path, contents: nil)
         }
 
         return filePath
@@ -83,14 +86,17 @@ extension FileSupport {
     func remove(from measurement: MeasurementMO) throws {
         let filePath = try path(for: measurement.identifier)
         let parent = filePath.deletingLastPathComponent()
+        let fileManager = FileManager.default
 
-        try FileManager.default.removeItem(at: filePath)
+        if try filePath.checkResourceIsReachable() {
+            try fileManager.removeItem(at: filePath)
+        }
 
         // Remove the measurement folder if it is empty now.
         if parent.hasDirectoryPath {
-            let contents = try FileManager.default.contentsOfDirectory(at: parent, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+            let contents = try fileManager.contentsOfDirectory(at: parent, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
             if contents.isEmpty {
-                try FileManager.default.removeItem(at: parent)
+                try fileManager.removeItem(at: parent)
             }
         }
     }

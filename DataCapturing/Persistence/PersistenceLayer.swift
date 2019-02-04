@@ -319,7 +319,7 @@ public class PersistenceLayer {
      - onFinished: The optional handler to call as soon as the database operation has finished.
      - Throws: If accessing the local file system failes for some reason and thus the `Acceleration` instances can not be saved.
      */
-    func save(accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void) = {}) throws {
+    func save(accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void) = {}) {
         container.performBackgroundTask { context in
             do {
                 let measurementIdentifier = measurement.identifier
@@ -335,6 +335,7 @@ public class PersistenceLayer {
                 context.refresh(measurement, mergeChanges: true)
                 handler()
             } catch let error {
+                // TODO: Do not use a fatal error but rather a status provided to the handler.
                 fatalError("PersistenceLayer.save(accelerations: \(accelerations.count), toMeasurement: \(measurement.identifier)): Unable to load measurement! Error \(error).")
             }
         }
