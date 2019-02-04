@@ -48,8 +48,22 @@ class SerializationTest: XCTestCase {
             fatalError("Unable to initialize persistence layer.")
         }
 
-        fixture = persistenceLayer.createMeasurement(at: 1, withContext: .bike)
-        persistenceLayer.syncSave(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100)], accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: fixture)
+        let measurementCreationPromise = expectation(description: "Store fixture measurement!")
+        persistenceLayer!.createMeasurement(at: 1, withContext: .bike) { measurement in
+            self.fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
+            self.persistenceLayer.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100)], toMeasurement: self.fixture!) { _ in
+                do {
+                    try self.persistenceLayer!.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: self.fixture!) {
+                        measurementCreationPromise.fulfill()
+                    }
+                } catch {
+                    XCTFail("Unable to store fixture data")
+                }
+            }
+
+        }
+
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     override func tearDown() {
@@ -64,7 +78,11 @@ class SerializationTest: XCTestCase {
         var resCache: Data?
         let promise = expectation(description: "Unable to load measurement to serialize!")
         persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
-            resCache = self.oocut.serialize(measurement)
+            do {
+                resCache = try self.oocut.serialize(measurement)
+            } catch {
+                XCTFail("Unexpected error during measurement serialization")
+            }
             promise.fulfill()
         }
 
@@ -136,31 +154,35 @@ class SerializationTest: XCTestCase {
         var accuracy: [UInt16] = []
         persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier) { (measurement) in
             let locations = measurement.geoLocations
-            let serializedData = self.oocut.serialize(measurement)
+            do {
+                let serializedData = try self.oocut.serialize(measurement)
 
-            for index in 0..<locations.count {
-                let indexOffset = index * 36 // width of one geo location
-                let timestampStartIndex = indexOffset
-                let timestampEndIndex = indexOffset + 8
-                let timestampData = serializedData[timestampStartIndex..<timestampEndIndex]
-                let accuracyStartIndex = indexOffset + 32
-                let accuracyEndIndex = indexOffset + 36
-                let accuracyData = serializedData[accuracyStartIndex..<accuracyEndIndex]
-                timestamp.append(self.dataToUInt32(data: Array(timestampData)))
-                accuracy.append(self.dataToUInt16(data: Array(accuracyData)))
+                for index in 0..<locations!.count {
+                    let indexOffset = index * 36 // width of one geo location
+                    let timestampStartIndex = indexOffset
+                    let timestampEndIndex = indexOffset + 8
+                    let timestampData = serializedData[timestampStartIndex..<timestampEndIndex]
+                    let accuracyStartIndex = indexOffset + 32
+                    let accuracyEndIndex = indexOffset + 36
+                    let accuracyData = serializedData[accuracyStartIndex..<accuracyEndIndex]
+                    timestamp.append(self.dataToUInt32(data: Array(timestampData)))
+                    accuracy.append(self.dataToUInt16(data: Array(accuracyData)))
+                }
+
+                //print(serializedData.map { String(format: "%02x", $0) }.joined())
+                XCTAssert(timestamp.count == 3)
+                XCTAssert(timestamp[0] == 10_000)
+                XCTAssert(timestamp[1] == 10_100)
+                XCTAssert(timestamp[2] == 10_100)
+
+                XCTAssert(accuracy.count == 3)
+                XCTAssert(accuracy[0] == 200)
+                XCTAssert(accuracy[1] == 200)
+                XCTAssert(accuracy[2] == 200)
+                promise.fulfill()
+            } catch {
+                XCTFail()
             }
-
-            //print(serializedData.map { String(format: "%02x", $0) }.joined())
-            promise.fulfill()
-            XCTAssert(timestamp.count == 3)
-            XCTAssert(timestamp[0] == 10_000)
-            XCTAssert(timestamp[1] == 10_100)
-            XCTAssert(timestamp[2] == 10_100)
-
-            XCTAssert(accuracy.count == 3)
-            XCTAssert(accuracy[0] == 200)
-            XCTAssert(accuracy[1] == 200)
-            XCTAssert(accuracy[2] == 200)
         }
 
         waitForExpectations(timeout: 10, handler: nil)
