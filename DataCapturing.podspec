@@ -1,3 +1,20 @@
+# Copyright 2018 Cyface GmbH
+#
+# This file is part of the Cyface SDK for iOS.
+#
+# The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# The Cyface SDK for iOS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+
 #
 # Be sure to run `pod lib lint Cyface.podspec' to ensure this is a
 # valid spec before submitting.
@@ -8,7 +25,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'DataCapturing'
-  s.version          = '1.0.2'
+  s.version          = '1.2.0'
   s.summary          = 'Framework used to continuously capture data from all available sensors on an iOS device and transmit it to a Cyface-API compatible server.'
 
 # This description is used to generate tags and improve search results.
@@ -30,7 +47,8 @@ This framework can be included by your App if you are going to capture sensor da
 
   s.platform	     = :ios, '11.0'
 
-  s.source_files = 'DataCapturing/*.swift','DataCapturing/Model/*.swift'
+  s.source_files = 'DataCapturing/*.swift','DataCapturing/Model/*.swift','DataCapturing/Cyface/*.swift','DataCapturing/Movebis/*.swift','DataCapturing/Persistence/*.swift'
+  s.resources = 'DataCapturing/Model/CyfaceModel.xcdatamodeld'
   
   # s.resource_bundles = {
   #   'Cyface' => ['Cyface/Assets/*.png']
@@ -41,9 +59,9 @@ This framework can be included by your App if you are going to capture sensor da
   
   # The following transitive dependencies are used by this project:
   # This one is used to handle network traffic like multipart requests
-  s.dependency 'Alamofire', '~> 4.6'
+  s.dependency 'Alamofire', '~> 4.8.1'
   # A wrapper for the complicated ObjectiveC compression API.
-  s.dependency 'DataCompression', '~> 2.0.1'
+  s.dependency 'DataCompression', '~> 3.0.0'
 
   s.test_spec 'DataCapturingTests' do |test_spec|
     test_spec.source_files = 'DataCapturingTests/*.swift'

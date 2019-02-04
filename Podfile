@@ -7,9 +7,9 @@ target 'DataCapturing' do
   # use_frameworks!
 
   # Used for network traffic
-  pod 'Alamofire', '~> 4.6'
+  pod 'Alamofire', '~> 4.7.3'
   # A wrapper for the complicated ObjectiveC compression API.
-  pod 'DataCompression', '~> 2.0.1'
+  pod 'DataCompression', '~> 3.0.0'
 
   target 'DataCapturingTests' do
     inherit! :search_paths

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cyface GmbH
+ * Copyright 2019 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -19,12 +19,21 @@
 
 import Foundation
 
-public class MeasurementEntity {
-    public let identifier: Int64
-    public let measurementContext: MeasurementContext
+/**
+An `Authenticator` provides functionality to authenticate this app.
 
-    public init(identifier: Int64, context: MeasurementContext) {
-        self.identifier = identifier
-        self.measurementContext = context
-    }
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.0.0
+ */
+public protocol Authenticator {
+
+    /**
+     Runs the authentication and calls the appropriate function `onSuccess` or `onFailure` when finished.
+
+     - Parameters:
+     - onSuccess: A closure called and supplied with the resulting authentication token, when authentication was successful.
+     - onFailure: A closure called and supplied with the causing error, when authentication was not successful.
+    */
+    func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void)
 }

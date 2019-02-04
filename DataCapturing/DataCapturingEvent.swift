@@ -1,10 +1,21 @@
-//
-//  DataCapturingEvents.swift
-//  DataCapturing
-//
-//  Created by Team Cyface on 13.12.17.
-//  Copyright © 2017 Cyface GmbH. All rights reserved.
-//
+/*
+ * Copyright 2017 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 
@@ -24,22 +35,51 @@ public enum DataCapturingEvent {
     case geoLocationFixLost
     /**
      Occurs each time the `DataCapturingService` receives a new geo location position.
+
      - Parameter position: The new geo location position.
      */
     case geoLocationAcquired(position: GeoLocation)
     /**
      Occurs each time the application runs out of space.
      How much space is used and how much is available may be retrieved from `allocation`.
+
      - Parameter allocation: Information about the applications disk (or rather SD card) space consumption.
      */
     case lowDiskSpace(allocation: DiskConsumption)
     /**
-     Occurs if the `DataCapturingService` has synchronized all pending cached data successfully
-     and deleted the local copies.
+     Occurs if the `DataCapturingService` has synchronized a measurement successfully
+     and cleaned the local copies.
+
+     - Parameter measurement: The measurement which finished synchronization.
+     - Parameter status: Whether synchronization was a success or a failure.
      */
-    case synchronizationSuccessful
+    case synchronizationFinished(measurement: MeasurementEntity, status: SynchronizationStatus)
+    /**
+     Occurs when the synchronization of a measurement has started.
+
+     - Parameter measurement: The measurement the gets synchronized.
+    */
+    case synchronizationStarted(measurement: MeasurementEntity)
     /**
      Used to notify the client application of a successful start of the `DataCapturingService`.
      */
     case serviceStarted(measurement: MeasurementEntity)
+}
+
+/**
+ Provides information on whether a synchronization was successful or not.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.0.0
+ */
+public enum SynchronizationStatus {
+    /**
+    Data synchronization complete succefully.
+    */
+    case success
+    /**
+     Data synchronization failed.s
+    */
+    case failure
 }
