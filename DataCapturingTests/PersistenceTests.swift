@@ -29,11 +29,11 @@ class PersistenceTests: XCTestCase {
         super.setUp()
 
         let promise = expectation(description: "Create fixture measurement!")
-        oocut = PersistenceLayer { pl in
-            pl.createMeasurement(at: 10_000, withContext: .bike) { measurement in
+        oocut = PersistenceLayer { persistence in
+            persistence.createMeasurement(at: 10_000, withContext: .bike) { measurement in
                 self.fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
-                pl.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], toMeasurement: self.fixture!) {_ in
-                    pl.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: self.fixture!) {
+                persistence.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], toMeasurement: self.fixture!) {_ in
+                    persistence.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: self.fixture!) {
                         promise.fulfill()
                     }
                 }
