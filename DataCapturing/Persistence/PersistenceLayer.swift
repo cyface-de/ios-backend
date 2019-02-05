@@ -74,7 +74,7 @@ public class PersistenceLayer {
 
      - Parameter onCompletionHandler: Called when the persistence layer has successfully finished initialization.
      */
-    public init(onCompletionHandler: @escaping () -> Void) {
+    public init(onCompletionHandler: @escaping (PersistenceLayer) -> Void) {
         /*
          The following code is necessary to load the CyfaceModel from the DataCapturing framework.
          It is only necessary because we are using a framework.
@@ -99,7 +99,7 @@ public class PersistenceLayer {
             if let error = error {
                 fatalError("Unable to load persistent storage \(error).")
             } else {
-                onCompletionHandler()
+                onCompletionHandler(self)
             }
         }
     }
@@ -256,6 +256,7 @@ public class PersistenceLayer {
                 }
 
                 measurement.synchronized = true
+                measurement.accelerationsCount = 0
                 let accelerationsFile = AccelerationsFile()
                 try accelerationsFile.remove(from: measurement)
 
@@ -390,6 +391,7 @@ public class PersistenceLayer {
      */
     public func load(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (MeasurementMO) -> Void) {
         container.performBackgroundTask { context in
+            context.automaticallyMergesChangesFromParent = true
             if let measurement = self.load(measurementIdentifiedBy: identifier, from: context) {
                 handler(measurement)
             } else {
