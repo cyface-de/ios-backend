@@ -74,7 +74,7 @@ public class PersistenceLayer {
 
      - Parameter onCompletionHandler: Called when the persistence layer has successfully finished initialization.
      */
-    public init(onCompletionHandler: @escaping () -> Void) {
+    public init(onCompletionHandler: @escaping (PersistenceLayer) -> Void) {
         /*
          The following code is necessary to load the CyfaceModel from the DataCapturing framework.
          It is only necessary because we are using a framework.
@@ -99,7 +99,7 @@ public class PersistenceLayer {
             if let error = error {
                 fatalError("Unable to load persistent storage \(error).")
             } else {
-                onCompletionHandler()
+                onCompletionHandler(self)
             }
         }
     }
@@ -256,6 +256,7 @@ public class PersistenceLayer {
                 }
 
                 measurement.synchronized = true
+                measurement.accelerationsCount = 0
                 let accelerationsFile = AccelerationsFile()
                 try accelerationsFile.remove(from: measurement)
 
@@ -319,7 +320,7 @@ public class PersistenceLayer {
      - onFinished: The optional handler to call as soon as the database operation has finished.
      - Throws: If accessing the local file system failes for some reason and thus the `Acceleration` instances can not be saved.
      */
-    func save(accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void) = {}) throws {
+    func save(accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void) = {}) {
         container.performBackgroundTask { context in
             do {
                 let measurementIdentifier = measurement.identifier
@@ -335,6 +336,7 @@ public class PersistenceLayer {
                 context.refresh(measurement, mergeChanges: true)
                 handler()
             } catch let error {
+                // TODO: Do not use a fatal error but rather a status provided to the handler.
                 fatalError("PersistenceLayer.save(accelerations: \(accelerations.count), toMeasurement: \(measurement.identifier)): Unable to load measurement! Error \(error).")
             }
         }
@@ -389,6 +391,7 @@ public class PersistenceLayer {
      */
     public func load(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (MeasurementMO) -> Void) {
         container.performBackgroundTask { context in
+            context.automaticallyMergesChangesFromParent = true
             if let measurement = self.load(measurementIdentifiedBy: identifier, from: context) {
                 handler(measurement)
             } else {

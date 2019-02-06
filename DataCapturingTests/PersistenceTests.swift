@@ -27,27 +27,30 @@ class PersistenceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-        let syncGroup = DispatchGroup()
-        syncGroup.enter()
-        let oocut = PersistenceLayer {
-            syncGroup.leave()
-        }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError("Intialization of persistence layer timed out!")
+
+        let promise = expectation(description: "Create fixture measurement!")
+        oocut = PersistenceLayer { persistence in
+            persistence.createMeasurement(at: 10_000, withContext: .bike) { measurement in
+                self.fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
+                persistence.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], toMeasurement: self.fixture!) {_ in
+                    persistence.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: self.fixture!) {
+                        promise.fulfill()
+                    }
+                }
+            }
         }
 
-        let fixture = oocut.createMeasurement(at: 10_000, withContext: .bike)
-        oocut.syncSave(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: fixture)
-
-            self.oocut = oocut
-            self.fixture = fixture
+        waitForExpectations(timeout: 5, handler: nil)
     }
 
     override func tearDown() {
-        oocut.syncDelete()
+        let promise = expectation(description: "Clean database")
+        oocut.delete {
+            promise.fulfill()
+        }
         oocut = nil
         fixture = nil
+        waitForExpectations(timeout: 2, handler: nil)
         super.tearDown()
     }
 
@@ -55,79 +58,62 @@ class PersistenceTests: XCTestCase {
      Tests if new measurements are created with the correct identifier and if identifiers are increased for each new measurement. This should even work if one measurement is deleted in between.
      */
     func testCreateMeasurement() {
-        guard let secondMeasurement = oocut?.createMeasurement(at: 10_001, withContext: .bike) else {
-            fatalError()
+        let testPromise = expectation(description: "Create measurements")
+        oocut!.createMeasurement(at: 10_001, withContext: .bike) { secondMeasurement in
+            guard let firstMeasurement = self.fixture else {
+                fatalError()
+            }
+
+            let secondMeasurementIdentifier = secondMeasurement.identifier
+            XCTAssertEqual(secondMeasurementIdentifier, firstMeasurement.identifier+1)
+
+            self.oocut!.delete(measurement: MeasurementEntity(identifier: secondMeasurement.identifier, context: MeasurementContext(rawValue: secondMeasurement.context!)!)) {
+                self.oocut!.createMeasurement(at: 10_002, withContext: .bike) { thirdMeasurement in
+                    XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
+                    testPromise.fulfill()
+                }
+            }
         }
-        guard let firstMeasurement = fixture else {
-            fatalError()
-        }
 
-        let secondMeasurementIdentifier = secondMeasurement.identifier
-        XCTAssertEqual(secondMeasurementIdentifier, firstMeasurement.identifier+1)
-
-        oocut!.syncDelete(measurement: secondMeasurement)
-
-        guard let thirdMeasurement = oocut?.createMeasurement(at: 10_002, withContext: .bike) else {
-            fatalError()
-        }
-
-        XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
+        waitForExpectations(timeout: 2, handler: nil)
     }
 
     func testCleanMeasurement() {
-        var accelerationCount: Int?
-        var geoLocationCount: Int?
+        let testPromise = expectation(description: "Clean successful")
 
-        let syncGroup = DispatchGroup()
-        syncGroup.enter()
         oocut.load(measurementIdentifiedBy: fixture.identifier) { (measurementMo) in
-            accelerationCount = measurementMo.accelerations.count
-            geoLocationCount = measurementMo.geoLocations.count
-            syncGroup.leave()
+            let accelerationCount = measurementMo.accelerationsCount
+            let geoLocationCount = measurementMo.geoLocations!.count
+            XCTAssertEqual(accelerationCount, 3)
+            XCTAssertEqual(geoLocationCount, 2)
+
+            self.oocut.clean(measurement: self.fixture) {
+                self.oocut.load(measurementIdentifiedBy: self.fixture.identifier) { measurementMo in
+                    XCTAssertEqual(measurementMo.accelerationsCount, 0, "Accelerations have not been empty after cleaning!")
+                    XCTAssertFalse(measurementMo.geoLocations!.count==0, "Geo Locations was empty after cleaning!")
+                    testPromise.fulfill()
+                }
+            }
         }
 
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError()
-        }
-
-        XCTAssertEqual(accelerationCount, 3)
-        XCTAssertEqual(geoLocationCount, 2)
-
-        syncGroup.enter()
-        oocut.clean(measurement: fixture) {
-            syncGroup.leave()
-        }
-
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError()
-        }
-
-        var accelerationsIsEmpty = false
-        var geoLocationsIsEmpty = false
-
-        syncGroup.enter()
-        oocut.load(measurementIdentifiedBy: fixture.identifier) { measurementMo in
-            accelerationsIsEmpty = measurementMo.accelerations.isEmpty
-            geoLocationsIsEmpty = measurementMo.geoLocations.isEmpty
-            syncGroup.leave()
-        }
-
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError()
-        }
-
-        XCTAssertTrue(accelerationsIsEmpty, "Accelerations have not been empty after cleaning!")
-        XCTAssertTrue(!geoLocationsIsEmpty, "Geo Locations was empty after cleaning!")
+        waitForExpectations(timeout: 20000, handler: nil)
     }
 
     func testDeleteMeasurement() {
-        let countOfMeasurementsBeforeDeletion = oocut.syncCountMeasurements()
-        XCTAssertEqual(countOfMeasurementsBeforeDeletion, 1, "There should be one measurement before deleting it! There have been \(countOfMeasurementsBeforeDeletion).")
+        let testPromise = expectation(description: "Succesful measurement deletion")
 
-        oocut.syncDelete(measurement: fixture)
+        oocut!.countMeasurements { count in
+            XCTAssertEqual(count, 1, "There should be one measurement before deleting it! There have been \(count).")
 
-        let countOfMeasurementsAfterDeletion = oocut.syncCountMeasurements()
-        XCTAssertEqual(countOfMeasurementsAfterDeletion, 0, "There should be no measurement after deleting it! There where \(countOfMeasurementsAfterDeletion).")
+            self.oocut!.delete(measurement: self.fixture) {
+                self.oocut!.countMeasurements { count in
+                    XCTAssertEqual(count, 0, "There should be no measurement after deleting it! There where \(count).")
+                    testPromise.fulfill()
+                }
+            }
+        }
+
+        waitForExpectations(timeout: 2, handler: nil)
     }
 
     func testMergeDataToExistingMeasurement() {
@@ -137,52 +123,33 @@ class PersistenceTests: XCTestCase {
             Acceleration(timestamp: 10_006, x: 1.0, y: 1.0, z: 1.0),
             Acceleration(timestamp: 10_007, x: 1.0, y: 1.0, z: 1.0)
         ]
+        let testPromise = expectation(description: "Merge data on the same measurement!")
 
-        let syncGroup = DispatchGroup()
-        syncGroup.enter()
-        oocut.save(locations: [additionalLocation], toMeasurement: fixture) {
-            syncGroup.leave()
-        }
-        syncGroup.enter()
-        oocut.save(accelerations: additionalAccelerations, toMeasurement: fixture) {
-            syncGroup.leave()
-        }
-
-        XCTAssertEqual(syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)), .success)
-        var locationsCount = 0
-        var accelerationsCount = 0
-
-        syncGroup.enter()
-        oocut.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
-            locationsCount = measurement.geoLocations.count
-            accelerationsCount = measurement.accelerations.count
-            syncGroup.leave()
+        oocut.save(locations: [additionalLocation], toMeasurement: fixture) { _ in
+            self.oocut!.save(accelerations: additionalAccelerations, toMeasurement: self.fixture!) {
+                self.oocut!.load(measurementIdentifiedBy: self.fixture!.identifier) { (measurement) in
+                    XCTAssertEqual(measurement.geoLocations!.count, 3)
+                    XCTAssertEqual(measurement.accelerationsCount, 6)
+                    testPromise.fulfill()
+                }
+            }
         }
 
-        XCTAssertEqual(syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)), .success)
-        XCTAssertEqual(locationsCount, 3)
-        XCTAssertEqual(accelerationsCount, 6)
+        waitForExpectations(timeout: 2, handler: nil)
     }
 
     func testLoadMeasurement() {
         let promise = expectation(description: "Error while loading measurements!")
-        var resultIdentifier: Int64?
-        var resultContext: String?
-        var resultGeoLocationsCount: Int?
-        var resultAccelerationsCount: Int?
-        oocut.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
-            resultIdentifier = measurement.identifier
-            resultContext = measurement.context
-            resultGeoLocationsCount = measurement.geoLocations.count
-            resultAccelerationsCount = measurement.accelerations.count
+        oocut!.load(measurementIdentifiedBy: fixture!.identifier) { (measurement) in
+            XCTAssert(measurement.identifier == self.fixture!.identifier)
+            XCTAssert(measurement.context == "BICYCLE")
+            XCTAssert(measurement.geoLocations!.count == 2)
+            XCTAssert(measurement.accelerationsCount == 3)
             promise.fulfill()
         }
 
-        waitForExpectations(timeout: 10, handler: nil)
-        XCTAssert(resultIdentifier == fixture.identifier)
-        XCTAssert(resultContext == "BICYCLE")
-        XCTAssert(resultGeoLocationsCount == 2)
-        XCTAssert(resultAccelerationsCount == 3)
+        waitForExpectations(timeout: 5, handler: nil)
+
     }
 
     func testLoadSynchronizableMeasurements() {

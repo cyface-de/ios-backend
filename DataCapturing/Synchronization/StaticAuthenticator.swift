@@ -34,18 +34,13 @@ import Foundation
  */
 public class StaticAuthenticator: Authenticator {
     /// The token used for authentication.
-    let jwtToken: String
-
-    /**
-     Creates a completely initialized `StaticAuthenticator`
-
-     - Parameter jwtToken: The token to use for authentication.
-     */
-    public required init(jwtToken: String) {
-        self.jwtToken = jwtToken
-    }
+    public var jwtToken: String?
 
     public func authenticate(onSuccess: (String) -> Void, onFailure: (Error) -> Void) {
-        onSuccess(jwtToken)
+        if let jwtToken = jwtToken {
+            onSuccess(jwtToken)
+        } else {
+            onFailure(ServerConnectionError.notAuthenticated)
+        }
     }
 }

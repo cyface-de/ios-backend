@@ -322,7 +322,7 @@ public class DataCapturingService: NSObject {
                     let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: measurementContext)
 
                     // This closure makes sure that synchronization is possible again after each measurement was tried once.
-                    let synchronizationFinishedHandler: ()->Void = { [weak self] in
+                    let synchronizationFinishedHandler: () -> Void = { [weak self] in
                         guard let self = self else {
                             return
                         }
@@ -580,11 +580,7 @@ public class DataCapturingService: NSObject {
 
             // These calls are nested to make sure, that not two operations are writing via different contexts to the database.
             self.persistenceLayer.save(locations: localLocationsCache, toMeasurement: measurement) {_ in
-                do {
-                    try self.persistenceLayer.save(accelerations: localAccelerationsCache, toMeasurement: measurement)
-                } catch let error {
-                    fatalError("Unable to write acceleration data to file due to \(error).")
-                }
+                self.persistenceLayer.save(accelerations: localAccelerationsCache, toMeasurement: measurement)
             }
             self.accelerationsCache = [Acceleration]()
             self.locationsCache = [GeoLocation]()
