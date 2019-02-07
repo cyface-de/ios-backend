@@ -30,7 +30,7 @@
 		3DF7E10921F60AFC007CFF83 /* StaticAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E10421F60AFB007CFF83 /* StaticAuthenticator.swift */; };
 		3DF7E10A21F60AFC007CFF83 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E10521F60AFB007CFF83 /* Networking.swift */; };
 		3DF7E10B21F60AFC007CFF83 /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E10621F60AFB007CFF83 /* Authenticator.swift */; };
-		3DF7E11021F60B50007CFF83 /* CyfaceModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E10C21F60B4F007CFF83 /* CyfaceModel.xcdatamodeld */; };
+		3DF7E133220C36BD007CFF83 /* CyfaceModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E12F220C36BD007CFF83 /* CyfaceModel.xcdatamodeld */; };
 		3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */; };
 		9DB9C9E98A0F814379DB39E2 /* Pods_DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 561111CE2228E8D6E17A7964 /* Pods_DataCapturing.framework */; };
 /* End PBXBuildFile section */
@@ -71,9 +71,10 @@
 		3DF7E10421F60AFB007CFF83 /* StaticAuthenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StaticAuthenticator.swift; sourceTree = "<group>"; };
 		3DF7E10521F60AFB007CFF83 /* Networking.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		3DF7E10621F60AFB007CFF83 /* Authenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authenticator.swift; sourceTree = "<group>"; };
-		3DF7E10D21F60B4F007CFF83 /* 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 3.xcdatamodel; sourceTree = "<group>"; };
-		3DF7E10E21F60B4F007CFF83 /* CyfaceModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CyfaceModel.xcdatamodel; sourceTree = "<group>"; };
-		3DF7E10F21F60B4F007CFF83 /* 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 2.xcdatamodel; sourceTree = "<group>"; };
+		3DF7E130220C36BD007CFF83 /* 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 3.xcdatamodel; sourceTree = "<group>"; };
+		3DF7E131220C36BD007CFF83 /* CyfaceModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CyfaceModel.xcdatamodel; sourceTree = "<group>"; };
+		3DF7E132220C36BD007CFF83 /* 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 2.xcdatamodel; sourceTree = "<group>"; };
+		3DF7E134220C374F007CFF83 /* 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 4.xcdatamodel; sourceTree = "<group>"; };
 		3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeasurementContext.swift; sourceTree = "<group>"; };
 		467CD9E43BEB6FB9EC4DA8ED /* Pods_DataCapturingTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataCapturingTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C171A31E1467713AFA5A047 /* Pods-DataCapturing.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DataCapturing/Pods-DataCapturing.debug.xcconfig"; sourceTree = "<group>"; };
@@ -172,7 +173,7 @@
 		3DE419E31FD193D7001282D0 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				3DF7E10C21F60B4F007CFF83 /* CyfaceModel.xcdatamodeld */,
+				3DF7E12F220C36BD007CFF83 /* CyfaceModel.xcdatamodeld */,
 				3D8CC21F20A6D89A0095CCD4 /* Acceleration.swift */,
 				3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */,
 				3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */,
@@ -423,7 +424,6 @@
 				3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */,
 				3DF7E10021F60AB1007CFF83 /* PersistenceLayer.swift in Sources */,
 				3D0511D7204D267600967898 /* MovebisDataCapturingService.swift in Sources */,
-				3DF7E11021F60B50007CFF83 /* CyfaceModel.xcdatamodeld in Sources */,
 				3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */,
 				3D8CC22220A6D89A0095CCD4 /* Acceleration.swift in Sources */,
 				3DF7E10821F60AFC007CFF83 /* ServerConnection.swift in Sources */,
@@ -431,6 +431,7 @@
 				3D8CC22020A6D89A0095CCD4 /* GeoLocation.swift in Sources */,
 				3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */,
 				3D1505EE213EA68D002994D2 /* DataCapturingError.swift in Sources */,
+				3DF7E133220C36BD007CFF83 /* CyfaceModel.xcdatamodeld in Sources */,
 				3DF7E10921F60AFC007CFF83 /* StaticAuthenticator.swift in Sources */,
 				3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */,
 				3D8CC22120A6D89A0095CCD4 /* Measurement.swift in Sources */,
@@ -691,14 +692,15 @@
 /* End XCConfigurationList section */
 
 /* Begin XCVersionGroup section */
-		3DF7E10C21F60B4F007CFF83 /* CyfaceModel.xcdatamodeld */ = {
+		3DF7E12F220C36BD007CFF83 /* CyfaceModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				3DF7E10D21F60B4F007CFF83 /* 3.xcdatamodel */,
-				3DF7E10E21F60B4F007CFF83 /* CyfaceModel.xcdatamodel */,
-				3DF7E10F21F60B4F007CFF83 /* 2.xcdatamodel */,
+				3DF7E134220C374F007CFF83 /* 4.xcdatamodel */,
+				3DF7E130220C36BD007CFF83 /* 3.xcdatamodel */,
+				3DF7E131220C36BD007CFF83 /* CyfaceModel.xcdatamodel */,
+				3DF7E132220C36BD007CFF83 /* 2.xcdatamodel */,
 			);
-			currentVersion = 3DF7E10D21F60B4F007CFF83 /* 3.xcdatamodel */;
+			currentVersion = 3DF7E134220C374F007CFF83 /* 4.xcdatamodel */;
 			path = CyfaceModel.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
