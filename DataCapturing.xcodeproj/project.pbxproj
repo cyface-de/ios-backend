@@ -31,6 +31,8 @@
 		3DF7E10A21F60AFC007CFF83 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E10521F60AFB007CFF83 /* Networking.swift */; };
 		3DF7E10B21F60AFC007CFF83 /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E10621F60AFB007CFF83 /* Authenticator.swift */; };
 		3DF7E133220C36BD007CFF83 /* CyfaceModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E12F220C36BD007CFF83 /* CyfaceModel.xcdatamodeld */; };
+		3DF7E136220C3974007CFF83 /* DistanceCalculationStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */; };
+		3DF7E138220C3D42007CFF83 /* DistanceCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */; };
 		3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */; };
 		9DB9C9E98A0F814379DB39E2 /* Pods_DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 561111CE2228E8D6E17A7964 /* Pods_DataCapturing.framework */; };
 /* End PBXBuildFile section */
@@ -75,6 +77,8 @@
 		3DF7E131220C36BD007CFF83 /* CyfaceModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CyfaceModel.xcdatamodel; sourceTree = "<group>"; };
 		3DF7E132220C36BD007CFF83 /* 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 2.xcdatamodel; sourceTree = "<group>"; };
 		3DF7E134220C374F007CFF83 /* 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 4.xcdatamodel; sourceTree = "<group>"; };
+		3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistanceCalculationStrategy.swift; sourceTree = "<group>"; };
+		3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistanceCalculationTests.swift; sourceTree = "<group>"; };
 		3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeasurementContext.swift; sourceTree = "<group>"; };
 		467CD9E43BEB6FB9EC4DA8ED /* Pods_DataCapturingTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataCapturingTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C171A31E1467713AFA5A047 /* Pods-DataCapturing.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DataCapturing/Pods-DataCapturing.debug.xcconfig"; sourceTree = "<group>"; };
@@ -137,6 +141,7 @@
 				3D0BDEA51FB1B951004EA25E /* Info.plist */,
 				3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */,
 				3D1505ED213EA68D002994D2 /* DataCapturingError.swift */,
+				3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */,
 			);
 			path = DataCapturing;
 			sourceTree = "<group>";
@@ -148,6 +153,7 @@
 				3D0511E5204D622700967898 /* SerializationTest.swift */,
 				3D0BDEB11FB1B951004EA25E /* Info.plist */,
 				3D0511EC204ED0C200967898 /* PersistenceTests.swift */,
+				3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */,
 			);
 			path = DataCapturingTests;
 			sourceTree = "<group>";
@@ -423,6 +429,7 @@
 				3DF7E10A21F60AFC007CFF83 /* Networking.swift in Sources */,
 				3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */,
 				3DF7E10021F60AB1007CFF83 /* PersistenceLayer.swift in Sources */,
+				3DF7E136220C3974007CFF83 /* DistanceCalculationStrategy.swift in Sources */,
 				3D0511D7204D267600967898 /* MovebisDataCapturingService.swift in Sources */,
 				3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */,
 				3D8CC22220A6D89A0095CCD4 /* Acceleration.swift in Sources */,
@@ -444,6 +451,7 @@
 			files = (
 				3D0511E7204D622700967898 /* SerializationTest.swift in Sources */,
 				3D0511ED204ED0C200967898 /* PersistenceTests.swift in Sources */,
+				3DF7E138220C3D42007CFF83 /* DistanceCalculationTests.swift in Sources */,
 				3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
