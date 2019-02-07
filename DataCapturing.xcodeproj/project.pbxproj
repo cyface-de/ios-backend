@@ -129,7 +129,6 @@
 				3DF7E10121F60AFB007CFF83 /* Synchronization */,
 				3D58B79A2136EEA5003F53C9 /* Persistence */,
 				3DC6A7192052F14900E7CB84 /* Movebis */,
-				3DC6A7182052F14000E7CB84 /* Cyface */,
 				3DE419E31FD193D7001282D0 /* Model */,
 				3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */,
 				3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */,
@@ -160,13 +159,6 @@
 				3D58B79E2136F045003F53C9 /* FileSupport.swift */,
 			);
 			path = Persistence;
-			sourceTree = "<group>";
-		};
-		3DC6A7182052F14000E7CB84 /* Cyface */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Cyface;
 			sourceTree = "<group>";
 		};
 		3DC6A7192052F14900E7CB84 /* Movebis */ = {
@@ -640,7 +632,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = KTRX4PN8UB;
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				INFOPLIST_FILE = DataCapturingTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.DataCapturingTests;
@@ -656,7 +648,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = KTRX4PN8UB;
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				INFOPLIST_FILE = DataCapturingTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.DataCapturingTests;
