@@ -41,7 +41,7 @@ class SerializationTest: XCTestCase {
         oocut = CyfaceBinaryFormatSerializer()
 
         let measurementCreationPromise = expectation(description: "Store fixture measurement!")
-        persistenceLayer = PersistenceLayer { persistence in
+        persistenceLayer = PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy()) { persistence in
             persistence.createMeasurement(at: 1, withContext: .bike) { measurement in
                 self.fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
                 persistence.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100)], toMeasurement: self.fixture!) { _ in

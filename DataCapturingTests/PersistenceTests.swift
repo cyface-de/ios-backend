@@ -22,6 +22,8 @@ import XCTest
 
 class PersistenceTests: XCTestCase {
 
+    private static let defaultPromiseTimeout = 5.0
+
     var oocut: PersistenceLayer!
     var fixture: MeasurementEntity!
 
@@ -29,10 +31,10 @@ class PersistenceTests: XCTestCase {
         super.setUp()
 
         let promise = expectation(description: "Create fixture measurement!")
-        oocut = PersistenceLayer { persistence in
+        oocut = PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy()) { persistence in
             persistence.createMeasurement(at: 10_000, withContext: .bike) { measurement in
                 self.fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
-                persistence.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], toMeasurement: self.fixture!) {_ in
+                persistence.save(locations: [GeoLocation(latitude: 51.052181, longitude: 13.728956, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 51.051837, longitude: 13.729010, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], toMeasurement: self.fixture!) {_ in
                     persistence.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: self.fixture!) {
                         promise.fulfill()
                     }
@@ -40,7 +42,7 @@ class PersistenceTests: XCTestCase {
             }
         }
 
-        waitForExpectations(timeout: 5, handler: nil)
+        wait(for: [promise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 
     override func tearDown() {
@@ -50,7 +52,7 @@ class PersistenceTests: XCTestCase {
         }
         oocut = nil
         fixture = nil
-        waitForExpectations(timeout: 2, handler: nil)
+        wait(for: [promise], timeout: PersistenceTests.defaultPromiseTimeout)
         super.tearDown()
     }
 
@@ -59,7 +61,7 @@ class PersistenceTests: XCTestCase {
      */
     func testCreateMeasurement() {
         let testPromise = expectation(description: "Create measurements")
-        oocut!.createMeasurement(at: 10_001, withContext: .bike) { secondMeasurement in
+        oocut.createMeasurement(at: 10_001, withContext: .bike) { secondMeasurement in
             guard let firstMeasurement = self.fixture else {
                 fatalError()
             }
@@ -75,7 +77,7 @@ class PersistenceTests: XCTestCase {
             }
         }
 
-        waitForExpectations(timeout: 2, handler: nil)
+        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 
     func testCleanMeasurement() {
@@ -96,7 +98,7 @@ class PersistenceTests: XCTestCase {
             }
         }
 
-        waitForExpectations(timeout: 20000, handler: nil)
+        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 
     func testDeleteMeasurement() {
@@ -113,7 +115,7 @@ class PersistenceTests: XCTestCase {
             }
         }
 
-        waitForExpectations(timeout: 2, handler: nil)
+        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 
     func testMergeDataToExistingMeasurement() {
@@ -135,7 +137,7 @@ class PersistenceTests: XCTestCase {
             }
         }
 
-        waitForExpectations(timeout: 2, handler: nil)
+        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 
     func testLoadMeasurement() {
@@ -148,7 +150,7 @@ class PersistenceTests: XCTestCase {
             promise.fulfill()
         }
 
-        waitForExpectations(timeout: 5, handler: nil)
+        wait(for: [promise], timeout: PersistenceTests.defaultPromiseTimeout)
 
     }
 
@@ -160,14 +162,14 @@ class PersistenceTests: XCTestCase {
             promisePriorClean.fulfill()
         }
 
-        waitForExpectations(timeout: 10, handler: nil)
+        wait(for: [promisePriorClean], timeout: PersistenceTests.defaultPromiseTimeout)
 
         let promiseClean = expectation(description: "Error while cleaning fixture measurement!")
         oocut.clean(measurement: fixture) {
             promiseClean.fulfill()
         }
 
-        waitForExpectations(timeout: 10, handler: nil)
+        wait(for: [promiseClean], timeout: PersistenceTests.defaultPromiseTimeout)
 
         let promisePostClean = expectation(description: "Error while loading measurements!")
         var countOfLoadedMeasurementsPostClean = 0
@@ -176,9 +178,35 @@ class PersistenceTests: XCTestCase {
             promisePostClean.fulfill()
         }
 
-        waitForExpectations(timeout: 10, handler: nil)
+        wait(for: [promisePostClean], timeout: PersistenceTests.defaultPromiseTimeout)
         XCTAssertEqual(countOfLoadedMeasurementsPriorClean, 1)
         XCTAssertEqual(countOfLoadedMeasurementsPostClean, 0)
-        print("test")
+    }
+
+    func testDistanceWasCalculated() {
+        let expectedTrackLength = 38.44
+        let distanceCalculationAccuracy = 0.01
+
+        let testPromise = expectation(description: "Measurement was loaded.")
+        oocut.load(measurementIdentifiedBy: fixture.identifier) { measurement in
+            XCTAssertEqual(measurement.trackLength, expectedTrackLength, accuracy: expectedTrackLength * distanceCalculationAccuracy, "Measurement length \(measurement.trackLength) should be within \(distanceCalculationAccuracy*100)% of \(expectedTrackLength).")
+            testPromise.fulfill()
+        }
+
+        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
+    }
+
+    func testDistanceWasAdded() {
+        let expectedTrackLength = 83.57
+        let distanceCalculationAccuracy = 0.01
+
+        let testPromise = expectation(description: "Measurement was saved.")
+        let locations: [GeoLocation] = [GeoLocation(latitude: 51.051432, longitude: 13.729053, accuracy: 1.0, speed: 1.0, timestamp: 10_300)]
+        oocut.save(locations: locations, toMeasurement: fixture, onFinished: { measurement in
+            XCTAssertEqual(measurement.trackLength, expectedTrackLength, accuracy: expectedTrackLength * distanceCalculationAccuracy, "Measurement length \(measurement.trackLength) should be within \(distanceCalculationAccuracy*100)% of \(expectedTrackLength).")
+            testPromise.fulfill()
+        })
+
+        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 }

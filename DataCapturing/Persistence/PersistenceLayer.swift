@@ -67,14 +67,20 @@ public class PersistenceLayer {
         return nextIdentifier
     }
 
+    /// Used to update a measurements length, each time new locations are added.
+    private let distanceCalculator: DistanceCalculationStrategy
+
     // MARK: - Initializers
 
     /**
      Public constructor usable by external callers.
 
-     - Parameter onCompletionHandler: Called when the persistence layer has successfully finished initialization.
+     - Parameters:
+     - withDistanceCalculator: An algorithm used to calculate the distance between geo locations.
+     - onCompletionHandler: Called when the persistence layer has successfully finished initialization.
      */
-    public init(onCompletionHandler: @escaping (PersistenceLayer) -> Void) {
+    public init(withDistanceCalculator: DistanceCalculationStrategy, onCompletionHandler: @escaping (PersistenceLayer) -> Void) {
+        self.distanceCalculator = withDistanceCalculator
         /*
          The following code is necessary to load the CyfaceModel from the DataCapturing framework.
          It is only necessary because we are using a framework.
@@ -280,10 +286,16 @@ public class PersistenceLayer {
         container.performBackgroundTask { context in
             let measurementIdentifier = measurement.identifier
             guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
+                // TODO: Do not use fatal error but provide status to onFinished handler
                 fatalError("PersistenceLayer.save(locations: \(locations.count), toMeasurement: \(measurementIdentifier)): Unable to load measurement!")
             }
 
-            self.internalSave(locations: locations, toMeasurement: measurement, onContext: context)
+            do {
+                try self.internalSave(locations: locations, toMeasurement: measurement, onContext: context)
+            } catch {
+                // TODO: Do not use fatal error but provide status to onFinished handler
+                fatalError()
+            }
             context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
             context.saveRecursively()
             context.refresh(measurement, mergeChanges: true)
@@ -294,12 +306,21 @@ public class PersistenceLayer {
     /**
      Saves the provided `GeoLocation` instances to the data storage. This is an internal save method that should only run on a `PersistenceContainer` background thread.
 
+     This method also increases the track length based on the added `GeoLocation` objects.
+
      - Parameters:
      - locations: The `GeoLocation` instances to save.
      - toMeasurement: The measurement to save to.
      - onContext: The `NSManagedObjectContext` to save the data to.
      */
-    private func internalSave(locations: [GeoLocation], toMeasurement measurement: MeasurementMO, onContext context: NSManagedObjectContext) {
+    private func internalSave(locations: [GeoLocation], toMeasurement measurement: MeasurementMO, onContext context: NSManagedObjectContext) throws {
+        let geoLocationFetchRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
+        geoLocationFetchRequest.fetchLimit = 1
+        let maxTimestampInMeaurementPredicate = NSPredicate(format: "timestamp==max(timestamp) && measurement==%@", measurement)
+        geoLocationFetchRequest.predicate = maxTimestampInMeaurementPredicate
+        var lastCapturedLocation = try geoLocationFetchRequest.execute().first
+        var distance = 0.0
+
         locations.forEach { location in
             let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
             dbLocation.lat = location.latitude
@@ -308,7 +329,15 @@ public class PersistenceLayer {
             dbLocation.timestamp = location.timestamp
             dbLocation.accuracy = location.accuracy
             measurement.addToGeoLocations(dbLocation)
+
+            if let lastCapturedLocation = lastCapturedLocation {
+                let delta = distanceCalculator.calculateDistance(from: lastCapturedLocation, to: dbLocation)
+                distance += delta
+            }
+            lastCapturedLocation = dbLocation
         }
+
+        measurement.trackLength += distance
     }
 
     /**

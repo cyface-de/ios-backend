@@ -38,7 +38,39 @@ class DistanceCalculationTests: XCTestCase {
         let calculatedDistance = oocut.calculateDistance(from: fromLocation, to: toLocation)
         let inverseCalculatedDistance = oocut.calculateDistance(from: toLocation, to: fromLocation)
 
-        let expectedAccuracy = expectedDistance * 0.1 // Accuracy should be within 1%
+        let expectedAccuracy = expectedDistance * 0.01 // Accuracy should be within 1%
+        XCTAssertEqual(expectedDistance, calculatedDistance, accuracy: expectedAccuracy, "Expected distance \(expectedDistance) was not within \(expectedAccuracy) of calculated distance \(calculatedDistance).")
+        XCTAssertEqual(calculatedDistance, inverseCalculatedDistance, accuracy: expectedAccuracy, "Calculated distance \(calculatedDistance) was not within \(expectedAccuracy) of inverse calculated distance \(inverseCalculatedDistance).")
+    }
+
+    func testDefaultCalculation_ShortDistance() {
+        let oocut = DefaultDistanceCalculationStrategy()
+        guard let fromLatitude = CLLocationDegrees(exactly: 51.052181) else {
+            XCTFail("Unable to initialize fromLatitude")
+            return
+        }
+        guard let fromLongitude = CLLocationDegrees(exactly: 13.728956) else {
+            XCTFail("Unable to initialize fromLongitude")
+            return
+        }
+        let fromLocation = CLLocation(latitude: fromLatitude, longitude: fromLongitude)
+
+        guard let toLatitude = CLLocationDegrees(exactly: 51.051837) else {
+            XCTFail("Unable to initialize toLatitude")
+            return
+        }
+        guard let toLongitude = CLLocationDegrees(exactly: 13.729010) else {
+            XCTFail("Unable to initialize toLongitude")
+            return
+        }
+        let toLocation = CLLocation(latitude: toLatitude, longitude: toLongitude)
+
+        let expectedDistance = 38.44
+
+        let calculatedDistance = oocut.calculateDistance(from: fromLocation, to: toLocation)
+        let inverseCalculatedDistance = oocut.calculateDistance(from: toLocation, to: fromLocation)
+
+        let expectedAccuracy = expectedDistance * 0.01 // Accuracy should be within 1%
         XCTAssertEqual(expectedDistance, calculatedDistance, accuracy: expectedAccuracy, "Expected distance \(expectedDistance) was not within \(expectedAccuracy) of calculated distance \(calculatedDistance).")
         XCTAssertEqual(calculatedDistance, inverseCalculatedDistance, accuracy: expectedAccuracy, "Calculated distance \(calculatedDistance) was not within \(expectedAccuracy) of inverse calculated distance \(inverseCalculatedDistance).")
     }
