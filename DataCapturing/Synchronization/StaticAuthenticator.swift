@@ -29,12 +29,17 @@ import Foundation
  If this is not the case, API calls based on this authenticator are going to fail!
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 2.0.0
  */
 public class StaticAuthenticator: Authenticator {
     /// The token used for authentication.
     public var jwtToken: String?
+
+    /// Default constructor needs to be publicly exposed to be able to create it.
+    public init() {
+        // Nothing to do here
+    }
 
     public func authenticate(onSuccess: (String) -> Void, onFailure: (Error) -> Void) {
         if let jwtToken = jwtToken {
