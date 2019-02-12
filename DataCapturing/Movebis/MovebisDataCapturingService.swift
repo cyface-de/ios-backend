@@ -87,9 +87,11 @@ public class MovebisDataCapturingService: DataCapturingService {
      - persistenceLayer: An API to store, retrieve and update captured data to the local system
      until the App can transmit it to a server.
      - eventHandler: A handler for events occuring during data capturing.
+     - Throws: If the networking stack for data synchronization was not successfully initialized.
      */
-    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent) -> Void)) {
-        super.init(connection: serverConnection, sensorManager: manager, persistenceLayer: persistence, dataSynchronizationIsActive: true, eventHandler: eventHandler)
+    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent) -> Void)) throws {
+        let synchronizer = try Synchronizer(persistenceLayer: persistence, cleaner: AccelerationPointRemovalCleaner(), serverConnection: serverConnection, handler: eventHandler)
+        super.init(sensorManager: manager, persistenceLayer: persistence, synchronizer: synchronizer, eventHandler: eventHandler)
     }
 
     /**
@@ -98,17 +100,14 @@ public class MovebisDataCapturingService: DataCapturingService {
      This is a long running asynchronous operation.
      The provided handler is notified of its completion by receiving the event `DataCapturingEvent.serviceStarted`.
      If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.
-     
+
+     - Parameter onFinishedCall: A handler called when the start up process has finished. You should not call other lifecycle methods, before the handler has returned.
      - Throws:
      - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()`if you want to continue.
      */
-    public func start() throws {
-        return try start(inContext: .bike)
-    }
-
-    override func cleanDataAfterSync(for measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void)) {
-        persistenceLayer.clean(measurement: measurement) {
-            handler()
+    public func start(onFinishedCall handler: @escaping (Status) -> Void) throws {
+        return try start(inContext: .bike) { status in
+            handler(status)
         }
     }
 }

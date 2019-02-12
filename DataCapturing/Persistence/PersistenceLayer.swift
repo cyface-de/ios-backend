@@ -78,8 +78,9 @@ public class PersistenceLayer {
      - Parameters:
      - withDistanceCalculator: An algorithm used to calculate the distance between geo locations.
      - onCompletionHandler: Called when the persistence layer has successfully finished initialization.
+     - Throws: A `PersistenceError.modelNotLoabable` if the model is not loadable
      */
-    public init(withDistanceCalculator: DistanceCalculationStrategy, onCompletionHandler: @escaping (PersistenceLayer) -> Void) {
+    public init(withDistanceCalculator: DistanceCalculationStrategy, onCompletionHandler: @escaping (PersistenceLayer?, Status) -> Void) throws {
         self.distanceCalculator = withDistanceCalculator
         /*
          The following code is necessary to load the CyfaceModel from the DataCapturing framework.
@@ -92,48 +93,25 @@ public class PersistenceLayer {
 
         let bundle = Bundle(for: type(of: self))
         guard let modelURL = bundle.url(forResource: momdName, withExtension: "momd") else {
-            fatalError("Error loading model from bundle \(bundle.bundleURL).")
+            throw PersistenceError.modelNotLoadable(bundle.bundleURL)
         }
 
         guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
-            fatalError("Error initializing mom from: \(modelURL)")
+            throw PersistenceError.modelNotInitializable(modelURL)
         }
 
         container = NSPersistentContainer(name: momdName, managedObjectModel: mom)
 
         container.loadPersistentStores { _, error in
             if let error = error {
-                fatalError("Unable to load persistent storage \(error).")
+                onCompletionHandler(nil, .error(error))
             } else {
-                onCompletionHandler(self)
+                onCompletionHandler(self, .success)
             }
         }
     }
 
     // MARK: - Database Writing Methods
-
-    /**
-     * Creates a new measurement with the provided `timestamp`.
-     *
-     * - Parameters:
-     *     - timestamp: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
-     *     - withContext: The measurement context the new measurement is created in.
-     */
-    @available(*, deprecated, message: "Please use the asynchronous version instead")
-    public func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext) -> MeasurementEntity {
-        var ret: MeasurementEntity?
-        let syncGroup = DispatchGroup()
-        syncGroup.enter()
-        createMeasurement(at: timestamp, withContext: mContext) { measurement in
-            ret = MeasurementEntity(identifier: measurement.identifier, context: mContext)
-            syncGroup.leave()
-        }
-
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError("PersistenceLayer.createMeasurement(at: \(timestamp), withContext: \(mContext.rawValue)): Unable to create measurement!")
-        }
-        return ret!
-    }
 
     /**
      * Creates a new `measurement` asynchronuously and informs the caller when finished.
@@ -143,30 +121,33 @@ public class PersistenceLayer {
      *    - withContext: The measurement context the new measurement is created in.
      *    - onFinishedCall: Handler that is called with the new measurement as parameter when the measurement has been stored in the database.
      */
-    public func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext, onFinishedCall handler: @escaping ((MeasurementMO) -> Void)) {
+    public func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext, onFinishedCall handler: @escaping ((MeasurementMO?, Status) -> Void)) {
         container.performBackgroundTask { context in
             // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
             var identifier = self.nextIdentifier
-            while self.load(measurementIdentifiedBy: identifier, from: context) != nil {
-                identifier = self.nextIdentifier
-            }
+            do {
+                while try self.load(measurementIdentifiedBy: identifier, from: context) != nil {
+                    identifier = self.nextIdentifier
+                }
 
-            if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
-                let measurement = MeasurementMO(entity: description, insertInto: context)
-                measurement.timestamp = timestamp
-                measurement.identifier = identifier
-                measurement.synchronized = false
-                measurement.context = mContext.rawValue
-                context.saveRecursively()
+                if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
+                    let measurement = MeasurementMO(entity: description, insertInto: context)
+                    measurement.timestamp = timestamp
+                    measurement.identifier = identifier
+                    measurement.synchronized = false
+                    measurement.context = mContext.rawValue
+                    context.saveRecursively()
 
-                handler(measurement)
-            } else {
-                fatalError("PersistenceLayer.createMeasurement(at: \(timestamp), withContext: \(mContext.rawValue): Unable to create measurement!")
+                    handler(measurement, .success)
+                } else {
+                    handler(nil, .error(PersistenceError.measurementNotCreatable(timestamp)))
+                }
+            } catch let error {
+                handler(nil, .error(error))
             }
         }
     }
 
-    // TODO: Delete Accelerations as well.
     /**
      Deletes the measurement from the data storage on a background thread. Calls the provided handler when deletion has been completed.
      
@@ -174,35 +155,23 @@ public class PersistenceLayer {
      - measurement: The measurement to delete from the data storage.
      - onFinishedCall: The handler to call, when deletion has completed.
      */
-    func delete(measurement: MeasurementEntity, onFinishedCall handler: @escaping (() -> Void)) {
+    func delete(measurement: MeasurementEntity, onFinishedCall handler: @escaping ((Status) -> Void)) {
         container.performBackgroundTask { context in
             let measurementIdentifier = measurement.identifier
-            guard let measurement = self.load(measurementIdentifiedBy: measurement.identifier, from: context) else {
-                fatalError("PersistenceLayer.delete(measurement: \(measurementIdentifier): Unable to load measurement!")
-            }
-
-            let accelerationFile = AccelerationsFile()
             do {
+                guard let measurement = try self.load(measurementIdentifiedBy: measurement.identifier, from: context) else {
+                    handler(.error(PersistenceError.measurementNotLoadable(measurementIdentifier)))
+                    return
+                }
+
+                let accelerationFile = AccelerationsFile()
                 try accelerationFile.remove(from: measurement)
+                context.delete(measurement)
+                context.saveRecursively()
+                handler(.success)
             } catch let error {
-                fatalError("PersistenceLayer.delete(measurement: \(measurement)): Unable to remove accelerations due to \(error.localizedDescription).")
+                handler(.error(error))
             }
-
-            context.delete(measurement)
-            context.saveRecursively()
-            handler()
-        }
-    }
-
-    @available(*, deprecated, message: "Please use the asynchronous version `delete` instead.")
-    func syncDelete(measurement: MeasurementEntity) {
-        let syncGroup = DispatchGroup()
-        syncGroup.enter()
-        delete(measurement: measurement) {
-            syncGroup.leave()
-        }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError("PersistenceLayer.syncDelete(measurement: \(measurement.identifier)): Unable to delete measurements from data storage!")
         }
     }
 
@@ -211,39 +180,27 @@ public class PersistenceLayer {
      
      - Parameter onFinishedCall: A handler called after deletion is complete.
      */
-    func delete(onFinishedCall handler: @escaping () -> Void) {
+    func delete(onFinishedCall handler: @escaping (Status) -> Void) {
         container.performBackgroundTask { context in
-            let syncGroup = DispatchGroup()
-            syncGroup.enter()
-            self.loadMeasurements(onFinishedCall: { (measurements) in
-                measurements.forEach({ (measurement) in
-                    // debugPrint("Deleting measurement: \(measurement.identifier).")
-                    do {
+            self.loadMeasurements(onFinishedCall: { measurements, status in
+                guard case .success = status else {
+                    return handler(status)
+                }
+                do {
+                    guard let measurements = measurements else {
+                        return handler(.error(PersistenceError.measurementsNotLoadable))
+                    }
+
+                    for measurement in measurements {
                         let object = try context.existingObject(with: measurement.objectID)
                         context.delete(object)
-                    } catch {
-                        fatalError("PersistenceLayer.delete(): Unable to delete measurements!")
                     }
-                })
-                syncGroup.leave()
+                    context.saveRecursively()
+                    handler(.success)
+                } catch let error {
+                    handler(.error(error))
+                }
             })
-            guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-                fatalError("PersistenceLayer.delete(): Asynchronous delete was not successful.")
-            }
-            context.saveRecursively()
-            handler()
-        }
-    }
-
-    @available(*, deprecated, message: "Please use the asynchronous version `delete` instead!")
-    func syncDelete() {
-        let syncGroup = DispatchGroup()
-        syncGroup.enter()
-        delete {
-            syncGroup.leave()
-        }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError("PersistenceLayer.syncDelete(): Unable to delete measurements from data storage!")
         }
     }
 
@@ -253,11 +210,11 @@ public class PersistenceLayer {
      - Parameters:
      - measurement: The measurement to strip of accelerations
      */
-    func clean(measurement: MeasurementEntity, whenFinishedCall finishedHandler: @escaping () -> Void) {
+    func clean(measurement: MeasurementEntity, whenFinishedCall finishedHandler: @escaping (Status) -> Void) {
         container.performBackgroundTask { context in
             do {
                 let measurementIdentifier = measurement.identifier
-                guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
+                guard let measurement = try self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
                     throw PersistenceError.dataNotLoadable(measurement: measurementIdentifier)
                 }
 
@@ -267,9 +224,9 @@ public class PersistenceLayer {
                 try accelerationsFile.remove(from: measurement)
 
                 context.saveRecursively()
-                finishedHandler()
+                finishedHandler(.success)
             } catch let error {
-                fatalError("PersistenceLayer.clean(measurement: \(measurement.identifier)): Unable to load measurement! Error \(error).")
+                finishedHandler(.error(error))
             }
         }
     }
@@ -282,24 +239,22 @@ public class PersistenceLayer {
      - toMeasurement: The measurement to store the `location` and `accelerations` to.
      - onFinished: The handler to call as soon as the database operation has finished.
      */
-    func save(locations: [GeoLocation], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping (MeasurementMO) -> Void = {_ in }) {
+    func save(locations: [GeoLocation], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping (MeasurementMO?, Status) -> Void) {
         container.performBackgroundTask { context in
             let measurementIdentifier = measurement.identifier
-            guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
-                // TODO: Do not use fatal error but provide status to onFinished handler
-                fatalError("PersistenceLayer.save(locations: \(locations.count), toMeasurement: \(measurementIdentifier)): Unable to load measurement!")
-            }
-
             do {
+                guard let measurement = try self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
+                    return handler(nil, .error(PersistenceError.measurementNotLoadable(measurementIdentifier)))
+                }
+
                 try self.internalSave(locations: locations, toMeasurement: measurement, onContext: context)
-            } catch {
-                // TODO: Do not use fatal error but provide status to onFinished handler
-                fatalError()
+                context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+                context.saveRecursively()
+                context.refresh(measurement, mergeChanges: true)
+                handler(measurement, .success)
+            } catch let error {
+                handler(nil, .error(error))
             }
-            context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
-            context.saveRecursively()
-            context.refresh(measurement, mergeChanges: true)
-            handler(measurement)
         }
     }
 
@@ -346,14 +301,14 @@ public class PersistenceLayer {
      - Parameters:
      - accelerations: An array of `Acceleration` instances to store.
      - toMeasurement: The measurement to store the `location` and `accelerations` to.
-     - onFinished: The optional handler to call as soon as the database operation has finished.
+     - onFinished: The handler to call as soon as the database operation has finished.
      - Throws: If accessing the local file system failes for some reason and thus the `Acceleration` instances can not be saved.
      */
-    func save(accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping (() -> Void) = {}) {
+    func save(accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping ((MeasurementMO?, Status) -> Void)) {
         container.performBackgroundTask { context in
             do {
                 let measurementIdentifier = measurement.identifier
-                guard let measurement = self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
+                guard let measurement = try self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
                     throw PersistenceError.dataNotLoadable(measurement: measurementIdentifier)
                 }
 
@@ -363,10 +318,9 @@ public class PersistenceLayer {
                 context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
                 context.saveRecursively()
                 context.refresh(measurement, mergeChanges: true)
-                handler()
+                handler(measurement, .success)
             } catch let error {
-                // TODO: Do not use a fatal error but rather a status provided to the handler.
-                fatalError("PersistenceLayer.save(accelerations: \(accelerations.count), toMeasurement: \(measurement.identifier)): Unable to load measurement! Error \(error).")
+                handler(nil, .error(error))
             }
         }
     }
@@ -394,20 +348,16 @@ public class PersistenceLayer {
      - Returns:
      - The `MeasurementMO` object for the provided identifier or `nil` if no such mesurement exists.
      */
-    private func load(measurementIdentifiedBy identifier: Int64, from context: NSManagedObjectContext) -> MeasurementMO? {
+    private func load(measurementIdentifiedBy identifier: Int64, from context: NSManagedObjectContext) throws -> MeasurementMO? {
         let fetchRequest: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         // The following needs to use an Objective-C number. That is why `measurementIdentifier` is wrapped in `NSNumber`
         fetchRequest.predicate = NSPredicate(format: "identifier==%@", NSNumber(value: identifier))
 
-        do {
-            let results = try context.fetch(fetchRequest)
-            if results.count == 1 {
-                return results[0]
-            } else {
-                return nil
-            }
-        } catch {
-            fatalError("PersistenceLayer.load(measurementIdentifier: \(identifier)): Unable to fetch any results due to \(error)")
+        let results = try context.fetch(fetchRequest)
+        if results.count == 1 {
+            return results[0]
+        } else {
+            return nil
         }
     }
 
@@ -418,13 +368,17 @@ public class PersistenceLayer {
      - measurement: The `measurement` to load.
      - onFinishedCall: The handler to call when loading the `measurement` has finished
      */
-    public func load(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (MeasurementMO) -> Void) {
+    public func load(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (MeasurementMO?, Status) -> Void) {
         container.performBackgroundTask { context in
             context.automaticallyMergesChangesFromParent = true
-            if let measurement = self.load(measurementIdentifiedBy: identifier, from: context) {
-                handler(measurement)
-            } else {
-                fatalError("Unable to load measurement with identifier \(identifier).")
+            do {
+                if let measurement = try self.load(measurementIdentifiedBy: identifier, from: context) {
+                    handler(measurement, .success)
+                } else {
+                    handler(nil, .error(PersistenceError.dataNotLoadable(measurement: identifier)))
+                }
+            } catch let error {
+                handler(nil, .error(error))
             }
         }
     }
@@ -435,14 +389,14 @@ public class PersistenceLayer {
      - Parameters:
      - handler: The handler to call after loading the measurements has finished.
      */
-    public func loadMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]) -> Void) {
+    public func loadMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]?, Status) -> Void) {
         container.performBackgroundTask { (context) in
             let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
             do {
                 let fetchResult = try context.fetch(request)
-                handler(fetchResult)
-            } catch {
-                fatalError("PersistenceLayer.loadMeasurements(): Unable to load due to: \(error.localizedDescription)")
+                handler(fetchResult, .success)
+            } catch let error {
+                handler(nil, .error(error))
             }
         }
     }
@@ -451,17 +405,17 @@ public class PersistenceLayer {
      Loads only those measurements that have not been synchronized to a Cyface database yet.
 
      - Parameter onFinishedCall: Handler called when loading the not synchronized measurements has finished. This provides the loaded measurements as an array, which will be empty if there are no such measurements.
-    */
-    public func loadSynchronizableMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]) -> Void) {
+     */
+    public func loadSynchronizableMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]?, Status) -> Void) {
         container.performBackgroundTask { (context) in
             let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
             // Fetch only not synchronized measurements
             request.predicate = NSPredicate(format: "synchronized == %@", NSNumber(value: false))
             do {
                 let fetchResult = try context.fetch(request)
-                handler(fetchResult)
-            } catch {
-                fatalError("PersistenceLayer.loadSynchronizableMeasurements(): Unable to load due to \(error.localizedDescription)")
+                handler(fetchResult, .success)
+            } catch let error {
+                handler(nil, .error(error))
             }
         }
     }
@@ -471,31 +425,16 @@ public class PersistenceLayer {
      
      - Parameter handler: The handler called after counting has finished. This handler receives the result as a parameter.
      */
-    public func countMeasurements(onFinishedCall handler: @escaping (Int) -> Void) {
+    public func countMeasurements(onFinishedCall handler: @escaping (Int?, Status) -> Void) {
         container.performBackgroundTask { (context) in
             let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-            let count = try? context.count(for: request)
-            handler(count ?? 0)
+            do {
+                let count = try context.count(for: request)
+                handler(count, .success)
+            } catch let error {
+                handler(nil, .error(error))
+            }
         }
-    }
-
-    /**
-     Counts all the measurements currently saved in the database.
-
-     - Returns: The number of measurements in the database.
-     */
-    public func syncCountMeasurements() -> Int {
-        let syncGroup = DispatchGroup()
-        var ret: Int?
-        syncGroup.enter()
-        countMeasurements { count in
-            ret = count
-            syncGroup.leave()
-        }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError("PersistenceLayer.syncDelete(): Unable to delete measurements from data storage!")
-        }
-        return ret!
     }
 }
 
@@ -529,5 +468,10 @@ extension NSManagedObjectContext {
 }
 
 enum PersistenceError: Error {
+    case modelNotLoadable(URL)
+    case modelNotInitializable(URL)
+    case measurementNotCreatable(Int64)
+    case measurementNotLoadable(Int64)
+    case measurementsNotLoadable
     case dataNotLoadable(measurement: Int64)
 }

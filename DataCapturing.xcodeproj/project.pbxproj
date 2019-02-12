@@ -21,6 +21,7 @@
 		3D1505EE213EA68D002994D2 /* DataCapturingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1505ED213EA68D002994D2 /* DataCapturingError.swift */; };
 		3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79D2136F045003F53C9 /* BinarySerializer.swift */; };
 		3D58B7A02136F046003F53C9 /* FileSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79E2136F045003F53C9 /* FileSupport.swift */; };
+		3D7EC16B2212ED0900F33E81 /* Synchronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7EC16A2212ED0900F33E81 /* Synchronizer.swift */; };
 		3D8CC22020A6D89A0095CCD4 /* GeoLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */; };
 		3D8CC22120A6D89A0095CCD4 /* Measurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */; };
 		3D8CC22220A6D89A0095CCD4 /* Acceleration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21F20A6D89A0095CCD4 /* Acceleration.swift */; };
@@ -33,6 +34,7 @@
 		3DF7E133220C36BD007CFF83 /* CyfaceModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E12F220C36BD007CFF83 /* CyfaceModel.xcdatamodeld */; };
 		3DF7E136220C3974007CFF83 /* DistanceCalculationStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */; };
 		3DF7E138220C3D42007CFF83 /* DistanceCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */; };
+		3DF7E174220F65EC007CFF83 /* Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E173220F65EC007CFF83 /* Status.swift */; };
 		3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */; };
 		9DB9C9E98A0F814379DB39E2 /* Pods_DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 561111CE2228E8D6E17A7964 /* Pods_DataCapturing.framework */; };
 /* End PBXBuildFile section */
@@ -64,6 +66,7 @@
 		3D1505ED213EA68D002994D2 /* DataCapturingError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCapturingError.swift; sourceTree = "<group>"; };
 		3D58B79D2136F045003F53C9 /* BinarySerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinarySerializer.swift; sourceTree = "<group>"; };
 		3D58B79E2136F045003F53C9 /* FileSupport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileSupport.swift; sourceTree = "<group>"; };
+		3D7EC16A2212ED0900F33E81 /* Synchronizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Synchronizer.swift; sourceTree = "<group>"; };
 		3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeoLocation.swift; sourceTree = "<group>"; };
 		3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Measurement.swift; sourceTree = "<group>"; };
 		3D8CC21F20A6D89A0095CCD4 /* Acceleration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Acceleration.swift; sourceTree = "<group>"; };
@@ -79,6 +82,7 @@
 		3DF7E134220C374F007CFF83 /* 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 4.xcdatamodel; sourceTree = "<group>"; };
 		3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistanceCalculationStrategy.swift; sourceTree = "<group>"; };
 		3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistanceCalculationTests.swift; sourceTree = "<group>"; };
+		3DF7E173220F65EC007CFF83 /* Status.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
 		3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeasurementContext.swift; sourceTree = "<group>"; };
 		467CD9E43BEB6FB9EC4DA8ED /* Pods_DataCapturingTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataCapturingTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C171A31E1467713AFA5A047 /* Pods-DataCapturing.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DataCapturing/Pods-DataCapturing.debug.xcconfig"; sourceTree = "<group>"; };
@@ -142,6 +146,7 @@
 				3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */,
 				3D1505ED213EA68D002994D2 /* DataCapturingError.swift */,
 				3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */,
+				3DF7E173220F65EC007CFF83 /* Status.swift */,
 			);
 			path = DataCapturing;
 			sourceTree = "<group>";
@@ -196,6 +201,7 @@
 				3DF7E10421F60AFB007CFF83 /* StaticAuthenticator.swift */,
 				3DF7E10521F60AFB007CFF83 /* Networking.swift */,
 				3DF7E10621F60AFB007CFF83 /* Authenticator.swift */,
+				3D7EC16A2212ED0900F33E81 /* Synchronizer.swift */,
 			);
 			path = Synchronization;
 			sourceTree = "<group>";
@@ -424,6 +430,7 @@
 			files = (
 				3D1505EC213E9F3A002994D2 /* (null) in Sources */,
 				3DF7E10B21F60AFC007CFF83 /* Authenticator.swift in Sources */,
+				3DF7E174220F65EC007CFF83 /* Status.swift in Sources */,
 				3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */,
 				3DF7E10721F60AFC007CFF83 /* CredentialsAuthenticator.swift in Sources */,
 				3DF7E10A21F60AFC007CFF83 /* Networking.swift in Sources */,
@@ -436,6 +443,7 @@
 				3DF7E10821F60AFC007CFF83 /* ServerConnection.swift in Sources */,
 				3D58B7A02136F046003F53C9 /* FileSupport.swift in Sources */,
 				3D8CC22020A6D89A0095CCD4 /* GeoLocation.swift in Sources */,
+				3D7EC16B2212ED0900F33E81 /* Synchronizer.swift in Sources */,
 				3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */,
 				3D1505EE213EA68D002994D2 /* DataCapturingError.swift in Sources */,
 				3DF7E133220C36BD007CFF83 /* CyfaceModel.xcdatamodeld in Sources */,

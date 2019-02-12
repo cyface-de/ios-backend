@@ -169,12 +169,21 @@ public class ServerConnection {
         // Load and serialize measurement synchronously.
         let loadMeasurementGroup = DispatchGroup()
         loadMeasurementGroup.enter()
-        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurementModel in
-            defer {loadMeasurementGroup.leave()}
-            do {
-                let payloadUrl = try self.write(measurementModel)
-                request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
-            } catch {
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurementModel, status in
+            switch status {
+            case .success:
+                guard let measurementModel = measurementModel else {
+                    return failure(measurement, ServerConnectionError.unexpectedError)
+                }
+
+                defer {loadMeasurementGroup.leave()}
+                do {
+                    let payloadUrl = try self.write(measurementModel)
+                    request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+                } catch {
+                    failure(measurement, error)
+                }
+            case .error(let error):
                 failure(measurement, error)
             }
         }

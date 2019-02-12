@@ -304,7 +304,7 @@ class CyfaceBinaryFormatSerializer {
     /// Serializer to transform geo location objects
     let geoLocationsSerializer = GeoLocationSerializer()
     /**
-     Serializes the provided `measurement` and compresses the returned data.
+     Serializes the provided `measurement` and compresses the returned data using RFC-1951 Deflate algorithm.
      
      - Parameters:
      - measurement: The `measurement` to serialize.
@@ -330,7 +330,14 @@ class CyfaceBinaryFormatSerializer {
      */
     func serialize(_ measurement: MeasurementMO) throws -> Data {
         let serializedMeasurement = try measurementSerializer.serialize(serializable: measurement)
-        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: measurement.geoLocations?.array as! [GeoLocationMO])
+        guard let geoLocations = measurement.geoLocations else {
+            throw SerializationError.invalidData
+        }
+        guard let geoLocationsArray = geoLocations.array as? [GeoLocationMO] else {
+            throw SerializationError.invalidData
+        }
+
+        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: geoLocationsArray)
         let serializedAccelerations = try accelerationsFile.data(for: measurement)
 
         var ret = Data()
