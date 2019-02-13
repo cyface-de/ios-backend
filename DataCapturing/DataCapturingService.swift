@@ -25,13 +25,12 @@ import os.log
 /**
  An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.
  
- To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using
- `forceSync(onFinish:)`.
+ To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provides `Synchronizer`.
  
  An object of this class is not thread safe and should only be used once per application. You may start and stop the service as often as you like and reuse the object.
  
  - Author: Klemens Muthmann
- - Version: 5.1.0
+ - Version: 6.0.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -89,9 +88,13 @@ public class DataCapturingService: NSObject {
     /// Synchronizes read and write operations on the `locationsCache` and the `accelerationsCache`.
     private let cacheSynchronizationQueue = DispatchQueue(label: "cacheSynchronization", attributes: .concurrent)
 
+    /// The interval between data write opertions, during data capturing.
+    private let savingInterval: TimeInterval
+
     /// A timer called in regular intervals to save the captured data to the underlying database.
     private var backgroundSynchronizationTimer: Timer!
 
+    /// An optional API that is responsible for synchronizing data with a Cyface server.
     public var synchronizer: Synchronizer?
 
     // MARK: - Initializers
@@ -105,6 +108,7 @@ public class DataCapturingService: NSObject {
      Since it seems to be impossible to create that instance inside a framework at the moment,
      you have to provide it via this parameter.
      - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
+     - savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
      - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
      - dataSynchronizationIsActive: A flag telling the system, whether it should synchronize data or not. If this is `true` data will be synchronized; if it is `false`, no data will be synchronized.
      - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
@@ -112,6 +116,7 @@ public class DataCapturingService: NSObject {
     public init(
         sensorManager manager: CMMotionManager,
         updateInterval interval: Double = 100,
+        savingInterval time: TimeInterval = 30,
         persistenceLayer persistence: PersistenceLayer,
         synchronizer: Synchronizer?,
         eventHandler: @escaping ((DataCapturingEvent) -> Void)) {
@@ -123,7 +128,8 @@ public class DataCapturingService: NSObject {
         motionManager.accelerometerUpdateInterval = 1.0 / interval
         self.handler = eventHandler
         self.synchronizer = synchronizer
-        
+        self.savingInterval = time
+
         super.init()
     }
 
@@ -154,7 +160,7 @@ public class DataCapturingService: NSObject {
             }
             let entity = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurementContext)!)
             self.currentMeasurement = entity
-            self.startCapturing()
+            self.startCapturing(savingEvery: savingInterval)
             self.handler(DataCapturingEvent.serviceStarted(measurement: entity))
             }
         }
@@ -218,7 +224,7 @@ public class DataCapturingService: NSObject {
             throw DataCapturingError.isRunning
         }
 
-        startCapturing()
+        startCapturing(savingEvery: savingInterval)
         isPaused = false
     }
 
@@ -235,8 +241,10 @@ public class DataCapturingService: NSObject {
     // TODO: Saving interval should be a parameter.
     /**
      Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
+
+     - Parameter savingEvery: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
      */
-    func startCapturing() {
+    func startCapturing(savingEvery time: TimeInterval) {
         // Preconditions
         guard !isRunning else {
             os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: LOG, type: .info)
@@ -254,6 +262,7 @@ public class DataCapturingService: NSObject {
         if motionManager.isAccelerometerAvailable {
             motionManager.startAccelerometerUpdates(to: queue) { data, _ in
                 guard let myData = data else {
+                    // Should only happen if the device accelerometer is broken or something similar. If this leads to problems we can substitute by a soft error handling such as a warning or something similar. However in such a case we might think everything works fine, while it really does not.
                     fatalError("DataCapturingService.start(): No Accelerometer data available!")
                 }
 
@@ -269,8 +278,7 @@ public class DataCapturingService: NSObject {
             }
         }
 
-        // Run data saving every 30 seconds
-        backgroundSynchronizationTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true, block: saveCapturedData)
+        backgroundSynchronizationTimer = Timer.scheduledTimer(withTimeInterval: time, repeats: true, block: saveCapturedData)
 
         isRunning = true
     }
@@ -300,6 +308,7 @@ public class DataCapturingService: NSObject {
      */
     func saveCapturedData(timer: Timer) {
         guard let measurement = currentMeasurement else {
+            // Using a fatal error here since we can not provide a callback or throw an error. If this leads to App crashes a soft catch of this error is possible, by just printing a warning or something similar.
             fatalError("No current measurement to save the location to! Data capturing impossible.")
         }
 
