@@ -22,7 +22,7 @@ let persistenceLayer = PersistenceLayer { persistence in
 }
 ```
 
-1. Create a `PersistenceLayer` and wait asynchronously for CoreData to be ready, before you continue.
+1. Create a `PersistenceLayer` and wait asynchronously for CoreData to be ready, before you continue. Waiting asynchronously is optional, but you should to this to avoid weird errors occuring when you access a `PersistenceLayer` before it is initialized.
 2. Create an `Authenticator` like explained under *Using an authenticator* below.
 3. Create a `ServerConnection` for measurement data transmission. Provide the URL of a Cyface or Movebis server  endpoint together with the initialized `PersistenceLayer` instance and the `Authenticator`.
 4. Finally create the `DataCapturingService` or `MovebisDataCapturingService` as shown, providing the required parameters.
