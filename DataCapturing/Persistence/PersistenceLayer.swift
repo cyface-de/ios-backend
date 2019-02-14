@@ -467,11 +467,33 @@ extension NSManagedObjectContext {
     }
 }
 
+/**
+ An enumeration of all the errors thrown by the `PersistenceLayer`.
+
+ ```
+ case modelNotLoadable
+ case modelNotInitializable
+ case measurementNotCreatable
+ case measurementNotLoadable
+ case measurementsNotLoadable
+ case dataNotLoadable
+ ```
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.3.0
+ */
 enum PersistenceError: Error {
+    /// If the CoreData model used by the Cyface SDK was not loadable
     case modelNotLoadable(URL)
+    /// If the CoreData model used by the Cyface SDK was not initialized successfully.
     case modelNotInitializable(URL)
+    /// If a measurement was not created successfully.
     case measurementNotCreatable(Int64)
+    /// If a measurement was not loaded successfully.
     case measurementNotLoadable(Int64)
+    /// If measurements could not be loaded in bulk.
     case measurementsNotLoadable
+    /// If some data belonging to a measurement could not be loaded.
     case dataNotLoadable(measurement: Int64)
 }

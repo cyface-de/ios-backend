@@ -23,6 +23,15 @@ import Foundation
  Events occuring during capturing and transmitting data.
  
  These events may be received by a closure provided to the `DataCapturingService` on calling start.
+ ```
+ case geoLocationFixAcquired
+ case geoLocationFixLost
+ case geoLocationAcquired
+ case lowDiskSpace
+ case serviceStarted
+ case synchronizationFinished
+ case synchronizationStarted
+ ```
  
  - Author: Klemens Muthmann
  - Version: 2.0.0
@@ -49,15 +58,14 @@ public enum DataCapturingEvent {
     /**
      Used to notify the client application of a successful start of the `DataCapturingService`.
      */
-    case serviceStarted(measurement: MeasurementEntity)
+    case serviceStarted(measurement: MeasurementMO?)
     /**
      Occurs if the `DataCapturingService` has synchronized a measurement successfully
      and cleaned the local copies.
 
      - Parameter measurement: The measurement which finished synchronization.
-     - Parameter status: Whether synchronization was a success or a failure.
      */
-    case synchronizationFinished(measurement: MeasurementEntity, status: Status)
+    case synchronizationFinished(measurement: MeasurementEntity)
     /**
      Occurs when the synchronization of a measurement has started.
 

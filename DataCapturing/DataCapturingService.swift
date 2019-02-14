@@ -46,7 +46,7 @@ public class DataCapturingService: NSObject {
     public var isPaused: Bool
 
     /// A listener that is notified of important events during data capturing.
-    private var handler: ((DataCapturingEvent) -> Void)
+    private var handler: ((DataCapturingEvent, Status) -> Void)
 
     /// The currently recorded `Measurement` or `nil` if there is no active recording.
     public var currentMeasurement: MeasurementEntity?
@@ -119,7 +119,7 @@ public class DataCapturingService: NSObject {
         savingInterval time: TimeInterval = 30,
         persistenceLayer persistence: PersistenceLayer,
         synchronizer: Synchronizer?,
-        eventHandler: @escaping ((DataCapturingEvent) -> Void)) {
+        eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) {
 
         self.isRunning = false
         self.isPaused = false
@@ -136,15 +136,19 @@ public class DataCapturingService: NSObject {
     // MARK: - Methods
 
     /**
-     Starts the capturing process with an optional closure, that is notified of important events during the capturing process. This operation is idempotent.
+     Starts the capturing process.
+
+     This startup procedure is asynchronous.
+     The event handler provided to the initializer receives a `DataCapturingEvent.serviceStarted`, after the startup has finished.
+      If an error happened during this process, it is provided as part of this handlers `Status` argument.
      
      - Parameters:
      - context: The `MeasurementContext` to use for the newly created measurement.
-     - onFinishedCall: The handler to call as soon as this call to start has completed and measuring has started. If an error happened during this process, it is provided as part of this handlers `Status` argument.
+     
      - Throws:
      - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
-    public func start(inContext context: MeasurementContext, onFinishedCall handler: @escaping (Status) -> Void) throws {
+    public func start(inContext context: MeasurementContext) throws {
         guard !isPaused else {
             throw DataCapturingError.isPaused
         }
@@ -152,16 +156,16 @@ public class DataCapturingService: NSObject {
         let timestamp = currentTimeInMillisSince1970()
         persistenceLayer.createMeasurement(at: timestamp, withContext: context) { measurement, status in
             if case .error = status {
-                return handler(status)
+                return self.handler(.serviceStarted(measurement: nil), status)
             } else {
 
             guard let measurement = measurement, let measurementContext = measurement.context else {
-                return handler(.error(PersistenceError.measurementNotLoadable(timestamp)))
+                return self.handler(.serviceStarted(measurement: nil), .error(PersistenceError.measurementNotLoadable(timestamp)))
             }
             let entity = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurementContext)!)
             self.currentMeasurement = entity
-            self.startCapturing(savingEvery: savingInterval)
-            self.handler(DataCapturingEvent.serviceStarted(measurement: entity))
+            self.startCapturing(savingEvery: self.savingInterval)
+            self.handler(.serviceStarted(measurement: measurement), .success)
             }
         }
     }
@@ -360,7 +364,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
             }
 
             DispatchQueue.main.async {
-                self.handler(.geoLocationAcquired(position: geoLocation))
+                self.handler(.geoLocationAcquired(position: geoLocation), .success)
             }
         }
     }

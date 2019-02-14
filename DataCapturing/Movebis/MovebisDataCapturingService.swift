@@ -54,7 +54,8 @@ public class MovebisDataCapturingService: DataCapturingService {
         }
     }
 
-    /** `CLLocationManager` that provides location updates to the UI,
+    /**
+     `CLLocationManager` that provides location updates to the UI,
      even when no data capturing is running.
      */
     private lazy var preCapturingLocationManager: CLLocationManager = {
@@ -77,7 +78,7 @@ public class MovebisDataCapturingService: DataCapturingService {
      Creates a new `MovebisDataCapturingService` with the ability capture location
      when no data capturing runs.
      - Parameters:
-     - serverConnection: A connection to a Cyface API server.
+     - connection: A connection to a Cyface API server.
      - sensorManager: An instance of `CMMotionManager`.
      There should be only one instance of this type in your application.
      Since it seems to be impossible to create that instance inside a framework at the moment,
@@ -89,10 +90,12 @@ public class MovebisDataCapturingService: DataCapturingService {
      - eventHandler: A handler for events occuring during data capturing.
      - Throws: If the networking stack for data synchronization was not successfully initialized.
      */
-    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent) -> Void)) throws {
+    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) throws {
         let synchronizer = try Synchronizer(persistenceLayer: persistence, cleaner: AccelerationPointRemovalCleaner(), serverConnection: serverConnection, handler: eventHandler)
         super.init(sensorManager: manager, persistenceLayer: persistence, synchronizer: synchronizer, eventHandler: eventHandler)
     }
+
+    // MARK: - Methods
 
     /**
      Starts the capturing process, notifying the provided handler of important events.
@@ -101,13 +104,10 @@ public class MovebisDataCapturingService: DataCapturingService {
      The provided handler is notified of its completion by receiving the event `DataCapturingEvent.serviceStarted`.
      If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.
 
-     - Parameter onFinishedCall: A handler called when the start up process has finished. You should not call other lifecycle methods, before the handler has returned.
      - Throws:
      - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()`if you want to continue.
      */
-    public func start(onFinishedCall handler: @escaping (Status) -> Void) throws {
-        return try start(inContext: .bike) { status in
-            handler(status)
-        }
+    public func start() throws {
+        return try start(inContext: .bike)
     }
 }

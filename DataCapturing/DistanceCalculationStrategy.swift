@@ -48,6 +48,7 @@ public protocol DistanceCalculationStrategy {
     func calculateDistance(from previousLocation: GeoLocationMO, to location: GeoLocationMO) -> Double
 }
 
+// MARK: - Implementation
 /**
  Calculates the distance between two locations based on the internal distance function provided by iOS.
 
@@ -56,6 +57,8 @@ public protocol DistanceCalculationStrategy {
  - Since: 2.2.0
  */
 public class DefaultDistanceCalculationStrategy: DistanceCalculationStrategy {
+
+    // MARK: - Methods
 
     public func calculateDistance(from previousLocation: CLLocation, to location: CLLocation) -> Double {
         return location.distance(from: previousLocation)

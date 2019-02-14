@@ -19,10 +19,36 @@
 
 import Foundation
 
+/**
+ Represents one measurement carried out by the Cyface SDK.
+
+ A measurement is a track of geo locations and associated accelerations.
+
+ - Remark: DO NOT confuse this class with CoreData generated model object `MeasurementMO`. Since the model object is not thread safe you should use an instance of this class if you hand data between processes.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 1.0.0
+ */
 public class MeasurementEntity {
+
+    // MARK: - Properties
+
+    /// The device wide unique identifier of this measurement.
     public let identifier: Int64
+
+    /// The context of this measurement. This is application specific and might be something like the vehicle used.
     public let measurementContext: MeasurementContext
 
+    // MARK: - Initializers
+
+    /**
+     Creates a new `MeasurementEntity` initializing all its properties to the provided values
+
+     - Parameters:
+     - identifier: The device wide unique identifier of this measurement.
+     - context: The context of this measurement. This is application specific and might be something like the vehicle used.
+     */
     public init(identifier: Int64, context: MeasurementContext) {
         self.identifier = identifier
         self.measurementContext = context

@@ -227,7 +227,7 @@ public class ServerConnection {
      - onSuccess: Called with information about the transmitted measurement if the response indicates success.
      - response: The HTTP response received.
      - Throws: If the response was not successful.
- */
+     */
     func onResponseReady(forMeasurement measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void), _ response: DataResponse<String>) throws {
         switch response.result {
         case .success:
@@ -250,7 +250,7 @@ public class ServerConnection {
 }
 
 /**
- A struct encapsulating errors used by this server connection to communicate to all the error handlers.
+ An enumeration encapsulating errors used by server connections.
  ````
  case authenticationNotSuccessful
  case notAuthenticated
@@ -258,7 +258,6 @@ public class ServerConnection {
  case missingInstallationIdentifier
  case missingMeasurementIdentifier
  case missingDeviceType
- case deviceNotRegistered
  case invalidResponse
  case unexpectedError
  ````
@@ -268,6 +267,7 @@ public class ServerConnection {
  - Since: 1.0.0
  */
 public enum ServerConnectionError: Error {
+    /// If authentication was carried out but was not successful
     case authenticationNotSuccessful
     /// Error occuring if this client tried to communicate with the server without proper authentication.
     case notAuthenticated

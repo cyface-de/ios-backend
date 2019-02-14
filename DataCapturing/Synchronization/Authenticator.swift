@@ -20,7 +20,7 @@
 import Foundation
 
 /**
-An `Authenticator` provides functionality to authenticate this app.
+An `Authenticator` provides functionality to authenticate this app on a servoer for receiving the captured data.
 
  - Author: Klemens Muthmann
  - Version: 1.0.0

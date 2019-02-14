@@ -33,13 +33,20 @@ import Foundation
  - Since: 2.0.0
  */
 public class StaticAuthenticator: Authenticator {
+
+    // MARK: - Properties
+
     /// The token used for authentication.
     public var jwtToken: String?
+
+    // MARK: - Initializers
 
     /// Default constructor needs to be publicly exposed to be able to create it.
     public init() {
         // Nothing to do here
     }
+
+    // MARK: - Methods
 
     public func authenticate(onSuccess: (String) -> Void, onFailure: (Error) -> Void) {
         if let jwtToken = jwtToken {

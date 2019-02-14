@@ -1,22 +1,46 @@
-//
-//  Synchronizer.swift
-//  DataCapturing
-//
-//  Created by Team Cyface on 12.02.19.
-//  Copyright © 2019 Cyface GmbH. All rights reserved.
-//
+/*
+ * Copyright 2019 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import os.log
 import Alamofire
 
+/**
+ An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.3.0
+ */
 public class Synchronizer {
 
     // MARK: - Properties
 
+    /// Persistent storage used to load synchronizable measurements from.
     private let persistenceLayer: PersistenceLayer
+
+    /// A strategy for cleaning the persistent storage after data synchronization.
     private let cleaner: Cleaner
+
+    /// A connection to a Cyface server used to synchronize the data to.
     private let serverConnection: ServerConnection
+
     /// Handles background synchronization of available `Measurement`s.
     let reachabilityManager: NetworkReachabilityManager
 
@@ -26,9 +50,11 @@ public class Synchronizer {
     /// Whether there is a data synchronization in progress or not.
     private var synchronizationInProgress = false
 
+    /// The measurements to synchonize in the current synchronization run.
     private var countOfMeasurementsToSynchronize = 0
 
-    private let handler: (DataCapturingEvent) -> Void
+    /// The handler to call, when synchronization for a measurement has finished.
+    private let handler: (DataCapturingEvent, Status) -> Void
 
     /**
      A flag indicating whether synchronization of data should only happen if the device is connected to a wireless local area network (Wifi).
@@ -42,12 +68,15 @@ public class Synchronizer {
     // MARK: - Initializers
 
     /**
+     Initializer that sets the initial value of all the properties and prepares the background synchronization job.
+
      - Parameters:
-     - persistenceLayer:
-     - cleaner: 
+     - persistenceLayer: Persistent storage used to load synchronizable measurements from.
+     - cleaner: A strategy for cleaning the persistent storage after data synchronization.
      - serverConnection: An authenticated connection to a Cyface API server.
+     - handler: The handler to call, when synchronization for a measurement has finished.
      */
-    init(persistenceLayer: PersistenceLayer, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent) -> Void) throws {
+    init(persistenceLayer: PersistenceLayer, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) throws {
         self.persistenceLayer = persistenceLayer
         self.cleaner = cleaner
         self.serverConnection = serverConnection
@@ -69,8 +98,11 @@ public class Synchronizer {
         }
     }
 
+    /**
+     Makes sure background synchronization is stopped when this object dies.
+     */
     deinit {
-        self.reachabilityManager.stopListening() 
+        self.reachabilityManager.stopListening()
     }
 
     // MARK: - API Methods
@@ -101,12 +133,25 @@ public class Synchronizer {
         }
     }
 
+    /**
+     Starts background synchronization as prepared in this objects initializer.
+
+     Synchronization is stopped automatically if there are no measurements left to synchronize.
+     You should restart this each time a new measurement has been finished.
+     */
     public func activate() {
         reachabilityManager.startListening()
     }
 
     // MARK: - Internal Methods
 
+    /**
+     Synchronizes the array of provided measurements if the status was successful and measurements are provided
+
+     - Parameters:
+     - synchronizableMeasurements: The synchronizable measurements to synchronize or `nil` if they have not been loaded.
+     - status: Provides the status of whether loading the measurements was successful or not.
+     */
     private func handle(synchronizableMeasurements: [MeasurementMO]?, status: Status) {
         guard let measurements = synchronizableMeasurements else {
             return
@@ -130,29 +175,44 @@ public class Synchronizer {
 
             let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: measurementContext)
 
-            handler(.synchronizationStarted(measurement: measurementEntity))
+            handler(.synchronizationStarted(measurement: measurementEntity), .success)
             serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier, context: measurementContext), onSuccess: successHandler, onFailure: failureHandler)
         }
     }
 
+    /**
+     Handles the successful synchronization of a single measurement.
+
+     - Parameter measurement: The synchronized measurement.
+     */
     private func successHandler(measurement: MeasurementEntity) {
         cleaner.clean(measurement: measurement, from: persistenceLayer) { [weak self] status in
             guard let self = self else {
                 return
             }
 
-            self.handler(.synchronizationFinished(measurement: measurement, status: status))
+            self.handler(.synchronizationFinished(measurement: measurement), status)
         }
         synchronizationFinishedHandler()
     }
 
+    /**
+     Handles the failed synchronization of a single measurement.
+
+     - Parameters:
+     - measurement: The measurement for which the synchronization failed.
+     - error: The error causing the failure.
+     */
     private func failureHandler(measurement: MeasurementEntity, error: Error) {
         os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
         os_log("Error: %@", error.localizedDescription)
-        handler(.synchronizationFinished(measurement: measurement, status: .error(error)))
+        handler(.synchronizationFinished(measurement: measurement), .error(error))
         synchronizationFinishedHandler()
     }
 
+    /**
+     Called when all measurements of the current synchronization where tried once.
+     */
     private func synchronizationFinishedHandler() {
         serverSynchronizationQueue.async { [weak self] in
             guard let self = self else {
@@ -167,6 +227,13 @@ public class Synchronizer {
     }
 }
 
+/**
+Implementations of this protocol are responsible for cleaning the database after a synchronization run.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.3.0
+ */
 public protocol Cleaner {
 
     /**
@@ -174,11 +241,19 @@ public protocol Cleaner {
 
      - Parameters:
      - measurement: The measurement to clean.
-     - handler: Called as soon as deletion has finished.
+     - from: The `PersistenceLayer` to call for cleaning the data.
+     - onFinishedCall: Called as soon as deletion has finished.
      */
     func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer, onFinishedCall handler:@escaping (Status) -> Void)
 }
 
+/**
+A cleaner removing each synchronized measurement from the database completely.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.3.0
+ */
 public class DeletionCleaner: Cleaner {
     public func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer, onFinishedCall handler:@escaping (Status) -> Void) {
         persistenceLayer.delete(measurement: measurement) { status in
@@ -187,6 +262,13 @@ public class DeletionCleaner: Cleaner {
     }
 }
 
+/**
+A cleaner removing only the accelerations from each synchronized measurement, thus keeping the track information available.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.3.0
+ */
 public class AccelerationPointRemovalCleaner: Cleaner {
 
     public func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer, onFinishedCall handler:@escaping (Status) -> Void) {
@@ -196,6 +278,18 @@ public class AccelerationPointRemovalCleaner: Cleaner {
     }
 }
 
+/**
+ Enumeration of all the errors that might happen during data synchronization (except for `ServerConnectionError` cases).
+
+ ```
+ case reachabilityNotInitialized
+ ```
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 2.3.0
+ */
 public enum SynchronizationError: Error {
+    /// If the background reachability checker was not successfully initialized.
     case reachabilityNotInitialized
 }
