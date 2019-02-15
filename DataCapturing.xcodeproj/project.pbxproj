@@ -17,7 +17,7 @@
 		3D0BDEB21FB1B951004EA25E /* DataCapturing.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0BDEA41FB1B951004EA25E /* DataCapturing.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */; };
 		3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */; };
-		3D1505EC213E9F3A002994D2 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		3D1505EC213E9F3A002994D2 /* BuildFile in Sources */ = {isa = PBXBuildFile; };
 		3D1505EE213EA68D002994D2 /* DataCapturingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1505ED213EA68D002994D2 /* DataCapturingError.swift */; };
 		3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79D2136F045003F53C9 /* BinarySerializer.swift */; };
 		3D58B7A02136F046003F53C9 /* FileSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79E2136F045003F53C9 /* FileSupport.swift */; };
@@ -269,7 +269,6 @@
 				3D0BDEA71FB1B951004EA25E /* Frameworks */,
 				3D0BDEA81FB1B951004EA25E /* Resources */,
 				3D8CC21C20A6D84F0095CCD4 /* ShellScript */,
-				571384DBA5D7654E9C69FEB9 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -365,26 +364,6 @@
 			shellPath = /bin/sh;
 			shellScript = "if which swiftlint >/dev/null; then\n    swiftlint\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi";
 		};
-		571384DBA5D7654E9C69FEB9 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-DataCapturingTests/Pods-DataCapturingTests-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
-				"${BUILT_PRODUCTS_DIR}/DataCompression/DataCompression.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DataCompression.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DataCapturingTests/Pods-DataCapturingTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		C553272A0241738860630EA8 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -428,7 +407,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D1505EC213E9F3A002994D2 /* (null) in Sources */,
+				3D1505EC213E9F3A002994D2 /* BuildFile in Sources */,
 				3DF7E10B21F60AFC007CFF83 /* Authenticator.swift in Sources */,
 				3DF7E174220F65EC007CFF83 /* Status.swift in Sources */,
 				3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */,

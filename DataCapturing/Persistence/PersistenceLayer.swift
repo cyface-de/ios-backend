@@ -155,7 +155,7 @@ public class PersistenceLayer {
      - measurement: The measurement to delete from the data storage.
      - onFinishedCall: The handler to call, when deletion has completed.
      */
-    func delete(measurement: MeasurementEntity, onFinishedCall handler: @escaping ((Status) -> Void)) {
+    public func delete(measurement: MeasurementEntity, onFinishedCall handler: @escaping ((Status) -> Void)) {
         container.performBackgroundTask { context in
             let measurementIdentifier = measurement.identifier
             do {

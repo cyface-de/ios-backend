@@ -58,6 +58,13 @@ public protocol DistanceCalculationStrategy {
  */
 public class DefaultDistanceCalculationStrategy: DistanceCalculationStrategy {
 
+    // MARK: - Initializers
+
+    /// A no-argument default consturctor.
+    public init() {
+        // Nothing to do here.
+    }
+
     // MARK: - Methods
 
     public func calculateDistance(from previousLocation: CLLocation, to location: CLLocation) -> Double {

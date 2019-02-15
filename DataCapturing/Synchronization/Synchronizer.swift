@@ -76,7 +76,7 @@ public class Synchronizer {
      - serverConnection: An authenticated connection to a Cyface API server.
      - handler: The handler to call, when synchronization for a measurement has finished.
      */
-    init(persistenceLayer: PersistenceLayer, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) throws {
+    public init(persistenceLayer: PersistenceLayer, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) throws {
         self.persistenceLayer = persistenceLayer
         self.cleaner = cleaner
         self.serverConnection = serverConnection
@@ -255,6 +255,12 @@ A cleaner removing each synchronized measurement from the database completely.
  - Since: 2.3.0
  */
 public class DeletionCleaner: Cleaner {
+
+    /// Public default constructor required to create instances of this class.
+    public init() {
+        // Nothing to do here
+    }
+
     public func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer, onFinishedCall handler:@escaping (Status) -> Void) {
         persistenceLayer.delete(measurement: measurement) { status in
             handler(status)
@@ -270,6 +276,11 @@ A cleaner removing only the accelerations from each synchronized measurement, th
  - Since: 2.3.0
  */
 public class AccelerationPointRemovalCleaner: Cleaner {
+
+    /// Public default constructor required to create instances of this class.
+    public init() {
+        // Nothing to do here
+    }
 
     public func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer, onFinishedCall handler:@escaping (Status) -> Void) {
         persistenceLayer.clean(measurement: measurement) { (status) in

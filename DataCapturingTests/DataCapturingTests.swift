@@ -38,13 +38,18 @@ class DataCapturingTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        let syncGroup = DispatchGroup()
-        syncGroup.enter()
-        persistenceLayer = PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy()) { _ in
-            syncGroup.leave()
-        }
-        guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-            fatalError("Failed to initialize persistence layer.")
+
+        do {
+            let syncGroup = DispatchGroup()
+            syncGroup.enter()
+            persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy()) { _, _ in
+                syncGroup.leave()
+            }
+            guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
+                fatalError("Failed to initialize persistence layer.")
+            }
+        } catch let error {
+            fatalError("Failed to initialize persistence layer: \(error.localizedDescription)")
         }
 
         authenticator = StaticAuthenticator()
@@ -65,7 +70,11 @@ class DataCapturingTests: XCTestCase {
         }
 
         let promise = expectation(description: "No error on synchronization!")
-        persistenceLayer.createMeasurement(at: 2, withContext: .bike) { measurementMo in
+        persistenceLayer.createMeasurement(at: 2, withContext: .bike) { measurementMo, status in
+            guard case .success = status, let measurementMo = measurementMo else {
+                XCTFail("Unable to create measurement")
+                return promise.fulfill()
+            }
 
             self.authenticator!.jwtToken = "replace me"
 

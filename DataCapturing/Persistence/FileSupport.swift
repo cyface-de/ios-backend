@@ -117,7 +117,7 @@ extension FileSupport {
  - Version: 2.0.0
  - Since: 2.0.0
  */
-struct AccelerationsFile: FileSupport {
+public struct AccelerationsFile: FileSupport {
 
     // MARK: - Properties
 
@@ -132,6 +132,11 @@ struct AccelerationsFile: FileSupport {
     /// File extension used for files containing accelerations.
     var fileExtension: String {
         return "cyfa"
+    }
+
+    /// Public initializer for external systems to access acceleration data.
+    public init() {
+        // Nothing to do here
     }
 
     // MARK: - Methods
@@ -164,7 +169,7 @@ struct AccelerationsFile: FileSupport {
      - Throws: If the file containing the accelerations was not readable.
      - Returns: An array of all the acceleration value from the provided measurement.
     */
-    func load(from measurement: MeasurementMO) throws -> [Acceleration] {
+    public func load(from measurement: MeasurementMO) throws -> [Acceleration] {
         do {
             let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
             defer {fileHandle.closeFile()}

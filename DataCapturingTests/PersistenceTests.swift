@@ -31,15 +31,29 @@ class PersistenceTests: XCTestCase {
         super.setUp()
 
         let promise = expectation(description: "Create fixture measurement!")
-        oocut = PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy()) { persistence in
-            persistence.createMeasurement(at: 10_000, withContext: .bike) { measurement in
-                self.fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
-                persistence.save(locations: [GeoLocation(latitude: 51.052181, longitude: 13.728956, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 51.051837, longitude: 13.729010, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], toMeasurement: self.fixture!) {_ in
-                    persistence.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: self.fixture!) {
-                        promise.fulfill()
+        do {
+            oocut = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy()) { persistence, status in
+                guard case .success = status, let persistence = persistence else {
+                    XCTFail("Unable to initialize persistence layer!")
+                    return promise.fulfill()
+                }
+
+                persistence.createMeasurement(at: 10_000, withContext: .bike) { measurement, status in
+                    guard case .success = status, let measurement = measurement else {
+                        XCTFail("Unable to create measurement in persistence layer!")
+                        return
+                    }
+
+                    self.fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
+                    persistence.save(locations: [GeoLocation(latitude: 51.052181, longitude: 13.728956, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 51.051837, longitude: 13.729010, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], toMeasurement: self.fixture!) {_, _ in
+                        persistence.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: self.fixture!) { _, _ in
+                            promise.fulfill()
+                        }
                     }
                 }
             }
+        } catch let error {
+            XCTFail("Unable to set up due to \(error.localizedDescription)")
         }
 
         wait(for: [promise], timeout: PersistenceTests.defaultPromiseTimeout)
@@ -47,7 +61,11 @@ class PersistenceTests: XCTestCase {
 
     override func tearDown() {
         let promise = expectation(description: "Clean database")
-        oocut.delete {
+        oocut.delete { status in
+            guard case .success = status else {
+                fatalError()
+            }
+
             promise.fulfill()
         }
         oocut = nil
@@ -61,16 +79,22 @@ class PersistenceTests: XCTestCase {
      */
     func testCreateMeasurement() {
         let testPromise = expectation(description: "Create measurements")
-        oocut.createMeasurement(at: 10_001, withContext: .bike) { secondMeasurement in
-            guard let firstMeasurement = self.fixture else {
-                fatalError()
+        oocut.createMeasurement(at: 10_001, withContext: .bike) { secondMeasurement, status in
+            guard case .success = status, let secondMeasurement = secondMeasurement, let firstMeasurement = self.fixture else {
+                XCTFail("Unable to load second measurement!")
+                return testPromise.fulfill()
             }
 
             let secondMeasurementIdentifier = secondMeasurement.identifier
             XCTAssertEqual(secondMeasurementIdentifier, firstMeasurement.identifier+1)
 
-            self.oocut!.delete(measurement: MeasurementEntity(identifier: secondMeasurement.identifier, context: MeasurementContext(rawValue: secondMeasurement.context!)!)) {
-                self.oocut!.createMeasurement(at: 10_002, withContext: .bike) { thirdMeasurement in
+            self.oocut.delete(measurement: MeasurementEntity(identifier: secondMeasurement.identifier, context: MeasurementContext(rawValue: secondMeasurement.context!)!)) { status in
+                self.oocut.createMeasurement(at: Int64(10_002), withContext: MeasurementContext.bike) { thirdMeasurement, status in
+                    guard case .success = status, let thirdMeasurement = thirdMeasurement else {
+                        XCTFail("Unable to load third measurement!")
+                        return testPromise.fulfill()
+                    }
+
                     XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
                     testPromise.fulfill()
                 }
@@ -83,14 +107,29 @@ class PersistenceTests: XCTestCase {
     func testCleanMeasurement() {
         let testPromise = expectation(description: "Clean successful")
 
-        oocut.load(measurementIdentifiedBy: fixture.identifier) { (measurementMo) in
+        oocut.load(measurementIdentifiedBy: fixture.identifier) { measurementMo, status in
+            guard case .success = status, let measurementMo = measurementMo else {
+                XCTFail("Unable to load measurement object!")
+                return testPromise.fulfill()
+            }
+
             let accelerationCount = measurementMo.accelerationsCount
             let geoLocationCount = measurementMo.geoLocations!.count
             XCTAssertEqual(accelerationCount, 3)
             XCTAssertEqual(geoLocationCount, 2)
 
-            self.oocut.clean(measurement: self.fixture) {
-                self.oocut.load(measurementIdentifiedBy: self.fixture.identifier) { measurementMo in
+            self.oocut.clean(measurement: self.fixture) { status in
+                guard case .success = status else {
+                    XCTFail("Unable to clean measurement!")
+                    return testPromise.fulfill()
+                }
+
+                self.oocut.load(measurementIdentifiedBy: self.fixture.identifier) { measurementMo, status in
+                    guard case .success = status, let measurementMo = measurementMo else {
+                        XCTFail("Unable to load measurement object!")
+                        return testPromise.fulfill()
+                    }
+
                     XCTAssertEqual(measurementMo.accelerationsCount, 0, "Accelerations have not been empty after cleaning!")
                     XCTAssertFalse(measurementMo.geoLocations!.count==0, "Geo Locations was empty after cleaning!")
                     testPromise.fulfill()
@@ -104,11 +143,26 @@ class PersistenceTests: XCTestCase {
     func testDeleteMeasurement() {
         let testPromise = expectation(description: "Succesful measurement deletion")
 
-        oocut!.countMeasurements { count in
+        oocut.countMeasurements { [weak self] count, status in
+            guard case .success = status, let count = count, let self = self else {
+                XCTFail("Unable to count measurements!")
+                return testPromise.fulfill()
+            }
+
             XCTAssertEqual(count, 1, "There should be one measurement before deleting it! There have been \(count).")
 
-            self.oocut!.delete(measurement: self.fixture) {
-                self.oocut!.countMeasurements { count in
+            self.oocut!.delete(measurement: self.fixture) { status in
+                guard case .success = status else {
+                    XCTFail("Unable to delete measurement")
+                    return testPromise.fulfill()
+                }
+
+                self.oocut.countMeasurements { count, status in
+                    guard case .success = status, let count = count else {
+                        XCTFail("Unable to count measurements")
+                        return testPromise.fulfill()
+                    }
+
                     XCTAssertEqual(count, 0, "There should be no measurement after deleting it! There where \(count).")
                     testPromise.fulfill()
                 }
@@ -127,9 +181,24 @@ class PersistenceTests: XCTestCase {
         ]
         let testPromise = expectation(description: "Merge data on the same measurement!")
 
-        oocut.save(locations: [additionalLocation], toMeasurement: fixture) { _ in
-            self.oocut!.save(accelerations: additionalAccelerations, toMeasurement: self.fixture!) {
-                self.oocut!.load(measurementIdentifiedBy: self.fixture!.identifier) { (measurement) in
+        oocut.save(locations: [additionalLocation], toMeasurement: fixture) { _, status in
+            guard case .success = status else {
+                XCTFail("Unable to save measurement!")
+                return testPromise.fulfill()
+            }
+
+            self.oocut.save(accelerations: additionalAccelerations, toMeasurement: self.fixture!) { _, status in
+                guard case .success = status else {
+                    XCTFail("Unable to save measurement!")
+                    return testPromise.fulfill()
+                }
+
+                self.oocut.load(measurementIdentifiedBy: self.fixture!.identifier) { measurement, status in
+                    guard case .success = status, let measurement = measurement else {
+                        XCTFail("Unable to load measurement!")
+                        return testPromise.fulfill()
+                    }
+
                     XCTAssertEqual(measurement.geoLocations!.count, 3)
                     XCTAssertEqual(measurement.accelerationsCount, 6)
                     testPromise.fulfill()
@@ -142,7 +211,12 @@ class PersistenceTests: XCTestCase {
 
     func testLoadMeasurement() {
         let promise = expectation(description: "Error while loading measurements!")
-        oocut!.load(measurementIdentifiedBy: fixture!.identifier) { (measurement) in
+        oocut.load(measurementIdentifiedBy: fixture!.identifier) { measurement, status in
+            guard case .success = status, let measurement = measurement else {
+                XCTFail("Unable to load measurement!")
+                return promise.fulfill()
+            }
+
             XCTAssert(measurement.identifier == self.fixture!.identifier)
             XCTAssert(measurement.context == "BICYCLE")
             XCTAssert(measurement.geoLocations!.count == 2)
@@ -157,7 +231,12 @@ class PersistenceTests: XCTestCase {
     func testLoadSynchronizableMeasurements() {
         let promisePriorClean = expectation(description: "Error while loading measurements!")
         var countOfLoadedMeasurementsPriorClean = 0
-        oocut.loadSynchronizableMeasurements { (measurements) in
+        oocut.loadSynchronizableMeasurements { measurements, status in
+            guard case .success = status, let measurements = measurements else {
+                XCTFail("Unable to load synchronizable measurements!")
+                return promisePriorClean.fulfill()
+            }
+
             countOfLoadedMeasurementsPriorClean += measurements.count
             promisePriorClean.fulfill()
         }
@@ -165,7 +244,12 @@ class PersistenceTests: XCTestCase {
         wait(for: [promisePriorClean], timeout: PersistenceTests.defaultPromiseTimeout)
 
         let promiseClean = expectation(description: "Error while cleaning fixture measurement!")
-        oocut.clean(measurement: fixture) {
+        oocut.clean(measurement: fixture) { status in
+            guard case .success = status else {
+                XCTFail("Unable to clean measurement!")
+                return promiseClean.fulfill()
+            }
+
             promiseClean.fulfill()
         }
 
@@ -173,7 +257,12 @@ class PersistenceTests: XCTestCase {
 
         let promisePostClean = expectation(description: "Error while loading measurements!")
         var countOfLoadedMeasurementsPostClean = 0
-        oocut.loadSynchronizableMeasurements { (measurements) in
+        oocut.loadSynchronizableMeasurements { measurements, status in
+            guard case .success = status, let measurements = measurements else {
+                XCTFail("Unable to load synchronizable measurements")
+                return promisePostClean.fulfill()
+            }
+
             countOfLoadedMeasurementsPostClean += measurements.count
             promisePostClean.fulfill()
         }
@@ -188,7 +277,12 @@ class PersistenceTests: XCTestCase {
         let distanceCalculationAccuracy = 0.01
 
         let testPromise = expectation(description: "Measurement was loaded.")
-        oocut.load(measurementIdentifiedBy: fixture.identifier) { measurement in
+        oocut.load(measurementIdentifiedBy: fixture.identifier) { measurement, status in
+            guard case .success = status, let measurement = measurement else {
+                XCTFail("Unable to load measurement!")
+                return testPromise.fulfill()
+            }
+
             XCTAssertEqual(measurement.trackLength, expectedTrackLength, accuracy: expectedTrackLength * distanceCalculationAccuracy, "Measurement length \(measurement.trackLength) should be within \(distanceCalculationAccuracy*100)% of \(expectedTrackLength).")
             testPromise.fulfill()
         }
@@ -202,7 +296,12 @@ class PersistenceTests: XCTestCase {
 
         let testPromise = expectation(description: "Measurement was saved.")
         let locations: [GeoLocation] = [GeoLocation(latitude: 51.051432, longitude: 13.729053, accuracy: 1.0, speed: 1.0, timestamp: 10_300)]
-        oocut.save(locations: locations, toMeasurement: fixture, onFinished: { measurement in
+        oocut.save(locations: locations, toMeasurement: fixture, onFinished: { measurement, status in
+            guard case .success = status, let measurement = measurement else {
+                XCTFail("Unable to save measurement!")
+                return testPromise.fulfill()
+            }
+
             XCTAssertEqual(measurement.trackLength, expectedTrackLength, accuracy: expectedTrackLength * distanceCalculationAccuracy, "Measurement length \(measurement.trackLength) should be within \(distanceCalculationAccuracy*100)% of \(expectedTrackLength).")
             testPromise.fulfill()
         })
