@@ -41,15 +41,29 @@ class SerializationTest: XCTestCase {
         oocut = CyfaceBinaryFormatSerializer()
 
         let measurementCreationPromise = expectation(description: "Store fixture measurement!")
-        persistenceLayer = PersistenceLayer { persistence in
-            persistence.createMeasurement(at: 1, withContext: .bike) { measurement in
+        do {
+        persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy()) { persistence, status in
+            guard case .success = status, let persistence = persistence else {
+                XCTFail("Unable to set up test since persistence layer could not be initialized!")
+                return measurementCreationPromise.fulfill()
+            }
+
+            persistence.createMeasurement(at: 1, withContext: .bike) { measurement, status in
+                guard case .success = status, let measurement = measurement else {
+                    XCTFail("Unable to create measurement!")
+                    return measurementCreationPromise.fulfill()
+                }
+
                 self.fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
-                persistence.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100)], toMeasurement: self.fixture!) { _ in
-                    persistence.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: self.fixture!) {
+                persistence.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100)], toMeasurement: self.fixture!) { _, _ in
+                    persistence.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: self.fixture!) { _, _ in
                         measurementCreationPromise.fulfill()
                     }
                 }
             }
+        }
+        } catch let error {
+            XCTFail("Unable to set up test since persistence layer could not be initialized due to \(error.localizedDescription)!")
         }
 
         waitForExpectations(timeout: 10, handler: nil)
@@ -58,7 +72,11 @@ class SerializationTest: XCTestCase {
     override func tearDown() {
         oocut = nil
         let tearDownPromise = expectation(description: "Delete the whole database.")
-        persistenceLayer.delete {
+        persistenceLayer.delete { status in
+            guard case .success = status else {
+                fatalError()
+            }
+
             tearDownPromise.fulfill()
         }
         waitForExpectations(timeout: 5, handler: nil)
@@ -71,7 +89,12 @@ class SerializationTest: XCTestCase {
     func testUncompressedSerialization() {
         var resCache: Data?
         let promise = expectation(description: "Unable to load measurement to serialize!")
-        persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
+        persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { measurement, status in
+            guard case .success = status, let measurement = measurement else {
+                XCTFail("Unable to load measurement!")
+                return promise.fulfill()
+            }
+
             do {
                 resCache = try self.oocut.serialize(measurement)
             } catch {
@@ -106,7 +129,12 @@ class SerializationTest: XCTestCase {
         var resCache: Data?
         let syncGroup = DispatchGroup()
         syncGroup.enter()
-        persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { (measurement) in
+        persistenceLayer.load(measurementIdentifiedBy: fixture.identifier) { measurement, status in
+            guard case .success = status, let measurement = measurement else {
+                XCTFail("Unable to load measurement!")
+                return syncGroup.leave()
+            }
+
             do {
                 resCache = try self.oocut.serializeCompressed(measurement)
             } catch {
@@ -146,7 +174,12 @@ class SerializationTest: XCTestCase {
 
         var timestamp: [UInt32] = []
         var accuracy: [UInt16] = []
-        persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier) { (measurement) in
+        persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier) { measurement, status in
+            guard case .success = status, let measurement = measurement else {
+                XCTFail("Unable to load measurement!")
+                return promise.fulfill()
+            }
+
             let locations = measurement.geoLocations
             do {
                 let serializedData = try self.oocut.serialize(measurement)

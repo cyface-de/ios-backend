@@ -29,10 +29,14 @@ import Alamofire
  */
 class Networking {
 
+    // MARK: - Properties
+
     /// The Alamofire session manager used to transmit data to and receive responses from a Cyface server.
     public var sessionManager: Alamofire.SessionManager
     /// An Alamofire session manaager used for background data transmission.
     public var backgroundSessionManager: Alamofire.SessionManager
+
+    // MARK: - Initializers
 
     /**
      Creates a completely initialized object of this class.

@@ -24,60 +24,6 @@ import DataCompression
 let dataFormatVersion: UInt16 = 1
 
 /**
- Enum used to specify the correct byte order. Apple uses little endian while Cyface uses big endian.
- 
- ````
- case bigEndian
- case littleEndian
- ````
- */
-enum ByteOrder {
-    /// Big endian byte order. The byte with the highest order is the first.
-    case bigEndian
-    /// little endian byte order. The byte with the lowest order is the first.
-    case littleEndian
-
-    /**
-     Converts the provided value into a byte representation.
-     
-     - Parameters:
-     - value: The value to convert to a byte representation.
-     - inOrder: The byte order to use. Apple usually uses little endian, while the Cyface binary format is currently in big endian format, because that is the standard on Android and in the backend system.
-     - Returns: An array of bytes, representing the provided value.
-     */
-    func convertToBytes<T: BinaryInteger>(_ value: T) -> [UInt8] {
-        let ret = value.extractBytes()
-        return self == .bigEndian ? ret.reversed() : ret
-    }
-
-    func convertToInt64(_ data: Data) throws -> Int64 {
-        guard data.count == 8 else {
-            throw SerializationError.invalidData
-        }
-
-        switch self {
-        case .bigEndian:
-            return Int64(bigEndian: data.withUnsafeBytes {$0.pointee})
-        case .littleEndian:
-            return Int64(bigEndian: data.withUnsafeBytes {$0.pointee})
-        }
-    }
-
-    func convertToDouble(_ data: Data) throws -> Double {
-        guard data.count == 8 else {
-            throw SerializationError.invalidData
-        }
-
-        switch self {
-        case .bigEndian:
-            return Double(bitPattern: UInt64(bigEndian: data.withUnsafeBytes {$0.pointee}))
-        case .littleEndian:
-            return Double(bitPattern: UInt64(littleEndian: data.withUnsafeBytes {$0.pointee}))
-        }
-    }
-}
-
-/**
  Protocol that must be fullfilled by a serializer to transform an object into the Cyface binary format. The associated type `Serializable` is a placeholder for the type of object to serialize and deserialize.
  
  - Author: Klemens Muthmann
@@ -107,6 +53,8 @@ protocol BinarySerializer {
 
 }
 
+// MARK: - Implementation
+
 extension BinarySerializer {
     /**
      Serializes and compresses the provided serializable and returns the serialized variant.
@@ -126,7 +74,6 @@ extension BinarySerializer {
     }
 }
 
-// MARK: - Protocol implementations
 /*
  In contrast to Apples proposals, these are not implemented as structs but classes. The reason is that none of the implementations contain a state and I see absolutely no reason to copy stateless instances around all the time. Probably slows down everything.
  */
@@ -141,6 +88,7 @@ extension BinarySerializer {
 class MeasurementSerializer: BinarySerializer {
     /// Binds the Serializeable from the `BinarySerializer` protocol to a measurement.
     typealias Serializable = MeasurementMO
+    /// The byte order used to serialize data to Cyface binary format.
     static let byteOrder = ByteOrder.bigEndian
 
     /**
@@ -304,7 +252,7 @@ class CyfaceBinaryFormatSerializer {
     /// Serializer to transform geo location objects
     let geoLocationsSerializer = GeoLocationSerializer()
     /**
-     Serializes the provided `measurement` and compresses the returned data.
+     Serializes the provided `measurement` and compresses the returned data using RFC-1951 Deflate algorithm.
      
      - Parameters:
      - measurement: The `measurement` to serialize.
@@ -330,7 +278,14 @@ class CyfaceBinaryFormatSerializer {
      */
     func serialize(_ measurement: MeasurementMO) throws -> Data {
         let serializedMeasurement = try measurementSerializer.serialize(serializable: measurement)
-        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: measurement.geoLocations?.array as! [GeoLocationMO])
+        guard let geoLocations = measurement.geoLocations else {
+            throw SerializationError.invalidData
+        }
+        guard let geoLocationsArray = geoLocations.array as? [GeoLocationMO] else {
+            throw SerializationError.invalidData
+        }
+
+        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: geoLocationsArray)
         let serializedAccelerations = try accelerationsFile.data(for: measurement)
 
         var ret = Data()
@@ -382,4 +337,58 @@ enum SerializationError: Error {
     case missingData
     /// Thrown if the data read was no valid or some corrupted Cyface binray format.
     case invalidData
+}
+
+/**
+ Enum used to specify the correct byte order. Apple uses little endian while Cyface uses big endian.
+
+ ````
+ case bigEndian
+ case littleEndian
+ ````
+ */
+enum ByteOrder {
+    /// Big endian byte order. The byte with the highest order is the first.
+    case bigEndian
+    /// little endian byte order. The byte with the lowest order is the first.
+    case littleEndian
+
+    /**
+     Converts the provided value into a byte representation.
+
+     - Parameters:
+     - value: The value to convert to a byte representation.
+     - inOrder: The byte order to use. Apple usually uses little endian, while the Cyface binary format is currently in big endian format, because that is the standard on Android and in the backend system.
+     - Returns: An array of bytes, representing the provided value.
+     */
+    func convertToBytes<T: BinaryInteger>(_ value: T) -> [UInt8] {
+        let ret = value.extractBytes()
+        return self == .bigEndian ? ret.reversed() : ret
+    }
+
+    func convertToInt64(_ data: Data) throws -> Int64 {
+        guard data.count == 8 else {
+            throw SerializationError.invalidData
+        }
+
+        switch self {
+        case .bigEndian:
+            return Int64(bigEndian: data.withUnsafeBytes {$0.pointee})
+        case .littleEndian:
+            return Int64(bigEndian: data.withUnsafeBytes {$0.pointee})
+        }
+    }
+
+    func convertToDouble(_ data: Data) throws -> Double {
+        guard data.count == 8 else {
+            throw SerializationError.invalidData
+        }
+
+        switch self {
+        case .bigEndian:
+            return Double(bitPattern: UInt64(bigEndian: data.withUnsafeBytes {$0.pointee}))
+        case .littleEndian:
+            return Double(bitPattern: UInt64(littleEndian: data.withUnsafeBytes {$0.pointee}))
+        }
+    }
 }

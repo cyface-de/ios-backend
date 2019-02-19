@@ -20,20 +20,22 @@
 import Foundation
 
 /**
-An `Authenticator` provides functionality to authenticate this app on a servoer for receiving the captured data.
+The status returned by asynchronous callback handlers.
+
+ This tells the caller, whether an asynchronous call has been successful or not and if not it provides further information about the `Error`. This is required, since an asynchronous call can not throw an `Error` to the calling thread.
+
+ ```
+ case success
+ case error(Error)
+ ```
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
- - Since: 2.0.0
+ - Since: 2.2.0
  */
-public protocol Authenticator {
-
-    /**
-     Runs the authentication and calls the appropriate function `onSuccess` or `onFailure` when finished.
-
-     - Parameters:
-     - onSuccess: A closure called and supplied with the resulting authentication token, when authentication was successful.
-     - onFailure: A closure called and supplied with the causing error, when authentication was not successful.
-    */
-    func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void)
+public enum Status {
+    /// The status returned if an asynchronous callback has finished successfully.
+    case success
+    /// The status returned if an asynchronous callback has finished with an error. Details about the error are available via the `Error` parameter.
+    case error(Error)
 }

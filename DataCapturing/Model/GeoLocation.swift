@@ -19,18 +19,49 @@
 
 import Foundation
 
+/**
+ One geo location measurement provided by the system.
+
+ Each measurement received by the `DataCapturingService` leads to the creation of one `GeoLocation` instance. They are kept in memory until saved to persistent storage.
+
+ - Remark: DO NOT confuse this class with CoreData generated model object `GeoLocationMO`. Since the model object is not thread safe you should use an instance of this class if you hand data between processes.
+ - SeeAlso: `DataCapturingService`, `PersistenceLayer.save(:[GeoLocation]:MeasurementEntity:(MeasurementMO?, Status) -> Void)`, `GeoLocationMO`
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 1.0.0
+ */
 public class GeoLocation {
 
     // MARK: - Properties
 
+    /// The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion.
     public let latitude: Double
+
+    /// The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.
     public let longitude: Double
+
+    /// The estimated accuracy of the measurement in meters.
     public let accuracy: Double
+
+    /// The speed the device was moving during the measurement in meters per second.
     public let speed: Double
+
+    /// The time the measurement happened at in milliseconds since the 1st of january 1970.
     public let timestamp: Int64
 
     // MARK: - Initializers
 
+    /**
+     The default constructor, which initializes all properties to the provided values.
+
+     - Parameters:
+     - latitude: The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion.
+     - longitude: The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.
+     - accuracy: The estimated accuracy of the measurement in meters.
+     - speed: The speed the device was moving during the measurement in meters per second.
+     - timestamp: The time the measurement happened at in milliseconds since the 1st of january 1970.
+     */
     public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: Int64) {
         self.latitude = latitude
         self.longitude = longitude
