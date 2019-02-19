@@ -133,7 +133,7 @@ public class DataCapturingService: NSObject {
         super.init()
     }
 
-    // MARK: - Methods
+    // MARK: - Public API Methods
 
     /**
      Starts the capturing process.
@@ -242,7 +242,8 @@ public class DataCapturingService: NSObject {
         return Int64(value.timeIntervalSince1970*1000.0)
     }
 
-    // TODO: Saving interval should be a parameter.
+    // MARK: - Internal Support Methods
+    
     /**
      Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
 
