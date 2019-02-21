@@ -29,6 +29,8 @@ import os.log
  */
 protocol FileSupport {
 
+    // MARK: - Properties
+
     /// The generic type of the data to store to a file.
     associatedtype Serializable
     /// The name of the file to store.
@@ -36,6 +38,7 @@ protocol FileSupport {
     /// The file extension of the file to store.
     var fileExtension: String { get }
 
+    // MARK: - Methods
     /**
      Appends data to a file for a certain measurement.
      
@@ -46,8 +49,13 @@ protocol FileSupport {
      - Returns: The local URL identifying the file to write to.
      */
     func write(serializable: Serializable, to measurement: Int64) throws -> URL
+    /**
+     Removes the file for the provided `MeasurementMO` instance.
+     */
     func remove(from measurement: MeasurementMO) throws
 }
+
+// MARK: - Implementation
 
 extension FileSupport {
 
@@ -109,7 +117,9 @@ extension FileSupport {
  - Version: 2.0.0
  - Since: 2.0.0
  */
-struct AccelerationsFile: FileSupport {
+public struct AccelerationsFile: FileSupport {
+
+    // MARK: - Properties
 
     /// A serializer to transform between `Acceleration` instances and the Cyface Binary Format.
     let serializer = AccelerationSerializer()
@@ -123,6 +133,13 @@ struct AccelerationsFile: FileSupport {
     var fileExtension: String {
         return "cyfa"
     }
+
+    /// Public initializer for external systems to access acceleration data.
+    public init() {
+        // Nothing to do here
+    }
+
+    // MARK: - Methods
 
     /**
      Writes the provided accelerations to the provided measurement.
@@ -152,7 +169,7 @@ struct AccelerationsFile: FileSupport {
      - Throws: If the file containing the accelerations was not readable.
      - Returns: An array of all the acceleration value from the provided measurement.
     */
-    func load(from measurement: MeasurementMO) throws -> [Acceleration] {
+    public func load(from measurement: MeasurementMO) throws -> [Acceleration] {
         do {
             let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
             defer {fileHandle.closeFile()}
@@ -190,6 +207,8 @@ struct AccelerationsFile: FileSupport {
  */
 struct MeasurementFile: FileSupport {
 
+    // MARK: - Properties
+
     /// The logger used by objects of this class.
     private static let logger = OSLog(subsystem: "de.cyface", category: "SDK")
 
@@ -202,6 +221,8 @@ struct MeasurementFile: FileSupport {
     var fileExtension: String {
         return "cyf"
     }
+
+    // MARK: - Methods
 
     /**
      Write a file containing a serialized measurement in Cyface Binary Format, to the local file system data storage.

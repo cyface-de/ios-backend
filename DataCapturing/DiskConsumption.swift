@@ -30,6 +30,9 @@ import Foundation
  To avoid filling up the users SD card it is advisable to delte `Measurement`s as soon as they use up too much space.
  */
 public class DiskConsumption {
+
+    // MARK: - Properties
+
     /**
      The amount of bytes currently used by the `DataCapturingService`.
      */
@@ -38,6 +41,8 @@ public class DiskConsumption {
      The amount of bytes still available for the `DataCapturingService`.
      */
     public let availableBytes: Int
+
+    // MARK: - Initializers
 
     /**
      Creates a new completely initialized `DiskConsumption` object.

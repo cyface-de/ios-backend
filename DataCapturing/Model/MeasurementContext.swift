@@ -19,7 +19,30 @@
 
 import Foundation
 
+/**
+ The context of this measurement. This is application specific and might be something like the vehicle used.
+
+ ```
+ case leisure
+ case work
+ case shopping
+ case car
+ case bike
+ case motorbike
+ ```
+ - Todo: Make this dynamic, instead of a static enum.
+ */
 public enum MeasurementContext: String {
-    case leisure = "FREIZEIT", work = "ARBEIT", shopping = "EINKAUFEN"
-    case car = "CAR", bike = "BICYCLE", motorbike = "MOTORBIKE"
+    /// The measurement was taken during leisure time.
+    case leisure = "FREIZEIT"
+    /// The measurement was taken while on the job or on the way to or from the job.
+    case work = "ARBEIT"
+    /// The measurement was taken while shopping
+    case shopping = "EINKAUFEN"
+    /// The measurement was taken driving a car.
+    case car = "CAR"
+    /// The measurement was taken riding a bicycle.
+    case bike = "BICYCLE"
+    /// The measurement was taken riding a motorbike.
+    case motorbike = "MOTORBIKE"
 }

@@ -19,17 +19,44 @@
 
 import Foundation
 
+/**
+ Represents one acceleration measurement carried out by the system.
+
+ Such a measurement happens multiple times per second. The `DataCapturingService` stores each of them in one instance of an `Acceleration` until they are saved to persistent storage.
+
+ - SeeAlso: `DataCapturingService`, `PersistenceLayer::save(:[Acceleration]:MeasurementEntity:((MeasurementMO?, Status) -> Void))`
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 1.0.0
+ */
 public class Acceleration {
 
     // MARK: - Properties
 
+    /// The time in millisceonds since the 1st of january 1970, this acceleration was captured at.
     public let timestamp: Int64
+
+    /// Acceleration in the device x direction, which is towards the right side if the homebutton faces you.
     public let x: Double
+
+    /// Acceleration in the device y direction, which is towards the top of the device if the homebutton faces you.
     public let y: Double
+
+    /// Acceleration in the device z direction, which is standing on the screen pointing towards you if the homebutton faces you.
     public let z: Double
 
     // MARK: - Initializers
 
+    /**
+     The default constructor, which initializes all the properties of an `Acceleration` instance.
+
+     - Parameters:
+     - timestamp:
+     - x: Acceleration in the device x direction, which is towards the right side if the homebutton faces you.
+     - y: Acceleration in the device y direction, which is towards the top of the device if the homebutton faces you.
+     - z: Acceleration in the device z direction, which is standing on the screen pointing towards you if the homebutton faces you.
+     */
     public init(timestamp: Int64, x: Double, y: Double, z: Double) {
         self.timestamp = timestamp
         self.x = x

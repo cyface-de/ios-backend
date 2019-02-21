@@ -169,12 +169,21 @@ public class ServerConnection {
         // Load and serialize measurement synchronously.
         let loadMeasurementGroup = DispatchGroup()
         loadMeasurementGroup.enter()
-        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurementModel in
-            defer {loadMeasurementGroup.leave()}
-            do {
-                let payloadUrl = try self.write(measurementModel)
-                request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
-            } catch {
+        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurementModel, status in
+            switch status {
+            case .success:
+                guard let measurementModel = measurementModel else {
+                    return failure(measurement, ServerConnectionError.unexpectedError)
+                }
+
+                defer {loadMeasurementGroup.leave()}
+                do {
+                    let payloadUrl = try self.write(measurementModel)
+                    request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+                } catch {
+                    failure(measurement, error)
+                }
+            case .error(let error):
                 failure(measurement, error)
             }
         }
@@ -218,7 +227,7 @@ public class ServerConnection {
      - onSuccess: Called with information about the transmitted measurement if the response indicates success.
      - response: The HTTP response received.
      - Throws: If the response was not successful.
- */
+     */
     func onResponseReady(forMeasurement measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void), _ response: DataResponse<String>) throws {
         switch response.result {
         case .success:
@@ -241,7 +250,7 @@ public class ServerConnection {
 }
 
 /**
- A struct encapsulating errors used by this server connection to communicate to all the error handlers.
+ An enumeration encapsulating errors used by server connections.
  ````
  case authenticationNotSuccessful
  case notAuthenticated
@@ -249,7 +258,6 @@ public class ServerConnection {
  case missingInstallationIdentifier
  case missingMeasurementIdentifier
  case missingDeviceType
- case deviceNotRegistered
  case invalidResponse
  case unexpectedError
  ````
@@ -259,6 +267,7 @@ public class ServerConnection {
  - Since: 1.0.0
  */
 public enum ServerConnectionError: Error {
+    /// If authentication was carried out but was not successful
     case authenticationNotSuccessful
     /// Error occuring if this client tried to communicate with the server without proper authentication.
     case notAuthenticated

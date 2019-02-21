@@ -30,6 +30,8 @@ import os.log
  */
 public class CredentialsAuthenticator: Authenticator {
 
+    // MARK: - Properties
+
     /// The logger used for objects of this class.
     private static let oslog = OSLog(subsystem: "de.cyface", category: "CredentialsAuthenticator")
     /// The username used for authentication.
@@ -38,6 +40,8 @@ public class CredentialsAuthenticator: Authenticator {
     private let password: String
     /// The location of the Cyface Collector API, used for authentication.
     private let authenticationEndpoint: URL
+
+    // MARK: - Initializers
 
     /**
      Creates a new completely initialized but not yet authenticated `Authenticator`.
@@ -53,10 +57,13 @@ public class CredentialsAuthenticator: Authenticator {
         self.authenticationEndpoint = authenticationEndpoint
     }
 
+    // MARK: - Methods
+
     public func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
         // This is hardcoded JSON. It should not fail so we may use try!
         // Does this have the potential for some kind of injection attack?
-        let jsonCredentials = try! JSONSerialization.data(withJSONObject: ["username": username, "password": password])
+        do {
+        let jsonCredentials = try JSONSerialization.data(withJSONObject: ["username": username, "password": password])
         let url = authenticationEndpoint.appendingPathComponent("login")
 
         Alamofire.upload(jsonCredentials, to: url, method: .post, headers: nil).response { response in
@@ -71,6 +78,9 @@ public class CredentialsAuthenticator: Authenticator {
             } else {
                 onFailure(ServerConnectionError.authenticationNotSuccessful)
             }
+        }
+        } catch let error {
+            onFailure(error)
         }
     }
 }

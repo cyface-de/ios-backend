@@ -1,4 +1,4 @@
-framework module DataCompression {
+module DataCompression {
   umbrella header "DataCompression-umbrella.h"
 
   export *

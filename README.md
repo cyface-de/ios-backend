@@ -37,6 +37,26 @@ It should be supplied with an appropriate JWT token prior to the first authentic
 
 The `CredentialsAuthenticator` retrieves a JWT token from the server directly and tries to refresh that token, if it has become invalid.
 
+### Getting the length of a track
+
+The Cyface SDK for iOS is capable of providing the length of a track in meters.
+To get access to this value you should either use the instance of `PersistenceLayer` that you have created, for the `DataCapturingService` or create a new one on demand.
+Using that `PersistenceLayer` you can access the track length by loading a measurement, which looks similar to:
+
+```swift
+var trackLength:Double
+persistenceLayer.load(measurementIdentifiedBy: identifier) { measurement, status in
+    guard case .success = status, let measurement = measurement else {
+        fatalError()     
+    }
+
+    trackLength = measurement.trackLength
+}
+```
+
+Notice that this call is asynchronous.
+If a synchronous call is required use for example a [`DispatchGroup`](https://developer.apple.com/documentation/dispatch/dispatchgroup).
+
 ## Building from Source
 Contains swiftlint
 See: https://github.com/realm/SwiftLint
