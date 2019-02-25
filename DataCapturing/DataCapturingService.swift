@@ -624,4 +624,9 @@ extension DataCapturingService: CLLocationManagerDelegate {
             }
         }
     }
+
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        debugPrint("Unable to receive location! Error: \(error.localizedDescription)")
+        os_log("Unable to receive location! Error: %{public}@", log: OSLog.default, type: .error, error.localizedDescription)
+    }
 }
