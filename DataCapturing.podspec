@@ -25,7 +25,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'DataCapturing'
-  s.version          = '1.2.0'
+  s.version          = '3.0.0'
   s.summary          = 'Framework used to continuously capture data from all available sensors on an iOS device and transmit it to a Cyface-API compatible server.'
 
 # This description is used to generate tags and improve search results.
@@ -47,7 +47,7 @@ This framework can be included by your App if you are going to capture sensor da
 
   s.platform	     = :ios, '11.0'
 
-  s.source_files = 'DataCapturing/*.swift','DataCapturing/Model/*.swift','DataCapturing/Cyface/*.swift','DataCapturing/Movebis/*.swift','DataCapturing/Persistence/*.swift'
+  s.source_files = 'DataCapturing/*.swift','DataCapturing/Model/*.swift','DataCapturing/Model/CyfaceModel.xcdatamodeld','DataCapturing/Movebis/*.swift','DataCapturing/Persistence/*.swift','DataCapturing/Synchronization/*.swift'
   s.resources = 'DataCapturing/Model/CyfaceModel.xcdatamodeld'
   
   # s.resource_bundles = {

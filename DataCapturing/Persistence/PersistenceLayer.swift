@@ -28,7 +28,7 @@ import CoreData
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 3.0.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
@@ -121,7 +121,7 @@ public class PersistenceLayer {
      *    - withContext: The measurement context the new measurement is created in.
      *    - onFinishedCall: Handler that is called with the new measurement as parameter when the measurement has been stored in the database.
      */
-    public func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext, onFinishedCall handler: @escaping ((MeasurementMO?, Status) -> Void)) {
+    func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext, onFinishedCall handler: @escaping ((MeasurementMO?, Status) -> Void)) {
         container.performBackgroundTask { context in
             // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
             var identifier = self.nextIdentifier
@@ -146,6 +146,22 @@ public class PersistenceLayer {
                 handler(nil, .error(error))
             }
         }
+    }
+
+    func appendNewTrack(to measurement: MeasurementMO, onFinishedCall handler: @escaping (Status) -> Void) {
+        let context = container.viewContext
+        //container.performBackgroundTask { context in
+        let measurementOnCurrentContext = context.object(with: measurement.objectID) as! MeasurementMO
+        if let trackDescription = NSEntityDescription.entity(forEntityName: "Track", in: context) {
+            let track = Track.init(entity: trackDescription, insertInto: context)
+            measurementOnCurrentContext.addToTracks(track)
+
+            context.saveRecursively()
+            handler(.success)
+        } else {
+            handler(.error(PersistenceError.trackNotCreatable))
+        }
+        //}
     }
 
     /**
@@ -232,110 +248,86 @@ public class PersistenceLayer {
     }
 
     /**
-     Stores the provided `location` and `accelerations` to the provided measurement.
+     Stores the provided `locations` to the provided track in the measurement.
      
      - Parameters:
-     - locations: An array of `GeoLocation` instances to store.
-     - toMeasurement: The measurement to store the `location` and `accelerations` to.
+     - locations: An array of `GeoLocation` instances, ordered by timestamp to store in the database.
+     - to: The track to save the `GeoLocation` instances into.
+     - in: The measurement to store the `location` and `accelerations` to.
      - onFinished: The handler to call as soon as the database operation has finished.
      */
-    func save(locations: [GeoLocation], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping (MeasurementMO?, Status) -> Void) {
+    func save(locations: [GeoLocation], to track: Track, in measurement: MeasurementMO, onFinished handler: @escaping (Status) -> Void) {
         container.performBackgroundTask { context in
-            let measurementIdentifier = measurement.identifier
+            guard let locationDescription = NSEntityDescription.entity(forEntityName: "GeoLocation", in: context) else {
+                return handler(Status.error(PersistenceError.geoLocationNotCreatable))
+            }
+
             do {
-                guard let measurement = try self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
-                    return handler(nil, .error(PersistenceError.measurementNotLoadable(measurementIdentifier)))
+                let track = context.object(with: track.objectID) as! Track
+                let measurement = context.object(with: measurement.objectID) as! MeasurementMO
+
+                let geoLocationFetchRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
+                geoLocationFetchRequest.fetchLimit = 1
+                let maxTimestampInTrackPredicate = NSPredicate(format: "timestamp==max(timestamp) && track==%@", track)
+                geoLocationFetchRequest.predicate = maxTimestampInTrackPredicate
+                var lastCapturedLocation = try geoLocationFetchRequest.execute().first
+                var distance = 0.0
+
+                locations.forEach { location in
+
+                    let dbLocation = GeoLocationMO.init(entity: locationDescription, insertInto: context)
+                    dbLocation.lat = location.latitude
+                    dbLocation.lon = location.longitude
+                    dbLocation.speed = location.speed
+                    dbLocation.timestamp = location.timestamp
+                    dbLocation.accuracy = location.accuracy
+                    track.addToLocations(dbLocation)
+
+                    if let lastCapturedLocation = lastCapturedLocation {
+                        let delta = self.distanceCalculator.calculateDistance(from: lastCapturedLocation, to: dbLocation)
+                        distance += delta
+                    }
+                    lastCapturedLocation = dbLocation
                 }
 
-                try self.internalSave(locations: locations, toMeasurement: measurement, onContext: context)
+                measurement.trackLength += distance
+
                 context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
                 context.saveRecursively()
                 context.refresh(measurement, mergeChanges: true)
-                handler(measurement, .success)
+                handler(.success)
             } catch let error {
-                handler(nil, .error(error))
+                handler(.error(error))
             }
         }
     }
 
     /**
-     Saves the provided `GeoLocation` instances to the data storage. This is an internal save method that should only run on a `PersistenceContainer` background thread.
-
-     This method also increases the track length based on the added `GeoLocation` objects.
-
-     - Parameters:
-     - locations: The `GeoLocation` instances to save.
-     - toMeasurement: The measurement to save to.
-     - onContext: The `NSManagedObjectContext` to save the data to.
-     */
-    private func internalSave(locations: [GeoLocation], toMeasurement measurement: MeasurementMO, onContext context: NSManagedObjectContext) throws {
-        let geoLocationFetchRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
-        geoLocationFetchRequest.fetchLimit = 1
-        let maxTimestampInMeaurementPredicate = NSPredicate(format: "timestamp==max(timestamp) && measurement==%@", measurement)
-        geoLocationFetchRequest.predicate = maxTimestampInMeaurementPredicate
-        var lastCapturedLocation = try geoLocationFetchRequest.execute().first
-        var distance = 0.0
-
-        locations.forEach { location in
-            let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
-            dbLocation.lat = location.latitude
-            dbLocation.lon = location.longitude
-            dbLocation.speed = location.speed
-            dbLocation.timestamp = location.timestamp
-            dbLocation.accuracy = location.accuracy
-            measurement.addToGeoLocations(dbLocation)
-
-            if let lastCapturedLocation = lastCapturedLocation {
-                let delta = distanceCalculator.calculateDistance(from: lastCapturedLocation, to: dbLocation)
-                distance += delta
-            }
-            lastCapturedLocation = dbLocation
-        }
-
-        measurement.trackLength += distance
-    }
-
-    /**
-     Stores the provided `location` and `accelerations` to the provided measurement.
+     Stores the provided `accelerations` to the provided measurement.
 
      - Parameters:
      - accelerations: An array of `Acceleration` instances to store.
-     - toMeasurement: The measurement to store the `location` and `accelerations` to.
-     - onFinished: The handler to call as soon as the database operation has finished.
+     - in: The measurement to store the `accelerations` to.
+     - onFinished: The handler to call as soon as the persistence operation has finished.
      - Throws: If accessing the local file system failes for some reason and thus the `Acceleration` instances can not be saved.
      */
-    func save(accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping ((MeasurementMO?, Status) -> Void)) {
+    func save(accelerations: [Acceleration], in measurement: MeasurementMO, onFinished handler: @escaping ((Status) -> Void)) {
         container.performBackgroundTask { context in
             do {
-                let measurementIdentifier = measurement.identifier
-                guard let measurement = try self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
-                    throw PersistenceError.dataNotLoadable(measurement: measurementIdentifier)
-                }
+                let measurement = context.object(with: measurement.objectID) as! MeasurementMO
 
-                try self.internalSave(accelerations: accelerations, toMeasurement: measurement)
+                let accelerationsFile = AccelerationsFile()
+                _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
                 measurement.accelerationsCount = measurement.accelerationsCount.advanced(by: accelerations.count)
 
                 context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
                 context.saveRecursively()
                 context.refresh(measurement, mergeChanges: true)
-                handler(measurement, .success)
+                handler(.success)
             } catch let error {
-                handler(nil, .error(error))
+                handler(.error(error))
             }
         }
-    }
-
-    /**
-     Saves the provided `Acceleration` instances to the data storage. This is an internal save method that should only run on a `PersistenceContainer` background thread.
-
-     - Parameters:
-     - accelerations: The `GeoLocation` instances to save.
-     - toMeasurement: The measurement to save to.
-     - Throws: If accessing the local file system failes for some reason and thus the `Acceleration` instances can not be saved.
-     */
-    private func internalSave(accelerations: [Acceleration], toMeasurement measurement: MeasurementMO) throws {
-        let accelerationsFile = AccelerationsFile()
-        _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
     }
 
     // MARK: - Database Read Only Methods
@@ -436,6 +428,38 @@ public class PersistenceLayer {
             }
         }
     }
+
+    // MARK: - Support Methods
+
+    /**
+     Collects all geo locations from all tracks of a measurement and merges them to a single array.
+
+     - Parameter from: The measurement to collect the geo locations from.
+     - Throws:
+     - `SerializationError.missingData`: If no track data was found.
+     - `SerializationError.invalidData`: If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+     */
+    public static func collectGeoLocations(from measurement: MeasurementMO) throws -> [GeoLocationMO] {
+        guard let tracks = measurement.tracks else {
+            throw SerializationError.missingData
+        }
+
+        var ret = [GeoLocationMO]()
+
+        for track in tracks {
+            guard let typedTrack = track as? Track, let locations = typedTrack.locations else {
+                throw SerializationError.invalidData
+            }
+
+            guard let typedLocations = locations.array as? [GeoLocationMO] else {
+                throw SerializationError.invalidData
+            }
+
+            ret.append(contentsOf: typedLocations)
+        }
+
+        return ret
+    }
 }
 
 /**
@@ -477,10 +501,12 @@ extension NSManagedObjectContext {
  case measurementNotLoadable
  case measurementsNotLoadable
  case dataNotLoadable
+ case trackNotCreatable
+ case geoLocationNotCreatable
  ```
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 2.3.0
  */
 enum PersistenceError: Error {
@@ -496,4 +522,8 @@ enum PersistenceError: Error {
     case measurementsNotLoadable
     /// If some data belonging to a measurement could not be loaded.
     case dataNotLoadable(measurement: Int64)
+    /// For some reason creating a track has failed.
+    case trackNotCreatable
+    /// For some reason it is impossible to create a new geo location object.
+    case geoLocationNotCreatable
 }

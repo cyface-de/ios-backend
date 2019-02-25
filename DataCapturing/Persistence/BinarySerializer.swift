@@ -82,7 +82,7 @@ extension BinarySerializer {
  A serializer for measurements into the Cyface binary format represenation.
  
  - Author: Klemens Muthmann
- - Since: 2.0.0
+ - Since: 2.0.1
  - Version: 1.0.0
  */
 class MeasurementSerializer: BinarySerializer {
@@ -100,11 +100,12 @@ class MeasurementSerializer: BinarySerializer {
      - 4 Bytes: Count of directions (not used on iOS yet)
      
      - Parameter measurement: The measurement to serialize.
+     - Throws:
+     - `SerializationError.missingData`: If no track data was found.
+     - `SerializationError.invalidData`: If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
      */
     func serialize(serializable measurement: MeasurementMO) throws -> Data {
-        guard let geoLocations = measurement.geoLocations else {
-            throw SerializationError.missingData
-        }
+        let geoLocations = try PersistenceLayer.collectGeoLocations(from: measurement)
 
         var dataArray = [UInt8]()
         // add header
@@ -241,7 +242,7 @@ class GeoLocationSerializer: BinarySerializer {
  Transforms measurement data into the Cyface binary format used for transmission via the network.
  
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 1.0.0
  */
 class CyfaceBinaryFormatSerializer {
@@ -273,19 +274,14 @@ class CyfaceBinaryFormatSerializer {
      Serializes the provided measurement into the Cyface binary format.
      
      - Parameter measurement: The `measurement` to serialize.
-     - Throws: If accelerations file was not accessible.
+     - Throws: If accelerations file was not accessible or database was inconsistent.
      - Returns: The serialized measurement in Cyface binary format.
      */
     func serialize(_ measurement: MeasurementMO) throws -> Data {
         let serializedMeasurement = try measurementSerializer.serialize(serializable: measurement)
-        guard let geoLocations = measurement.geoLocations else {
-            throw SerializationError.invalidData
-        }
-        guard let geoLocationsArray = geoLocations.array as? [GeoLocationMO] else {
-            throw SerializationError.invalidData
-        }
+        let geoLocations = try PersistenceLayer.collectGeoLocations(from: measurement)
 
-        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: geoLocationsArray)
+        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: geoLocations)
         let serializedAccelerations = try accelerationsFile.data(for: measurement)
 
         var ret = Data()

@@ -60,11 +60,25 @@ public class MovebisDataCapturingService: DataCapturingService {
      */
     private lazy var preCapturingLocationManager: CLLocationManager = {
         let manager = CLLocationManager()
+
+        let authorizationStatus = CLLocationManager.authorizationStatus()
+        if authorizationStatus != .authorizedWhenInUse && authorizationStatus != .authorizedAlways {
+            // User has not authorized access to location information.
+            debugPrint("Not Authorized!")
+            return manager
+        }
+        // Do not start services that aren't available.
+        if !CLLocationManager.locationServicesEnabled() {
+            // Location services is not available.
+            debugPrint("Not available!")
+            return manager
+        }
+
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
-        manager.allowsBackgroundLocationUpdates = false
+        manager.allowsBackgroundLocationUpdates = true
         // The following might shut off updates according to documentation in certain cases.
         // Do we have to start it again?
-        manager.activityType = .otherNavigation
+        manager.activityType = .other
         manager.showsBackgroundLocationIndicator = false
         manager.distanceFilter = kCLDistanceFilterNone
         // Ask the user for its ok with data tracking.
