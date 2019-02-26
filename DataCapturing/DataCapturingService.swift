@@ -92,7 +92,7 @@ public class DataCapturingService: NSObject {
     private let savingInterval: TimeInterval
 
     /// A timer called in regular intervals to save the captured data to the underlying database.
-    private var backgroundSynchronizationTimer: Timer!
+    private var backgroundSynchronizationTimer: DispatchSourceTimer!
 
     /// An optional API that is responsible for synchronizing data with a Cyface server.
     public var synchronizer: Synchronizer?
@@ -265,7 +265,7 @@ public class DataCapturingService: NSObject {
             }
 
             self.persistenceLayer.appendNewTrack(to: measurement, onFinishedCall: { status in
-                DispatchQueue.main.async {
+                DispatchQueue.main.sync {
                     self.locationManager.delegate = self
                     self.locationManager.startUpdatingLocation()
                 }
@@ -292,7 +292,10 @@ public class DataCapturingService: NSObject {
                     }
                 }
 
-                self.backgroundSynchronizationTimer = Timer.scheduledTimer(withTimeInterval: time, repeats: true, block: self.saveCapturedData)
+                self.backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.cacheSynchronizationQueue)
+                self.backgroundSynchronizationTimer.setEventHandler(handler: self.saveCapturedData)
+                self.backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
+                self.backgroundSynchronizationTimer.resume()
 
                 self.isRunning = true
             })
@@ -311,18 +314,18 @@ public class DataCapturingService: NSObject {
         motionManager.stopAccelerometerUpdates()
         locationManager.stopUpdatingLocation()
         locationManager.delegate = nil
-        backgroundSynchronizationTimer.fire()
-        backgroundSynchronizationTimer.invalidate()
+        backgroundSynchronizationTimer.cancel()
+        saveCapturedData()
         isRunning = false
 
     }
 
     /**
-     Method called by the `backgroundSynchronizationTimer` on each invocation. This method saves all data from `accelerationsCache` and from `locationsCache` to the underlying data storage (database and file system) and cleans both caches.
+     Method called by the `backgroundSynchronizationTimer` on each invocation.
 
-     - Parameter timer: The timer used to call this method.
+     This method saves all data from `accelerationsCache` and from `locationsCache` to the underlying data storage (database and file system) and cleans both caches.
      */
-    func saveCapturedData(timer: Timer) {
+    func saveCapturedData() {
         guard let measurement = currentMeasurement else {
             // Using a fatal error here since we can not provide a callback or throw an error. If this leads to App crashes a soft catch of this error is possible, by just printing a warning or something similar.
             fatalError("No current measurement to save the location to! Data capturing impossible.")
