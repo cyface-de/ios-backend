@@ -32,7 +32,7 @@ import os.log
  This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
 
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 4.0.0
  - Since: 1.0.0
  */
 public class ServerConnection {
@@ -40,7 +40,7 @@ public class ServerConnection {
     // MARK: - Properties
 
     /// The logger used for objects of this class.
-    private static let osLog = OSLog(subsystem: "de.cyface", category: "ServerConnection")
+    private static let osLog = OSLog(subsystem: "ServerConnection", category: "de.cyface")
 
     /// An `URL` used to upload data to. There should be a server available at that location.
     public var apiURL: URL
@@ -79,7 +79,7 @@ public class ServerConnection {
      Creates a new server connection to a certain endpoint, loading data from the provided `persistenceLayer`.
 
      - Parameters:
-     - url: The URL endpoint to upload data to.
+     - apiURL: The URL endpoint to upload data to.
      - persistenceLayer: The layer used to load the data to upload from.
      - authenticator: An object used to authenticate this app with a Cyface Collector server.
      */
@@ -96,8 +96,8 @@ public class ServerConnection {
 
      - Parameters:
      - measurement: The measurement to synchronize.
-     - success: The handler to call, when synchronization has succeeded. This handler is provided with the synchronized `MeasurementEntity`.
-     - failure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The `MeasurementEntity` is the same as the one provided as parameter to this method.
+     - onSuccess: The handler to call, when synchronization has succeeded. This handler is provided with the synchronized `MeasurementEntity`.
+     - onFailure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The `MeasurementEntity` is the same as the one provided as parameter to this method.
      */
     public func sync(measurement: MeasurementEntity, onSuccess success: @escaping ((MeasurementEntity) -> Void) = {_ in }, onFailure failure: @escaping ((MeasurementEntity, Error) -> Void) = {_, _ in }) {
 
@@ -127,14 +127,14 @@ public class ServerConnection {
 
         let encode: ((MultipartFormData) -> Void) = {data in
             do {
-                try self.create(request: data, forMeasurement: measurement, onFailure: onFailure)
-            } catch {
-                onFailure(measurement, error)
+                try self.create(request: data, for: measurement)
+            } catch let error {
+                os_log("Encoding data failed! Error %{PUBLIC}@", log: ServerConnection.osLog, type: .error, error.localizedDescription)
             }
         }
         networking.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
             do {
-                try self.onEncodingComplete(forMeasurement: measurement, withResult: encodingResult, onSuccess: onSuccess, onFailure: onFailure)
+                try self.onEncodingComplete(for: measurement, with: encodingResult, onSuccess: onSuccess, onFailure: onFailure)
             } catch {
                 onFailure(measurement, error)
             }
@@ -146,11 +146,10 @@ public class ServerConnection {
 
      - Parameters:
      - request: The request to fill with data.
-     - forMeasurement: The measurement to transmit.
-     - onFailure: A failure handler called with information about the failed measurement and the error, if request creation was not successful
+     - for: The measurement to transmit.
      - Throws: If serializing the data to transmit was not successful.
- */
-    func create(request: MultipartFormData, forMeasurement measurement: MeasurementEntity, onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
+     */
+    func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
             throw ServerConnectionError.missingInstallationIdentifier
         }
@@ -167,30 +166,11 @@ public class ServerConnection {
         request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
 
         // Load and serialize measurement synchronously.
-        let loadMeasurementGroup = DispatchGroup()
-        loadMeasurementGroup.enter()
-        persistenceLayer.load(measurementIdentifiedBy: measurement.identifier) { measurementModel, status in
-            switch status {
-            case .success:
-                guard let measurementModel = measurementModel else {
-                    return failure(measurement, ServerConnectionError.unexpectedError)
-                }
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
 
-                defer {loadMeasurementGroup.leave()}
-                do {
-                    let payloadUrl = try self.write(measurementModel)
-                    request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
-                } catch {
-                    failure(measurement, error)
-                }
-            case .error(let error):
-                failure(measurement, error)
-            }
-        }
-
-        guard loadMeasurementGroup.wait(timeout: DispatchTime.now() + .seconds(120)) == DispatchTimeoutResult.success else {
-            throw ServerConnectionError.serializationTimeout
-        }
+        let payloadUrl = try write(measurement)
+        request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
     }
 
     /**
@@ -198,18 +178,18 @@ public class ServerConnection {
      Starts the actual data transmission if encoding was successful.
 
      - Parameters:
-     - forMeasurement: The measurement that was encoded into a transmission request
-     - withResult: The encoded measurement.
+     - for: The measurement that was encoded into a transmission request
+     - with: The encoded measurement.
      - onSuccess: Called if data transmission was successful. Gets the transmitted measurement as a parameter.
      - onFailure: Called if data transmission failed for some reason. Gets the transmitted measurement and information about the error.
     */
-    func onEncodingComplete(forMeasurement measurement: MeasurementEntity, withResult result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
+    func onEncodingComplete(for measurement: MeasurementEntity, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
         switch result {
         case .success(let upload, _, _):
             // Two status codes are acceptable. A 201 is a successful upload, while a 409 is a conflict. In both cases the measurement should be marked as uploaded successfully.
             upload.validate(statusCode: [201, 409]).responseString { response in
                 do {
-                    try self.onResponseReady(forMeasurement: measurement, onSuccess: success, response)
+                    try self.onResponseReady(for: measurement, onSuccess: success, response)
                 } catch {
                     failure(measurement, error)
                 }
@@ -223,12 +203,12 @@ public class ServerConnection {
      A handler for the result from a data transmission call.
 
      - Parameters:
-     - forMeasurement: The measurement that was transmitted.
+     - for: The measurement that was transmitted.
      - onSuccess: Called with information about the transmitted measurement if the response indicates success.
      - response: The HTTP response received.
      - Throws: If the response was not successful.
      */
-    func onResponseReady(forMeasurement measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void), _ response: DataResponse<String>) throws {
+    func onResponseReady(for measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void), _ response: DataResponse<String>) throws {
         switch response.result {
         case .success:
             success(measurement)

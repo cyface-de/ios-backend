@@ -58,7 +58,7 @@ public enum DataCapturingEvent {
     /**
      Used to notify the client application of a successful start of the `DataCapturingService`.
      */
-    case serviceStarted(measurement: MeasurementMO?)
+    case serviceStarted(measurement: Int64?)
     /**
      Occurs if the `DataCapturingService` has synchronized a measurement successfully
      and cleaned the local copies.

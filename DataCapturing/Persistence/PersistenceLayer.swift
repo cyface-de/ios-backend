@@ -70,6 +70,8 @@ public class PersistenceLayer {
     /// Used to update a measurements length, each time new locations are added.
     private let distanceCalculator: DistanceCalculationStrategy
 
+    public var context: NSManagedObjectContext?
+
     // MARK: - Initializers
 
     /**
@@ -80,7 +82,7 @@ public class PersistenceLayer {
      - onCompletionHandler: Called when the persistence layer has successfully finished initialization.
      - Throws: A `PersistenceError.modelNotLoabable` if the model is not loadable
      */
-    public init(withDistanceCalculator: DistanceCalculationStrategy, onCompletionHandler: @escaping (PersistenceLayer?, Status) -> Void) throws {
+    public init(withDistanceCalculator: DistanceCalculationStrategy) throws {
         self.distanceCalculator = withDistanceCalculator
         /*
          The following code is necessary to load the CyfaceModel from the DataCapturing framework.
@@ -102,13 +104,8 @@ public class PersistenceLayer {
 
         container = NSPersistentContainer(name: momdName, managedObjectModel: mom)
 
-        container.loadPersistentStores { _, error in
-            if let error = error {
-                onCompletionHandler(nil, .error(error))
-            } else {
-                onCompletionHandler(self, .success)
-            }
-        }
+        // This actually runs synchronously if the `shouldAddStoreAsynchronously` of `NSPersistentStoreDescription` is not set to `true`.
+        container.loadPersistentStores(completionHandler: {_, _ in})
     }
 
     // MARK: - Database Writing Methods
@@ -121,45 +118,43 @@ public class PersistenceLayer {
      *    - withContext: The measurement context the new measurement is created in.
      *    - onFinishedCall: Handler that is called with the new measurement as parameter when the measurement has been stored in the database.
      */
-    func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext, onFinishedCall handler: @escaping ((MeasurementMO?, Status) -> Void)) {
-        container.performBackgroundTask { context in
-            // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
-            var identifier = self.nextIdentifier
-            do {
-                while try self.load(measurementIdentifiedBy: identifier, from: context) != nil {
-                    identifier = self.nextIdentifier
-                }
+    func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext) throws -> MeasurementMO {
+        let context = try getContext()
+        // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
+        var identifier = self.nextIdentifier
+        while try load(measurementIdentifiedBy: identifier, from: context) != nil {
+            identifier = self.nextIdentifier
+        }
 
-                if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
-                    let measurement = MeasurementMO(entity: description, insertInto: context)
-                    measurement.timestamp = timestamp
-                    measurement.identifier = identifier
-                    measurement.synchronized = false
-                    measurement.context = mContext.rawValue
-                    context.saveRecursively()
+        if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
+            let measurement = MeasurementMO(entity: description, insertInto: context)
+            measurement.timestamp = timestamp
+            measurement.identifier = identifier
+            measurement.synchronized = false
+            measurement.context = mContext.rawValue
+            context.saveRecursively()
 
-                    handler(measurement, .success)
-                } else {
-                    handler(nil, .error(PersistenceError.measurementNotCreatable(timestamp)))
-                }
-            } catch let error {
-                handler(nil, .error(error))
-            }
+            context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+            context.refresh(measurement, mergeChanges: true)
+            return measurement
+        } else {
+            throw PersistenceError.measurementNotCreatable(timestamp)
         }
     }
 
-    func appendNewTrack(to measurement: MeasurementMO, onFinishedCall handler: @escaping (Status) -> Void) {
-        let context = container.viewContext
+    func appendNewTrack(to measurement: MeasurementMO) throws {
+        let context = try getContext()
         //container.performBackgroundTask { context in
-        let measurementOnCurrentContext = context.object(with: measurement.objectID) as! MeasurementMO
+        let measurementOnCurrentContext = try migrate(measurement: measurement, to: context)
         if let trackDescription = NSEntityDescription.entity(forEntityName: "Track", in: context) {
             let track = Track.init(entity: trackDescription, insertInto: context)
             measurementOnCurrentContext.addToTracks(track)
 
             context.saveRecursively()
-            handler(.success)
+            context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+            context.refresh(measurement, mergeChanges: true)
         } else {
-            handler(.error(PersistenceError.trackNotCreatable))
+            throw PersistenceError.trackNotCreatable
         }
         //}
     }
@@ -171,24 +166,17 @@ public class PersistenceLayer {
      - measurement: The measurement to delete from the data storage.
      - onFinishedCall: The handler to call, when deletion has completed.
      */
-    public func delete(measurement: MeasurementEntity, onFinishedCall handler: @escaping ((Status) -> Void)) {
-        container.performBackgroundTask { context in
-            let measurementIdentifier = measurement.identifier
-            do {
-                guard let measurement = try self.load(measurementIdentifiedBy: measurement.identifier, from: context) else {
-                    handler(.error(PersistenceError.measurementNotLoadable(measurementIdentifier)))
-                    return
-                }
-
-                let accelerationFile = AccelerationsFile()
-                try accelerationFile.remove(from: measurement)
-                context.delete(measurement)
-                context.saveRecursively()
-                handler(.success)
-            } catch let error {
-                handler(.error(error))
-            }
+    public func delete(measurement: MeasurementEntity) throws {
+        let context = try getContext()
+        let measurementIdentifier = measurement.identifier
+        guard let measurement = try load(measurementIdentifiedBy: measurement.identifier, from: context) else {
+            throw PersistenceError.measurementNotLoadable(measurementIdentifier)
         }
+
+        let accelerationFile = AccelerationsFile()
+        try accelerationFile.remove(from: measurement)
+        context.delete(measurement)
+        context.saveRecursively()
     }
 
     /**
@@ -196,28 +184,15 @@ public class PersistenceLayer {
      
      - Parameter onFinishedCall: A handler called after deletion is complete.
      */
-    func delete(onFinishedCall handler: @escaping (Status) -> Void) {
-        container.performBackgroundTask { context in
-            self.loadMeasurements(onFinishedCall: { measurements, status in
-                guard case .success = status else {
-                    return handler(status)
-                }
-                do {
-                    guard let measurements = measurements else {
-                        return handler(.error(PersistenceError.measurementsNotLoadable))
-                    }
+    func delete() throws {
+        let context = try getContext()
+        let measurements = try loadMeasurements()
 
-                    for measurement in measurements {
-                        let object = try context.existingObject(with: measurement.objectID)
-                        context.delete(object)
-                    }
-                    context.saveRecursively()
-                    handler(.success)
-                } catch let error {
-                    handler(.error(error))
-                }
-            })
+        for measurement in measurements {
+            let object = try context.existingObject(with: measurement.objectID)
+            context.delete(object)
         }
+        context.saveRecursively()
     }
 
     /**
@@ -226,80 +201,70 @@ public class PersistenceLayer {
      - Parameters:
      - measurement: The measurement to strip of accelerations
      */
-    func clean(measurement: MeasurementEntity, whenFinishedCall finishedHandler: @escaping (Status) -> Void) {
-        container.performBackgroundTask { context in
-            do {
-                let measurementIdentifier = measurement.identifier
-                guard let measurement = try self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
-                    throw PersistenceError.dataNotLoadable(measurement: measurementIdentifier)
-                }
-
-                measurement.synchronized = true
-                measurement.accelerationsCount = 0
-                let accelerationsFile = AccelerationsFile()
-                try accelerationsFile.remove(from: measurement)
-
-                context.saveRecursively()
-                finishedHandler(.success)
-            } catch let error {
-                finishedHandler(.error(error))
-            }
+    func clean(measurement: MeasurementEntity) throws {
+        let context = try getContext()
+        let measurementIdentifier = measurement.identifier
+        guard let measurement = try load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
+            throw PersistenceError.dataNotLoadable(measurement: measurementIdentifier)
         }
+
+        measurement.synchronized = true
+        measurement.accelerationsCount = 0
+        let accelerationsFile = AccelerationsFile()
+        try accelerationsFile.remove(from: measurement)
+
+        context.saveRecursively()
     }
 
     /**
-     Stores the provided `locations` to the provided track in the measurement.
-     
+     Stores the provided `locations` to the most recent track in the measurement.
+
      - Parameters:
      - locations: An array of `GeoLocation` instances, ordered by timestamp to store in the database.
-     - to: The track to save the `GeoLocation` instances into.
      - in: The measurement to store the `location` and `accelerations` to.
      - onFinished: The handler to call as soon as the database operation has finished.
      */
-    func save(locations: [GeoLocation], to track: Track, in measurement: MeasurementMO, onFinished handler: @escaping (Status) -> Void) {
-        container.performBackgroundTask { context in
-            guard let locationDescription = NSEntityDescription.entity(forEntityName: "GeoLocation", in: context) else {
-                return handler(Status.error(PersistenceError.geoLocationNotCreatable))
-            }
-
-            do {
-                let track = context.object(with: track.objectID) as! Track
-                let measurement = context.object(with: measurement.objectID) as! MeasurementMO
-
-                let geoLocationFetchRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
-                geoLocationFetchRequest.fetchLimit = 1
-                let maxTimestampInTrackPredicate = NSPredicate(format: "timestamp==max(timestamp) && track==%@", track)
-                geoLocationFetchRequest.predicate = maxTimestampInTrackPredicate
-                var lastCapturedLocation = try geoLocationFetchRequest.execute().first
-                var distance = 0.0
-
-                locations.forEach { location in
-
-                    let dbLocation = GeoLocationMO.init(entity: locationDescription, insertInto: context)
-                    dbLocation.lat = location.latitude
-                    dbLocation.lon = location.longitude
-                    dbLocation.speed = location.speed
-                    dbLocation.timestamp = location.timestamp
-                    dbLocation.accuracy = location.accuracy
-                    track.addToLocations(dbLocation)
-
-                    if let lastCapturedLocation = lastCapturedLocation {
-                        let delta = self.distanceCalculator.calculateDistance(from: lastCapturedLocation, to: dbLocation)
-                        distance += delta
-                    }
-                    lastCapturedLocation = dbLocation
-                }
-
-                measurement.trackLength += distance
-
-                context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
-                context.saveRecursively()
-                context.refresh(measurement, mergeChanges: true)
-                handler(.success)
-            } catch let error {
-                handler(.error(error))
-            }
+    func save(locations: [GeoLocation], in measurement: MeasurementMO) throws {
+        let context = try getContext()
+        guard let locationDescription = NSEntityDescription.entity(forEntityName: "GeoLocation", in: context) else {
+            throw PersistenceError.geoLocationNotCreatable
         }
+
+        let measurement = try migrate(measurement: measurement, to: context)
+
+        guard let track = measurement.tracks?.lastObject as? Track else {
+            throw PersistenceError.dataNotLoadable(measurement: measurement.identifier)
+        }
+
+        let geoLocationFetchRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
+        geoLocationFetchRequest.fetchLimit = 1
+        let maxTimestampInTrackPredicate = NSPredicate(format: "timestamp==max(timestamp) && track==%@", track)
+        geoLocationFetchRequest.predicate = maxTimestampInTrackPredicate
+        geoLocationFetchRequest.resultType = .managedObjectResultType
+        var lastCapturedLocation = try context.fetch(geoLocationFetchRequest).first
+        var distance = 0.0
+
+        locations.forEach { location in
+            let dbLocation = GeoLocationMO.init(entity: locationDescription, insertInto: context)
+            dbLocation.lat = location.latitude
+            dbLocation.lon = location.longitude
+            dbLocation.speed = location.speed
+            dbLocation.timestamp = location.timestamp
+            dbLocation.accuracy = location.accuracy
+            track.addToLocations(dbLocation)
+
+            if let lastCapturedLocation = lastCapturedLocation {
+                let delta = self.distanceCalculator.calculateDistance(from: lastCapturedLocation, to: dbLocation)
+                distance += delta
+            }
+            lastCapturedLocation = dbLocation
+        }
+
+        measurement.trackLength += distance
+
+        context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        context.saveRecursively()
+        context.refresh(measurement, mergeChanges: true)
     }
 
     /**
@@ -311,29 +276,24 @@ public class PersistenceLayer {
      - onFinished: The handler to call as soon as the persistence operation has finished.
      - Throws: If accessing the local file system failes for some reason and thus the `Acceleration` instances can not be saved.
      */
-    func save(accelerations: [Acceleration], in measurement: MeasurementMO, onFinished handler: @escaping ((Status) -> Void)) {
-        container.performBackgroundTask { context in
-            do {
-                let measurement = context.object(with: measurement.objectID) as! MeasurementMO
+    func save(accelerations: [Acceleration], in measurement: MeasurementMO) throws {
+        let context = try getContext()
 
-                let accelerationsFile = AccelerationsFile()
-                _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
-                measurement.accelerationsCount = measurement.accelerationsCount.advanced(by: accelerations.count)
+        let measurement = try migrate(measurement: measurement, to: context)
 
-                context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
-                context.saveRecursively()
-                context.refresh(measurement, mergeChanges: true)
-                handler(.success)
-            } catch let error {
-                handler(.error(error))
-            }
-        }
+        let accelerationsFile = AccelerationsFile()
+        _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
+        measurement.accelerationsCount = measurement.accelerationsCount.advanced(by: accelerations.count)
+
+        context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        context.saveRecursively()
+        context.refresh(measurement, mergeChanges: true)
     }
 
     // MARK: - Database Read Only Methods
     /**
      Internal load method, loading the provided `measurement` on the provided `context`.
-     
+
      - Parameters:
      - measurementIdentifiedBy: The `measurement` to load.
      - from: The CoreData `context` to load the `measurement` from.
@@ -355,42 +315,31 @@ public class PersistenceLayer {
 
     /**
      Loads the data belonging to the provided `measurement` in the background an calls `onFinishedCall` with the data storage representation of that `measurement`. Using that represenation is not thread safe. Do not use it outside of the handler.
-     
+
      - Parameters:
      - measurement: The `measurement` to load.
-     - onFinishedCall: The handler to call when loading the `measurement` has finished
      */
-    public func load(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (MeasurementMO?, Status) -> Void) {
-        container.performBackgroundTask { context in
-            context.automaticallyMergesChangesFromParent = true
-            do {
-                if let measurement = try self.load(measurementIdentifiedBy: identifier, from: context) {
-                    handler(measurement, .success)
-                } else {
-                    handler(nil, .error(PersistenceError.dataNotLoadable(measurement: identifier)))
-                }
-            } catch let error {
-                handler(nil, .error(error))
-            }
+    public func load(measurementIdentifiedBy identifier: Int64) throws -> MeasurementMO {
+        let context = try getContext()
+        context.automaticallyMergesChangesFromParent = true
+        if let measurement = try self.load(measurementIdentifiedBy: identifier, from: context) {
+            return measurement
+        } else {
+            throw PersistenceError.dataNotLoadable(measurement: identifier)
         }
     }
 
     /**
      Loads all the measurements from the data storage. Runs asynchronously in the background and calls a handler after loading has been completed. You should never use the objects in the provided array outside of the handler, since they are not thread safe and lose all data if transfered outside.
-     
+
      - Parameters:
      - handler: The handler to call after loading the measurements has finished.
      */
-    public func loadMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]?, Status) -> Void) {
-        container.performBackgroundTask { (context) in
-            let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-            do {
-                let fetchResult = try context.fetch(request)
-                handler(fetchResult, .success)
-            } catch let error {
-                handler(nil, .error(error))
-            }
-        }
+    public func loadMeasurements() throws -> [MeasurementMO] {
+        let context = try getContext()
+        let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+        let fetchResult = try context.fetch(request)
+        return fetchResult
     }
 
     /**
@@ -398,38 +347,48 @@ public class PersistenceLayer {
 
      - Parameter onFinishedCall: Handler called when loading the not synchronized measurements has finished. This provides the loaded measurements as an array, which will be empty if there are no such measurements.
      */
-    public func loadSynchronizableMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]?, Status) -> Void) {
-        container.performBackgroundTask { (context) in
-            let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-            // Fetch only not synchronized measurements
-            request.predicate = NSPredicate(format: "synchronized == %@", NSNumber(value: false))
-            do {
-                let fetchResult = try context.fetch(request)
-                handler(fetchResult, .success)
-            } catch let error {
-                handler(nil, .error(error))
-            }
-        }
+    public func loadSynchronizableMeasurements() throws -> [MeasurementMO] {
+        let context = try getContext()
+        let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+        // Fetch only not synchronized measurements
+        request.predicate = NSPredicate(format: "synchronized == %@", NSNumber(value: false))
+        let fetchResult = try context.fetch(request)
+        return fetchResult
     }
 
     /**
      Counts the amount of measurements currently stored in the data store, asynchronously in the background.
-     
+
      - Parameter handler: The handler called after counting has finished. This handler receives the result as a parameter.
      */
-    public func countMeasurements(onFinishedCall handler: @escaping (Int?, Status) -> Void) {
-        container.performBackgroundTask { (context) in
-            let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-            do {
-                let count = try context.count(for: request)
-                handler(count, .success)
-            } catch let error {
-                handler(nil, .error(error))
-            }
+    public func countMeasurements() throws -> Int {
+        let context = try getContext()
+        let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+        let count = try context.count(for: request)
+        return count
+    }
+
+    private func migrate(measurement: MeasurementMO, to context: NSManagedObjectContext) throws -> MeasurementMO {
+        guard let measurement = context.object(with: measurement.objectID) as? MeasurementMO else {
+            throw PersistenceError.inconsistentData
         }
+
+        return measurement
+    }
+
+    private func getContext() throws -> NSManagedObjectContext{
+        guard let context = self.context == nil ? container.newBackgroundContext() : self.context else {
+            throw PersistenceError.noContext
+        }
+
+        return context
     }
 
     // MARK: - Support Methods
+
+    public func makeContext() -> NSManagedObjectContext {
+        return container.newBackgroundContext()
+    }
 
     /**
      Collects all geo locations from all tracks of a measurement and merges them to a single array.
@@ -458,6 +417,14 @@ public class PersistenceLayer {
             ret.append(contentsOf: typedLocations)
         }
 
+        return ret
+    }
+
+    public static func extractIdentifiers(from measurements: [MeasurementMO]) -> [Int64] {
+        var ret = [Int64]()
+        for measurement in measurements {
+            ret.append(measurement.identifier)
+        }
         return ret
     }
 }
@@ -526,4 +493,8 @@ enum PersistenceError: Error {
     case trackNotCreatable
     /// For some reason it is impossible to create a new geo location object.
     case geoLocationNotCreatable
+    /// Some data is not in the format it is expected to be.
+    case inconsistentData
+    /// The system is unable to get a proper `NSManagedObjectContext` instance.
+    case noContext
 }

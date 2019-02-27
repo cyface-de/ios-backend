@@ -88,6 +88,8 @@ public class DataCapturingService: NSObject {
     /// Synchronizes read and write operations on the `locationsCache` and the `accelerationsCache`.
     private let cacheSynchronizationQueue = DispatchQueue(label: "cacheSynchronization", attributes: .concurrent)
 
+    private let lifecycleQueue = DispatchQueue(label: "lifecylce")
+
     /// The interval between data write opertions, during data capturing.
     private let savingInterval: TimeInterval
 
@@ -149,32 +151,21 @@ public class DataCapturingService: NSObject {
      - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
     public func start(inContext context: MeasurementContext) throws {
-        guard !isPaused else {
-            throw DataCapturingError.isPaused
-        }
-
-        let timestamp = currentTimeInMillisSince1970()
-        persistenceLayer.createMeasurement(at: timestamp, withContext: context) { measurement, status in
-            if case .error = status {
-                return self.handler(.serviceStarted(measurement: nil), status)
-            } else {
-
-                guard let measurement = measurement, let measurementContext = measurement.context else {
-                    return self.handler(.serviceStarted(measurement: nil), .error(PersistenceError.measurementNotLoadable(timestamp)))
-                }
-                let entity = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurementContext)!)
-                self.currentMeasurement = entity
-                do {
-                    try self.startCapturing(savingEvery: self.savingInterval)
-                } catch let error {
-                    self.handler(.serviceStarted(measurement: measurement), .error(error))
-                }
-                self.handler(.serviceStarted(measurement: measurement), .success)
+        try lifecycleQueue.sync {
+            guard !isPaused else {
+                throw DataCapturingError.isPaused
             }
+
+            let timestamp = currentTimeInMillisSince1970()
+            persistenceLayer.context = persistenceLayer.makeContext()
+            let measurement = try persistenceLayer.createMeasurement(at: timestamp, withContext: context)
+            let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: context)
+            self.currentMeasurement = measurementEntity
+            try startCapturing(savingEvery: savingInterval)
+            handler(.serviceStarted(measurement: measurementEntity.identifier), .success)
         }
     }
 
-    // TODO: Add a queue that runs all the lifecycle methods
     /**
      Stops the currently running data capturing process or does nothing if the process is not
      running.
@@ -183,18 +174,19 @@ public class DataCapturingService: NSObject {
      - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
      */
     public func stop() throws {
-        guard !isPaused else {
-            throw DataCapturingError.isPaused
-        }
+        try lifecycleQueue.sync {
+            guard !isPaused else {
+                throw DataCapturingError.isPaused
+            }
 
-        stopCapturing()
-        currentMeasurement = nil
-        if let synchronizer = synchronizer {
-            synchronizer.activate()
+            stopCapturing()
+            currentMeasurement = nil
+            if let synchronizer = synchronizer {
+                synchronizer.activate()
+            }
         }
     }
 
-    // TODO: Add a queue that runs all the lifecylce methods
     /**
      Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now. After using `pause()` you must call resume before you can call any other lifecycle method like `stop()`, for example.
 
@@ -203,19 +195,20 @@ public class DataCapturingService: NSObject {
      - `DataCapturingError.isPaused` if the service was already paused and pausing it again makes no sense.
      */
     public func pause() throws {
-        guard isRunning else {
-            throw DataCapturingError.notRunning
-        }
+        try lifecycleQueue.sync {
+            guard isRunning else {
+                throw DataCapturingError.notRunning
+            }
 
-        guard !isPaused else {
-            throw DataCapturingError.isPaused
-        }
+            guard !isPaused else {
+                throw DataCapturingError.isPaused
+            }
 
-        stopCapturing()
-        isPaused = true
+            stopCapturing()
+            isPaused = true
+        }
     }
 
-    // TODO: Add a queue that runs all the lifecycle methods
     /**
      Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
 
@@ -225,21 +218,22 @@ public class DataCapturingService: NSObject {
      - `DataCapturingError.noCurrentMeasurement`: If no current measurement is available while resuming data capturing.
      */
     public func resume() throws {
-        guard isPaused else {
-            throw DataCapturingError.notPaused
-        }
+        try lifecycleQueue.sync {
+            guard isPaused else {
+                throw DataCapturingError.notPaused
+            }
 
-        guard !isRunning else {
-            throw DataCapturingError.isRunning
-        }
+            guard !isRunning else {
+                throw DataCapturingError.isRunning
+            }
 
-        try startCapturing(savingEvery: savingInterval)
-        isPaused = false
+            try startCapturing(savingEvery: savingInterval)
+            isPaused = false
+        }
     }
 
     // MARK: - Internal Support Methods
 
-    // TODO: This method is asynchronous but does not report the time it has finished via callback. Best solution would be to run everything on the same background queue (persistence and lifecycle) to prevent other lifecycle methods from interrupting such a call, which would cause errors.
     /**
      Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
 
@@ -255,51 +249,43 @@ public class DataCapturingService: NSObject {
             throw DataCapturingError.noCurrentMeasurement
         }
 
-        persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier) { measurement, status in
-            guard case .success = status, let measurement = measurement else {
-                if case .error(let error) = status {
-                    return os_log("Unable to load current measurement %@! Error: %@", log: self.LOG, type: .error, currentMeasurement.identifier, error.localizedDescription)
-                } else {
-                    fatalError("Unable to get error!")
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
+        try persistenceLayer.appendNewTrack(to: measurement)
+        self.locationManager.delegate = self
+
+        let queue = OperationQueue()
+        queue.qualityOfService = QualityOfService.userInitiated
+        queue.underlyingQueue = self.capturingQueue
+        if self.motionManager.isAccelerometerAvailable {
+            self.motionManager.startAccelerometerUpdates(to: queue) { data, _ in
+                guard let myData = data else {
+                    // Should only happen if the device accelerometer is broken or something similar. If this leads to problems we can substitute by a soft error handling such as a warning or something similar. However in such a case we might think everything works fine, while it really does not.
+                    fatalError("DataCapturingService.start(): No Accelerometer data available!")
+                }
+
+                let accValues = myData.acceleration
+                let acc = Acceleration(timestamp: self.currentTimeInMillisSince1970(),
+                                       x: accValues.x,
+                                       y: accValues.y,
+                                       z: accValues.z)
+                // Synchronize this write operation.
+                self.cacheSynchronizationQueue.async(flags: .barrier) {
+                    self.accelerationsCache.append(acc)
                 }
             }
-
-            self.persistenceLayer.appendNewTrack(to: measurement, onFinishedCall: { status in
-                DispatchQueue.main.sync {
-                    self.locationManager.delegate = self
-                    self.locationManager.startUpdatingLocation()
-                }
-
-                let queue = OperationQueue()
-                queue.qualityOfService = QualityOfService.userInitiated
-                queue.underlyingQueue = self.capturingQueue
-                if self.motionManager.isAccelerometerAvailable {
-                    self.motionManager.startAccelerometerUpdates(to: queue) { data, _ in
-                        guard let myData = data else {
-                            // Should only happen if the device accelerometer is broken or something similar. If this leads to problems we can substitute by a soft error handling such as a warning or something similar. However in such a case we might think everything works fine, while it really does not.
-                            fatalError("DataCapturingService.start(): No Accelerometer data available!")
-                        }
-
-                        let accValues = myData.acceleration
-                        let acc = Acceleration(timestamp: self.currentTimeInMillisSince1970(),
-                                               x: accValues.x,
-                                               y: accValues.y,
-                                               z: accValues.z)
-                        // Synchronize this write operation.
-                        self.cacheSynchronizationQueue.async(flags: .barrier) {
-                            self.accelerationsCache.append(acc)
-                        }
-                    }
-                }
-
-                self.backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.cacheSynchronizationQueue)
-                self.backgroundSynchronizationTimer.setEventHandler(handler: self.saveCapturedData)
-                self.backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
-                self.backgroundSynchronizationTimer.resume()
-
-                self.isRunning = true
-            })
         }
+
+        self.backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.cacheSynchronizationQueue)
+        self.backgroundSynchronizationTimer.setEventHandler(handler: self.saveCapturedData)
+        self.backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
+        self.backgroundSynchronizationTimer.resume()
+
+        DispatchQueue.main.async {
+            self.locationManager.startUpdatingLocation()
+        }
+
+        self.isRunning = true
     }
 
     /**
@@ -332,46 +318,21 @@ public class DataCapturingService: NSObject {
         }
 
         cacheSynchronizationQueue.async(flags: .barrier) {
-            let localAccelerationsCache = self.accelerationsCache
-            let localLocationsCache = self.locationsCache
+            do {
+                let localAccelerationsCache = self.accelerationsCache
+                let localLocationsCache = self.locationsCache
 
-            // These calls are nested to make sure, that not two operations are writing via different contexts to the database.
-            self.persistenceLayer.load(measurementIdentifiedBy: measurement.identifier, onFinishedCall: { measurementMo, status in
-                guard case .success = status, let measurementMo = measurementMo else {
-                    if case .error(let error) = status {
-                        return os_log("Unable to load measurement %@ to store data! Error: %@", log: self.LOG, type: .error, measurement.identifier, error.localizedDescription)
-                    } else {
-                        fatalError("Unable to get error reason!")
-                    }
-                }
+                self.persistenceLayer.context = self.persistenceLayer.makeContext()
+                let measurement = try self.persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
 
-                guard let tracks = measurementMo.tracks, let track = tracks.lastObject as? Track else {
-                    return os_log("Unable to load tracks for measurement %@! Cannot store data!", log: self.LOG, type: .error, measurement.identifier)
-                }
+                try self.persistenceLayer.save(locations: localLocationsCache, in: measurement)
+                try self.persistenceLayer.save(accelerations: localAccelerationsCache, in: measurement)
 
-                self.persistenceLayer.save(locations: localLocationsCache, to: track, in: measurementMo) { status in
-                    guard case .success = status else {
-                        if case .error(let error) = status {
-                            return os_log("Unable to save locations to measurement %@! Error: %@", log:self.LOG, type: .error, measurement.identifier, error.localizedDescription)
-                        } else {
-                            fatalError("Unable to get error reason!")
-                        }
-                    }
-
-                    self.persistenceLayer.save(accelerations: localAccelerationsCache, in: measurementMo) { status in
-                        guard case .success = status else {
-                            if case .error(let error) = status {
-                                return os_log("Unable to save accelerations to measurement %@! Error: %@", log: self.LOG, type: .error, measurement.identifier, error.localizedDescription)
-                            } else {
-                                fatalError("Unable to get error reason!")
-                            }
-                        }
-                    }
-                }
-            })
-
-            self.accelerationsCache = [Acceleration]()
-            self.locationsCache = [GeoLocation]()
+                self.accelerationsCache = [Acceleration]()
+                self.locationsCache = [GeoLocation]()
+            } catch let error {
+                return os_log("Unable to save captured data. Error %@", log: self.LOG, type: .error, error.localizedDescription)
+            }
         }
     }
 
@@ -429,7 +390,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
      - Parameters:
      - manager: The location manager reporting the error.
      - didFailWithError: The reported error.
-    */
+     */
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         os_log("Location service failed with error: %@!", log: LOG, type: .error, error.localizedDescription)
     }
