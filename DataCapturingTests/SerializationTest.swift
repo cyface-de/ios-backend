@@ -24,7 +24,7 @@ import XCTest
  Tests whether serialization and deserialization into and from the Cyface Binary Format works as expected
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 1.0.0
  */
 class SerializationTest: XCTestCase {

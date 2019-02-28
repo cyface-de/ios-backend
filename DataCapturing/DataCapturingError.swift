@@ -31,7 +31,7 @@ import Foundation
 
  - Author: Klemens Muthmann
  - Since: 1.2.0
- - Version: 1.0.0
+ - Version: 1.1.0
  */
 public enum DataCapturingError: Error {
     /// Thrown if the service was paused when it should not have been.

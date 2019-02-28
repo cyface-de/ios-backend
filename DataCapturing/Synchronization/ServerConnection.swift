@@ -62,7 +62,7 @@ public class ServerConnection {
 
     /**
      A globally unique identifier of this device. This is used to separate data transmitted by one device from data transmitted by another one on the server side. An installation identifier is not device specific for technical and data protection reasons it is recreated every time the app is reinstalled.
-    */
+     */
     var installationIdentifier: String {
         if let applicationIdentifier = UserDefaults.standard.string(forKey: "de.cyface.identifier") {
             return applicationIdentifier
@@ -147,7 +147,17 @@ public class ServerConnection {
      - Parameters:
      - request: The request to fill with data.
      - for: The measurement to transmit.
-     - Throws: If serializing the data to transmit was not successful.
+     - Throws:
+        - `ServerConnectionError.missingInstallationIdentifier` If there is no valid installation identifier to identify this SDK installation with a server.
+        - `ServerConnectionError.missingMeasurementIdentifier` If the current measurement has no valid device wide unique identifier.
+        - `ServerConnectionError.missingDeviceType` If the device type of this device could not be figured out.
+        - `PersistenceError.dataNotLoadable` If there is no such measurement.
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+        - `FileSupportError.notReadable` If the data file was not readable.
+        - Some unspecified errors from within CoreData.
+        - Some unspecified undocumented file system error if file was not accessible.
      */
     func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
@@ -182,7 +192,9 @@ public class ServerConnection {
      - with: The encoded measurement.
      - onSuccess: Called if data transmission was successful. Gets the transmitted measurement as a parameter.
      - onFailure: Called if data transmission failed for some reason. Gets the transmitted measurement and information about the error.
-    */
+     - Throws:
+        - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
+     */
     func onEncodingComplete(for measurement: MeasurementEntity, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
         switch result {
         case .success(let upload, _, _):
@@ -206,7 +218,8 @@ public class ServerConnection {
      - for: The measurement that was transmitted.
      - onSuccess: Called with information about the transmitted measurement if the response indicates success.
      - response: The HTTP response received.
-     - Throws: If the response was not successful.
+     - Throws:
+        - Some unspecified undocumented error if the response was not successful.
      */
     func onResponseReady(for measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void), _ response: DataResponse<String>) throws {
         switch response.result {
@@ -222,6 +235,11 @@ public class ServerConnection {
 
      - Parameter measurement: The measurement to serialize as a file.
      - Returns: The url of the file containing the measurement data.
+     - Throws:
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+        - `FileSupportError.notReadable` If the data file was not readable.
+        - Some unspecified undocumented file system error if file was not accessible.
      */
     private func write(_ measurement: MeasurementMO) throws -> URL {
         let measurementFile = MeasurementFile()

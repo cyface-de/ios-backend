@@ -25,7 +25,7 @@ import CoreMotion
  This test is intended to test capturing some data in isolation. There are still some problems with this, due to restrictions in Apple's test support.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.3
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {

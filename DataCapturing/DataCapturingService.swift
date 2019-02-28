@@ -25,12 +25,10 @@ import os.log
 /**
  An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.
  
- To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provides `Synchronizer`.
- 
- An object of this class is not thread safe and should only be used once per application. You may start and stop the service as often as you like and reuse the object.
+ To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided `Synchronizer`.
  
  - Author: Klemens Muthmann
- - Version: 6.0.0
+ - Version: 7.0.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -88,6 +86,10 @@ public class DataCapturingService: NSObject {
     /// Synchronizes read and write operations on the `locationsCache` and the `accelerationsCache`.
     private let cacheSynchronizationQueue = DispatchQueue(label: "cacheSynchronization", attributes: .concurrent)
 
+    /**
+     A queue used to synchronize calls to the lifecycle methods `start`, `pause`, `resume` and `stop`.
+     Using such a queue prevents successiv calls to these methods to interrupt each other.
+     */
     private let lifecycleQueue = DispatchQueue(label: "lifecylce")
 
     /// The interval between data write opertions, during data capturing.
@@ -103,16 +105,15 @@ public class DataCapturingService: NSObject {
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data
      via the provided server connection and accessing data a certain amount of times per second.
+
      - Parameters:
-     
      - sensorManager: An instance of `CMMotionManager`.
      There should be only one instance of this type in your application.
-     Since it seems to be impossible to create that instance inside a framework at the moment,
-     you have to provide it via this parameter.
+     Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
      - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
      - savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
      - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
-     - dataSynchronizationIsActive: A flag telling the system, whether it should synchronize data or not. If this is `true` data will be synchronized; if it is `false`, no data will be synchronized.
+     - synchronizer: An optional instance of a `Synchronizer` used to transmit measured data to a server. If this is `nil` no data synchronization is going to happen.
      - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
      */
     public init(

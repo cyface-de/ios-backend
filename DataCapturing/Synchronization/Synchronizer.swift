@@ -24,8 +24,10 @@ import Alamofire
 /**
  An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.
 
+ An object of this call can be used to synchronize data either in the foreground or in the background. Background synchronization happens only if the synchronizing device has an active Wifi connection. To activate background synchronization you need to call the `activate` method.
+
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 2.3.0
  */
 public class Synchronizer {
@@ -75,6 +77,7 @@ public class Synchronizer {
      - cleaner: A strategy for cleaning the persistent storage after data synchronization.
      - serverConnection: An authenticated connection to a Cyface API server.
      - handler: The handler to call, when synchronization for a measurement has finished.
+     - Throws: `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
      */
     public init(persistenceLayer: PersistenceLayer, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) throws {
         self.persistenceLayer = persistenceLayer
@@ -234,7 +237,7 @@ public class Synchronizer {
  Implementations of this protocol are responsible for cleaning the database after a synchronization run.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 2.3.0
  */
 public protocol Cleaner {
@@ -245,7 +248,11 @@ public protocol Cleaner {
      - Parameters:
      - measurement: The measurement to clean.
      - from: The `PersistenceLayer` to call for cleaning the data.
-     - onFinishedCall: Called as soon as deletion has finished.
+     - Throws:
+        - `PersistenceError.measurementNotLoadable` If the measurement to delete was not available.
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
+        - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
      */
     func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer) throws
 }
@@ -254,7 +261,7 @@ public protocol Cleaner {
  A cleaner removing each synchronized measurement from the database completely.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 2.3.0
  */
 public class DeletionCleaner: Cleaner {
@@ -273,7 +280,7 @@ public class DeletionCleaner: Cleaner {
  A cleaner removing only the accelerations from each synchronized measurement, thus keeping the track information available.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 2.3.0
  */
 public class AccelerationPointRemovalCleaner: Cleaner {
