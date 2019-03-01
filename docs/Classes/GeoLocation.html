@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>DiskConsumption Class Reference</title>
+    <title>GeoLocation Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Class/DiskConsumption" class="dashAnchor"></a>
-    <a title="DiskConsumption Class Reference"></a>
+    <a name="//apple_ref/swift/Class/GeoLocation" class="dashAnchor"></a>
+    <a title="GeoLocation Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
@@ -21,7 +21,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">DataCapturing Reference</a>
         <img id="carat" src="../img/carat.png" />
-        DiskConsumption Class Reference
+        GeoLocation Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -136,26 +136,35 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>DiskConsumption</h1>
-            <p>Objects of this class represent the current disk (or rather SD card) space used and available.</p>
+            <h1>GeoLocation</h1>
+            <p>One geo location measurement provided by the system.</p>
+
+<p>Each measurement received by the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code> leads to the creation of one <code>GeoLocation</code> instance. They are kept in memory until saved to persistent storage.</p>
+<div class="aside aside-remark">
+    <p class="aside-title">Remark</p>
+    DO NOT confuse this class with CoreData generated model object <code><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></code>. Since the model object is not thread safe you should use an instance of this class if you hand data between processes.
+
+</div>
+<div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    <p><code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>, <code>PersistenceLayer.save(:[GeoLocation]:MeasurementEntity:(MeasurementMO?, Status) -&gt; Void)</code>, <code><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></code></p>
+
+</div>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
-    Klemens Muthmann
+    <p>Klemens Muthmann</p>
 
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    1.0.0
+    <p>1.0.0</p>
+
+</div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
-    1.0.0
+    <p>1.0.0</p>
 
 </div>
-
-</div>
-
-<p>This space is mostly filled with unsynchronized <code>Measurement</code>s.
-To avoid filling up the users SD card it is advisable to delte <code>Measurement</code>s as soon as they use up too much space.</p>
 
           </section>
           <section class="section task-group-section">
@@ -172,8 +181,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/consumedBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">consumedBytes</a>
+                    <a name="//apple_ref/swift/Property/latitude" class="dashAnchor"></a>
+                    <a class="token" href="#/">latitude</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -181,7 +190,7 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The amount of bytes currently used by the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                        <p>The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion.</p>
 
                       </div>
                     </section>
@@ -191,8 +200,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/availableBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">availableBytes</a>
+                    <a name="//apple_ref/swift/Property/longitude" class="dashAnchor"></a>
+                    <a class="token" href="#/">longitude</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -200,7 +209,64 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The amount of bytes still available for the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                        <p>The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/accuracy" class="dashAnchor"></a>
+                    <a class="token" href="#/">accuracy</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The estimated accuracy of the measurement in meters.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/speed" class="dashAnchor"></a>
+                    <a class="token" href="#/">speed</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The speed the device was moving during the measurement in meters per second.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/timestamp" class="dashAnchor"></a>
+                    <a class="token" href="#/">timestamp</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The time the measurement happened at in milliseconds since the 1st of january 1970.</p>
 
                       </div>
                     </section>
@@ -221,8 +287,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/init(consumedBytes:availableBytes:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">init(consumedBytes:availableBytes:)</a>
+                    <a name="//apple_ref/swift/Method/init(latitude:longitude:accuracy:speed:timestamp:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">init(latitude:longitude:accuracy:speed:timestamp:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -230,7 +296,15 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a new completely initialized <code>DiskConsumption</code> object.</p>
+                        <p>The default constructor, which initializes all properties to the provided values.</p>
+
+<ul>
+<li>latitude: The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion.</li>
+<li>longitude: The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.</li>
+<li>accuracy: The estimated accuracy of the measurement in meters.</li>
+<li>speed: The speed the device was moving during the measurement in meters per second.</li>
+<li>timestamp: The time the measurement happened at in milliseconds since the 1st of january 1970.</li>
+</ul>
 
                       </div>
                     </section>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>DiskConsumption Class Reference</title>
+    <title>Synchronizer Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Class/DiskConsumption" class="dashAnchor"></a>
-    <a title="DiskConsumption Class Reference"></a>
+    <a name="//apple_ref/swift/Class/Synchronizer" class="dashAnchor"></a>
+    <a title="Synchronizer Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
@@ -21,7 +21,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">DataCapturing Reference</a>
         <img id="carat" src="../img/carat.png" />
-        DiskConsumption Class Reference
+        Synchronizer Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -136,8 +136,10 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>DiskConsumption</h1>
-            <p>Objects of this class represent the current disk (or rather SD card) space used and available.</p>
+            <h1>Synchronizer</h1>
+            <p>An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.</p>
+
+<p>An object of this call can be used to synchronize data either in the foreground or in the background. Background synchronization happens only if the synchronizing device has an active Wifi connection. To activate background synchronization you need to call the <code>activate</code> method.</p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -145,17 +147,14 @@
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    1.0.0
+    1.0.1
+
+</div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
-    1.0.0
+    2.3.0
 
 </div>
-
-</div>
-
-<p>This space is mostly filled with unsynchronized <code>Measurement</code>s.
-To avoid filling up the users SD card it is advisable to delte <code>Measurement</code>s as soon as they use up too much space.</p>
 
           </section>
           <section class="section task-group-section">
@@ -172,8 +171,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/consumedBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">consumedBytes</a>
+                    <a name="//apple_ref/swift/Property/syncOnWiFiOnly" class="dashAnchor"></a>
+                    <a class="token" href="#/">syncOnWiFiOnly</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -181,26 +180,11 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The amount of bytes currently used by the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                        <p>A flag indicating whether synchronization of data should only happen if the device is connected to a wireless local area network (Wifi).</p>
 
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/availableBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">availableBytes</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The amount of bytes still available for the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+<p>If <code>true</code> data is only synchronized via Wifi; if <code>false</code> data is also synchronized via mobile network.
+The default setting is <code>true</code>.
+Setting this to <code>false</code> might put heavy load on the users device and deplete her or his data plan.</p>
 
                       </div>
                     </section>
@@ -221,8 +205,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/init(consumedBytes:availableBytes:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">init(consumedBytes:availableBytes:)</a>
+                    <a name="//apple_ref/swift/Method/init(persistenceLayer:cleaner:serverConnection:handler:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">init(persistenceLayer:cleaner:serverConnection:handler:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -230,7 +214,75 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a new completely initialized <code>DiskConsumption</code> object.</p>
+                        <p>Initializer that sets the initial value of all the properties and prepares the background synchronization job.</p>
+<li>persistenceLayer: Persistent storage used to load synchronizable measurements from.</li>
+<li>cleaner: A strategy for cleaning the persistent storage after data synchronization.</li>
+<li>serverConnection: An authenticated connection to a Cyface API server.</li>
+<li>handler: The handler to call, when synchronization for a measurement has finished.</li>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code>SynchronizationError.reachabilityNotInitilized</code>: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/API%20Methods"></a>
+                <a name="//apple_ref/swift/Section/API Methods" class="dashAnchor"></a>
+                <a href="#/API%20Methods">
+                  <h3 class="section-name">API Methods</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/sync()" class="dashAnchor"></a>
+                    <a class="token" href="#/">sync()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Synchronize all measurements now if a connection is available.</p>
+
+<p>If this is not called the service might wait for an opportune moment to start synchronization.
+The call is asynchronous, meaning it returns almost immediately, while the synchronization continues running inside its own thread.</p>
+
+<p>You may call this method multiple times in short succession.
+However only one synchronization can be active at a given time.
+If you call this during an active synchronization it is going to return without doing anything.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/activate()" class="dashAnchor"></a>
+                    <a class="token" href="#/">activate()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Starts background synchronization as prepared in this objects initializer.</p>
+
+<p>Synchronization is stopped automatically if there are no measurements left to synchronize.
+You should restart this each time a new measurement has been finished.</p>
 
                       </div>
                     </section>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Protocols  Reference</title>
+    <title>Enumerations  Reference</title>
     <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,7 +10,7 @@
     
   </head>
   <body>
-    <a title="Protocols  Reference"></a>
+    <a title="Enumerations  Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="index.html">DataCapturing Docs</a> (0% documented)</p>
@@ -20,7 +20,7 @@
       <p id="breadcrumbs">
         <a href="index.html">DataCapturing Reference</a>
         <img id="carat" src="img/carat.png" />
-        Protocols  Reference
+        Enumerations  Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -135,8 +135,8 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>Protocols</h1>
-            <p>The following protocols are available globally.</p>
+            <h1>Enumerations</h1>
+            <p>The following enumerations are available globally.</p>
 
           </section>
           <section class="section task-group-section">
@@ -146,8 +146,8 @@
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Protocol/Authenticator" class="dashAnchor"></a>
-                    <a class="token" href="#/">Authenticator</a>
+                    <a name="//apple_ref/swift/Enum/Status" class="dashAnchor"></a>
+                    <a class="token" href="#/">Status</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -155,47 +155,12 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>An <code>Authenticator</code> provides functionality to authenticate this app on a servoer for receiving the captured data.</p>
-<div class="aside aside-author">
-    <p class="aside-title">Author</p>
-    Klemens Muthmann
+                        <p>The status returned by asynchronous callback handlers.</p>
 
-</div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    1.0.0
-
-</div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    2.0.0
-
-</div>
-
-                        <a href="Protocols/Authenticator.html" class="slightly-smaller">See more</a>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Protocol/DistanceCalculationStrategy" class="dashAnchor"></a>
-                    <a class="token" href="#/">DistanceCalculationStrategy</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>This protocol provides a way to calculate the distance between two geo locations in meters.
-Different implementations are possible.</p>
+<p>This tells the caller, whether an asynchronous call has been successful or not and if not it provides further information about the <code>Error</code>. This is required, since an asynchronous call can not throw an <code>Error</code> to the calling thread.</p>
+<pre class="highlight plaintext"><code> case success
+ case error(Error)
+</code></pre>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -212,7 +177,7 @@ Different implementations are possible.</p>
 
 </div>
 
-                        <a href="Protocols/DistanceCalculationStrategy.html" class="slightly-smaller">See more</a>
+                        <a href="Enums/Status.html" class="slightly-smaller">See more</a>
                       </div>
                     </section>
                   </div>
@@ -225,8 +190,8 @@ Different implementations are possible.</p>
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Protocol/Cleaner" class="dashAnchor"></a>
-                    <a class="token" href="#/">Cleaner</a>
+                    <a name="//apple_ref/swift/Enum/DataCapturingEvent" class="dashAnchor"></a>
+                    <a class="token" href="#/">DataCapturingEvent</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -234,7 +199,17 @@ Different implementations are possible.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Implementations of this protocol are responsible for cleaning the database after a synchronization run.</p>
+                        <p>Events occuring during capturing and transmitting data.</p>
+
+<p>These events may be received by a closure provided to the <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code> on calling start.</p>
+<pre class="highlight plaintext"><code>case geoLocationFixAcquired
+case geoLocationFixLost
+case geoLocationAcquired
+case lowDiskSpace
+case serviceStarted
+case synchronizationFinished
+case synchronizationStarted
+</code></pre>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -247,11 +222,229 @@ Different implementations are possible.</p>
 </div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
+    1.0.0
+
+</div>
+
+                        <a href="Enums/DataCapturingEvent.html" class="slightly-smaller">See more</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Enum/ServerConnectionError" class="dashAnchor"></a>
+                    <a class="token" href="#/">ServerConnectionError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>An enumeration encapsulating errors used by server connections.</p>
+<pre class="highlight plaintext"><code>case authenticationNotSuccessful
+case notAuthenticated
+case serializationTimeout
+case missingInstallationIdentifier
+case missingMeasurementIdentifier
+case missingDeviceType
+case invalidResponse
+case unexpectedError
+</code></pre>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    3.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    1.0.0
+
+</div>
+
+                        <a href="Enums/ServerConnectionError.html" class="slightly-smaller">See more</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Implementation"></a>
+                <a name="//apple_ref/swift/Section/Implementation" class="dashAnchor"></a>
+                <a href="#/Implementation">
+                  <h3 class="section-name">Implementation</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Enum/FileSupportError" class="dashAnchor"></a>
+                    <a class="token" href="#/">FileSupportError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Errors created by the Cyface SDK associated with accessing the file system.</p>
+<pre class="highlight plaintext"><code>case notReadable
+</code></pre>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    1.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    2.0.0
+
+</div>
+
+                        <a href="Enums/FileSupportError.html" class="slightly-smaller">See more</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Enum/SynchronizationError" class="dashAnchor"></a>
+                    <a class="token" href="#/">SynchronizationError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Enumeration of all the errors that might happen during data synchronization (except for <code><a href="Enums/ServerConnectionError.html">ServerConnectionError</a></code> cases).</p>
+<pre class="highlight plaintext"><code>case reachabilityNotInitialized
+</code></pre>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    1.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
     2.3.0
 
 </div>
 
-                        <a href="Protocols/Cleaner.html" class="slightly-smaller">See more</a>
+                        <a href="Enums/SynchronizationError.html" class="slightly-smaller">See more</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Enum/DataCapturingError" class="dashAnchor"></a>
+                    <a class="token" href="#/">DataCapturingError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>An enumeration for all errors caused by capturing data.</p>
+<pre class="highlight plaintext"><code>case isPaused
+case notPaused
+case isRunning
+case notRunning
+case noCurrentMeasurement
+</code></pre>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    1.2.0
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    1.1.0
+
+</div>
+
+                        <a href="Enums/DataCapturingError.html" class="slightly-smaller">See more</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Enum/MeasurementContext" class="dashAnchor"></a>
+                    <a class="token" href="#/">MeasurementContext</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The context of this measurement. This is application specific and might be something like the vehicle used.</p>
+<pre class="highlight plaintext"><code>case leisure
+case work
+case shopping
+case car
+case bike
+case motorbike
+</code></pre>
+<div class="aside aside-todo">
+    <p class="aside-title">Todo</p>
+    Make this dynamic, instead of a static enum.
+
+</div>
+
+                        <a href="Enums/MeasurementContext.html" class="slightly-smaller">See more</a>
                       </div>
                     </section>
                   </div>

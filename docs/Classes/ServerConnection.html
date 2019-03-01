@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>DiskConsumption Class Reference</title>
+    <title>ServerConnection Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Class/DiskConsumption" class="dashAnchor"></a>
-    <a title="DiskConsumption Class Reference"></a>
+    <a name="//apple_ref/swift/Class/ServerConnection" class="dashAnchor"></a>
+    <a title="ServerConnection Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
@@ -21,7 +21,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">DataCapturing Reference</a>
         <img id="carat" src="../img/carat.png" />
-        DiskConsumption Class Reference
+        ServerConnection Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -136,8 +136,15 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>DiskConsumption</h1>
-            <p>Objects of this class represent the current disk (or rather SD card) space used and available.</p>
+            <h1>ServerConnection</h1>
+            <p>Realizes a connection to a Cyface Collector server.</p>
+
+<p>An object of this class realizes a connection between an iOS app capturing some data and a Cyface Collector server receiving that data.
+The data is transmitted using HTTPS in chunks of one measurement.
+The transmission format is compressed Cyface binary format.
+The cyface binary format is created by a <code>CyfaceBinaryFormatSerializer</code>.</p>
+
+<p>This implementation follows code published here: <a href="https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63">https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63</a></p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -145,17 +152,14 @@
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    1.0.0
+    4.0.0
+
+</div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
     1.0.0
 
 </div>
-
-</div>
-
-<p>This space is mostly filled with unsynchronized <code>Measurement</code>s.
-To avoid filling up the users SD card it is advisable to delte <code>Measurement</code>s as soon as they use up too much space.</p>
 
           </section>
           <section class="section task-group-section">
@@ -172,8 +176,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/consumedBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">consumedBytes</a>
+                    <a name="//apple_ref/swift/Property/apiURL" class="dashAnchor"></a>
+                    <a class="token" href="#/">apiURL</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -181,26 +185,7 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The amount of bytes currently used by the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
-
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/availableBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">availableBytes</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The amount of bytes still available for the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                        <p>An <code>URL</code> used to upload data to. There should be a server available at that location.</p>
 
                       </div>
                     </section>
@@ -221,8 +206,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/init(consumedBytes:availableBytes:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">init(consumedBytes:availableBytes:)</a>
+                    <a name="//apple_ref/swift/Method/init(apiURL:persistenceLayer:authenticator:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">init(apiURL:persistenceLayer:authenticator:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -230,7 +215,49 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a new completely initialized <code>DiskConsumption</code> object.</p>
+                        <p>Creates a new server connection to a certain endpoint, loading data from the provided <code>persistenceLayer</code>.</p>
+
+<ul>
+<li>apiURL: The URL endpoint to upload data to.</li>
+<li>persistenceLayer: The layer used to load the data to upload from.</li>
+<li>authenticator: An object used to authenticate this app with a Cyface Collector server.</li>
+</ul>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Methods"></a>
+                <a name="//apple_ref/swift/Section/Methods" class="dashAnchor"></a>
+                <a href="#/Methods">
+                  <h3 class="section-name">Methods</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/sync(measurement:onSuccess:onFailure:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">sync(measurement:onSuccess:onFailure:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Synchronizes the provided <code>measurement</code> with a remote server and calls either a <code>success</code> or <code>failure</code> handler when finished.</p>
+
+<ul>
+<li>measurement: The measurement to synchronize.</li>
+<li>onSuccess: The handler to call, when synchronization has succeeded. This handler is provided with the synchronized <code><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></code>.</li>
+<li>onFailure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The <code><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></code> is the same as the one provided as parameter to this method.</li>
+</ul>
 
                       </div>
                     </section>

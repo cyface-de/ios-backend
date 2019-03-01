@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>DiskConsumption Class Reference</title>
+    <title>Acceleration Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Class/DiskConsumption" class="dashAnchor"></a>
-    <a title="DiskConsumption Class Reference"></a>
+    <a name="//apple_ref/swift/Class/Acceleration" class="dashAnchor"></a>
+    <a title="Acceleration Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
@@ -21,7 +21,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">DataCapturing Reference</a>
         <img id="carat" src="../img/carat.png" />
-        DiskConsumption Class Reference
+        Acceleration Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -136,26 +136,30 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>DiskConsumption</h1>
-            <p>Objects of this class represent the current disk (or rather SD card) space used and available.</p>
+            <h1>Acceleration</h1>
+            <p>Represents one acceleration measurement carried out by the system.</p>
+
+<p>Such a measurement happens multiple times per second. The <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code> stores each of them in one instance of an <code>Acceleration</code> until they are saved to persistent storage.</p>
+<div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    <p><code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>, <code>PersistenceLayer::save(:[Acceleration]:MeasurementEntity:((MeasurementMO?, Status) -&gt; Void))</code></p>
+
+</div>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
-    Klemens Muthmann
+    <p>Klemens Muthmann</p>
 
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    1.0.0
+    <p>1.0.0</p>
+
+</div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
-    1.0.0
+    <p>1.0.0</p>
 
 </div>
-
-</div>
-
-<p>This space is mostly filled with unsynchronized <code>Measurement</code>s.
-To avoid filling up the users SD card it is advisable to delte <code>Measurement</code>s as soon as they use up too much space.</p>
 
           </section>
           <section class="section task-group-section">
@@ -172,8 +176,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/consumedBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">consumedBytes</a>
+                    <a name="//apple_ref/swift/Property/timestamp" class="dashAnchor"></a>
+                    <a class="token" href="#/">timestamp</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -181,7 +185,7 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The amount of bytes currently used by the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                        <p>The time in millisceonds since the 1st of january 1970, this acceleration was captured at.</p>
 
                       </div>
                     </section>
@@ -191,8 +195,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/availableBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">availableBytes</a>
+                    <a name="//apple_ref/swift/Property/x" class="dashAnchor"></a>
+                    <a class="token" href="#/">x</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -200,7 +204,45 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The amount of bytes still available for the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                        <p>Acceleration in the device x direction, which is towards the right side if the homebutton faces you.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/y" class="dashAnchor"></a>
+                    <a class="token" href="#/">y</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Acceleration in the device y direction, which is towards the top of the device if the homebutton faces you.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/z" class="dashAnchor"></a>
+                    <a class="token" href="#/">z</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Acceleration in the device z direction, which is standing on the screen pointing towards you if the homebutton faces you.</p>
 
                       </div>
                     </section>
@@ -221,8 +263,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/init(consumedBytes:availableBytes:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">init(consumedBytes:availableBytes:)</a>
+                    <a name="//apple_ref/swift/Method/init(timestamp:x:y:z:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">init(timestamp:x:y:z:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -230,7 +272,14 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a new completely initialized <code>DiskConsumption</code> object.</p>
+                        <p>The default constructor, which initializes all the properties of an <code>Acceleration</code> instance.</p>
+
+<ul>
+<li>timestamp:</li>
+<li>x: Acceleration in the device x direction, which is towards the right side if the homebutton faces you.</li>
+<li>y: Acceleration in the device y direction, which is towards the top of the device if the homebutton faces you.</li>
+<li>z: Acceleration in the device z direction, which is standing on the screen pointing towards you if the homebutton faces you.</li>
+</ul>
 
                       </div>
                     </section>

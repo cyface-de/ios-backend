@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>DataCapturingService Class Reference</title>
+    <title>PersistenceLayer Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Class/DataCapturingService" class="dashAnchor"></a>
-    <a title="DataCapturingService Class Reference"></a>
+    <a name="//apple_ref/swift/Class/PersistenceLayer" class="dashAnchor"></a>
+    <a title="PersistenceLayer Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
@@ -21,7 +21,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">DataCapturing Reference</a>
         <img id="carat" src="../img/carat.png" />
-        DataCapturingService Class Reference
+        PersistenceLayer Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -136,10 +136,12 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>DataCapturingService</h1>
-            <p>An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.</p>
+            <h1>PersistenceLayer</h1>
+            <p>An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and accelerations. Most functions are asynchronous and provide a handler to react when they are finished.</p>
 
-<p>To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided <code><a href="../Classes/Synchronizer.html">Synchronizer</a></code>.</p>
+<p>All entities have two representations. They are either represented as a subclass of <code>NSManagedObject</code> or as a custom entity class. The former are <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code>, <code>AccelerationPointMO</code> and <code><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></code>, while the latter are <code><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></code>, <code><a href="../Classes/Acceleration.html">Acceleration</a></code> and <code><a href="../Classes/GeoLocation.html">GeoLocation</a></code>. You should always try to the second costum classes, because the subclasses of <code>NSManagedObject</code> are not thread safe and should never be used outside of the handler they are provided to as parameter.</p>
+
+<p>Read access is public while manipulation of the data stored is restricted to the framework.</p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -147,7 +149,7 @@
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    7.0.0
+    3.0.0
 
 </div>
 <div class="aside aside-since">
@@ -171,8 +173,8 @@
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/isRunning" class="dashAnchor"></a>
-                    <a class="token" href="#/">isRunning</a>
+                    <a name="//apple_ref/swift/Property/context" class="dashAnchor"></a>
+                    <a class="token" href="#/">context</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -180,64 +182,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p><code>true</code> if data capturing is running; <code>false</code> otherwise.</p>
-
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/isPaused" class="dashAnchor"></a>
-                    <a class="token" href="#/">isPaused</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p><code>true</code> if data capturing was running but is currently paused; <code>false</code> otherwise.</p>
-
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/currentMeasurement" class="dashAnchor"></a>
-                    <a class="token" href="#/">currentMeasurement</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The currently recorded <code>Measurement</code> or <code>nil</code> if there is no active recording.</p>
-
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/synchronizer" class="dashAnchor"></a>
-                    <a class="token" href="#/">synchronizer</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>An optional API that is responsible for synchronizing data with a Cyface server.</p>
+                        <p>The current <code>NSManagedObjectContext</code> used by this persistence layer. This has to be reset if the layer is used on a different thread. If it is <code>nil</code> each method is going to use its own context, which can cause problems if model objects are used between those methods.</p>
 
                       </div>
                     </section>
@@ -258,8 +203,8 @@
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/init(sensorManager:updateInterval:savingInterval:persistenceLayer:synchronizer:eventHandler:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">init(sensorManager:updateInterval:savingInterval:persistenceLayer:synchronizer:eventHandler:)</a>
+                    <a name="//apple_ref/swift/Method/init(withDistanceCalculator:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">init(withDistanceCalculator:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -267,19 +212,15 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a new completely initialized <code>DataCapturingService</code> transmitting data
-via the provided server connection and accessing data a certain amount of times per second.</p>
-
-<ul>
-<li>sensorManager: An instance of <code>CMMotionManager</code>.
-There should be only one instance of this type in your application.
-Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.</li>
-<li>updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.</li>
-<li>savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.</li>
-<li>persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.</li>
-<li>synchronizer: An optional instance of a <code><a href="../Classes/Synchronizer.html">Synchronizer</a></code> used to transmit measured data to a server. If this is <code>nil</code> no data synchronization is going to happen.</li>
-<li>eventHandler: An optional handler used by the capturing process to inform about <code><a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a></code>s.</li>
+                        <p>Public constructor usable by external callers.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.modelNotLoabable</code> If the model is not loadable</li>
+<li><code>PersistenceError.modelNotInitializable</code> If the model was loaded (so it is available) but can not be initialized.</li>
 </ul>
+
+</div>
 
                       </div>
                     </section>
@@ -289,10 +230,10 @@ Since it seems to be impossible to create that instance inside a framework at th
             </div>
             <div class="task-group">
               <div class="task-name-container">
-                <a name="/Public%20API%20Methods"></a>
-                <a name="//apple_ref/swift/Section/Public API Methods" class="dashAnchor"></a>
-                <a href="#/Public%20API%20Methods">
-                  <h3 class="section-name">Public API Methods</h3>
+                <a name="/Database%20Writing%20Methods"></a>
+                <a name="//apple_ref/swift/Section/Database Writing Methods" class="dashAnchor"></a>
+                <a href="#/Database%20Writing%20Methods">
+                  <h3 class="section-name">Database Writing Methods</h3>
                 </a>
               </div>
               <ul>
@@ -300,8 +241,8 @@ Since it seems to be impossible to create that instance inside a framework at th
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/start(inContext:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">start(inContext:)</a>
+                    <a name="//apple_ref/swift/Method/delete(measurement:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">delete(measurement:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -309,94 +250,18 @@ Since it seems to be impossible to create that instance inside a framework at th
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Starts the capturing process.</p>
-
-<p>This startup procedure is asynchronous.
-The event handler provided to the initializer receives a <code>DataCapturingEvent.serviceStarted</code>, after the startup has finished.
-If an error happened during this process, it is provided as part of this handlers <code><a href="../Enums/Status.html">Status</a></code> argument.</p>
-<li><p>context: The <code><a href="../Enums/MeasurementContext.html">MeasurementContext</a></code> to use for the newly created measurement.</p></li>
+                        <p>Deletes the measurement from the data storag.</p>
+<li>measurement: The measurement to delete from the data storage.</li>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    <p>Throws:</p>
+    <ul>
+<li><code>PersistenceError.measurementNotLoadable</code> If the measurement to delete was not available.</li>
+<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li>Some unspecified errors from within CoreData.</li>
+<li>Some internal file system error on failure of creating or accessing the accelerations file at the required path.</li>
+</ul>
 
 </div>
-<li><p><code><a href="../Enums/DataCapturingError.html#/isPaused">DataCapturingError.isPaused</a></code> if the service was paused and thus starting it makes no sense. If you need to continue call <code>resume(((DataCapturingEvent) -&gt; Void))</code>.</p></li>
-
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/stop()" class="dashAnchor"></a>
-                    <a class="token" href="#/">stop()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Stops the currently running data capturing process or does nothing if the process is not
-running.</p>
-<div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    
-</div>
-<li><code><a href="../Enums/DataCapturingError.html#/isPaused">DataCapturingError.isPaused</a></code> if the service was paused and thus stopping it makes no sense.</li>
-
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/pause()" class="dashAnchor"></a>
-                    <a class="token" href="#/">pause()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Pauses the current data capturing measurement for the moment. No data is captured until <code><a href="../Classes/DataCapturingService.html#/resume()">resume()</a></code> has been called, but upon the call to <code><a href="../Classes/DataCapturingService.html#/resume()">resume()</a></code> the last measurement will be continued instead of beginning a new now. After using <code>pause()</code> you must call resume before you can call any other lifecycle method like <code><a href="../Classes/DataCapturingService.html#/stop()">stop()</a></code>, for example.</p>
-<div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    
-</div>
-<li><code>DataCaturingError.notRunning</code> if the service was not running and thus pausing it makes no sense.</li>
-<li><code><a href="../Enums/DataCapturingError.html#/isPaused">DataCapturingError.isPaused</a></code> if the service was already paused and pausing it again makes no sense.</li>
-
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/resume()" class="dashAnchor"></a>
-                    <a class="token" href="#/">resume()</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Resumes the current data capturing with the data capturing measurement that was running when <code><a href="../Classes/DataCapturingService.html#/pause()">pause()</a></code> was called. A call to this method is only valid after a call to <code><a href="../Classes/DataCapturingService.html#/pause()">pause()</a></code>. It is going to fail if used after <code>start()</code> or <code><a href="../Classes/DataCapturingService.html#/stop()">stop()</a></code>.</p>
-<div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    
-</div>
-<li><code><a href="../Enums/DataCapturingError.html#/notPaused">DataCapturingError.notPaused</a></code>: If the service was not paused and thus resuming it makes no sense.</li>
-<li><code><a href="../Enums/DataCapturingError.html#/isRunning">DataCapturingError.isRunning</a></code>: If the service was running and thus resuming it makes no sense.</li>
-<li><code><a href="../Enums/DataCapturingError.html#/noCurrentMeasurement">DataCapturingError.noCurrentMeasurement</a></code>: If no current measurement is available while resuming data capturing.</li>
 
                       </div>
                     </section>
@@ -405,13 +270,20 @@ running.</p>
               </ul>
             </div>
             <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Database%20Read%20Only%20Methods"></a>
+                <a name="//apple_ref/swift/Section/Database Read Only Methods" class="dashAnchor"></a>
+                <a href="#/Database%20Read%20Only%20Methods">
+                  <h3 class="section-name">Database Read Only Methods</h3>
+                </a>
+              </div>
               <ul>
                 <li class="item">
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/locationManager(_:didUpdateLocations:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">locationManager(_:didUpdateLocations:)</a>
+                    <a name="//apple_ref/swift/Method/load(measurementIdentifiedBy:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">load(measurementIdentifiedBy:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -419,12 +291,16 @@ running.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The listener method that is informed about new geo locations.</p>
-
-<ul>
-<li>manager: The location manager used.</li>
-<li>didUpdateLocation: An array of the updated locations.</li>
+                        <p>Loads the data belonging to the provided <code>measurement</code> in the background an calls <code>onFinishedCall</code> with the data storage representation of that <code>measurement</code>. Using that represenation is not thread safe. Do not use it outside of the handler.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.dataNotLoadable</code> If there is no such measurement.</li>
+<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li>Some unspecified errors from within CoreData.</li>
 </ul>
+
+</div>
 
                       </div>
                     </section>
@@ -434,8 +310,8 @@ running.</p>
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/locationManager(_:didFailWithError:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">locationManager(_:didFailWithError:)</a>
+                    <a name="//apple_ref/swift/Method/loadMeasurements()" class="dashAnchor"></a>
+                    <a class="token" href="#/">loadMeasurements()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -443,12 +319,148 @@ running.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The listener method informed about error during location tracking. Just prints those errors to the log.</p>
-
-<ul>
-<li>manager: The location manager reporting the error.</li>
-<li>didFailWithError: The reported error.</li>
+                        <p>Loads all the measurements from the data storage.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li>Some unspecified errors from within CoreData.</li>
 </ul>
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/loadSynchronizableMeasurements()" class="dashAnchor"></a>
+                    <a class="token" href="#/">loadSynchronizableMeasurements()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Loads only those measurements that have not been synchronized to a Cyface database yet.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li>Some unspecified errors from within CoreData.</li>
+</ul>
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/countMeasurements()" class="dashAnchor"></a>
+                    <a class="token" href="#/">countMeasurements()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Counts the amount of measurements currently stored in the data store.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li>Some unspecified errors from within CoreData.</li>
+</ul>
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Support%20Methods"></a>
+                <a name="//apple_ref/swift/Section/Support Methods" class="dashAnchor"></a>
+                <a href="#/Support%20Methods">
+                  <h3 class="section-name">Support Methods</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/makeContext()" class="dashAnchor"></a>
+                    <a class="token" href="#/">makeContext()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Creates a new background <code>NSManagedObjectContext</code> for the current thread. This can be used to set an appropriate value for the <code><a href="../Classes/PersistenceLayer.html#/context">context</a></code> attribute.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/collectGeoLocations(from:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">collectGeoLocations(from:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Collects all geo locations from all tracks of a measurement and merges them to a single array.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>SerializationError.missingData</code> If no track data was found.</li>
+<li><code>SerializationError.invalidData</code> If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.</li>
+</ul>
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/extractIdentifiers(from:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">extractIdentifiers(from:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Transforms a list of <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code> objects to a list containing the identifiers.</p>
+
+<p>If you want to use a list of <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code> objects between different threads you must reload them on a context appropriate for that thread.
+To ease this task, this method can be used to make a collection of measurement identifiers, transfer them to the other thread and reload all the measurements there.</p>
 
                       </div>
                     </section>

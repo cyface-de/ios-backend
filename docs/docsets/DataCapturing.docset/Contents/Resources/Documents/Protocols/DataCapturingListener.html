@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>DataCapturingListener Protocol Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Protocol/DataCapturingListener" class="dashAnchor"></a>
+    <a title="DataCapturingListener Protocol Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html"> Docs</a> (75% documented)</p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html"> Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        DataCapturingListener Protocol Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DiskConsumption.html">DiskConsumption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Measurement.html">Measurement</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Protocols/DataCapturingListener.html">DataCapturingListener</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/GpsPosition.html">GpsPosition</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/Reason.html">Reason</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>DataCapturingListener</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">DataCapturingListener</span></code></pre>
+
+                </div>
+              </div>
+            <p>This protocol defines how to listen for data capturing events.</p>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    <p>Klemens Muthmann</p>
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    <p>1.0.0</p>
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    <p>Since
+1.0.0</p>
+
+</div>
+
+<p>An instance of a class implementing this protocol should register with a <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code> via the method <code>DataCapturingService.startCapturing(Listener:DataCapturingListener)</code>.</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing0aB8ListenerP15onGpsFixAcquireyyF"></a>
+                    <a name="//apple_ref/swift/Method/onGpsFixAcquire()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB8ListenerP15onGpsFixAcquireyyF">onGpsFixAcquire()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Called everytime the capturing service received a geo location fix and thus is able to track its position.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">func</span> <span class="nf">onGpsFixAcquire</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing0aB8ListenerP12onGpsFixLostyyF"></a>
+                    <a name="//apple_ref/swift/Method/onGpsFixLost()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB8ListenerP12onGpsFixLostyyF">onGpsFixLost()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Called everytime the capturing service loses its geo location fix.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">func</span> <span class="nf">onGpsFixLost</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing0aB8ListenerP24onNewGpsPositionAcquiredyAA0fG0V8position_tF"></a>
+                    <a name="//apple_ref/swift/Method/onNewGpsPositionAcquired(position:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB8ListenerP24onNewGpsPositionAcquiredyAA0fG0V8position_tF">onNewGpsPositionAcquired(position:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>This method is called eacht time the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>receives a new geo location position.</p>
+
+<ul>
+<li>position: The new geo location position.</li>
+</ul>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">func</span> <span class="nf">onNewGpsPositionAcquired</span><span class="p">(</span><span class="nv">position</span><span class="p">:</span><span class="kt"><a href="../Structs/GpsPosition.html">GpsPosition</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing0aB8ListenerP14onLowDiskSpaceyAA0F11ConsumptionC10allocation_tF"></a>
+                    <a name="//apple_ref/swift/Method/onLowDiskSpace(allocation:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB8ListenerP14onLowDiskSpaceyAA0F11ConsumptionC10allocation_tF">onLowDiskSpace(allocation:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>This method is called each time the application runs out of space. How much space is used and how much is available may be retrieved from <code>allocation</code>.
+-parameters:</p>
+
+<ul>
+<li>allocation: Information about the applications disk (or rather SD card) space consumption.</li>
+</ul>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">func</span> <span class="nf">onLowDiskSpace</span><span class="p">(</span><span class="nv">allocation</span><span class="p">:</span><span class="kt"><a href="../Classes/DiskConsumption.html">DiskConsumption</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing0aB8ListenerP9onRequireSbSS10permission_AA6ReasonV3fortF"></a>
+                    <a name="//apple_ref/swift/Method/onRequire(permission:for:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB8ListenerP9onRequireSbSS10permission_AA6ReasonV3fortF">onRequire(permission:for:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Invoked each time the `DataCapturingService requires some pemission from the iOS system. That way it is possible to show the user some explanation as to why that permission is required.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">func</span> <span class="nf">onRequire</span><span class="p">(</span><span class="nv">permission</span><span class="p">:</span><span class="kt">String</span><span class="p">,</span><span class="k">for</span> <span class="nv">reason</span> <span class="p">:</span> <span class="kt"><a href="../Structs/Reason.html">Reason</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing0aB8ListenerP27onSynchronizationSuccessfulyyF"></a>
+                    <a name="//apple_ref/swift/Method/onSynchronizationSuccessful()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB8ListenerP27onSynchronizationSuccessfulyyF">onSynchronizationSuccessful()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Invoked if the service has synchronized all pending cached data successfully and delted the local copies.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">func</span> <span class="nf">onSynchronizationSuccessful</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2017 <a class="link" href="" target="_blank" rel="external"></a>. All rights reserved. (Last updated: 2017-11-07)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

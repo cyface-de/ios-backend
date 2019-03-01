@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>DiskConsumption Class Reference</title>
+    <title>ServerConnectionError Enumeration Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Class/DiskConsumption" class="dashAnchor"></a>
-    <a title="DiskConsumption Class Reference"></a>
+    <a name="//apple_ref/swift/Enum/ServerConnectionError" class="dashAnchor"></a>
+    <a title="ServerConnectionError Enumeration Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
@@ -21,7 +21,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">DataCapturing Reference</a>
         <img id="carat" src="../img/carat.png" />
-        DiskConsumption Class Reference
+        ServerConnectionError Enumeration Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -136,8 +136,17 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>DiskConsumption</h1>
-            <p>Objects of this class represent the current disk (or rather SD card) space used and available.</p>
+            <h1>ServerConnectionError</h1>
+            <p>An enumeration encapsulating errors used by server connections.</p>
+<pre class="highlight plaintext"><code>case authenticationNotSuccessful
+case notAuthenticated
+case serializationTimeout
+case missingInstallationIdentifier
+case missingMeasurementIdentifier
+case missingDeviceType
+case invalidResponse
+case unexpectedError
+</code></pre>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -145,35 +154,25 @@
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    1.0.0
+    3.0.0
+
+</div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
     1.0.0
 
 </div>
 
-</div>
-
-<p>This space is mostly filled with unsynchronized <code>Measurement</code>s.
-To avoid filling up the users SD card it is advisable to delte <code>Measurement</code>s as soon as they use up too much space.</p>
-
           </section>
           <section class="section task-group-section">
             <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Properties"></a>
-                <a name="//apple_ref/swift/Section/Properties" class="dashAnchor"></a>
-                <a href="#/Properties">
-                  <h3 class="section-name">Properties</h3>
-                </a>
-              </div>
               <ul>
                 <li class="item">
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/consumedBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">consumedBytes</a>
+                    <a name="//apple_ref/swift/Element/authenticationNotSuccessful" class="dashAnchor"></a>
+                    <a class="token" href="#/">authenticationNotSuccessful</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -181,26 +180,7 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The amount of bytes currently used by the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
-
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/availableBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">availableBytes</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The amount of bytes still available for the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                        <p>If authentication was carried out but was not successful</p>
 
                       </div>
                     </section>
@@ -209,20 +189,13 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
               </ul>
             </div>
             <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Initializers"></a>
-                <a name="//apple_ref/swift/Section/Initializers" class="dashAnchor"></a>
-                <a href="#/Initializers">
-                  <h3 class="section-name">Initializers</h3>
-                </a>
-              </div>
               <ul>
                 <li class="item">
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/init(consumedBytes:availableBytes:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">init(consumedBytes:availableBytes:)</a>
+                    <a name="//apple_ref/swift/Element/notAuthenticated" class="dashAnchor"></a>
+                    <a class="token" href="#/">notAuthenticated</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -230,7 +203,145 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a new completely initialized <code>DiskConsumption</code> object.</p>
+                        <p>Error occuring if this client tried to communicate with the server without proper authentication.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Element/serializationTimeout" class="dashAnchor"></a>
+                    <a class="token" href="#/">serializationTimeout</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>If data serialization for upload took too long.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Element/missingInstallationIdentifier" class="dashAnchor"></a>
+                    <a class="token" href="#/">missingInstallationIdentifier</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Thrown if no installation identifier is available.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Element/missingMeasurementIdentifier" class="dashAnchor"></a>
+                    <a class="token" href="#/">missingMeasurementIdentifier</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Thrown if the measurement was not persistent and thus has not identifier</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Element/missingDeviceType" class="dashAnchor"></a>
+                    <a class="token" href="#/">missingDeviceType</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Thrown if no device type was available from the system.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Element/invalidResponse" class="dashAnchor"></a>
+                    <a class="token" href="#/">invalidResponse</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Thrown if the response was not parseable.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Element/unexpectedError" class="dashAnchor"></a>
+                    <a class="token" href="#/">unexpectedError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Used for all unexpected errors, that should not occur during normal operation.</p>
 
                       </div>
                     </section>

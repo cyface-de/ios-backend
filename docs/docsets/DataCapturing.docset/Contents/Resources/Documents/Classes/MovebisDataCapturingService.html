@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>DiskConsumption Class Reference</title>
+    <title>MovebisDataCapturingService Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Class/DiskConsumption" class="dashAnchor"></a>
-    <a title="DiskConsumption Class Reference"></a>
+    <a name="//apple_ref/swift/Class/MovebisDataCapturingService" class="dashAnchor"></a>
+    <a title="MovebisDataCapturingService Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
@@ -21,7 +21,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">DataCapturing Reference</a>
         <img id="carat" src="../img/carat.png" />
-        DiskConsumption Class Reference
+        MovebisDataCapturingService Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -136,8 +136,12 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>DiskConsumption</h1>
-            <p>Objects of this class represent the current disk (or rather SD card) space used and available.</p>
+            <h1>MovebisDataCapturingService</h1>
+            <p>A <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code> implementation that provides the ability to capture locations
+before an actual measurement has been started.</p>
+
+<p>To receive the updates set the <code>preCapturingLocationDelegate</code>.
+The instance you provide will receive the updates.</p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -145,17 +149,14 @@
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    1.0.0
+    4.0.1
+
+</div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
     1.0.0
 
 </div>
-
-</div>
-
-<p>This space is mostly filled with unsynchronized <code>Measurement</code>s.
-To avoid filling up the users SD card it is advisable to delte <code>Measurement</code>s as soon as they use up too much space.</p>
 
           </section>
           <section class="section task-group-section">
@@ -172,8 +173,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/consumedBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">consumedBytes</a>
+                    <a name="//apple_ref/swift/Property/preCapturingLocationDelegate" class="dashAnchor"></a>
+                    <a class="token" href="#/">preCapturingLocationDelegate</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -181,26 +182,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The amount of bytes currently used by the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
-
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/availableBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">availableBytes</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The amount of bytes still available for the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                        <p>The delegate that gets informed about location updates.
+You may set this to <code>nil</code> if you would like to deactive location updates.</p>
 
                       </div>
                     </section>
@@ -221,8 +204,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/init(consumedBytes:availableBytes:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">init(consumedBytes:availableBytes:)</a>
+                    <a name="//apple_ref/swift/Method/init(connection:sensorManager:updateInterval:savingInterval:persistenceLayer:eventHandler:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">init(connection:sensorManager:updateInterval:savingInterval:persistenceLayer:eventHandler:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -230,7 +213,61 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a new completely initialized <code>DiskConsumption</code> object.</p>
+                        <p>Creates a new <code>MovebisDataCapturingService</code> with the ability capture location
+when no data capturing runs.</p>
+<li>connection: A connection to a Cyface API server.</li>
+<li>sensorManager: An instance of <code>CMMotionManager</code>.
+There should be only one instance of this type in your application.
+Since it seems to be impossible to create that instance inside a framework at the moment,
+you have to provide it via this parameter.</li>
+<li>updateInterval: The accelerometer update interval in Hertz. Default value is 100 Hertz.</li>
+<li>savingInterval: The time between save operations during data capturing in seconds. Default value is 30 seconds.</li>
+<li>persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.</li>
+<li>eventHandler: A handler for events occuring during data capturing.</li>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    If the networking stack for data synchronization was not successfully initialized.
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Methods"></a>
+                <a name="//apple_ref/swift/Section/Methods" class="dashAnchor"></a>
+                <a href="#/Methods">
+                  <h3 class="section-name">Methods</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/start()" class="dashAnchor"></a>
+                    <a class="token" href="#/">start()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Starts the capturing process, notifying the provided handler of important events.</p>
+
+<p>This is a long running asynchronous operation.
+The provided handler is notified of its completion by receiving the event <code>DataCapturingEvent.serviceStarted</code>.
+If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    
+</div>
+<li><code><a href="../Enums/DataCapturingError.html#/isPaused">DataCapturingError.isPaused</a></code> if the service was paused and thus it makes no sense to start it. Use <code>resume()</code>if you want to continue.</li>
 
                       </div>
                     </section>

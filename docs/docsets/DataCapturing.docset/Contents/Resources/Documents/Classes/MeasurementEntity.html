@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>DiskConsumption Class Reference</title>
+    <title>MeasurementEntity Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Class/DiskConsumption" class="dashAnchor"></a>
-    <a title="DiskConsumption Class Reference"></a>
+    <a name="//apple_ref/swift/Class/MeasurementEntity" class="dashAnchor"></a>
+    <a title="MeasurementEntity Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
@@ -21,7 +21,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">DataCapturing Reference</a>
         <img id="carat" src="../img/carat.png" />
-        DiskConsumption Class Reference
+        MeasurementEntity Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -136,26 +136,30 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>DiskConsumption</h1>
-            <p>Objects of this class represent the current disk (or rather SD card) space used and available.</p>
+            <h1>MeasurementEntity</h1>
+            <p>Represents one measurement carried out by the Cyface SDK.</p>
+
+<p>A measurement is a track of geo locations and associated accelerations.</p>
+<div class="aside aside-remark">
+    <p class="aside-title">Remark</p>
+    <p>DO NOT confuse this class with CoreData generated model object <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code>. Since the model object is not thread safe you should use an instance of this class if you hand data between processes.</p>
+
+</div>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
-    Klemens Muthmann
+    <p>Klemens Muthmann</p>
 
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    1.0.0
+    <p>1.0.0</p>
+
+</div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
-    1.0.0
+    <p>1.0.0</p>
 
 </div>
-
-</div>
-
-<p>This space is mostly filled with unsynchronized <code>Measurement</code>s.
-To avoid filling up the users SD card it is advisable to delte <code>Measurement</code>s as soon as they use up too much space.</p>
 
           </section>
           <section class="section task-group-section">
@@ -172,8 +176,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/consumedBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">consumedBytes</a>
+                    <a name="//apple_ref/swift/Property/identifier" class="dashAnchor"></a>
+                    <a class="token" href="#/">identifier</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -181,7 +185,7 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The amount of bytes currently used by the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                        <p>The device wide unique identifier of this measurement.</p>
 
                       </div>
                     </section>
@@ -191,8 +195,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Property/availableBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/">availableBytes</a>
+                    <a name="//apple_ref/swift/Property/measurementContext" class="dashAnchor"></a>
+                    <a class="token" href="#/">measurementContext</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -200,7 +204,7 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The amount of bytes still available for the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                        <p>The context of this measurement. This is application specific and might be something like the vehicle used.</p>
 
                       </div>
                     </section>
@@ -221,8 +225,8 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                   <div>
                     <code>
                     <a name="/"></a>
-                    <a name="//apple_ref/swift/Method/init(consumedBytes:availableBytes:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">init(consumedBytes:availableBytes:)</a>
+                    <a name="//apple_ref/swift/Method/init(identifier:context:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">init(identifier:context:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -230,7 +234,12 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a new completely initialized <code>DiskConsumption</code> object.</p>
+                        <p>Creates a new <code>MeasurementEntity</code> initializing all its properties to the provided values</p>
+
+<ul>
+<li>identifier: The device wide unique identifier of this measurement.</li>
+<li>context: The context of this measurement. This is application specific and might be something like the vehicle used.</li>
+</ul>
 
                       </div>
                     </section>
