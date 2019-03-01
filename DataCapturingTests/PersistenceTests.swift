@@ -194,4 +194,31 @@ class PersistenceTests: XCTestCase {
             XCTFail("Error \(error.localizedDescription)")
         }
     }
+
+    func testLoadGeoLocationTracks() throws {
+        let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
+
+        guard let tracks = measurement.tracks?.array as? [Track] else {
+            return XCTFail("Unable to load tracks!")
+        }
+        XCTAssertEqual(tracks.count, 1, "There should only be one track in the fixture measurement!")
+
+        guard let locations = tracks[0].locations?.array as? [GeoLocationMO] else {
+            return XCTFail("Unable to load geo locations!")
+        }
+        XCTAssertEqual(locations.count, 2, "There should be two locations in the fixture measurement!")
+
+        try oocut.appendNewTrack(to: measurement)
+        try oocut.save(locations: [GeoLocation(latitude: 2.0, longitude: 2.0, accuracy: 1.0, speed: 10.0, timestamp: 5)], in: measurement)
+
+        guard let tracksAfterRefresh = measurement.tracks?.array as? [Track] else {
+            return XCTFail("Unable to load tracks!")
+        }
+        XCTAssertEqual(tracksAfterRefresh.count, 2, "There should only be one track in the fixture measurement!")
+
+        guard let locationsInSecondTrack = tracksAfterRefresh[1].locations?.array as? [GeoLocationMO] else {
+            return XCTFail("Unable to load geo locations!")
+        }
+        XCTAssertEqual(locationsInSecondTrack.count, 1, "There should be two locations in the fixture measurement!")
+    }
 }
