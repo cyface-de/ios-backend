@@ -64,7 +64,8 @@ extension FileSupport {
 
      - Parameter for: The measurement to create the path to the data file for.
      - Returns: The path to the file as an URL.
-     - Throws: On failure of creating the file at the required path.
+     - Throws:
+        - Some internal file system error on failure of creating the file at the required path.
      */
     fileprivate func path(for measurement: Int64) throws -> URL {
         let measurementIdentifier = measurement
@@ -89,7 +90,8 @@ extension FileSupport {
      Removes the data file for the provided measurement. If this was the last or only data file it also deletes the folder containing the files for the measurement.
 
      - Parameter from: The measurement to delete the data from.
-     - Throws: If reading or writing the file system failed.
+     - Throws:
+        - Some internal file system error on failure of creating the file at the required path.
      */
     func remove(from measurement: MeasurementMO) throws {
         let filePath = try path(for: measurement.identifier)
@@ -147,11 +149,12 @@ public struct AccelerationsFile: FileSupport {
      - Parameters:
      - serializable: The array of `Acceleration` instances to write.
      - to: The measurement to write the accelerations to.
-     - Throws: If accessing the file system for reading or writing was not successful.
      - Returns: The file system URL of the file that was written to.
+     - Throws:
+        - Some internal file system error on failure of creating the file at the required path.
      */
     func write(serializable: [Acceleration], to measurement: Int64) throws -> URL {
-        let accelerationData = try serializer.serialize(serializable: serializable)
+        let accelerationData = serializer.serialize(serializable: serializable)
         let accelerationFilePath = try path(for: measurement)
 
         let fileHandle = try FileHandle(forWritingTo: accelerationFilePath)
@@ -184,8 +187,10 @@ public struct AccelerationsFile: FileSupport {
      Provides the binary data for the acceleration values of the provided measurement.
 
      - Parameter for: The measurement to provide data for.
-     - Throws: If the file storing the accelerations was not readable.
      - Returns: The serialized accelerations in Cyface Binary Format.
+     - Throws:
+        - `FileSupportError.notReadable` If the data file was not readable.
+        - Some unspecified undocumented file system error if file was not accessible.
     */
     func data(for measurement: MeasurementMO) throws -> Data {
         do {
@@ -230,8 +235,12 @@ struct MeasurementFile: FileSupport {
      - Parameters:
      - serializable: The measurement to write.
      - to: The measurement to write to.
-     - Throws: In case the file system was not accessible for reading or writing.
      - Returns: A file system URL pointing to the written file.
+     - Throws:
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+        - `FileSupportError.notReadable` If the data file was not readable.
+        - Some unspecified undocumented file system error if file was not accessible.
     */
     func write(serializable: MeasurementMO, to measurement: Int64) throws -> URL {
         let measurementData = try data(from: serializable)
@@ -250,8 +259,12 @@ struct MeasurementFile: FileSupport {
      Creates a data representation from some `MeasurementMO` object.
 
      - Parameter from: A valid object to create a data in Cyface binary format representation for.
-     - Throws: If part of the required information was not accessible.
      - Returns: The data in the Cyface binary format.
+     - Throws:
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+        - `FileSupportError.notReadable` If the data file was not readable.
+        - Some unspecified undocumented file system error if file was not accessible.
      */
     func data(from serializable: MeasurementMO) throws -> Data? {
         let serializer = CyfaceBinaryFormatSerializer()

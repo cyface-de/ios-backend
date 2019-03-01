@@ -28,7 +28,7 @@ import CoreData
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 3.0.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
@@ -70,17 +70,20 @@ public class PersistenceLayer {
     /// Used to update a measurements length, each time new locations are added.
     private let distanceCalculator: DistanceCalculationStrategy
 
+    /// The current `NSManagedObjectContext` used by this persistence layer. This has to be reset if the layer is used on a different thread. If it is `nil` each method is going to use its own context, which can cause problems if model objects are used between those methods.
+    public var context: NSManagedObjectContext?
+
     // MARK: - Initializers
 
     /**
      Public constructor usable by external callers.
 
-     - Parameters:
-     - withDistanceCalculator: An algorithm used to calculate the distance between geo locations.
-     - onCompletionHandler: Called when the persistence layer has successfully finished initialization.
-     - Throws: A `PersistenceError.modelNotLoabable` if the model is not loadable
+     - Parameter withDistanceCalculator: An algorithm used to calculate the distance between geo locations.
+     - Throws:
+        - `PersistenceError.modelNotLoabable` If the model is not loadable
+        - `PersistenceError.modelNotInitializable` If the model was loaded (so it is available) but can not be initialized.
      */
-    public init(withDistanceCalculator: DistanceCalculationStrategy, onCompletionHandler: @escaping (PersistenceLayer?, Status) -> Void) throws {
+    public init(withDistanceCalculator: DistanceCalculationStrategy) throws {
         self.distanceCalculator = withDistanceCalculator
         /*
          The following code is necessary to load the CyfaceModel from the DataCapturing framework.
@@ -102,251 +105,231 @@ public class PersistenceLayer {
 
         container = NSPersistentContainer(name: momdName, managedObjectModel: mom)
 
-        container.loadPersistentStores { _, error in
-            if let error = error {
-                onCompletionHandler(nil, .error(error))
-            } else {
-                onCompletionHandler(self, .success)
-            }
-        }
+        // This actually runs synchronously if the `shouldAddStoreAsynchronously` of `NSPersistentStoreDescription` is not set to `true`.
+        container.loadPersistentStores(completionHandler: {_, _ in})
     }
 
     // MARK: - Database Writing Methods
 
     /**
-     * Creates a new `measurement` asynchronuously and informs the caller when finished.
-     *
-     * - Parameters:
-     *    - at: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
-     *    - withContext: The measurement context the new measurement is created in.
-     *    - onFinishedCall: Handler that is called with the new measurement as parameter when the measurement has been stored in the database.
+     Creates a new `MeasurementMO` in data storage.
+
+     - Parameters:
+        - at: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
+        - withContext: The measurement context the new measurement is created in.
+     - Returns: The newly created model object for the measurement.
+     - Throws:
+        - `PersistenceError.measurementNotCreatable(timestamp)` If CoreData was unable to create the new entity.
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
      */
-    public func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext, onFinishedCall handler: @escaping ((MeasurementMO?, Status) -> Void)) {
-        container.performBackgroundTask { context in
-            // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
-            var identifier = self.nextIdentifier
-            do {
-                while try self.load(measurementIdentifiedBy: identifier, from: context) != nil {
-                    identifier = self.nextIdentifier
-                }
+    func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext) throws -> MeasurementMO {
+        let context = try getContext()
+        // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
+        var identifier = self.nextIdentifier
+        while try load(measurementIdentifiedBy: identifier, from: context) != nil {
+            identifier = self.nextIdentifier
+        }
 
-                if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
-                    let measurement = MeasurementMO(entity: description, insertInto: context)
-                    measurement.timestamp = timestamp
-                    measurement.identifier = identifier
-                    measurement.synchronized = false
-                    measurement.context = mContext.rawValue
-                    context.saveRecursively()
+        if let description = NSEntityDescription.entity(forEntityName: "Measurement", in: context) {
+            let measurement = MeasurementMO(entity: description, insertInto: context)
+            measurement.timestamp = timestamp
+            measurement.identifier = identifier
+            measurement.synchronized = false
+            measurement.context = mContext.rawValue
+            context.saveRecursively()
 
-                    handler(measurement, .success)
-                } else {
-                    handler(nil, .error(PersistenceError.measurementNotCreatable(timestamp)))
-                }
-            } catch let error {
-                handler(nil, .error(error))
-            }
+            context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+            context.refresh(measurement, mergeChanges: true)
+            return measurement
+        } else {
+            throw PersistenceError.measurementNotCreatable(timestamp)
         }
     }
 
     /**
-     Deletes the measurement from the data storage on a background thread. Calls the provided handler when deletion has been completed.
+     This adds a new track to the end of the list of tracks of the provided measurement. New locations are always written to the last track. You need to call this method before adding any locations to a measurement.
+
+     - Parameter to: The measurement to add the new track to.
+     - Throws:
+        - `PersistenceError.trackNotCreatable` If the `Track` entity could not be created by CoreData.
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - `PersistenceError.inconsistentData` If CoreData is incapable of migrating. If this happens something is seriously wrong with CoreData.
+     */
+    func appendNewTrack(to measurement: MeasurementMO) throws {
+        let context = try getContext()
+        //container.performBackgroundTask { context in
+        let measurementOnCurrentContext = try migrate(measurement: measurement, to: context)
+        if let trackDescription = NSEntityDescription.entity(forEntityName: "Track", in: context) {
+            let track = Track.init(entity: trackDescription, insertInto: context)
+            measurementOnCurrentContext.addToTracks(track)
+
+            context.saveRecursively()
+            context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+            context.refresh(measurement, mergeChanges: true)
+        } else {
+            throw PersistenceError.trackNotCreatable
+        }
+        //}
+    }
+
+    /**
+     Deletes the measurement from the data storag.
      
      - Parameters:
      - measurement: The measurement to delete from the data storage.
-     - onFinishedCall: The handler to call, when deletion has completed.
+     - Throws:
+        - `PersistenceError.measurementNotLoadable` If the measurement to delete was not available.
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
+        - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
      */
-    public func delete(measurement: MeasurementEntity, onFinishedCall handler: @escaping ((Status) -> Void)) {
-        container.performBackgroundTask { context in
-            let measurementIdentifier = measurement.identifier
-            do {
-                guard let measurement = try self.load(measurementIdentifiedBy: measurement.identifier, from: context) else {
-                    handler(.error(PersistenceError.measurementNotLoadable(measurementIdentifier)))
-                    return
-                }
-
-                let accelerationFile = AccelerationsFile()
-                try accelerationFile.remove(from: measurement)
-                context.delete(measurement)
-                context.saveRecursively()
-                handler(.success)
-            } catch let error {
-                handler(.error(error))
-            }
+    public func delete(measurement: MeasurementEntity) throws {
+        let context = try getContext()
+        let measurementIdentifier = measurement.identifier
+        guard let measurement = try load(measurementIdentifiedBy: measurement.identifier, from: context) else {
+            throw PersistenceError.measurementNotLoadable(measurementIdentifier)
         }
+
+        let accelerationFile = AccelerationsFile()
+        try accelerationFile.remove(from: measurement)
+        context.delete(measurement)
+        context.saveRecursively()
     }
 
     /**
      Deletes everything from the data storage.
      
-     - Parameter onFinishedCall: A handler called after deletion is complete.
+     - Throws:
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
      */
-    func delete(onFinishedCall handler: @escaping (Status) -> Void) {
-        container.performBackgroundTask { context in
-            self.loadMeasurements(onFinishedCall: { measurements, status in
-                guard case .success = status else {
-                    return handler(status)
-                }
-                do {
-                    guard let measurements = measurements else {
-                        return handler(.error(PersistenceError.measurementsNotLoadable))
-                    }
+    func delete() throws {
+        let context = try getContext()
+        let measurements = try loadMeasurements()
 
-                    for measurement in measurements {
-                        let object = try context.existingObject(with: measurement.objectID)
-                        context.delete(object)
-                    }
-                    context.saveRecursively()
-                    handler(.success)
-                } catch let error {
-                    handler(.error(error))
-                }
-            })
+        for measurement in measurements {
+            let object = try context.existingObject(with: measurement.objectID)
+            context.delete(object)
         }
+        context.saveRecursively()
     }
 
     /**
      Strips the provided measurement of all accelerations.
      
-     - Parameters:
-     - measurement: The measurement to strip of accelerations
+     - Parameter measurement: The measurement to strip of accelerations
+     - Throws:
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
+        - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
      */
-    func clean(measurement: MeasurementEntity, whenFinishedCall finishedHandler: @escaping (Status) -> Void) {
-        container.performBackgroundTask { context in
-            do {
-                let measurementIdentifier = measurement.identifier
-                guard let measurement = try self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
-                    throw PersistenceError.dataNotLoadable(measurement: measurementIdentifier)
-                }
-
-                measurement.synchronized = true
-                measurement.accelerationsCount = 0
-                let accelerationsFile = AccelerationsFile()
-                try accelerationsFile.remove(from: measurement)
-
-                context.saveRecursively()
-                finishedHandler(.success)
-            } catch let error {
-                finishedHandler(.error(error))
-            }
+    func clean(measurement: MeasurementEntity) throws {
+        let context = try getContext()
+        let measurementIdentifier = measurement.identifier
+        guard let measurement = try load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
+            throw PersistenceError.dataNotLoadable(measurement: measurementIdentifier)
         }
+
+        measurement.synchronized = true
+        measurement.accelerationsCount = 0
+        let accelerationsFile = AccelerationsFile()
+        try accelerationsFile.remove(from: measurement)
+
+        context.saveRecursively()
     }
 
     /**
-     Stores the provided `location` and `accelerations` to the provided measurement.
-     
-     - Parameters:
-     - locations: An array of `GeoLocation` instances to store.
-     - toMeasurement: The measurement to store the `location` and `accelerations` to.
-     - onFinished: The handler to call as soon as the database operation has finished.
-     */
-    func save(locations: [GeoLocation], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping (MeasurementMO?, Status) -> Void) {
-        container.performBackgroundTask { context in
-            let measurementIdentifier = measurement.identifier
-            do {
-                guard let measurement = try self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
-                    return handler(nil, .error(PersistenceError.measurementNotLoadable(measurementIdentifier)))
-                }
+     Stores the provided `locations` to the most recent track in the measurement. Please make sure to call `appendNewTrack(:to)` with the same measurement at least once before using this method.
 
-                try self.internalSave(locations: locations, toMeasurement: measurement, onContext: context)
-                context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
-                context.saveRecursively()
-                context.refresh(measurement, mergeChanges: true)
-                handler(measurement, .success)
-            } catch let error {
-                handler(nil, .error(error))
-            }
+     - Parameters:
+     - locations: An array of `GeoLocation` instances, ordered by timestamp to store in the database.
+     - in: The measurement to store the `location` and `accelerations` to.
+     - Throws:
+        - `PersistenceError.geoLocationNotCreatable` If CoreData is incapable of creating a geo location entity.
+        - `PersistenceError.dataNotLoadable` If no valid `Track` was available.
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - `PersistenceError.inconsistentData` If CoreData is incapable of migrating. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
+     */
+    func save(locations: [GeoLocation], in measurement: MeasurementMO) throws {
+        let context = try getContext()
+        guard let locationDescription = NSEntityDescription.entity(forEntityName: "GeoLocation", in: context) else {
+            throw PersistenceError.geoLocationNotCreatable
         }
-    }
 
-    /**
-     Saves the provided `GeoLocation` instances to the data storage. This is an internal save method that should only run on a `PersistenceContainer` background thread.
+        let measurement = try migrate(measurement: measurement, to: context)
 
-     This method also increases the track length based on the added `GeoLocation` objects.
+        guard let track = measurement.tracks?.lastObject as? Track else {
+            throw PersistenceError.dataNotLoadable(measurement: measurement.identifier)
+        }
 
-     - Parameters:
-     - locations: The `GeoLocation` instances to save.
-     - toMeasurement: The measurement to save to.
-     - onContext: The `NSManagedObjectContext` to save the data to.
-     */
-    private func internalSave(locations: [GeoLocation], toMeasurement measurement: MeasurementMO, onContext context: NSManagedObjectContext) throws {
         let geoLocationFetchRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
         geoLocationFetchRequest.fetchLimit = 1
-        let maxTimestampInMeaurementPredicate = NSPredicate(format: "timestamp==max(timestamp) && measurement==%@", measurement)
-        geoLocationFetchRequest.predicate = maxTimestampInMeaurementPredicate
-        var lastCapturedLocation = try geoLocationFetchRequest.execute().first
+        let maxTimestampInTrackPredicate = NSPredicate(format: "timestamp==max(timestamp) && track==%@", track)
+        geoLocationFetchRequest.predicate = maxTimestampInTrackPredicate
+        geoLocationFetchRequest.resultType = .managedObjectResultType
+        var lastCapturedLocation = try context.fetch(geoLocationFetchRequest).first
         var distance = 0.0
 
         locations.forEach { location in
-            let dbLocation = GeoLocationMO.init(entity: GeoLocationMO.entity(), insertInto: context)
+            let dbLocation = GeoLocationMO.init(entity: locationDescription, insertInto: context)
             dbLocation.lat = location.latitude
             dbLocation.lon = location.longitude
             dbLocation.speed = location.speed
             dbLocation.timestamp = location.timestamp
             dbLocation.accuracy = location.accuracy
-            measurement.addToGeoLocations(dbLocation)
+            track.addToLocations(dbLocation)
 
             if let lastCapturedLocation = lastCapturedLocation {
-                let delta = distanceCalculator.calculateDistance(from: lastCapturedLocation, to: dbLocation)
+                let delta = self.distanceCalculator.calculateDistance(from: lastCapturedLocation, to: dbLocation)
                 distance += delta
             }
             lastCapturedLocation = dbLocation
         }
 
         measurement.trackLength += distance
+
+        context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        context.saveRecursively()
+        context.refresh(measurement, mergeChanges: true)
     }
 
     /**
-     Stores the provided `location` and `accelerations` to the provided measurement.
+     Stores the provided `accelerations` to the provided measurement.
 
      - Parameters:
      - accelerations: An array of `Acceleration` instances to store.
-     - toMeasurement: The measurement to store the `location` and `accelerations` to.
-     - onFinished: The handler to call as soon as the database operation has finished.
-     - Throws: If accessing the local file system failes for some reason and thus the `Acceleration` instances can not be saved.
+     - in: The measurement to store the `accelerations` to.
+     - Throws:
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - `PersistenceError.inconsistentData` If CoreData is incapable of migrating. If this happens something is seriously wrong with CoreData.
+        - Some internal file system error on failure of accessing the acceleration file at the required path.
      */
-    func save(accelerations: [Acceleration], toMeasurement measurement: MeasurementEntity, onFinished handler: @escaping ((MeasurementMO?, Status) -> Void)) {
-        container.performBackgroundTask { context in
-            do {
-                let measurementIdentifier = measurement.identifier
-                guard let measurement = try self.load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
-                    throw PersistenceError.dataNotLoadable(measurement: measurementIdentifier)
-                }
+    func save(accelerations: [Acceleration], in measurement: MeasurementMO) throws {
+        let context = try getContext()
 
-                try self.internalSave(accelerations: accelerations, toMeasurement: measurement)
-                measurement.accelerationsCount = measurement.accelerationsCount.advanced(by: accelerations.count)
+        let measurement = try migrate(measurement: measurement, to: context)
 
-                context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
-                context.saveRecursively()
-                context.refresh(measurement, mergeChanges: true)
-                handler(measurement, .success)
-            } catch let error {
-                handler(nil, .error(error))
-            }
-        }
-    }
-
-    /**
-     Saves the provided `Acceleration` instances to the data storage. This is an internal save method that should only run on a `PersistenceContainer` background thread.
-
-     - Parameters:
-     - accelerations: The `GeoLocation` instances to save.
-     - toMeasurement: The measurement to save to.
-     - Throws: If accessing the local file system failes for some reason and thus the `Acceleration` instances can not be saved.
-     */
-    private func internalSave(accelerations: [Acceleration], toMeasurement measurement: MeasurementMO) throws {
         let accelerationsFile = AccelerationsFile()
         _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
+        measurement.accelerationsCount = measurement.accelerationsCount.advanced(by: accelerations.count)
+
+        context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+        context.saveRecursively()
+        context.refresh(measurement, mergeChanges: true)
     }
 
     // MARK: - Database Read Only Methods
     /**
      Internal load method, loading the provided `measurement` on the provided `context`.
-     
+
      - Parameters:
-     - measurementIdentifiedBy: The `measurement` to load.
-     - from: The CoreData `context` to load the `measurement` from.
-     - Returns:
-     - The `MeasurementMO` object for the provided identifier or `nil` if no such mesurement exists.
+        - measurementIdentifiedBy: The `measurement` to load.
+        - from: The CoreData `context` to load the `measurement` from.
+     - Returns: The `MeasurementMO` object for the provided identifier or `nil` if no such mesurement exists.
+     - Throws:
+        - Some unspecified errors from within CoreData.
      */
     private func load(measurementIdentifiedBy identifier: Int64, from context: NSManagedObjectContext) throws -> MeasurementMO? {
         let fetchRequest: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
@@ -363,78 +346,162 @@ public class PersistenceLayer {
 
     /**
      Loads the data belonging to the provided `measurement` in the background an calls `onFinishedCall` with the data storage representation of that `measurement`. Using that represenation is not thread safe. Do not use it outside of the handler.
-     
-     - Parameters:
-     - measurement: The `measurement` to load.
-     - onFinishedCall: The handler to call when loading the `measurement` has finished
+
+     - Parameter measurementIdentifiedBy: The device wide unique identifier of the measurement to load.
+     - Returns: The requested measurement as a model object.
+     - Throws:
+        - `PersistenceError.dataNotLoadable` If there is no such measurement.
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
      */
-    public func load(measurementIdentifiedBy identifier: Int64, onFinishedCall handler: @escaping (MeasurementMO?, Status) -> Void) {
-        container.performBackgroundTask { context in
-            context.automaticallyMergesChangesFromParent = true
-            do {
-                if let measurement = try self.load(measurementIdentifiedBy: identifier, from: context) {
-                    handler(measurement, .success)
-                } else {
-                    handler(nil, .error(PersistenceError.dataNotLoadable(measurement: identifier)))
-                }
-            } catch let error {
-                handler(nil, .error(error))
-            }
+    public func load(measurementIdentifiedBy identifier: Int64) throws -> MeasurementMO {
+        let context = try getContext()
+        context.automaticallyMergesChangesFromParent = true
+        if let measurement = try self.load(measurementIdentifiedBy: identifier, from: context) {
+            return measurement
+        } else {
+            throw PersistenceError.dataNotLoadable(measurement: identifier)
         }
     }
 
     /**
-     Loads all the measurements from the data storage. Runs asynchronously in the background and calls a handler after loading has been completed. You should never use the objects in the provided array outside of the handler, since they are not thread safe and lose all data if transfered outside.
-     
-     - Parameters:
-     - handler: The handler to call after loading the measurements has finished.
+     Loads all the measurements from the data storage.
+
+     - Returns: An array of all measurements currently stored on this device.
+     - Throws:
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
      */
-    public func loadMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]?, Status) -> Void) {
-        container.performBackgroundTask { (context) in
-            let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-            do {
-                let fetchResult = try context.fetch(request)
-                handler(fetchResult, .success)
-            } catch let error {
-                handler(nil, .error(error))
-            }
-        }
+    public func loadMeasurements() throws -> [MeasurementMO] {
+        let context = try getContext()
+        let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+        let fetchResult = try context.fetch(request)
+        return fetchResult
     }
 
     /**
      Loads only those measurements that have not been synchronized to a Cyface database yet.
 
-     - Parameter onFinishedCall: Handler called when loading the not synchronized measurements has finished. This provides the loaded measurements as an array, which will be empty if there are no such measurements.
+     - Returns: An array containing all the not synchronized measurements.
+     - Throws:
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
      */
-    public func loadSynchronizableMeasurements(onFinishedCall handler: @escaping ([MeasurementMO]?, Status) -> Void) {
-        container.performBackgroundTask { (context) in
-            let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-            // Fetch only not synchronized measurements
-            request.predicate = NSPredicate(format: "synchronized == %@", NSNumber(value: false))
-            do {
-                let fetchResult = try context.fetch(request)
-                handler(fetchResult, .success)
-            } catch let error {
-                handler(nil, .error(error))
-            }
-        }
+    public func loadSynchronizableMeasurements() throws -> [MeasurementMO] {
+        let context = try getContext()
+        let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+        // Fetch only not synchronized measurements
+        request.predicate = NSPredicate(format: "synchronized == %@", NSNumber(value: false))
+        let fetchResult = try context.fetch(request)
+        return fetchResult
     }
 
     /**
-     Counts the amount of measurements currently stored in the data store, asynchronously in the background.
-     
-     - Parameter handler: The handler called after counting has finished. This handler receives the result as a parameter.
+     Counts the amount of measurements currently stored in the data store.
+
+     - Returns: The count of measurements currently stored on this device.
+     - Throws:
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
      */
-    public func countMeasurements(onFinishedCall handler: @escaping (Int?, Status) -> Void) {
-        container.performBackgroundTask { (context) in
-            let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
-            do {
-                let count = try context.count(for: request)
-                handler(count, .success)
-            } catch let error {
-                handler(nil, .error(error))
-            }
+    public func countMeasurements() throws -> Int {
+        let context = try getContext()
+        let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+        let count = try context.count(for: request)
+        return count
+    }
+
+    /**
+     Migrates a `MeasurementMO` instance to a new `NSManagedObjectContext`. Calling this method is always required if there is a new context.
+
+     - Parameters:
+        - measurement: The `MeasurementMO` instance to migrate.
+        - to: The `NSManagedObjectContext` to migrate to.
+     - Returns: The migrated `MeasurementMO` instance.
+     - Throws:
+        - `PersistenceError.inconsistentData` If CoreData is incapable of migrating. If this happens something is seriously wrong with CoreData.
+     */
+    private func migrate(measurement: MeasurementMO, to context: NSManagedObjectContext) throws -> MeasurementMO {
+        guard let measurement = context.object(with: measurement.objectID) as? MeasurementMO else {
+            throw PersistenceError.inconsistentData
         }
+
+        return measurement
+    }
+
+    /**
+     Either provides the existing `NSManagedObjectContext` currently used by this instance or a temporary background context only valid for the current call.
+     If a background context is used all model objects from previous calls become separated from CoreData and will not work anymore.
+
+     - Returns: The current value stored in the `context` attribute or a temporary background context.
+     - Throws:
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+     */
+    private func getContext() throws -> NSManagedObjectContext{
+        guard let context = self.context == nil ? container.newBackgroundContext() : self.context else {
+            throw PersistenceError.noContext
+        }
+
+        return context
+    }
+
+    // MARK: - Support Methods
+
+    /**
+     Creates a new background `NSManagedObjectContext` for the current thread. This can be used to set an appropriate value for the `context` attribute.
+
+     - Returns: The newly created context.
+     */
+    public func makeContext() -> NSManagedObjectContext {
+        return container.newBackgroundContext()
+    }
+
+    /**
+     Collects all geo locations from all tracks of a measurement and merges them to a single array.
+
+     - Parameter from: The measurement to collect the geo locations from.
+     - Returns: An array containing all the collected geo locations from all tracks of the provided measurement.
+     - Throws:
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+     */
+    public static func collectGeoLocations(from measurement: MeasurementMO) throws -> [GeoLocationMO] {
+        guard let tracks = measurement.tracks else {
+            throw SerializationError.missingData
+        }
+
+        var ret = [GeoLocationMO]()
+
+        for track in tracks {
+            guard let typedTrack = track as? Track, let locations = typedTrack.locations else {
+                throw SerializationError.invalidData
+            }
+
+            guard let typedLocations = locations.array as? [GeoLocationMO] else {
+                throw SerializationError.invalidData
+            }
+
+            ret.append(contentsOf: typedLocations)
+        }
+
+        return ret
+    }
+
+    /**
+     Transforms a list of `MeasurementMO` objects to a list containing the identifiers.
+
+     If you want to use a list of `MeasurementMO` objects between different threads you must reload them on a context appropriate for that thread.
+     To ease this task, this method can be used to make a collection of measurement identifiers, transfer them to the other thread and reload all the measurements there.
+
+     - Parameter from: The array of `MeasurementMO` instances to extract the identifiers for.
+     - Returns: A collection containing all the device wide unqiue identifiers of the provided measurements.
+     */
+    public static func extractIdentifiers(from measurements: [MeasurementMO]) -> [Int64] {
+        var ret = [Int64]()
+        for measurement in measurements {
+            ret.append(measurement.identifier)
+        }
+        return ret
     }
 }
 
@@ -477,10 +544,12 @@ extension NSManagedObjectContext {
  case measurementNotLoadable
  case measurementsNotLoadable
  case dataNotLoadable
+ case trackNotCreatable
+ case geoLocationNotCreatable
  ```
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 2.3.0
  */
 enum PersistenceError: Error {
@@ -496,4 +565,12 @@ enum PersistenceError: Error {
     case measurementsNotLoadable
     /// If some data belonging to a measurement could not be loaded.
     case dataNotLoadable(measurement: Int64)
+    /// For some reason creating a track has failed.
+    case trackNotCreatable
+    /// For some reason it is impossible to create a new geo location object.
+    case geoLocationNotCreatable
+    /// Some data is not in the format it is expected to be.
+    case inconsistentData
+    /// The system is unable to get a proper `NSManagedObjectContext` instance.
+    case noContext
 }

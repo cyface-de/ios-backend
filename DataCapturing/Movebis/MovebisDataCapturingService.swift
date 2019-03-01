@@ -30,12 +30,15 @@ import os.log
  The instance you provide will receive the updates.
  
  - Author: Klemens Muthmann
- - Version: 4.0.0
+ - Version: 4.0.1
  - Since: 1.0.0
  */
 public class MovebisDataCapturingService: DataCapturingService {
 
     // MARK: - Properties
+
+    /// Logger used for objects of this class.
+    private static let log = OSLog.init(subsystem: "MovebisDataCapturingService", category: "de.cyface")
 
     /**
      The delegate that gets informed about location updates.
@@ -60,11 +63,23 @@ public class MovebisDataCapturingService: DataCapturingService {
      */
     private lazy var preCapturingLocationManager: CLLocationManager = {
         let manager = CLLocationManager()
+
+        let authorizationStatus = CLLocationManager.authorizationStatus()
+        if authorizationStatus != .authorizedWhenInUse && authorizationStatus != .authorizedAlways {
+            // User has not authorized access to location information.
+            os_log("Location service not authorized!", log: MovebisDataCapturingService.log, type: .default)
+            return manager
+        }
+        // Do not start services that aren't available.
+        if !CLLocationManager.locationServicesEnabled() {
+            // Location services is not available.
+            os_log("Location service not available!", log: MovebisDataCapturingService.log, type: .default)
+            return manager
+        }
+
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         manager.allowsBackgroundLocationUpdates = false
-        // The following might shut off updates according to documentation in certain cases.
-        // Do we have to start it again?
-        manager.activityType = .otherNavigation
+        manager.activityType = .other
         manager.showsBackgroundLocationIndicator = false
         manager.distanceFilter = kCLDistanceFilterNone
         // Ask the user for its ok with data tracking.
@@ -84,9 +99,7 @@ public class MovebisDataCapturingService: DataCapturingService {
      Since it seems to be impossible to create that instance inside a framework at the moment,
      you have to provide it via this parameter.
      - updateInterval: The accelerometer update interval in Hertz.
-     By default this is set to the supported maximum of 100 Hz.
-     - persistenceLayer: An API to store, retrieve and update captured data to the local system
-     until the App can transmit it to a server.
+     - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
      - eventHandler: A handler for events occuring during data capturing.
      - Throws: If the networking stack for data synchronization was not successfully initialized.
      */

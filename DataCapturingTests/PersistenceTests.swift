@@ -20,57 +20,44 @@
 import XCTest
 @testable import DataCapturing
 
-class PersistenceTests: XCTestCase {
+/**
+ Tests that using the `PersistenceLayer` works as expected.
 
-    private static let defaultPromiseTimeout = 5.0
+ - Author: Klemens Muthmann
+ - Version: 1.0.1
+ - Since: 1.0.0
+ */
+class PersistenceTests: XCTestCase {
 
     var oocut: PersistenceLayer!
     var fixture: MeasurementEntity!
 
     override func setUp() {
         super.setUp()
-
-        let promise = expectation(description: "Create fixture measurement!")
         do {
-            oocut = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy()) { persistence, status in
-                guard case .success = status, let persistence = persistence else {
-                    XCTFail("Unable to initialize persistence layer!")
-                    return promise.fulfill()
-                }
+            oocut = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+            oocut.context = oocut.makeContext()
+            let measurement = try oocut.createMeasurement(at: 10_000, withContext: .bike)
+            try oocut.appendNewTrack(to: measurement)
 
-                persistence.createMeasurement(at: 10_000, withContext: .bike) { measurement, status in
-                    guard case .success = status, let measurement = measurement else {
-                        XCTFail("Unable to create measurement in persistence layer!")
-                        return
-                    }
+            fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
 
-                    self.fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
-                    persistence.save(locations: [GeoLocation(latitude: 51.052181, longitude: 13.728956, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 51.051837, longitude: 13.729010, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], toMeasurement: self.fixture!) {_, _ in
-                        persistence.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], toMeasurement: self.fixture!) { _, _ in
-                            promise.fulfill()
-                        }
-                    }
-                }
-            }
+            try oocut.save(locations: [GeoLocation(latitude: 51.052181, longitude: 13.728956, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 51.051837, longitude: 13.729010, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], in: measurement)
+            try oocut.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], in: measurement)
+
         } catch let error {
             XCTFail("Unable to set up due to \(error.localizedDescription)")
         }
-
-        wait(for: [promise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 
     override func tearDown() {
-        let promise = expectation(description: "Clean database")
-        oocut.delete { status in
-            guard case .success = status else {
-                fatalError()
-            }
-
-            promise.fulfill()
+        do {
+            try oocut.delete()
+        } catch {
+            fatalError()
         }
         oocut = nil
         fixture = nil
-        wait(for: [promise], timeout: PersistenceTests.defaultPromiseTimeout)
         super.tearDown()
     }
 
@@ -78,98 +65,56 @@ class PersistenceTests: XCTestCase {
      Tests if new measurements are created with the correct identifier and if identifiers are increased for each new measurement. This should even work if one measurement is deleted in between.
      */
     func testCreateMeasurement() {
-        let testPromise = expectation(description: "Create measurements")
-        oocut.createMeasurement(at: 10_001, withContext: .bike) { secondMeasurement, status in
-            guard case .success = status, let secondMeasurement = secondMeasurement, let firstMeasurement = self.fixture else {
-                XCTFail("Unable to load second measurement!")
-                return testPromise.fulfill()
-            }
+        do {
+            let secondMeasurement = try oocut.createMeasurement(at: 10_001, withContext: .bike)
 
             let secondMeasurementIdentifier = secondMeasurement.identifier
-            XCTAssertEqual(secondMeasurementIdentifier, firstMeasurement.identifier+1)
+            XCTAssertEqual(secondMeasurementIdentifier, fixture.identifier+1)
 
-            self.oocut.delete(measurement: MeasurementEntity(identifier: secondMeasurement.identifier, context: MeasurementContext(rawValue: secondMeasurement.context!)!)) { status in
-                self.oocut.createMeasurement(at: Int64(10_002), withContext: MeasurementContext.bike) { thirdMeasurement, status in
-                    guard case .success = status, let thirdMeasurement = thirdMeasurement else {
-                        XCTFail("Unable to load third measurement!")
-                        return testPromise.fulfill()
-                    }
+            try oocut.delete(measurement: MeasurementEntity(identifier: secondMeasurement.identifier, context: MeasurementContext(rawValue: secondMeasurement.context!)!))
+            let thirdMeasurement = try oocut.createMeasurement(at: Int64(10_002), withContext: MeasurementContext.bike)
 
-                    XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
-                    testPromise.fulfill()
-                }
-            }
+            XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
+        } catch let error {
+            XCTFail("Error \(error.localizedDescription)")
         }
-
-        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 
     func testCleanMeasurement() {
-        let testPromise = expectation(description: "Clean successful")
+        do {
+            let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
-        oocut.load(measurementIdentifiedBy: fixture.identifier) { measurementMo, status in
-            guard case .success = status, let measurementMo = measurementMo else {
-                XCTFail("Unable to load measurement object!")
-                return testPromise.fulfill()
-            }
-
-            let accelerationCount = measurementMo.accelerationsCount
-            let geoLocationCount = measurementMo.geoLocations!.count
+            let accelerationCount = measurement.accelerationsCount
+            let geoLocationCount = try PersistenceLayer.collectGeoLocations(from: measurement).count
             XCTAssertEqual(accelerationCount, 3)
             XCTAssertEqual(geoLocationCount, 2)
 
-            self.oocut.clean(measurement: self.fixture) { status in
-                guard case .success = status else {
-                    XCTFail("Unable to clean measurement!")
-                    return testPromise.fulfill()
-                }
+            try oocut.clean(measurement: fixture)
 
-                self.oocut.load(measurementIdentifiedBy: self.fixture.identifier) { measurementMo, status in
-                    guard case .success = status, let measurementMo = measurementMo else {
-                        XCTFail("Unable to load measurement object!")
-                        return testPromise.fulfill()
-                    }
+            let measurementAfterClean = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
-                    XCTAssertEqual(measurementMo.accelerationsCount, 0, "Accelerations have not been empty after cleaning!")
-                    XCTAssertFalse(measurementMo.geoLocations!.count==0, "Geo Locations was empty after cleaning!")
-                    testPromise.fulfill()
-                }
-            }
+            XCTAssertEqual(measurementAfterClean.accelerationsCount, 0, "Accelerations have not been empty after cleaning!")
+            let geoLocationCountAfterClean = try PersistenceLayer.collectGeoLocations(from: measurementAfterClean).count
+            XCTAssertFalse(geoLocationCountAfterClean==0, "Geo Locations was empty after cleaning!")
+        } catch let error {
+            XCTFail("Error \(error.localizedDescription)")
         }
-
-        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 
     func testDeleteMeasurement() {
-        let testPromise = expectation(description: "Succesful measurement deletion")
-
-        oocut.countMeasurements { [weak self] count, status in
-            guard case .success = status, let count = count, let self = self else {
-                XCTFail("Unable to count measurements!")
-                return testPromise.fulfill()
-            }
+        do {
+            let count = try oocut.countMeasurements()
 
             XCTAssertEqual(count, 1, "There should be one measurement before deleting it! There have been \(count).")
 
-            self.oocut!.delete(measurement: self.fixture) { status in
-                guard case .success = status else {
-                    XCTFail("Unable to delete measurement")
-                    return testPromise.fulfill()
-                }
+            try oocut.delete(measurement: fixture)
 
-                self.oocut.countMeasurements { count, status in
-                    guard case .success = status, let count = count else {
-                        XCTFail("Unable to count measurements")
-                        return testPromise.fulfill()
-                    }
+            let countAfterDelete = try oocut.countMeasurements()
 
-                    XCTAssertEqual(count, 0, "There should be no measurement after deleting it! There where \(count).")
-                    testPromise.fulfill()
-                }
-            }
+            XCTAssertEqual(countAfterDelete, 0, "There should be no measurement after deleting it! There where \(count).")
+        } catch let error {
+            XCTFail("Error \(error.localizedDescription)")
         }
-
-        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 
     func testMergeDataToExistingMeasurement() {
@@ -179,133 +124,74 @@ class PersistenceTests: XCTestCase {
             Acceleration(timestamp: 10_006, x: 1.0, y: 1.0, z: 1.0),
             Acceleration(timestamp: 10_007, x: 1.0, y: 1.0, z: 1.0)
         ]
-        let testPromise = expectation(description: "Merge data on the same measurement!")
 
-        oocut.save(locations: [additionalLocation], toMeasurement: fixture) { _, status in
-            guard case .success = status else {
-                XCTFail("Unable to save measurement!")
-                return testPromise.fulfill()
-            }
+        do {
+            let fixtureMeasurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
+            try oocut.save(locations: [additionalLocation], in: fixtureMeasurement)
+            try oocut.save(accelerations: additionalAccelerations, in: fixtureMeasurement)
+            let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
-            self.oocut.save(accelerations: additionalAccelerations, toMeasurement: self.fixture!) { _, status in
-                guard case .success = status else {
-                    XCTFail("Unable to save measurement!")
-                    return testPromise.fulfill()
-                }
-
-                self.oocut.load(measurementIdentifiedBy: self.fixture!.identifier) { measurement, status in
-                    guard case .success = status, let measurement = measurement else {
-                        XCTFail("Unable to load measurement!")
-                        return testPromise.fulfill()
-                    }
-
-                    XCTAssertEqual(measurement.geoLocations!.count, 3)
-                    XCTAssertEqual(measurement.accelerationsCount, 6)
-                    testPromise.fulfill()
-                }
-            }
+            XCTAssertEqual(try PersistenceLayer.collectGeoLocations(from: measurement).count, 3)
+            XCTAssertEqual(measurement.accelerationsCount, 6)
+        } catch let error {
+            XCTFail("Error \(error.localizedDescription)")
         }
-
-        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 
     func testLoadMeasurement() {
-        let promise = expectation(description: "Error while loading measurements!")
-        oocut.load(measurementIdentifiedBy: fixture!.identifier) { measurement, status in
-            guard case .success = status, let measurement = measurement else {
-                XCTFail("Unable to load measurement!")
-                return promise.fulfill()
-            }
+        do {
+            let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
-            XCTAssert(measurement.identifier == self.fixture!.identifier)
+            XCTAssert(measurement.identifier == fixture.identifier)
             XCTAssert(measurement.context == "BICYCLE")
-            XCTAssert(measurement.geoLocations!.count == 2)
+            XCTAssert(try PersistenceLayer.collectGeoLocations(from: measurement).count == 2)
             XCTAssert(measurement.accelerationsCount == 3)
-            promise.fulfill()
+        } catch let error {
+            XCTFail("Error \(error.localizedDescription)")
         }
-
-        wait(for: [promise], timeout: PersistenceTests.defaultPromiseTimeout)
-
     }
 
     func testLoadSynchronizableMeasurements() {
-        let promisePriorClean = expectation(description: "Error while loading measurements!")
-        var countOfLoadedMeasurementsPriorClean = 0
-        oocut.loadSynchronizableMeasurements { measurements, status in
-            guard case .success = status, let measurements = measurements else {
-                XCTFail("Unable to load synchronizable measurements!")
-                return promisePriorClean.fulfill()
-            }
+        do {
+            let countOfLoadedMeasurementsPriorClean = try oocut.loadSynchronizableMeasurements().count
 
-            countOfLoadedMeasurementsPriorClean += measurements.count
-            promisePriorClean.fulfill()
+            try oocut.clean(measurement: fixture)
+
+            let countOfLoadedMeasurementsPostClean = try oocut.loadSynchronizableMeasurements().count
+
+            XCTAssertEqual(countOfLoadedMeasurementsPriorClean, 1)
+            XCTAssertEqual(countOfLoadedMeasurementsPostClean, 0)
+        } catch let error {
+            XCTFail("Error \(error.localizedDescription)")
         }
-
-        wait(for: [promisePriorClean], timeout: PersistenceTests.defaultPromiseTimeout)
-
-        let promiseClean = expectation(description: "Error while cleaning fixture measurement!")
-        oocut.clean(measurement: fixture) { status in
-            guard case .success = status else {
-                XCTFail("Unable to clean measurement!")
-                return promiseClean.fulfill()
-            }
-
-            promiseClean.fulfill()
-        }
-
-        wait(for: [promiseClean], timeout: PersistenceTests.defaultPromiseTimeout)
-
-        let promisePostClean = expectation(description: "Error while loading measurements!")
-        var countOfLoadedMeasurementsPostClean = 0
-        oocut.loadSynchronizableMeasurements { measurements, status in
-            guard case .success = status, let measurements = measurements else {
-                XCTFail("Unable to load synchronizable measurements")
-                return promisePostClean.fulfill()
-            }
-
-            countOfLoadedMeasurementsPostClean += measurements.count
-            promisePostClean.fulfill()
-        }
-
-        wait(for: [promisePostClean], timeout: PersistenceTests.defaultPromiseTimeout)
-        XCTAssertEqual(countOfLoadedMeasurementsPriorClean, 1)
-        XCTAssertEqual(countOfLoadedMeasurementsPostClean, 0)
     }
 
     func testDistanceWasCalculated() {
         let expectedTrackLength = 38.44
         let distanceCalculationAccuracy = 0.01
 
-        let testPromise = expectation(description: "Measurement was loaded.")
-        oocut.load(measurementIdentifiedBy: fixture.identifier) { measurement, status in
-            guard case .success = status, let measurement = measurement else {
-                XCTFail("Unable to load measurement!")
-                return testPromise.fulfill()
-            }
+        do {
+            let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
             XCTAssertEqual(measurement.trackLength, expectedTrackLength, accuracy: expectedTrackLength * distanceCalculationAccuracy, "Measurement length \(measurement.trackLength) should be within \(distanceCalculationAccuracy*100)% of \(expectedTrackLength).")
-            testPromise.fulfill()
+        } catch let error {
+            XCTFail("Error \(error.localizedDescription)")
         }
-
-        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
     }
 
     func testDistanceWasAdded() {
         let expectedTrackLength = 83.57
         let distanceCalculationAccuracy = 0.01
 
-        let testPromise = expectation(description: "Measurement was saved.")
         let locations: [GeoLocation] = [GeoLocation(latitude: 51.051432, longitude: 13.729053, accuracy: 1.0, speed: 1.0, timestamp: 10_300)]
-        oocut.save(locations: locations, toMeasurement: fixture, onFinished: { measurement, status in
-            guard case .success = status, let measurement = measurement else {
-                XCTFail("Unable to save measurement!")
-                return testPromise.fulfill()
-            }
+
+        do {
+            let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
+            try oocut.save(locations: locations, in: measurement)
 
             XCTAssertEqual(measurement.trackLength, expectedTrackLength, accuracy: expectedTrackLength * distanceCalculationAccuracy, "Measurement length \(measurement.trackLength) should be within \(distanceCalculationAccuracy*100)% of \(expectedTrackLength).")
-            testPromise.fulfill()
-        })
-
-        wait(for: [testPromise], timeout: PersistenceTests.defaultPromiseTimeout)
+        } catch let error {
+            XCTFail("Error \(error.localizedDescription)")
+        }
     }
 }

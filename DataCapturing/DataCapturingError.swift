@@ -26,11 +26,12 @@ import Foundation
  case notPaused
  case isRunning
  case notRunning
+ case noCurrentMeasurement
  ````
 
  - Author: Klemens Muthmann
  - Since: 1.2.0
- - Version: 1.0.0
+ - Version: 1.1.0
  */
 public enum DataCapturingError: Error {
     /// Thrown if the service was paused when it should not have been.
@@ -41,4 +42,6 @@ public enum DataCapturingError: Error {
     case isRunning
     /// Thrown if the service was not running when it should have been.
     case notRunning
+    /// For some reason there was no current measurement to write data to or to read information to, during a capturing run. This can already happen during start up, if the current measurement was not created for some reason.
+    case noCurrentMeasurement
 }

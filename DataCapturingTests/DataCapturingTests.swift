@@ -25,29 +25,22 @@ import CoreMotion
  This test is intended to test capturing some data in isolation. There are still some problems with this, due to restrictions in Apple's test support.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.3
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {
 
     /// A connection to a Cyface Server backend.
-    var oocut: ServerConnection?
+    var oocut: ServerConnection!
     /// A `PersistenceLayer` providing access to write and read some example data.
-    var persistenceLayer: PersistenceLayer?
-    var authenticator: StaticAuthenticator?
+    var persistenceLayer: PersistenceLayer!
+    var authenticator: StaticAuthenticator!
 
     override func setUp() {
         super.setUp()
 
         do {
-            let syncGroup = DispatchGroup()
-            syncGroup.enter()
-            persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy()) { _, _ in
-                syncGroup.leave()
-            }
-            guard syncGroup.wait(timeout: DispatchTime.now() + .seconds(2)) == .success else {
-                fatalError("Failed to initialize persistence layer.")
-            }
+            persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
         } catch let error {
             fatalError("Failed to initialize persistence layer: \(error.localizedDescription)")
         }
@@ -58,6 +51,8 @@ class DataCapturingTests: XCTestCase {
 
     override func tearDown() {
         oocut = nil
+        persistenceLayer = nil
+        authenticator = nil
         super.tearDown()
     }
 
@@ -65,31 +60,25 @@ class DataCapturingTests: XCTestCase {
      This test tests the actual upload of data to a Movebis server. Since we can not assume there is one such server in each and every test environment (especially under CI conditions), the test is skipped by default. Enable it to selectively test data upload in isolation. The test should also not run on an arbitrary server, since most servers will reject the transmitted data on the second run, because of data duplication.
      */
     func skipped_testSynchronizationWithMovebisServer() {
-        guard let oocut = oocut, let persistenceLayer = persistenceLayer else {
-            fatalError("Test failed!")
-        }
-
-        let promise = expectation(description: "No error on synchronization!")
-        persistenceLayer.createMeasurement(at: 2, withContext: .bike) { measurementMo, status in
-            guard case .success = status, let measurementMo = measurementMo else {
-                XCTFail("Unable to create measurement")
-                return promise.fulfill()
-            }
+        let promise = expectation(description: "Successful data transmission")
+        do {
+            let measurement = try persistenceLayer.createMeasurement(at: 2, withContext: .bike)
 
             self.authenticator!.jwtToken = "replace me"
 
-            let successHandler: ((MeasurementEntity) -> Void) = { _ in
+            let entity = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
+            oocut.sync(measurement: entity, onSuccess: {submitted in
+                XCTAssertEqual(submitted.identifier, entity.identifier)
                 promise.fulfill()
-            }
-            let failureHandler: ((MeasurementEntity, Error) -> Void) = { _, _ in
-                XCTFail("Synchronization produced an error!")
-            }
-
-            let measurement = MeasurementEntity(identifier: measurementMo.identifier, context: MeasurementContext(rawValue: measurementMo.context!)!)
-            oocut.sync(measurement: measurement, onSuccess: successHandler, onFailure: failureHandler)
+            }, onFailure: {_, error in
+                XCTFail("Error \(error)")
+                promise.fulfill()
+            })
+        } catch let error {
+            XCTFail("Synchronization produced an error! \(error)")
         }
 
-        waitForExpectations(timeout: 10, handler: nil)
+        wait(for: [promise], timeout: 10)
     }
 
     // TODO: This test does not work since we can not test with background location updates in the moment.

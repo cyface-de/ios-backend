@@ -45,31 +45,33 @@ public enum DataCapturingEvent {
     /**
      Occurs each time the `DataCapturingService` receives a new geo location position.
 
-     - Parameter position: The new geo location position.
+     - position: The new geo location position.
      */
     case geoLocationAcquired(position: GeoLocation)
     /**
      Occurs each time the application runs out of space.
      How much space is used and how much is available may be retrieved from `allocation`.
 
-     - Parameter allocation: Information about the applications disk (or rather SD card) space consumption.
+     - allocation: Information about the applications disk (or rather SD card) space consumption.
      */
     case lowDiskSpace(allocation: DiskConsumption)
     /**
      Used to notify the client application of a successful start of the `DataCapturingService`.
+
+     - measurement: The device wide unique identifier of the measurement for which the service has started.
      */
-    case serviceStarted(measurement: MeasurementMO?)
+    case serviceStarted(measurement: Int64?)
     /**
      Occurs if the `DataCapturingService` has synchronized a measurement successfully
      and cleaned the local copies.
 
-     - Parameter measurement: The measurement which finished synchronization.
+     - measurement: The measurement which finished synchronization.
      */
     case synchronizationFinished(measurement: MeasurementEntity)
     /**
      Occurs when the synchronization of a measurement has started.
 
-     - Parameter measurement: The measurement the gets synchronized.
+     - measurement: The measurement the gets synchronized.
      */
     case synchronizationStarted(measurement: MeasurementEntity)
 }
