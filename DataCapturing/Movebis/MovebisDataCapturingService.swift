@@ -64,12 +64,6 @@ public class MovebisDataCapturingService: DataCapturingService {
     private lazy var preCapturingLocationManager: CLLocationManager = {
         let manager = CLLocationManager()
 
-        let authorizationStatus = CLLocationManager.authorizationStatus()
-        if authorizationStatus != .authorizedWhenInUse && authorizationStatus != .authorizedAlways {
-            // User has not authorized access to location information.
-            os_log("Location service not authorized!", log: MovebisDataCapturingService.log, type: .default)
-            return manager
-        }
         // Do not start services that aren't available.
         if !CLLocationManager.locationServicesEnabled() {
             // Location services is not available.
@@ -79,11 +73,19 @@ public class MovebisDataCapturingService: DataCapturingService {
 
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         manager.allowsBackgroundLocationUpdates = false
-        manager.activityType = .other
+        manager.activityType = .otherNavigation
         manager.showsBackgroundLocationIndicator = false
         manager.distanceFilter = kCLDistanceFilterNone
         // Ask the user for its ok with data tracking.
         manager.requestAlwaysAuthorization()
+
+        let authorizationStatus = CLLocationManager.authorizationStatus()
+        if authorizationStatus != .authorizedWhenInUse && authorizationStatus != .authorizedAlways {
+            // User has not authorized access to location information.
+            os_log("Location service not authorized!", log: MovebisDataCapturingService.log, type: .default)
+            return manager
+        }
+
         return manager
     }()
 

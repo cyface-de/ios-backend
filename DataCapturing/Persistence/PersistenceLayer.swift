@@ -437,7 +437,7 @@ public class PersistenceLayer {
      - Throws:
         - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
      */
-    private func getContext() throws -> NSManagedObjectContext{
+    private func getContext() throws -> NSManagedObjectContext {
         guard let context = self.context == nil ? container.newBackgroundContext() : self.context else {
             throw PersistenceError.noContext
         }

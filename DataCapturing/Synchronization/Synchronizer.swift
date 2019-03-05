@@ -132,7 +132,7 @@ public class Synchronizer {
             do {
                 self.persistenceLayer.context = self.persistenceLayer.makeContext()
                 let measurements = try self.persistenceLayer.loadSynchronizableMeasurements()
-                self.handle(synchronizableMeasurements:  measurements, status: .success)
+                self.handle(synchronizableMeasurements: measurements, status: .success)
             } catch let error {
                 self.handle(synchronizableMeasurements: nil, status: .error(error))
             }
