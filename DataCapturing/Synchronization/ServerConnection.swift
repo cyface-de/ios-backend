@@ -148,18 +148,29 @@ public class ServerConnection {
      - request: The request to fill with data.
      - for: The measurement to transmit.
      - Throws:
-        - `ServerConnectionError.missingInstallationIdentifier` If there is no valid installation identifier to identify this SDK installation with a server.
-        - `ServerConnectionError.missingMeasurementIdentifier` If the current measurement has no valid device wide unique identifier.
-        - `ServerConnectionError.missingDeviceType` If the device type of this device could not be figured out.
-        - `PersistenceError.dataNotLoadable` If there is no such measurement.
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-        - `FileSupportError.notReadable` If the data file was not readable.
-        - Some unspecified errors from within CoreData.
-        - Some unspecified undocumented file system error if file was not accessible.
+     - `ServerConnectionError.missingInstallationIdentifier` If there is no valid installation identifier to identify this SDK installation with a server.
+     - `ServerConnectionError.missingMeasurementIdentifier` If the current measurement has no valid device wide unique identifier.
+     - `ServerConnectionError.missingDeviceType` If the device type of this device could not be figured out.
+     - `PersistenceError.dataNotLoadable` If there is no such measurement.
+     - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+     - `SerializationError.missingData` If no track data was found.
+     - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+     - `FileSupportError.notReadable` If the data file was not readable.
+     - Some unspecified errors from within CoreData.
+     - Some unspecified undocumented file system error if file was not accessible.
      */
     func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
+        // Load and serialize measurement synchronously.
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
+
+        try addMetaData(to: request, for: measurement)
+
+        let payloadUrl = try write(measurement)
+        request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+    }
+
+    func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
             throw ServerConnectionError.missingInstallationIdentifier
         }
@@ -170,17 +181,33 @@ public class ServerConnection {
             throw ServerConnectionError.missingDeviceType
         }
 
+        let bundle = Bundle(for: type(of: self))
+        guard let appVersion = (bundle.infoDictionary?["CFBundleShortVersionString"] as? String)?.data(using: String.Encoding.utf8) else {
+            throw ServerConnectionError.missingAppVersion
+        }
+
+        let length = String(measurement.trackLength).data(using: String.Encoding.utf8)!
+        let locationCount = String(try PersistenceLayer.collectGeoLocations(from: measurement).count).data(using: String.Encoding.utf8)!
+
+        if let startLocationRaw = (measurement.tracks?.firstObject as? Track)?.locations?.firstObject as? GeoLocationMO {
+            let startLocation = "lat: \(startLocationRaw.lat), lon: \(startLocationRaw.lon), time: \(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+            request.append(startLocation, withName: "startLocation")
+        }
+
+        if let endLocationRaw = (measurement.tracks?.lastObject as? Track)?.locations?.lastObject as? GeoLocationMO {
+            let endLocation = "lat: \(endLocationRaw.lat), lon \(endLocationRaw.lon), time: \(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+            request.append(endLocation, withName: "endLocation")
+        }
+
         request.append(deviceIdData, withName: "deviceId")
         request.append(measurementIdData, withName: "measurementId")
         request.append(deviceTypeData, withName: "deviceType")
         request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
+        request.append(appVersion, withName: "appVersion")
 
-        // Load and serialize measurement synchronously.
-        persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
 
-        let payloadUrl = try write(measurement)
-        request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+        request.append(length, withName: "length")
+        request.append(locationCount, withName: "locationCount")
     }
 
     /**
@@ -193,7 +220,7 @@ public class ServerConnection {
      - onSuccess: Called if data transmission was successful. Gets the transmitted measurement as a parameter.
      - onFailure: Called if data transmission failed for some reason. Gets the transmitted measurement and information about the error.
      - Throws:
-        - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
+     - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
      */
     func onEncodingComplete(for measurement: MeasurementEntity, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
         switch result {
@@ -219,7 +246,7 @@ public class ServerConnection {
      - onSuccess: Called with information about the transmitted measurement if the response indicates success.
      - response: The HTTP response received.
      - Throws:
-        - Some unspecified undocumented error if the response was not successful.
+     - Some unspecified undocumented error if the response was not successful.
      */
     func onResponseReady(for measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void), _ response: DataResponse<String>) throws {
         switch response.result {
@@ -236,10 +263,10 @@ public class ServerConnection {
      - Parameter measurement: The measurement to serialize as a file.
      - Returns: The url of the file containing the measurement data.
      - Throws:
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-        - `FileSupportError.notReadable` If the data file was not readable.
-        - Some unspecified undocumented file system error if file was not accessible.
+     - `SerializationError.missingData` If no track data was found.
+     - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+     - `FileSupportError.notReadable` If the data file was not readable.
+     - Some unspecified undocumented file system error if file was not accessible.
      */
     private func write(_ measurement: MeasurementMO) throws -> URL {
         let measurementFile = MeasurementFile()
@@ -261,7 +288,7 @@ public class ServerConnection {
  ````
 
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 3.1.0
  - Since: 1.0.0
  */
 public enum ServerConnectionError: Error {
@@ -281,4 +308,6 @@ public enum ServerConnectionError: Error {
     case invalidResponse
     /// Used for all unexpected errors, that should not occur during normal operation.
     case unexpectedError
+    /// This applications version could not be loaded
+    case missingAppVersion
 }
