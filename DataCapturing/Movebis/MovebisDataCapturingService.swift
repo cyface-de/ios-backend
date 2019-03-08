@@ -64,12 +64,6 @@ public class MovebisDataCapturingService: DataCapturingService {
     private lazy var preCapturingLocationManager: CLLocationManager = {
         let manager = CLLocationManager()
 
-        let authorizationStatus = CLLocationManager.authorizationStatus()
-        if authorizationStatus != .authorizedWhenInUse && authorizationStatus != .authorizedAlways {
-            // User has not authorized access to location information.
-            os_log("Location service not authorized!", log: MovebisDataCapturingService.log, type: .default)
-            return manager
-        }
         // Do not start services that aren't available.
         if !CLLocationManager.locationServicesEnabled() {
             // Location services is not available.
@@ -79,11 +73,19 @@ public class MovebisDataCapturingService: DataCapturingService {
 
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         manager.allowsBackgroundLocationUpdates = false
-        manager.activityType = .other
+        manager.activityType = .otherNavigation
         manager.showsBackgroundLocationIndicator = false
         manager.distanceFilter = kCLDistanceFilterNone
         // Ask the user for its ok with data tracking.
         manager.requestAlwaysAuthorization()
+
+        let authorizationStatus = CLLocationManager.authorizationStatus()
+        if authorizationStatus != .authorizedWhenInUse && authorizationStatus != .authorizedAlways {
+            // User has not authorized access to location information.
+            os_log("Location service not authorized!", log: MovebisDataCapturingService.log, type: .default)
+            return manager
+        }
+
         return manager
     }()
 
@@ -98,14 +100,15 @@ public class MovebisDataCapturingService: DataCapturingService {
      There should be only one instance of this type in your application.
      Since it seems to be impossible to create that instance inside a framework at the moment,
      you have to provide it via this parameter.
-     - updateInterval: The accelerometer update interval in Hertz.
+     - updateInterval: The accelerometer update interval in Hertz. Default value is 100 Hertz.
+     - savingInterval: The time between save operations during data capturing in seconds. Default value is 30 seconds.
      - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
      - eventHandler: A handler for events occuring during data capturing.
      - Throws: If the networking stack for data synchronization was not successfully initialized.
      */
-    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval interval: Double, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) throws {
+    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval: Double = 100, savingInterval: Double = 30, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) throws {
         let synchronizer = try Synchronizer(persistenceLayer: persistence, cleaner: AccelerationPointRemovalCleaner(), serverConnection: serverConnection, handler: eventHandler)
-        super.init(sensorManager: manager, persistenceLayer: persistence, synchronizer: synchronizer, eventHandler: eventHandler)
+        super.init(sensorManager: manager, updateInterval: updateInterval, savingInterval: savingInterval, persistenceLayer: persistence, synchronizer: synchronizer, eventHandler: eventHandler)
     }
 
     // MARK: - Methods

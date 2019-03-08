@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>PersistenceLayer Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Class/PersistenceLayer" class="dashAnchor"></a>
+    <a title="PersistenceLayer Class Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">DataCapturing Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        PersistenceLayer Class Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/Acceleration.html">Acceleration</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/AccelerationPointRemovalCleaner.html">AccelerationPointRemovalCleaner</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DefaultDistanceCalculationStrategy.html">DefaultDistanceCalculationStrategy</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DeletionCleaner.html">DeletionCleaner</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DiskConsumption.html">DiskConsumption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/GeoLocation.html">GeoLocation</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MeasurementEntity.html">MeasurementEntity</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MeasurementMO.html">MeasurementMO</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MovebisDataCapturingService.html">MovebisDataCapturingService</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/PersistenceLayer.html">PersistenceLayer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/ServerConnection.html">ServerConnection</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/StaticAuthenticator.html">StaticAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Synchronizer.html">Synchronizer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Track.html">Track</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Enums/DataCapturingError.html">DataCapturingError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/FileSupportError.html">FileSupportError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MeasurementContext.html">MeasurementContext</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ServerConnectionError.html">ServerConnectionError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/Status.html">Status</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/SynchronizationError.html">SynchronizationError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Protocols/Authenticator.html">Authenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/Cleaner.html">Cleaner</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/AccelerationsFile.html">AccelerationsFile</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>PersistenceLayer</h1>
+            <p>An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and accelerations. Most functions are asynchronous and provide a handler to react when they are finished.</p>
+
+<p>All entities have two representations. They are either represented as a subclass of <code>NSManagedObject</code> or as a custom entity class. The former are <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code>, <code>AccelerationPointMO</code> and <code><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></code>, while the latter are <code><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></code>, <code><a href="../Classes/Acceleration.html">Acceleration</a></code> and <code><a href="../Classes/GeoLocation.html">GeoLocation</a></code>. You should always try to the second costum classes, because the subclasses of <code>NSManagedObject</code> are not thread safe and should never be used outside of the handler they are provided to as parameter.</p>
+
+<p>Read access is public while manipulation of the data stored is restricted to the framework.</p>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    3.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    1.0.0
+
+</div>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Properties"></a>
+                <a name="//apple_ref/swift/Section/Properties" class="dashAnchor"></a>
+                <a href="#/Properties">
+                  <h3 class="section-name">Properties</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/context" class="dashAnchor"></a>
+                    <a class="token" href="#/">context</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The current <code>NSManagedObjectContext</code> used by this persistence layer. This has to be reset if the layer is used on a different thread. If it is <code>nil</code> each method is going to use its own context, which can cause problems if model objects are used between those methods.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Initializers"></a>
+                <a name="//apple_ref/swift/Section/Initializers" class="dashAnchor"></a>
+                <a href="#/Initializers">
+                  <h3 class="section-name">Initializers</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/init(withDistanceCalculator:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">init(withDistanceCalculator:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Public constructor usable by external callers.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.modelNotLoabable</code> If the model is not loadable</li>
+<li><code>PersistenceError.modelNotInitializable</code> If the model was loaded (so it is available) but can not be initialized.</li>
+</ul>
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Database%20Writing%20Methods"></a>
+                <a name="//apple_ref/swift/Section/Database Writing Methods" class="dashAnchor"></a>
+                <a href="#/Database%20Writing%20Methods">
+                  <h3 class="section-name">Database Writing Methods</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/delete(measurement:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">delete(measurement:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Deletes the measurement from the data storag.</p>
+<li>measurement: The measurement to delete from the data storage.</li>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.measurementNotLoadable</code> If the measurement to delete was not available.</li>
+<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li>Some unspecified errors from within CoreData.</li>
+<li>Some internal file system error on failure of creating or accessing the accelerations file at the required path.</li>
+</ul>
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Database%20Read%20Only%20Methods"></a>
+                <a name="//apple_ref/swift/Section/Database Read Only Methods" class="dashAnchor"></a>
+                <a href="#/Database%20Read%20Only%20Methods">
+                  <h3 class="section-name">Database Read Only Methods</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/load(measurementIdentifiedBy:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">load(measurementIdentifiedBy:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Loads the data belonging to the provided <code>measurement</code> in the background an calls <code>onFinishedCall</code> with the data storage representation of that <code>measurement</code>. Using that represenation is not thread safe. Do not use it outside of the handler.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.dataNotLoadable</code> If there is no such measurement.</li>
+<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li>Some unspecified errors from within CoreData.</li>
+</ul>
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/loadMeasurements()" class="dashAnchor"></a>
+                    <a class="token" href="#/">loadMeasurements()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Loads all the measurements from the data storage.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li>Some unspecified errors from within CoreData.</li>
+</ul>
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/loadSynchronizableMeasurements()" class="dashAnchor"></a>
+                    <a class="token" href="#/">loadSynchronizableMeasurements()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Loads only those measurements that have not been synchronized to a Cyface database yet.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li>Some unspecified errors from within CoreData.</li>
+</ul>
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/countMeasurements()" class="dashAnchor"></a>
+                    <a class="token" href="#/">countMeasurements()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Counts the amount of measurements currently stored in the data store.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li>Some unspecified errors from within CoreData.</li>
+</ul>
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Support%20Methods"></a>
+                <a name="//apple_ref/swift/Section/Support Methods" class="dashAnchor"></a>
+                <a href="#/Support%20Methods">
+                  <h3 class="section-name">Support Methods</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/makeContext()" class="dashAnchor"></a>
+                    <a class="token" href="#/">makeContext()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Creates a new background <code>NSManagedObjectContext</code> for the current thread. This can be used to set an appropriate value for the <code><a href="../Classes/PersistenceLayer.html#/context">context</a></code> attribute.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/collectGeoLocations(from:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">collectGeoLocations(from:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Collects all geo locations from all tracks of a measurement and merges them to a single array.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>SerializationError.missingData</code> If no track data was found.</li>
+<li><code>SerializationError.invalidData</code> If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.</li>
+</ul>
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/extractIdentifiers(from:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">extractIdentifiers(from:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Transforms a list of <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code> objects to a list containing the identifiers.</p>
+
+<p>If you want to use a list of <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code> objects between different threads you must reload them on a context appropriate for that thread.
+To ease this task, this method can be used to make a collection of measurement identifiers, transfer them to the other thread and reload all the measurements there.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-01)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>
