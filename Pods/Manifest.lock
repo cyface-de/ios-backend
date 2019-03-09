@@ -1,10 +1,10 @@
 PODS:
-  - Alamofire (4.7.3)
-  - DataCompression (3.0.0)
+  - Alamofire (4.8.1)
+  - DataCompression (3.1.0)
 
 DEPENDENCIES:
-  - Alamofire (~> 4.7.3)
-  - DataCompression (~> 3.0.0)
+  - Alamofire (~> 4.8.1)
+  - DataCompression (~> 3.1.0)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -12,9 +12,9 @@ SPEC REPOS:
     - DataCompression
 
 SPEC CHECKSUMS:
-  Alamofire: c7287b6e5d7da964a70935e5db17046b7fde6568
-  DataCompression: 4df426340ccbf53851df71dd652bd80d0ea47eb7
+  Alamofire: 16ce2c353fb72865124ddae8a57c5942388f4f11
+  DataCompression: 8ff335fceb429220b210aa4842d331ceaec5c464
 
-PODFILE CHECKSUM: f96c4c31af579b92c6fedf85be231f29ace75072
+PODFILE CHECKSUM: 8775b555ea0d9e917daad16d6b42fdb6857c81b1
 
 COCOAPODS: 1.6.0

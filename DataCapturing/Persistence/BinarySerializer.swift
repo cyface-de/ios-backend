@@ -19,6 +19,7 @@
 
 import Foundation
 import DataCompression
+import os.log
 
 /// The current version of the Cyface binary format.
 let dataFormatVersion: UInt16 = 1
@@ -31,23 +32,28 @@ let dataFormatVersion: UInt16 = 1
  - Since: 2.0.0
  */
 protocol BinarySerializer {
+
     /// The type of the item to serialize.
     associatedtype Serializable
 
+    // MARK: - Methods
     /**
-     Serializes the provided serializable into a Cyface binary format representation. This only works for supported object types such as `MeasurementMO`, ÀccelerationPointMO` and `GeoLocationMO`.
+     Serializes the provided serializable into a Cyface binary format representation. This only works for supported object types such as `MeasurementMO`, `Acceleration` and `GeoLocationMO`.
      
      - Parameter serializable: The object to serialize
      - Returns: A binary format representation of the provided object
+     - Throws:
+     - `SerializationError.missingData` If no track data was found.
+     - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
      */
     func serialize(serializable: Serializable) throws -> Data
 
     /**
      Serializes the provided `measurement` and compresses the returned data.
      
-     - Parameters:
-     - serializable: The `serializable` object to serialize
+     - Parameter serializable: The `serializable` object to serialize
      - Returns: The serialized measurement in the compressed Cyface binary format
+     - Throws:
      */
     func serializeCompressed(serializable: Serializable) throws -> Data
 
@@ -60,14 +66,18 @@ extension BinarySerializer {
      Serializes and compresses the provided serializable and returns the serialized variant.
      
      - Parameter serializable: The object to serialize.
-     - Throws: If provided `serializable` is missing some data or is not serializable at all.
+     - Throws:
+        - `SerializationError.decompressionFailed` If decompressing the provided `Serializable` failed for some reason.
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
      - Returns: A compressed variant of the serialized data.
      */
     func serializeCompressed(serializable: Serializable) throws -> Data {
         let res = try serialize(serializable: serializable)
 
         guard let compressed = res.deflate() else {
-            fatalError("CyfaceBinaryFormatSerializer.serializeCompressed(\(serializable)): Unable to compress data.")
+            os_log("CyfaceBinaryFormatSerializer.serializeCompressed(serializable: %{PRIVATE}@): Unable to compress data.", log: OSLog.init(subsystem: "BinarySerializer", category: "de.cyface"), type: .error, String(describing: serializable))
+            throw SerializationError.decompressionFailed
         }
 
         return compressed
@@ -83,7 +93,7 @@ extension BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 1.0.0
+ - Version: 1.0.1
  */
 class MeasurementSerializer: BinarySerializer {
     /// Binds the Serializeable from the `BinarySerializer` protocol to a measurement.
@@ -99,12 +109,13 @@ class MeasurementSerializer: BinarySerializer {
      - 4 Bytes: Count of rotations (not used on iOS yet)
      - 4 Bytes: Count of directions (not used on iOS yet)
      
-     - Parameter measurement: The measurement to serialize.
+     - Parameter serializable: The measurement to serialize.
+     - Throws:
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
      */
     func serialize(serializable measurement: MeasurementMO) throws -> Data {
-        guard let geoLocations = measurement.geoLocations else {
-            throw SerializationError.missingData
-        }
+        let geoLocations = try PersistenceLayer.collectGeoLocations(from: measurement)
 
         var dataArray = [UInt8]()
         // add header
@@ -136,10 +147,10 @@ class AccelerationSerializer: BinarySerializer {
      - 8 Bytes: y as double
      - 8 Bytes: z as double
      
-     - Parameter accelerations: The array of accelerations to serialize.
+     - Parameter serializable: The array of accelerations to serialize.
      - Returns: An array of serialized bytes.
      */
-    func serialize(serializable accelerations: [Acceleration]) throws -> Data {
+    func serialize(serializable accelerations: [Acceleration]) -> Data {
         var ret = [UInt8]()
         let byteOrder = ByteOrder.bigEndian
 
@@ -161,9 +172,12 @@ class AccelerationSerializer: BinarySerializer {
     /**
      Deserializes the provided `data` into a `Serializable`. Only use this if your data is not compressed. Otherwise use `deserializeCompressed(:Data)`.
 
-     - Parameter data: The `data` to deserialize
-     - Throws: If the data is not deserializable
+     - Parameters:
+     - data: The `data` to deserialize
+     - count: The amount of accelerations in `data`.
      - Returns: An object of type `Serializable` created from the provided `data`
+     - Throws:
+        - `SerializationError.invalidData` If there is not enough data for `count` of accelerations.
      */
     func deserialize(data: Data, count: UInt32) throws -> [Acceleration] {
         guard data.count == count*32 else {
@@ -207,7 +221,7 @@ class GeoLocationSerializer: BinarySerializer {
      - 8 Bytes: speed as double
      - 4 Bytes: accuracy as int
      
-     - Parameter geoLocations: The array of locations to serialize.
+     - Parameter serializable: The array of locations to serialize.
      - Returns: An array of serialized bytes.
      */
     func serialize(serializable locations: [GeoLocationMO]) -> Data {
@@ -241,7 +255,7 @@ class GeoLocationSerializer: BinarySerializer {
  Transforms measurement data into the Cyface binary format used for transmission via the network.
  
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 1.0.0
  */
 class CyfaceBinaryFormatSerializer {
@@ -254,10 +268,10 @@ class CyfaceBinaryFormatSerializer {
     /**
      Serializes the provided `measurement` and compresses the returned data using RFC-1951 Deflate algorithm.
      
-     - Parameters:
-     - measurement: The `measurement` to serialize.
+     - Parameter measurement: The `measurement` to serialize.
      - Returns: The serialized measurement in the compressed Cyface binary format
-     - Throws: `SerializationError.compressionFailed` if compression was not successful.
+     - Throws:
+        - `SerializationError.compressionFailed` if compression was not successful.
      */
     func serializeCompressed(_ measurement: MeasurementMO) throws -> Data {
         let res = try serialize(measurement)
@@ -273,19 +287,18 @@ class CyfaceBinaryFormatSerializer {
      Serializes the provided measurement into the Cyface binary format.
      
      - Parameter measurement: The `measurement` to serialize.
-     - Throws: If accelerations file was not accessible.
      - Returns: The serialized measurement in Cyface binary format.
+     - Throws:
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+        - `FileSupportError.notReadable` If the data file was not readable.
+        - Some unspecified undocumented file system error if file was not accessible.
      */
     func serialize(_ measurement: MeasurementMO) throws -> Data {
         let serializedMeasurement = try measurementSerializer.serialize(serializable: measurement)
-        guard let geoLocations = measurement.geoLocations else {
-            throw SerializationError.invalidData
-        }
-        guard let geoLocationsArray = geoLocations.array as? [GeoLocationMO] else {
-            throw SerializationError.invalidData
-        }
+        let geoLocations = try PersistenceLayer.collectGeoLocations(from: measurement)
 
-        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: geoLocationsArray)
+        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: geoLocations)
         let serializedAccelerations = try accelerationsFile.data(for: measurement)
 
         var ret = Data()
@@ -366,6 +379,14 @@ enum ByteOrder {
         return self == .bigEndian ? ret.reversed() : ret
     }
 
+    /**
+     Converts the provided value into a 64 bit integer value.
+
+     - Parameter data: The data to convert.
+     - Returns: The converted `data` as a 64 bit integer.
+     - Throws:
+     - `SerializationError.invalidData` If the provided data is not exactly 8 byte long.
+     */
     func convertToInt64(_ data: Data) throws -> Int64 {
         guard data.count == 8 else {
             throw SerializationError.invalidData
@@ -379,6 +400,14 @@ enum ByteOrder {
         }
     }
 
+    /**
+     Converts the provided value into a double value.
+
+     - Parameter data: The data to convert.
+     - Returns: The converted `data` as a double.
+     - Throws:
+     - `SerializationError.invalidData` If the provided data is not exactly 8 byte long.
+     */
     func convertToDouble(_ data: Data) throws -> Double {
         guard data.count == 8 else {
             throw SerializationError.invalidData

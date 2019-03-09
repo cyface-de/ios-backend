@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Synchronizer Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Class/Synchronizer" class="dashAnchor"></a>
+    <a title="Synchronizer Class Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">DataCapturing Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        Synchronizer Class Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/Acceleration.html">Acceleration</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/AccelerationPointRemovalCleaner.html">AccelerationPointRemovalCleaner</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DefaultDistanceCalculationStrategy.html">DefaultDistanceCalculationStrategy</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DeletionCleaner.html">DeletionCleaner</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DiskConsumption.html">DiskConsumption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/GeoLocation.html">GeoLocation</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MeasurementEntity.html">MeasurementEntity</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MeasurementMO.html">MeasurementMO</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MovebisDataCapturingService.html">MovebisDataCapturingService</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/PersistenceLayer.html">PersistenceLayer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/ServerConnection.html">ServerConnection</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/StaticAuthenticator.html">StaticAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Synchronizer.html">Synchronizer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Track.html">Track</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Enums/DataCapturingError.html">DataCapturingError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/FileSupportError.html">FileSupportError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MeasurementContext.html">MeasurementContext</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ServerConnectionError.html">ServerConnectionError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/Status.html">Status</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/SynchronizationError.html">SynchronizationError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Protocols/Authenticator.html">Authenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/Cleaner.html">Cleaner</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/AccelerationsFile.html">AccelerationsFile</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>Synchronizer</h1>
+            <p>An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.</p>
+
+<p>An object of this call can be used to synchronize data either in the foreground or in the background. Background synchronization happens only if the synchronizing device has an active Wifi connection. To activate background synchronization you need to call the <code>activate</code> method.</p>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    1.0.1
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    2.3.0
+
+</div>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Properties"></a>
+                <a name="//apple_ref/swift/Section/Properties" class="dashAnchor"></a>
+                <a href="#/Properties">
+                  <h3 class="section-name">Properties</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/syncOnWiFiOnly" class="dashAnchor"></a>
+                    <a class="token" href="#/">syncOnWiFiOnly</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A flag indicating whether synchronization of data should only happen if the device is connected to a wireless local area network (Wifi).</p>
+
+<p>If <code>true</code> data is only synchronized via Wifi; if <code>false</code> data is also synchronized via mobile network.
+The default setting is <code>true</code>.
+Setting this to <code>false</code> might put heavy load on the users device and deplete her or his data plan.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Initializers"></a>
+                <a name="//apple_ref/swift/Section/Initializers" class="dashAnchor"></a>
+                <a href="#/Initializers">
+                  <h3 class="section-name">Initializers</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/init(persistenceLayer:cleaner:serverConnection:handler:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">init(persistenceLayer:cleaner:serverConnection:handler:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Initializer that sets the initial value of all the properties and prepares the background synchronization job.</p>
+<li>persistenceLayer: Persistent storage used to load synchronizable measurements from.</li>
+<li>cleaner: A strategy for cleaning the persistent storage after data synchronization.</li>
+<li>serverConnection: An authenticated connection to a Cyface API server.</li>
+<li>handler: The handler to call, when synchronization for a measurement has finished.</li>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code>SynchronizationError.reachabilityNotInitilized</code>: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/API%20Methods"></a>
+                <a name="//apple_ref/swift/Section/API Methods" class="dashAnchor"></a>
+                <a href="#/API%20Methods">
+                  <h3 class="section-name">API Methods</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/sync()" class="dashAnchor"></a>
+                    <a class="token" href="#/">sync()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Synchronize all measurements now if a connection is available.</p>
+
+<p>If this is not called the service might wait for an opportune moment to start synchronization.
+The call is asynchronous, meaning it returns almost immediately, while the synchronization continues running inside its own thread.</p>
+
+<p>You may call this method multiple times in short succession.
+However only one synchronization can be active at a given time.
+If you call this during an active synchronization it is going to return without doing anything.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/activate()" class="dashAnchor"></a>
+                    <a class="token" href="#/">activate()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Starts background synchronization as prepared in this objects initializer.</p>
+
+<p>Synchronization is stopped automatically if there are no measurements left to synchronize.
+You should restart this each time a new measurement has been finished.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-01)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

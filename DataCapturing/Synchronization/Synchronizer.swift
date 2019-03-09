@@ -24,8 +24,10 @@ import Alamofire
 /**
  An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.
 
+ An object of this call can be used to synchronize data either in the foreground or in the background. Background synchronization happens only if the synchronizing device has an active Wifi connection. To activate background synchronization you need to call the `activate` method.
+
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 2.3.0
  */
 public class Synchronizer {
@@ -75,6 +77,7 @@ public class Synchronizer {
      - cleaner: A strategy for cleaning the persistent storage after data synchronization.
      - serverConnection: An authenticated connection to a Cyface API server.
      - handler: The handler to call, when synchronization for a measurement has finished.
+     - Throws: `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
      */
     public init(persistenceLayer: PersistenceLayer, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) throws {
         self.persistenceLayer = persistenceLayer
@@ -118,10 +121,7 @@ public class Synchronizer {
      If you call this during an active synchronization it is going to return without doing anything.
      */
     public func sync() {
-        serverSynchronizationQueue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
+        serverSynchronizationQueue.async {
 
             if self.synchronizationInProgress {
                 return
@@ -129,7 +129,13 @@ public class Synchronizer {
                 self.synchronizationInProgress = true
             }
 
-            self.persistenceLayer.loadSynchronizableMeasurements(onFinishedCall: self.handle)
+            do {
+                self.persistenceLayer.context = self.persistenceLayer.makeContext()
+                let measurements = try self.persistenceLayer.loadSynchronizableMeasurements()
+                self.handle(synchronizableMeasurements: measurements, status: .success)
+            } catch let error {
+                self.handle(synchronizableMeasurements: nil, status: .error(error))
+            }
         }
     }
 
@@ -167,10 +173,10 @@ public class Synchronizer {
 
         for measurement in measurements {
             guard let measurementContextString = measurement.context else {
-                fatalError("Unable to load measurement context from measurement \(measurement.identifier).")
+                fatalError("Synchronizer.handle(synchronizableMeasurements: \(String(describing: synchronizableMeasurements?.count)), \(status)): Unable to load measurement context from measurement \(measurement.identifier).")
             }
             guard let measurementContext = MeasurementContext(rawValue: measurementContextString) else {
-                fatalError("Invalid measurement context: \(measurementContextString) in database.")
+                fatalError("Synchronizer.handle(synchronizableMeasurements: \(String(describing: synchronizableMeasurements?.count)), \(status)): Invalid measurement context: \(measurementContextString) in database.")
             }
 
             let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: measurementContext)
@@ -186,13 +192,13 @@ public class Synchronizer {
      - Parameter measurement: The synchronized measurement.
      */
     private func successHandler(measurement: MeasurementEntity) {
-        cleaner.clean(measurement: measurement, from: persistenceLayer) { [weak self] status in
-            guard let self = self else {
-                return
-            }
-
-            self.handler(.synchronizationFinished(measurement: measurement), status)
+        do {
+            try cleaner.clean(measurement: measurement, from: persistenceLayer)
+            handler(.synchronizationFinished(measurement: measurement), .success)
+        } catch let error {
+            handler(.synchronizationFinished(measurement: measurement), .error(error))
         }
+
         synchronizationFinishedHandler()
     }
 
@@ -221,17 +227,17 @@ public class Synchronizer {
 
             self.countOfMeasurementsToSynchronize -= 1
             if self.countOfMeasurementsToSynchronize==0 {
-                  self.synchronizationInProgress = false
+                self.synchronizationInProgress = false
             }
         }
     }
 }
 
 /**
-Implementations of this protocol are responsible for cleaning the database after a synchronization run.
+ Implementations of this protocol are responsible for cleaning the database after a synchronization run.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 2.3.0
  */
 public protocol Cleaner {
@@ -242,16 +248,20 @@ public protocol Cleaner {
      - Parameters:
      - measurement: The measurement to clean.
      - from: The `PersistenceLayer` to call for cleaning the data.
-     - onFinishedCall: Called as soon as deletion has finished.
+     - Throws:
+        - `PersistenceError.measurementNotLoadable` If the measurement to delete was not available.
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
+        - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
      */
-    func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer, onFinishedCall handler:@escaping (Status) -> Void)
+    func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer) throws
 }
 
 /**
-A cleaner removing each synchronized measurement from the database completely.
+ A cleaner removing each synchronized measurement from the database completely.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 2.3.0
  */
 public class DeletionCleaner: Cleaner {
@@ -261,18 +271,16 @@ public class DeletionCleaner: Cleaner {
         // Nothing to do here
     }
 
-    public func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer, onFinishedCall handler:@escaping (Status) -> Void) {
-        persistenceLayer.delete(measurement: measurement) { status in
-            handler(status)
-        }
+    public func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer) throws {
+        try persistenceLayer.delete(measurement: measurement)
     }
 }
 
 /**
-A cleaner removing only the accelerations from each synchronized measurement, thus keeping the track information available.
+ A cleaner removing only the accelerations from each synchronized measurement, thus keeping the track information available.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 2.3.0
  */
 public class AccelerationPointRemovalCleaner: Cleaner {
@@ -282,10 +290,8 @@ public class AccelerationPointRemovalCleaner: Cleaner {
         // Nothing to do here
     }
 
-    public func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer, onFinishedCall handler:@escaping (Status) -> Void) {
-        persistenceLayer.clean(measurement: measurement) { (status) in
-            handler(status)
-        }
+    public func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer) throws {
+        try persistenceLayer.clean(measurement: measurement)
     }
 }
 

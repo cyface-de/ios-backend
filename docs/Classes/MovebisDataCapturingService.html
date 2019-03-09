@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>MovebisDataCapturingService Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Class/MovebisDataCapturingService" class="dashAnchor"></a>
+    <a title="MovebisDataCapturingService Class Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">DataCapturing Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        MovebisDataCapturingService Class Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes/Acceleration.html">Acceleration</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/AccelerationPointRemovalCleaner.html">AccelerationPointRemovalCleaner</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DefaultDistanceCalculationStrategy.html">DefaultDistanceCalculationStrategy</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DeletionCleaner.html">DeletionCleaner</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/DiskConsumption.html">DiskConsumption</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/GeoLocation.html">GeoLocation</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MeasurementEntity.html">MeasurementEntity</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MeasurementMO.html">MeasurementMO</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/MovebisDataCapturingService.html">MovebisDataCapturingService</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/PersistenceLayer.html">PersistenceLayer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/ServerConnection.html">ServerConnection</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/StaticAuthenticator.html">StaticAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Synchronizer.html">Synchronizer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Track.html">Track</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Enums/DataCapturingError.html">DataCapturingError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/FileSupportError.html">FileSupportError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/MeasurementContext.html">MeasurementContext</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/ServerConnectionError.html">ServerConnectionError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/Status.html">Status</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/SynchronizationError.html">SynchronizationError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Protocols/Authenticator.html">Authenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/Cleaner.html">Cleaner</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Structs/AccelerationsFile.html">AccelerationsFile</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>MovebisDataCapturingService</h1>
+            <p>A <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code> implementation that provides the ability to capture locations
+before an actual measurement has been started.</p>
+
+<p>To receive the updates set the <code>preCapturingLocationDelegate</code>.
+The instance you provide will receive the updates.</p>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    4.0.1
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    1.0.0
+
+</div>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Properties"></a>
+                <a name="//apple_ref/swift/Section/Properties" class="dashAnchor"></a>
+                <a href="#/Properties">
+                  <h3 class="section-name">Properties</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Property/preCapturingLocationDelegate" class="dashAnchor"></a>
+                    <a class="token" href="#/">preCapturingLocationDelegate</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The delegate that gets informed about location updates.
+You may set this to <code>nil</code> if you would like to deactive location updates.</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Initializers"></a>
+                <a name="//apple_ref/swift/Section/Initializers" class="dashAnchor"></a>
+                <a href="#/Initializers">
+                  <h3 class="section-name">Initializers</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/init(connection:sensorManager:updateInterval:savingInterval:persistenceLayer:eventHandler:)" class="dashAnchor"></a>
+                    <a class="token" href="#/">init(connection:sensorManager:updateInterval:savingInterval:persistenceLayer:eventHandler:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Creates a new <code>MovebisDataCapturingService</code> with the ability capture location
+when no data capturing runs.</p>
+<li>connection: A connection to a Cyface API server.</li>
+<li>sensorManager: An instance of <code>CMMotionManager</code>.
+There should be only one instance of this type in your application.
+Since it seems to be impossible to create that instance inside a framework at the moment,
+you have to provide it via this parameter.</li>
+<li>updateInterval: The accelerometer update interval in Hertz. Default value is 100 Hertz.</li>
+<li>savingInterval: The time between save operations during data capturing in seconds. Default value is 30 seconds.</li>
+<li>persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.</li>
+<li>eventHandler: A handler for events occuring during data capturing.</li>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    If the networking stack for data synchronization was not successfully initialized.
+
+</div>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Methods"></a>
+                <a name="//apple_ref/swift/Section/Methods" class="dashAnchor"></a>
+                <a href="#/Methods">
+                  <h3 class="section-name">Methods</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/"></a>
+                    <a name="//apple_ref/swift/Method/start()" class="dashAnchor"></a>
+                    <a class="token" href="#/">start()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Starts the capturing process, notifying the provided handler of important events.</p>
+
+<p>This is a long running asynchronous operation.
+The provided handler is notified of its completion by receiving the event <code>DataCapturingEvent.serviceStarted</code>.
+If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    
+</div>
+<li><code><a href="../Enums/DataCapturingError.html#/isPaused">DataCapturingError.isPaused</a></code> if the service was paused and thus it makes no sense to start it. Use <code>resume()</code>if you want to continue.</li>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-01)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>
