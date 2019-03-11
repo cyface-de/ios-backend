@@ -21,9 +21,13 @@ import Foundation
 import CoreData
 
 /**
- An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and accelerations. Most functions are asynchronous and provide a handler to react when they are finished.
+ An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and accelerations.
  
- All entities have two representations. They are either represented as a subclass of `NSManagedObject` or as a custom entity class. The former are `MeasurementMO`, `AccelerationPointMO` and `GeoLocationMO`, while the latter are `MeasurementEntity`, `Acceleration` and `GeoLocation`. You should always try to the second costum classes, because the subclasses of `NSManagedObject` are not thread safe and should never be used outside of the handler they are provided to as parameter.
+ All entities produced by a `PersistenceLayer` are not thread save and thus should not be used outside the calling thread.
+ If multiple calls to this API are necessary, it is necessary to set an `NSManagedObjectContext` for the property `PersistenceLayer.context`.
+ The creation of this context needs to be carried out on the same thread as the API calls.
+
+ A valid usage pattern is to create a new `PersistenceLayer` instance as part of a custom method accessing the data storage and initialize the API. Using a `PersistenceLayer` as global state can result in strange errors resulting from CoreData.
  
  Read access is public while manipulation of the data stored is restricted to the framework.
  

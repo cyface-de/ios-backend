@@ -45,7 +45,7 @@ public class ServerConnection {
     /// An `URL` used to upload data to. There should be a server available at that location.
     public var apiURL: URL
     /// A connection to the persistence layer containing the data to transfer to the server.
-    private let persistenceLayer: PersistenceLayer
+    //private let persistenceLayer: PersistenceLayer
     /// A handler for network sessions. This is especially useful to realize background data transfer sessions.
     private let networking = Networking(with: "de.cyface")
     /// An object used to authenticate this app with a Cyface Collector server.
@@ -76,16 +76,14 @@ public class ServerConnection {
     // MARK: - Initializers
 
     /**
-     Creates a new server connection to a certain endpoint, loading data from the provided `persistenceLayer`.
+     Creates a new server connection to a certain endpoint, using the provided authentication method.
 
      - Parameters:
      - apiURL: The URL endpoint to upload data to.
-     - persistenceLayer: The layer used to load the data to upload from.
      - authenticator: An object used to authenticate this app with a Cyface Collector server.
      */
-    public required init(apiURL url: URL, persistenceLayer: PersistenceLayer, authenticator: Authenticator) {
+    public required init(apiURL url: URL, authenticator: Authenticator) {
         self.apiURL = url
-        self.persistenceLayer = persistenceLayer
         self.authenticator = authenticator
     }
 
@@ -145,22 +143,25 @@ public class ServerConnection {
      Create a MultiPart/FormData request to transmit a measurement to a Cyface Collector server.
 
      - Parameters:
-     - request: The request to fill with data.
-     - for: The measurement to transmit.
+        - request: The request to fill with data.
+        - for: The measurement to transmit.
      - Throws:
-     - `ServerConnectionError.missingInstallationIdentifier` If there is no valid installation identifier to identify this SDK installation with a server.
-     - `ServerConnectionError.missingMeasurementIdentifier` If the current measurement has no valid device wide unique identifier.
-     - `ServerConnectionError.missingDeviceType` If the device type of this device could not be figured out.
-     - `PersistenceError.dataNotLoadable` If there is no such measurement.
-     - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
-     - `SerializationError.missingData` If no track data was found.
-     - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-     - `FileSupportError.notReadable` If the data file was not readable.
-     - Some unspecified errors from within CoreData.
-     - Some unspecified undocumented file system error if file was not accessible.
+        - `ServerConnectionError.missingInstallationIdentifier` If there is no valid installation identifier to identify this SDK installation with a server.
+        - `ServerConnectionError.missingMeasurementIdentifier` If the current measurement has no valid device wide unique identifier.
+        - `ServerConnectionError.missingDeviceType` If the device type of this device could not be figured out.
+        - `PersistenceError.dataNotLoadable` If there is no such measurement.
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - `PersistenceError.modelNotLoabable` If the model is not loadable
+        - `PersistenceError.modelNotInitializable` If the model was loaded (so it is available) but can not be initialized.
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+        - `FileSupportError.notReadable` If the data file was not readable.
+        - Some unspecified errors from within CoreData.
+        - Some unspecified undocumented file system error if file was not accessible.
      */
     func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
         // Load and serialize measurement synchronously.
+        let persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
 
@@ -204,8 +205,6 @@ public class ServerConnection {
         request.append(deviceTypeData, withName: "deviceType")
         request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
         request.append(appVersion, withName: "appVersion")
-
-
         request.append(length, withName: "length")
         request.append(locationCount, withName: "locationCount")
     }
