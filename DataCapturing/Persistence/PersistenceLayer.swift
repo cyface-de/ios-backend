@@ -32,7 +32,7 @@ import CoreData
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 3.0.1
  - Since: 1.0.0
  */
 public class PersistenceLayer {

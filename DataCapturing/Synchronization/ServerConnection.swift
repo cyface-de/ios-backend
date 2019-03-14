@@ -32,7 +32,7 @@ import os.log
  This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
 
  - Author: Klemens Muthmann
- - Version: 4.0.0
+ - Version: 4.0.1
  - Since: 1.0.0
  */
 public class ServerConnection {
@@ -79,8 +79,8 @@ public class ServerConnection {
      Creates a new server connection to a certain endpoint, using the provided authentication method.
 
      - Parameters:
-     - apiURL: The URL endpoint to upload data to.
-     - authenticator: An object used to authenticate this app with a Cyface Collector server.
+        - apiURL: The URL endpoint to upload data to.
+        - authenticator: An object used to authenticate this app with a Cyface Collector server.
      */
     public required init(apiURL url: URL, authenticator: Authenticator) {
         self.apiURL = url
@@ -93,9 +93,9 @@ public class ServerConnection {
      Synchronizes the provided `measurement` with a remote server and calls either a `success` or `failure` handler when finished.
 
      - Parameters:
-     - measurement: The measurement to synchronize.
-     - onSuccess: The handler to call, when synchronization has succeeded. This handler is provided with the synchronized `MeasurementEntity`.
-     - onFailure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The `MeasurementEntity` is the same as the one provided as parameter to this method.
+        - measurement: The measurement to synchronize.
+        - onSuccess: The handler to call, when synchronization has succeeded. This handler is provided with the synchronized `MeasurementEntity`.
+        - onFailure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The `MeasurementEntity` is the same as the one provided as parameter to this method.
      */
     public func sync(measurement: MeasurementEntity, onSuccess success: @escaping ((MeasurementEntity) -> Void) = {_ in }, onFailure failure: @escaping ((MeasurementEntity, Error) -> Void) = {_, _ in }) {
 
@@ -111,10 +111,10 @@ public class ServerConnection {
      The handler called after this app has successfully authenticated with a Cyface Collector server.
 
      - Parameters:
-     - token: The Java Web Token returned by the authentication process
-     - measurement: The measurement to transmit.
-     - onSuccess: Called after successful data transmission with information about which measurement was transmitted.
-     - onFailure: Called after a failed data transmission with information about which measurement failed and the error.
+        - token: The Java Web Token returned by the authentication process
+        - measurement: The measurement to transmit.
+        - onSuccess: Called after successful data transmission with information about which measurement was transmitted.
+        - onFailure: Called after a failed data transmission with information about which measurement failed and the error.
      */
     func onAuthenticated(token: String, measurement: MeasurementEntity, onSuccess: @escaping (MeasurementEntity) -> Void, onFailure: @escaping (MeasurementEntity, Error) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
