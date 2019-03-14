@@ -32,7 +32,7 @@ import os.log
  This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
 
  - Author: Klemens Muthmann
- - Version: 4.0.0
+ - Version: 4.0.1
  - Since: 1.0.0
  */
 public class ServerConnection {
@@ -45,7 +45,7 @@ public class ServerConnection {
     /// An `URL` used to upload data to. There should be a server available at that location.
     public var apiURL: URL
     /// A connection to the persistence layer containing the data to transfer to the server.
-    private let persistenceLayer: PersistenceLayer
+    //private let persistenceLayer: PersistenceLayer
     /// A handler for network sessions. This is especially useful to realize background data transfer sessions.
     private let networking = Networking(with: "de.cyface")
     /// An object used to authenticate this app with a Cyface Collector server.
@@ -76,16 +76,14 @@ public class ServerConnection {
     // MARK: - Initializers
 
     /**
-     Creates a new server connection to a certain endpoint, loading data from the provided `persistenceLayer`.
+     Creates a new server connection to a certain endpoint, using the provided authentication method.
 
      - Parameters:
-     - apiURL: The URL endpoint to upload data to.
-     - persistenceLayer: The layer used to load the data to upload from.
-     - authenticator: An object used to authenticate this app with a Cyface Collector server.
+        - apiURL: The URL endpoint to upload data to.
+        - authenticator: An object used to authenticate this app with a Cyface Collector server.
      */
-    public required init(apiURL url: URL, persistenceLayer: PersistenceLayer, authenticator: Authenticator) {
+    public required init(apiURL url: URL, authenticator: Authenticator) {
         self.apiURL = url
-        self.persistenceLayer = persistenceLayer
         self.authenticator = authenticator
     }
 
@@ -95,9 +93,9 @@ public class ServerConnection {
      Synchronizes the provided `measurement` with a remote server and calls either a `success` or `failure` handler when finished.
 
      - Parameters:
-     - measurement: The measurement to synchronize.
-     - onSuccess: The handler to call, when synchronization has succeeded. This handler is provided with the synchronized `MeasurementEntity`.
-     - onFailure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The `MeasurementEntity` is the same as the one provided as parameter to this method.
+        - measurement: The measurement to synchronize.
+        - onSuccess: The handler to call, when synchronization has succeeded. This handler is provided with the synchronized `MeasurementEntity`.
+        - onFailure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The `MeasurementEntity` is the same as the one provided as parameter to this method.
      */
     public func sync(measurement: MeasurementEntity, onSuccess success: @escaping ((MeasurementEntity) -> Void) = {_ in }, onFailure failure: @escaping ((MeasurementEntity, Error) -> Void) = {_, _ in }) {
 
@@ -113,10 +111,10 @@ public class ServerConnection {
      The handler called after this app has successfully authenticated with a Cyface Collector server.
 
      - Parameters:
-     - token: The Java Web Token returned by the authentication process
-     - measurement: The measurement to transmit.
-     - onSuccess: Called after successful data transmission with information about which measurement was transmitted.
-     - onFailure: Called after a failed data transmission with information about which measurement failed and the error.
+        - token: The Java Web Token returned by the authentication process
+        - measurement: The measurement to transmit.
+        - onSuccess: Called after successful data transmission with information about which measurement was transmitted.
+        - onFailure: Called after a failed data transmission with information about which measurement failed and the error.
      */
     func onAuthenticated(token: String, measurement: MeasurementEntity, onSuccess: @escaping (MeasurementEntity) -> Void, onFailure: @escaping (MeasurementEntity, Error) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
@@ -145,14 +143,16 @@ public class ServerConnection {
      Create a MultiPart/FormData request to transmit a measurement to a Cyface Collector server.
 
      - Parameters:
-     - request: The request to fill with data.
-     - for: The measurement to transmit.
+        - request: The request to fill with data.
+        - for: The measurement to transmit.
      - Throws:
         - `ServerConnectionError.missingInstallationIdentifier` If there is no valid installation identifier to identify this SDK installation with a server.
         - `ServerConnectionError.missingMeasurementIdentifier` If the current measurement has no valid device wide unique identifier.
         - `ServerConnectionError.missingDeviceType` If the device type of this device could not be figured out.
         - `PersistenceError.dataNotLoadable` If there is no such measurement.
         - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - `PersistenceError.modelNotLoabable` If the model is not loadable
+        - `PersistenceError.modelNotInitializable` If the model was loaded (so it is available) but can not be initialized.
         - `SerializationError.missingData` If no track data was found.
         - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
         - `FileSupportError.notReadable` If the data file was not readable.
@@ -160,6 +160,18 @@ public class ServerConnection {
         - Some unspecified undocumented file system error if file was not accessible.
      */
     func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
+        // Load and serialize measurement synchronously.
+        let persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
+
+        try addMetaData(to: request, for: measurement)
+
+        let payloadUrl = try write(measurement)
+        request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+    }
+
+    func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
             throw ServerConnectionError.missingInstallationIdentifier
         }
@@ -170,17 +182,31 @@ public class ServerConnection {
             throw ServerConnectionError.missingDeviceType
         }
 
+        let bundle = Bundle(for: type(of: self))
+        guard let appVersion = (bundle.infoDictionary?["CFBundleShortVersionString"] as? String)?.data(using: String.Encoding.utf8) else {
+            throw ServerConnectionError.missingAppVersion
+        }
+
+        let length = String(measurement.trackLength).data(using: String.Encoding.utf8)!
+        let locationCount = String(try PersistenceLayer.collectGeoLocations(from: measurement).count).data(using: String.Encoding.utf8)!
+
+        if let startLocationRaw = (measurement.tracks?.firstObject as? Track)?.locations?.firstObject as? GeoLocationMO {
+            let startLocation = "lat: \(startLocationRaw.lat), lon: \(startLocationRaw.lon), time: \(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+            request.append(startLocation, withName: "startLocation")
+        }
+
+        if let endLocationRaw = (measurement.tracks?.lastObject as? Track)?.locations?.lastObject as? GeoLocationMO {
+            let endLocation = "lat: \(endLocationRaw.lat), lon \(endLocationRaw.lon), time: \(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+            request.append(endLocation, withName: "endLocation")
+        }
+
         request.append(deviceIdData, withName: "deviceId")
         request.append(measurementIdData, withName: "measurementId")
         request.append(deviceTypeData, withName: "deviceType")
         request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
-
-        // Load and serialize measurement synchronously.
-        persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
-
-        let payloadUrl = try write(measurement)
-        request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+        request.append(appVersion, withName: "appVersion")
+        request.append(length, withName: "length")
+        request.append(locationCount, withName: "locationCount")
     }
 
     /**
@@ -193,7 +219,7 @@ public class ServerConnection {
      - onSuccess: Called if data transmission was successful. Gets the transmitted measurement as a parameter.
      - onFailure: Called if data transmission failed for some reason. Gets the transmitted measurement and information about the error.
      - Throws:
-        - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
+     - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
      */
     func onEncodingComplete(for measurement: MeasurementEntity, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
         switch result {
@@ -219,7 +245,7 @@ public class ServerConnection {
      - onSuccess: Called with information about the transmitted measurement if the response indicates success.
      - response: The HTTP response received.
      - Throws:
-        - Some unspecified undocumented error if the response was not successful.
+     - Some unspecified undocumented error if the response was not successful.
      */
     func onResponseReady(for measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void), _ response: DataResponse<String>) throws {
         switch response.result {
@@ -236,10 +262,10 @@ public class ServerConnection {
      - Parameter measurement: The measurement to serialize as a file.
      - Returns: The url of the file containing the measurement data.
      - Throws:
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-        - `FileSupportError.notReadable` If the data file was not readable.
-        - Some unspecified undocumented file system error if file was not accessible.
+     - `SerializationError.missingData` If no track data was found.
+     - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+     - `FileSupportError.notReadable` If the data file was not readable.
+     - Some unspecified undocumented file system error if file was not accessible.
      */
     private func write(_ measurement: MeasurementMO) throws -> URL {
         let measurementFile = MeasurementFile()
@@ -261,7 +287,7 @@ public class ServerConnection {
  ````
 
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 3.1.0
  - Since: 1.0.0
  */
 public enum ServerConnectionError: Error {
@@ -281,4 +307,6 @@ public enum ServerConnectionError: Error {
     case invalidResponse
     /// Used for all unexpected errors, that should not occur during normal operation.
     case unexpectedError
+    /// This applications version could not be loaded
+    case missingAppVersion
 }

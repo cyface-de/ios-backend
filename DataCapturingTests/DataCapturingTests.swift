@@ -46,7 +46,7 @@ class DataCapturingTests: XCTestCase {
         }
 
         authenticator = StaticAuthenticator()
-        oocut = ServerConnection(apiURL: URL(string: "https://localhost:8080")!, persistenceLayer: persistenceLayer!, authenticator: authenticator!)
+        oocut = ServerConnection(apiURL: URL(string: "https://localhost:8080")!, authenticator: authenticator!)
     }
 
     override func tearDown() {
