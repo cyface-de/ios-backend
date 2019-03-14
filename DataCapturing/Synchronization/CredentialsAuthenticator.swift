@@ -66,7 +66,7 @@ public class CredentialsAuthenticator: Authenticator {
         let jsonCredentials = try JSONSerialization.data(withJSONObject: ["username": username, "password": password])
         let url = authenticationEndpoint.appendingPathComponent("login")
 
-        Alamofire.upload(jsonCredentials, to: url, method: .post, headers: nil).response { response in
+        Networking.sharedInstance.sessionManager.upload(jsonCredentials, to: url, method: .post, headers: nil).response { response in
             guard let httpResponse = response.response else {
                 os_log("Unable to unwrap authentication response", log: CredentialsAuthenticator.oslog, type: OSLogType.error)
                 onFailure(ServerConnectionError.authenticationNotSuccessful)

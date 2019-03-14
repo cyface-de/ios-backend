@@ -44,10 +44,6 @@ public class ServerConnection {
 
     /// An `URL` used to upload data to. There should be a server available at that location.
     public var apiURL: URL
-    /// A connection to the persistence layer containing the data to transfer to the server.
-    //private let persistenceLayer: PersistenceLayer
-    /// A handler for network sessions. This is especially useful to realize background data transfer sessions.
-    private let networking = Networking(with: "de.cyface")
     /// An object used to authenticate this app with a Cyface Collector server.
     private let authenticator: Authenticator
     /**
@@ -124,13 +120,14 @@ public class ServerConnection {
         ]
 
         let encode: ((MultipartFormData) -> Void) = {data in
+            os_log("Encoding!", log: ServerConnection.osLog, type: OSLogType.default)
             do {
                 try self.create(request: data, for: measurement)
             } catch let error {
                 os_log("Encoding data failed! Error %{PUBLIC}@", log: ServerConnection.osLog, type: .error, error.localizedDescription)
             }
         }
-        networking.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
+        Networking.sharedInstance.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
             do {
                 try self.onEncodingComplete(for: measurement, with: encodingResult, onSuccess: onSuccess, onFailure: onFailure)
             } catch {
@@ -160,6 +157,7 @@ public class ServerConnection {
         - Some unspecified undocumented file system error if file was not accessible.
      */
     func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
+        os_log("Creating request", log: ServerConnection.osLog, type: .default)
         // Load and serialize measurement synchronously.
         let persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
         persistenceLayer.context = persistenceLayer.makeContext()
@@ -222,35 +220,19 @@ public class ServerConnection {
      - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
      */
     func onEncodingComplete(for measurement: MeasurementEntity, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
+        os_log("encoding complete", log: ServerConnection.osLog, type: .default)
         switch result {
         case .success(let upload, _, _):
             // Two status codes are acceptable. A 201 is a successful upload, while a 409 is a conflict. In both cases the measurement should be marked as uploaded successfully.
             upload.validate(statusCode: [201, 409]).responseString { response in
-                do {
-                    try self.onResponseReady(for: measurement, onSuccess: success, response)
-                } catch {
+                os_log("Validating Upload!", log: ServerConnection.osLog, type: .default)
+                switch response.result {
+                case .success:
+                    success(measurement)
+                case .failure(let error):
                     failure(measurement, error)
                 }
             }
-        case .failure(let error):
-            throw error
-        }
-    }
-
-    /**
-     A handler for the result from a data transmission call.
-
-     - Parameters:
-     - for: The measurement that was transmitted.
-     - onSuccess: Called with information about the transmitted measurement if the response indicates success.
-     - response: The HTTP response received.
-     - Throws:
-     - Some unspecified undocumented error if the response was not successful.
-     */
-    func onResponseReady(for measurement: MeasurementEntity, onSuccess success: ((MeasurementEntity) -> Void), _ response: DataResponse<String>) throws {
-        switch response.result {
-        case .success:
-            success(measurement)
         case .failure(let error):
             throw error
         }

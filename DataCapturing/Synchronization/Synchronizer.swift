@@ -73,10 +73,10 @@ public class Synchronizer {
      Initializer that sets the initial value of all the properties and prepares the background synchronization job.
 
      - Parameters:
-     - persistenceLayer: Persistent storage used to load synchronizable measurements from.
-     - cleaner: A strategy for cleaning the persistent storage after data synchronization.
-     - serverConnection: An authenticated connection to a Cyface API server.
-     - handler: The handler to call, when synchronization for a measurement has finished.
+        - persistenceLayer: Persistent storage used to load synchronizable measurements from.
+        - cleaner: A strategy for cleaning the persistent storage after data synchronization.
+        - serverConnection: An authenticated connection to a Cyface API server.
+        - handler: The handler to call, when synchronization for a measurement has finished.
      - Throws: `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
      */
     public init(persistenceLayer: PersistenceLayer, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) throws {
