@@ -31,6 +31,7 @@ class Networking {
 
     // MARK: - Properties
 
+    /// The singleton instance of the `Networking` class. This is necessary since it is not allowed to use multiple session managers with the same identifier.
     static let sharedInstance = Networking(with: "de.cyface")
     /// The Alamofire session manager used to transmit data to and receive responses from a Cyface server.
     var sessionManager: Alamofire.SessionManager
