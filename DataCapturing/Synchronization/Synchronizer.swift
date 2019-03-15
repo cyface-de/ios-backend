@@ -27,7 +27,7 @@ import Alamofire
  An object of this call can be used to synchronize data either in the foreground or in the background. Background synchronization happens only if the synchronizing device has an active Wifi connection. To activate background synchronization you need to call the `activate` method.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 2.3.0
  */
 public class Synchronizer {

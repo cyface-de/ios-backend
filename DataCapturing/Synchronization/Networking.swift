@@ -24,7 +24,7 @@ import Alamofire
  A wrapper class for accessing the network stack
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 2.0.0
  */
 class Networking {

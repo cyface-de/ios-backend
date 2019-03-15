@@ -25,7 +25,7 @@ import os.log
  An authenticator using a combination of username and password to authenticate against a Cyface data collector server.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 2.0.0
  */
 public class CredentialsAuthenticator: Authenticator {
