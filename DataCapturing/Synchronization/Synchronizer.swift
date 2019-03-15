@@ -27,7 +27,7 @@ import Alamofire
  An object of this call can be used to synchronize data either in the foreground or in the background. Background synchronization happens only if the synchronizing device has an active Wifi connection. To activate background synchronization you need to call the `activate` method.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 2.3.0
  */
 public class Synchronizer {
@@ -73,10 +73,10 @@ public class Synchronizer {
      Initializer that sets the initial value of all the properties and prepares the background synchronization job.
 
      - Parameters:
-     - persistenceLayer: Persistent storage used to load synchronizable measurements from.
-     - cleaner: A strategy for cleaning the persistent storage after data synchronization.
-     - serverConnection: An authenticated connection to a Cyface API server.
-     - handler: The handler to call, when synchronization for a measurement has finished.
+        - persistenceLayer: Persistent storage used to load synchronizable measurements from.
+        - cleaner: A strategy for cleaning the persistent storage after data synchronization.
+        - serverConnection: An authenticated connection to a Cyface API server.
+        - handler: The handler to call, when synchronization for a measurement has finished.
      - Throws: `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
      */
     public init(persistenceLayer: PersistenceLayer, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) throws {

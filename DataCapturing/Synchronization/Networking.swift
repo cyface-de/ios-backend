@@ -24,17 +24,19 @@ import Alamofire
  A wrapper class for accessing the network stack
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 2.0.0
  */
 class Networking {
 
     // MARK: - Properties
 
+    /// The singleton instance of the `Networking` class. This is necessary since it is not allowed to use multiple session managers with the same identifier.
+    static let sharedInstance = Networking(with: "de.cyface")
     /// The Alamofire session manager used to transmit data to and receive responses from a Cyface server.
-    public var sessionManager: Alamofire.SessionManager
+    var sessionManager: Alamofire.SessionManager
     /// An Alamofire session manaager used for background data transmission.
-    public var backgroundSessionManager: Alamofire.SessionManager
+    var backgroundSessionManager: Alamofire.SessionManager
 
     // MARK: - Initializers
 
@@ -43,7 +45,7 @@ class Networking {
 
      - Parameter identifier: The background session identifier. Using the same identifier retrieves your previous session after app shutdown.
     */
-    init(with identifier: String) {
+    private init(with identifier: String) {
         // Remove Accept-Encoding from the default headers.
         var defaultHeaders = Alamofire.SessionManager.defaultHTTPHeaders
         defaultHeaders.removeValue(forKey: "Accept-Encoding")
