@@ -14,7 +14,7 @@
     <a title="MovebisDataCapturingService Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (72% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -137,6 +137,12 @@
         <section>
           <section class="section">
             <h1>MovebisDataCapturingService</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">MovebisDataCapturingService</span><span class="p">:</span> <span class="kt"><a href="../Classes/DataCapturingService.html">DataCapturingService</a></span></code></pre>
+
+                </div>
+              </div>
             <p>A <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code> implementation that provides the ability to capture locations
 before an actual measurement has been started.</p>
 
@@ -172,9 +178,9 @@ The instance you provide will receive the updates.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing07MovebisaB7ServiceC03preB16LocationDelegateSo017CLLocationManagerG0_pSgvp"></a>
                     <a name="//apple_ref/swift/Property/preCapturingLocationDelegate" class="dashAnchor"></a>
-                    <a class="token" href="#/">preCapturingLocationDelegate</a>
+                    <a class="token" href="#/s:13DataCapturing07MovebisaB7ServiceC03preB16LocationDelegateSo017CLLocationManagerG0_pSgvp">preCapturingLocationDelegate</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -185,6 +191,14 @@ The instance you provide will receive the updates.</p>
                         <p>The delegate that gets informed about location updates.
 You may set this to <code>nil</code> if you would like to deactive location updates.</p>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">preCapturingLocationDelegate</span><span class="p">:</span> <span class="kt">CLLocationManagerDelegate</span><span class="p">?</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
@@ -203,9 +217,9 @@ You may set this to <code>nil</code> if you would like to deactive location upda
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing07MovebisaB7ServiceC10connection13sensorManager14updateInterval06savingI016persistenceLayer12eventHandlerAcA16ServerConnectionC_So08CMMotionG0CS2dAA011PersistenceL0CyAA0aB5EventO_AA6StatusOtctKcfc"></a>
                     <a name="//apple_ref/swift/Method/init(connection:sensorManager:updateInterval:savingInterval:persistenceLayer:eventHandler:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">init(connection:sensorManager:updateInterval:savingInterval:persistenceLayer:eventHandler:)</a>
+                    <a class="token" href="#/s:13DataCapturing07MovebisaB7ServiceC10connection13sensorManager14updateInterval06savingI016persistenceLayer12eventHandlerAcA16ServerConnectionC_So08CMMotionG0CS2dAA011PersistenceL0CyAA0aB5EventO_AA6StatusOtctKcfc">init(connection:sensorManager:updateInterval:savingInterval:persistenceLayer:eventHandler:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -231,6 +245,14 @@ you have to provide it via this parameter.</li>
 </div>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">connection</span> <span class="nv">serverConnection</span><span class="p">:</span> <span class="kt"><a href="../Classes/ServerConnection.html">ServerConnection</a></span><span class="p">,</span> <span class="n">sensorManager</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CMMotionManager</span><span class="p">,</span> <span class="nv">updateInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="nv">savingInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">persistenceLayer</span> <span class="nv">persistence</span><span class="p">:</span> <span class="kt"><a href="../Classes/PersistenceLayer.html">PersistenceLayer</a></span><span class="p">,</span> <span class="nv">eventHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">((</span><span class="kt"><a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a></span><span class="p">,</span> <span class="kt"><a href="../Enums/Status.html">Status</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">))</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
@@ -248,9 +270,9 @@ you have to provide it via this parameter.</li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing07MovebisaB7ServiceC5startyyKF"></a>
                     <a name="//apple_ref/swift/Method/start()" class="dashAnchor"></a>
-                    <a class="token" href="#/">start()</a>
+                    <a class="token" href="#/s:13DataCapturing07MovebisaB7ServiceC5startyyKF">start()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -267,8 +289,16 @@ If you need to run code and be sure that the service has started you need to lis
     <p class="aside-title">Throws</p>
     
 </div>
-<li><code><a href="../Enums/DataCapturingError.html#/isPaused">DataCapturingError.isPaused</a></code> if the service was paused and thus it makes no sense to start it. Use <code>resume()</code>if you want to continue.</li>
+<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO8isPausedyA2CmF">DataCapturingError.isPaused</a></code> if the service was paused and thus it makes no sense to start it. Use <code>resume()</code>if you want to continue.</li>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">start</span><span class="p">()</span> <span class="k">throws</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
@@ -278,7 +308,7 @@ If you need to run code and be sure that the service has started you need to lis
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-01)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-15)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
