@@ -299,7 +299,9 @@ public class DataCapturingService: NSObject {
         }
 
         motionManager.stopAccelerometerUpdates()
-        locationManager.stopUpdatingLocation()
+        DispatchQueue.main.async {
+            self.locationManager.stopUpdatingLocation()
+        }
         locationManager.delegate = nil
         backgroundSynchronizationTimer.cancel()
         saveCapturedData()
