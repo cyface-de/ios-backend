@@ -56,7 +56,7 @@ public class DataCapturingService: NSObject {
      Provides access to the devices geo location capturing hardware (such as GPS, GLONASS, GALILEO, etc.)
      and handles geo location updates in the background.
      */
-    private lazy var locationManager: CLLocationManager = {
+    lazy var locationManager: CLLocationManager = {
         let manager = CLLocationManager()
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         manager.allowsBackgroundLocationUpdates = true
@@ -75,13 +75,13 @@ public class DataCapturingService: NSObject {
     let persistenceLayer: PersistenceLayer
 
     /// An in memory storage for accelerations, before they are written to disk.
-    private var accelerationsCache = [Acceleration]()
+    var accelerationsCache = [Acceleration]()
 
     /// An in memory storage for geo locations, before they are written to disk.
-    private var locationsCache = [GeoLocation]()
+    var locationsCache = [GeoLocation]()
 
     /// The background queue used to capture data.
-    private let capturingQueue = DispatchQueue.global(qos: .userInitiated)
+    let capturingQueue = DispatchQueue.global(qos: .userInitiated)
 
     /// Synchronizes read and write operations on the `locationsCache` and the `accelerationsCache`.
     private let cacheSynchronizationQueue = DispatchQueue(label: "cacheSynchronization", attributes: .concurrent)

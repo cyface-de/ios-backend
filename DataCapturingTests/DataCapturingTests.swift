@@ -32,117 +32,147 @@ import CoreData
 class DataCapturingTests: XCTestCase {
 
     /// A connection to a Cyface Server backend.
-    var oocut: ServerConnection!
-    /// A manager for the CoreData stack providing access to write and read some example data.
-    var dataManager: CoreDataManager!
-    /// Authenticator to use to test connections to the Movebis server.
+    var oocut: TestDataCapturingService!
     var authenticator: StaticAuthenticator!
 
-    /// Sets up theis test by creating a proper `ServerConnection`.
     override func setUp() {
         super.setUp()
 
-        guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
-            fatalError()
+        do {
+            let persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+            let sensorManager = TestMotionManager()
+            oocut = TestDataCapturingService(sensorManager: sensorManager, persistenceLayer: persistenceLayer, synchronizer: nil) { event, status in }
+        } catch let error {
+            fatalError("Failed to initialize persistence layer: \(error.localizedDescription)")
         }
-        let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
-        manager.setup(bundle: bundle)
-
-        authenticator = StaticAuthenticator()
-        oocut = ServerConnection(apiURL: URL(string: "https://localhost:8080")!, authenticator: authenticator!, onManager: manager)
     }
 
     /// Tears down the test environment.
     override func tearDown() {
-        oocut = nil
-        dataManager = nil
         authenticator = nil
         super.tearDown()
     }
 
-    /**
-     This test tests the actual upload of data to a Movebis server. Since we can not assume there is one such server in each and every test environment (especially under CI conditions), the test is skipped by default. Enable it to selectively test data upload in isolation. The test should also not run on an arbitrary server, since most servers will reject the transmitted data on the second run, because of data duplication.
-     */
-    func skipped_testSynchronizationWithMovebisServer() {
-        let promise = expectation(description: "Successful data transmission")
-        do {
-            let persistenceLayer = PersistenceLayer(onManager: dataManager)
-            let measurement = try persistenceLayer.createMeasurement(at: 2, withContext: .bike)
-
-            self.authenticator!.jwtToken = "replace me"
-
-            let entity = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
-            oocut.sync(measurement: entity, onSuccess: {submitted in
-                XCTAssertEqual(submitted.identifier, entity.identifier)
-                promise.fulfill()
-            }, onFailure: {_, error in
-                XCTFail("Error \(error)")
-                promise.fulfill()
-            })
-        } catch let error {
-            XCTFail("Synchronization produced an error! \(error)")
-        }
-
-        wait(for: [promise], timeout: 10)
+    func testStartStop_HappyPath() throws {
+        try oocut.start(inContext: .bike)
+        try oocut.stop()
     }
 
-    // TODO: This test does not work since we can not test with background location updates in the moment.
-    /*func testCaptureData() {
-     guard let oocut = oocut else {
-     XCTFail("Unable to get server connection object.")
-     return
-     }
-     let persistenceLayer = PersistenceLayer()
-     let sensorManager = CMMotionManager()
-     let dataCapturingService = MovebisDataCapturingService(connection: oocut, sensorManager: sensorManager, updateInterval: 0.0, persistenceLayer: persistenceLayer)
-
-     dataCapturingService.start()
-     XCTAssertTrue(dataCapturingService.isRunning)
-     let prePauseCountOfMeasurements = dataCapturingService.countMeasurements()
-
-     dataCapturingService.pause()
-     XCTAssertFalse(dataCapturingService.isRunning)
-     
-     dataCapturingService.resume()
-     XCTAssertTrue(dataCapturingService.isRunning)
-     let postPauseCountOfMeasurements = dataCapturingService.countMeasurements()
-     XCTAssertEqual(prePauseCountOfMeasurements, postPauseCountOfMeasurements)
-
-     dataCapturingService.stop()
-     XCTAssertFalse(dataCapturingService.isRunning)
-     }*/
-
-    // TODO: (STAD-104) This does currently not work as a test case is not allowed to run background location updates.
-    /**
-     Tests whether loading only inactive measurements on the `MovebisDataCapturingService` works as expected.
-
-     - Throws:
-        - `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
-        - `DataCapturingError.isPaused` If the service was paused and thus it makes no sense to start it.
-        - `DataCapturingError.isPaused` If the service was paused and thus stopping it makes no sense.
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
-        - Some unspecified errors from within CoreData.
-     */
-    func skip_testLoadOnlyInactiveMeasurement_HappyPath() throws {
-        // Arrange
-        let sensorManager = CMMotionManager()
-        let dcs = try MovebisDataCapturingService(connection: oocut, sensorManager: sensorManager, dataManager: dataManager) { _, _ in
-
-        }
-
-        // Act
-        // 1st Measurement
-        try dcs.start()
-        try dcs.stop()
-
-        // 2nd Measurement
-        try dcs.start()
-        try dcs.stop()
-
-        // 3rd Measurement
-        try dcs.start()
-
-        // Assert
-        XCTAssertEqual(try dcs.loadInactiveMeasurements().count, 2)
+    func testStartPauseResumeStop_HappyPath() throws {
+        try oocut.start(inContext: .bike)
+        try oocut.pause()
+        try oocut.resume()
+        try oocut.stop()
     }
+
+    func testDoubleStart() throws {
+        try oocut.start(inContext: .bike)
+        try oocut.start(inContext: .bike)
+        try oocut.stop()
+    }
+
+    func testDoubleResume() throws {
+        try oocut.start(inContext: .bike)
+        try oocut.pause()
+        try oocut.resume()
+        try oocut.resume()
+        try oocut.stop()
+    }
+
+    func testDoublePause() throws {
+        try oocut.start(inContext: .bike)
+        try oocut.pause()
+        try oocut.pause()
+        try oocut.resume()
+        try oocut.stop()
+    }
+
+    func testDoubleStop() throws {
+        try oocut.start(inContext: .bike)
+        try oocut.stop()
+        try oocut.stop()
+    }
+
+    func testPauseFromIdle() throws {
+        try oocut.pause()
+    }
+
+    func testResumeFromIdle() throws {
+        try oocut.stop()
+    }
+
+    func testStopFromIdle() throws {
+        try oocut.stop()
+    }
+
+    func testLifecyclePerformance() throws {
+        measure {
+            oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000)]
+            oocut.accelerationsCache = []
+            for i in 0...99 {
+            oocut.accelerationsCache.append(Acceleration(timestamp: 10_000 + Int64(i), x: 1.0, y: 1.0, z: 1.0))
+            }
+            oocut.saveCapturedData()
+        }
+    }
+
+// TODO: This test does not work since we can not test with background location updates in the moment.
+/*func testCaptureData() {
+guard let oocut = oocut else {
+XCTFail("Unable to get server connection object.")
+return
+}
+let persistenceLayer = PersistenceLayer()
+let sensorManager = CMMotionManager()
+let dataCapturingService = MovebisDataCapturingService(connection: oocut, sensorManager: sensorManager, updateInterval: 0.0, persistenceLayer: persistenceLayer)
+
+dataCapturingService.start()
+XCTAssertTrue(dataCapturingService.isRunning)
+let prePauseCountOfMeasurements = dataCapturingService.countMeasurements()
+
+dataCapturingService.pause()
+XCTAssertFalse(dataCapturingService.isRunning)
+
+dataCapturingService.resume()
+XCTAssertTrue(dataCapturingService.isRunning)
+let postPauseCountOfMeasurements = dataCapturingService.countMeasurements()
+XCTAssertEqual(prePauseCountOfMeasurements, postPauseCountOfMeasurements)
+
+dataCapturingService.stop()
+XCTAssertFalse(dataCapturingService.isRunning)
+}*/
+
+// TODO: (STAD-104) This does currently not work as a test case is not allowed to run background location updates.
+/**
+Tests whether loading only inactive measurements on the `MovebisDataCapturingService` works as expected.
+
+- Throws:
+- `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
+- `DataCapturingError.isPaused` If the service was paused and thus it makes no sense to start it.
+- `DataCapturingError.isPaused` If the service was paused and thus stopping it makes no sense.
+- `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+- Some unspecified errors from within CoreData.
+*/
+func skip_testLoadOnlyInactiveMeasurement_HappyPath() throws {
+// Arrange
+let sensorManager = CMMotionManager()
+let dcs = try MovebisDataCapturingService(connection: oocut, sensorManager: sensorManager, dataManager: dataManager) { _, _ in
+
+}
+
+// Act
+// 1st Measurement
+try dcs.start()
+try dcs.stop()
+
+// 2nd Measurement
+try dcs.start()
+try dcs.stop()
+
+// 3rd Measurement
+try dcs.start()
+
+// Assert
+XCTAssertEqual(try dcs.loadInactiveMeasurements().count, 2)
+}
 }
