@@ -14,7 +14,7 @@
     <a title="PersistenceLayer Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (72% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -137,9 +137,19 @@
         <section>
           <section class="section">
             <h1>PersistenceLayer</h1>
-            <p>An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and accelerations. Most functions are asynchronous and provide a handler to react when they are finished.</p>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">PersistenceLayer</span></code></pre>
 
-<p>All entities have two representations. They are either represented as a subclass of <code>NSManagedObject</code> or as a custom entity class. The former are <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code>, <code>AccelerationPointMO</code> and <code><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></code>, while the latter are <code><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></code>, <code><a href="../Classes/Acceleration.html">Acceleration</a></code> and <code><a href="../Classes/GeoLocation.html">GeoLocation</a></code>. You should always try to the second costum classes, because the subclasses of <code>NSManagedObject</code> are not thread safe and should never be used outside of the handler they are provided to as parameter.</p>
+                </div>
+              </div>
+            <p>An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and accelerations.</p>
+
+<p>All entities produced by a <code>PersistenceLayer</code> are not thread save and thus should not be used outside the calling thread.
+If multiple calls to this API are necessary, it is necessary to set an <code>NSManagedObjectContext</code> for the property <code><a href="../Classes/PersistenceLayer.html#/s:13DataCapturing16PersistenceLayerC7contextSo22NSManagedObjectContextCSgvp">PersistenceLayer.context</a></code>.
+The creation of this context needs to be carried out on the same thread as the API calls.</p>
+
+<p>A valid usage pattern is to create a new <code>PersistenceLayer</code> instance as part of a custom method accessing the data storage and initialize the API. Using a <code>PersistenceLayer</code> as global state can result in strange errors resulting from CoreData.</p>
 
 <p>Read access is public while manipulation of the data stored is restricted to the framework.</p>
 <div class="aside aside-author">
@@ -149,7 +159,7 @@
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    3.0.0
+    3.0.1
 
 </div>
 <div class="aside aside-since">
@@ -172,9 +182,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC7contextSo22NSManagedObjectContextCSgvp"></a>
                     <a name="//apple_ref/swift/Property/context" class="dashAnchor"></a>
-                    <a class="token" href="#/">context</a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC7contextSo22NSManagedObjectContextCSgvp">context</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -184,6 +194,14 @@
                       <div class="abstract">
                         <p>The current <code>NSManagedObjectContext</code> used by this persistence layer. This has to be reset if the layer is used on a different thread. If it is <code>nil</code> each method is going to use its own context, which can cause problems if model objects are used between those methods.</p>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">context</span><span class="p">:</span> <span class="kt">NSManagedObjectContext</span><span class="p">?</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
@@ -202,9 +220,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC22withDistanceCalculatorAcA0F19CalculationStrategy_p_tKcfc"></a>
                     <a name="//apple_ref/swift/Method/init(withDistanceCalculator:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">init(withDistanceCalculator:)</a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC22withDistanceCalculatorAcA0F19CalculationStrategy_p_tKcfc">init(withDistanceCalculator:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -223,6 +241,33 @@
 </div>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">withDistanceCalculator</span><span class="p">:</span> <span class="kt"><a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>withDistanceCalculator</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>An algorithm used to calculate the distance between geo locations.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </section>
                   </div>
                 </li>
@@ -240,9 +285,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC6delete11measurementyAA17MeasurementEntityC_tKF"></a>
                     <a name="//apple_ref/swift/Method/delete(measurement:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">delete(measurement:)</a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC6delete11measurementyAA17MeasurementEntityC_tKF">delete(measurement:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -264,6 +309,14 @@
 </div>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">delete</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
@@ -281,9 +334,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC4load23measurementIdentifiedByAA13MeasurementMOCs5Int64V_tKF"></a>
                     <a name="//apple_ref/swift/Method/load(measurementIdentifiedBy:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">load(measurementIdentifiedBy:)</a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC4load23measurementIdentifiedByAA13MeasurementMOCs5Int64V_tKF">load(measurementIdentifiedBy:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -303,15 +356,46 @@
 </div>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">load</span><span class="p">(</span><span class="n">measurementIdentifiedBy</span> <span class="nv">identifier</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>measurementIdentifiedBy</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The device wide unique identifier of the measurement to load.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The requested measurement as a model object.</p>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC16loadMeasurementsSayAA13MeasurementMOCGyKF"></a>
                     <a name="//apple_ref/swift/Method/loadMeasurements()" class="dashAnchor"></a>
-                    <a class="token" href="#/">loadMeasurements()</a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC16loadMeasurementsSayAA13MeasurementMOCGyKF">loadMeasurements()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -330,15 +414,27 @@
 </div>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">loadMeasurements</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>An array of all measurements currently stored on this device.</p>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC30loadSynchronizableMeasurementsSayAA13MeasurementMOCGyKF"></a>
                     <a name="//apple_ref/swift/Method/loadSynchronizableMeasurements()" class="dashAnchor"></a>
-                    <a class="token" href="#/">loadSynchronizableMeasurements()</a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC30loadSynchronizableMeasurementsSayAA13MeasurementMOCGyKF">loadSynchronizableMeasurements()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -357,15 +453,27 @@
 </div>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">loadSynchronizableMeasurements</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>An array containing all the not synchronized measurements.</p>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC17countMeasurementsSiyKF"></a>
                     <a name="//apple_ref/swift/Method/countMeasurements()" class="dashAnchor"></a>
-                    <a class="token" href="#/">countMeasurements()</a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC17countMeasurementsSiyKF">countMeasurements()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -384,6 +492,18 @@
 </div>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">countMeasurements</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Int</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The count of measurements currently stored on this device.</p>
+                      </div>
                     </section>
                   </div>
                 </li>
@@ -401,9 +521,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC11makeContextSo015NSManagedObjectF0CyF"></a>
                     <a name="//apple_ref/swift/Method/makeContext()" class="dashAnchor"></a>
-                    <a class="token" href="#/">makeContext()</a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC11makeContextSo015NSManagedObjectF0CyF">makeContext()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -411,8 +531,20 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a new background <code>NSManagedObjectContext</code> for the current thread. This can be used to set an appropriate value for the <code><a href="../Classes/PersistenceLayer.html#/context">context</a></code> attribute.</p>
+                        <p>Creates a new background <code>NSManagedObjectContext</code> for the current thread. This can be used to set an appropriate value for the <code><a href="../Classes/PersistenceLayer.html#/s:13DataCapturing16PersistenceLayerC7contextSo22NSManagedObjectContextCSgvp">context</a></code> attribute.</p>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">makeContext</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">NSManagedObjectContext</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The newly created context.</p>
                       </div>
                     </section>
                   </div>
@@ -420,9 +552,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC19collectGeoLocations4fromSayAA0F10LocationMOCGAA011MeasurementJ0C_tKFZ"></a>
                     <a name="//apple_ref/swift/Method/collectGeoLocations(from:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">collectGeoLocations(from:)</a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC19collectGeoLocations4fromSayAA0F10LocationMOCGAA011MeasurementJ0C_tKFZ">collectGeoLocations(from:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -441,15 +573,46 @@
 </div>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">collectGeoLocations</span><span class="p">(</span><span class="n">from</span> <span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>from</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The measurement to collect the geo locations from.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>An array containing all the collected geo locations from all tracks of the provided measurement.</p>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC18extractIdentifiers4fromSays5Int64VGSayAA13MeasurementMOCG_tFZ"></a>
                     <a name="//apple_ref/swift/Method/extractIdentifiers(from:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">extractIdentifiers(from:)</a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC18extractIdentifiers4fromSays5Int64VGSayAA13MeasurementMOCG_tFZ">extractIdentifiers(from:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -463,6 +626,37 @@
 To ease this task, this method can be used to make a collection of measurement identifiers, transfer them to the other thread and reload all the measurements there.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">extractIdentifiers</span><span class="p">(</span><span class="n">from</span> <span class="nv">measurements</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">])</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt">Int64</span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>from</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The array of <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code> instances to extract the identifiers for.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>A collection containing all the device wide unqiue identifiers of the provided measurements.</p>
+                      </div>
                     </section>
                   </div>
                 </li>
@@ -471,7 +665,7 @@ To ease this task, this method can be used to make a collection of measurement i
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-01)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-15)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

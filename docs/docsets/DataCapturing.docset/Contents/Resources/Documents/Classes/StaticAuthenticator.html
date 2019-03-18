@@ -14,7 +14,7 @@
     <a title="StaticAuthenticator Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (72% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -137,6 +137,12 @@
         <section>
           <section class="section">
             <h1>StaticAuthenticator</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">StaticAuthenticator</span><span class="p">:</span> <span class="kt"><a href="../Protocols/Authenticator.html">Authenticator</a></span></code></pre>
+
+                </div>
+              </div>
             <p>A <code>StaticAuthenticator</code> always does authentication using the same Java Web Token (JWT).
 This token is provided as a fixed value and never changes.
 The creator of an object of this class needs to make sure, that the token is valid.</p>
@@ -174,9 +180,9 @@ If this is not the case, API calls based on this authenticator are going to fail
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing19StaticAuthenticatorC8jwtTokenSSSgvp"></a>
                     <a name="//apple_ref/swift/Property/jwtToken" class="dashAnchor"></a>
-                    <a class="token" href="#/">jwtToken</a>
+                    <a class="token" href="#/s:13DataCapturing19StaticAuthenticatorC8jwtTokenSSSgvp">jwtToken</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -186,6 +192,14 @@ If this is not the case, API calls based on this authenticator are going to fail
                       <div class="abstract">
                         <p>The token used for authentication.</p>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">jwtToken</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
@@ -204,9 +218,9 @@ If this is not the case, API calls based on this authenticator are going to fail
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing19StaticAuthenticatorCACycfc"></a>
                     <a name="//apple_ref/swift/Method/init()" class="dashAnchor"></a>
-                    <a class="token" href="#/">init()</a>
+                    <a class="token" href="#/s:13DataCapturing19StaticAuthenticatorCACycfc">init()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -216,6 +230,14 @@ If this is not the case, API calls based on this authenticator are going to fail
                       <div class="abstract">
                         <p>Default constructor needs to be publicly exposed to be able to create it.</p>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">()</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
@@ -234,9 +256,9 @@ If this is not the case, API calls based on this authenticator are going to fail
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing13AuthenticatorP12authenticate9onSuccess0E7FailureyySSc_ys5Error_pctF"></a>
                     <a name="//apple_ref/swift/Method/authenticate(onSuccess:onFailure:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">authenticate(onSuccess:onFailure:)</a>
+                    <a class="token" href="#/s:13DataCapturing13AuthenticatorP12authenticate9onSuccess0E7FailureyySSc_ys5Error_pctF">authenticate(onSuccess:onFailure:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -246,6 +268,14 @@ If this is not the case, API calls based on this authenticator are going to fail
                       <div class="abstract">
                         
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">authenticate</span><span class="p">(</span><span class="nv">onSuccess</span><span class="p">:</span> <span class="p">(</span><span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">,</span> <span class="nv">onFailure</span><span class="p">:</span> <span class="p">(</span><span class="kt">Error</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
@@ -254,7 +284,7 @@ If this is not the case, API calls based on this authenticator are going to fail
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-01)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-15)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

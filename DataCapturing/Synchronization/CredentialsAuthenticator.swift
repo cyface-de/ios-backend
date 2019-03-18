@@ -25,7 +25,7 @@ import os.log
  An authenticator using a combination of username and password to authenticate against a Cyface data collector server.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 2.0.0
  */
 public class CredentialsAuthenticator: Authenticator {
@@ -66,7 +66,7 @@ public class CredentialsAuthenticator: Authenticator {
         let jsonCredentials = try JSONSerialization.data(withJSONObject: ["username": username, "password": password])
         let url = authenticationEndpoint.appendingPathComponent("login")
 
-        Alamofire.upload(jsonCredentials, to: url, method: .post, headers: nil).response { response in
+        Networking.sharedInstance.sessionManager.upload(jsonCredentials, to: url, method: .post, headers: nil).response { response in
             guard let httpResponse = response.response else {
                 os_log("Unable to unwrap authentication response", log: CredentialsAuthenticator.oslog, type: OSLogType.error)
                 onFailure(ServerConnectionError.authenticationNotSuccessful)
