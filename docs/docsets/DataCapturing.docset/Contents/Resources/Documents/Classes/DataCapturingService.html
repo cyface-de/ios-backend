@@ -14,7 +14,7 @@
     <a title="DataCapturingService Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (0% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (72% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -137,6 +137,12 @@
         <section>
           <section class="section">
             <h1>DataCapturingService</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DataCapturingService</span><span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+
+                </div>
+              </div>
             <p>An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.</p>
 
 <p>To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided <code><a href="../Classes/Synchronizer.html">Synchronizer</a></code>.</p>
@@ -170,9 +176,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing0aB7ServiceC9isRunningSbvp"></a>
                     <a name="//apple_ref/swift/Property/isRunning" class="dashAnchor"></a>
-                    <a class="token" href="#/">isRunning</a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC9isRunningSbvp">isRunning</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -183,15 +189,23 @@
                         <p><code>true</code> if data capturing is running; <code>false</code> otherwise.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isRunning</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing0aB7ServiceC8isPausedSbvp"></a>
                     <a name="//apple_ref/swift/Property/isPaused" class="dashAnchor"></a>
-                    <a class="token" href="#/">isPaused</a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC8isPausedSbvp">isPaused</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -202,15 +216,23 @@
                         <p><code>true</code> if data capturing was running but is currently paused; <code>false</code> otherwise.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isPaused</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing0aB7ServiceC18currentMeasurementAA0E6EntityCSgvp"></a>
                     <a name="//apple_ref/swift/Property/currentMeasurement" class="dashAnchor"></a>
-                    <a class="token" href="#/">currentMeasurement</a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC18currentMeasurementAA0E6EntityCSgvp">currentMeasurement</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -221,15 +243,23 @@
                         <p>The currently recorded <code>Measurement</code> or <code>nil</code> if there is no active recording.</p>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">currentMeasurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing0aB7ServiceC12synchronizerAA12SynchronizerCSgvp"></a>
                     <a name="//apple_ref/swift/Property/synchronizer" class="dashAnchor"></a>
-                    <a class="token" href="#/">synchronizer</a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC12synchronizerAA12SynchronizerCSgvp">synchronizer</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -239,6 +269,14 @@
                       <div class="abstract">
                         <p>An optional API that is responsible for synchronizing data with a Cyface server.</p>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">synchronizer</span><span class="p">:</span> <span class="kt"><a href="../Classes/Synchronizer.html">Synchronizer</a></span><span class="p">?</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
@@ -257,9 +295,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing0aB7ServiceC13sensorManager14updateInterval06savingG016persistenceLayer12synchronizer12eventHandlerACSo08CMMotionE0C_S2dAA011PersistenceJ0CAA12SynchronizerCSgyAA0aB5EventO_AA6StatusOtctcfc"></a>
                     <a name="//apple_ref/swift/Method/init(sensorManager:updateInterval:savingInterval:persistenceLayer:synchronizer:eventHandler:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">init(sensorManager:updateInterval:savingInterval:persistenceLayer:synchronizer:eventHandler:)</a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC13sensorManager14updateInterval06savingG016persistenceLayer12synchronizer12eventHandlerACSo08CMMotionE0C_S2dAA011PersistenceJ0CAA12SynchronizerCSgyAA0aB5EventO_AA6StatusOtctcfc">init(sensorManager:updateInterval:savingInterval:persistenceLayer:synchronizer:eventHandler:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -282,6 +320,20 @@ Since it seems to be impossible to create that instance inside a framework at th
 </ul>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span>
+    <span class="n">sensorManager</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CMMotionManager</span><span class="p">,</span>
+    <span class="n">updateInterval</span> <span class="nv">interval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">savingInterval</span> <span class="nv">time</span><span class="p">:</span> <span class="kt">TimeInterval</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="n">persistenceLayer</span> <span class="nv">persistence</span><span class="p">:</span> <span class="kt"><a href="../Classes/PersistenceLayer.html">PersistenceLayer</a></span><span class="p">,</span>
+    <span class="nv">synchronizer</span><span class="p">:</span> <span class="kt"><a href="../Classes/Synchronizer.html">Synchronizer</a></span><span class="p">?,</span>
+    <span class="nv">eventHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">((</span><span class="kt"><a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a></span><span class="p">,</span> <span class="kt"><a href="../Enums/Status.html">Status</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">))</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
@@ -299,9 +351,9 @@ Since it seems to be impossible to create that instance inside a framework at th
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing0aB7ServiceC5start9inContextyAA011MeasurementF0O_tKF"></a>
                     <a name="//apple_ref/swift/Method/start(inContext:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">start(inContext:)</a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC5start9inContextyAA011MeasurementF0O_tKF">start(inContext:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -320,8 +372,16 @@ If an error happened during this process, it is provided as part of this handler
     <p>Throws:</p>
 
 </div>
-<li><p><code><a href="../Enums/DataCapturingError.html#/isPaused">DataCapturingError.isPaused</a></code> if the service was paused and thus starting it makes no sense. If you need to continue call <code>resume(((DataCapturingEvent) -&gt; Void))</code>.</p></li>
+<li><p><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO8isPausedyA2CmF">DataCapturingError.isPaused</a></code> if the service was paused and thus starting it makes no sense. If you need to continue call <code>resume(((DataCapturingEvent) -&gt; Void))</code>.</p></li>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">start</span><span class="p">(</span><span class="n">inContext</span> <span class="nv">context</span><span class="p">:</span> <span class="kt"><a href="../Enums/MeasurementContext.html">MeasurementContext</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
@@ -329,9 +389,9 @@ If an error happened during this process, it is provided as part of this handler
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing0aB7ServiceC4stopyyKF"></a>
                     <a name="//apple_ref/swift/Method/stop()" class="dashAnchor"></a>
-                    <a class="token" href="#/">stop()</a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC4stopyyKF">stop()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -345,8 +405,16 @@ running.</p>
     <p class="aside-title">Throws</p>
     
 </div>
-<li><code><a href="../Enums/DataCapturingError.html#/isPaused">DataCapturingError.isPaused</a></code> if the service was paused and thus stopping it makes no sense.</li>
+<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO8isPausedyA2CmF">DataCapturingError.isPaused</a></code> if the service was paused and thus stopping it makes no sense.</li>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">stop</span><span class="p">()</span> <span class="k">throws</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
@@ -354,9 +422,9 @@ running.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing0aB7ServiceC5pauseyyKF"></a>
                     <a name="//apple_ref/swift/Method/pause()" class="dashAnchor"></a>
-                    <a class="token" href="#/">pause()</a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC5pauseyyKF">pause()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -364,14 +432,22 @@ running.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Pauses the current data capturing measurement for the moment. No data is captured until <code><a href="../Classes/DataCapturingService.html#/resume()">resume()</a></code> has been called, but upon the call to <code><a href="../Classes/DataCapturingService.html#/resume()">resume()</a></code> the last measurement will be continued instead of beginning a new now. After using <code>pause()</code> you must call resume before you can call any other lifecycle method like <code><a href="../Classes/DataCapturingService.html#/stop()">stop()</a></code>, for example.</p>
+                        <p>Pauses the current data capturing measurement for the moment. No data is captured until <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC6resumeyyKF">resume()</a></code> has been called, but upon the call to <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC6resumeyyKF">resume()</a></code> the last measurement will be continued instead of beginning a new now. After using <code>pause()</code> you must call resume before you can call any other lifecycle method like <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC4stopyyKF">stop()</a></code>, for example.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
     
 </div>
 <li><code>DataCaturingError.notRunning</code> if the service was not running and thus pausing it makes no sense.</li>
-<li><code><a href="../Enums/DataCapturingError.html#/isPaused">DataCapturingError.isPaused</a></code> if the service was already paused and pausing it again makes no sense.</li>
+<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO8isPausedyA2CmF">DataCapturingError.isPaused</a></code> if the service was already paused and pausing it again makes no sense.</li>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">pause</span><span class="p">()</span> <span class="k">throws</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
@@ -379,9 +455,9 @@ running.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/s:13DataCapturing0aB7ServiceC6resumeyyKF"></a>
                     <a name="//apple_ref/swift/Method/resume()" class="dashAnchor"></a>
-                    <a class="token" href="#/">resume()</a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC6resumeyyKF">resume()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -389,15 +465,23 @@ running.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Resumes the current data capturing with the data capturing measurement that was running when <code><a href="../Classes/DataCapturingService.html#/pause()">pause()</a></code> was called. A call to this method is only valid after a call to <code><a href="../Classes/DataCapturingService.html#/pause()">pause()</a></code>. It is going to fail if used after <code>start()</code> or <code><a href="../Classes/DataCapturingService.html#/stop()">stop()</a></code>.</p>
+                        <p>Resumes the current data capturing with the data capturing measurement that was running when <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC5pauseyyKF">pause()</a></code> was called. A call to this method is only valid after a call to <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC5pauseyyKF">pause()</a></code>. It is going to fail if used after <code>start()</code> or <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC4stopyyKF">stop()</a></code>.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
     
 </div>
-<li><code><a href="../Enums/DataCapturingError.html#/notPaused">DataCapturingError.notPaused</a></code>: If the service was not paused and thus resuming it makes no sense.</li>
-<li><code><a href="../Enums/DataCapturingError.html#/isRunning">DataCapturingError.isRunning</a></code>: If the service was running and thus resuming it makes no sense.</li>
-<li><code><a href="../Enums/DataCapturingError.html#/noCurrentMeasurement">DataCapturingError.noCurrentMeasurement</a></code>: If no current measurement is available while resuming data capturing.</li>
+<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO9notPausedyA2CmF">DataCapturingError.notPaused</a></code>: If the service was not paused and thus resuming it makes no sense.</li>
+<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO9isRunningyA2CmF">DataCapturingError.isRunning</a></code>: If the service was running and thus resuming it makes no sense.</li>
+<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO20noCurrentMeasurementyA2CmF">DataCapturingError.noCurrentMeasurement</a></code>: If no current measurement is available while resuming data capturing.</li>
 
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">resume</span><span class="p">()</span> <span class="k">throws</span></code></pre>
+
+                        </div>
                       </div>
                     </section>
                   </div>
@@ -409,9 +493,9 @@ running.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/c:@CM@DataCapturing@objc(cs)DataCapturingService(im)locationManager:didUpdateLocations:"></a>
                     <a name="//apple_ref/swift/Method/locationManager(_:didUpdateLocations:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">locationManager(_:didUpdateLocations:)</a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)DataCapturingService(im)locationManager:didUpdateLocations:">locationManager(_:didUpdateLocations:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -427,15 +511,23 @@ running.</p>
 </ul>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">locationManager</span><span class="p">(</span><span class="n">_</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CLLocationManager</span><span class="p">,</span> <span class="n">didUpdateLocations</span> <span class="nv">locations</span><span class="p">:</span> <span class="p">[</span><span class="kt">CLLocation</span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/"></a>
+                    <a name="/c:@CM@DataCapturing@objc(cs)DataCapturingService(im)locationManager:didFailWithError:"></a>
                     <a name="//apple_ref/swift/Method/locationManager(_:didFailWithError:)" class="dashAnchor"></a>
-                    <a class="token" href="#/">locationManager(_:didFailWithError:)</a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)DataCapturingService(im)locationManager:didFailWithError:">locationManager(_:didFailWithError:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -451,6 +543,14 @@ running.</p>
 </ul>
 
                       </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">locationManager</span><span class="p">(</span><span class="n">_</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CLLocationManager</span><span class="p">,</span> <span class="n">didFailWithError</span> <span class="nv">error</span><span class="p">:</span> <span class="kt">Error</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
                     </section>
                   </div>
                 </li>
@@ -459,7 +559,7 @@ running.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-01)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-15)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

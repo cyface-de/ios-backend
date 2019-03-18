@@ -17,7 +17,7 @@
 		3D0BDEB21FB1B951004EA25E /* DataCapturing.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0BDEA41FB1B951004EA25E /* DataCapturing.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */; };
 		3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */; };
-		3D1505EC213E9F3A002994D2 /* BuildFile in Sources */ = {isa = PBXBuildFile; };
+		3D1505EC213E9F3A002994D2 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		3D1505EE213EA68D002994D2 /* DataCapturingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1505ED213EA68D002994D2 /* DataCapturingError.swift */; };
 		3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79D2136F045003F53C9 /* BinarySerializer.swift */; };
 		3D58B7A02136F046003F53C9 /* FileSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79E2136F045003F53C9 /* FileSupport.swift */; };
@@ -460,7 +460,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D1505EC213E9F3A002994D2 /* BuildFile in Sources */,
+				3D1505EC213E9F3A002994D2 /* (null) in Sources */,
 				3DF7E10B21F60AFC007CFF83 /* Authenticator.swift in Sources */,
 				3DF7E174220F65EC007CFF83 /* Status.swift in Sources */,
 				3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */,

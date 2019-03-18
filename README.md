@@ -1,5 +1,5 @@
 #  Cyface iOS - SDK
-[![CI: Bitrise](https://app.bitrise.io/app/6f20b76474d7ea1a/status.svg?token=UIbKTKFzCOkyGWu3t8D3pQ)](link="https://bitrise.io/")
+[![CI: Bitrise](https://app.bitrise.io/app/45ec21fd3b5a664b/status.svg?token=aE1ZWjYUkjxhAtYMX8bcCg)](https://bitrise.io/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Introduction
@@ -35,7 +35,7 @@ let persistence = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCa
 // 3
 let authenticator = StaticAuthenticator()
 // 4
-let serverConnection = ServerConnection(apiURL: url, persistenceLayer: persistence, authenticator: authenticator)
+let serverConnection = ServerConnection(apiURL: url, authenticator: authenticator)
 // 5
 let sensorManager = CMMotionManager()
 // 6
@@ -51,7 +51,7 @@ let dcs = try MovebisDataCapturingService(connection: serverConnection, sensorMa
 1. Import Apples *CoreMotion* framework, to be able to create a motion manager.
 2. Create a `PersistenceLayer` and provide a distance calculation strategy. Currently there is only the `DefaultDistanceCalculationStrategy` which uses the integrated distance calculation between locations as provided by Apple.
 3. Create an `Authenticator` like explained under *Using an authenticator* below.
-4. Create a `ServerConnection` for measurement data transmission. Provide the URL of a Cyface or Movebis server  endpoint together with the initialized `PersistenceLayer` instance and the `Authenticator`.
+4. Create a `ServerConnection` for measurement data transmission. Provide the URL of a Cyface or Movebis server endpoint and the `Authenticator`.
 5. Create `CMMotionManager` from the CoreMotion framework. This is responsible for capturing sensor data from your device.
 6. Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to caputre 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.
 7. Create a saving interval in seconds. The value 10 for example means that your data is saved to persistent storage every 10 seconds. This also means your currently captured measurement is updated every 10 seconds. Values like the measurement length are updated at this point as well. If you need to update your UI frequently you should set this to a low value. This however also puts a higher load on your database.
@@ -98,12 +98,41 @@ let measurement = try persistenceLayer.load(measurementIdentifiedBy: identifier)
 let trackLength = measurement.trackLength
 ```
 
+### Continuous synchronization
+
+To keep measurements synchronized without user interaction, the Cyface SDK provides the `Synchronizer`.
+It is advised to create a synchronizer after successful authentication.
+Do not forget to call `Synchronizer.activate()`.
+This starts a background process, that monitors the devices connectivity state and watches for an active WiFi connection.
+If one is found, synchronization for all unsynchronized measurements is executed.
+Creating a synchronizer should look something like:
+
+```swift
+let synchronizer = try Synchronizer(
+// 1.
+persistenceLayer: try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy()), 
+// 2.
+cleaner: AccelerationPointRemovalCleaner(), 
+// 3.
+serverConnection: serverConnection) { event, status in 
+	// Handle .synchronizationFinished event for example by checking status for .success or .failure
+}
+```
+
+1. Create a `PersistenceLayer` which is used to check the database for synchronizable measurements. It is advisable to always create a new one, to avoid multi threading issues.
+2. Create a `Cleaner` which cleanes the database after successful synchronization.
+3. Provide a `ServerConnection` used to transmit the synchronizable data.
+
 ## API Documentation
 [See](docs/index.html)
 
 ## Building from Source
 Contains swiftlint
 See: https://github.com/realm/SwiftLint
+
+### Creating the documentation
+* Install Jazzy
+* Call `jazzy` from the terminal in the root folder.
 
 ## License
 Copyright 2017 Cyface GmbH
