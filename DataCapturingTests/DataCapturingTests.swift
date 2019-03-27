@@ -106,4 +106,42 @@ class DataCapturingTests: XCTestCase {
      dataCapturingService.stop()
      XCTAssertFalse(dataCapturingService.isRunning)
      }*/
+
+    // TODO: (STAD-104) This does currently not work as a test case is not allowed to run background location updates.
+    /**
+     Tests whether loading only inactive measurements on the `MovebisDataCapturingService` works as expected.
+
+     - Throws:
+        - `PersistenceError.modelNotLoabable` If the model is not loadable
+        - `PersistenceError.modelNotInitializable` If the model was loaded (so it is available) but can not be initialized.
+        - `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
+        - `DataCapturingError.isPaused` If the service was paused and thus it makes no sense to start it.
+        - `DataCapturingError.isPaused` If the service was paused and thus stopping it makes no sense.
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
+     */
+    func skip_testLoadOnlyInactiveMeasurement_HappyPath() throws {
+        // Arrange
+        let serverConnection = ServerConnection(apiURL: URL(string: "http://localhost")!, authenticator: StaticAuthenticator())
+        let sensorManager = CMMotionManager()
+        let persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+        let dcs = try MovebisDataCapturingService(connection: serverConnection, sensorManager: sensorManager, persistenceLayer: persistenceLayer) { _, _ in
+
+        }
+
+        // Act
+        // 1st Measurement
+        try dcs.start()
+        try dcs.stop()
+
+        // 2nd Measurement
+        try dcs.start()
+        try dcs.stop()
+
+        // 3rd Measurement
+        try dcs.start()
+
+        // Assert
+        XCTAssertEqual(try dcs.loadInactiveMeasurements().count, 2)
+    }
 }
