@@ -143,6 +143,7 @@ public class MovebisDataCapturingService: DataCapturingService {
      */
     public func loadInactiveMeasurements() throws -> [MeasurementMO] {
         let persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+        persistenceLayer.context = persistenceLayer.makeContext()
         let ret = try persistenceLayer.loadMeasurements()
 
         // Filter active measurement if any.
