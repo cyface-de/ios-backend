@@ -89,6 +89,8 @@ public class MovebisDataCapturingService: DataCapturingService {
         return manager
     }()
 
+    private let dataManager: CoreDataManager
+
     // MARK: - Initializers
 
     /**
@@ -103,12 +105,14 @@ public class MovebisDataCapturingService: DataCapturingService {
         you have to provide it via this parameter.
         - updateInterval: The accelerometer update interval in Hertz. Default value is 100 Hertz.
         - savingInterval: The time between save operations during data capturing in seconds. Default value is 30 seconds.
-        - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
+        - dataManager: The CoreData stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
         - eventHandler: A handler for events occuring during data capturing.
      - Throws:
         - `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
      */
-    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval: Double = 100, savingInterval: Double = 30, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) throws {
+    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval: Double = 100, savingInterval: Double = 30, dataManager: CoreDataManager, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) throws {
+        self.dataManager = dataManager
+        let persistence = try PersistenceLayer(onManager: dataManager)
         let synchronizer = try Synchronizer(persistenceLayer: persistence, cleaner: AccelerationPointRemovalCleaner(), serverConnection: serverConnection, handler: eventHandler)
         super.init(sensorManager: manager, updateInterval: updateInterval, savingInterval: savingInterval, persistenceLayer: persistence, synchronizer: synchronizer, eventHandler: eventHandler)
     }
@@ -142,7 +146,7 @@ public class MovebisDataCapturingService: DataCapturingService {
         - Some unspecified errors from within CoreData.
      */
     public func loadInactiveMeasurements() throws -> [MeasurementMO] {
-        let persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+        let persistenceLayer = try PersistenceLayer(onManager: dataManager)
         persistenceLayer.context = persistenceLayer.makeContext()
         let ret = try persistenceLayer.loadMeasurements()
 

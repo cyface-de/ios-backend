@@ -18,6 +18,7 @@
  */
 
 import XCTest
+import CoreData
 @testable import DataCapturing
 
 /**
@@ -35,7 +36,12 @@ class PersistenceTests: XCTestCase {
     override func setUp() {
         super.setUp()
         do {
-            oocut = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+            let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
+                fatalError()
+            }
+            manager.setup(bundle: bundle)
+            oocut = try PersistenceLayer(onManager: manager)
             oocut.context = oocut.makeContext()
             let measurement = try oocut.createMeasurement(at: 10_000, withContext: .bike)
             try oocut.appendNewTrack(to: measurement)
@@ -220,5 +226,20 @@ class PersistenceTests: XCTestCase {
             return XCTFail("Unable to load geo locations!")
         }
         XCTAssertEqual(locationsInSecondTrack.count, 1, "There should be two locations in the fixture measurement!")
+    }
+
+    func testLoadInactiveMeasurements() throws {
+        let secondMeasurement = try oocut.createMeasurement(at: 20_000, withContext: .bike)
+        let secondMeasurementIdentifier = secondMeasurement.identifier
+        let measurements = try oocut.loadMeasurements()
+
+        // Filter active measurement if any.
+        let filteredMeasurements = measurements.filter { measurement in
+            return measurement.identifier != secondMeasurementIdentifier
+        }
+
+        XCTAssertEqual(filteredMeasurements.count, 1)
+        XCTAssertEqual(filteredMeasurements.first!.identifier, 1)
+        XCTAssertTrue(filteredMeasurements.first!.trackLength > 0.0)
     }
 }

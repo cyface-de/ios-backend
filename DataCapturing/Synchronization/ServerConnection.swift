@@ -69,6 +69,8 @@ public class ServerConnection {
         }
     }
 
+    let manager: CoreDataManager
+
     // MARK: - Initializers
 
     /**
@@ -77,10 +79,12 @@ public class ServerConnection {
      - Parameters:
         - apiURL: The URL endpoint to upload data to.
         - authenticator: An object used to authenticate this app with a Cyface Collector server.
+        - onManager: The CoreData stack used to load the data to transmit.
      */
-    public required init(apiURL url: URL, authenticator: Authenticator) {
+    public required init(apiURL url: URL, authenticator: Authenticator, onManager manager: CoreDataManager) {
         self.apiURL = url
         self.authenticator = authenticator
+        self.manager = manager
     }
 
     // MARK: - Methods
@@ -159,7 +163,7 @@ public class ServerConnection {
     func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
         os_log("Creating request", log: ServerConnection.osLog, type: .default)
         // Load and serialize measurement synchronously.
-        let persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+        let persistenceLayer = try PersistenceLayer(onManager: manager)
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
 
@@ -194,7 +198,7 @@ public class ServerConnection {
         }
 
         if let endLocationRaw = (measurement.tracks?.lastObject as? Track)?.locations?.lastObject as? GeoLocationMO {
-            let endLocation = "lat: \(endLocationRaw.lat), lon \(endLocationRaw.lon), time: \(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+            let endLocation = "lat: \(endLocationRaw.lat), lon: \(endLocationRaw.lon), time: \(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
             request.append(endLocation, withName: "endLocation")
         }
 

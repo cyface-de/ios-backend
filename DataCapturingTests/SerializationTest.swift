@@ -18,6 +18,7 @@
  */
 
 import XCTest
+import CoreData
 @testable import DataCapturing
 
 /**
@@ -35,13 +36,20 @@ class SerializationTest: XCTestCase {
     var persistenceLayer: PersistenceLayer!
     /// A `MeasurementEntity` holding a test measurement to serialize and deserialize.
     var fixture: MeasurementEntity!
+    /// A manager for handling the CoreData stack.
+    var coreDataStack: CoreDataManager!
 
     override func setUp() {
         super.setUp()
         oocut = CyfaceBinaryFormatSerializer()
 
         do {
-            persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+            guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
+                fatalError()
+            }
+            coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            coreDataStack.setup(bundle: bundle)
+            persistenceLayer = try PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
             let measurement = try persistenceLayer.createMeasurement(at: 1, withContext: .bike)
             try persistenceLayer.appendNewTrack(to: measurement)
@@ -62,6 +70,7 @@ class SerializationTest: XCTestCase {
         } catch {
             fatalError()
         }
+        coreDataStack = nil
         super.tearDown()
     }
 

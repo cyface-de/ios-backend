@@ -19,6 +19,7 @@
 
 import XCTest
 import CoreMotion
+import CoreData
 @testable import DataCapturing
 
 /**
@@ -32,26 +33,26 @@ class DataCapturingTests: XCTestCase {
 
     /// A connection to a Cyface Server backend.
     var oocut: ServerConnection!
-    /// A `PersistenceLayer` providing access to write and read some example data.
-    var persistenceLayer: PersistenceLayer!
+    /// A manager for the CoreData stack providing access to write and read some example data.
+    var dataManager: CoreDataManager!
     var authenticator: StaticAuthenticator!
 
     override func setUp() {
         super.setUp()
 
-        do {
-            persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
-        } catch let error {
-            fatalError("Failed to initialize persistence layer: \(error.localizedDescription)")
+        guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
+            fatalError()
         }
+        let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+        manager.setup(bundle: bundle)
 
         authenticator = StaticAuthenticator()
-        oocut = ServerConnection(apiURL: URL(string: "https://localhost:8080")!, authenticator: authenticator!)
+        oocut = ServerConnection(apiURL: URL(string: "https://localhost:8080")!, authenticator: authenticator!, onManager: manager)
     }
 
     override func tearDown() {
         oocut = nil
-        persistenceLayer = nil
+        dataManager = nil
         authenticator = nil
         super.tearDown()
     }
@@ -62,6 +63,7 @@ class DataCapturingTests: XCTestCase {
     func skipped_testSynchronizationWithMovebisServer() {
         let promise = expectation(description: "Successful data transmission")
         do {
+            let persistenceLayer = try PersistenceLayer(onManager: dataManager)
             let measurement = try persistenceLayer.createMeasurement(at: 2, withContext: .bike)
 
             self.authenticator!.jwtToken = "replace me"
@@ -122,10 +124,8 @@ class DataCapturingTests: XCTestCase {
      */
     func skip_testLoadOnlyInactiveMeasurement_HappyPath() throws {
         // Arrange
-        let serverConnection = ServerConnection(apiURL: URL(string: "http://localhost")!, authenticator: StaticAuthenticator())
         let sensorManager = CMMotionManager()
-        let persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
-        let dcs = try MovebisDataCapturingService(connection: serverConnection, sensorManager: sensorManager, persistenceLayer: persistenceLayer) { _, _ in
+        let dcs = try MovebisDataCapturingService(connection: oocut, sensorManager: sensorManager, dataManager: dataManager) { _, _ in
 
         }
 

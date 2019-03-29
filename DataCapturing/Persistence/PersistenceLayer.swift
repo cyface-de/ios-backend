@@ -19,6 +19,7 @@
 
 import Foundation
 import CoreData
+import os.log
 
 /**
  An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and accelerations.
@@ -39,16 +40,18 @@ public class PersistenceLayer {
 
     // MARK: - Properties
 
-    /// Container for the persistent object model.
-    private let container: NSPersistentContainer
+    private static let log = OSLog(subsystem: "de.cyface", category: "PersistenceLayer")
+
+    /// Manager encapsulating the CoreData stack.
+    private let manager: CoreDataManager
 
     /// The identifier that has been assigned the last to a new `Measurement`.
     var lastIdentifier: Int64?
 
     /// The next identifier to assign to a new `Measurement`.
     var nextIdentifier: Int64 {
-        let persistentStore = container.persistentStoreCoordinator.persistentStores[0]
-        let coordinator = container.persistentStoreCoordinator
+        let persistentStore = manager.persistentContainer.persistentStoreCoordinator.persistentStores[0]
+        let coordinator = manager.persistentContainer.persistentStoreCoordinator
 
         if lastIdentifier == nil {
             // identifier is already stored as metadata.
@@ -82,35 +85,21 @@ public class PersistenceLayer {
     /**
      Public constructor usable by external callers.
 
-     - Parameter withDistanceCalculator: An algorithm used to calculate the distance between geo locations.
+     - Parameters:
+        - withDistanceCalculator: An algorithm used to calculate the distance between geo locations.
+        - manager: A manager for the CoreData stack use by this `PersistenceLayer`.
      - Throws:
         - `PersistenceError.modelNotLoabable` If the model is not loadable
         - `PersistenceError.modelNotInitializable` If the model was loaded (so it is available) but can not be initialized.
      */
-    public init(withDistanceCalculator: DistanceCalculationStrategy) throws {
+    public init(onManager manager: CoreDataManager, withDistanceCalculator: DistanceCalculationStrategy = DefaultDistanceCalculationStrategy()) throws {
         self.distanceCalculator = withDistanceCalculator
-        /*
-         The following code is necessary to load the CyfaceModel from the DataCapturing framework.
-         It is only necessary because we are using a framework.
-         Usually this would be much simpler as shown by many tutorials.
-         Details are available from the following StackOverflow Thread:
-         https://stackoverflow.com/questions/42553749/core-data-failed-to-load-model
-         */
-        let momdName = "CyfaceModel"
 
-        let bundle = Bundle(for: type(of: self))
-        guard let modelURL = bundle.url(forResource: momdName, withExtension: "momd") else {
-            throw PersistenceError.modelNotLoadable(bundle.bundleURL)
-        }
-
-        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
-            throw PersistenceError.modelNotInitializable(modelURL)
-        }
-
-        container = NSPersistentContainer(name: momdName, managedObjectModel: mom)
-
-        // This actually runs synchronously if the `shouldAddStoreAsynchronously` of `NSPersistentStoreDescription` is not set to `true`.
-        container.loadPersistentStores(completionHandler: {_, _ in})
+        /*let bundle = Bundle(for: type(of: self))
+        CoreDataManager.shared.setup(bundle: bundle) {
+            os_log("Setup PersistenceLayer", log: PersistenceLayer.log, type: OSLogType.info)
+        }*/
+        self.manager = manager
     }
 
     // MARK: - Database Writing Methods
@@ -270,10 +259,12 @@ public class PersistenceLayer {
 
         let geoLocationFetchRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
         geoLocationFetchRequest.fetchLimit = 1
-        let maxTimestampInTrackPredicate = NSPredicate(format: "timestamp==max(timestamp) && track==%@", track)
+        let maxTimestampInTrackPredicate = NSPredicate(format: "track==%@", track)
         geoLocationFetchRequest.predicate = maxTimestampInTrackPredicate
+        geoLocationFetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
         geoLocationFetchRequest.resultType = .managedObjectResultType
-        var lastCapturedLocation = try context.fetch(geoLocationFetchRequest).first
+        let capturedLocations = try context.fetch(geoLocationFetchRequest)
+        var lastCapturedLocation = capturedLocations.first
         var distance = 0.0
 
         locations.forEach { location in
@@ -442,7 +433,7 @@ public class PersistenceLayer {
         - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
      */
     private func getContext() throws -> NSManagedObjectContext {
-        guard let context = self.context == nil ? container.newBackgroundContext() : self.context else {
+        guard let context = self.context == nil ? manager.backgroundContext : self.context else {
             throw PersistenceError.noContext
         }
 
@@ -457,7 +448,7 @@ public class PersistenceLayer {
      - Returns: The newly created context.
      */
     public func makeContext() -> NSManagedObjectContext {
-        return container.newBackgroundContext()
+        return manager.backgroundContext
     }
 
     /**
