@@ -33,7 +33,7 @@ import os.log
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 3.0.1
+ - Version: 4.0.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
@@ -196,12 +196,15 @@ public class PersistenceLayer {
      - Throws:
         - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
         - Some unspecified errors from within CoreData.
+        - Some internal file system error on failure of creating the file at the required path.
      */
     func delete() throws {
         let context = try getContext()
         let measurements = try loadMeasurements()
+        let accelerationsFile = AccelerationsFile()
 
         for measurement in measurements {
+            try accelerationsFile.remove(from: measurement)
             let object = try context.existingObject(with: measurement.objectID)
             context.delete(object)
         }
