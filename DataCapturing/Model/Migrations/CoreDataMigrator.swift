@@ -9,15 +9,21 @@
 import Foundation
 import CoreData
 
-protocol CoreDataMigratorProtocol {
+public protocol CoreDataMigratorProtocol {
     func requiresMigration(at storeURL: URL, toVersion version: CoreDataMigrationVersion, inBundle bundle: Bundle) -> Bool
     func migrateStore(at storeURL: URL, toVersion version: CoreDataMigrationVersion, inBundle bundle: Bundle)
 }
 
-class CoreDataMigrator: CoreDataMigratorProtocol {
+public class CoreDataMigrator: CoreDataMigratorProtocol {
+
+    // MARK: - Initializers
+
+    public init() {
+        // Nothing to do here
+    }
 
     // MARK: - Methods
-    func requiresMigration(at storeURL: URL, toVersion version: CoreDataMigrationVersion, inBundle bundle: Bundle = Bundle.main) -> Bool {
+    public func requiresMigration(at storeURL: URL, toVersion version: CoreDataMigrationVersion, inBundle bundle: Bundle = Bundle.main) -> Bool {
         guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL) else {
             return false
         }
@@ -25,7 +31,7 @@ class CoreDataMigrator: CoreDataMigratorProtocol {
         return (CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle) != version)
     }
 
-    func migrateStore(at storeURL: URL, toVersion version: CoreDataMigrationVersion, inBundle bundle: Bundle = Bundle.main) {
+    public func migrateStore(at storeURL: URL, toVersion version: CoreDataMigrationVersion, inBundle bundle: Bundle = Bundle.main) {
         forceWALCheckpointingForStore(at: storeURL, inBundle: bundle)
 
         var currentURL = storeURL

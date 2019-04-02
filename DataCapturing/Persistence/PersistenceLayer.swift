@@ -88,17 +88,10 @@ public class PersistenceLayer {
      - Parameters:
         - withDistanceCalculator: An algorithm used to calculate the distance between geo locations.
         - manager: A manager for the CoreData stack use by this `PersistenceLayer`.
-     - Throws:
-        - `PersistenceError.modelNotLoabable` If the model is not loadable
-        - `PersistenceError.modelNotInitializable` If the model was loaded (so it is available) but can not be initialized.
      */
-    public init(onManager manager: CoreDataManager, withDistanceCalculator: DistanceCalculationStrategy = DefaultDistanceCalculationStrategy()) throws {
+    public init(onManager manager: CoreDataManager, withDistanceCalculator: DistanceCalculationStrategy = DefaultDistanceCalculationStrategy()) {
         self.distanceCalculator = withDistanceCalculator
 
-        /*let bundle = Bundle(for: type(of: self))
-        CoreDataManager.shared.setup(bundle: bundle) {
-            os_log("Setup PersistenceLayer", log: PersistenceLayer.log, type: OSLogType.info)
-        }*/
         self.manager = manager
     }
 

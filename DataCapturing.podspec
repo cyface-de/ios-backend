@@ -48,8 +48,7 @@ This framework can be included by your App if you are going to capture sensor da
   s.platform	     = :ios, '11.0'
 
   s.source_files = 'DataCapturing/**/*{.h,.m,.swift}'
-  # s.source_files = 'DataCapturing/*.swift','DataCapturing/Model/*.swift','DataCapturing/Model/CyfaceModel.xcdatamodeld','DataCapturing/Model/CyfaceModel.xcdatamodeld/*.xcdatamodel','DataCapturing/Movebis/*.swift','DataCapturing/Persistence/*.swift','DataCapturing/Synchronization/*.swift'
-  s.resources = [ 'DataCapturing/**/*.xcdatamodeld','DataCapturing/**/*.xcdatamodeld/*.xcdatamodel' ]
+  s.resources = [ 'DataCapturing/**/*{.xcdatamodeld,.xcdatamodel,.xcmappingmodel}' ]
   # s.preserve_paths = 'DataCapturing/Model/CyfaceModel.xcdatamodeld'
   # s.requires_arc = true
 
@@ -59,8 +58,8 @@ This framework can be included by your App if you are going to capture sensor da
   # }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  s.framework = 'CoreData'
+  s.frameworks = 'CoreData', 'CoreLocation', 'CoreMotion'
+  # s.framework = 'CoreData'
   
   # The following transitive dependencies are used by this project:
   # This one is used to handle network traffic like multipart requests
@@ -69,7 +68,7 @@ This framework can be included by your App if you are going to capture sensor da
   s.dependency 'DataCompression', '~> 3.1.0'
 
   s.test_spec 'DataCapturingTests' do |test_spec|
-    test_spec.source_files = 'DataCapturingTests/*.swift'
+    test_spec.source_files = 'DataCapturingTests/**/*.swift'
     #test_spec.dependency 'OCMock' # This dependency will only be linked with your tests.
   end
 

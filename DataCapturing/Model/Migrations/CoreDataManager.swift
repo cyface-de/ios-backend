@@ -50,7 +50,7 @@ public class CoreDataManager {
 
     // MARK: - Init
 
-    init(storeType: String = NSSQLiteStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator()) {
+    public init(storeType: String = NSSQLiteStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator()) {
         self.storeType = storeType
         self.migrator = migrator
     }

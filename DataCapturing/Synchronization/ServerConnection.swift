@@ -45,7 +45,7 @@ public class ServerConnection {
     /// An `URL` used to upload data to. There should be a server available at that location.
     public var apiURL: URL
     /// An object used to authenticate this app with a Cyface Collector server.
-    private let authenticator: Authenticator
+    public let authenticator: Authenticator
     /**
      A name that tells the system which kind of iOS device this is.
      */
@@ -163,7 +163,7 @@ public class ServerConnection {
     func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
         os_log("Creating request", log: ServerConnection.osLog, type: .default)
         // Load and serialize measurement synchronously.
-        let persistenceLayer = try PersistenceLayer(onManager: manager)
+        let persistenceLayer = PersistenceLayer(onManager: manager)
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
 

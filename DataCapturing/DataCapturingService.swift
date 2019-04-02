@@ -102,31 +102,32 @@ public class DataCapturingService: NSObject {
     public var synchronizer: Synchronizer?
 
     // MARK: - Initializers
+
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data
      via the provided server connection and accessing data a certain amount of times per second.
 
      - Parameters:
-     - sensorManager: An instance of `CMMotionManager`.
+        - sensorManager: An instance of `CMMotionManager`.
      There should be only one instance of this type in your application.
      Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
-     - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
-     - savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
-     - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
-     - synchronizer: An optional instance of a `Synchronizer` used to transmit measured data to a server. If this is `nil` no data synchronization is going to happen.
-     - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
+        - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
+        - savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
+        - dataManager: The `CoreData` stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
+        - synchronizer: An optional instance of a `Synchronizer` used to transmit measured data to a server. If this is `nil` no data synchronization is going to happen.
+        - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
      */
     public init(
         sensorManager manager: CMMotionManager,
         updateInterval interval: Double = 100,
         savingInterval time: TimeInterval = 30,
-        persistenceLayer persistence: PersistenceLayer,
+        dataManager: CoreDataManager,
         synchronizer: Synchronizer?,
         eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) {
 
         self.isRunning = false
         self.isPaused = false
-        self.persistenceLayer = persistence
+        self.persistenceLayer = PersistenceLayer(onManager: dataManager)
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
         self.handler = eventHandler

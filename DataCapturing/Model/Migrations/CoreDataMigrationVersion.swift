@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum CoreDataMigrationVersion: String, CaseIterable {
+public enum CoreDataMigrationVersion: String, CaseIterable {
     case version1 = "CyfaceModel"
     case version2 = "2"
     case version3 = "3"

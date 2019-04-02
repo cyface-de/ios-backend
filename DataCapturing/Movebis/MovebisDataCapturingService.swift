@@ -112,9 +112,9 @@ public class MovebisDataCapturingService: DataCapturingService {
      */
     public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval: Double = 100, savingInterval: Double = 30, dataManager: CoreDataManager, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) throws {
         self.dataManager = dataManager
-        let persistence = try PersistenceLayer(onManager: dataManager)
+        let persistence = PersistenceLayer(onManager: dataManager)
         let synchronizer = try Synchronizer(persistenceLayer: persistence, cleaner: AccelerationPointRemovalCleaner(), serverConnection: serverConnection, handler: eventHandler)
-        super.init(sensorManager: manager, updateInterval: updateInterval, savingInterval: savingInterval, persistenceLayer: persistence, synchronizer: synchronizer, eventHandler: eventHandler)
+        super.init(sensorManager: manager, updateInterval: updateInterval, savingInterval: savingInterval, dataManager: dataManager, synchronizer: synchronizer, eventHandler: eventHandler)
     }
 
     // MARK: - Methods
@@ -140,13 +140,11 @@ public class MovebisDataCapturingService: DataCapturingService {
      - Attention: The returned array contains CoreData `NSManagedObject` instances (or a instances of a subclass). `NSManagedObject` is not thread safe and looses all attribute values as soon as transfered to a different thread. Handle the objects in the returned array with care and copy all required values before using them from a different thread (like for example a callback or delegate).
      - Returns: An array of measurements stored in the database without the one currently captured, if capturing is active.
      - Throws:
-        - `PersistenceError.modelNotLoabable` If the data model is not loadable
-        - `PersistenceError.modelNotInitializable` If the data model was loaded (so it is available) but can not be initialized.
         - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
         - Some unspecified errors from within CoreData.
      */
     public func loadInactiveMeasurements() throws -> [MeasurementMO] {
-        let persistenceLayer = try PersistenceLayer(onManager: dataManager)
+        let persistenceLayer = PersistenceLayer(onManager: dataManager)
         persistenceLayer.context = persistenceLayer.makeContext()
         let ret = try persistenceLayer.loadMeasurements()
 
