@@ -32,7 +32,7 @@ import os.log
  This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
 
  - Author: Klemens Muthmann
- - Version: 4.0.2
+ - Version: 5.0.0
  - Since: 1.0.0
  */
 public class ServerConnection {
@@ -41,14 +41,11 @@ public class ServerConnection {
 
     /// The logger used for objects of this class.
     private static let osLog = OSLog(subsystem: "ServerConnection", category: "de.cyface")
-
     /// An `URL` used to upload data to. There should be a server available at that location.
     public var apiURL: URL
     /// An object used to authenticate this app with a Cyface Collector server.
     public let authenticator: Authenticator
-    /**
-     A name that tells the system which kind of iOS device this is.
-     */
+    /// A name that tells the system which kind of iOS device this is.
     private var modelIdentifier: String {
         if let simulatorModelIdentifier = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] { return simulatorModelIdentifier }
         var sysinfo = utsname()
@@ -69,6 +66,7 @@ public class ServerConnection {
         }
     }
 
+    /// The *CoreData* stack used to access the data to transfer.
     let manager: CoreDataManager
 
     // MARK: - Initializers
@@ -79,7 +77,7 @@ public class ServerConnection {
      - Parameters:
         - apiURL: The URL endpoint to upload data to.
         - authenticator: An object used to authenticate this app with a Cyface Collector server.
-        - onManager: The CoreData stack used to load the data to transmit.
+        - onManager: The *CoreData* stack used to load the data to transmit.
      */
     public required init(apiURL url: URL, authenticator: Authenticator, onManager manager: CoreDataManager) {
         self.apiURL = url

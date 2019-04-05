@@ -1,25 +1,48 @@
-//
-//  DataMigrationTest.swift
-//  DataCapturingTests
-//
-//  Created by Team Cyface on 18.03.19.
-//  Copyright © 2019 Cyface GmbH. All rights reserved.
-//
+/*
+ * Copyright 2019 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import XCTest
 import CoreData
 @testable import DataCapturing
 
+/**
+ Tests that data migration between different versions of the Cyface data model are going to work as expected.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 4.0.0
+ */
 class DataMigrationTest: XCTestCase {
 
+    /// Initializes the test environment by cleaning the temporary directory from any files that might have remained from failed previous tests.
     override func setUp() {
         FileManager.clearTempDirectoryContents()
     }
 
+    /// Shuts down the test environment by cleaning the temporary directory.
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        FileManager.clearTempDirectoryContents()
     }
 
+    /**
+     Tests that loadin a custom mapping model works. This test is used as a show case for how to load a mapping model. The code is not actually used in the app.
+     */
     func testLoadMappingModel() throws {
         let oldResource = "3"
         let newResource = "4"
@@ -35,6 +58,12 @@ class DataMigrationTest: XCTestCase {
         XCTAssertNotNil(mappingModel)
     }
 
+    /**
+     Tests a successful migration from version 1 to version 2.
+
+     - Throws:
+        - Some unspecified CoreData errors.
+     */
     func testMigrationV1ToV2() throws {
         // Arrange, Act
         let context = migrate(fromVersion: .version1, toVersion: .version2, usingTestData: "V1TestData.sqlite")
@@ -43,6 +72,12 @@ class DataMigrationTest: XCTestCase {
         try assertV2(onContext: context)
     }
 
+    /**
+     Tests a successful migration from version 2 to version 3.
+
+     - Throws:
+        - Some unspecified CoreData errors.
+     */
     func testMigrationV2ToV3() throws {
         // Arrange, Act
         let context = migrate(fromVersion: .version2, toVersion: .version3, usingTestData: "V2TestData.sqlite")
@@ -51,6 +86,12 @@ class DataMigrationTest: XCTestCase {
         try assertV3(onContext: context)
     }
 
+    /**
+     Tests a successful migration from version 3 to version 4.
+
+     - Throws:
+        - Some unspecified CoreData errors.
+     */
     func testMigrationV3ToV4() throws {
         // Arrange, Act
         let context = migrate(fromVersion: .version3, toVersion: .version4, usingTestData: "V3TestData.sqlite")
@@ -59,14 +100,29 @@ class DataMigrationTest: XCTestCase {
         try assertV4(onContext: context, withFirstLocationCount: 300, withSecondLocationCount: 200)
     }
 
+    /**
+     Tests a successful migration from version 1 to version 4. This tests the whole update path in one go.
+
+     - Throws:
+        - Some unspecified CoreData errors.
+     */
     func testMigrationV1ToV4() throws {
         // Arrange, Act
         let context = migrate(fromVersion: .version1, toVersion: .version4, usingTestData: "V1TestData.sqlite")
 
         // Assert
-        try assertV4(onContext: context, withFirstLocationCount: 200, withSecondLocationCount: 100)
+        try assertV4(onContext: context, withFirstLocationCount: 100, withSecondLocationCount: 200)
     }
 
+    /**
+     Migrates a test data store `fromVersion` to a not necessarily consecutive `toVersion` using a pregenerated data store as test data.
+
+     - Parameters:
+        - fromVersion: The version of the provided pregenerated data store used as input
+        - toVersion: The version to migrate the pregenerated data store to
+        - usingTestData: The test data store to migrate to
+     - Returns: The `NSManagedObjectContext` on the migrated data store.
+     */
     func migrate(fromVersion: CoreDataMigrationVersion, toVersion: CoreDataMigrationVersion, usingTestData testDatastore: String) -> NSManagedObjectContext {
         // Arrange
         guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
@@ -93,79 +149,14 @@ class DataMigrationTest: XCTestCase {
         return context
     }
 
-    /*func loadContainer(from model: String, with version: String, from bundleIdentifiedBy: String) -> NSPersistentContainer {
-     let modelURL = Bundle(identifier: bundleIdentifiedBy)?.url(forResource: model, withExtension: "momd")
-     let managedObjectModelBundle = Bundle(url: modelURL!)
-     let managedObjectModelVersionURL = managedObjectModelBundle!.url(forResource: version, withExtension: "mom")
+    /**
+     Assert a successful migration to a version 2 database.
 
-     let managedObjectModel = NSManagedObjectModel.init(contentsOf: managedObjectModelVersionURL!)!
-
-     let container = NSPersistentContainer(name: model, managedObjectModel: managedObjectModel)
-
-     let description = NSPersistentStoreDescription()
-     description.type = storeType
-     description.shouldInferMappingModelAutomatically = false
-     description.shouldMigrateStoreAutomatically = false
-     container.persistentStoreDescriptions = [description]
-
-     container.loadPersistentStores { (_, _) in
-     // Nothing to do here
-     }
-     return container
-     }
-
-     func loadContainer(from model: String, with version: String, from bundleIdentifiedBy: String, at location: URL) -> NSPersistentContainer {
-     let modelURL = Bundle(identifier: bundleIdentifiedBy)?.url(forResource: model, withExtension: "momd")
-     let managedObjectModelBundle = Bundle(url: modelURL!)
-     let managedObjectModelVersionURL = managedObjectModelBundle!.url(forResource: version, withExtension: "mom")
-
-     let managedObjectModel = NSManagedObjectModel.init(contentsOf: managedObjectModelVersionURL!)!
-
-     let container = NSPersistentContainer(name: model, managedObjectModel: managedObjectModel)
-
-     let description = NSPersistentStoreDescription()
-     description.type = NSSQLiteStoreType
-     description.url = location
-     description.shouldInferMappingModelAutomatically = false
-     description.shouldMigrateStoreAutomatically = false
-     container.persistentStoreDescriptions = [description]
-
-     container.loadPersistentStores { (_, _) in
-     // Nothing to do here
-     }
-     return container
-     }*/
-
-    func cleanDatabaseFiles(oldDatabase: URL, newDatabase: URL) {
-        do {
-            let fileManager = FileManager.default
-            let oldDatabaseSHM = oldDatabase.deletingPathExtension().appendingPathExtension("sqlite-shm")
-            let oldDatabaseWAL = oldDatabase.deletingPathExtension().appendingPathExtension("sqlite-wal")
-            let newDatabaseSHM = newDatabase.deletingPathExtension().appendingPathExtension("sqlite-shm")
-            let newDatabaseWAL = newDatabase.deletingPathExtension().appendingPathExtension("sqlite-wal")
-            if try oldDatabase.checkPromisedItemIsReachable() {
-                try fileManager.removeItem(at: oldDatabase)
-            }
-            if try oldDatabaseSHM.checkPromisedItemIsReachable() {
-                try fileManager.removeItem(at: oldDatabaseSHM)
-            }
-            if try oldDatabaseWAL.checkPromisedItemIsReachable() {
-                try fileManager.removeItem(at: oldDatabaseWAL)
-            }
-            if try newDatabase.checkPromisedItemIsReachable() {
-                try fileManager.removeItem(at: newDatabase)
-            }
-            if try newDatabaseSHM.checkPromisedItemIsReachable() {
-                try fileManager.removeItem(at: newDatabaseSHM)
-            }
-            if try newDatabaseWAL.checkPromisedItemIsReachable() {
-                try fileManager.removeItem(at: newDatabaseWAL)
-            }
-        } catch let error {
-            fatalError("\(error)")
-        }
-    }
-
+     - Parameters:
+        - onContext: A context on the version 2 data store
+     - Throws:
+        - Some unspecified *CoreData* errors.
+     */
     func assertV2(onContext context: NSManagedObjectContext) throws {
         let request = NSFetchRequest<NSManagedObject>(entityName: "Measurement")
 
@@ -176,6 +167,14 @@ class DataMigrationTest: XCTestCase {
         XCTAssertEqual(migratedMeasurements.first?.value(forKeyPath: "context") as? String, "BICYCLE")
     }
 
+    /**
+     Assert a successful migration to a version 3 database.
+
+     - Parameters:
+        - onContext: A context on the version 3 data store
+     - Throws:
+        - Some unspecified *CoreData* errors.
+     */
     func assertV3(onContext context: NSManagedObjectContext) throws {
         let request = NSFetchRequest<NSManagedObject>(entityName: "Measurement")
 
@@ -185,6 +184,16 @@ class DataMigrationTest: XCTestCase {
         XCTAssertEqual(migratedMeasurements.first?.primitiveValue(forKey: "accelerationCount") as? Int, 0)
     }
 
+    /**
+     Assert a successful migration to a version 4 database.
+
+     - Parameters:
+        - onContext: A context on the version 4 data store
+        - withFirstLocationCount: Number of geo locations on the first measurement
+        - withSecondLocationCount: Number of geo locations on the second measurement
+     - Throws:
+        - Some unspecified *CoreData* errors.
+     */
     func assertV4(onContext context: NSManagedObjectContext, withFirstLocationCount firstLocationCount: Int, withSecondLocationCount secondLocationCount: Int) throws {
         let measurementFetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Measurement")
         let sort = NSSortDescriptor(key: "identifier", ascending: false)
@@ -193,6 +202,8 @@ class DataMigrationTest: XCTestCase {
         let migratedMeasurements = try context.fetch(measurementFetchRequest)
 
         XCTAssertEqual(migratedMeasurements.count, 2)
+        XCTAssertEqual(migratedMeasurements[0].primitiveValue(forKey: "identifier") as? Int64, Int64(2))
+        XCTAssertEqual(migratedMeasurements[1].primitiveValue(forKey: "identifier") as? Int64, Int64(1))
         guard let tracksFromFirstMeasurement = migratedMeasurements[0].value(forKey: "tracks") as? NSOrderedSet else {
             XCTFail("Unable to load tracks from the first migrated measurement!")
             return
@@ -227,7 +238,13 @@ class DataMigrationTest: XCTestCase {
         XCTAssertEqual(locationsFromTrackTwo.count, secondLocationCount)
     }
 
-    /*func skip_testExample() throws {
+    /**
+     A test used to create an input data storeage file used by other tests. This is skipped since it is usually only required to run once when a new version of the Cyface data model is released.
+
+     - Throws:
+        - Unspecified *CoreData* errors on saving of the data model.
+     */
+    func skip_testExample() throws {
         guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
             fatalError()
         }
@@ -243,21 +260,62 @@ class DataMigrationTest: XCTestCase {
         }
         migrator.forceWALCheckpointingForStore(at: database, inBundle: bundle)
         print("done")
-    }*/
+    }
+
+    /**
+     Loads an `NSPersistentContainer` with a model in a specific version from a store at the provided location inside the provided bundle.
+
+     - Parameters:
+        - from: The data model to load from
+        - with: The version of the data model to load
+        - from: The bundle containing the model and storage files
+        - at: The location of the storage file (usually an SQLite file
+     - Returns: The loaded `NSPersistentContainer`
+     */
+    func loadContainer(from model: String, with version: String, from bundleIdentifiedBy: String, at location: URL) -> NSPersistentContainer {
+        let modelURL = Bundle(identifier: bundleIdentifiedBy)?.url(forResource: model, withExtension: "momd")
+        let managedObjectModelBundle = Bundle(url: modelURL!)
+        let managedObjectModelVersionURL = managedObjectModelBundle!.url(forResource: version, withExtension: "mom")
+
+        let managedObjectModel = NSManagedObjectModel.init(contentsOf: managedObjectModelVersionURL!)!
+
+        let container = NSPersistentContainer(name: model, managedObjectModel: managedObjectModel)
+
+        let description = NSPersistentStoreDescription()
+        description.type = NSSQLiteStoreType
+        description.url = location
+        description.shouldInferMappingModelAutomatically = false
+        description.shouldMigrateStoreAutomatically = false
+        container.persistentStoreDescriptions = [description]
+
+        container.loadPersistentStores { (_, _) in
+            // Nothing to do here
+        }
+        return container
+    }
 }
 
 extension FileManager {
 
     // MARK: - Temp
 
+    /// Removes everything from the temporary directory.
     static func clearTempDirectoryContents() {
-        let tmpDirectoryContents = try! FileManager.default.contentsOfDirectory(atPath: NSTemporaryDirectory())
+        guard let tmpDirectoryContents = try? FileManager.default.contentsOfDirectory(atPath: NSTemporaryDirectory()) else {
+            fatalError()
+        }
         tmpDirectoryContents.forEach {
             let fileURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true).appendingPathComponent($0)
             try? FileManager.default.removeItem(atPath: fileURL.path)
         }
     }
 
+    /**
+     Moves the provided file to a temporary directory and provides a URL pointing to the new location.
+
+     - Parameter filename: The name of the file to move
+     - Returns: A `URL` pointing to the new files new location inside the temporary directory.
+     */
     static func moveFileFromBundleToTempDirectory(filename: String) -> URL {
         let destinationURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true).appendingPathComponent(filename)
         try? FileManager.default.removeItem(at: destinationURL)
@@ -270,11 +328,22 @@ extension FileManager {
 
 extension NSManagedObjectContext {
 
-    // MARK: Model
+    // MARK: - Initializers
 
+    /**
+     Creates a `NSManagedObjectContext` based on its model and a store location. The file at the `storeURL` must of course be compatible with the provided `NSManagedObjectModel`.
+
+     - Parameters:
+        - model: The model to create the context for
+        - storeURL: The URL of a store file compatible to the provided model. This will become the parent of this context.
+     */
     convenience init(model: NSManagedObjectModel, storeURL: URL) {
         let persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
-        try! persistentStoreCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: storeURL, options: nil)
+        do {
+            try persistentStoreCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: storeURL, options: nil)
+        } catch {
+            fatalError("\(error)")
+        }
 
         self.init(concurrencyType: .mainQueueConcurrencyType)
 
@@ -283,6 +352,9 @@ extension NSManagedObjectContext {
 
     // MARK: - Destroy
 
+    /**
+     Closes and destroyes all stores.
+     */
     func destroyStore() {
         persistentStoreCoordinator?.persistentStores.forEach {
             try? persistentStoreCoordinator?.remove($0)

@@ -40,6 +40,7 @@ public class PersistenceLayer {
 
     // MARK: - Properties
 
+    /// Identifies log messages comming from this class.
     private static let log = OSLog(subsystem: "de.cyface", category: "PersistenceLayer")
 
     /// Manager encapsulating the CoreData stack.

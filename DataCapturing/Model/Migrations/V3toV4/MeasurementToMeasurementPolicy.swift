@@ -1,16 +1,36 @@
-//
-//  GeoLocationToTrackPolicy.swift
-//  DataCapturing
-//
-//  Created by Team Cyface on 18.03.19.
-//  Copyright © 2019 Cyface GmbH. All rights reserved.
-//
+/*
+ * Copyright 2019 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import CoreData
 import CoreLocation
 
+/**
+ This policy describes how to convert measurements between databases of version 3 and 4 of the Cyface model.
+ It is used by a Mapping to carry out that conversion on devices installing an SDK requiring version 4 but having version 3.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 4.0.0
+ */
 class MeasurementToMeasurementPolicy: NSEntityMigrationPolicy {
+
     override func createDestinationInstances(forSource sInstance: NSManagedObject, in mapping: NSEntityMapping, manager: NSMigrationManager) throws {
         try super.createDestinationInstances(forSource: sInstance, in: mapping, manager: manager)
 
@@ -33,10 +53,7 @@ class MeasurementToMeasurementPolicy: NSEntityMigrationPolicy {
         measurement.setPrimitiveValue(trackLength, forKey: "trackLength")
 
         // Add geo locations to user info so we can later associate them with the correct thread
-        /*var userInfo = manager.userInfo == nil ? [AnyHashable: Any]() : manager.userInfo!*/
         let migratedLocations = migrate(locations: locations, forTrack: track)
-        /*userInfo[track.objectID]=migratedLocations
-        manager.userInfo = userInfo*/
         track.setValue(migratedLocations, forKey: "locations")
     }
 
@@ -52,20 +69,14 @@ class MeasurementToMeasurementPolicy: NSEntityMigrationPolicy {
         }
 
         dInstance.setValue(NSOrderedSet(array: tracks), forKey: "tracks")
-
-        // Get the locations from user info and add them to the track
-        /*guard let userInfo = manager.userInfo else {
-            fatalError()
-        }
-
-        guard let track = tracks.first as? NSManagedObject else {
-            fatalError()
-        }
-
-        let locations = userInfo[track.objectID]
-        track.setValue(locations, forKey: "locations")*/
     }
 
+    /**
+     Calculate the length of a version 3 array of geo locations from a measurement. This is required to update the migrated measurement with the track length.
+
+     - Parameters:
+        - ofLocations: The locations to use for track length calculation.
+     */
     func calcLength(ofLocations locations: NSOrderedSet) -> NSNumber {
         var trackLength = 0.0
         let distanceCalculationStrategy = DefaultDistanceCalculationStrategy()
@@ -89,6 +100,13 @@ class MeasurementToMeasurementPolicy: NSEntityMigrationPolicy {
         return NSNumber(value: trackLength)
     }
 
+    /**
+     Migrates all version 3 locations to version 4 locations as children of the provided track.
+
+     - Parameters:
+        - locations: The version 3 locations to migrate to version 4
+        - forTrack: The track to store the migrated version 4 locations to.
+     */
     func migrate(locations: NSOrderedSet, forTrack track: NSManagedObject) -> NSOrderedSet {
         var migratedLocations = [NSManagedObject]()
         for originalLocation in locations {
@@ -116,6 +134,14 @@ class MeasurementToMeasurementPolicy: NSEntityMigrationPolicy {
         return NSOrderedSet(array: migratedLocations)
     }
 
+    /**
+     Reads geo locations from a version 3 measurement and inserts them into a version 4 track entity.
+
+     - Parameters:
+        - from: The measurement model object version 3 to load the geo locations from.
+        - into: The track to insert the locations into
+        - withDestination: The destination `NSManagedObjectContext` to use to create copied geo locations from.
+     */
     func insertLocations(from source: NSManagedObject, into track: NSManagedObject, withDestination context: NSManagedObjectContext) {
         var migratedLocations = [NSManagedObject]()
         guard let originalLocations = source.value(forKey: "geoLocations") as? NSOrderedSet else {

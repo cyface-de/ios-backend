@@ -255,7 +255,7 @@ class GeoLocationSerializer: BinarySerializer {
  Transforms measurement data into the Cyface binary format used for transmission via the network.
  
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.1.0
  - Since: 1.0.0
  */
 public class CyfaceBinaryFormatSerializer {

@@ -28,7 +28,7 @@ import os.log
  To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided `Synchronizer`.
  
  - Author: Klemens Muthmann
- - Version: 7.0.1
+ - Version: 8.0.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -158,7 +158,7 @@ public class DataCapturingService: NSObject {
                 throw DataCapturingError.isPaused
             }
 
-            let timestamp = currentTimeInMillisSince1970()
+            let timestamp = DataCapturingService.currentTimeInMillisSince1970()
             persistenceLayer.context = persistenceLayer.makeContext()
             let measurement = try persistenceLayer.createMeasurement(at: timestamp, withContext: context)
             let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: context)
@@ -267,7 +267,7 @@ public class DataCapturingService: NSObject {
                 }
 
                 let accValues = myData.acceleration
-                let acc = Acceleration(timestamp: self.currentTimeInMillisSince1970(),
+                let acc = Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(),
                                        x: accValues.x,
                                        y: accValues.y,
                                        z: accValues.z)
@@ -341,12 +341,12 @@ public class DataCapturingService: NSObject {
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
-    private func currentTimeInMillisSince1970() -> Int64 {
+    public static func currentTimeInMillisSince1970() -> Int64 {
         return convertToUtcTimestamp(date: Date())
     }
 
     /// Converts a `Data` object to a UTC milliseconds timestamp since january 1st 1970.
-    private func convertToUtcTimestamp(date value: Date) -> Int64 {
+    private static func convertToUtcTimestamp(date value: Date) -> Int64 {
         return Int64(value.timeIntervalSince1970*1000.0)
     }
 }
@@ -376,7 +376,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
                 longitude: location.coordinate.longitude,
                 accuracy: location.horizontalAccuracy,
                 speed: location.speed,
-                timestamp: convertToUtcTimestamp(date: location.timestamp))
+                timestamp: DataCapturingService.convertToUtcTimestamp(date: location.timestamp))
 
             cacheSynchronizationQueue.async(flags: .barrier) {
                 self.locationsCache.append(geoLocation)

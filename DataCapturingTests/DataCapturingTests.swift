@@ -26,7 +26,7 @@ import CoreData
  This test is intended to test capturing some data in isolation. There are still some problems with this, due to restrictions in Apple's test support.
 
  - Author: Klemens Muthmann
- - Version: 1.0.3
+ - Version: 1.1.0
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {
@@ -35,8 +35,10 @@ class DataCapturingTests: XCTestCase {
     var oocut: ServerConnection!
     /// A manager for the CoreData stack providing access to write and read some example data.
     var dataManager: CoreDataManager!
+    /// Authenticator to use to test connections to the Movebis server.
     var authenticator: StaticAuthenticator!
 
+    /// Sets up theis test by creating a proper `ServerConnection`.
     override func setUp() {
         super.setUp()
 
@@ -50,6 +52,7 @@ class DataCapturingTests: XCTestCase {
         oocut = ServerConnection(apiURL: URL(string: "https://localhost:8080")!, authenticator: authenticator!, onManager: manager)
     }
 
+    /// Tears down the test environment.
     override func tearDown() {
         oocut = nil
         dataManager = nil
@@ -63,7 +66,7 @@ class DataCapturingTests: XCTestCase {
     func skipped_testSynchronizationWithMovebisServer() {
         let promise = expectation(description: "Successful data transmission")
         do {
-            let persistenceLayer = try PersistenceLayer(onManager: dataManager)
+            let persistenceLayer = PersistenceLayer(onManager: dataManager)
             let measurement = try persistenceLayer.createMeasurement(at: 2, withContext: .bike)
 
             self.authenticator!.jwtToken = "replace me"
@@ -114,8 +117,6 @@ class DataCapturingTests: XCTestCase {
      Tests whether loading only inactive measurements on the `MovebisDataCapturingService` works as expected.
 
      - Throws:
-        - `PersistenceError.modelNotLoabable` If the model is not loadable
-        - `PersistenceError.modelNotInitializable` If the model was loaded (so it is available) but can not be initialized.
         - `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
         - `DataCapturingError.isPaused` If the service was paused and thus it makes no sense to start it.
         - `DataCapturingError.isPaused` If the service was paused and thus stopping it makes no sense.

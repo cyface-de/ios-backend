@@ -25,14 +25,17 @@ import CoreData
  Tests that using the `PersistenceLayer` works as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.1.0
  - Since: 1.0.0
  */
 class PersistenceTests: XCTestCase {
 
+    /// A `PersistenceLayer` used for testing.
     var oocut: PersistenceLayer!
+    /// Some test data.
     var fixture: MeasurementEntity!
 
+    /// Initializes the test enviroment by saving some test data to the test `PersistenceLayer`.
     override func setUp() {
         super.setUp()
         do {
@@ -41,7 +44,7 @@ class PersistenceTests: XCTestCase {
                 fatalError()
             }
             manager.setup(bundle: bundle)
-            oocut = try PersistenceLayer(onManager: manager)
+            oocut = PersistenceLayer(onManager: manager)
             oocut.context = oocut.makeContext()
             let measurement = try oocut.createMeasurement(at: 10_000, withContext: .bike)
             try oocut.appendNewTrack(to: measurement)
@@ -56,6 +59,7 @@ class PersistenceTests: XCTestCase {
         }
     }
 
+    /// Cleans the test enviroment by deleting all data.
     override func tearDown() {
         do {
             try oocut.delete()
@@ -86,6 +90,7 @@ class PersistenceTests: XCTestCase {
         }
     }
 
+    /// Tests if cleaning the test measurement from its additional sensor data is successful.
     func testCleanMeasurement() {
         do {
             let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
@@ -107,6 +112,7 @@ class PersistenceTests: XCTestCase {
         }
     }
 
+    /// Tests that deleting a measurement is successful.
     func testDeleteMeasurement() {
         do {
             let count = try oocut.countMeasurements()
@@ -123,6 +129,7 @@ class PersistenceTests: XCTestCase {
         }
     }
 
+    /// Tests that writing some data to an existing measurement is successful.
     func testMergeDataToExistingMeasurement() {
         let additionalLocation = GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 800, speed: 5.0, timestamp: 10_005)
         let additionalAccelerations = [
@@ -144,6 +151,7 @@ class PersistenceTests: XCTestCase {
         }
     }
 
+    /// Tests that loading the test measurement is successful.
     func testLoadMeasurement() {
         do {
             let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
@@ -157,6 +165,7 @@ class PersistenceTests: XCTestCase {
         }
     }
 
+    /// Tests that accessing only synchronizable measurements does not return everything.
     func testLoadSynchronizableMeasurements() {
         do {
             let countOfLoadedMeasurementsPriorClean = try oocut.loadSynchronizableMeasurements().count
@@ -172,6 +181,7 @@ class PersistenceTests: XCTestCase {
         }
     }
 
+    /// Tests that some distance is calculated for the test measurement.
     func testDistanceWasCalculated() {
         let expectedTrackLength = 38.44
         let distanceCalculationAccuracy = 0.01
@@ -185,6 +195,7 @@ class PersistenceTests: XCTestCase {
         }
     }
 
+    /// Tests that distance is successfully created if new locations are added to a measurement.
     func testDistanceWasAdded() {
         let expectedTrackLength = 83.57
         let distanceCalculationAccuracy = 0.01
@@ -201,6 +212,7 @@ class PersistenceTests: XCTestCase {
         }
     }
 
+    /// Tests that geo locations are added successfully to tracks and can be loaded from them.
     func testLoadGeoLocationTracks() throws {
         let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
@@ -228,6 +240,7 @@ class PersistenceTests: XCTestCase {
         XCTAssertEqual(locationsInSecondTrack.count, 1, "There should be two locations in the fixture measurement!")
     }
 
+    /// Tests code to load only inactive (all measurements except the one currently captured) measurements in isolation.
     func testLoadInactiveMeasurements() throws {
         let secondMeasurement = try oocut.createMeasurement(at: 20_000, withContext: .bike)
         let secondMeasurementIdentifier = secondMeasurement.identifier
