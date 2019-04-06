@@ -357,8 +357,8 @@ extension NSManagedObjectContext {
      */
     func destroyStore() {
         persistentStoreCoordinator?.persistentStores.forEach {
-            try? persistentStoreCoordinator?.remove($0)
-            try? persistentStoreCoordinator?.destroyPersistentStore(at: $0.url!, ofType: $0.type, options: nil)
+            ((try? persistentStoreCoordinator?.remove($0)) as ()??)
+            ((try? persistentStoreCoordinator?.destroyPersistentStore(at: $0.url!, ofType: $0.type, options: nil)) as ()??)
         }
     }
 }
