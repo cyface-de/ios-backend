@@ -179,6 +179,9 @@ public class DataCapturingService: NSObject {
                 throw DataCapturingError.isPaused
             }
 
+            backgroundSynchronizationTimer?.setCancelHandler {
+                self.handler(.serviceStopped(measurement: self.currentMeasurement?.identifier), .success)
+            }
             stopCapturing()
             currentMeasurement = nil
             if let synchronizer = synchronizer {
