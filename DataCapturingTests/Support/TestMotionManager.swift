@@ -11,16 +11,16 @@ import CoreMotion
 
 class TestMotionManager: CMMotionManager {
 
-    var timer : DispatchSourceTimer?
+    var timer: DispatchSourceTimer?
 
     override func startAccelerometerUpdates(to queue: OperationQueue, withHandler handler: @escaping CMAccelerometerHandler) {
         timer = DispatchSource.makeTimerSource(queue: queue.underlyingQueue)
-        timer!.setEventHandler  {
+        timer!.setEventHandler {
             queue.addOperation {
-                let acceleration = CMAcceleration(x: 1.0,y: 1.0,z: 1.0)
+                let acceleration = CMAcceleration(x: 1.0, y: 1.0, z: 1.0)
                 let data = FakeAccelerometerData(acceleration: acceleration)
                 //data?.acceleration = acceleration
-                handler(data,nil)
+                handler(data, nil)
             }
         }
         timer!.schedule(deadline: .now(), repeating: 0.01)
@@ -28,9 +28,7 @@ class TestMotionManager: CMMotionManager {
     }
 
     override var isAccelerometerAvailable: Bool {
-        get {
-            return true
-        }
+        return true
     }
 
     override func stopAccelerometerUpdates() {
@@ -40,11 +38,9 @@ class TestMotionManager: CMMotionManager {
 
 }
 
-class FakeAccelerometerData : CMAccelerometerData {
+class FakeAccelerometerData: CMAccelerometerData {
     override var acceleration: CMAcceleration {
-        get {
-            return acc
-        }
+        return acc
     }
 
     let acc: CMAcceleration

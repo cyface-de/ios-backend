@@ -26,6 +26,8 @@
 		3D1D9A94224D4F420053B1B7 /* V2TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3D1D9A91224D4F420053B1B7 /* V2TestData.sqlite */; };
 		3D1D9A95224D4F420053B1B7 /* V3TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3D1D9A92224D4F420053B1B7 /* V3TestData.sqlite */; };
 		3D1D9A96224D4F420053B1B7 /* V1TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3D1D9A93224D4F420053B1B7 /* V1TestData.sqlite */; };
+		3D3A7DD02258C9440019998A /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3A7DCF2258C9440019998A /* LocationManager.swift */; };
+		3D3A7DD22258E39B0019998A /* TestLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3A7DD12258E39B0019998A /* TestLocationManager.swift */; };
 		3D4A9402224E7986008A54AE /* V3toV4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A9401224E7986008A54AE /* V3toV4.xcmappingmodel */; };
 		3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79D2136F045003F53C9 /* BinarySerializer.swift */; };
 		3D58B7A02136F046003F53C9 /* FileSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79E2136F045003F53C9 /* FileSupport.swift */; };
@@ -92,6 +94,8 @@
 		3D1D9A92224D4F420053B1B7 /* V3TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V3TestData.sqlite; sourceTree = "<group>"; };
 		3D1D9A93224D4F420053B1B7 /* V1TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V1TestData.sqlite; sourceTree = "<group>"; };
 		3D20D1CE222029C900A0538D /* Alamofire.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D3A7DCF2258C9440019998A /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		3D3A7DD12258E39B0019998A /* TestLocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestLocationManager.swift; sourceTree = "<group>"; };
 		3D4A9401224E7986008A54AE /* V3toV4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = V3toV4.xcmappingmodel; sourceTree = "<group>"; };
 		3D58B79D2136F045003F53C9 /* BinarySerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinarySerializer.swift; sourceTree = "<group>"; };
 		3D58B79E2136F045003F53C9 /* FileSupport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileSupport.swift; sourceTree = "<group>"; };
@@ -199,6 +203,7 @@
 				3D1505ED213EA68D002994D2 /* DataCapturingError.swift */,
 				3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */,
 				3DF7E173220F65EC007CFF83 /* Status.swift */,
+				3D3A7DCF2258C9440019998A /* LocationManager.swift */,
 			);
 			path = DataCapturing;
 			sourceTree = "<group>";
@@ -248,6 +253,16 @@
 			path = Persistence;
 			sourceTree = "<group>";
 		};
+		3D8E524B223EB220004D7E2B /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				3D8E524C223EB240004D7E2B /* TestMotionManager.swift */,
+				3D8E524E223EB2A1004D7E2B /* TestDataCapturingService.swift */,
+				3D3A7DD12258E39B0019998A /* TestLocationManager.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
 		3D8E5252223F91FE004D7E2B /* Migrations */ = {
 			isa = PBXGroup;
 			children = (
@@ -258,15 +273,6 @@
 				3D1D9A8C224CC4080053B1B7 /* CoreDataManager.swift */,
 			);
 			path = Migrations;
-			sourceTree = "<group>";
-		};
-		3D8E524B223EB220004D7E2B /* Support */ = {
-			isa = PBXGroup;
-			children = (
-				3D8E524C223EB240004D7E2B /* TestMotionManager.swift */,
-				3D8E524E223EB2A1004D7E2B /* TestDataCapturingService.swift */,
-			);
-			path = Support;
 			sourceTree = "<group>";
 		};
 		3DC6A7192052F14900E7CB84 /* Movebis */ = {
@@ -554,6 +560,7 @@
 				3D0511D7204D267600967898 /* MovebisDataCapturingService.swift in Sources */,
 				3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */,
 				3D8CC22220A6D89A0095CCD4 /* Acceleration.swift in Sources */,
+				3D3A7DD02258C9440019998A /* LocationManager.swift in Sources */,
 				3D8FAD81222E913600D98D65 /* Track+CoreDataProperties.swift in Sources */,
 				3D8FAD80222E913600D98D65 /* GeoLocationMO+CoreDataClass.swift in Sources */,
 				3DF7E10821F60AFC007CFF83 /* ServerConnection.swift in Sources */,
@@ -583,6 +590,7 @@
 				3D8E524D223EB240004D7E2B /* TestMotionManager.swift in Sources */,
 				3D0511ED204ED0C200967898 /* PersistenceTests.swift in Sources */,
 				3D8E524F223EB2A1004D7E2B /* TestDataCapturingService.swift in Sources */,
+				3D3A7DD22258E39B0019998A /* TestLocationManager.swift in Sources */,
 				3DF7E138220C3D42007CFF83 /* DistanceCalculationTests.swift in Sources */,
 				3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */,
 				3D1D9A8F224D28190053B1B7 /* DataSetCreator.swift in Sources */,
