@@ -144,10 +144,10 @@ public class DataCapturingService: NSObject {
      If an error happened during this process, it is provided as part of this handlers `Status` argument.
      
      - Parameters:
-     - context: The `MeasurementContext` to use for the newly created measurement.
+        - context: The `MeasurementContext` to use for the newly created measurement.
      
      - Throws:
-     - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
+        - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
     public func start(inContext context: MeasurementContext) throws {
         try lifecycleQueue.sync {
@@ -171,7 +171,7 @@ public class DataCapturingService: NSObject {
      running.
 
      - Throws:
-     - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
+        - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
      */
     public func stop() throws {
         try lifecycleQueue.sync {
@@ -194,8 +194,8 @@ public class DataCapturingService: NSObject {
      Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now. After using `pause()` you must call resume before you can call any other lifecycle method like `stop()`, for example.
 
      - Throws:
-     - `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.
-     - `DataCapturingError.isPaused` if the service was already paused and pausing it again makes no sense.
+        - `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.
+        - `DataCapturingError.isPaused` if the service was already paused and pausing it again makes no sense.
      */
     public func pause() throws {
         try lifecycleQueue.sync {
