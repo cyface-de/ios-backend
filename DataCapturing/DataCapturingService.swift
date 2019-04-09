@@ -28,7 +28,7 @@ import os.log
  To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided `Synchronizer`.
  
  - Author: Klemens Muthmann
- - Version: 7.0.1
+ - Version: 8.0.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -102,31 +102,32 @@ public class DataCapturingService: NSObject {
     public var synchronizer: Synchronizer?
 
     // MARK: - Initializers
+
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data
      via the provided server connection and accessing data a certain amount of times per second.
 
      - Parameters:
-     - sensorManager: An instance of `CMMotionManager`.
+        - sensorManager: An instance of `CMMotionManager`.
      There should be only one instance of this type in your application.
      Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
-     - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
-     - savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
-     - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
-     - synchronizer: An optional instance of a `Synchronizer` used to transmit measured data to a server. If this is `nil` no data synchronization is going to happen.
-     - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
+        - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
+        - savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
+        - dataManager: The `CoreData` stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
+        - synchronizer: An optional instance of a `Synchronizer` used to transmit measured data to a server. If this is `nil` no data synchronization is going to happen.
+        - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
      */
     public init(
         sensorManager manager: CMMotionManager,
         updateInterval interval: Double = 100,
         savingInterval time: TimeInterval = 30,
-        persistenceLayer persistence: PersistenceLayer,
+        dataManager: CoreDataManager,
         synchronizer: Synchronizer?,
         eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) {
 
         self.isRunning = false
         self.isPaused = false
-        self.persistenceLayer = persistence
+        self.persistenceLayer = PersistenceLayer(onManager: dataManager)
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
         self.handler = eventHandler
@@ -157,7 +158,7 @@ public class DataCapturingService: NSObject {
                 throw DataCapturingError.isPaused
             }
 
-            let timestamp = currentTimeInMillisSince1970()
+            let timestamp = DataCapturingService.currentTimeInMillisSince1970()
             persistenceLayer.context = persistenceLayer.makeContext()
             let measurement = try persistenceLayer.createMeasurement(at: timestamp, withContext: context)
             let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: context)
@@ -266,7 +267,7 @@ public class DataCapturingService: NSObject {
                 }
 
                 let accValues = myData.acceleration
-                let acc = Acceleration(timestamp: self.currentTimeInMillisSince1970(),
+                let acc = Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(),
                                        x: accValues.x,
                                        y: accValues.y,
                                        z: accValues.z)
@@ -340,12 +341,12 @@ public class DataCapturingService: NSObject {
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
-    private func currentTimeInMillisSince1970() -> Int64 {
+    public static func currentTimeInMillisSince1970() -> Int64 {
         return convertToUtcTimestamp(date: Date())
     }
 
     /// Converts a `Data` object to a UTC milliseconds timestamp since january 1st 1970.
-    private func convertToUtcTimestamp(date value: Date) -> Int64 {
+    private static func convertToUtcTimestamp(date value: Date) -> Int64 {
         return Int64(value.timeIntervalSince1970*1000.0)
     }
 }
@@ -375,7 +376,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
                 longitude: location.coordinate.longitude,
                 accuracy: location.horizontalAccuracy,
                 speed: location.speed,
-                timestamp: convertToUtcTimestamp(date: location.timestamp))
+                timestamp: DataCapturingService.convertToUtcTimestamp(date: location.timestamp))
 
             cacheSynchronizationQueue.async(flags: .barrier) {
                 self.locationsCache.append(geoLocation)

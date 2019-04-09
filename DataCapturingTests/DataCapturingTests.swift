@@ -19,39 +19,43 @@
 
 import XCTest
 import CoreMotion
+import CoreData
 @testable import DataCapturing
 
 /**
  This test is intended to test capturing some data in isolation. There are still some problems with this, due to restrictions in Apple's test support.
 
  - Author: Klemens Muthmann
- - Version: 1.0.3
+ - Version: 1.1.0
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {
 
     /// A connection to a Cyface Server backend.
     var oocut: ServerConnection!
-    /// A `PersistenceLayer` providing access to write and read some example data.
-    var persistenceLayer: PersistenceLayer!
+    /// A manager for the CoreData stack providing access to write and read some example data.
+    var dataManager: CoreDataManager!
+    /// Authenticator to use to test connections to the Movebis server.
     var authenticator: StaticAuthenticator!
 
+    /// Sets up theis test by creating a proper `ServerConnection`.
     override func setUp() {
         super.setUp()
 
-        do {
-            persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
-        } catch let error {
-            fatalError("Failed to initialize persistence layer: \(error.localizedDescription)")
+        guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
+            fatalError()
         }
+        let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+        manager.setup(bundle: bundle)
 
         authenticator = StaticAuthenticator()
-        oocut = ServerConnection(apiURL: URL(string: "https://localhost:8080")!, authenticator: authenticator!)
+        oocut = ServerConnection(apiURL: URL(string: "https://localhost:8080")!, authenticator: authenticator!, onManager: manager)
     }
 
+    /// Tears down the test environment.
     override func tearDown() {
         oocut = nil
-        persistenceLayer = nil
+        dataManager = nil
         authenticator = nil
         super.tearDown()
     }
@@ -62,6 +66,7 @@ class DataCapturingTests: XCTestCase {
     func skipped_testSynchronizationWithMovebisServer() {
         let promise = expectation(description: "Successful data transmission")
         do {
+            let persistenceLayer = PersistenceLayer(onManager: dataManager)
             let measurement = try persistenceLayer.createMeasurement(at: 2, withContext: .bike)
 
             self.authenticator!.jwtToken = "replace me"
@@ -106,4 +111,38 @@ class DataCapturingTests: XCTestCase {
      dataCapturingService.stop()
      XCTAssertFalse(dataCapturingService.isRunning)
      }*/
+
+    // TODO: (STAD-104) This does currently not work as a test case is not allowed to run background location updates.
+    /**
+     Tests whether loading only inactive measurements on the `MovebisDataCapturingService` works as expected.
+
+     - Throws:
+        - `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
+        - `DataCapturingError.isPaused` If the service was paused and thus it makes no sense to start it.
+        - `DataCapturingError.isPaused` If the service was paused and thus stopping it makes no sense.
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
+     */
+    func skip_testLoadOnlyInactiveMeasurement_HappyPath() throws {
+        // Arrange
+        let sensorManager = CMMotionManager()
+        let dcs = try MovebisDataCapturingService(connection: oocut, sensorManager: sensorManager, dataManager: dataManager) { _, _ in
+
+        }
+
+        // Act
+        // 1st Measurement
+        try dcs.start()
+        try dcs.stop()
+
+        // 2nd Measurement
+        try dcs.start()
+        try dcs.stop()
+
+        // 3rd Measurement
+        try dcs.start()
+
+        // Assert
+        XCTAssertEqual(try dcs.loadInactiveMeasurements().count, 2)
+    }
 }

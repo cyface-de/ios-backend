@@ -255,10 +255,10 @@ class GeoLocationSerializer: BinarySerializer {
  Transforms measurement data into the Cyface binary format used for transmission via the network.
  
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.1.0
  - Since: 1.0.0
  */
-class CyfaceBinaryFormatSerializer {
+public class CyfaceBinaryFormatSerializer {
     /// Serializer to transform measurement objects
     let measurementSerializer = MeasurementSerializer()
     /// Serializer to transform acceleration objects
@@ -273,7 +273,7 @@ class CyfaceBinaryFormatSerializer {
      - Throws:
         - `SerializationError.compressionFailed` if compression was not successful.
      */
-    func serializeCompressed(_ measurement: MeasurementMO) throws -> Data {
+    public func serializeCompressed(_ measurement: MeasurementMO) throws -> Data {
         let res = try serialize(measurement)
 
         guard let compressed = res.deflate() else {

@@ -18,13 +18,14 @@
  */
 
 import XCTest
+import CoreData
 @testable import DataCapturing
 
 /**
  Tests whether serialization and deserialization into and from the Cyface Binary Format works as expected
 
  - Author: Klemens Muthmann
- - Version: 1.0.2
+ - Version: 1.0.4
  - Since: 1.0.0
  */
 class SerializationTest: XCTestCase {
@@ -35,13 +36,21 @@ class SerializationTest: XCTestCase {
     var persistenceLayer: PersistenceLayer!
     /// A `MeasurementEntity` holding a test measurement to serialize and deserialize.
     var fixture: MeasurementEntity!
+    /// A manager for handling the CoreData stack.
+    var coreDataStack: CoreDataManager!
 
+    /// Initializes the test data set and `PersistenceLayer` with some test data.
     override func setUp() {
         super.setUp()
         oocut = CyfaceBinaryFormatSerializer()
 
         do {
-            persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+            guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
+                fatalError()
+            }
+            coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            coreDataStack.setup(bundle: bundle)
+            persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
             let measurement = try persistenceLayer.createMeasurement(at: 1, withContext: .bike)
             try persistenceLayer.appendNewTrack(to: measurement)
@@ -55,6 +64,7 @@ class SerializationTest: XCTestCase {
         }
     }
 
+    /// Finalizes the test environment by deleting all test data.
     override func tearDown() {
         oocut = nil
         do {
@@ -62,6 +72,7 @@ class SerializationTest: XCTestCase {
         } catch {
             fatalError()
         }
+        coreDataStack = nil
         super.tearDown()
     }
 

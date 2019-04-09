@@ -30,7 +30,7 @@ import os.log
  The instance you provide will receive the updates.
  
  - Author: Klemens Muthmann
- - Version: 4.0.1
+ - Version: 4.2.0
  - Since: 1.0.0
  */
 public class MovebisDataCapturingService: DataCapturingService {
@@ -89,41 +89,72 @@ public class MovebisDataCapturingService: DataCapturingService {
         return manager
     }()
 
+    private let dataManager: CoreDataManager
+
     // MARK: - Initializers
 
     /**
      Creates a new `MovebisDataCapturingService` with the ability capture location
      when no data capturing runs.
+
      - Parameters:
-     - connection: A connection to a Cyface API server.
-     - sensorManager: An instance of `CMMotionManager`.
-     There should be only one instance of this type in your application.
-     Since it seems to be impossible to create that instance inside a framework at the moment,
-     you have to provide it via this parameter.
-     - updateInterval: The accelerometer update interval in Hertz. Default value is 100 Hertz.
-     - savingInterval: The time between save operations during data capturing in seconds. Default value is 30 seconds.
-     - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
-     - eventHandler: A handler for events occuring during data capturing.
-     - Throws: If the networking stack for data synchronization was not successfully initialized.
+        - connection: A connection to a Cyface API server.
+        - sensorManager: An instance of `CMMotionManager`.
+        There should be only one instance of this type in your application.
+        Since it seems to be impossible to create that instance inside a framework at the moment,
+        you have to provide it via this parameter.
+        - updateInterval: The accelerometer update interval in Hertz. Default value is 100 Hertz.
+        - savingInterval: The time between save operations during data capturing in seconds. Default value is 30 seconds.
+        - dataManager: The CoreData stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
+        - eventHandler: A handler for events occuring during data capturing.
+     - Throws:
+        - `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
      */
-    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval: Double = 100, savingInterval: Double = 30, persistenceLayer persistence: PersistenceLayer, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) throws {
+    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval: Double = 100, savingInterval: Double = 30, dataManager: CoreDataManager, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) throws {
+        self.dataManager = dataManager
+        let persistence = PersistenceLayer(onManager: dataManager)
         let synchronizer = try Synchronizer(persistenceLayer: persistence, cleaner: AccelerationPointRemovalCleaner(), serverConnection: serverConnection, handler: eventHandler)
-        super.init(sensorManager: manager, updateInterval: updateInterval, savingInterval: savingInterval, persistenceLayer: persistence, synchronizer: synchronizer, eventHandler: eventHandler)
+        super.init(sensorManager: manager, updateInterval: updateInterval, savingInterval: savingInterval, dataManager: dataManager, synchronizer: synchronizer, eventHandler: eventHandler)
     }
 
     // MARK: - Methods
 
     /**
-     Starts the capturing process, notifying the provided handler of important events.
-     
-     This is a long running asynchronous operation.
-     The provided handler is notified of its completion by receiving the event `DataCapturingEvent.serviceStarted`.
+     Starts the capturing process, notifying the `eventHandler`, provided to the constructor of important events.
+
+     The `eventHandler`, that you did provide as a parameter to this objects constructor, is notified of the completion  of the start up process by receiving the event `DataCapturingEvent.serviceStarted`.
      If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.
 
      - Throws:
-     - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()`if you want to continue.
+        - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()` if you want to continue.
      */
     public func start() throws {
         return try start(inContext: .bike)
+    }
+
+    /**
+     Loads only those measurements that are not captured at the moment.
+
+     This should be used to display all finished measurements in the UI.
+     Measurements are loaded from the database via CoreData and provided as `MeasurementMO` instances.
+     - Attention: The returned array contains CoreData `NSManagedObject` instances (or a instances of a subclass). `NSManagedObject` is not thread safe and looses all attribute values as soon as transfered to a different thread. Handle the objects in the returned array with care and copy all required values before using them from a different thread (like for example a callback or delegate).
+     - Returns: An array of measurements stored in the database without the one currently captured, if capturing is active.
+     - Throws:
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
+     */
+    public func loadInactiveMeasurements() throws -> [MeasurementMO] {
+        let persistenceLayer = PersistenceLayer(onManager: dataManager)
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let ret = try persistenceLayer.loadMeasurements()
+
+        // Filter active measurement if any.
+        if let currentMeasurement = currentMeasurement {
+            return ret.filter { measurement in
+                return measurement.identifier != currentMeasurement.identifier
+            }
+        } else {
+            return ret
+        }
     }
 }
