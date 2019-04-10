@@ -1,7 +1,7 @@
 #  Cyface iOS - SDK
 [![CI: Bitrise](https://app.bitrise.io/app/45ec21fd3b5a664b/status.svg?token=aE1ZWjYUkjxhAtYMX8bcCg)](https://bitrise.io/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Swift 4.2](https://img.shields.io/badge/Swift-4.2-blue.svg)](https://swift.org)
+[![Swift 5.0](https://img.shields.io/badge/Swift-5.0-blue.svg)](https://swift.org)
 
 ## Introduction
 

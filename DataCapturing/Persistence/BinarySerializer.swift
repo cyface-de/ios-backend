@@ -125,7 +125,7 @@ class MeasurementSerializer: BinarySerializer {
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(0)))
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(0)))
 
-        return Data(bytes: dataArray)
+        return Data(dataArray)
     }
 }
 
@@ -166,7 +166,7 @@ class AccelerationSerializer: BinarySerializer {
             // 32 Bytes
         }
 
-        return Data(bytes: ret)
+        return Data(ret)
     }
 
     /**
@@ -247,7 +247,7 @@ class GeoLocationSerializer: BinarySerializer {
             // = 36 Bytes
         }
 
-        return Data(bytes: ret)
+        return Data(ret)
     }
 }
 
@@ -394,9 +394,9 @@ enum ByteOrder {
 
         switch self {
         case .bigEndian:
-            return Int64(bigEndian: data.withUnsafeBytes {$0.pointee})
+            return Int64(bigEndian: data.withUnsafeBytes { $0.load(as: Int64.self) })
         case .littleEndian:
-            return Int64(bigEndian: data.withUnsafeBytes {$0.pointee})
+            return Int64(bigEndian: data.withUnsafeBytes { $0.load(as: Int64.self) })
         }
     }
 
@@ -415,9 +415,9 @@ enum ByteOrder {
 
         switch self {
         case .bigEndian:
-            return Double(bitPattern: UInt64(bigEndian: data.withUnsafeBytes {$0.pointee}))
+            return Double(bitPattern: UInt64(bigEndian: data.withUnsafeBytes { $0.load(as: UInt64.self) }))
         case .littleEndian:
-            return Double(bitPattern: UInt64(littleEndian: data.withUnsafeBytes {$0.pointee}))
+            return Double(bitPattern: UInt64(littleEndian: data.withUnsafeBytes { $0.load(as: UInt64.self) }))
         }
     }
 }
