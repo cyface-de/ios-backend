@@ -31,11 +31,14 @@ import CoreData
  */
 class DataCapturingTests: XCTestCase {
 
+    /// The object of the class under test. This `DataCapturingService` is a `TestDataCapturingService` simulating all sensor updates.
     var oocut: TestDataCapturingService!
+    /// The *CoreData* stack to access and check data create by lifecycle methods.
     var coreDataStack: CoreDataManager!
+    /// The mocked sensor manager used to simulate accelerometer updates.
     var sensorManager: TestMotionManager!
+    /// A `PersistenceLayer` used to load data created by the lifecycle methods and assert it.
     var persistenceLayer: PersistenceLayer!
-    //var syncQueue = DispatchQueue.init(label: "de.cyface.capturing.test")
 
     /// Initializes every test by creating a `TestDataCapturingService`.
     override func setUp() {

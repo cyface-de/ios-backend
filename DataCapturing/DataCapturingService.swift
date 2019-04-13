@@ -28,7 +28,7 @@ import os.log
  To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided `Synchronizer`.
  
  - Author: Klemens Muthmann
- - Version: 8.0.0
+ - Version: 8.1.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {

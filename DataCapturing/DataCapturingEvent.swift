@@ -35,7 +35,7 @@ import Foundation
  ```
  
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.1.0
  - Since: 1.0.0
  */
 public enum DataCapturingEvent {

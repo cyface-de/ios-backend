@@ -145,10 +145,11 @@ public struct AccelerationsFile: FileSupport {
 
     /**
      Writes the provided accelerations to the provided measurement.
+     
 
      - Parameters:
-     - serializable: The array of `Acceleration` instances to write.
-     - to: The measurement to write the accelerations to.
+        - serializable: The array of `Acceleration` instances to write.
+        - to: The measurement to write the accelerations to.
      - Returns: The file system URL of the file that was written to.
      - Throws:
         - Some internal file system error on failure of creating the file at the required path.
