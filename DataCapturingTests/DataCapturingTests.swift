@@ -23,126 +23,244 @@ import CoreData
 @testable import DataCapturing
 
 /**
- This test is intended to test capturing some data in isolation. There are still some problems with this, due to restrictions in Apple's test support.
+ This test is intended to test capturing some data in isolation.
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 2.0.0
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {
 
-    /// A connection to a Cyface Server backend.
-    var oocut: ServerConnection!
-    /// A manager for the CoreData stack providing access to write and read some example data.
-    var dataManager: CoreDataManager!
-    /// Authenticator to use to test connections to the Movebis server.
-    var authenticator: StaticAuthenticator!
+    /// The object of the class under test. This `DataCapturingService` is a `TestDataCapturingService` simulating all sensor updates.
+    var oocut: TestDataCapturingService!
+    /// The *CoreData* stack to access and check data create by lifecycle methods.
+    var coreDataStack: CoreDataManager!
+    /// The mocked sensor manager used to simulate accelerometer updates.
+    var sensorManager: TestMotionManager!
+    /// A `PersistenceLayer` used to load data created by the lifecycle methods and assert it.
+    var persistenceLayer: PersistenceLayer!
 
-    /// Sets up theis test by creating a proper `ServerConnection`.
+    /// Initializes every test by creating a `TestDataCapturingService`.
     override func setUp() {
         super.setUp()
 
         guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
             fatalError()
         }
-        let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
-        manager.setup(bundle: bundle)
 
-        authenticator = StaticAuthenticator()
-        oocut = ServerConnection(apiURL: URL(string: "https://localhost:8080")!, authenticator: authenticator!, onManager: manager)
+        coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+        coreDataStack.setup(bundle: bundle)
+        sensorManager = TestMotionManager()
+        oocut = TestDataCapturingService(sensorManager: sensorManager, dataManager: coreDataStack, synchronizer: nil) { _, _ in }
+        oocut.coreLocationManager = TestLocationManager()
+        persistenceLayer = PersistenceLayer(onManager: coreDataStack)
     }
 
     /// Tears down the test environment.
     override func tearDown() {
+        // Wait for write operations to have finished! This is necessary to delete the data again.
         oocut = nil
-        dataManager = nil
-        authenticator = nil
+        sensorManager = nil
+        do {
+            // Handle this in its own thread to avoid race conditions.
+            //try syncQueue.sync {
+                try persistenceLayer.delete()
+            //}
+        } catch {
+            fatalError("\(error)")
+        }
+        persistenceLayer = nil
+        coreDataStack = nil
         super.tearDown()
     }
 
     /**
-     This test tests the actual upload of data to a Movebis server. Since we can not assume there is one such server in each and every test environment (especially under CI conditions), the test is skipped by default. Enable it to selectively test data upload in isolation. The test should also not run on an arbitrary server, since most servers will reject the transmitted data on the second run, because of data duplication.
-     */
-    func skipped_testSynchronizationWithMovebisServer() {
-        let promise = expectation(description: "Successful data transmission")
-        do {
-            let persistenceLayer = PersistenceLayer(onManager: dataManager)
-            let measurement = try persistenceLayer.createMeasurement(at: 2, withContext: .bike)
-
-            self.authenticator!.jwtToken = "replace me"
-
-            let entity = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
-            oocut.sync(measurement: entity, onSuccess: {submitted in
-                XCTAssertEqual(submitted.identifier, entity.identifier)
-                promise.fulfill()
-            }, onFailure: {_, error in
-                XCTFail("Error \(error)")
-                promise.fulfill()
-            })
-        } catch let error {
-            XCTFail("Synchronization produced an error! \(error)")
-        }
-
-        wait(for: [promise], timeout: 10)
-    }
-
-    // TODO: This test does not work since we can not test with background location updates in the moment.
-    /*func testCaptureData() {
-     guard let oocut = oocut else {
-     XCTFail("Unable to get server connection object.")
-     return
-     }
-     let persistenceLayer = PersistenceLayer()
-     let sensorManager = CMMotionManager()
-     let dataCapturingService = MovebisDataCapturingService(connection: oocut, sensorManager: sensorManager, updateInterval: 0.0, persistenceLayer: persistenceLayer)
-
-     dataCapturingService.start()
-     XCTAssertTrue(dataCapturingService.isRunning)
-     let prePauseCountOfMeasurements = dataCapturingService.countMeasurements()
-
-     dataCapturingService.pause()
-     XCTAssertFalse(dataCapturingService.isRunning)
-     
-     dataCapturingService.resume()
-     XCTAssertTrue(dataCapturingService.isRunning)
-     let postPauseCountOfMeasurements = dataCapturingService.countMeasurements()
-     XCTAssertEqual(prePauseCountOfMeasurements, postPauseCountOfMeasurements)
-
-     dataCapturingService.stop()
-     XCTAssertFalse(dataCapturingService.isRunning)
-     }*/
-
-    // TODO: (STAD-104) This does currently not work as a test case is not allowed to run background location updates.
-    /**
-     Tests whether loading only inactive measurements on the `MovebisDataCapturingService` works as expected.
+     Checks correct workings of a simple start/stop lifecycle.
 
      - Throws:
-        - `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
-        - `DataCapturingError.isPaused` If the service was paused and thus it makes no sense to start it.
-        - `DataCapturingError.isPaused` If the service was paused and thus stopping it makes no sense.
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
-        - Some unspecified errors from within CoreData.
+        - `DataCapturingError.isPaused` if the service was paused and thus starting or stopping it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
-    func skip_testLoadOnlyInactiveMeasurement_HappyPath() throws {
-        // Arrange
-        let sensorManager = CMMotionManager()
-        let dcs = try MovebisDataCapturingService(connection: oocut, sensorManager: sensorManager, dataManager: dataManager) { _, _ in
+    func testStartStop_HappyPath() throws {
+        try oocut.start(inContext: .bike)
+        XCTAssertTrue(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        try oocut.stop()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+    }
 
+    /**
+     Checks the correct execution of a typical lifecylce with a pause in between.
+
+     - Throws:
+        - `DataCapturingError.isPaused` if the service was paused and thus starting, pausing it again or stopping it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
+        - `DataCapturingError.notRunning` if the service was not running and thus pausing it makes no sense.
+        - `DataCapturingError.notPaused`: If the service was not paused and thus resuming it makes no sense.
+        - `DataCapturingError.isRunning`: If the service was running and thus resuming it makes no sense.
+        - `DataCapturingError.noCurrentMeasurement`: If no current measurement is available while resuming data capturing.
+     */
+    func testStartPauseResumeStop_HappyPath() throws {
+        persistenceLayer.context = persistenceLayer.makeContext()
+
+        try oocut.start(inContext: .bike)
+        XCTAssertTrue(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        let prePauseCountOfMeasurements = try persistenceLayer.countMeasurements()
+
+        try oocut.pause()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertTrue(oocut.isPaused)
+        try oocut.resume()
+        let postPauseCountOfMeasurements = try persistenceLayer.countMeasurements()
+        XCTAssertEqual(prePauseCountOfMeasurements, postPauseCountOfMeasurements)
+        XCTAssertTrue(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        try oocut.stop()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+    }
+
+    /**
+     Checks that calling `start` twice causes no errors and is gracefully ignored.
+
+     - Throws:
+        - `DataCapturingError.isPaused` if the service was paused and thus starting or stopping it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
+     */
+    func testDoubleStart() throws {
+        try oocut.start(inContext: .bike)
+        XCTAssertTrue(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        try oocut.start(inContext: .bike)
+        XCTAssertTrue(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        try oocut.stop()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+    }
+
+    /**
+     Checks that calling resume on a stopped service twice causes the appropriate `DataCapturingError` and leaves the `DataCapturingService` in a state where stopping is still possible.
+
+     - Throws:
+        - `DataCapturingError.isPaused` if the service was paused and thus starting, pausing it again or stopping it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
+        - `DataCapturingError.notRunning` if the service was not running and thus pausing it makes no sense.
+        - `DataCapturingError.notPaused`: If the service was not paused and thus resuming it makes no sense.
+        - `DataCapturingError.isRunning`: If the service was running and thus resuming it makes no sense.
+        - `DataCapturingError.noCurrentMeasurement`: If no current measurement is available while resuming data capturing.
+     */
+    func testDoubleResume() throws {
+        try oocut.start(inContext: .bike)
+        XCTAssertTrue(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        try oocut.pause()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertTrue(oocut.isPaused)
+        try oocut.resume()
+        XCTAssertTrue(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        XCTAssertThrowsError(try oocut.resume()) { error in
+            XCTAssertTrue(error is DataCapturingError)
+            XCTAssertTrue(oocut.isRunning)
+            XCTAssertFalse(oocut.isPaused)
         }
+        try oocut.stop()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+    }
 
-        // Act
-        // 1st Measurement
-        try dcs.start()
-        try dcs.stop()
+    /**
+     Checks that pausing the service multiple times causes the appropriate `DataCapturingError` and leave the service in a state, where it can still be resumed.
 
-        // 2nd Measurement
-        try dcs.start()
-        try dcs.stop()
+     - Throws:
+        - `DataCapturingError.isPaused` if the service was paused and thus starting, pausing it again or stopping it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
+        - `DataCapturingError.notRunning` if the service was not running and thus pausing it makes no sense.
+        - `DataCapturingError.notPaused`: If the service was not paused and thus resuming it makes no sense.
+        - `DataCapturingError.isRunning`: If the service was running and thus resuming it makes no sense.
+        - `DataCapturingError.noCurrentMeasurement`: If no current measurement is available while resuming data capturing.
+     */
+    func testDoublePause() throws {
+        try oocut.start(inContext: .bike)
+        XCTAssertTrue(oocut.isRunning)
+        try oocut.pause()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertTrue(oocut.isPaused)
+        XCTAssertThrowsError(try oocut.pause(), "Calling pause twice should throw an error!") { error in
+            XCTAssertTrue(error is DataCapturingError)
+            XCTAssertFalse(oocut.isRunning)
+            XCTAssertTrue(oocut.isPaused)
+        }
+        try oocut.resume()
+        XCTAssertTrue(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        try oocut.stop()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+    }
 
-        // 3rd Measurement
-        try dcs.start()
+    /**
+     Checks that stopping a running service multiple times causes no errors and leaves the service in the expected stopped state.
 
-        // Assert
-        XCTAssertEqual(try dcs.loadInactiveMeasurements().count, 2)
+     - Throws:
+        - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
+        - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
+     */
+    func testDoubleStop() throws {
+        try oocut.start(inContext: .bike)
+        XCTAssertTrue(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        try oocut.stop()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        try oocut.stop()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+    }
+
+    /// Checks that pausing a not started service results in an exception and does not change the `DataCapturingService` state.
+    func testPauseFromIdle() {
+        XCTAssertThrowsError(try oocut.pause(), "Pausing a non running service, should throw an error!") { error in
+            XCTAssertTrue(error is DataCapturingError, "Error should be a DataCapturingError!")
+            XCTAssertFalse(oocut.isRunning)
+            XCTAssertFalse(oocut.isPaused)
+        }
+    }
+
+    /// Checks that resuming a not started service results in an exception and does not change the `DataCapturingService` state.
+    func testResumeFromIdle() {
+        XCTAssertThrowsError(try oocut.resume(), "Resuming a non paused service, should throw an error!") { error in
+            XCTAssertTrue(error is DataCapturingError, "Error should be a DataCapturingError!")
+            XCTAssertFalse(oocut.isRunning)
+            XCTAssertFalse(oocut.isPaused)
+        }
+    }
+
+    /**
+     Checks that stopping a stopped service causes no errors and leave the `DataCapturingService` in a stopped state
+
+     - Throws:
+        - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
+    */
+    func testStopFromIdle() throws {
+        try oocut.stop()
+        XCTAssertFalse(oocut.isPaused)
+        XCTAssertFalse(oocut.isRunning)
+    }
+
+    /// Tests the performance of saving a batch of measurement data during data capturing. This time must never exceed the time it takes to capture that data.
+    func testLifecyclePerformance() {
+        measure {
+            do {
+                let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
+                oocut.currentMeasurement = MeasurementEntity(identifier: measurement.identifier, context: .bike)
+                oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000)]
+                oocut.accelerationsCache = []
+                for i in 0...99 {
+                    oocut.accelerationsCache.append(Acceleration(timestamp: 10_000 + Int64(i), x: 1.0, y: 1.0, z: 1.0))
+                }
+                oocut.saveCapturedData()
+            } catch {
+                XCTFail("\(error)")
+            }
+        }
     }
 }
