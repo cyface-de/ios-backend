@@ -19,12 +19,13 @@
 
 import Foundation
 import CoreData
+@testable import DataCapturing
 
 /**
  This class contains utility code used to create data stores in specific versions of the Cyface model.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 4.0.0
  */
 class DataSetCreator {
@@ -156,5 +157,42 @@ class DataSetCreator {
         measurement02.setValue(NSOrderedSet(array: geoLocations02), forKey: "geoLocations")
 
         try context.save()
+    }
+
+    /**
+     Create a measurement on the test persistence layer for serialization.
+
+     - Parameters:
+        - countOfGeoLocations: The amount of geo locations to create within the test measurement
+        - countOfAccelerations: The amount of accelerations to create within the test measurement
+     - Returns: The created test measurement
+     - Throws:
+        - Some unspecified errors from within CoreData.
+        - Some internal file system error on failure of accessing the acceleration file at the required path.
+     */
+    static func fakeMeasurement(countOfGeoLocations: Int, countOfAccelerations: Int, persistenceLayer: PersistenceLayer) throws -> MeasurementMO {
+        let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
+        measurement.accelerationsCount = Int32(countOfAccelerations)
+        measurement.synchronized = false
+        measurement.trackLength = Double.random(in: 0..<10_000.0)
+
+        persistenceLayer.appendNewTrack(to: measurement)
+        var locations = [GeoLocation]()
+
+        for _ in 0..<countOfGeoLocations {
+            let location = GeoLocation(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: DataCapturingService.currentTimeInMillisSince1970())
+
+            locations.append(location)
+        }
+        try persistenceLayer.save(locations: locations, in: measurement)
+
+        var accelerations = [Acceleration]()
+        for _ in 0..<countOfAccelerations {
+            let acceleration = Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(), x: Double.random(in: -10.0...10.0), y: Double.random(in: -10.0...10.0), z: Double.random(in: -10.0...10.0))
+            accelerations.append(acceleration)
+        }
+        try persistenceLayer.save(accelerations: accelerations, in: measurement)
+
+        return measurement
     }
 }
