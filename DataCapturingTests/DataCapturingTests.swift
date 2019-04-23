@@ -246,8 +246,26 @@ class DataCapturingTests: XCTestCase {
         XCTAssertFalse(oocut.isRunning)
     }
 
-    /// Tests the performance of saving a batch of measurement data during data capturing. This time must never exceed the time it takes to capture that data.
-    func testLifecyclePerformance() {
+    /**
+    Tests the performance of saving a batch of measurement data during data capturing.
+    This time must never exceed the time it takes to capture that data.
+
+     - Throws:
+        - PersistenceError.measurementNotCreatable(timestamp) If CoreData was unable to create the new entity.
+        - PersistenceError.noContext If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - Some unspecified errors from within CoreData.
+     */
+    func testLifecyclePerformance() throws {
+        // Run once so code is loaded faster for the measured runs.
+        let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
+        oocut.currentMeasurement = MeasurementEntity(identifier: measurement.identifier, context: .bike)
+        oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000)]
+        oocut.accelerationsCache = []
+        for i in 0...99 {
+            oocut.accelerationsCache.append(Acceleration(timestamp: 10_000 + Int64(i), x: 1.0, y: 1.0, z: 1.0))
+        }
+        oocut.saveCapturedData()
+
         measure {
             do {
                 let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
