@@ -25,7 +25,7 @@ import CoreData
  Tests whether serialization and deserialization into and from the Cyface Binary Format works as expected
 
  - Author: Klemens Muthmann
- - Version: 1.0.4
+ - Version: 1.0.6
  - Since: 1.0.0
  */
 class SerializationTest: XCTestCase {
@@ -53,7 +53,7 @@ class SerializationTest: XCTestCase {
             persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
             let measurement = try persistenceLayer.createMeasurement(at: 1, withContext: .bike)
-            try persistenceLayer.appendNewTrack(to: measurement)
+            persistenceLayer.appendNewTrack(to: measurement)
 
             fixture = MeasurementEntity(identifier: measurement.identifier, context: .bike)
             try persistenceLayer.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100)], in: measurement)

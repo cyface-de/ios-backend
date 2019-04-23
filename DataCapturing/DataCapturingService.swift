@@ -28,7 +28,7 @@ import os.log
  To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided `Synchronizer`.
  
  - Author: Klemens Muthmann
- - Version: 8.1.0
+ - Version: 8.1.1
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -241,6 +241,9 @@ public class DataCapturingService: NSObject {
      Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
 
      - Parameter savingEvery: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
+     - Throws:
+        - PersistenceError If there is no such measurement.
+        - Some unspecified errors from within CoreData.
      */
     func startCapturing(savingEvery time: TimeInterval) throws {
         // Preconditions
@@ -255,7 +258,7 @@ public class DataCapturingService: NSObject {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
-        try persistenceLayer.appendNewTrack(to: measurement)
+        persistenceLayer.appendNewTrack(to: measurement)
         self.coreLocationManager.locationDelegate = self
 
         let queue = OperationQueue()

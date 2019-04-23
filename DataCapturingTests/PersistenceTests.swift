@@ -25,7 +25,7 @@ import CoreData
  Tests that using the `PersistenceLayer` works as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 1.1.1
  - Since: 1.0.0
  */
 class PersistenceTests: XCTestCase {
@@ -47,7 +47,7 @@ class PersistenceTests: XCTestCase {
             oocut = PersistenceLayer(onManager: manager)
             oocut.context = oocut.makeContext()
             let measurement = try oocut.createMeasurement(at: 10_000, withContext: .bike)
-            try oocut.appendNewTrack(to: measurement)
+            oocut.appendNewTrack(to: measurement)
 
             fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
 
@@ -226,7 +226,7 @@ class PersistenceTests: XCTestCase {
         }
         XCTAssertEqual(locations.count, 2, "There should be two locations in the fixture measurement!")
 
-        try oocut.appendNewTrack(to: measurement)
+        oocut.appendNewTrack(to: measurement)
         try oocut.save(locations: [GeoLocation(latitude: 2.0, longitude: 2.0, accuracy: 1.0, speed: 10.0, timestamp: 5)], in: measurement)
 
         guard let tracksAfterRefresh = measurement.tracks?.array as? [Track] else {

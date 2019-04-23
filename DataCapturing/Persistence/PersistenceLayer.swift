@@ -33,7 +33,7 @@ import os.log
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 4.0.0
+ - Version: 5.0.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
@@ -106,12 +106,10 @@ public class PersistenceLayer {
         - withContext: The measurement context the new measurement is created in.
      - Returns: The newly created model object for the measurement.
      - Throws:
-        - `PersistenceError.measurementNotCreatable(timestamp)` If CoreData was unable to create the new entity.
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
         - Some unspecified errors from within CoreData.
      */
     func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext) throws -> MeasurementMO {
-        let context = try getContext()
+        let context = getContext()
         // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
         var identifier = self.nextIdentifier
         while try load(measurementIdentifiedBy: identifier, from: context) != nil {
@@ -130,7 +128,7 @@ public class PersistenceLayer {
             context.refresh(measurement, mergeChanges: true)
             return measurement
         } else {
-            throw PersistenceError.measurementNotCreatable(timestamp)
+            fatalError("Unable to create new measurement. Something is seriously wrong with your CoreData configuration.")
         }
     }
 
@@ -138,15 +136,11 @@ public class PersistenceLayer {
      This adds a new track to the end of the list of tracks of the provided measurement. New locations are always written to the last track. You need to call this method before adding any locations to a measurement.
 
      - Parameter to: The measurement to add the new track to.
-     - Throws:
-        - `PersistenceError.trackNotCreatable` If the `Track` entity could not be created by CoreData.
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
-        - `PersistenceError.inconsistentData` If CoreData is incapable of migrating. If this happens something is seriously wrong with CoreData.
      */
-    func appendNewTrack(to measurement: MeasurementMO) throws {
-        let context = try getContext()
+    func appendNewTrack(to measurement: MeasurementMO) {
+        let context = getContext()
         //container.performBackgroundTask { context in
-        let measurementOnCurrentContext = try migrate(measurement: measurement, to: context)
+        let measurementOnCurrentContext = migrate(measurement: measurement, to: context)
         if let trackDescription = NSEntityDescription.entity(forEntityName: "Track", in: context) {
             let track = Track.init(entity: trackDescription, insertInto: context)
             measurementOnCurrentContext.addToTracks(track)
@@ -155,7 +149,7 @@ public class PersistenceLayer {
             context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
             context.refresh(measurement, mergeChanges: true)
         } else {
-            throw PersistenceError.trackNotCreatable
+            fatalError("Unable to create Track. Something is seriously wrong with your CoreData configuration.")
         }
         //}
     }
@@ -166,16 +160,15 @@ public class PersistenceLayer {
      - Parameters:
      - measurement: The measurement to delete from the data storage.
      - Throws:
-        - `PersistenceError.measurementNotLoadable` If the measurement to delete was not available.
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - `PersistenceError` If the measurement to delete was not available.
         - Some unspecified errors from within CoreData.
         - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
      */
     public func delete(measurement: MeasurementEntity) throws {
-        let context = try getContext()
+        let context = getContext()
         let measurementIdentifier = measurement.identifier
         guard let measurement = try load(measurementIdentifiedBy: measurement.identifier, from: context) else {
-            throw PersistenceError.measurementNotLoadable(measurementIdentifier)
+            throw PersistenceError(type: .measurementNotLoadable(measurementIdentifier), verboseDescription: "Unable to load measurement \(measurementIdentifier) from context \(context.name ?? "no name")!", inMethodName: #function, inFileName: #file, atLineNumber: #line)
         }
 
         let accelerationFile = AccelerationsFile()
@@ -188,12 +181,11 @@ public class PersistenceLayer {
      Deletes everything from the data storage.
      
      - Throws:
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
         - Some unspecified errors from within CoreData.
         - Some internal file system error on failure of creating the file at the required path.
      */
     func delete() throws {
-        let context = try getContext()
+        let context = getContext()
         let measurements = try loadMeasurements()
         let accelerationsFile = AccelerationsFile()
 
@@ -210,15 +202,15 @@ public class PersistenceLayer {
      
      - Parameter measurement: The measurement to strip of accelerations
      - Throws:
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - `PersistenceError` If the measurement to clean was not available.
         - Some unspecified errors from within CoreData.
         - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
      */
     func clean(measurement: MeasurementEntity) throws {
-        let context = try getContext()
+        let context = getContext()
         let measurementIdentifier = measurement.identifier
         guard let measurement = try load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
-            throw PersistenceError.dataNotLoadable(measurement: measurementIdentifier)
+            throw PersistenceError(type: .measurementNotLoadable(measurementIdentifier), verboseDescription: "Unable to load measurement \(measurementIdentifier) from context \(context.name ?? "no name")! Measurement does not exist!", inMethodName: #function, inFileName: #file, atLineNumber: #line)
         }
 
         measurement.synchronized = true
@@ -236,22 +228,19 @@ public class PersistenceLayer {
      - locations: An array of `GeoLocation` instances, ordered by timestamp to store in the database.
      - in: The measurement to store the `location` and `accelerations` to.
      - Throws:
-        - `PersistenceError.geoLocationNotCreatable` If CoreData is incapable of creating a geo location entity.
-        - `PersistenceError.dataNotLoadable` If no valid `Track` was available.
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
-        - `PersistenceError.inconsistentData` If CoreData is incapable of migrating. If this happens something is seriously wrong with CoreData.
+        - `PersistenceError` If no valid `Track` was available.
         - Some unspecified errors from within CoreData.
      */
     func save(locations: [GeoLocation], in measurement: MeasurementMO) throws {
-        let context = try getContext()
+        let context = getContext()
         guard let locationDescription = NSEntityDescription.entity(forEntityName: "GeoLocation", in: context) else {
-            throw PersistenceError.geoLocationNotCreatable
+            fatalError("Unable to create geo location description on context \(context.name ?? "no name")!")
         }
 
-        let measurement = try migrate(measurement: measurement, to: context)
+        let measurement = migrate(measurement: measurement, to: context)
 
         guard let track = measurement.tracks?.lastObject as? Track else {
-            throw PersistenceError.dataNotLoadable(measurement: measurement.identifier)
+            throw PersistenceError(type: .dataNotLoadable(measurement: measurement.identifier), verboseDescription: "Unable to load any track for measurement \(measurement.identifier)! Did you create a track before saving locations?", inMethodName: #function, inFileName: #file, atLineNumber: #line)
         }
 
         let geoLocationFetchRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
@@ -294,14 +283,12 @@ public class PersistenceLayer {
      - accelerations: An array of `Acceleration` instances to store.
      - in: The measurement to store the `accelerations` to.
      - Throws:
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
-        - `PersistenceError.inconsistentData` If CoreData is incapable of migrating. If this happens something is seriously wrong with CoreData.
         - Some internal file system error on failure of accessing the acceleration file at the required path.
      */
     func save(accelerations: [Acceleration], in measurement: MeasurementMO) throws {
-        let context = try getContext()
+        let context = getContext()
 
-        let measurement = try migrate(measurement: measurement, to: context)
+        let measurement = migrate(measurement: measurement, to: context)
 
         let accelerationsFile = AccelerationsFile()
         _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
@@ -342,17 +329,16 @@ public class PersistenceLayer {
      - Parameter measurementIdentifiedBy: The device wide unique identifier of the measurement to load.
      - Returns: The requested measurement as a model object.
      - Throws:
-        - `PersistenceError.dataNotLoadable` If there is no such measurement.
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - `PersistenceError` If there is no such measurement.
         - Some unspecified errors from within CoreData.
      */
     public func load(measurementIdentifiedBy identifier: Int64) throws -> MeasurementMO {
-        let context = try getContext()
+        let context = getContext()
         context.automaticallyMergesChangesFromParent = true
         if let measurement = try self.load(measurementIdentifiedBy: identifier, from: context) {
             return measurement
         } else {
-            throw PersistenceError.dataNotLoadable(measurement: identifier)
+            throw PersistenceError(type: .measurementNotLoadable(identifier), verboseDescription: "Unable to load measurement \(identifier) from context \(context.name ?? "no name")! No such measurement!", inMethodName: #function, inFileName: #file, atLineNumber: #line)
         }
     }
 
@@ -361,11 +347,10 @@ public class PersistenceLayer {
 
      - Returns: An array of all measurements currently stored on this device.
      - Throws:
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
         - Some unspecified errors from within CoreData.
      */
     public func loadMeasurements() throws -> [MeasurementMO] {
-        let context = try getContext()
+        let context = getContext()
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         let fetchResult = try context.fetch(request)
         return fetchResult
@@ -376,11 +361,10 @@ public class PersistenceLayer {
 
      - Returns: An array containing all the not synchronized measurements.
      - Throws:
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
         - Some unspecified errors from within CoreData.
      */
     public func loadSynchronizableMeasurements() throws -> [MeasurementMO] {
-        let context = try getContext()
+        let context = getContext()
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         // Fetch only not synchronized measurements
         request.predicate = NSPredicate(format: "synchronized == %@", NSNumber(value: false))
@@ -393,11 +377,10 @@ public class PersistenceLayer {
 
      - Returns: The count of measurements currently stored on this device.
      - Throws:
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
         - Some unspecified errors from within CoreData.
      */
     public func countMeasurements() throws -> Int {
-        let context = try getContext()
+        let context = getContext()
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         let count = try context.count(for: request)
         return count
@@ -413,12 +396,12 @@ public class PersistenceLayer {
      - Throws:
         - `PersistenceError.inconsistentData` If CoreData is incapable of migrating. If this happens something is seriously wrong with CoreData.
      */
-    private func migrate(measurement: MeasurementMO, to context: NSManagedObjectContext) throws -> MeasurementMO {
-        guard let measurement = context.object(with: measurement.objectID) as? MeasurementMO else {
-            throw PersistenceError.inconsistentData
+    private func migrate(measurement: MeasurementMO, to context: NSManagedObjectContext) -> MeasurementMO {
+        guard let migratedMeasurement = context.object(with: measurement.objectID) as? MeasurementMO else {
+            fatalError("CoreData was unable to migrate measurement \(measurement) to context \(context.name ?? "no name")! Something seems to be seriously wrong with your CoreData configuration.")
         }
 
-        return measurement
+        return migratedMeasurement
     }
 
     /**
@@ -426,12 +409,10 @@ public class PersistenceLayer {
      If a background context is used all model objects from previous calls become separated from CoreData and will not work anymore.
 
      - Returns: The current value stored in the `context` attribute or a temporary background context.
-     - Throws:
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
      */
-    private func getContext() throws -> NSManagedObjectContext {
+    private func getContext() -> NSManagedObjectContext {
         guard let context = self.context == nil ? manager.backgroundContext : self.context else {
-            throw PersistenceError.noContext
+            fatalError("There has been no CoreData context and it was not possible to create a background context. Something seems to be seriously wrong with your CoreData configuration.")
         }
 
         return context
@@ -527,42 +508,61 @@ extension NSManagedObjectContext {
 }
 
 /**
- An enumeration of all the errors thrown by the `PersistenceLayer`.
-
- ```
- case modelNotLoadable
- case modelNotInitializable
- case measurementNotCreatable
- case measurementNotLoadable
- case measurementsNotLoadable
- case dataNotLoadable
- case trackNotCreatable
- case geoLocationNotCreatable
- ```
+ An structure for all the errors thrown by the `PersistenceLayer`.
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 2.0.0
  - Since: 2.3.0
  */
-enum PersistenceError: Error {
-    /// If the CoreData model used by the Cyface SDK was not loadable
-    case modelNotLoadable(URL)
-    /// If the CoreData model used by the Cyface SDK was not initialized successfully.
-    case modelNotInitializable(URL)
-    /// If a measurement was not created successfully.
-    case measurementNotCreatable(Int64)
-    /// If a measurement was not loaded successfully.
-    case measurementNotLoadable(Int64)
-    /// If measurements could not be loaded in bulk.
-    case measurementsNotLoadable
-    /// If some data belonging to a measurement could not be loaded.
-    case dataNotLoadable(measurement: Int64)
-    /// For some reason creating a track has failed.
-    case trackNotCreatable
-    /// For some reason it is impossible to create a new geo location object.
-    case geoLocationNotCreatable
-    /// Some data is not in the format it is expected to be.
-    case inconsistentData
-    /// The system is unable to get a proper `NSManagedObjectContext` instance.
-    case noContext
+struct PersistenceError: Error {
+    /**
+     Error categories thrown by the `PersistenceLayer`.
+
+     ```
+     case measurementNotLoadable
+     case measurementsNotLoadable
+     case dataNotLoadable
+     ```
+
+     - Author: Klemens Muthmann
+     - Version: 1.0.0
+     - Since: 4.0.0
+     */
+    enum Category {
+        /// If a measurement was not loaded successfully.
+        case measurementNotLoadable(Int64)
+        /// If measurements could not be loaded in bulk.
+        case measurementsNotLoadable
+        /// If some data belonging to a measurement could not be loaded.
+        case dataNotLoadable(measurement: Int64)
+    }
+
+    /// The `Category` of this error.
+    let type: Category
+    /// A human readable explanation for the error.
+    let verboseDescription: String
+    /// The name of the method this error has occured within.
+    let inMethodName: String
+    /// The name of the file this error has occured within.
+    let inFileName: String
+    /// The number of the line of code this error has occured within.
+    let atLineNumber: Int
+
+    /**
+     Handles a `PersistenceError` appropriately, by showing its details.
+
+     - Parameter error: The error to handle.
+     - Returns: The error description shown by this method call.
+     */
+    static func handle(error: PersistenceError) -> String {
+        let readableError = """
+                            \nERROR - operation: [\(error.type)];
+                            reason: [\(error.verboseDescription)];
+                            in method: [\(error.inMethodName)];
+                            in file: [\(error.inFileName)];
+                            at line: [\(error.atLineNumber)]\n
+                            """
+        print(readableError)
+        return readableError
+    }
 }
