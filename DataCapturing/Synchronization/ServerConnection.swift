@@ -188,17 +188,26 @@ public class ServerConnection {
         }
 
         let length = String(measurement.trackLength).data(using: String.Encoding.utf8)!
-        let locationCount = String(try PersistenceLayer.collectGeoLocations(from: measurement).count).data(using: String.Encoding.utf8)!
+        let locationCount = try PersistenceLayer.collectGeoLocations(from: measurement).count
+        let locationCountData = String(locationCount).data(using: String.Encoding.utf8)!
 
-        if let startLocationRaw = (measurement.tracks?.firstObject as? Track)?.locations?.firstObject as? GeoLocationMO {
-            let startLocation = "lat: \(startLocationRaw.lat), lon: \(startLocationRaw.lon), time: \(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-            request.append(startLocation, withName: "startLocation")
-        }
+            if let startLocationRaw = (measurement.tracks?.firstObject as? Track)?.locations?.firstObject as? GeoLocationMO {
+                let startLocationLat = "\(startLocationRaw.lat)".data(using: String.Encoding.utf8)!
+                let startLocationLon = "\(startLocationRaw.lon)".data(using: String.Encoding.utf8)!
+                let startLocationTs = "\(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+                request.append(startLocationLat, withName: "startLocationLat")
+                request.append(startLocationLon, withName: "startLocationLon")
+                request.append(startLocationTs, withName: "startLocationTs")
+            }
 
-        if let endLocationRaw = (measurement.tracks?.lastObject as? Track)?.locations?.lastObject as? GeoLocationMO {
-            let endLocation = "lat: \(endLocationRaw.lat), lon: \(endLocationRaw.lon), time: \(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-            request.append(endLocation, withName: "endLocation")
-        }
+            if let endLocationRaw = (measurement.tracks?.lastObject as? Track)?.locations?.lastObject as? GeoLocationMO {
+                let endLocationLat = "\(endLocationRaw.lat)".data(using: String.Encoding.utf8)!
+                let endLocationLon = "\(endLocationRaw.lon)".data(using: String.Encoding.utf8)!
+                let endLocationTs = "\(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+                request.append(endLocationLat, withName: "endLocationLat")
+                request.append(endLocationLon, withName: "endLocationLon")
+                request.append(endLocationTs, withName: "endLocationTs")
+            }
 
         request.append(deviceIdData, withName: "deviceId")
         request.append(measurementIdData, withName: "measurementId")
@@ -206,7 +215,7 @@ public class ServerConnection {
         request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
         request.append(appVersion, withName: "appVersion")
         request.append(length, withName: "length")
-        request.append(locationCount, withName: "locationCount")
+        request.append(locationCountData, withName: "locationCount")
     }
 
     /**
