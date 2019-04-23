@@ -223,12 +223,12 @@ public class ServerConnection {
      Starts the actual data transmission if encoding was successful.
 
      - Parameters:
-     - for: The measurement that was encoded into a transmission request
-     - with: The encoded measurement.
-     - onSuccess: Called if data transmission was successful. Gets the transmitted measurement as a parameter.
-     - onFailure: Called if data transmission failed for some reason. Gets the transmitted measurement and information about the error.
+        - for: The measurement that was encoded into a transmission request
+        - with: The encoded measurement.
+        - onSuccess: Called if data transmission was successful. Gets the transmitted measurement as a parameter.
+        - onFailure: Called if data transmission failed for some reason. Gets the transmitted measurement and information about the error.
      - Throws:
-     - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
+        - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
      */
     func onEncodingComplete(for measurement: MeasurementEntity, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
         os_log("encoding complete", log: ServerConnection.osLog, type: .default)
@@ -255,10 +255,10 @@ public class ServerConnection {
      - Parameter measurement: The measurement to serialize as a file.
      - Returns: The url of the file containing the measurement data.
      - Throws:
-     - `SerializationError.missingData` If no track data was found.
-     - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-     - `FileSupportError.notReadable` If the data file was not readable.
-     - Some unspecified undocumented file system error if file was not accessible.
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+        - `FileSupportError.notReadable` If the data file was not readable.
+        - Some unspecified undocumented file system error if file was not accessible.
      */
     private func write(_ measurement: MeasurementMO) throws -> URL {
         let measurementFile = MeasurementFile()
