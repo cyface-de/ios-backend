@@ -340,6 +340,10 @@ extension BinaryInteger {
  case missingData
  case invalidData
  ````
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 1.0.0
  */
 enum SerializationError: Error {
     /// Thrown if compression of serialized data was not successful.
@@ -359,6 +363,10 @@ enum SerializationError: Error {
  case bigEndian
  case littleEndian
  ````
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.1
+ - Since: 2.3.0
  */
 enum ByteOrder {
     /// Big endian byte order. The byte with the highest order is the first.
