@@ -556,12 +556,12 @@ struct PersistenceError: Error {
      */
     static func handle(error: PersistenceError) -> String {
         let readableError = """
-                            \nERROR - operation: [\(error.type)];
-                            reason: [\(error.verboseDescription)];
-                            in method: [\(error.inMethodName)];
-                            in file: [\(error.inFileName)];
-                            at line: [\(error.atLineNumber)]\n
-                            """
+        \nERROR - operation: [\(error.type)];
+        reason: [\(error.verboseDescription)];
+        in method: [\(error.inMethodName)];
+        in file: [\(error.inFileName)];
+        at line: [\(error.atLineNumber)]\n
+        """
         print(readableError)
         return readableError
     }

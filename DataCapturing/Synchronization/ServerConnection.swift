@@ -173,18 +173,18 @@ public class ServerConnection {
 
     func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
-            throw ServerConnectionError.missingInstallationIdentifier
+            fatalError("Installation identifier was missing!")
         }
         guard let measurementIdData = String(measurement.identifier).data(using: String.Encoding.utf8) else {
-            throw ServerConnectionError.missingMeasurementIdentifier
+            fatalError("Measurement identifier was missing!")
         }
         guard let deviceTypeData = modelIdentifier.data(using: String.Encoding.utf8) else {
-            throw ServerConnectionError.missingDeviceType
+            fatalError("Device model identifier was missing!")
         }
 
         let bundle = Bundle(for: type(of: self))
         guard let appVersion = (bundle.infoDictionary?["CFBundleShortVersionString"] as? String)?.data(using: String.Encoding.utf8) else {
-            throw ServerConnectionError.missingAppVersion
+            fatalError("Application version was missing!")
         }
 
         let length = String(measurement.trackLength).data(using: String.Encoding.utf8)!
@@ -267,39 +267,55 @@ public class ServerConnection {
 }
 
 /**
- An enumeration encapsulating errors used by server connections.
- ````
- case authenticationNotSuccessful
- case notAuthenticated
- case serializationTimeout
- case missingInstallationIdentifier
- case missingMeasurementIdentifier
- case missingDeviceType
- case invalidResponse
- case unexpectedError
- ````
+ A structure encapsulating errors used by server connections.
 
  - Author: Klemens Muthmann
- - Version: 3.1.0
+ - Version: 4.0.0
  - Since: 1.0.0
  */
-public enum ServerConnectionError: Error {
-    /// If authentication was carried out but was not successful
-    case authenticationNotSuccessful
-    /// Error occuring if this client tried to communicate with the server without proper authentication.
-    case notAuthenticated
-    /// If data serialization for upload took too long.
-    case serializationTimeout
-    /// Thrown if no installation identifier is available.
-    case missingInstallationIdentifier
-    /// Thrown if the measurement was not persistent and thus has not identifier
-    case missingMeasurementIdentifier
-    /// Thrown if no device type was available from the system.
-    case missingDeviceType
-    /// Thrown if the response was not parseable.
-    case invalidResponse
-    /// Used for all unexpected errors, that should not occur during normal operation.
-    case unexpectedError
-    /// This applications version could not be loaded
-    case missingAppVersion
+public struct ServerConnectionError: Error {
+    /**
+     ```
+     case authenticationNotSuccessful
+     case notAuthenticated
+     ```
+
+     - Author: Klemens Muthmann
+     - Version: 1.0.0
+     - Since: 4.0.0
+     */
+    enum Category {
+        /// If authentication was carried out but was not successful
+        case authenticationNotSuccessful
+        /// Error occuring if this client tried to communicate with the server without proper authentication.
+        case notAuthenticated
+    }
+    /// The `Category` of this error.
+    let type: Category
+    /// A human readable explanation for the error.
+    let verboseDescription: String
+    /// The name of the method this error has occured within.
+    let inMethodName: String
+    /// The name of the file this error has occured within.
+    let inFileName: String
+    /// The number of the line of code this error has occured within.
+    let atLineNumber: Int
+
+    /**
+     Handles a `ServerConnectionError` appropriately, by showing its details.
+
+     - Parameter error: The error to handle.
+     - Returns: The error description shown by this method call.
+     */
+    static func handle(error: ServerConnectionError) -> String {
+        let readableError = """
+        \nERROR - operation: [\(error.type)];
+        reason: [\(error.verboseDescription)];
+        in method: [\(error.inMethodName)];
+        in file: [\(error.inFileName)];
+        at line: [\(error.atLineNumber)]\n
+        """
+        print(readableError)
+        return readableError
+    }
 }
