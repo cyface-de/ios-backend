@@ -10,6 +10,7 @@
 		3D0511D7204D267600967898 /* MovebisDataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D6204D267600967898 /* MovebisDataCapturingService.swift */; };
 		3D0511E7204D622700967898 /* SerializationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E5204D622700967898 /* SerializationTest.swift */; };
 		3D0511ED204ED0C200967898 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511EC204ED0C200967898 /* PersistenceTests.swift */; };
+		3D064ADA22719833003E9205 /* V4TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3D064AD922719832003E9205 /* V4TestData.sqlite */; };
 		3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */; };
 		3D0BDEAB1FB1B951004EA25E /* DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */; };
 		3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */; };
@@ -28,6 +29,7 @@
 		3D1D9A96224D4F420053B1B7 /* V1TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3D1D9A93224D4F420053B1B7 /* V1TestData.sqlite */; };
 		3D3A7DD02258C9440019998A /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3A7DCF2258C9440019998A /* LocationManager.swift */; };
 		3D3A7DD22258E39B0019998A /* TestLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3A7DD12258E39B0019998A /* TestLocationManager.swift */; };
+		3D3A7DE72268C7160019998A /* RepeatingTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3A7DE62268C7160019998A /* RepeatingTimer.swift */; };
 		3D3A7DFC226F10BA0019998A /* ServerConnectionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3A7DFB226F10BA0019998A /* ServerConnectionTest.swift */; };
 		3D4A9402224E7986008A54AE /* V3toV4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A9401224E7986008A54AE /* V3toV4.xcmappingmodel */; };
 		3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79D2136F045003F53C9 /* BinarySerializer.swift */; };
@@ -76,6 +78,7 @@
 		3D0511D6204D267600967898 /* MovebisDataCapturingService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovebisDataCapturingService.swift; sourceTree = "<group>"; };
 		3D0511E5204D622700967898 /* SerializationTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerializationTest.swift; sourceTree = "<group>"; };
 		3D0511EC204ED0C200967898 /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
+		3D064AD922719832003E9205 /* V4TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V4TestData.sqlite; sourceTree = "<group>"; };
 		3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingEvent.swift; sourceTree = "<group>"; };
 		3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D0BDEA41FB1B951004EA25E /* DataCapturing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataCapturing.h; sourceTree = "<group>"; };
@@ -97,6 +100,7 @@
 		3D20D1CE222029C900A0538D /* Alamofire.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D3A7DCF2258C9440019998A /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		3D3A7DD12258E39B0019998A /* TestLocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestLocationManager.swift; sourceTree = "<group>"; };
+		3D3A7DE62268C7160019998A /* RepeatingTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatingTimer.swift; sourceTree = "<group>"; };
 		3D3A7DFB226F10BA0019998A /* ServerConnectionTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConnectionTest.swift; sourceTree = "<group>"; };
 		3D4A9401224E7986008A54AE /* V3toV4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = V3toV4.xcmappingmodel; sourceTree = "<group>"; };
 		3D58B79D2136F045003F53C9 /* BinarySerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinarySerializer.swift; sourceTree = "<group>"; };
@@ -128,6 +132,7 @@
 		3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistanceCalculationStrategy.swift; sourceTree = "<group>"; };
 		3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistanceCalculationTests.swift; sourceTree = "<group>"; };
 		3DF7E173220F65EC007CFF83 /* Status.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
+		3DF85FD42270F88200A6C80A /* 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 5.xcdatamodel; sourceTree = "<group>"; };
 		3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeasurementContext.swift; sourceTree = "<group>"; };
 		418D66E641571506040C7316 /* Pods-DataCapturing-DataCapturingTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing-DataCapturingTests.debug.xcconfig"; path = "Target Support Files/Pods-DataCapturing-DataCapturingTests/Pods-DataCapturing-DataCapturingTests.debug.xcconfig"; sourceTree = "<group>"; };
 		69089A881E653FB9864FB3D5 /* Pods-DataCapturing.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.debug.xcconfig"; path = "Target Support Files/Pods-DataCapturing/Pods-DataCapturing.debug.xcconfig"; sourceTree = "<group>"; };
@@ -204,6 +209,7 @@
 				3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */,
 				3DF7E173220F65EC007CFF83 /* Status.swift */,
 				3D3A7DCF2258C9440019998A /* LocationManager.swift */,
+				3D3A7DE62268C7160019998A /* RepeatingTimer.swift */,
 			);
 			path = DataCapturing;
 			sourceTree = "<group>";
@@ -227,6 +233,7 @@
 		3D1D9A90224D4F420053B1B7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				3D064AD922719832003E9205 /* V4TestData.sqlite */,
 				3D1D9A91224D4F420053B1B7 /* V2TestData.sqlite */,
 				3D1D9A92224D4F420053B1B7 /* V3TestData.sqlite */,
 				3D1D9A93224D4F420053B1B7 /* V1TestData.sqlite */,
@@ -435,6 +442,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D1D9A95224D4F420053B1B7 /* V3TestData.sqlite in Resources */,
+				3D064ADA22719833003E9205 /* V4TestData.sqlite in Resources */,
 				3D1D9A96224D4F420053B1B7 /* V1TestData.sqlite in Resources */,
 				3D1D9A94224D4F420053B1B7 /* V2TestData.sqlite in Resources */,
 			);
@@ -575,6 +583,7 @@
 				3D8FAD7E222E913600D98D65 /* MeasurementMO+CoreDataClass.swift in Sources */,
 				3D1505EE213EA68D002994D2 /* DataCapturingError.swift in Sources */,
 				3DF7E133220C36BD007CFF83 /* CyfaceModel.xcdatamodeld in Sources */,
+				3D3A7DE72268C7160019998A /* RepeatingTimer.swift in Sources */,
 				3DF7E10921F60AFC007CFF83 /* StaticAuthenticator.swift in Sources */,
 				3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */,
 				3D8CC22120A6D89A0095CCD4 /* Measurement.swift in Sources */,
@@ -846,12 +855,13 @@
 		3DF7E12F220C36BD007CFF83 /* CyfaceModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				3DF85FD42270F88200A6C80A /* 5.xcdatamodel */,
 				3DF7E134220C374F007CFF83 /* 4.xcdatamodel */,
 				3DF7E130220C36BD007CFF83 /* 3.xcdatamodel */,
 				3DF7E131220C36BD007CFF83 /* CyfaceModel.xcdatamodel */,
 				3DF7E132220C36BD007CFF83 /* 2.xcdatamodel */,
 			);
-			currentVersion = 3DF7E134220C374F007CFF83 /* 4.xcdatamodel */;
+			currentVersion = 3DF85FD42270F88200A6C80A /* 5.xcdatamodel */;
 			path = CyfaceModel.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

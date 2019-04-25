@@ -29,7 +29,7 @@ import Foundation
  If this is not the case, API calls based on this authenticator are going to fail!
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 1.1.1
  - Since: 2.0.0
  */
 public class StaticAuthenticator: Authenticator {
@@ -52,7 +52,7 @@ public class StaticAuthenticator: Authenticator {
         if let jwtToken = jwtToken {
             onSuccess(jwtToken)
         } else {
-            onFailure(ServerConnectionError.notAuthenticated)
+            onFailure(ServerConnectionError(type: .notAuthenticated, verboseDescription: "No JWT token provided for authentication.", inMethodName: #function, inFileName: #file, atLineNumber: #line))
         }
     }
 }

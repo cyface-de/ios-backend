@@ -25,7 +25,7 @@ import CoreData
  This class contains utility code used to create data stores in specific versions of the Cyface model.
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 1.2.0
  - Since: 4.0.0
  */
 class DataSetCreator {
@@ -157,6 +157,77 @@ class DataSetCreator {
         measurement02.setValue(NSOrderedSet(array: geoLocations02), forKey: "geoLocations")
 
         try context.save()
+    }
+
+    static func createV4Data(in container: NSPersistentContainer) throws {
+        let context = container.newBackgroundContext()
+
+        let measurement01 = createV4Measurement(450*100, "BICYCLE", Int64(1), false, Int64(10_000), 450.0, context)
+        let trackOne = NSEntityDescription.insertNewObject(forEntityName: "Track", into: context)
+        let trackOneGeoLocations = createV4GeoLocations(200, Int64(10_000), trackOne, context)
+        trackOne.setValue(NSOrderedSet(array: trackOneGeoLocations), forKey: "locations")
+        trackOne.setValue(measurement01, forKey: "measurement")
+        let trackTwo = NSEntityDescription.insertNewObject(forEntityName: "Track", into: context)
+        let trackTwoGeoLocations = createV4GeoLocations(250, 10_300, trackTwo, context)
+        trackTwo.setValue(NSOrderedSet(array: trackTwoGeoLocations), forKey: "locations")
+        trackTwo.setValue(measurement01, forKey: "measurement")
+
+        let measurement02 = createV4Measurement(300*100, "BICYCLE", Int64(2), false, Int64(20_000), 300, context)
+        let trackForMeasurementTwo = NSEntityDescription.insertNewObject(forEntityName: "Track", into: context)
+        let trackForMeasurementTwoGeoLocations = createV4GeoLocations(300, Int64(20_000), trackForMeasurementTwo, context)
+        trackForMeasurementTwo.setValue(NSOrderedSet(array: trackForMeasurementTwoGeoLocations), forKey: "locations")
+        trackForMeasurementTwo.setValue(measurement02, forKey: "measurement")
+
+        try context.save()
+    }
+
+    /**
+     Creates a new measurement instance as an `NSManagedObject` in a Cyface version 4 database.
+
+     - Parameters:
+        - accelerationsCount: The number of accelerations stored with this measurement. Since accelerations are not stored in the database in version 4 anymore, these objects are not actually created.
+        - vehicleContext: The vehicle used to capture the measurement. Usually one of "BICYCLE", "CAR" or "MOTORBIKE", but might be any `String` for simulation purposes.
+        - identifier: The measurement identifier as a device wide unique identifier, used to distinguish this measurement from others.
+        - synchronized: Whether this measurement is already synchronized to a server or not.
+        - timestamp: The time the measurement was started in milliseconds since the 1st of january 1970.
+        - trackLength: The length of the track in meters
+        - context: An `NSManagedObjectContext` used to create the new `NSManagedObject` instance. This must be a version 4 `NSManagedObjectContext`.
+     - Returns: A new version 4 measurement.
+     */
+    static func createV4Measurement(_ accelerationsCount: Int64, _ vehicleContext: String, _ identifier: Int64, _ synchronized: Bool, _ timestamp: Int64, _ trackLength: Double, _ context: NSManagedObjectContext) -> NSManagedObject {
+        let ret = NSEntityDescription.insertNewObject(forEntityName: "Measurement", into: context)
+        ret.setPrimitiveValue(accelerationsCount, forKey: "accelerationsCount")
+        ret.setPrimitiveValue(vehicleContext, forKey: "context")
+        ret.setPrimitiveValue(identifier, forKey: "identifier")
+        ret.setPrimitiveValue(synchronized, forKey: "synchronized")
+        ret.setPrimitiveValue(timestamp, forKey: "timestamp")
+        ret.setPrimitiveValue(trackLength, forKey: "trackLength")
+        return ret
+    }
+
+    /**
+     Creates an array filled with geo location `NSManagedObject` instances usable by *CoreData* in a Version 4 Cyface database.
+
+     - Parameters:
+        - count: The amount of instances to create.
+        - startTimestamp: The timestamp used for the first instance in milliseconds since the 1st of january 1970. This is increased by 1 second per location.
+        - track: The track entity these new locations are going to belong to. This `NSManagedObject` must be from the same `NSManagedObjectContext` as the one provided to this method.
+        - context: The `NSManagedObjectContext` to use for instance creation. This must be a valid version 4 `NSManagedObjectContext`.
+     - Returns: An array containing `count` geo locations.
+     */
+    static func createV4GeoLocations(_ count: Int, _ startTimestamp: Int64, _ track: NSManagedObject, _ context: NSManagedObjectContext) -> [NSManagedObject] {
+        var ret = [NSManagedObject]()
+        for i in 0..<count {
+            let geoLocation = NSEntityDescription.insertNewObject(forEntityName: "GeoLocation", into: context)
+            geoLocation.setPrimitiveValue(1.0, forKey: "accuracy")
+            geoLocation.setPrimitiveValue(52.0+0.01*Double(i), forKey: "lat")
+            geoLocation.setPrimitiveValue(13.7+0.01*Double(i), forKey: "lon")
+            geoLocation.setPrimitiveValue(1.0, forKey: "speed")
+            geoLocation.setPrimitiveValue(20_000+i, forKey: "timestamp")
+            geoLocation.setValue(track, forKey: "track")
+            ret.append(geoLocation)
+        }
+        return ret
     }
 
     /**

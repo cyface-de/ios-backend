@@ -28,7 +28,7 @@ import os.log
  To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided `Synchronizer`.
  
  - Author: Klemens Muthmann
- - Version: 8.1.1
+ - Version: 8.1.3
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -172,18 +172,29 @@ public class DataCapturingService: NSObject {
 
      - Throws:
         - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
+        - `DataCapturingError.noCurrentMeasurement` If there is no measurement to stop.
      */
     public func stop() throws {
         try lifecycleQueue.sync {
             guard !isPaused else {
                 throw DataCapturingError.isPaused
             }
+            guard let currentMeasurement = currentMeasurement, isRunning else {
+                os_log("Trying to stop a stopped service! Ignoring call to stop!", log: LOG, type: .default)
+                return
+            }
 
             backgroundSynchronizationTimer?.setCancelHandler {
                 self.handler(.serviceStopped(measurement: self.currentMeasurement?.identifier), .success)
             }
             stopCapturing()
-            currentMeasurement = nil
+            let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+            persistenceLayer.context = persistenceLayer.makeContext()
+            let currentMeasurementEntity = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
+            currentMeasurementEntity.synchronizable = true
+            persistenceLayer.context?.saveRecursively()
+            self.currentMeasurement = nil
+
             if let synchronizer = synchronizer {
                 synchronizer.activate()
             }

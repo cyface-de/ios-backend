@@ -25,7 +25,7 @@ import os.log
  An authenticator using a combination of username and password to authenticate against a Cyface data collector server.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 2.0.0
  */
 public class CredentialsAuthenticator: Authenticator {
@@ -68,15 +68,15 @@ public class CredentialsAuthenticator: Authenticator {
 
         Networking.sharedInstance.sessionManager.upload(jsonCredentials, to: url, method: .post, headers: nil).response { response in
             guard let httpResponse = response.response else {
-                os_log("Unable to unwrap authentication response", log: CredentialsAuthenticator.oslog, type: OSLogType.error)
-                onFailure(ServerConnectionError.authenticationNotSuccessful)
+                os_log("Unable to unwrap authentication response!", log: CredentialsAuthenticator.oslog, type: OSLogType.error)
+                onFailure(ServerConnectionError(type: .authenticationNotSuccessful, verboseDescription: "Unable to unwrap authentication response!", inMethodName: #function, inFileName: #file, atLineNumber: #line))
                 return
             }
 
             if httpResponse.statusCode==200, let authorizationValue = httpResponse.allHeaderFields["Authorization"] as? String {
                 onSuccess(authorizationValue)
             } else {
-                onFailure(ServerConnectionError.authenticationNotSuccessful)
+                onFailure(ServerConnectionError(type: .authenticationNotSuccessful, verboseDescription: "Authentication was not successful!", inMethodName: #function, inFileName: #file, atLineNumber: #line))
             }
         }
         } catch let error {

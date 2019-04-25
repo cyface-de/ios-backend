@@ -25,7 +25,7 @@ import CoreData
  Tests that data migration between different versions of the Cyface data model are going to work as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 4.0.0
  */
 class DataMigrationTest: XCTestCase {
@@ -100,6 +100,14 @@ class DataMigrationTest: XCTestCase {
         try assertV4(onContext: context, withFirstLocationCount: 300, withSecondLocationCount: 200)
     }
 
+    func testMigrationV4ToV5() throws {
+        // Arrange, Act
+        let context = migrate(fromVersion: .version4, toVersion: .version5, usingTestData: "V4TestData.sqlite")
+
+        // Assert
+        try assertV5(onContext: context)
+    }
+
     /**
      Tests a successful migration from version 1 to version 4. This tests the whole update path in one go.
 
@@ -112,6 +120,14 @@ class DataMigrationTest: XCTestCase {
 
         // Assert
         try assertV4(onContext: context, withFirstLocationCount: 100, withSecondLocationCount: 200)
+    }
+
+    func testMigrationV1ToV5() throws {
+        // Arrange, Act
+        let context = migrate(fromVersion: .version1, toVersion: .version5, usingTestData: "V1TestData.sqlite")
+
+        // Assert
+        try assertV5(onContext: context)
     }
 
     /**
@@ -238,6 +254,17 @@ class DataMigrationTest: XCTestCase {
         XCTAssertEqual(locationsFromTrackTwo.count, secondLocationCount)
     }
 
+    func assertV5(onContext context: NSManagedObjectContext) throws {
+        let measurementFetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Measurement")
+        let sort = NSSortDescriptor(key: "identifier", ascending: false)
+        measurementFetchRequest.sortDescriptors = [sort]
+        let migratedMeasurements = try context.fetch(measurementFetchRequest)
+
+        XCTAssertEqual(migratedMeasurements.count, 2)
+        XCTAssertEqual(migratedMeasurements[0].primitiveValue(forKey: "synchronizable") as? Bool, true)
+        XCTAssertEqual(migratedMeasurements[1].primitiveValue(forKey: "synchronizable") as? Bool, true)
+    }
+
     /**
      A test used to create an input data storeage file used by other tests. This is skipped since it is usually only required to run once when a new version of the Cyface data model is released.
 
@@ -251,9 +278,9 @@ class DataMigrationTest: XCTestCase {
 
         let migrator = CoreDataMigrator()
         let location = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let database = location.appendingPathComponent("V3TestData").appendingPathExtension("sqlite")
-        let container = loadContainer(from: "CyfaceModel", with: "3", from: "de.cyface.DataCapturing", at: database)
-        try DataSetCreator.createV3Data(in: container)
+        let database = location.appendingPathComponent("V4TestData").appendingPathExtension("sqlite")
+        let container = loadContainer(from: "CyfaceModel", with: "4", from: "de.cyface.DataCapturing", at: database)
+        try DataSetCreator.createV4Data(in: container)
 
         for store in container.persistentStoreCoordinator.persistentStores {
             try container.persistentStoreCoordinator.remove(store)
