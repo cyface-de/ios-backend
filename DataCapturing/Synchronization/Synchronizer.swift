@@ -65,9 +65,8 @@ public class Synchronizer {
     /// A timer called regularly to check for available measurements and synchronize them if not done yet.
     private let dataSynchronizationTimer: RepeatingTimer
 
+    /// A queue synchronizing access to the Alamofire `NetworkReachabilityManager`.
     private let isReachableCheckingQueue = DispatchQueue.global(qos: .background)
-
-    private var protectedMeasurementIdentifier = [Int64]()
 
     /**
      A flag indicating whether synchronization of data should only happen if the device is connected to a wireless local area network (Wifi).
@@ -187,8 +186,8 @@ public class Synchronizer {
      Synchronizes the array of provided measurements if the status was successful and measurements are provided
 
      - Parameters:
-     - synchronizableMeasurements: The synchronizable measurements to synchronize or `nil` if they have not been loaded.
-     - status: Provides the status of whether loading the measurements was successful or not.
+        - synchronizableMeasurements: The synchronizable measurements to synchronize or `nil` if they have not been loaded.
+        - status: Provides the status of whether loading the measurements was successful or not.
      */
     private func handle(synchronizableMeasurements: [MeasurementMO]?, status: Status) {
         guard let measurements = synchronizableMeasurements else {
@@ -243,8 +242,8 @@ public class Synchronizer {
      Handles the failed synchronization of a single measurement.
 
      - Parameters:
-     - measurement: The measurement for which the synchronization failed.
-     - error: The error causing the failure.
+        - measurement: The measurement for which the synchronization failed.
+        - error: The error causing the failure.
      */
     private func failureHandler(measurement: MeasurementEntity, error: Error) {
         os_log("Unable to upload data for measurement: %@!", log: log, type: .error, NSNumber(value: measurement.identifier))
@@ -297,8 +296,8 @@ public protocol Cleaner {
      Cleans the database after a measurement has been synchronized.
 
      - Parameters:
-     - measurement: The measurement to clean.
-     - from: The `PersistenceLayer` to call for cleaning the data.
+        - measurement: The measurement to clean.
+        - from: The `PersistenceLayer` to call for cleaning the data.
      - Throws:
         - `PersistenceError.measurementNotLoadable` If the measurement to delete was not available.
         - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
