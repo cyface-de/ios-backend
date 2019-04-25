@@ -94,7 +94,8 @@ public class Synchronizer {
         self.cleaner = cleaner
         self.serverConnection = serverConnection
         self.handler = handler
-        dataSynchronizationTimer = RepeatingTimer(timeInterval: 5)
+        // Try to synchronize once per hour.
+        dataSynchronizationTimer = RepeatingTimer(timeInterval: 60 * 60)
         guard let reachabilityManager = NetworkReachabilityManager(host: serverConnection.apiURL.absoluteString) else {
             throw SynchronizationError.reachabilityNotInitialized
         }
@@ -203,10 +204,6 @@ public class Synchronizer {
         }
 
         for measurement in measurements {
-            if protectedMeasurementIdentifier.contains(measurement.identifier) {
-                continue
-            }
-
             guard let measurementContextString = measurement.context else {
                 fatalError("Synchronizer.handle(synchronizableMeasurements: \(String(describing: synchronizableMeasurements?.count)), \(status)): Unable to load measurement context from measurement \(measurement.identifier).")
             }
