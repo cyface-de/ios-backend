@@ -24,7 +24,7 @@ import CoreData
  A protocol implemented by classes responsible for migrating from old to new data models.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 4.0.0
  */
 public protocol CoreDataMigratorProtocol {

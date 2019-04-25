@@ -25,7 +25,7 @@ import CoreData
  Tests that using the `PersistenceLayer` works as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.1.1
+ - Version: 1.1.2
  - Since: 1.0.0
  */
 class PersistenceTests: XCTestCase {
@@ -168,6 +168,9 @@ class PersistenceTests: XCTestCase {
     /// Tests that accessing only synchronizable measurements does not return everything.
     func testLoadSynchronizableMeasurements() {
         do {
+            let fixtureMeasurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
+            fixtureMeasurement.synchronizable = true
+            oocut.context?.saveRecursively()
             let countOfLoadedMeasurementsPriorClean = try oocut.loadSynchronizableMeasurements().count
 
             try oocut.clean(measurement: fixture)

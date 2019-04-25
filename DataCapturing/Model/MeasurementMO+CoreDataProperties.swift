@@ -1,8 +1,9 @@
 //
 //  MeasurementMO+CoreDataProperties.swift
-//  
+//  DataCapturing
 //
-//  Created by Team Cyface on 05.03.19.
+//  Created by Team Cyface on 24.04.19.
+//  Copyright © 2019 Cyface GmbH. All rights reserved.
 //
 //
 
@@ -21,6 +22,7 @@ extension MeasurementMO {
     @NSManaged public var synchronized: Bool
     @NSManaged public var timestamp: Int64
     @NSManaged public var trackLength: Double
+    @NSManaged public var synchronizable: Bool
     @NSManaged public var tracks: NSOrderedSet?
 
 }

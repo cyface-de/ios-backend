@@ -33,7 +33,7 @@ import os.log
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 5.0.0
+ - Version: 5.0.1
  - Since: 1.0.0
  */
 public class PersistenceLayer {
@@ -121,6 +121,7 @@ public class PersistenceLayer {
             measurement.timestamp = timestamp
             measurement.identifier = identifier
             measurement.synchronized = false
+            measurement.synchronizable = false
             measurement.context = mContext.rawValue
             context.saveRecursively()
 
@@ -158,7 +159,7 @@ public class PersistenceLayer {
      Deletes the measurement from the data storag.
      
      - Parameters:
-     - measurement: The measurement to delete from the data storage.
+        - measurement: The measurement to delete from the data storage.
      - Throws:
         - `PersistenceError` If the measurement to delete was not available.
         - Some unspecified errors from within CoreData.
@@ -357,7 +358,7 @@ public class PersistenceLayer {
     }
 
     /**
-     Loads only those measurements that have not been synchronized to a Cyface database yet.
+     Loads only those measurements that have not been synchronized to a Cyface database yet and that are synchronizable at the moment.
 
      - Returns: An array containing all the not synchronized measurements.
      - Throws:
@@ -367,7 +368,7 @@ public class PersistenceLayer {
         let context = getContext()
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         // Fetch only not synchronized measurements
-        request.predicate = NSPredicate(format: "synchronized == %@", NSNumber(value: false))
+        request.predicate = NSPredicate(format: "synchronized == %@ AND synchronizable == %@", argumentArray: [ NSNumber(value: false), NSNumber(value: true)])
         let fetchResult = try context.fetch(request)
         return fetchResult
     }
@@ -508,7 +509,7 @@ extension NSManagedObjectContext {
 }
 
 /**
- An structure for all the errors thrown by the `PersistenceLayer`.
+ A structure for all the errors thrown by the `PersistenceLayer`.
 
  - Author: Klemens Muthmann
  - Version: 2.0.0
@@ -536,7 +537,6 @@ struct PersistenceError: Error {
         /// If some data belonging to a measurement could not be loaded.
         case dataNotLoadable(measurement: Int64)
     }
-
     /// The `Category` of this error.
     let type: Category
     /// A human readable explanation for the error.

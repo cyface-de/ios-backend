@@ -28,7 +28,7 @@ import Alamofire
 
  - Author: Klemens Muthmann
  - Since: 4.0.0
- - Version: 1.0.0
+ - Version: 1.0.1
  */
 class ServerConnectionTest: XCTestCase {
 
@@ -58,12 +58,12 @@ class ServerConnectionTest: XCTestCase {
             do {
                 let formData = try data.encode()
                 let decodedRequest = String(decoding: formData, as: UTF8.self)
-                XCTAssertTrue(decodedRequest.contains("startLocationLat"))
-                XCTAssertTrue(decodedRequest.contains("startLocationLon"))
-                XCTAssertTrue(decodedRequest.contains("startLocationTs"))
-                XCTAssertTrue(decodedRequest.contains("endLocationLat"))
-                XCTAssertTrue(decodedRequest.contains("endLocationLon"))
-                XCTAssertTrue(decodedRequest.contains("endLocationTs"))
+                XCTAssertTrue(decodedRequest.contains("startLocLat"))
+                XCTAssertTrue(decodedRequest.contains("startLocLon"))
+                XCTAssertTrue(decodedRequest.contains("startLocTs"))
+                XCTAssertTrue(decodedRequest.contains("endLocLat"))
+                XCTAssertTrue(decodedRequest.contains("endLocLon"))
+                XCTAssertTrue(decodedRequest.contains("endLocTs"))
 
                 XCTAssertTrue(decodedRequest.contains("deviceId"))
                 XCTAssertTrue(decodedRequest.contains("measurementId"))

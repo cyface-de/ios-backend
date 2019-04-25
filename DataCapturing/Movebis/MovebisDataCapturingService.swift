@@ -112,8 +112,7 @@ public class MovebisDataCapturingService: DataCapturingService {
      */
     public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval: Double = 100, savingInterval: Double = 30, dataManager: CoreDataManager, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) throws {
         self.dataManager = dataManager
-        let persistence = PersistenceLayer(onManager: dataManager)
-        let synchronizer = try Synchronizer(persistenceLayer: persistence, cleaner: AccelerationPointRemovalCleaner(), serverConnection: serverConnection, handler: eventHandler)
+        let synchronizer = try Synchronizer(coreDataStack: dataManager, cleaner: AccelerationPointRemovalCleaner(), serverConnection: serverConnection, handler: eventHandler)
         super.init(sensorManager: manager, updateInterval: updateInterval, savingInterval: savingInterval, dataManager: dataManager, synchronizer: synchronizer, eventHandler: eventHandler)
     }
 

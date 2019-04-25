@@ -24,18 +24,22 @@ import Alamofire
 /**
  An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.
 
- An object of this call can be used to synchronize data either in the foreground or in the background. Background synchronization happens only if the synchronizing device has an active Wifi connection. To activate background synchronization you need to call the `activate` method.
+ An object of this call can be used to synchronize data either in the foreground or in the background.
+ Background synchronization happens only if the synchronizing device has an active Wifi connection.
+ To activate background synchronization you need to call the `activate` method.
+ Background synchronization is called as soon as WiFi becomes available or every 60 minutes.
 
  - Author: Klemens Muthmann
- - Version: 1.0.2
+ - Version: 2.0.0
  - Since: 2.3.0
  */
 public class Synchronizer {
 
     // MARK: - Properties
+    private let log = OSLog.init(subsystem: "Synchronizer", category: "de.cyface")
 
-    /// Persistent storage used to load synchronizable measurements from.
-    private let persistenceLayer: PersistenceLayer
+    /// Stack used to access *CoreData*.
+    private let coreDataStack: CoreDataManager
 
     /// A strategy for cleaning the persistent storage after data synchronization.
     private let cleaner: Cleaner
@@ -58,6 +62,13 @@ public class Synchronizer {
     /// The handler to call, when synchronization for a measurement has finished.
     private let handler: (DataCapturingEvent, Status) -> Void
 
+    /// A timer called regularly to check for available measurements and synchronize them if not done yet.
+    private let dataSynchronizationTimer: RepeatingTimer
+
+    private let isReachableCheckingQueue = DispatchQueue.global(qos: .background)
+
+    private var protectedMeasurementIdentifier = [Int64]()
+
     /**
      A flag indicating whether synchronization of data should only happen if the device is connected to a wireless local area network (Wifi).
 
@@ -73,29 +84,40 @@ public class Synchronizer {
      Initializer that sets the initial value of all the properties and prepares the background synchronization job.
 
      - Parameters:
-        - persistenceLayer: Persistent storage used to load synchronizable measurements from.
+        - coreDataStack: Stack used to access *CoreData*.
         - cleaner: A strategy for cleaning the persistent storage after data synchronization.
         - serverConnection: An authenticated connection to a Cyface API server.
         - handler: The handler to call, when synchronization for a measurement has finished.
      - Throws: `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
      */
-    public init(persistenceLayer: PersistenceLayer, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) throws {
-        self.persistenceLayer = persistenceLayer
+    public init(coreDataStack: CoreDataManager, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) throws {
+        self.coreDataStack = coreDataStack
         self.cleaner = cleaner
         self.serverConnection = serverConnection
         self.handler = handler
+        dataSynchronizationTimer = RepeatingTimer(timeInterval: 5)
         guard let reachabilityManager = NetworkReachabilityManager(host: serverConnection.apiURL.absoluteString) else {
             throw SynchronizationError.reachabilityNotInitialized
         }
         self.reachabilityManager = reachabilityManager
-        self.reachabilityManager.listener = { [weak self] status in
+        self.reachabilityManager.listener = { [weak self] _ in
             guard let self = self else {
                 return
             }
 
-            let reachable = self.syncOnWiFiOnly ?  status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) : status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) || status == NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi)
+            if self.isReachable() {
+                self.sync()
+            }
+        }
 
-            if reachable {
+        dataSynchronizationTimer.eventHandler = { [weak self] in
+            guard let self = self else {
+                return
+            }
+
+            let status = self.isReachable()
+            print(status)
+            if status {
                 self.sync()
             }
         }
@@ -106,6 +128,7 @@ public class Synchronizer {
      */
     deinit {
         self.reachabilityManager.stopListening()
+        dataSynchronizationTimer.suspend()
     }
 
     // MARK: - API Methods
@@ -121,7 +144,10 @@ public class Synchronizer {
      If you call this during an active synchronization it is going to return without doing anything.
      */
     public func sync() {
-        serverSynchronizationQueue.async {
+        serverSynchronizationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
 
             if self.synchronizationInProgress {
                 return
@@ -130,8 +156,9 @@ public class Synchronizer {
             }
 
             do {
-                self.persistenceLayer.context = self.persistenceLayer.makeContext()
-                let measurements = try self.persistenceLayer.loadSynchronizableMeasurements()
+                let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
+                persistenceLayer.context = persistenceLayer.makeContext()
+                let measurements = try persistenceLayer.loadSynchronizableMeasurements()
                 self.handle(synchronizableMeasurements: measurements, status: .success)
             } catch let error {
                 self.handle(synchronizableMeasurements: nil, status: .error(error))
@@ -146,7 +173,12 @@ public class Synchronizer {
      You should restart this each time a new measurement has been finished.
      */
     public func activate() {
+        if isReachable() {
+            sync()
+        }
         reachabilityManager.startListening()
+        // Try to synchronize once per hour
+        self.dataSynchronizationTimer.resume()
     }
 
     // MARK: - Internal Methods
@@ -172,6 +204,10 @@ public class Synchronizer {
         }
 
         for measurement in measurements {
+            if protectedMeasurementIdentifier.contains(measurement.identifier) {
+                continue
+            }
+
             guard let measurementContextString = measurement.context else {
                 fatalError("Synchronizer.handle(synchronizableMeasurements: \(String(describing: synchronizableMeasurements?.count)), \(status)): Unable to load measurement context from measurement \(measurement.identifier).")
             }
@@ -193,6 +229,7 @@ public class Synchronizer {
      */
     private func successHandler(measurement: MeasurementEntity) {
         do {
+            let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             try cleaner.clean(measurement: measurement, from: persistenceLayer)
             handler(.synchronizationFinished(measurement: measurement), .success)
         } catch let error {
@@ -210,8 +247,8 @@ public class Synchronizer {
      - error: The error causing the failure.
      */
     private func failureHandler(measurement: MeasurementEntity, error: Error) {
-        os_log("Unable to upload data for measurement: %@!", NSNumber(value: measurement.identifier))
-        os_log("Error: %@", error.localizedDescription)
+        os_log("Unable to upload data for measurement: %@!", log: log, type: .error, NSNumber(value: measurement.identifier))
+        os_log("Error: %@", log: log, type: .error, error.localizedDescription)
         handler(.synchronizationFinished(measurement: measurement), .error(error))
         synchronizationFinishedHandler()
     }
@@ -230,6 +267,20 @@ public class Synchronizer {
                 self.synchronizationInProgress = false
             }
         }
+    }
+
+    private func isReachable() -> Bool {
+        var ret = false
+        isReachableCheckingQueue.sync {
+
+            if self.syncOnWiFiOnly {
+                ret = NetworkReachabilityManager()?.isReachableOnEthernetOrWiFi ?? false
+            } else {
+                ret = NetworkReachabilityManager()?.isReachable ?? false
+            }
+        }
+
+        return ret
     }
 }
 
