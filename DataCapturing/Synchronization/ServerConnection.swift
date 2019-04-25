@@ -32,7 +32,7 @@ import os.log
  This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
 
  - Author: Klemens Muthmann
- - Version: 6.0.0
+ - Version: 7.0.0
  - Since: 1.0.0
  */
 public class ServerConnection {
@@ -195,18 +195,18 @@ public class ServerConnection {
                 let startLocationLat = "\(startLocationRaw.lat)".data(using: String.Encoding.utf8)!
                 let startLocationLon = "\(startLocationRaw.lon)".data(using: String.Encoding.utf8)!
                 let startLocationTs = "\(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-                request.append(startLocationLat, withName: "startLocationLat")
-                request.append(startLocationLon, withName: "startLocationLon")
-                request.append(startLocationTs, withName: "startLocationTs")
+                request.append(startLocationLat, withName: "startLocLat")
+                request.append(startLocationLon, withName: "startLocLon")
+                request.append(startLocationTs, withName: "startLocTs")
             }
 
             if let endLocationRaw = (measurement.tracks?.lastObject as? Track)?.locations?.lastObject as? GeoLocationMO {
                 let endLocationLat = "\(endLocationRaw.lat)".data(using: String.Encoding.utf8)!
                 let endLocationLon = "\(endLocationRaw.lon)".data(using: String.Encoding.utf8)!
                 let endLocationTs = "\(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-                request.append(endLocationLat, withName: "endLocationLat")
-                request.append(endLocationLon, withName: "endLocationLon")
-                request.append(endLocationTs, withName: "endLocationTs")
+                request.append(endLocationLat, withName: "endLocLat")
+                request.append(endLocationLon, withName: "endLocLon")
+                request.append(endLocationTs, withName: "endLocTs")
             }
 
         request.append(deviceIdData, withName: "deviceId")
