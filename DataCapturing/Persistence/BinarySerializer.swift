@@ -393,10 +393,10 @@ enum ByteOrder {
         }
 
         switch self {
-            case .bigEndian:
-                return Int64(bigEndian: data.withUnsafeBytes { $0.load(as: Int64.self) })
-            case .littleEndian:
-                return Int64(bigEndian: data.withUnsafeBytes { $0.load(as: Int64.self) })
+        case .bigEndian:
+            return Int64(bigEndian: data.withUnsafeBytes { $0.load(as: Int64.self) })
+        case .littleEndian:
+            return Int64(bigEndian: data.withUnsafeBytes { $0.load(as: Int64.self) })
         }
     }
 

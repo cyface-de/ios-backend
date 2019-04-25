@@ -188,17 +188,26 @@ public class ServerConnection {
         }
 
         let length = String(measurement.trackLength).data(using: String.Encoding.utf8)!
-        let locationCount = String(try PersistenceLayer.collectGeoLocations(from: measurement).count).data(using: String.Encoding.utf8)!
+        let locationCount = try PersistenceLayer.collectGeoLocations(from: measurement).count
+        let locationCountData = String(locationCount).data(using: String.Encoding.utf8)!
 
-        if let startLocationRaw = (measurement.tracks?.firstObject as? Track)?.locations?.firstObject as? GeoLocationMO {
-            let startLocation = "lat: \(startLocationRaw.lat), lon: \(startLocationRaw.lon), time: \(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-            request.append(startLocation, withName: "startLocation")
-        }
+            if let startLocationRaw = (measurement.tracks?.firstObject as? Track)?.locations?.firstObject as? GeoLocationMO {
+                let startLocationLat = "\(startLocationRaw.lat)".data(using: String.Encoding.utf8)!
+                let startLocationLon = "\(startLocationRaw.lon)".data(using: String.Encoding.utf8)!
+                let startLocationTs = "\(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+                request.append(startLocationLat, withName: "startLocationLat")
+                request.append(startLocationLon, withName: "startLocationLon")
+                request.append(startLocationTs, withName: "startLocationTs")
+            }
 
-        if let endLocationRaw = (measurement.tracks?.lastObject as? Track)?.locations?.lastObject as? GeoLocationMO {
-            let endLocation = "lat: \(endLocationRaw.lat), lon: \(endLocationRaw.lon), time: \(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-            request.append(endLocation, withName: "endLocation")
-        }
+            if let endLocationRaw = (measurement.tracks?.lastObject as? Track)?.locations?.lastObject as? GeoLocationMO {
+                let endLocationLat = "\(endLocationRaw.lat)".data(using: String.Encoding.utf8)!
+                let endLocationLon = "\(endLocationRaw.lon)".data(using: String.Encoding.utf8)!
+                let endLocationTs = "\(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+                request.append(endLocationLat, withName: "endLocationLat")
+                request.append(endLocationLon, withName: "endLocationLon")
+                request.append(endLocationTs, withName: "endLocationTs")
+            }
 
         request.append(deviceIdData, withName: "deviceId")
         request.append(measurementIdData, withName: "measurementId")
@@ -206,7 +215,7 @@ public class ServerConnection {
         request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
         request.append(appVersion, withName: "appVersion")
         request.append(length, withName: "length")
-        request.append(locationCount, withName: "locationCount")
+        request.append(locationCountData, withName: "locationCount")
     }
 
     /**
@@ -214,12 +223,12 @@ public class ServerConnection {
      Starts the actual data transmission if encoding was successful.
 
      - Parameters:
-     - for: The measurement that was encoded into a transmission request
-     - with: The encoded measurement.
-     - onSuccess: Called if data transmission was successful. Gets the transmitted measurement as a parameter.
-     - onFailure: Called if data transmission failed for some reason. Gets the transmitted measurement and information about the error.
+        - for: The measurement that was encoded into a transmission request
+        - with: The encoded measurement.
+        - onSuccess: Called if data transmission was successful. Gets the transmitted measurement as a parameter.
+        - onFailure: Called if data transmission failed for some reason. Gets the transmitted measurement and information about the error.
      - Throws:
-     - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
+        - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
      */
     func onEncodingComplete(for measurement: MeasurementEntity, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
         os_log("encoding complete", log: ServerConnection.osLog, type: .default)
@@ -246,10 +255,10 @@ public class ServerConnection {
      - Parameter measurement: The measurement to serialize as a file.
      - Returns: The url of the file containing the measurement data.
      - Throws:
-     - `SerializationError.missingData` If no track data was found.
-     - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-     - `FileSupportError.notReadable` If the data file was not readable.
-     - Some unspecified undocumented file system error if file was not accessible.
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+        - `FileSupportError.notReadable` If the data file was not readable.
+        - Some unspecified undocumented file system error if file was not accessible.
      */
     private func write(_ measurement: MeasurementMO) throws -> URL {
         let measurementFile = MeasurementFile()

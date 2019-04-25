@@ -25,7 +25,7 @@ import CoreData
  Tests whether serialization and deserialization into and from the Cyface Binary Format works as expected
 
  - Author: Klemens Muthmann
- - Version: 1.0.4
+ - Version: 1.0.6
  - Since: 1.0.0
  */
 class SerializationTest: XCTestCase {
@@ -53,7 +53,7 @@ class SerializationTest: XCTestCase {
             persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
             let measurement = try persistenceLayer.createMeasurement(at: 1, withContext: .bike)
-            try persistenceLayer.appendNewTrack(to: measurement)
+            persistenceLayer.appendNewTrack(to: measurement)
 
             fixture = MeasurementEntity(identifier: measurement.identifier, context: .bike)
             try persistenceLayer.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100)], in: measurement)
@@ -130,7 +130,7 @@ class SerializationTest: XCTestCase {
      This creates a really big test data set usable to test programs unpacking such a set. This test is skipped since it takes really long.
      */
     func skip_testSerializeBigDataSet() throws {
-        let measurement = try fakeMeasurement(countOfGeoLocations: 36_000, countOfAccelerations: 3_600_000)
+        let measurement = try DataSetCreator.fakeMeasurement(countOfGeoLocations: 36_000, countOfAccelerations: 3_600_000, persistenceLayer: persistenceLayer)
         let data = try oocut.serialize(measurement)
         try data.write(to: URL(fileURLWithPath: "/Users/cyface/data.cyf"))
     }
@@ -207,39 +207,5 @@ class SerializationTest: XCTestCase {
             value = value | UInt16(byte)
         }
         return value
-    }
-
-    /**
-     Create a measurement on the test persistence layer for serialization.
-
-     - Parameters:
-        - countOfGeoLocations: The amount of geo locations to create within the test measurement
-        - countOfAccelerations: The amount of accelerations to create within the test measurement
-     - Returns: The created test measurement
-     */
-    func fakeMeasurement(countOfGeoLocations: Int, countOfAccelerations: Int) throws -> MeasurementMO {
-        let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
-        measurement.accelerationsCount = Int32(countOfAccelerations)
-        measurement.synchronized = false
-        measurement.trackLength = Double.random(in: 0..<10_000.0)
-
-        try persistenceLayer.appendNewTrack(to: measurement)
-        var locations = [GeoLocation]()
-
-        for _ in 0..<countOfGeoLocations {
-            let location = GeoLocation(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: DataCapturingService.currentTimeInMillisSince1970())
-
-            locations.append(location)
-        }
-        try persistenceLayer.save(locations: locations, in: measurement)
-
-        var accelerations = [Acceleration]()
-        for _ in 0..<countOfAccelerations {
-            let acceleration = Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(), x: Double.random(in: -10.0...10.0), y: Double.random(in: -10.0...10.0), z: Double.random(in: -10.0...10.0))
-            accelerations.append(acceleration)
-        }
-        try persistenceLayer.save(accelerations: accelerations, in: measurement)
-
-        return measurement
     }
 }
