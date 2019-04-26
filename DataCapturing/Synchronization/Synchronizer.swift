@@ -30,7 +30,7 @@ import Alamofire
  Background synchronization is called as soon as WiFi becomes available or every 60 minutes.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.1.0
  - Since: 2.3.0
  */
 public class Synchronizer {
@@ -168,17 +168,21 @@ public class Synchronizer {
 
     /**
      Starts background synchronization as prepared in this objects initializer.
-
-     Synchronization is stopped automatically if there are no measurements left to synchronize.
-     You should restart this each time a new measurement has been finished.
      */
     public func activate() {
         if isReachable() {
             sync()
         }
         reachabilityManager.startListening()
-        // Try to synchronize once per hour
-        self.dataSynchronizationTimer.resume()
+        dataSynchronizationTimer.resume()
+    }
+
+    /**
+     Stops background synchronization.
+     */
+    public func deactivate() {
+        reachabilityManager.stopListening()
+        dataSynchronizationTimer.suspend()
     }
 
     // MARK: - Internal Methods

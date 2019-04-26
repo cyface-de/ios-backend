@@ -26,7 +26,7 @@ import CoreData
  This test is intended to test capturing some data in isolation.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.0.1
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {
@@ -51,7 +51,7 @@ class DataCapturingTests: XCTestCase {
         coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
         coreDataStack.setup(bundle: bundle)
         sensorManager = TestMotionManager()
-        oocut = TestDataCapturingService(sensorManager: sensorManager, dataManager: coreDataStack, synchronizer: nil) { _, _ in }
+        oocut = TestDataCapturingService(sensorManager: sensorManager, dataManager: coreDataStack) { _, _ in }
         oocut.coreLocationManager = TestLocationManager()
         persistenceLayer = PersistenceLayer(onManager: coreDataStack)
     }
@@ -256,29 +256,16 @@ class DataCapturingTests: XCTestCase {
         - Some unspecified errors from within CoreData.
      */
     func testLifecyclePerformance() throws {
-        // Run once so code is loaded faster for the measured runs.
         let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
         oocut.currentMeasurement = MeasurementEntity(identifier: measurement.identifier, context: .bike)
-        oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000)]
-        oocut.accelerationsCache = []
-        for i in 0...99 {
-            oocut.accelerationsCache.append(Acceleration(timestamp: 10_000 + Int64(i), x: 1.0, y: 1.0, z: 1.0))
-        }
-        oocut.saveCapturedData()
 
         measure {
-            do {
-                let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
-                oocut.currentMeasurement = MeasurementEntity(identifier: measurement.identifier, context: .bike)
-                oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000)]
-                oocut.accelerationsCache = []
-                for i in 0...99 {
-                    oocut.accelerationsCache.append(Acceleration(timestamp: 10_000 + Int64(i), x: 1.0, y: 1.0, z: 1.0))
-                }
-                oocut.saveCapturedData()
-            } catch {
-                XCTFail("\(error)")
+            oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000)]
+            oocut.accelerationsCache = []
+            for i in 0...99 {
+                oocut.accelerationsCache.append(Acceleration(timestamp: 10_000 + Int64(i), x: 1.0, y: 1.0, z: 1.0))
             }
+            oocut.saveCapturedData()
         }
     }
 }

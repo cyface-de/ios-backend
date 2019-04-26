@@ -270,7 +270,7 @@ public class ServerConnection {
  A structure encapsulating errors used by server connections.
 
  - Author: Klemens Muthmann
- - Version: 4.0.0
+ - Version: 4.1.0
  - Since: 1.0.0
  */
 public struct ServerConnectionError: Error {
@@ -307,7 +307,7 @@ public struct ServerConnectionError: Error {
      - Parameter error: The error to handle.
      - Returns: The error description shown by this method call.
      */
-    static func handle(error: ServerConnectionError) -> String {
+    public static func handle(error: ServerConnectionError) -> String {
         let readableError = """
         \nERROR - operation: [\(error.type)];
         reason: [\(error.verboseDescription)];

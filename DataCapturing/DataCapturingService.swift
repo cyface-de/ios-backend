@@ -28,7 +28,7 @@ import os.log
  To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided `Synchronizer`.
  
  - Author: Klemens Muthmann
- - Version: 8.1.3
+ - Version: 9.0.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -95,9 +95,6 @@ public class DataCapturingService: NSObject {
     /// A timer called in regular intervals to save the captured data to the underlying database.
     private var backgroundSynchronizationTimer: DispatchSourceTimer!
 
-    /// An optional API that is responsible for synchronizing data with a Cyface server.
-    public var synchronizer: Synchronizer?
-
     // MARK: - Initializers
 
     /**
@@ -111,7 +108,6 @@ public class DataCapturingService: NSObject {
         - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
         - savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
         - dataManager: The `CoreData` stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
-        - synchronizer: An optional instance of a `Synchronizer` used to transmit measured data to a server. If this is `nil` no data synchronization is going to happen.
         - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
      */
     public init(
@@ -119,7 +115,6 @@ public class DataCapturingService: NSObject {
         updateInterval interval: Double = 100,
         savingInterval time: TimeInterval = 30,
         dataManager: CoreDataManager,
-        synchronizer: Synchronizer?,
         eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) {
 
         self.isRunning = false
@@ -128,7 +123,6 @@ public class DataCapturingService: NSObject {
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
         self.handler = eventHandler
-        self.synchronizer = synchronizer
         self.savingInterval = time
 
         super.init()
@@ -194,10 +188,6 @@ public class DataCapturingService: NSObject {
             currentMeasurementEntity.synchronizable = true
             persistenceLayer.context?.saveRecursively()
             self.currentMeasurement = nil
-
-            if let synchronizer = synchronizer {
-                synchronizer.activate()
-            }
         }
     }
 

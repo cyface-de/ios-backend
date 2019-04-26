@@ -22,10 +22,13 @@ import Alamofire
 import os.log
 
 /**
- An authenticator using a combination of username and password to authenticate against a Cyface data collector server.
+ An authenticator using a combination of `username` and `password` to authenticate against a Cyface data collector server.
+
+ After creation of an instance of this class you need to provide a `username` and a `password`, before calling `authenticate`()`.
+ If no `username` or `password` is available the function will call its failure handler with the `ServerConnectionError.Category.notAuthenticated`.
 
  - Author: Klemens Muthmann
- - Version: 1.0.2
+ - Version: 2.0.0
  - Since: 2.0.0
  */
 public class CredentialsAuthenticator: Authenticator {
@@ -33,52 +36,55 @@ public class CredentialsAuthenticator: Authenticator {
     // MARK: - Properties
 
     /// The logger used for objects of this class.
-    private static let oslog = OSLog(subsystem: "de.cyface", category: "CredentialsAuthenticator")
+    private static let log = OSLog(subsystem: "de.cyface", category: "CredentialsAuthenticator")
     /// The username used for authentication.
-    private let username: String
+    public var username: String?
     /// The password used for authentication.
-    private let password: String
+    public var password: String?
     /// The location of the Cyface Collector API, used for authentication.
-    private let authenticationEndpoint: URL
+    public var authenticationEndpoint: URL
 
     // MARK: - Initializers
 
     /**
-     Creates a new completely initialized but not yet authenticated `Authenticator`.
+     Creates a new not yet authenticated `Authenticator`.
+     To authenticate you need to provide a valid `username` and `password` and call `authenticate(:(String) -> Void, :(Error) -> Void)` afterwards.
 
      - Parameters:
-     - username: The username used for authentication.
-     - password: The password used for authentication.
-     - authenticationEndpoint: The location of the Cyface Collector API, used for authentication.
+        - authenticationEndpoint: The location of the Cyface Collector API, used for authentication.
      */
-    public required init(username: String, password: String, authenticationEndpoint: URL) {
-        self.username = username
-        self.password = password
+    public required init(authenticationEndpoint: URL) {
         self.authenticationEndpoint = authenticationEndpoint
     }
 
     // MARK: - Methods
 
     public func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
-        // This is hardcoded JSON. It should not fail so we may use try!
+        guard let username = username else {
+            return onFailure(ServerConnectionError(type: .notAuthenticated, verboseDescription: "Missing username!", inMethodName: #function, inFileName: #file, atLineNumber: #line))
+        }
+
+        guard let password = password else {
+            return onFailure(ServerConnectionError(type: .notAuthenticated, verboseDescription: "Missing password!", inMethodName: #function, inFileName: #file, atLineNumber: #line))
+        }
+
         // Does this have the potential for some kind of injection attack?
         do {
-        let jsonCredentials = try JSONSerialization.data(withJSONObject: ["username": username, "password": password])
-        let url = authenticationEndpoint.appendingPathComponent("login")
+            let jsonCredentials = try JSONSerialization.data(withJSONObject: ["username": username, "password": password])
+            let url = authenticationEndpoint.appendingPathComponent("login")
 
-        Networking.sharedInstance.sessionManager.upload(jsonCredentials, to: url, method: .post, headers: nil).response { response in
-            guard let httpResponse = response.response else {
-                os_log("Unable to unwrap authentication response!", log: CredentialsAuthenticator.oslog, type: OSLogType.error)
-                onFailure(ServerConnectionError(type: .authenticationNotSuccessful, verboseDescription: "Unable to unwrap authentication response!", inMethodName: #function, inFileName: #file, atLineNumber: #line))
-                return
-            }
+            Networking.sharedInstance.sessionManager.upload(jsonCredentials, to: url, method: .post, headers: nil).response { response in
+                guard let httpResponse = response.response else {
+                    os_log("Unable to unwrap authentication response!", log: CredentialsAuthenticator.log, type: OSLogType.error)
+                    return onFailure(ServerConnectionError(type: .authenticationNotSuccessful, verboseDescription: "Unable to unwrap authentication response!", inMethodName: #function, inFileName: #file, atLineNumber: #line))
+                }
 
-            if httpResponse.statusCode==200, let authorizationValue = httpResponse.allHeaderFields["Authorization"] as? String {
-                onSuccess(authorizationValue)
-            } else {
-                onFailure(ServerConnectionError(type: .authenticationNotSuccessful, verboseDescription: "Authentication was not successful!", inMethodName: #function, inFileName: #file, atLineNumber: #line))
+                if httpResponse.statusCode==200, let authorizationValue = httpResponse.allHeaderFields["Authorization"] as? String {
+                    onSuccess(authorizationValue)
+                } else {
+                    onFailure(ServerConnectionError(type: .authenticationNotSuccessful, verboseDescription: "Authentication was not successful!", inMethodName: #function, inFileName: #file, atLineNumber: #line))
+                }
             }
-        }
         } catch let error {
             onFailure(error)
         }
