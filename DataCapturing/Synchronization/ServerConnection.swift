@@ -307,7 +307,7 @@ public struct ServerConnectionError: Error {
      - Parameter error: The error to handle.
      - Returns: The error description shown by this method call.
      */
-    static func handle(error: ServerConnectionError) -> String {
+    public static func handle(error: ServerConnectionError) -> String {
         let readableError = """
         \nERROR - operation: [\(error.type)];
         reason: [\(error.verboseDescription)];
