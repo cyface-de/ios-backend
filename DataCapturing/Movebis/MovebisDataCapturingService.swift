@@ -30,7 +30,7 @@ import os.log
  The instance you provide will receive the updates.
  
  - Author: Klemens Muthmann
- - Version: 4.2.1
+ - Version: 4.2.2
  - Since: 1.0.0
  */
 public class MovebisDataCapturingService: DataCapturingService {

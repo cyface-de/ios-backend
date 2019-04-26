@@ -270,7 +270,7 @@ public class ServerConnection {
  A structure encapsulating errors used by server connections.
 
  - Author: Klemens Muthmann
- - Version: 4.0.0
+ - Version: 4.1.0
  - Since: 1.0.0
  */
 public struct ServerConnectionError: Error {
