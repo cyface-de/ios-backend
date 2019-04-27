@@ -125,7 +125,7 @@ class MeasurementSerializer: BinarySerializer {
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(0)))
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(0)))
 
-        return Data(bytes: dataArray)
+        return Data(dataArray)
     }
 }
 
@@ -166,7 +166,7 @@ class AccelerationSerializer: BinarySerializer {
             // 32 Bytes
         }
 
-        return Data(bytes: ret)
+        return Data(ret)
     }
 
     /**
@@ -247,7 +247,7 @@ class GeoLocationSerializer: BinarySerializer {
             // = 36 Bytes
         }
 
-        return Data(bytes: ret)
+        return Data(ret)
     }
 }
 
@@ -255,10 +255,10 @@ class GeoLocationSerializer: BinarySerializer {
  Transforms measurement data into the Cyface binary format used for transmission via the network.
  
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.1.0
  - Since: 1.0.0
  */
-class CyfaceBinaryFormatSerializer {
+public class CyfaceBinaryFormatSerializer {
     /// Serializer to transform measurement objects
     let measurementSerializer = MeasurementSerializer()
     /// Serializer to transform acceleration objects
@@ -273,7 +273,7 @@ class CyfaceBinaryFormatSerializer {
      - Throws:
         - `SerializationError.compressionFailed` if compression was not successful.
      */
-    func serializeCompressed(_ measurement: MeasurementMO) throws -> Data {
+    public func serializeCompressed(_ measurement: MeasurementMO) throws -> Data {
         let res = try serialize(measurement)
 
         guard let compressed = res.deflate() else {
@@ -340,6 +340,10 @@ extension BinaryInteger {
  case missingData
  case invalidData
  ````
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 1.0.0
  */
 enum SerializationError: Error {
     /// Thrown if compression of serialized data was not successful.
@@ -359,6 +363,10 @@ enum SerializationError: Error {
  case bigEndian
  case littleEndian
  ````
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.1
+ - Since: 2.3.0
  */
 enum ByteOrder {
     /// Big endian byte order. The byte with the highest order is the first.
@@ -394,9 +402,9 @@ enum ByteOrder {
 
         switch self {
         case .bigEndian:
-            return Int64(bigEndian: data.withUnsafeBytes {$0.pointee})
+            return Int64(bigEndian: data.withUnsafeBytes { $0.load(as: Int64.self) })
         case .littleEndian:
-            return Int64(bigEndian: data.withUnsafeBytes {$0.pointee})
+            return Int64(bigEndian: data.withUnsafeBytes { $0.load(as: Int64.self) })
         }
     }
 
@@ -415,9 +423,9 @@ enum ByteOrder {
 
         switch self {
         case .bigEndian:
-            return Double(bitPattern: UInt64(bigEndian: data.withUnsafeBytes {$0.pointee}))
+            return Double(bitPattern: UInt64(bigEndian: data.withUnsafeBytes { $0.load(as: UInt64.self) }))
         case .littleEndian:
-            return Double(bitPattern: UInt64(littleEndian: data.withUnsafeBytes {$0.pointee}))
+            return Double(bitPattern: UInt64(littleEndian: data.withUnsafeBytes { $0.load(as: UInt64.self) }))
         }
     }
 }

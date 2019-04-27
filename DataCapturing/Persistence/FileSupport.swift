@@ -43,8 +43,8 @@ protocol FileSupport {
      Appends data to a file for a certain measurement.
      
      - Parameters:
-     - serializable: The data to append.
-     - to: The measurement to append the data to.
+        - serializable: The data to append.
+        - to: The measurement to append the data to.
      - Throws: If accessing the data file has not been successful.
      - Returns: The local URL identifying the file to write to.
      */
@@ -145,10 +145,11 @@ public struct AccelerationsFile: FileSupport {
 
     /**
      Writes the provided accelerations to the provided measurement.
+     
 
      - Parameters:
-     - serializable: The array of `Acceleration` instances to write.
-     - to: The measurement to write the accelerations to.
+        - serializable: The array of `Acceleration` instances to write.
+        - to: The measurement to write the accelerations to.
      - Returns: The file system URL of the file that was written to.
      - Throws:
         - Some internal file system error on failure of creating the file at the required path.
@@ -207,7 +208,7 @@ public struct AccelerationsFile: FileSupport {
  Struct implementing the `FileSupport` protocol to serialize whole measurements to a file in Cyface binary format.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.0.1
  - Since: 2.0.0
  */
 struct MeasurementFile: FileSupport {
@@ -233,8 +234,8 @@ struct MeasurementFile: FileSupport {
      Write a file containing a serialized measurement in Cyface Binary Format, to the local file system data storage.
 
      - Parameters:
-     - serializable: The measurement to write.
-     - to: The measurement to write to.
+        - serializable: The measurement to write.
+        - to: The measurement to write to.
      - Returns: A file system URL pointing to the written file.
      - Throws:
         - `SerializationError.missingData` If no track data was found.
@@ -269,7 +270,7 @@ struct MeasurementFile: FileSupport {
     func data(from serializable: MeasurementMO) throws -> Data? {
         let serializer = CyfaceBinaryFormatSerializer()
 
-        return try serializer.serialize(serializable)
+        return try serializer.serializeCompressed(serializable)
     }
 }
 

@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		30A4E7EA52EAB8AE9CFA0DAB /* Pods_DataCapturing_DataCapturingTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D422788B56EAAC38E875E6 /* Pods_DataCapturing_DataCapturingTests.framework */; };
 		3D0511D7204D267600967898 /* MovebisDataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511D6204D267600967898 /* MovebisDataCapturingService.swift */; };
 		3D0511E7204D622700967898 /* SerializationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511E5204D622700967898 /* SerializationTest.swift */; };
 		3D0511ED204ED0C200967898 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0511EC204ED0C200967898 /* PersistenceTests.swift */; };
+		3D064ADA22719833003E9205 /* V4TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3D064AD922719832003E9205 /* V4TestData.sqlite */; };
 		3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */; };
 		3D0BDEAB1FB1B951004EA25E /* DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */; };
 		3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */; };
@@ -19,12 +19,29 @@
 		3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */; };
 		3D1505EC213E9F3A002994D2 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		3D1505EE213EA68D002994D2 /* DataCapturingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1505ED213EA68D002994D2 /* DataCapturingError.swift */; };
+		3D1D9A87224BAA8B0053B1B7 /* CoreDataMigrationVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1D9A86224BAA8B0053B1B7 /* CoreDataMigrationVersion.swift */; };
+		3D1D9A89224BACF20053B1B7 /* CoreDataMigrationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1D9A88224BACF20053B1B7 /* CoreDataMigrationStep.swift */; };
+		3D1D9A8B224BB1CE0053B1B7 /* CoreDataMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1D9A8A224BB1CE0053B1B7 /* CoreDataMigrator.swift */; };
+		3D1D9A8D224CC4080053B1B7 /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1D9A8C224CC4080053B1B7 /* CoreDataManager.swift */; };
+		3D1D9A8F224D28190053B1B7 /* DataSetCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1D9A8E224D28190053B1B7 /* DataSetCreator.swift */; };
+		3D1D9A94224D4F420053B1B7 /* V2TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3D1D9A91224D4F420053B1B7 /* V2TestData.sqlite */; };
+		3D1D9A95224D4F420053B1B7 /* V3TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3D1D9A92224D4F420053B1B7 /* V3TestData.sqlite */; };
+		3D1D9A96224D4F420053B1B7 /* V1TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3D1D9A93224D4F420053B1B7 /* V1TestData.sqlite */; };
+		3D3A7DD02258C9440019998A /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3A7DCF2258C9440019998A /* LocationManager.swift */; };
+		3D3A7DD22258E39B0019998A /* TestLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3A7DD12258E39B0019998A /* TestLocationManager.swift */; };
+		3D3A7DE72268C7160019998A /* RepeatingTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3A7DE62268C7160019998A /* RepeatingTimer.swift */; };
+		3D3A7DFC226F10BA0019998A /* ServerConnectionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3A7DFB226F10BA0019998A /* ServerConnectionTest.swift */; };
+		3D4A9402224E7986008A54AE /* V3toV4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A9401224E7986008A54AE /* V3toV4.xcmappingmodel */; };
 		3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79D2136F045003F53C9 /* BinarySerializer.swift */; };
 		3D58B7A02136F046003F53C9 /* FileSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D58B79E2136F045003F53C9 /* FileSupport.swift */; };
 		3D7EC16B2212ED0900F33E81 /* Synchronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7EC16A2212ED0900F33E81 /* Synchronizer.swift */; };
 		3D8CC22020A6D89A0095CCD4 /* GeoLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */; };
 		3D8CC22120A6D89A0095CCD4 /* Measurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */; };
 		3D8CC22220A6D89A0095CCD4 /* Acceleration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21F20A6D89A0095CCD4 /* Acceleration.swift */; };
+		3D8E524D223EB240004D7E2B /* TestMotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8E524C223EB240004D7E2B /* TestMotionManager.swift */; };
+		3D8E524F223EB2A1004D7E2B /* TestDataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8E524E223EB2A1004D7E2B /* TestDataCapturingService.swift */; };
+		3D8E5254223F921F004D7E2B /* MeasurementToMeasurementPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8E5253223F921F004D7E2B /* MeasurementToMeasurementPolicy.swift */; };
+		3D8E5256223FDC8E004D7E2B /* DataMigrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8E5255223FDC8E004D7E2B /* DataMigrationTest.swift */; };
 		3D8FAD7E222E913600D98D65 /* MeasurementMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8FAD78222E913500D98D65 /* MeasurementMO+CoreDataClass.swift */; };
 		3D8FAD7F222E913600D98D65 /* Track+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8FAD79222E913500D98D65 /* Track+CoreDataClass.swift */; };
 		3D8FAD80222E913600D98D65 /* GeoLocationMO+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8FAD7A222E913500D98D65 /* GeoLocationMO+CoreDataClass.swift */; };
@@ -42,7 +59,8 @@
 		3DF7E138220C3D42007CFF83 /* DistanceCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */; };
 		3DF7E174220F65EC007CFF83 /* Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E173220F65EC007CFF83 /* Status.swift */; };
 		3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */; };
-		D87DE907A7DC829BBD4DE7C8 /* Pods_DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB078A2A386F33146AA49681 /* Pods_DataCapturing.framework */; };
+		7FF23B8FE3F50F918F182109 /* Pods_DataCapturing_DataCapturingTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A390C666D826702A387F1CD /* Pods_DataCapturing_DataCapturingTests.framework */; };
+		93BDCD309E3AC506DFA0367A /* Pods_DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EA6D676458F65120939581D /* Pods_DataCapturing.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,10 +74,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1C3E9AFC6549AA3459D67085 /* Pods-DataCapturing-DataCapturingTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing-DataCapturingTests.debug.xcconfig"; path = "Target Support Files/Pods-DataCapturing-DataCapturingTests/Pods-DataCapturing-DataCapturingTests.debug.xcconfig"; sourceTree = "<group>"; };
+		0EA6D676458F65120939581D /* Pods_DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D0511D6204D267600967898 /* MovebisDataCapturingService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovebisDataCapturingService.swift; sourceTree = "<group>"; };
 		3D0511E5204D622700967898 /* SerializationTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerializationTest.swift; sourceTree = "<group>"; };
 		3D0511EC204ED0C200967898 /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
+		3D064AD922719832003E9205 /* V4TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V4TestData.sqlite; sourceTree = "<group>"; };
 		3D0A8B991FE1074B002A5813 /* DataCapturingEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingEvent.swift; sourceTree = "<group>"; };
 		3D0BDEA11FB1B951004EA25E /* DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D0BDEA41FB1B951004EA25E /* DataCapturing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataCapturing.h; sourceTree = "<group>"; };
@@ -70,13 +89,30 @@
 		3D0BDEBB1FB1C1AE004EA25E /* DataCapturingService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCapturingService.swift; sourceTree = "<group>"; };
 		3D0BDEC01FB1C1AE004EA25E /* DiskConsumption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiskConsumption.swift; sourceTree = "<group>"; };
 		3D1505ED213EA68D002994D2 /* DataCapturingError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCapturingError.swift; sourceTree = "<group>"; };
+		3D1D9A86224BAA8B0053B1B7 /* CoreDataMigrationVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMigrationVersion.swift; sourceTree = "<group>"; };
+		3D1D9A88224BACF20053B1B7 /* CoreDataMigrationStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMigrationStep.swift; sourceTree = "<group>"; };
+		3D1D9A8A224BB1CE0053B1B7 /* CoreDataMigrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMigrator.swift; sourceTree = "<group>"; };
+		3D1D9A8C224CC4080053B1B7 /* CoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
+		3D1D9A8E224D28190053B1B7 /* DataSetCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSetCreator.swift; sourceTree = "<group>"; };
+		3D1D9A91224D4F420053B1B7 /* V2TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V2TestData.sqlite; sourceTree = "<group>"; };
+		3D1D9A92224D4F420053B1B7 /* V3TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V3TestData.sqlite; sourceTree = "<group>"; };
+		3D1D9A93224D4F420053B1B7 /* V1TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V1TestData.sqlite; sourceTree = "<group>"; };
 		3D20D1CE222029C900A0538D /* Alamofire.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D3A7DCF2258C9440019998A /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		3D3A7DD12258E39B0019998A /* TestLocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestLocationManager.swift; sourceTree = "<group>"; };
+		3D3A7DE62268C7160019998A /* RepeatingTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatingTimer.swift; sourceTree = "<group>"; };
+		3D3A7DFB226F10BA0019998A /* ServerConnectionTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConnectionTest.swift; sourceTree = "<group>"; };
+		3D4A9401224E7986008A54AE /* V3toV4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = V3toV4.xcmappingmodel; sourceTree = "<group>"; };
 		3D58B79D2136F045003F53C9 /* BinarySerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinarySerializer.swift; sourceTree = "<group>"; };
 		3D58B79E2136F045003F53C9 /* FileSupport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileSupport.swift; sourceTree = "<group>"; };
 		3D7EC16A2212ED0900F33E81 /* Synchronizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Synchronizer.swift; sourceTree = "<group>"; };
 		3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeoLocation.swift; sourceTree = "<group>"; };
 		3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Measurement.swift; sourceTree = "<group>"; };
 		3D8CC21F20A6D89A0095CCD4 /* Acceleration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Acceleration.swift; sourceTree = "<group>"; };
+		3D8E524C223EB240004D7E2B /* TestMotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestMotionManager.swift; sourceTree = "<group>"; };
+		3D8E524E223EB2A1004D7E2B /* TestDataCapturingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDataCapturingService.swift; sourceTree = "<group>"; };
+		3D8E5253223F921F004D7E2B /* MeasurementToMeasurementPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementToMeasurementPolicy.swift; sourceTree = "<group>"; };
+		3D8E5255223FDC8E004D7E2B /* DataMigrationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataMigrationTest.swift; sourceTree = "<group>"; };
 		3D8FAD78222E913500D98D65 /* MeasurementMO+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MeasurementMO+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3D8FAD79222E913500D98D65 /* Track+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Track+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3D8FAD7A222E913500D98D65 /* GeoLocationMO+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GeoLocationMO+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -96,12 +132,13 @@
 		3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistanceCalculationStrategy.swift; sourceTree = "<group>"; };
 		3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistanceCalculationTests.swift; sourceTree = "<group>"; };
 		3DF7E173220F65EC007CFF83 /* Status.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
+		3DF85FD42270F88200A6C80A /* 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 5.xcdatamodel; sourceTree = "<group>"; };
 		3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeasurementContext.swift; sourceTree = "<group>"; };
-		6E7DD1855E9F96C549806EBD /* Pods-DataCapturing.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.debug.xcconfig"; path = "Target Support Files/Pods-DataCapturing/Pods-DataCapturing.debug.xcconfig"; sourceTree = "<group>"; };
-		84D422788B56EAAC38E875E6 /* Pods_DataCapturing_DataCapturingTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataCapturing_DataCapturingTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		BB078A2A386F33146AA49681 /* Pods_DataCapturing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CE6584377EF27FF831E7DEB0 /* Pods-DataCapturing-DataCapturingTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing-DataCapturingTests.release.xcconfig"; path = "Target Support Files/Pods-DataCapturing-DataCapturingTests/Pods-DataCapturing-DataCapturingTests.release.xcconfig"; sourceTree = "<group>"; };
-		EB0B604C6728A7C363ED51C4 /* Pods-DataCapturing.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.release.xcconfig"; path = "Target Support Files/Pods-DataCapturing/Pods-DataCapturing.release.xcconfig"; sourceTree = "<group>"; };
+		418D66E641571506040C7316 /* Pods-DataCapturing-DataCapturingTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing-DataCapturingTests.debug.xcconfig"; path = "Target Support Files/Pods-DataCapturing-DataCapturingTests/Pods-DataCapturing-DataCapturingTests.debug.xcconfig"; sourceTree = "<group>"; };
+		69089A881E653FB9864FB3D5 /* Pods-DataCapturing.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.debug.xcconfig"; path = "Target Support Files/Pods-DataCapturing/Pods-DataCapturing.debug.xcconfig"; sourceTree = "<group>"; };
+		9A390C666D826702A387F1CD /* Pods_DataCapturing_DataCapturingTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataCapturing_DataCapturingTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9CF5004576627914BE728929 /* Pods-DataCapturing.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.release.xcconfig"; path = "Target Support Files/Pods-DataCapturing/Pods-DataCapturing.release.xcconfig"; sourceTree = "<group>"; };
+		EC71CBA1AEB1C2464E6AE0E6 /* Pods-DataCapturing-DataCapturingTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing-DataCapturingTests.release.xcconfig"; path = "Target Support Files/Pods-DataCapturing-DataCapturingTests/Pods-DataCapturing-DataCapturingTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,7 +146,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D87DE907A7DC829BBD4DE7C8 /* Pods_DataCapturing.framework in Frameworks */,
+				93BDCD309E3AC506DFA0367A /* Pods_DataCapturing.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,7 +155,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D0BDEAB1FB1B951004EA25E /* DataCapturing.framework in Frameworks */,
-				30A4E7EA52EAB8AE9CFA0DAB /* Pods_DataCapturing_DataCapturingTests.framework in Frameworks */,
+				7FF23B8FE3F50F918F182109 /* Pods_DataCapturing_DataCapturingTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,10 +165,10 @@
 		34BEA5A794596E073679035C /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				6E7DD1855E9F96C549806EBD /* Pods-DataCapturing.debug.xcconfig */,
-				EB0B604C6728A7C363ED51C4 /* Pods-DataCapturing.release.xcconfig */,
-				1C3E9AFC6549AA3459D67085 /* Pods-DataCapturing-DataCapturingTests.debug.xcconfig */,
-				CE6584377EF27FF831E7DEB0 /* Pods-DataCapturing-DataCapturingTests.release.xcconfig */,
+				69089A881E653FB9864FB3D5 /* Pods-DataCapturing.debug.xcconfig */,
+				9CF5004576627914BE728929 /* Pods-DataCapturing.release.xcconfig */,
+				418D66E641571506040C7316 /* Pods-DataCapturing-DataCapturingTests.debug.xcconfig */,
+				EC71CBA1AEB1C2464E6AE0E6 /* Pods-DataCapturing-DataCapturingTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -171,6 +208,8 @@
 				3D1505ED213EA68D002994D2 /* DataCapturingError.swift */,
 				3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */,
 				3DF7E173220F65EC007CFF83 /* Status.swift */,
+				3D3A7DCF2258C9440019998A /* LocationManager.swift */,
+				3D3A7DE62268C7160019998A /* RepeatingTimer.swift */,
 			);
 			path = DataCapturing;
 			sourceTree = "<group>";
@@ -178,13 +217,37 @@
 		3D0BDEAE1FB1B951004EA25E /* DataCapturingTests */ = {
 			isa = PBXGroup;
 			children = (
+				3D1D9A90224D4F420053B1B7 /* Resources */,
+				3D8E524B223EB220004D7E2B /* Support */,
+				3D8E5255223FDC8E004D7E2B /* DataMigrationTest.swift */,
 				3D0BDEAF1FB1B951004EA25E /* DataCapturingTests.swift */,
 				3D0511E5204D622700967898 /* SerializationTest.swift */,
 				3D0BDEB11FB1B951004EA25E /* Info.plist */,
 				3D0511EC204ED0C200967898 /* PersistenceTests.swift */,
 				3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */,
+				3D3A7DFB226F10BA0019998A /* ServerConnectionTest.swift */,
 			);
 			path = DataCapturingTests;
+			sourceTree = "<group>";
+		};
+		3D1D9A90224D4F420053B1B7 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3D064AD922719832003E9205 /* V4TestData.sqlite */,
+				3D1D9A91224D4F420053B1B7 /* V2TestData.sqlite */,
+				3D1D9A92224D4F420053B1B7 /* V3TestData.sqlite */,
+				3D1D9A93224D4F420053B1B7 /* V1TestData.sqlite */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		3D370D502244C06E00351289 /* V3toV4 */ = {
+			isa = PBXGroup;
+			children = (
+				3D8E5253223F921F004D7E2B /* MeasurementToMeasurementPolicy.swift */,
+				3D4A9401224E7986008A54AE /* V3toV4.xcmappingmodel */,
+			);
+			path = V3toV4;
 			sourceTree = "<group>";
 		};
 		3D58B79A2136EEA5003F53C9 /* Persistence */ = {
@@ -195,6 +258,29 @@
 				3D58B79E2136F045003F53C9 /* FileSupport.swift */,
 			);
 			path = Persistence;
+			sourceTree = "<group>";
+		};
+		3D8E524B223EB220004D7E2B /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				3D8E524C223EB240004D7E2B /* TestMotionManager.swift */,
+				3D8E524E223EB2A1004D7E2B /* TestDataCapturingService.swift */,
+				3D1D9A8E224D28190053B1B7 /* DataSetCreator.swift */,
+				3D3A7DD12258E39B0019998A /* TestLocationManager.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		3D8E5252223F91FE004D7E2B /* Migrations */ = {
+			isa = PBXGroup;
+			children = (
+				3D370D502244C06E00351289 /* V3toV4 */,
+				3D1D9A86224BAA8B0053B1B7 /* CoreDataMigrationVersion.swift */,
+				3D1D9A88224BACF20053B1B7 /* CoreDataMigrationStep.swift */,
+				3D1D9A8A224BB1CE0053B1B7 /* CoreDataMigrator.swift */,
+				3D1D9A8C224CC4080053B1B7 /* CoreDataManager.swift */,
+			);
+			path = Migrations;
 			sourceTree = "<group>";
 		};
 		3DC6A7192052F14900E7CB84 /* Movebis */ = {
@@ -208,6 +294,7 @@
 		3DE419E31FD193D7001282D0 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				3D8E5252223F91FE004D7E2B /* Migrations */,
 				3D8FAD7A222E913500D98D65 /* GeoLocationMO+CoreDataClass.swift */,
 				3D8FAD7C222E913500D98D65 /* GeoLocationMO+CoreDataProperties.swift */,
 				3D8FAD79222E913500D98D65 /* Track+CoreDataClass.swift */,
@@ -240,8 +327,8 @@
 			isa = PBXGroup;
 			children = (
 				3D20D1CE222029C900A0538D /* Alamofire.framework */,
-				BB078A2A386F33146AA49681 /* Pods_DataCapturing.framework */,
-				84D422788B56EAAC38E875E6 /* Pods_DataCapturing_DataCapturingTests.framework */,
+				0EA6D676458F65120939581D /* Pods_DataCapturing.framework */,
+				9A390C666D826702A387F1CD /* Pods_DataCapturing_DataCapturingTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -264,7 +351,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3D0BDEB51FB1B951004EA25E /* Build configuration list for PBXNativeTarget "DataCapturing" */;
 			buildPhases = (
-				433357D4F60B3B6973CF4935 /* [CP] Check Pods Manifest.lock */,
+				B9D7C9A6100AA8763BA26A2D /* [CP] Check Pods Manifest.lock */,
 				3D0BDE9C1FB1B951004EA25E /* Sources */,
 				3D0BDE9D1FB1B951004EA25E /* Frameworks */,
 				3D0BDE9E1FB1B951004EA25E /* Headers */,
@@ -284,12 +371,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3D0BDEB81FB1B951004EA25E /* Build configuration list for PBXNativeTarget "DataCapturingTests" */;
 			buildPhases = (
-				16A06E4AD8EA65DA8EF0C6B7 /* [CP] Check Pods Manifest.lock */,
+				FBF370AAFDA15BB01A5A242D /* [CP] Check Pods Manifest.lock */,
 				3D0BDEA61FB1B951004EA25E /* Sources */,
 				3D0BDEA71FB1B951004EA25E /* Frameworks */,
 				3D0BDEA81FB1B951004EA25E /* Resources */,
 				3D8CC21C20A6D84F0095CCD4 /* ShellScript */,
-				7F745AD010E26FEDD3D62BD7 /* [CP] Embed Pods Frameworks */,
+				2EC4BCBF61547BB9E759F019 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -313,12 +400,12 @@
 				TargetAttributes = {
 					3D0BDEA01FB1B951004EA25E = {
 						CreatedOnToolsVersion = 9.1;
-						LastSwiftMigration = 1000;
+						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
 					};
 					3D0BDEA91FB1B951004EA25E = {
 						CreatedOnToolsVersion = 9.1;
-						LastSwiftMigration = 1000;
+						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -329,6 +416,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 3D0BDE971FB1B951004EA25E;
 			productRefGroup = 3D0BDEA21FB1B951004EA25E /* Products */;
@@ -353,13 +441,17 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D1D9A95224D4F420053B1B7 /* V3TestData.sqlite in Resources */,
+				3D064ADA22719833003E9205 /* V4TestData.sqlite in Resources */,
+				3D1D9A96224D4F420053B1B7 /* V1TestData.sqlite in Resources */,
+				3D1D9A94224D4F420053B1B7 /* V2TestData.sqlite in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		16A06E4AD8EA65DA8EF0C6B7 /* [CP] Check Pods Manifest.lock */ = {
+		2EC4BCBF61547BB9E759F019 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -367,18 +459,20 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
+				"${PODS_ROOT}/Target Support Files/Pods-DataCapturing-DataCapturingTests/Pods-DataCapturing-DataCapturingTests-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/DataCompression/DataCompression.framework",
 			);
-			name = "[CP] Check Pods Manifest.lock";
+			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-DataCapturing-DataCapturingTests-checkManifestLockResult.txt",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DataCompression.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DataCapturing-DataCapturingTests/Pods-DataCapturing-DataCapturingTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		3D8CC21C20A6D84F0095CCD4 /* ShellScript */ = {
@@ -407,7 +501,7 @@
 			shellPath = /bin/sh;
 			shellScript = "if which swiftlint >/dev/null; then\n    swiftlint\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi";
 		};
-		433357D4F60B3B6973CF4935 /* [CP] Check Pods Manifest.lock */ = {
+		B9D7C9A6100AA8763BA26A2D /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -429,7 +523,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		7F745AD010E26FEDD3D62BD7 /* [CP] Embed Pods Frameworks */ = {
+		FBF370AAFDA15BB01A5A242D /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -437,20 +531,18 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-DataCapturing-DataCapturingTests/Pods-DataCapturing-DataCapturingTests-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
-				"${BUILT_PRODUCTS_DIR}/DataCompression/DataCompression.framework",
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
-			name = "[CP] Embed Pods Frameworks";
+			name = "[CP] Check Pods Manifest.lock";
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DataCompression.framework",
+				"$(DERIVED_FILE_DIR)/Pods-DataCapturing-DataCapturingTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DataCapturing-DataCapturingTests/Pods-DataCapturing-DataCapturingTests-frameworks.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -464,6 +556,7 @@
 				3DF7E10B21F60AFC007CFF83 /* Authenticator.swift in Sources */,
 				3DF7E174220F65EC007CFF83 /* Status.swift in Sources */,
 				3D0A8B9A1FE1074B002A5813 /* DataCapturingEvent.swift in Sources */,
+				3D1D9A8D224CC4080053B1B7 /* CoreDataManager.swift in Sources */,
 				3DF7E10721F60AFC007CFF83 /* CredentialsAuthenticator.swift in Sources */,
 				3D8FAD7F222E913600D98D65 /* Track+CoreDataClass.swift in Sources */,
 				3D8FAD83222E913600D98D65 /* MeasurementMO+CoreDataProperties.swift in Sources */,
@@ -471,23 +564,30 @@
 				3D0BDEC11FB1C1AE004EA25E /* DataCapturingService.swift in Sources */,
 				3D8FAD82222E913600D98D65 /* GeoLocationMO+CoreDataProperties.swift in Sources */,
 				3DF7E10021F60AB1007CFF83 /* PersistenceLayer.swift in Sources */,
+				3D8E5254223F921F004D7E2B /* MeasurementToMeasurementPolicy.swift in Sources */,
 				3DF7E136220C3974007CFF83 /* DistanceCalculationStrategy.swift in Sources */,
 				3D0511D7204D267600967898 /* MovebisDataCapturingService.swift in Sources */,
 				3D58B79F2136F046003F53C9 /* BinarySerializer.swift in Sources */,
 				3D8CC22220A6D89A0095CCD4 /* Acceleration.swift in Sources */,
+				3D3A7DD02258C9440019998A /* LocationManager.swift in Sources */,
 				3D8FAD81222E913600D98D65 /* Track+CoreDataProperties.swift in Sources */,
 				3D8FAD80222E913600D98D65 /* GeoLocationMO+CoreDataClass.swift in Sources */,
 				3DF7E10821F60AFC007CFF83 /* ServerConnection.swift in Sources */,
 				3D58B7A02136F046003F53C9 /* FileSupport.swift in Sources */,
+				3D4A9402224E7986008A54AE /* V3toV4.xcmappingmodel in Sources */,
 				3D8CC22020A6D89A0095CCD4 /* GeoLocation.swift in Sources */,
 				3D7EC16B2212ED0900F33E81 /* Synchronizer.swift in Sources */,
+				3D1D9A87224BAA8B0053B1B7 /* CoreDataMigrationVersion.swift in Sources */,
 				3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */,
+				3D1D9A8B224BB1CE0053B1B7 /* CoreDataMigrator.swift in Sources */,
 				3D8FAD7E222E913600D98D65 /* MeasurementMO+CoreDataClass.swift in Sources */,
 				3D1505EE213EA68D002994D2 /* DataCapturingError.swift in Sources */,
 				3DF7E133220C36BD007CFF83 /* CyfaceModel.xcdatamodeld in Sources */,
+				3D3A7DE72268C7160019998A /* RepeatingTimer.swift in Sources */,
 				3DF7E10921F60AFC007CFF83 /* StaticAuthenticator.swift in Sources */,
 				3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */,
 				3D8CC22120A6D89A0095CCD4 /* Measurement.swift in Sources */,
+				3D1D9A89224BACF20053B1B7 /* CoreDataMigrationStep.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -495,10 +595,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D8E5256223FDC8E004D7E2B /* DataMigrationTest.swift in Sources */,
 				3D0511E7204D622700967898 /* SerializationTest.swift in Sources */,
+				3D8E524D223EB240004D7E2B /* TestMotionManager.swift in Sources */,
 				3D0511ED204ED0C200967898 /* PersistenceTests.swift in Sources */,
+				3D3A7DFC226F10BA0019998A /* ServerConnectionTest.swift in Sources */,
+				3D8E524F223EB2A1004D7E2B /* TestDataCapturingService.swift in Sources */,
+				3D3A7DD22258E39B0019998A /* TestLocationManager.swift in Sources */,
 				3DF7E138220C3D42007CFF83 /* DistanceCalculationTests.swift in Sources */,
 				3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */,
+				3D1D9A8F224D28190053B1B7 /* DataSetCreator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -632,7 +738,7 @@
 		};
 		3D0BDEB61FB1B951004EA25E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6E7DD1855E9F96C549806EBD /* Pods-DataCapturing.debug.xcconfig */;
+			baseConfigurationReference = 69089A881E653FB9864FB3D5 /* Pods-DataCapturing.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
@@ -652,14 +758,14 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
 		3D0BDEB71FB1B951004EA25E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EB0B604C6728A7C363ED51C4 /* Pods-DataCapturing.release.xcconfig */;
+			baseConfigurationReference = 9CF5004576627914BE728929 /* Pods-DataCapturing.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CLANG_ENABLE_MODULES = YES;
@@ -676,14 +782,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.DataCapturing;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
 		3D0BDEB91FB1B951004EA25E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1C3E9AFC6549AA3459D67085 /* Pods-DataCapturing-DataCapturingTests.debug.xcconfig */;
+			baseConfigurationReference = 418D66E641571506040C7316 /* Pods-DataCapturing-DataCapturingTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_STYLE = Automatic;
@@ -692,14 +798,14 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.DataCapturingTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
 		3D0BDEBA1FB1B951004EA25E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CE6584377EF27FF831E7DEB0 /* Pods-DataCapturing-DataCapturingTests.release.xcconfig */;
+			baseConfigurationReference = EC71CBA1AEB1C2464E6AE0E6 /* Pods-DataCapturing-DataCapturingTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_STYLE = Automatic;
@@ -708,7 +814,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.DataCapturingTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -749,12 +855,13 @@
 		3DF7E12F220C36BD007CFF83 /* CyfaceModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				3DF85FD42270F88200A6C80A /* 5.xcdatamodel */,
 				3DF7E134220C374F007CFF83 /* 4.xcdatamodel */,
 				3DF7E130220C36BD007CFF83 /* 3.xcdatamodel */,
 				3DF7E131220C36BD007CFF83 /* CyfaceModel.xcdatamodel */,
 				3DF7E132220C36BD007CFF83 /* 2.xcdatamodel */,
 			);
-			currentVersion = 3DF7E134220C374F007CFF83 /* 4.xcdatamodel */;
+			currentVersion = 3DF85FD42270F88200A6C80A /* 5.xcdatamodel */;
 			path = CyfaceModel.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

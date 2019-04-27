@@ -25,7 +25,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'DataCapturing'
-  s.version          = '4.0.0-alpha3'
+  s.version          = '4.0.0'
   s.summary          = 'Framework used to continuously capture data from all available sensors on an iOS device and transmit it to a Cyface-API compatible server.'
 
 # This description is used to generate tags and improve search results.
@@ -48,8 +48,7 @@ This framework can be included by your App if you are going to capture sensor da
   s.platform	     = :ios, '11.0'
 
   s.source_files = 'DataCapturing/**/*{.h,.m,.swift}'
-  # s.source_files = 'DataCapturing/*.swift','DataCapturing/Model/*.swift','DataCapturing/Model/CyfaceModel.xcdatamodeld','DataCapturing/Model/CyfaceModel.xcdatamodeld/*.xcdatamodel','DataCapturing/Movebis/*.swift','DataCapturing/Persistence/*.swift','DataCapturing/Synchronization/*.swift'
-  s.resources = [ 'DataCapturing/**/*.xcdatamodeld','DataCapturing/**/*.xcdatamodeld/*.xcdatamodel' ]
+  s.resources = [ 'DataCapturing/**/*{.xcdatamodeld,.xcdatamodel,.xcmappingmodel}' ]
   # s.preserve_paths = 'DataCapturing/Model/CyfaceModel.xcdatamodeld'
   # s.requires_arc = true
 
@@ -59,17 +58,17 @@ This framework can be included by your App if you are going to capture sensor da
   # }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  s.framework = 'CoreData'
+  s.frameworks = 'CoreData', 'CoreLocation', 'CoreMotion'
+  # s.framework = 'CoreData'
   
   # The following transitive dependencies are used by this project:
   # This one is used to handle network traffic like multipart requests
-  s.dependency 'Alamofire', '~> 4.8.1'
+  s.dependency 'Alamofire', '~> 4.8.2'
   # A wrapper for the complicated ObjectiveC compression API.
-  s.dependency 'DataCompression', '~> 3.1.0'
+  s.dependency 'DataCompression', '~> 3.4.0'
 
   s.test_spec 'DataCapturingTests' do |test_spec|
-    test_spec.source_files = 'DataCapturingTests/*.swift'
+    test_spec.source_files = 'DataCapturingTests/**/*.swift'
     #test_spec.dependency 'OCMock' # This dependency will only be linked with your tests.
   end
 

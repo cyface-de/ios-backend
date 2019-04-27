@@ -32,7 +32,7 @@ import os.log
  This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
 
  - Author: Klemens Muthmann
- - Version: 4.0.2
+ - Version: 7.0.0
  - Since: 1.0.0
  */
 public class ServerConnection {
@@ -41,14 +41,11 @@ public class ServerConnection {
 
     /// The logger used for objects of this class.
     private static let osLog = OSLog(subsystem: "ServerConnection", category: "de.cyface")
-
     /// An `URL` used to upload data to. There should be a server available at that location.
     public var apiURL: URL
     /// An object used to authenticate this app with a Cyface Collector server.
-    private let authenticator: Authenticator
-    /**
-     A name that tells the system which kind of iOS device this is.
-     */
+    public let authenticator: Authenticator
+    /// A name that tells the system which kind of iOS device this is.
     private var modelIdentifier: String {
         if let simulatorModelIdentifier = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] { return simulatorModelIdentifier }
         var sysinfo = utsname()
@@ -69,6 +66,9 @@ public class ServerConnection {
         }
     }
 
+    /// The *CoreData* stack used to access the data to transfer.
+    let manager: CoreDataManager
+
     // MARK: - Initializers
 
     /**
@@ -77,10 +77,12 @@ public class ServerConnection {
      - Parameters:
         - apiURL: The URL endpoint to upload data to.
         - authenticator: An object used to authenticate this app with a Cyface Collector server.
+        - onManager: The *CoreData* stack used to load the data to transmit.
      */
-    public required init(apiURL url: URL, authenticator: Authenticator) {
+    public required init(apiURL url: URL, authenticator: Authenticator, onManager manager: CoreDataManager) {
         self.apiURL = url
         self.authenticator = authenticator
+        self.manager = manager
     }
 
     // MARK: - Methods
@@ -159,7 +161,7 @@ public class ServerConnection {
     func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
         os_log("Creating request", log: ServerConnection.osLog, type: .default)
         // Load and serialize measurement synchronously.
-        let persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+        let persistenceLayer = PersistenceLayer(onManager: manager)
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
 
@@ -171,32 +173,41 @@ public class ServerConnection {
 
     func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
-            throw ServerConnectionError.missingInstallationIdentifier
+            fatalError("Installation identifier was missing!")
         }
         guard let measurementIdData = String(measurement.identifier).data(using: String.Encoding.utf8) else {
-            throw ServerConnectionError.missingMeasurementIdentifier
+            fatalError("Measurement identifier was missing!")
         }
         guard let deviceTypeData = modelIdentifier.data(using: String.Encoding.utf8) else {
-            throw ServerConnectionError.missingDeviceType
+            fatalError("Device model identifier was missing!")
         }
 
         let bundle = Bundle(for: type(of: self))
         guard let appVersion = (bundle.infoDictionary?["CFBundleShortVersionString"] as? String)?.data(using: String.Encoding.utf8) else {
-            throw ServerConnectionError.missingAppVersion
+            fatalError("Application version was missing!")
         }
 
         let length = String(measurement.trackLength).data(using: String.Encoding.utf8)!
-        let locationCount = String(try PersistenceLayer.collectGeoLocations(from: measurement).count).data(using: String.Encoding.utf8)!
+        let locationCount = try PersistenceLayer.collectGeoLocations(from: measurement).count
+        let locationCountData = String(locationCount).data(using: String.Encoding.utf8)!
 
-        if let startLocationRaw = (measurement.tracks?.firstObject as? Track)?.locations?.firstObject as? GeoLocationMO {
-            let startLocation = "lat: \(startLocationRaw.lat), lon: \(startLocationRaw.lon), time: \(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-            request.append(startLocation, withName: "startLocation")
-        }
+            if let startLocationRaw = (measurement.tracks?.firstObject as? Track)?.locations?.firstObject as? GeoLocationMO {
+                let startLocationLat = "\(startLocationRaw.lat)".data(using: String.Encoding.utf8)!
+                let startLocationLon = "\(startLocationRaw.lon)".data(using: String.Encoding.utf8)!
+                let startLocationTs = "\(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+                request.append(startLocationLat, withName: "startLocLat")
+                request.append(startLocationLon, withName: "startLocLon")
+                request.append(startLocationTs, withName: "startLocTs")
+            }
 
-        if let endLocationRaw = (measurement.tracks?.lastObject as? Track)?.locations?.lastObject as? GeoLocationMO {
-            let endLocation = "lat: \(endLocationRaw.lat), lon \(endLocationRaw.lon), time: \(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-            request.append(endLocation, withName: "endLocation")
-        }
+            if let endLocationRaw = (measurement.tracks?.lastObject as? Track)?.locations?.lastObject as? GeoLocationMO {
+                let endLocationLat = "\(endLocationRaw.lat)".data(using: String.Encoding.utf8)!
+                let endLocationLon = "\(endLocationRaw.lon)".data(using: String.Encoding.utf8)!
+                let endLocationTs = "\(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+                request.append(endLocationLat, withName: "endLocLat")
+                request.append(endLocationLon, withName: "endLocLon")
+                request.append(endLocationTs, withName: "endLocTs")
+            }
 
         request.append(deviceIdData, withName: "deviceId")
         request.append(measurementIdData, withName: "measurementId")
@@ -204,7 +215,7 @@ public class ServerConnection {
         request.append("iOS \(UIDevice.current.systemVersion)".data(using: String.Encoding.utf8)!, withName: "osVersion")
         request.append(appVersion, withName: "appVersion")
         request.append(length, withName: "length")
-        request.append(locationCount, withName: "locationCount")
+        request.append(locationCountData, withName: "locationCount")
     }
 
     /**
@@ -212,12 +223,12 @@ public class ServerConnection {
      Starts the actual data transmission if encoding was successful.
 
      - Parameters:
-     - for: The measurement that was encoded into a transmission request
-     - with: The encoded measurement.
-     - onSuccess: Called if data transmission was successful. Gets the transmitted measurement as a parameter.
-     - onFailure: Called if data transmission failed for some reason. Gets the transmitted measurement and information about the error.
+        - for: The measurement that was encoded into a transmission request
+        - with: The encoded measurement.
+        - onSuccess: Called if data transmission was successful. Gets the transmitted measurement as a parameter.
+        - onFailure: Called if data transmission failed for some reason. Gets the transmitted measurement and information about the error.
      - Throws:
-     - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
+        - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
      */
     func onEncodingComplete(for measurement: MeasurementEntity, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
         os_log("encoding complete", log: ServerConnection.osLog, type: .default)
@@ -244,10 +255,10 @@ public class ServerConnection {
      - Parameter measurement: The measurement to serialize as a file.
      - Returns: The url of the file containing the measurement data.
      - Throws:
-     - `SerializationError.missingData` If no track data was found.
-     - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-     - `FileSupportError.notReadable` If the data file was not readable.
-     - Some unspecified undocumented file system error if file was not accessible.
+        - `SerializationError.missingData` If no track data was found.
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+        - `FileSupportError.notReadable` If the data file was not readable.
+        - Some unspecified undocumented file system error if file was not accessible.
      */
     private func write(_ measurement: MeasurementMO) throws -> URL {
         let measurementFile = MeasurementFile()
@@ -256,39 +267,55 @@ public class ServerConnection {
 }
 
 /**
- An enumeration encapsulating errors used by server connections.
- ````
- case authenticationNotSuccessful
- case notAuthenticated
- case serializationTimeout
- case missingInstallationIdentifier
- case missingMeasurementIdentifier
- case missingDeviceType
- case invalidResponse
- case unexpectedError
- ````
+ A structure encapsulating errors used by server connections.
 
  - Author: Klemens Muthmann
- - Version: 3.1.0
+ - Version: 4.1.0
  - Since: 1.0.0
  */
-public enum ServerConnectionError: Error {
-    /// If authentication was carried out but was not successful
-    case authenticationNotSuccessful
-    /// Error occuring if this client tried to communicate with the server without proper authentication.
-    case notAuthenticated
-    /// If data serialization for upload took too long.
-    case serializationTimeout
-    /// Thrown if no installation identifier is available.
-    case missingInstallationIdentifier
-    /// Thrown if the measurement was not persistent and thus has not identifier
-    case missingMeasurementIdentifier
-    /// Thrown if no device type was available from the system.
-    case missingDeviceType
-    /// Thrown if the response was not parseable.
-    case invalidResponse
-    /// Used for all unexpected errors, that should not occur during normal operation.
-    case unexpectedError
-    /// This applications version could not be loaded
-    case missingAppVersion
+public struct ServerConnectionError: Error {
+    /**
+     ```
+     case authenticationNotSuccessful
+     case notAuthenticated
+     ```
+
+     - Author: Klemens Muthmann
+     - Version: 1.0.0
+     - Since: 4.0.0
+     */
+    enum Category {
+        /// If authentication was carried out but was not successful
+        case authenticationNotSuccessful
+        /// Error occuring if this client tried to communicate with the server without proper authentication.
+        case notAuthenticated
+    }
+    /// The `Category` of this error.
+    let type: Category
+    /// A human readable explanation for the error.
+    let verboseDescription: String
+    /// The name of the method this error has occured within.
+    let inMethodName: String
+    /// The name of the file this error has occured within.
+    let inFileName: String
+    /// The number of the line of code this error has occured within.
+    let atLineNumber: Int
+
+    /**
+     Handles a `ServerConnectionError` appropriately, by showing its details.
+
+     - Parameter error: The error to handle.
+     - Returns: The error description shown by this method call.
+     */
+    public static func handle(error: ServerConnectionError) -> String {
+        let readableError = """
+        \nERROR - operation: [\(error.type)];
+        reason: [\(error.verboseDescription)];
+        in method: [\(error.inMethodName)];
+        in file: [\(error.inFileName)];
+        at line: [\(error.atLineNumber)]\n
+        """
+        print(readableError)
+        return readableError
+    }
 }

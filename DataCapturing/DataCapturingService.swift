@@ -28,7 +28,7 @@ import os.log
  To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided `Synchronizer`.
  
  - Author: Klemens Muthmann
- - Version: 7.0.1
+ - Version: 9.0.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -56,7 +56,7 @@ public class DataCapturingService: NSObject {
      Provides access to the devices geo location capturing hardware (such as GPS, GLONASS, GALILEO, etc.)
      and handles geo location updates in the background.
      */
-    private lazy var locationManager: CLLocationManager = {
+    lazy var coreLocationManager: LocationManager = {
         let manager = CLLocationManager()
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         manager.allowsBackgroundLocationUpdates = true
@@ -69,22 +69,19 @@ public class DataCapturingService: NSObject {
     }()
 
     /**
-     An API to store, retrieve and update captured data to the local system until the App
+     The *CoreData* stack used to store, retrieve and update captured data to the local system until the App
      can transmit it to a server.
      */
-    let persistenceLayer: PersistenceLayer
+    let coreDataStack: CoreDataManager
 
     /// An in memory storage for accelerations, before they are written to disk.
-    private var accelerationsCache = [Acceleration]()
+    var accelerationsCache = [Acceleration]()
 
     /// An in memory storage for geo locations, before they are written to disk.
-    private var locationsCache = [GeoLocation]()
+    var locationsCache = [GeoLocation]()
 
     /// The background queue used to capture data.
-    private let capturingQueue = DispatchQueue.global(qos: .userInitiated)
-
-    /// Synchronizes read and write operations on the `locationsCache` and the `accelerationsCache`.
-    private let cacheSynchronizationQueue = DispatchQueue(label: "cacheSynchronization", attributes: .concurrent)
+    let capturingQueue = DispatchQueue.global(qos: .userInitiated)
 
     /**
      A queue used to synchronize calls to the lifecycle methods `start`, `pause`, `resume` and `stop`.
@@ -98,39 +95,34 @@ public class DataCapturingService: NSObject {
     /// A timer called in regular intervals to save the captured data to the underlying database.
     private var backgroundSynchronizationTimer: DispatchSourceTimer!
 
-    /// An optional API that is responsible for synchronizing data with a Cyface server.
-    public var synchronizer: Synchronizer?
-
     // MARK: - Initializers
+
     /**
      Creates a new completely initialized `DataCapturingService` transmitting data
      via the provided server connection and accessing data a certain amount of times per second.
 
      - Parameters:
-     - sensorManager: An instance of `CMMotionManager`.
+        - sensorManager: An instance of `CMMotionManager`.
      There should be only one instance of this type in your application.
      Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
-     - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
-     - savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
-     - persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.
-     - synchronizer: An optional instance of a `Synchronizer` used to transmit measured data to a server. If this is `nil` no data synchronization is going to happen.
-     - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
+        - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
+        - savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
+        - dataManager: The `CoreData` stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
+        - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
      */
     public init(
         sensorManager manager: CMMotionManager,
         updateInterval interval: Double = 100,
         savingInterval time: TimeInterval = 30,
-        persistenceLayer persistence: PersistenceLayer,
-        synchronizer: Synchronizer?,
+        dataManager: CoreDataManager,
         eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) {
 
         self.isRunning = false
         self.isPaused = false
-        self.persistenceLayer = persistence
+        coreDataStack = dataManager
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
         self.handler = eventHandler
-        self.synchronizer = synchronizer
         self.savingInterval = time
 
         super.init()
@@ -146,10 +138,10 @@ public class DataCapturingService: NSObject {
      If an error happened during this process, it is provided as part of this handlers `Status` argument.
      
      - Parameters:
-     - context: The `MeasurementContext` to use for the newly created measurement.
+        - context: The `MeasurementContext` to use for the newly created measurement.
      
      - Throws:
-     - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
+        - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
     public func start(inContext context: MeasurementContext) throws {
         try lifecycleQueue.sync {
@@ -157,7 +149,8 @@ public class DataCapturingService: NSObject {
                 throw DataCapturingError.isPaused
             }
 
-            let timestamp = currentTimeInMillisSince1970()
+            let timestamp = DataCapturingService.currentTimeInMillisSince1970()
+            let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
             let measurement = try persistenceLayer.createMeasurement(at: timestamp, withContext: context)
             let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: context)
@@ -172,19 +165,29 @@ public class DataCapturingService: NSObject {
      running.
 
      - Throws:
-     - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
+        - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
+        - `DataCapturingError.noCurrentMeasurement` If there is no measurement to stop.
      */
     public func stop() throws {
         try lifecycleQueue.sync {
             guard !isPaused else {
                 throw DataCapturingError.isPaused
             }
-
-            stopCapturing()
-            currentMeasurement = nil
-            if let synchronizer = synchronizer {
-                synchronizer.activate()
+            guard let currentMeasurement = currentMeasurement, isRunning else {
+                os_log("Trying to stop a stopped service! Ignoring call to stop!", log: LOG, type: .default)
+                return
             }
+
+            backgroundSynchronizationTimer?.setCancelHandler {
+                self.handler(.serviceStopped(measurement: self.currentMeasurement?.identifier), .success)
+            }
+            stopCapturing()
+            let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+            persistenceLayer.context = persistenceLayer.makeContext()
+            let currentMeasurementEntity = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
+            currentMeasurementEntity.synchronizable = true
+            persistenceLayer.context?.saveRecursively()
+            self.currentMeasurement = nil
         }
     }
 
@@ -192,8 +195,8 @@ public class DataCapturingService: NSObject {
      Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now. After using `pause()` you must call resume before you can call any other lifecycle method like `stop()`, for example.
 
      - Throws:
-     - `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.
-     - `DataCapturingError.isPaused` if the service was already paused and pausing it again makes no sense.
+        - `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.
+        - `DataCapturingError.isPaused` if the service was already paused and pausing it again makes no sense.
      */
     public func pause() throws {
         try lifecycleQueue.sync {
@@ -239,6 +242,9 @@ public class DataCapturingService: NSObject {
      Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
 
      - Parameter savingEvery: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
+     - Throws:
+        - PersistenceError If there is no such measurement.
+        - Some unspecified errors from within CoreData.
      */
     func startCapturing(savingEvery time: TimeInterval) throws {
         // Preconditions
@@ -250,10 +256,11 @@ public class DataCapturingService: NSObject {
             throw DataCapturingError.noCurrentMeasurement
         }
 
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
-        try persistenceLayer.appendNewTrack(to: measurement)
-        self.locationManager.delegate = self
+        persistenceLayer.appendNewTrack(to: measurement)
+        self.coreLocationManager.locationDelegate = self
 
         let queue = OperationQueue()
         queue.qualityOfService = QualityOfService.userInitiated
@@ -266,24 +273,31 @@ public class DataCapturingService: NSObject {
                 }
 
                 let accValues = myData.acceleration
-                let acc = Acceleration(timestamp: self.currentTimeInMillisSince1970(),
+                let acc = Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(),
                                        x: accValues.x,
                                        y: accValues.y,
                                        z: accValues.z)
                 // Synchronize this write operation.
-                self.cacheSynchronizationQueue.async(flags: .barrier) {
+                self.lifecycleQueue.async(flags: .barrier) {
                     self.accelerationsCache.append(acc)
                 }
             }
         }
 
-        self.backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.cacheSynchronizationQueue)
-        self.backgroundSynchronizationTimer.setEventHandler(handler: self.saveCapturedData)
+        self.backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.lifecycleQueue)
+        self.backgroundSynchronizationTimer.setEventHandler { [weak self] in
+            guard let self = self else {
+                return
+            }
+
+            self.saveCapturedData()
+        }
+
         self.backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
         self.backgroundSynchronizationTimer.resume()
 
         DispatchQueue.main.async {
-            self.locationManager.startUpdatingLocation()
+            self.coreLocationManager.startUpdatingLocation()
         }
 
         self.isRunning = true
@@ -300,11 +314,13 @@ public class DataCapturingService: NSObject {
 
         motionManager.stopAccelerometerUpdates()
         DispatchQueue.main.async {
-            self.locationManager.stopUpdatingLocation()
+            self.coreLocationManager.stopUpdatingLocation()
         }
-        locationManager.delegate = nil
+        coreLocationManager.locationDelegate = nil
         backgroundSynchronizationTimer.cancel()
-        saveCapturedData()
+            if !locationsCache.isEmpty || !accelerationsCache.isEmpty {
+                saveCapturedData()
+            }
         isRunning = false
 
     }
@@ -315,37 +331,36 @@ public class DataCapturingService: NSObject {
      This method saves all data from `accelerationsCache` and from `locationsCache` to the underlying data storage (database and file system) and cleans both caches.
      */
     func saveCapturedData() {
-        guard let measurement = currentMeasurement else {
-            // Using a fatal error here since we can not provide a callback or throw an error. If this leads to App crashes a soft catch of this error is possible, by just printing a warning or something similar.
-            fatalError("No current measurement to save the location to! Data capturing impossible.")
-        }
-
-        cacheSynchronizationQueue.async(flags: .barrier) {
-            do {
-                let localAccelerationsCache = self.accelerationsCache
-                let localLocationsCache = self.locationsCache
-
-                self.persistenceLayer.context = self.persistenceLayer.makeContext()
-                let measurement = try self.persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
-
-                try self.persistenceLayer.save(locations: localLocationsCache, in: measurement)
-                try self.persistenceLayer.save(accelerations: localAccelerationsCache, in: measurement)
-
-                self.accelerationsCache = [Acceleration]()
-                self.locationsCache = [GeoLocation]()
-            } catch let error {
-                return os_log("Unable to save captured data. Error %@", log: self.LOG, type: .error, error.localizedDescription)
+        do {
+            guard let currentMeasurement = self.currentMeasurement else {
+                os_log("No current measurement to save the location to! Data capturing impossible.", log: LOG, type: .error)
+                return
             }
+
+            let localAccelerationsCache = self.accelerationsCache
+            let localLocationsCache = self.locationsCache
+
+            let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
+            persistenceLayer.context = persistenceLayer.makeContext()
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
+
+            try persistenceLayer.save(locations: localLocationsCache, in: measurement)
+            try persistenceLayer.save(accelerations: localAccelerationsCache, in: measurement)
+
+            self.accelerationsCache = [Acceleration]()
+            self.locationsCache = [GeoLocation]()
+        } catch let error {
+            return os_log("Unable to save captured data. Error %@", log: self.LOG, type: .error, error.localizedDescription)
         }
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
-    private func currentTimeInMillisSince1970() -> Int64 {
+    public static func currentTimeInMillisSince1970() -> Int64 {
         return convertToUtcTimestamp(date: Date())
     }
 
     /// Converts a `Data` object to a UTC milliseconds timestamp since january 1st 1970.
-    private func convertToUtcTimestamp(date value: Date) -> Int64 {
+    private static func convertToUtcTimestamp(date value: Date) -> Int64 {
         return Int64(value.timeIntervalSince1970*1000.0)
     }
 }
@@ -375,9 +390,9 @@ extension DataCapturingService: CLLocationManagerDelegate {
                 longitude: location.coordinate.longitude,
                 accuracy: location.horizontalAccuracy,
                 speed: location.speed,
-                timestamp: convertToUtcTimestamp(date: location.timestamp))
+                timestamp: DataCapturingService.convertToUtcTimestamp(date: location.timestamp))
 
-            cacheSynchronizationQueue.async(flags: .barrier) {
+            lifecycleQueue.async(flags: .barrier) {
                 self.locationsCache.append(geoLocation)
             }
 

@@ -1,6 +1,7 @@
 #  Cyface iOS - SDK
 [![CI: Bitrise](https://app.bitrise.io/app/45ec21fd3b5a664b/status.svg?token=aE1ZWjYUkjxhAtYMX8bcCg)](https://bitrise.io/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Swift 5.0](https://img.shields.io/badge/Swift-5.0-blue.svg)](https://swift.org)
 
 ## Introduction
 
@@ -29,34 +30,107 @@ This should look similar to:
 ```swift
 // 1
 import CoreMotion
-...
 // 2
-let persistence = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+import CoreData
+...
 // 3
-let authenticator = StaticAuthenticator()
+let manager = CoreDataManager(storeType: NSSQLiteStoreType, migrator: CoreDataMigrator())
+guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
+    fatalError()
+}
+manager.setup(bundle: bundle)
 // 4
-let serverConnection = ServerConnection(apiURL: url, authenticator: authenticator)
+let authenticator = StaticAuthenticator()
 // 5
-let sensorManager = CMMotionManager()
+let serverConnection = ServerConnection(apiURL: url, authenticator: authenticator, onManager: manager)
 // 6
-let updateInterval = 100
+let sensorManager = CMMotionManager()
 // 7
-let savingInterval = 10
+let updateInterval = 100
 // 8
-let handler = handler
+let savingInterval = 10
 // 9
-let dcs = try MovebisDataCapturingService(connection: serverConnection, sensorManager: sensorManager, updateInterval: updateInterval, savingInterval: savingInterval, persistenceLayer: persistence, eventHandler: handler)
+let handler = handler
+// 10
+let dcs = try MovebisDataCapturingService(connection: serverConnection, sensorManager: sensorManager, updateInterval: updateInterval, savingInterval: savingInterval, dataManager: manager, eventHandler: handler)
 ```
 
 1. Import Apples *CoreMotion* framework, to be able to create a motion manager.
-2. Create a `PersistenceLayer` and provide a distance calculation strategy. Currently there is only the `DefaultDistanceCalculationStrategy` which uses the integrated distance calculation between locations as provided by Apple.
-3. Create an `Authenticator` like explained under *Using an authenticator* below.
-4. Create a `ServerConnection` for measurement data transmission. Provide the URL of a Cyface or Movebis server endpoint and the `Authenticator`.
-5. Create `CMMotionManager` from the CoreMotion framework. This is responsible for capturing sensor data from your device.
-6. Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to caputre 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.
-7. Create a saving interval in seconds. The value 10 for example means that your data is saved to persistent storage every 10 seconds. This also means your currently captured measurement is updated every 10 seconds. Values like the measurement length are updated at this point as well. If you need to update your UI frequently you should set this to a low value. This however also puts a higher load on your database.
-8. Provide a handler for events occuring during data capturing. Possible events are explained below.
-9. Finally create the `DataCapturingService` or `MovebisDataCapturingService` as shown, providing the required parameters.
+2. Import Apples *CoreData* framework, to be able to create a `CoreDataManager`
+3. Create the *CoreData* stack in the form of a `CoreDataManager`. Usually there should be only one instance of `CoreDataManager`. Nothing bad will happen if you use multiple ones, except for an unnecessary resource overhead. **However be careful to avoid calling the `setup(bundle:)` method on different threads automatically. This might leave your data storage in a corrupted state or at least crash your app. Also provide the store type and a `CoreDataMigrator`. The store type should be an `NSSQLiteStoreType` in production and might be an `NSInMemoryStoreType` in a test environment. If the `CoreDataManager` encounters an old data store it will migrate this data store to the current version. If there is much data to convert, this can take some time and probably should be wrapped into a background thread.
+4. Create an `Authenticator` like explained under *Using an authenticator* below.
+5. Create a `ServerConnection` for measurement data transmission. Provide the URL of a Cyface or Movebis server endpoint, the `Authenticator` and the `CoreDataManager`.
+6. Create `CMMotionManager` from the CoreMotion framework. This is responsible for capturing sensor data from your device.
+7. Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to caputre 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.
+8. Create a saving interval in seconds. The value 10 for example means that your data is saved to persistent storage every 10 seconds. This also means your currently captured measurement is updated every 10 seconds. Values like the measurement length are updated at this point as well. If you need to update your UI frequently you should set this to a low value. This however also puts a higher load on your database.
+9. Provide a handler for events occuring during data capturing. Possible events are explained below.
+10. Finally create the `DataCapturingService` or `MovebisDataCapturingService` as shown, providing the required parameters.
+
+### Getting the currently captured measurement
+
+If there is an active data capturing process - after a call to `DataCapturingService.start()` or  `DataCapturingService.resume()`, you can access the current measurement via:
+
+```swift
+if let currentMeasurementIdentifier = dcs.currentMeasurement?.identifier {
+    let currentMeasurement = persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+    // Use the measurement
+}
+```
+
+### Getting Track information from a measurement
+Each measurement is organized into multiple tracks, which are split if the `DataCapturingService.pause()` and  `DataCapturingService.resume()` is called.
+Each track contains an ordered list of geo locations.
+Accessing this information to display it on the screen should follow the pattern below:
+
+```swift
+do {
+    let persistenceLayer = PersistenceLayer(onManager: manager)
+    persistenceLayer.context = persistenceLayer.makeContext()
+    let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
+
+    guard let tracks = measurement.tracks?.array as? [Track] else {
+        fatalError()
+    }
+
+    for track in tracks {
+        guard let locations = track.locations?.array as? [GeoLocationMO] else {
+            fatalError()
+    }
+
+    guard !locations.isEmpty else {
+        os_log("No locations to display!")
+        continue
+    }
+
+    // Transform the location model objects from the database to a thread safe representation.
+    var localLocations = [GeoLocation]()
+    for location in locations {
+        localLocations.append(GeoLocation(latitude: location.lat, longitude: location.lon, accuracy: location.accuracy, speed: location.speed, timestamp: location.timestamp))
+    }
+
+    DispatchQueue.main.async { [weak self] in
+        guard let self = self else {
+            return
+        }
+        // Draw or refresh the UI.
+    }
+} catch {
+    os_log("Unable to load locations!")
+}
+```
+**ATTENTION:** Notice that all locations have been copied to new data objects. This is necessary, as *CoreData* objects are not thread safe and will loose all data upon usage on a different thread. You need to do this with all *CoreData* model objects before using them in your app. *CoreData* model objects currently are `MeasurementMO`, `Track` and `GeoLocationMO`.
+
+### Getting the length of a measurement
+
+The Cyface SDK for iOS is capable of providing the length of a measurement in meters.
+To get access to this value you should either use the instance of `PersistenceLayer` that you have created, for the `DataCapturingService` or create a new one on demand.
+Using that `PersistenceLayer` you can access the track length by loading a measurement, which looks similar to:
+
+```swift
+persistenceLayer.context = persistenceLayer.makeContext()
+let measurement = try persistenceLayer.load(measurementIdentifiedBy: identifier) 
+let trackLength = measurement.trackLength
+```
 
 ### Using an Authenticator
 The Cyface SDK for iOS transmits measurement data to a server. 
@@ -74,28 +148,16 @@ On each use of the `pause` and `resume` lifecycle methods a new track is created
 To access the locations from a track, do something like the following.
 
 ```swift
-let persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+let persistenceLayer = PersistenceLayer(onManager: manager)
 persistenceLayer.context = persistenceLayer.makeContext()
 let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
 if let tracks = measurement.tracks {
     if let locations = tracks[0].locations {
-	for location in locations {
+        for location in locations {
             print(\(location))
         }
     }
 }
-```
-
-### Getting the length of a measurement
-
-The Cyface SDK for iOS is capable of providing the length of a measurement in meters.
-To get access to this value you should either use the instance of `PersistenceLayer` that you have created, for the `DataCapturingService` or create a new one on demand.
-Using that `PersistenceLayer` you can access the track length by loading a measurement, which looks similar to:
-
-```swift
-persistenceLayer.context = persistenceLayer.makeContext()
-let measurement = try persistenceLayer.load(measurementIdentifiedBy: identifier) 
-let trackLength = measurement.trackLength
 ```
 
 ### Continuous synchronization
@@ -110,7 +172,7 @@ Creating a synchronizer should look something like:
 ```swift
 let synchronizer = try Synchronizer(
 // 1.
-persistenceLayer: try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy()), 
+persistenceLayer: PersistenceLayer(onManager: manager), 
 // 2.
 cleaner: AccelerationPointRemovalCleaner(), 
 // 3.

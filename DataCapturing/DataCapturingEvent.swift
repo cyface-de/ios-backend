@@ -29,12 +29,13 @@ import Foundation
  case geoLocationAcquired
  case lowDiskSpace
  case serviceStarted
+ case serviceStopped
  case synchronizationFinished
  case synchronizationStarted
  ```
  
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.1.0
  - Since: 1.0.0
  */
 public enum DataCapturingEvent {
@@ -62,8 +63,15 @@ public enum DataCapturingEvent {
      */
     case serviceStarted(measurement: Int64?)
     /**
-     Occurs if the `DataCapturingService` has synchronized a measurement successfully
-     and cleaned the local copies.
+     Used to notify the client application of a successful stop of the `DataCapturingService`.
+
+     - measurement: The device wide unique identifier of the measurement for which the service has stopped.
+     */
+    case serviceStopped(measurement: Int64?)
+    /**
+     Occurs if the `DataCapturingService` has finished synchronizing a measurement.
+     This does not necessarily mean, that the synchronization was successful.
+     Please check with the local data storage using a `PersistenceLayer` to see if the measurement synchronization was successful or not.
 
      - measurement: The measurement which finished synchronization.
      */

@@ -18,13 +18,14 @@
  */
 
 import XCTest
+import CoreData
 @testable import DataCapturing
 
 /**
  Tests whether serialization and deserialization into and from the Cyface Binary Format works as expected
 
  - Author: Klemens Muthmann
- - Version: 1.0.2
+ - Version: 1.0.6
  - Since: 1.0.0
  */
 class SerializationTest: XCTestCase {
@@ -35,16 +36,24 @@ class SerializationTest: XCTestCase {
     var persistenceLayer: PersistenceLayer!
     /// A `MeasurementEntity` holding a test measurement to serialize and deserialize.
     var fixture: MeasurementEntity!
+    /// A manager for handling the CoreData stack.
+    var coreDataStack: CoreDataManager!
 
+    /// Initializes the test data set and `PersistenceLayer` with some test data.
     override func setUp() {
         super.setUp()
         oocut = CyfaceBinaryFormatSerializer()
 
         do {
-            persistenceLayer = try PersistenceLayer(withDistanceCalculator: DefaultDistanceCalculationStrategy())
+            guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
+                fatalError()
+            }
+            coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            coreDataStack.setup(bundle: bundle)
+            persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
             let measurement = try persistenceLayer.createMeasurement(at: 1, withContext: .bike)
-            try persistenceLayer.appendNewTrack(to: measurement)
+            persistenceLayer.appendNewTrack(to: measurement)
 
             fixture = MeasurementEntity(identifier: measurement.identifier, context: .bike)
             try persistenceLayer.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100)], in: measurement)
@@ -55,6 +64,7 @@ class SerializationTest: XCTestCase {
         }
     }
 
+    /// Finalizes the test environment by deleting all test data.
     override func tearDown() {
         oocut = nil
         do {
@@ -62,6 +72,7 @@ class SerializationTest: XCTestCase {
         } catch {
             fatalError()
         }
+        coreDataStack = nil
         super.tearDown()
     }
 
@@ -113,6 +124,15 @@ class SerializationTest: XCTestCase {
         } catch let error {
             XCTFail("Error \(error)")
         }
+    }
+
+    /**
+     This creates a really big test data set usable to test programs unpacking such a set. This test is skipped since it takes really long.
+     */
+    func skip_testSerializeBigDataSet() throws {
+        let measurement = try DataSetCreator.fakeMeasurement(countOfGeoLocations: 36_000, countOfAccelerations: 3_600_000, persistenceLayer: persistenceLayer)
+        let data = try oocut.serialize(measurement)
+        try data.write(to: URL(fileURLWithPath: "/Users/cyface/data.cyf"))
     }
 
     /**
