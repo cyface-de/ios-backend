@@ -28,15 +28,17 @@ import Alamofire
  Background synchronization happens only if the synchronizing device has an active Wifi connection.
  To activate background synchronization you need to call the `activate` method.
  Background synchronization is called as soon as WiFi becomes available or every 60 minutes.
+ For foreground synchronization use `syncChecked()`.
 
  - Author: Klemens Muthmann
- - Version: 2.1.0
+ - Version: 3.0.0
  - Since: 2.3.0
  */
 public class Synchronizer {
 
     // MARK: - Properties
-    private let log = OSLog.init(subsystem: "Synchronizer", category: "de.cyface")
+    /// The logger used for objects of this class.
+    private static let log = OSLog.init(subsystem: "Synchronizer", category: "de.cyface")
 
     /// Stack used to access *CoreData*.
     private let coreDataStack: CoreDataManager
@@ -48,7 +50,7 @@ public class Synchronizer {
     private let serverConnection: ServerConnection
 
     /// Handles background synchronization of available `Measurement`s.
-    let reachabilityManager: NetworkReachabilityManager
+    var reachabilityManager: NetworkReachabilityManager?
 
     /// A queue to run synchronization on. This prevents the same measurement to be transmitted multiple times.
     private let serverSynchronizationQueue = DispatchQueue(label: "de.cyface.synchronization", qos: DispatchQoS.background)
@@ -87,39 +89,21 @@ public class Synchronizer {
         - cleaner: A strategy for cleaning the persistent storage after data synchronization.
         - serverConnection: An authenticated connection to a Cyface API server.
         - handler: The handler to call, when synchronization for a measurement has finished.
-     - Throws: `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
      */
-    public init(coreDataStack: CoreDataManager, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) throws {
+    public init(coreDataStack: CoreDataManager, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) {
         self.coreDataStack = coreDataStack
         self.cleaner = cleaner
         self.serverConnection = serverConnection
         self.handler = handler
         // Try to synchronize once per hour.
         dataSynchronizationTimer = RepeatingTimer(timeInterval: 60 * 60)
-        guard let reachabilityManager = NetworkReachabilityManager(host: serverConnection.apiURL.absoluteString) else {
-            throw SynchronizationError.reachabilityNotInitialized
-        }
-        self.reachabilityManager = reachabilityManager
-        self.reachabilityManager.listener = { [weak self] _ in
-            guard let self = self else {
-                return
-            }
-
-            if self.isReachable() {
-                self.sync()
-            }
-        }
 
         dataSynchronizationTimer.eventHandler = { [weak self] in
             guard let self = self else {
                 return
             }
 
-            let status = self.isReachable()
-            print(status)
-            if status {
-                self.sync()
-            }
+            self.syncChecked()
         }
     }
 
@@ -127,23 +111,78 @@ public class Synchronizer {
      Makes sure background synchronization is stopped when this object dies.
      */
     deinit {
-        self.reachabilityManager.stopListening()
+        self.reachabilityManager?.stopListening()
         dataSynchronizationTimer.suspend()
     }
 
     // MARK: - API Methods
 
     /**
-     Synchronize all measurements now if a connection is available.
+     Tries to synchronize all measurements after checking for a proper connection. If `syncOnWiFiOnly` is true, this will only work if the device is connected to a WiFi network.
+    */
+    public func syncChecked() {
+        self.isReachableCheckingQueue.sync {
+            if isReachable(reachabilityManager!.networkReachabilityStatus) {
+                sync()
+            }
+        }
+    }
 
-     If this is not called the service might wait for an opportune moment to start synchronization.
+    /**
+     Starts background synchronization as prepared in this objects initializer.
+     */
+    public func activate() {
+        let host = Synchronizer.stripSchemeFrom(url: serverConnection.apiURL)
+        reachabilityManager = NetworkReachabilityManager(host: host)
+        // Initial sync
+        syncChecked()
+        reachabilityManager?.listener = { status in
+            self.syncChecked()
+        }
+        if !reachabilityManager!.startListening() {
+            fatalError("Unable to start listening for network reachability!")
+        }
+
+        dataSynchronizationTimer.resume()
+    }
+
+    /**
+     Removes the scheme "http://" or "https://" from the beginning of the URL.
+     This is required by the *Alamofire* `NetworkReachabilityManager`.
+
+     - Parameter url: The URL to remove the scheme from.
+    */
+    private static func stripSchemeFrom(url: URL) -> String {
+        let stringifiedURL = url.absoluteString
+        if stringifiedURL.hasPrefix("http://") {
+            return stringifiedURL.replacingOccurrences(of: "http://", with: "", options: .anchored)
+        } else if stringifiedURL.hasPrefix("https://") {
+            return stringifiedURL.replacingOccurrences(of: "https://", with: "", options: .anchored)
+        } else {
+            fatalError("Invalid URL used within Synchronizer!")
+        }
+    }
+
+    /**
+     Stops background synchronization.
+     */
+    public func deactivate() {
+        reachabilityManager?.stopListening()
+        dataSynchronizationTimer.suspend()
+    }
+
+    // MARK: - Internal Methods
+
+    /**
+     Synchronize all measurements now.
+
      The call is asynchronous, meaning it returns almost immediately, while the synchronization continues running inside its own thread.
 
      You may call this method multiple times in short succession.
      However only one synchronization can be active at a given time.
      If you call this during an active synchronization it is going to return without doing anything.
      */
-    public func sync() {
+    private func sync() {
         serverSynchronizationQueue.async { [weak self] in
             guard let self = self else {
                 return
@@ -167,27 +206,6 @@ public class Synchronizer {
     }
 
     /**
-     Starts background synchronization as prepared in this objects initializer.
-     */
-    public func activate() {
-        if isReachable() {
-            sync()
-        }
-        reachabilityManager.startListening()
-        dataSynchronizationTimer.resume()
-    }
-
-    /**
-     Stops background synchronization.
-     */
-    public func deactivate() {
-        reachabilityManager.stopListening()
-        dataSynchronizationTimer.suspend()
-    }
-
-    // MARK: - Internal Methods
-
-    /**
      Synchronizes the array of provided measurements if the status was successful and measurements are provided
 
      - Parameters:
@@ -202,7 +220,6 @@ public class Synchronizer {
         countOfMeasurementsToSynchronize = measurements.count
         // If this is 0 initially, there have been no measurements for synchronization in the data storage. So we just stop processing
         guard countOfMeasurementsToSynchronize > 0 else {
-            reachabilityManager.stopListening()
             synchronizationInProgress = false
             return
         }
@@ -247,8 +264,8 @@ public class Synchronizer {
         - error: The error causing the failure.
      */
     private func failureHandler(measurement: MeasurementEntity, error: Error) {
-        os_log("Unable to upload data for measurement: %@!", log: log, type: .error, NSNumber(value: measurement.identifier))
-        os_log("Error: %@", log: log, type: .error, error.localizedDescription)
+        os_log("Unable to upload data for measurement: %@!", log: Synchronizer.log, type: .error, NSNumber(value: measurement.identifier))
+        os_log("Error: %@", log: Synchronizer.log, type: .error, error.localizedDescription)
         handler(.synchronizationFinished(measurement: measurement), .error(error))
         synchronizationFinishedHandler()
     }
@@ -269,16 +286,21 @@ public class Synchronizer {
         }
     }
 
-    private func isReachable() -> Bool {
+    /**
+     Checks if Cyface server is reachable via the network.
+     If `syncOnWiFiOnly` is `true` this returns `false` if no WiFi is available.
+     Otherwise it returns true if the Cyface server is available via any network connection.
+
+     - Parameter status: The current network status to check. This is provided by the `reachabilityManager`.
+     */
+    private func isReachable(_ status: NetworkReachabilityManager.NetworkReachabilityStatus) -> Bool {
         var ret = false
-        isReachableCheckingQueue.sync {
 
             if self.syncOnWiFiOnly {
-                ret = NetworkReachabilityManager()?.isReachableOnEthernetOrWiFi ?? false
+                ret = NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) == status
             } else {
-                ret = NetworkReachabilityManager()?.isReachable ?? false
+                ret = NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) == status || NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) == status
             }
-        }
 
         return ret
     }
@@ -344,20 +366,4 @@ public class AccelerationPointRemovalCleaner: Cleaner {
     public func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer) throws {
         try persistenceLayer.clean(measurement: measurement)
     }
-}
-
-/**
- Enumeration of all the errors that might happen during data synchronization (except for `ServerConnectionError` cases).
-
- ```
- case reachabilityNotInitialized
- ```
-
- - Author: Klemens Muthmann
- - Version: 1.0.0
- - Since: 2.3.0
- */
-public enum SynchronizationError: Error {
-    /// If the background reachability checker was not successfully initialized.
-    case reachabilityNotInitialized
 }
