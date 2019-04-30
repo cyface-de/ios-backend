@@ -170,16 +170,18 @@ public class DataCapturingService: NSObject {
      */
     public func stop() throws {
         try lifecycleQueue.sync {
-            guard !isPaused else {
-                throw DataCapturingError.isPaused
-            }
-            guard let currentMeasurement = currentMeasurement, isRunning else {
+            guard let currentMeasurement = currentMeasurement else {
                 os_log("Trying to stop a stopped service! Ignoring call to stop!", log: LOG, type: .default)
                 return
             }
 
+            guard isPaused || isRunning else {
+                fatalError("Trying to stop a not initialized service (not running and not paused)!")
+            }
+
+            // Inform about stopped event
             backgroundSynchronizationTimer?.setCancelHandler {
-                self.handler(.serviceStopped(measurement: self.currentMeasurement?.identifier), .success)
+                self.handler(.serviceStopped(measurement: currentMeasurement.identifier), .success)
             }
             stopCapturing()
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
@@ -188,6 +190,7 @@ public class DataCapturingService: NSObject {
             currentMeasurementEntity.synchronizable = true
             persistenceLayer.context?.saveRecursively()
             self.currentMeasurement = nil
+            isPaused = false
         }
     }
 
@@ -243,7 +246,7 @@ public class DataCapturingService: NSObject {
 
      - Parameter savingEvery: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
      - Throws:
-        - PersistenceError If there is no such measurement.
+        - PersistenceError If there is no current measurement.
         - Some unspecified errors from within CoreData.
      */
     func startCapturing(savingEvery time: TimeInterval) throws {
@@ -307,11 +310,6 @@ public class DataCapturingService: NSObject {
      An internal helper method for stopping the capturing process.
      */
     func stopCapturing() {
-        guard isRunning else {
-            os_log("Trying to stop a non running service!", log: LOG, type: .info)
-            return
-        }
-
         motionManager.stopAccelerometerUpdates()
         DispatchQueue.main.async {
             self.coreLocationManager.stopUpdatingLocation()
