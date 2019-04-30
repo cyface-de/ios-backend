@@ -23,12 +23,10 @@ import CoreLocation
 import os.log
 
 /**
- An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.
- 
- To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided `Synchronizer`.
+ An object of this class handles the lifecycle of starting and stopping data capturing.
  
  - Author: Klemens Muthmann
- - Version: 9.0.0
+ - Version: 9.1.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -69,8 +67,7 @@ public class DataCapturingService: NSObject {
     }()
 
     /**
-     The *CoreData* stack used to store, retrieve and update captured data to the local system until the App
-     can transmit it to a server.
+     The *CoreData* stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
      */
     let coreDataStack: CoreDataManager
 
@@ -98,8 +95,7 @@ public class DataCapturingService: NSObject {
     // MARK: - Initializers
 
     /**
-     Creates a new completely initialized `DataCapturingService` transmitting data
-     via the provided server connection and accessing data a certain amount of times per second.
+     Creates a new completely initialized `DataCapturingService` accessing data a certain amount of times per second.
 
      - Parameters:
         - sensorManager: An instance of `CMMotionManager`.
@@ -161,7 +157,7 @@ public class DataCapturingService: NSObject {
     }
 
     /**
-     Stops the currently running data capturing process or does nothing if the process is not
+     Stops the currently running or paused data capturing process or does nothing if the process is not
      running.
 
      - Throws:
@@ -195,7 +191,7 @@ public class DataCapturingService: NSObject {
     }
 
     /**
-     Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now. After using `pause()` you must call resume before you can call any other lifecycle method like `stop()`, for example.
+     Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now.
 
      - Throws:
         - `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.

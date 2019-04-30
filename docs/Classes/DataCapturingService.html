@@ -14,7 +14,7 @@
     <a title="DataCapturingService Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (72% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (74% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -37,7 +37,16 @@
                 <a href="../Classes/AccelerationPointRemovalCleaner.html">AccelerationPointRemovalCleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Classes/CoreDataManager.html">CoreDataManager</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/CoreDataMigrator.html">CoreDataMigrator</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
@@ -87,6 +96,9 @@
             <a href="../Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a href="../Enums/CoreDataMigrationVersion.html">CoreDataMigrationVersion</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Enums/DataCapturingError.html">DataCapturingError</a>
               </li>
               <li class="nav-group-task">
@@ -99,13 +111,7 @@
                 <a href="../Enums/MeasurementContext.html">MeasurementContext</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Enums/ServerConnectionError.html">ServerConnectionError</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Enums/Status.html">Status</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Enums/SynchronizationError.html">SynchronizationError</a>
               </li>
             </ul>
           </li>
@@ -119,6 +125,9 @@
                 <a href="../Protocols/Cleaner.html">Cleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Protocols/CoreDataMigratorProtocol.html">CoreDataMigratorProtocol</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a>
               </li>
             </ul>
@@ -128,6 +137,9 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="../Structs/AccelerationsFile.html">AccelerationsFile</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ServerConnectionError.html">ServerConnectionError</a>
               </li>
             </ul>
           </li>
@@ -143,9 +155,7 @@
 
                 </div>
               </div>
-            <p>An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.</p>
-
-<p>To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided <code><a href="../Classes/Synchronizer.html">Synchronizer</a></code>.</p>
+            <p>An object of this class handles the lifecycle of starting and stopping data capturing.</p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -153,7 +163,7 @@
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    7.0.0
+    9.1.0
 
 </div>
 <div class="aside aside-since">
@@ -254,33 +264,6 @@
                     </section>
                   </div>
                 </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing0aB7ServiceC12synchronizerAA12SynchronizerCSgvp"></a>
-                    <a name="//apple_ref/swift/Property/synchronizer" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC12synchronizerAA12SynchronizerCSgvp">synchronizer</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>An optional API that is responsible for synchronizing data with a Cyface server.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">synchronizer</span><span class="p">:</span> <span class="kt"><a href="../Classes/Synchronizer.html">Synchronizer</a></span><span class="p">?</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
               </ul>
             </div>
             <div class="task-group">
@@ -295,9 +278,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing0aB7ServiceC13sensorManager14updateInterval06savingG016persistenceLayer12synchronizer12eventHandlerACSo08CMMotionE0C_S2dAA011PersistenceJ0CAA12SynchronizerCSgyAA0aB5EventO_AA6StatusOtctcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(sensorManager:updateInterval:savingInterval:persistenceLayer:synchronizer:eventHandler:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC13sensorManager14updateInterval06savingG016persistenceLayer12synchronizer12eventHandlerACSo08CMMotionE0C_S2dAA011PersistenceJ0CAA12SynchronizerCSgyAA0aB5EventO_AA6StatusOtctcfc">init(sensorManager:updateInterval:savingInterval:persistenceLayer:synchronizer:eventHandler:)</a>
+                    <a name="/s:13DataCapturing0aB7ServiceC13sensorManager14updateInterval06savingG004dataE012eventHandlerACSo08CMMotionE0C_S2dAA04CoreaE0CyAA0aB5EventO_AA6StatusOtctcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(sensorManager:updateInterval:savingInterval:dataManager:eventHandler:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC13sensorManager14updateInterval06savingG004dataE012eventHandlerACSo08CMMotionE0C_S2dAA04CoreaE0CyAA0aB5EventO_AA6StatusOtctcfc">init(sensorManager:updateInterval:savingInterval:dataManager:eventHandler:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -305,19 +288,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a new completely initialized <code>DataCapturingService</code> transmitting data
-via the provided server connection and accessing data a certain amount of times per second.</p>
-
-<ul>
-<li>sensorManager: An instance of <code>CMMotionManager</code>.
-There should be only one instance of this type in your application.
-Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.</li>
-<li>updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.</li>
-<li>savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.</li>
-<li>persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.</li>
-<li>synchronizer: An optional instance of a <code><a href="../Classes/Synchronizer.html">Synchronizer</a></code> used to transmit measured data to a server. If this is <code>nil</code> no data synchronization is going to happen.</li>
-<li>eventHandler: An optional handler used by the capturing process to inform about <code><a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a></code>s.</li>
-</ul>
+                        <p>Creates a new completely initialized <code>DataCapturingService</code> accessing data a certain amount of times per second.</p>
 
                       </div>
                       <div class="declaration">
@@ -328,11 +299,79 @@ Since it seems to be impossible to create that instance inside a framework at th
     <span class="n">sensorManager</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CMMotionManager</span><span class="p">,</span>
     <span class="n">updateInterval</span> <span class="nv">interval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
     <span class="n">savingInterval</span> <span class="nv">time</span><span class="p">:</span> <span class="kt">TimeInterval</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
-    <span class="n">persistenceLayer</span> <span class="nv">persistence</span><span class="p">:</span> <span class="kt"><a href="../Classes/PersistenceLayer.html">PersistenceLayer</a></span><span class="p">,</span>
-    <span class="nv">synchronizer</span><span class="p">:</span> <span class="kt"><a href="../Classes/Synchronizer.html">Synchronizer</a></span><span class="p">?,</span>
+    <span class="nv">dataManager</span><span class="p">:</span> <span class="kt"><a href="../Classes/CoreDataManager.html">CoreDataManager</a></span><span class="p">,</span>
     <span class="nv">eventHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">((</span><span class="kt"><a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a></span><span class="p">,</span> <span class="kt"><a href="../Enums/Status.html">Status</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">))</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>sensorManager</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>An instance of <code>CMMotionManager</code>.
+There should be only one instance of this type in your application.
+Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>updateInterval</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>savingInterval</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>dataManager</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The <code>CoreData</code> stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>eventHandler</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>An optional handler used by the capturing process to inform about <code><a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a></code>s.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -366,13 +405,15 @@ Since it seems to be impossible to create that instance inside a framework at th
 <p>This startup procedure is asynchronous.
 The event handler provided to the initializer receives a <code>DataCapturingEvent.serviceStarted</code>, after the startup has finished.
 If an error happened during this process, it is provided as part of this handlers <code><a href="../Enums/Status.html">Status</a></code> argument.</p>
-<li><p>context: The <code><a href="../Enums/MeasurementContext.html">MeasurementContext</a></code> to use for the newly created measurement.</p></li>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
     <p>Throws:</p>
 
+<ul>
+<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO8isPausedyA2CmF">DataCapturingError.isPaused</a></code> if the service was paused and thus starting it makes no sense. If you need to continue call <code>resume(((DataCapturingEvent) -&gt; Void))</code>.</li>
+</ul>
+
 </div>
-<li><p><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO8isPausedyA2CmF">DataCapturingError.isPaused</a></code> if the service was paused and thus starting it makes no sense. If you need to continue call <code>resume(((DataCapturingEvent) -&gt; Void))</code>.</p></li>
 
                       </div>
                       <div class="declaration">
@@ -382,6 +423,25 @@ If an error happened during this process, it is provided as part of this handler
                           <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">start</span><span class="p">(</span><span class="n">inContext</span> <span class="nv">context</span><span class="p">:</span> <span class="kt"><a href="../Enums/MeasurementContext.html">MeasurementContext</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>context</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The <code><a href="../Enums/MeasurementContext.html">MeasurementContext</a></code> to use for the newly created measurement.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -399,13 +459,16 @@ If an error happened during this process, it is provided as part of this handler
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Stops the currently running data capturing process or does nothing if the process is not
+                        <p>Stops the currently running or paused data capturing process or does nothing if the process is not
 running.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    
-</div>
+    <ul>
 <li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO8isPausedyA2CmF">DataCapturingError.isPaused</a></code> if the service was paused and thus stopping it makes no sense.</li>
+<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO20noCurrentMeasurementyA2CmF">DataCapturingError.noCurrentMeasurement</a></code> If there is no measurement to stop.</li>
+</ul>
+
+</div>
 
                       </div>
                       <div class="declaration">
@@ -432,13 +495,15 @@ running.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Pauses the current data capturing measurement for the moment. No data is captured until <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC6resumeyyKF">resume()</a></code> has been called, but upon the call to <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC6resumeyyKF">resume()</a></code> the last measurement will be continued instead of beginning a new now. After using <code>pause()</code> you must call resume before you can call any other lifecycle method like <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC4stopyyKF">stop()</a></code>, for example.</p>
+                        <p>Pauses the current data capturing measurement for the moment. No data is captured until <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC6resumeyyKF">resume()</a></code> has been called, but upon the call to <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC6resumeyyKF">resume()</a></code> the last measurement will be continued instead of beginning a new now.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    
-</div>
+    <ul>
 <li><code>DataCaturingError.notRunning</code> if the service was not running and thus pausing it makes no sense.</li>
 <li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO8isPausedyA2CmF">DataCapturingError.isPaused</a></code> if the service was already paused and pausing it again makes no sense.</li>
+</ul>
+
+</div>
 
                       </div>
                       <div class="declaration">
@@ -480,6 +545,44 @@ running.</p>
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">resume</span><span class="p">()</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Internal%20Support%20Methods"></a>
+                <a name="//apple_ref/swift/Section/Internal Support Methods" class="dashAnchor"></a>
+                <a href="#/Internal%20Support%20Methods">
+                  <h3 class="section-name">Internal Support Methods</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing0aB7ServiceC28currentTimeInMillisSince1970s5Int64VyFZ"></a>
+                    <a name="//apple_ref/swift/Method/currentTimeInMillisSince1970()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC28currentTimeInMillisSince1970s5Int64VyFZ">currentTimeInMillisSince1970()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Provides the current time in milliseconds since january 1st 1970 (UTC).</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">currentTimeInMillisSince1970</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Int64</span></code></pre>
 
                         </div>
                       </div>
@@ -559,7 +662,7 @@ running.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-15)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-04-30)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
