@@ -14,7 +14,7 @@
     <a title="PersistenceLayer Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (72% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (74% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -37,7 +37,16 @@
                 <a href="../Classes/AccelerationPointRemovalCleaner.html">AccelerationPointRemovalCleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Classes/CoreDataManager.html">CoreDataManager</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/CoreDataMigrator.html">CoreDataMigrator</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
@@ -87,6 +96,9 @@
             <a href="../Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a href="../Enums/CoreDataMigrationVersion.html">CoreDataMigrationVersion</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Enums/DataCapturingError.html">DataCapturingError</a>
               </li>
               <li class="nav-group-task">
@@ -99,13 +111,7 @@
                 <a href="../Enums/MeasurementContext.html">MeasurementContext</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Enums/ServerConnectionError.html">ServerConnectionError</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Enums/Status.html">Status</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Enums/SynchronizationError.html">SynchronizationError</a>
               </li>
             </ul>
           </li>
@@ -119,6 +125,9 @@
                 <a href="../Protocols/Cleaner.html">Cleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Protocols/CoreDataMigratorProtocol.html">CoreDataMigratorProtocol</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a>
               </li>
             </ul>
@@ -128,6 +137,9 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="../Structs/AccelerationsFile.html">AccelerationsFile</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ServerConnectionError.html">ServerConnectionError</a>
               </li>
             </ul>
           </li>
@@ -159,7 +171,7 @@ The creation of this context needs to be carried out on the same thread as the A
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    3.0.1
+    5.0.1
 
 </div>
 <div class="aside aside-since">
@@ -220,9 +232,9 @@ The creation of this context needs to be carried out on the same thread as the A
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing16PersistenceLayerC22withDistanceCalculatorAcA0F19CalculationStrategy_p_tKcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(withDistanceCalculator:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC22withDistanceCalculatorAcA0F19CalculationStrategy_p_tKcfc">init(withDistanceCalculator:)</a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC9onManager22withDistanceCalculatorAcA04CoreaF0C_AA0H19CalculationStrategy_ptcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(onManager:withDistanceCalculator:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC9onManager22withDistanceCalculatorAcA04CoreaF0C_AA0H19CalculationStrategy_ptcfc">init(onManager:withDistanceCalculator:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -231,21 +243,13 @@ The creation of this context needs to be carried out on the same thread as the A
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Public constructor usable by external callers.</p>
-<div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    <ul>
-<li><code>PersistenceError.modelNotLoabable</code> If the model is not loadable</li>
-<li><code>PersistenceError.modelNotInitializable</code> If the model was loaded (so it is available) but can not be initialized.</li>
-</ul>
-
-</div>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">withDistanceCalculator</span><span class="p">:</span> <span class="kt"><a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">onManager</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt"><a href="../Classes/CoreDataManager.html">CoreDataManager</a></span><span class="p">,</span> <span class="nv">withDistanceCalculator</span><span class="p">:</span> <span class="kt"><a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a></span> <span class="o">=</span> <span class="kt"><a href="../Classes/DefaultDistanceCalculationStrategy.html">DefaultDistanceCalculationStrategy</a></span><span class="p">())</span></code></pre>
 
                         </div>
                       </div>
@@ -262,6 +266,18 @@ The creation of this context needs to be carried out on the same thread as the A
                               <td>
                                 <div>
                                   <p>An algorithm used to calculate the distance between geo locations.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>manager</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A manager for the CoreData stack use by this <code>PersistenceLayer</code>.</p>
                                 </div>
                               </td>
                             </tr>
@@ -296,12 +312,10 @@ The creation of this context needs to be carried out on the same thread as the A
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Deletes the measurement from the data storag.</p>
-<li>measurement: The measurement to delete from the data storage.</li>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
     <ul>
-<li><code>PersistenceError.measurementNotLoadable</code> If the measurement to delete was not available.</li>
-<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li><code>PersistenceError</code> If the measurement to delete was not available.</li>
 <li>Some unspecified errors from within CoreData.</li>
 <li>Some internal file system error on failure of creating or accessing the accelerations file at the required path.</li>
 </ul>
@@ -316,6 +330,25 @@ The creation of this context needs to be carried out on the same thread as the A
                           <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">delete</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>measurement</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The measurement to delete from the data storage.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -348,8 +381,7 @@ The creation of this context needs to be carried out on the same thread as the A
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
     <ul>
-<li><code>PersistenceError.dataNotLoadable</code> If there is no such measurement.</li>
-<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li><code>PersistenceError</code> If there is no such measurement.</li>
 <li>Some unspecified errors from within CoreData.</li>
 </ul>
 
@@ -407,7 +439,6 @@ The creation of this context needs to be carried out on the same thread as the A
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
     <ul>
-<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
 <li>Some unspecified errors from within CoreData.</li>
 </ul>
 
@@ -442,11 +473,10 @@ The creation of this context needs to be carried out on the same thread as the A
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Loads only those measurements that have not been synchronized to a Cyface database yet.</p>
+                        <p>Loads only those measurements that have not been synchronized to a Cyface database yet and that are synchronizable at the moment.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
     <ul>
-<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
 <li>Some unspecified errors from within CoreData.</li>
 </ul>
 
@@ -485,7 +515,6 @@ The creation of this context needs to be carried out on the same thread as the A
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
     <ul>
-<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
 <li>Some unspecified errors from within CoreData.</li>
 </ul>
 
@@ -665,7 +694,7 @@ To ease this task, this method can be used to make a collection of measurement i
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-15)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-04-30)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

@@ -14,7 +14,7 @@
     <a title="Synchronizer Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (72% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (74% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -37,7 +37,16 @@
                 <a href="../Classes/AccelerationPointRemovalCleaner.html">AccelerationPointRemovalCleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Classes/CoreDataManager.html">CoreDataManager</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/CoreDataMigrator.html">CoreDataMigrator</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
@@ -87,6 +96,9 @@
             <a href="../Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a href="../Enums/CoreDataMigrationVersion.html">CoreDataMigrationVersion</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Enums/DataCapturingError.html">DataCapturingError</a>
               </li>
               <li class="nav-group-task">
@@ -99,13 +111,7 @@
                 <a href="../Enums/MeasurementContext.html">MeasurementContext</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Enums/ServerConnectionError.html">ServerConnectionError</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Enums/Status.html">Status</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Enums/SynchronizationError.html">SynchronizationError</a>
               </li>
             </ul>
           </li>
@@ -119,6 +125,9 @@
                 <a href="../Protocols/Cleaner.html">Cleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Protocols/CoreDataMigratorProtocol.html">CoreDataMigratorProtocol</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a>
               </li>
             </ul>
@@ -128,6 +137,9 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="../Structs/AccelerationsFile.html">AccelerationsFile</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ServerConnectionError.html">ServerConnectionError</a>
               </li>
             </ul>
           </li>
@@ -145,7 +157,11 @@
               </div>
             <p>An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.</p>
 
-<p>An object of this call can be used to synchronize data either in the foreground or in the background. Background synchronization happens only if the synchronizing device has an active Wifi connection. To activate background synchronization you need to call the <code>activate</code> method.</p>
+<p>An object of this call can be used to synchronize data either in the foreground or in the background.
+Background synchronization happens only if the synchronizing device has an active Wifi connection.
+To activate background synchronization you need to call the <code>activate</code> method.
+Background synchronization is called as soon as WiFi becomes available or every 60 minutes.
+For foreground synchronization use <code>syncChecked()</code>.</p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -153,7 +169,7 @@
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    1.0.2
+    3.0.0
 
 </div>
 <div class="aside aside-since">
@@ -218,9 +234,9 @@ Setting this to <code>false</code> might put heavy load on the users device and 
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing12SynchronizerC16persistenceLayer7cleaner16serverConnection7handlerAcA011PersistenceE0C_AA7Cleaner_pAA06ServerH0CyAA0aB5EventO_AA6StatusOtctKcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(persistenceLayer:cleaner:serverConnection:handler:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing12SynchronizerC16persistenceLayer7cleaner16serverConnection7handlerAcA011PersistenceE0C_AA7Cleaner_pAA06ServerH0CyAA0aB5EventO_AA6StatusOtctKcfc">init(persistenceLayer:cleaner:serverConnection:handler:)</a>
+                    <a name="/s:13DataCapturing12SynchronizerC04coreA5Stack7cleaner16serverConnection7handlerAcA04CoreA7ManagerC_AA7Cleaner_pAA06ServerH0CyAA0aB5EventO_AA6StatusOtctcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(coreDataStack:cleaner:serverConnection:handler:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing12SynchronizerC04coreA5Stack7cleaner16serverConnection7handlerAcA04CoreA7ManagerC_AA7Cleaner_pAA06ServerH0CyAA0aB5EventO_AA6StatusOtctcfc">init(coreDataStack:cleaner:serverConnection:handler:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -229,18 +245,13 @@ Setting this to <code>false</code> might put heavy load on the users device and 
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Initializer that sets the initial value of all the properties and prepares the background synchronization job.</p>
-<div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    <code>SynchronizationError.reachabilityNotInitilized</code>: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
-
-</div>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">persistenceLayer</span><span class="p">:</span> <span class="kt"><a href="../Classes/PersistenceLayer.html">PersistenceLayer</a></span><span class="p">,</span> <span class="nv">cleaner</span><span class="p">:</span> <span class="kt"><a href="../Protocols/Cleaner.html">Cleaner</a></span><span class="p">,</span> <span class="nv">serverConnection</span><span class="p">:</span> <span class="kt"><a href="../Classes/ServerConnection.html">ServerConnection</a></span><span class="p">,</span> <span class="nv">handler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt"><a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a></span><span class="p">,</span> <span class="kt"><a href="../Enums/Status.html">Status</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">coreDataStack</span><span class="p">:</span> <span class="kt"><a href="../Classes/CoreDataManager.html">CoreDataManager</a></span><span class="p">,</span> <span class="nv">cleaner</span><span class="p">:</span> <span class="kt"><a href="../Protocols/Cleaner.html">Cleaner</a></span><span class="p">,</span> <span class="nv">serverConnection</span><span class="p">:</span> <span class="kt"><a href="../Classes/ServerConnection.html">ServerConnection</a></span><span class="p">,</span> <span class="nv">handler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt"><a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a></span><span class="p">,</span> <span class="kt"><a href="../Enums/Status.html">Status</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -251,12 +262,12 @@ Setting this to <code>false</code> might put heavy load on the users device and 
                             <tr>
                               <td>
                                 <code>
-                                <em>persistenceLayer</em>
+                                <em>coreDataStack</em>
                                 </code>
                               </td>
                               <td>
                                 <div>
-                                  <p>Persistent storage used to load synchronizable measurements from.</p>
+                                  <p>Stack used to access <em>CoreData</em>.</p>
                                 </div>
                               </td>
                             </tr>
@@ -302,6 +313,33 @@ Setting this to <code>false</code> might put heavy load on the users device and 
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing12SynchronizerCfd"></a>
+                    <a name="//apple_ref/swift/Method/deinit" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing12SynchronizerCfd">deinit</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Makes sure background synchronization is stopped when this object dies.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">deinit</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
             <div class="task-group">
@@ -316,9 +354,9 @@ Setting this to <code>false</code> might put heavy load on the users device and 
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing12SynchronizerC4syncyyF"></a>
-                    <a name="//apple_ref/swift/Method/sync()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing12SynchronizerC4syncyyF">sync()</a>
+                    <a name="/s:13DataCapturing12SynchronizerC11syncCheckedyyF"></a>
+                    <a name="//apple_ref/swift/Method/syncChecked()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing12SynchronizerC11syncCheckedyyF">syncChecked()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -326,21 +364,14 @@ Setting this to <code>false</code> might put heavy load on the users device and 
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Synchronize all measurements now if a connection is available.</p>
-
-<p>If this is not called the service might wait for an opportune moment to start synchronization.
-The call is asynchronous, meaning it returns almost immediately, while the synchronization continues running inside its own thread.</p>
-
-<p>You may call this method multiple times in short succession.
-However only one synchronization can be active at a given time.
-If you call this during an active synchronization it is going to return without doing anything.</p>
+                        <p>Tries to synchronize all measurements after checking for a proper connection. If <code><a href="../Classes/Synchronizer.html#/s:13DataCapturing12SynchronizerC14syncOnWiFiOnlySbvp">syncOnWiFiOnly</a></code> is true, this will only work if the device is connected to a WiFi network.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">sync</span><span class="p">()</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">syncChecked</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>
@@ -362,9 +393,6 @@ If you call this during an active synchronization it is going to return without 
                       <div class="abstract">
                         <p>Starts background synchronization as prepared in this objects initializer.</p>
 
-<p>Synchronization is stopped automatically if there are no measurements left to synchronize.
-You should restart this each time a new measurement has been finished.</p>
-
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
@@ -377,12 +405,39 @@ You should restart this each time a new measurement has been finished.</p>
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing12SynchronizerC10deactivateyyF"></a>
+                    <a name="//apple_ref/swift/Method/deactivate()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing12SynchronizerC10deactivateyyF">deactivate()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Stops background synchronization.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">deactivate</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-15)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-04-30)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

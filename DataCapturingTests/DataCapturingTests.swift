@@ -37,8 +37,6 @@ class DataCapturingTests: XCTestCase {
     var coreDataStack: CoreDataManager!
     /// The mocked sensor manager used to simulate accelerometer updates.
     var sensorManager: TestMotionManager!
-    /// A `PersistenceLayer` used to load data created by the lifecycle methods and assert it.
-    var persistenceLayer: PersistenceLayer!
 
     /// Initializes every test by creating a `TestDataCapturingService`.
     override func setUp() {
@@ -53,7 +51,6 @@ class DataCapturingTests: XCTestCase {
         sensorManager = TestMotionManager()
         oocut = TestDataCapturingService(sensorManager: sensorManager, dataManager: coreDataStack) { _, _ in }
         oocut.coreLocationManager = TestLocationManager()
-        persistenceLayer = PersistenceLayer(onManager: coreDataStack)
     }
 
     /// Tears down the test environment.
@@ -61,6 +58,8 @@ class DataCapturingTests: XCTestCase {
         // Wait for write operations to have finished! This is necessary to delete the data again.
         oocut = nil
         sensorManager = nil
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
         do {
             // Handle this in its own thread to avoid race conditions.
             //try syncQueue.sync {
@@ -69,7 +68,6 @@ class DataCapturingTests: XCTestCase {
         } catch {
             fatalError("\(error)")
         }
-        persistenceLayer = nil
         coreDataStack = nil
         super.tearDown()
     }
@@ -100,6 +98,7 @@ class DataCapturingTests: XCTestCase {
         - `DataCapturingError.noCurrentMeasurement`: If no current measurement is available while resuming data capturing.
      */
     func testStartPauseResumeStop_HappyPath() throws {
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
 
         try oocut.start(inContext: .bike)
@@ -115,6 +114,26 @@ class DataCapturingTests: XCTestCase {
         XCTAssertEqual(prePauseCountOfMeasurements, postPauseCountOfMeasurements)
         XCTAssertTrue(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
+        try oocut.stop()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+    }
+
+    func testStartPauseStop_HappyPath() throws {
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let preStartCountOfMeasurements = try persistenceLayer.countMeasurements()
+
+        try oocut.start(inContext: .bike)
+        XCTAssertTrue(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        let postStartCountOfMeasurements = try persistenceLayer.countMeasurements()
+        XCTAssertTrue(postStartCountOfMeasurements == preStartCountOfMeasurements + 1)
+
+        try oocut.pause()
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertTrue(oocut.isPaused)
+
         try oocut.stop()
         XCTAssertFalse(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
@@ -256,6 +275,8 @@ class DataCapturingTests: XCTestCase {
         - Some unspecified errors from within CoreData.
      */
     func testLifecyclePerformance() throws {
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
         oocut.currentMeasurement = MeasurementEntity(identifier: measurement.identifier, context: .bike)
 

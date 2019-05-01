@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>DiskConsumption Class Reference</title>
+    <title>CyfaceBinaryFormatSerializer Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Class/DiskConsumption" class="dashAnchor"></a>
-    <a title="DiskConsumption Class Reference"></a>
+    <a name="//apple_ref/swift/Class/CyfaceBinaryFormatSerializer" class="dashAnchor"></a>
+    <a title="CyfaceBinaryFormatSerializer Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">DataCapturing Docs</a> (74% documented)</p>
@@ -21,7 +21,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">DataCapturing Reference</a>
         <img id="carat" src="../img/carat.png" />
-        DiskConsumption Class Reference
+        CyfaceBinaryFormatSerializer Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -148,14 +148,14 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>DiskConsumption</h1>
+            <h1>CyfaceBinaryFormatSerializer</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DiskConsumption</span></code></pre>
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">CyfaceBinaryFormatSerializer</span></code></pre>
 
                 </div>
               </div>
-            <p>Objects of this class represent the current disk (or rather SD card) space used and available.</p>
+            <p>Transforms measurement data into the Cyface binary format used for transmission via the network.</p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -163,35 +163,25 @@
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    1.0.0
+    1.1.0
+
+</div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
     1.0.0
 
 </div>
 
-</div>
-
-<p>This space is mostly filled with unsynchronized <code>Measurement</code>s.
-To avoid filling up the users SD card it is advisable to delte <code>Measurement</code>s as soon as they use up too much space.</p>
-
           </section>
           <section class="section task-group-section">
             <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Properties"></a>
-                <a name="//apple_ref/swift/Section/Properties" class="dashAnchor"></a>
-                <a href="#/Properties">
-                  <h3 class="section-name">Properties</h3>
-                </a>
-              </div>
               <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing15DiskConsumptionC13consumedBytesSivp"></a>
-                    <a name="//apple_ref/swift/Property/consumedBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing15DiskConsumptionC13consumedBytesSivp">consumedBytes</a>
+                    <a name="/s:13DataCapturing28CyfaceBinaryFormatSerializerC19serializeCompressedy10Foundation0A0VAA13MeasurementMOCKF"></a>
+                    <a name="//apple_ref/swift/Method/serializeCompressed(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing28CyfaceBinaryFormatSerializerC19serializeCompressedy10Foundation0A0VAA13MeasurementMOCKF">serializeCompressed(_:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -199,79 +189,21 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The amount of bytes currently used by the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                        <p>Serializes the provided <code>measurement</code> and compresses the returned data using RFC-1951 Deflate algorithm.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>SerializationError.compressionFailed</code> if compression was not successful.</li>
+</ul>
+
+</div>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">consumedBytes</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing15DiskConsumptionC14availableBytesSivp"></a>
-                    <a name="//apple_ref/swift/Property/availableBytes" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing15DiskConsumptionC14availableBytesSivp">availableBytes</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The amount of bytes still available for the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">availableBytes</span><span class="p">:</span> <span class="kt">Int</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Initializers"></a>
-                <a name="//apple_ref/swift/Section/Initializers" class="dashAnchor"></a>
-                <a href="#/Initializers">
-                  <h3 class="section-name">Initializers</h3>
-                </a>
-              </div>
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing15DiskConsumptionC13consumedBytes09availableF0ACSi_Sitcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(consumedBytes:availableBytes:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing15DiskConsumptionC13consumedBytes09availableF0ACSi_Sitcfc">init(consumedBytes:availableBytes:)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Creates a new completely initialized <code>DiskConsumption</code> object.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">consumedBytes</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">availableBytes</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">serializeCompressed</span><span class="p">(</span><span class="n">_</span> <span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Data</span></code></pre>
 
                         </div>
                       </div>
@@ -282,29 +214,21 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                             <tr>
                               <td>
                                 <code>
-                                <em>consumedBytes</em>
+                                <em>measurement</em>
                                 </code>
                               </td>
                               <td>
                                 <div>
-                                  <p>The amount of bytes currently used by the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>availableBytes</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The amount of bytes still available for the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+                                  <p>The <code>measurement</code> to serialize.</p>
                                 </div>
                               </td>
                             </tr>
                           </tbody>
                         </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The serialized measurement in the compressed Cyface binary format</p>
                       </div>
                     </section>
                   </div>
