@@ -15,10 +15,7 @@ The core concept used in this framework is the *Measurement*. A measurement is o
 A measurement might contain pauses and therefore is structured into several tracks.
 There is an API to control the capturing lifecycle via the `DataCapturingService` class.
 There is also an API to access captured data via the `PersistenceLayer` class.
-The `ServerConnection` class finally is responsible for transmitting captured data to a Cyface server.
-
-## Migration Notes
-- [4.0.0](Documentation/4.0.0-MigrationGuid.md)
+The `ServerConnection` class is responsible for transmitting captured data to a Cyface server, while the Synchronizer makes sure this happens at convenient times and in regular intervals.
 
 ## Integration in your App
 
@@ -39,32 +36,26 @@ guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
     fatalError()
 }
 manager.setup(bundle: bundle)
-// 4
-let authenticator = StaticAuthenticator()
-// 5
-let serverConnection = ServerConnection(apiURL: url, authenticator: authenticator, onManager: manager)
-// 6
+// 4 
 let sensorManager = CMMotionManager()
-// 7
+// 5
 let updateInterval = 100
-// 8
+// 6
 let savingInterval = 10
-// 9
+// 7
 let handler = handler
-// 10
-let dcs = try MovebisDataCapturingService(connection: serverConnection, sensorManager: sensorManager, updateInterval: updateInterval, savingInterval: savingInterval, dataManager: manager, eventHandler: handler)
+// 8
+let dcs = try MovebisDataCapturingService(sensorManager: sensorManager, updateInterval: updateInterval, savingInterval: savingInterval, dataManager: manager, eventHandler: handler)
 ```
 
 1. Import Apples *CoreMotion* framework, to be able to create a motion manager.
 2. Import Apples *CoreData* framework, to be able to create a `CoreDataManager`
-3. Create the *CoreData* stack in the form of a `CoreDataManager`. Usually there should be only one instance of `CoreDataManager`. Nothing bad will happen if you use multiple ones, except for an unnecessary resource overhead. **However be careful to avoid calling the `setup(bundle:)` method on different threads automatically. This might leave your data storage in a corrupted state or at least crash your app. Also provide the store type and a `CoreDataMigrator`. The store type should be an `NSSQLiteStoreType` in production and might be an `NSInMemoryStoreType` in a test environment. If the `CoreDataManager` encounters an old data store it will migrate this data store to the current version. If there is much data to convert, this can take some time and probably should be wrapped into a background thread.
-4. Create an `Authenticator` like explained under *Using an authenticator* below.
-5. Create a `ServerConnection` for measurement data transmission. Provide the URL of a Cyface or Movebis server endpoint, the `Authenticator` and the `CoreDataManager`.
-6. Create `CMMotionManager` from the CoreMotion framework. This is responsible for capturing sensor data from your device.
-7. Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to caputre 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.
-8. Create a saving interval in seconds. The value 10 for example means that your data is saved to persistent storage every 10 seconds. This also means your currently captured measurement is updated every 10 seconds. Values like the measurement length are updated at this point as well. If you need to update your UI frequently you should set this to a low value. This however also puts a higher load on your database.
-9. Provide a handler for events occuring during data capturing. Possible events are explained below.
-10. Finally create the `DataCapturingService` or `MovebisDataCapturingService` as shown, providing the required parameters.
+3. Create the *CoreData* stack in the form of a `CoreDataManager`. Usually there should be only one instance of `CoreDataManager`. Nothing bad will happen if you use multiple ones, except for an unnecessary resource overhead. **However be careful to avoid calling the `setup(bundle:)` method on different threads concurrently. This might leave your data storage in a corrupted state or at least crash your app. Also provide the store type and a `CoreDataMigrator`. The store type should be an `NSSQLiteStoreType` in production and might be an `NSInMemoryStoreType` in a test environment. If the `CoreDataManager` encounters an old data store it will migrate this data store to the current version. If there is much data to convert, this can take some time and probably should be wrapped into a background thread.
+4. Create `CMMotionManager` from the *CoreMotion* framework. This is responsible for capturing sensor data from your device.
+5. Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to caputre 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.
+6. Create a saving interval in seconds. The value 10 for example means that your data is saved to persistent storage every 10 seconds. This also means your currently captured measurement is updated every 10 seconds. Values like the measurement length are updated at this point as well. If you need to update your UI frequently you should set this to a low value. This however also puts a higher load on your database.
+7. Provide a handler for events occuring during data capturing. Possible events are explained below.
+8. Finally create the `DataCapturingService` or `MovebisDataCapturingService` as shown, providing the required parameters.
 
 ### Getting the currently captured measurement
 
@@ -170,20 +161,28 @@ If one is found, synchronization for all unsynchronized measurements is executed
 Creating a synchronizer should look something like:
 
 ```swift
-let synchronizer = try Synchronizer(
 // 1.
-persistenceLayer: PersistenceLayer(onManager: manager), 
+let url = URL(string: "http://localhost/api")!
 // 2.
-cleaner: AccelerationPointRemovalCleaner(), 
+let serverConnection = ServerConnection(apiURL: url, authenticator: authenticator, onManager: manager)
 // 3.
+let synchronizer = try Synchronizer(
+// 4.
+coreDataStack: manager, 
+// 5.
+cleaner: AccelerationPointRemovalCleaner(), 
+// 6.
 serverConnection: serverConnection) { event, status in 
 	// Handle .synchronizationFinished event for example by checking status for .success or .failure
 }
 ```
 
-1. Create a `PersistenceLayer` which is used to check the database for synchronizable measurements. It is advisable to always create a new one, to avoid multi threading issues.
-2. Create a `Cleaner` which cleanes the database after successful synchronization.
-3. Provide a `ServerConnection` used to transmit the synchronizable data.
+1. Create the URL where your server is ready to receive data.
+2. Create a `ServerConnection` from the URL created in the previous step and add an authenticator and a manager as described above.
+3. Create the `Synchronizer` based on the following parameters.
+4. Preferrably use the same `CoreDataManager` as described under setting up the `DataCapturingService`.
+5. Create a `Cleaner` which cleanes the database after successful synchronization.
+6. Provide the `ServerConnection` as created in step 2.
 
 ## API Documentation
 [See](docs/index.html)
