@@ -14,7 +14,7 @@
     <a title="MovebisDataCapturingService Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (72% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (74% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -37,7 +37,16 @@
                 <a href="../Classes/AccelerationPointRemovalCleaner.html">AccelerationPointRemovalCleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Classes/CoreDataManager.html">CoreDataManager</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/CoreDataMigrator.html">CoreDataMigrator</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
@@ -87,6 +96,9 @@
             <a href="../Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a href="../Enums/CoreDataMigrationVersion.html">CoreDataMigrationVersion</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Enums/DataCapturingError.html">DataCapturingError</a>
               </li>
               <li class="nav-group-task">
@@ -99,13 +111,7 @@
                 <a href="../Enums/MeasurementContext.html">MeasurementContext</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Enums/ServerConnectionError.html">ServerConnectionError</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Enums/Status.html">Status</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../Enums/SynchronizationError.html">SynchronizationError</a>
               </li>
             </ul>
           </li>
@@ -119,6 +125,9 @@
                 <a href="../Protocols/Cleaner.html">Cleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Protocols/CoreDataMigratorProtocol.html">CoreDataMigratorProtocol</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a>
               </li>
             </ul>
@@ -128,6 +137,9 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="../Structs/AccelerationsFile.html">AccelerationsFile</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/ServerConnectionError.html">ServerConnectionError</a>
               </li>
             </ul>
           </li>
@@ -155,7 +167,7 @@ The instance you provide will receive the updates.</p>
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    4.0.1
+    4.2.2
 
 </div>
 <div class="aside aside-since">
@@ -217,9 +229,9 @@ You may set this to <code>nil</code> if you would like to deactive location upda
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing07MovebisaB7ServiceC10connection13sensorManager14updateInterval06savingI016persistenceLayer12eventHandlerAcA16ServerConnectionC_So08CMMotionG0CS2dAA011PersistenceL0CyAA0aB5EventO_AA6StatusOtctKcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(connection:sensorManager:updateInterval:savingInterval:persistenceLayer:eventHandler:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing07MovebisaB7ServiceC10connection13sensorManager14updateInterval06savingI016persistenceLayer12eventHandlerAcA16ServerConnectionC_So08CMMotionG0CS2dAA011PersistenceL0CyAA0aB5EventO_AA6StatusOtctKcfc">init(connection:sensorManager:updateInterval:savingInterval:persistenceLayer:eventHandler:)</a>
+                    <a name="/s:13DataCapturing07MovebisaB7ServiceC10connection13sensorManager14updateInterval06savingI004dataG012eventHandlerAcA16ServerConnectionC_So08CMMotionG0CS2dAA04CoreaG0CyAA0aB5EventO_AA6StatusOtctKcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(connection:sensorManager:updateInterval:savingInterval:dataManager:eventHandler:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing07MovebisaB7ServiceC10connection13sensorManager14updateInterval06savingI004dataG012eventHandlerAcA16ServerConnectionC_So08CMMotionG0CS2dAA04CoreaG0CyAA0aB5EventO_AA6StatusOtctKcfc">init(connection:sensorManager:updateInterval:savingInterval:dataManager:eventHandler:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -229,18 +241,11 @@ You may set this to <code>nil</code> if you would like to deactive location upda
                       <div class="abstract">
                         <p>Creates a new <code>MovebisDataCapturingService</code> with the ability capture location
 when no data capturing runs.</p>
-<li>connection: A connection to a Cyface API server.</li>
-<li>sensorManager: An instance of <code>CMMotionManager</code>.
-There should be only one instance of this type in your application.
-Since it seems to be impossible to create that instance inside a framework at the moment,
-you have to provide it via this parameter.</li>
-<li>updateInterval: The accelerometer update interval in Hertz. Default value is 100 Hertz.</li>
-<li>savingInterval: The time between save operations during data capturing in seconds. Default value is 30 seconds.</li>
-<li>persistenceLayer: An API to store, retrieve and update captured data to the local system until the App can transmit it to a server.</li>
-<li>eventHandler: A handler for events occuring during data capturing.</li>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    If the networking stack for data synchronization was not successfully initialized.
+    <ul>
+<li><code>SynchronizationError.reachabilityNotInitilized</code>: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.</li>
+</ul>
 
 </div>
 
@@ -249,9 +254,91 @@ you have to provide it via this parameter.</li>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">connection</span> <span class="nv">serverConnection</span><span class="p">:</span> <span class="kt"><a href="../Classes/ServerConnection.html">ServerConnection</a></span><span class="p">,</span> <span class="n">sensorManager</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CMMotionManager</span><span class="p">,</span> <span class="nv">updateInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="nv">savingInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">persistenceLayer</span> <span class="nv">persistence</span><span class="p">:</span> <span class="kt"><a href="../Classes/PersistenceLayer.html">PersistenceLayer</a></span><span class="p">,</span> <span class="nv">eventHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">((</span><span class="kt"><a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a></span><span class="p">,</span> <span class="kt"><a href="../Enums/Status.html">Status</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">))</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">connection</span> <span class="nv">serverConnection</span><span class="p">:</span> <span class="kt"><a href="../Classes/ServerConnection.html">ServerConnection</a></span><span class="p">,</span> <span class="n">sensorManager</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CMMotionManager</span><span class="p">,</span> <span class="nv">updateInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="nv">savingInterval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="nv">dataManager</span><span class="p">:</span> <span class="kt"><a href="../Classes/CoreDataManager.html">CoreDataManager</a></span><span class="p">,</span> <span class="nv">eventHandler</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">((</span><span class="kt"><a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a></span><span class="p">,</span> <span class="kt"><a href="../Enums/Status.html">Status</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">))</span> <span class="k">throws</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>connection</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A connection to a Cyface API server.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>sensorManager</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>An instance of <code>CMMotionManager</code>.
+There should be only one instance of this type in your application.
+Since it seems to be impossible to create that instance inside a framework at the moment,
+you have to provide it via this parameter.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>updateInterval</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The accelerometer update interval in Hertz. Default value is 100 Hertz.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>savingInterval</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The time between save operations during data capturing in seconds. Default value is 30 seconds.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>dataManager</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The CoreData stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>eventHandler</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A handler for events occuring during data capturing.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -280,16 +367,17 @@ you have to provide it via this parameter.</li>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Starts the capturing process, notifying the provided handler of important events.</p>
+                        <p>Starts the capturing process, notifying the <code>eventHandler</code>, provided to the constructor of important events.</p>
 
-<p>This is a long running asynchronous operation.
-The provided handler is notified of its completion by receiving the event <code>DataCapturingEvent.serviceStarted</code>.
+<p>The <code>eventHandler</code>, that you did provide as a parameter to this objects constructor, is notified of the completion  of the start up process by receiving the event <code>DataCapturingEvent.serviceStarted</code>.
 If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    
+    <ul>
+<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO8isPausedyA2CmF">DataCapturingError.isPaused</a></code> if the service was paused and thus it makes no sense to start it. Use <code>resume()</code> if you want to continue.</li>
+</ul>
+
 </div>
-<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO8isPausedyA2CmF">DataCapturingError.isPaused</a></code> if the service was paused and thus it makes no sense to start it. Use <code>resume()</code>if you want to continue.</li>
 
                       </div>
                       <div class="declaration">
@@ -303,12 +391,59 @@ If you need to run code and be sure that the service has started you need to lis
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing07MovebisaB7ServiceC24loadInactiveMeasurementsSayAA13MeasurementMOCGyKF"></a>
+                    <a name="//apple_ref/swift/Method/loadInactiveMeasurements()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing07MovebisaB7ServiceC24loadInactiveMeasurementsSayAA13MeasurementMOCGyKF">loadInactiveMeasurements()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Loads only those measurements that are not captured at the moment.</p>
+
+<p>This should be used to display all finished measurements in the UI.
+Measurements are loaded from the database via CoreData and provided as <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code> instances.</p>
+<div class="aside aside-attention">
+    <p class="aside-title">Attention</p>
+    The returned array contains CoreData <code>NSManagedObject</code> instances (or a instances of a subclass). <code>NSManagedObject</code> is not thread safe and looses all attribute values as soon as transfered to a different thread. Handle the objects in the returned array with care and copy all required values before using them from a different thread (like for example a callback or delegate).
+
+</div>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code>PersistenceError.noContext</code> If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.</li>
+<li>Some unspecified errors from within CoreData.</li>
+</ul>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">loadInactiveMeasurements</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>An array of measurements stored in the database without the one currently captured, if capturing is active.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-15)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-04-30)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

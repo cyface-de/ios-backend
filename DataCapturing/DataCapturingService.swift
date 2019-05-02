@@ -23,12 +23,10 @@ import CoreLocation
 import os.log
 
 /**
- An object of this class handles the lifecycle of starting and stopping data capturing as well as transmitting results to an appropriate server.
- 
- To avoid using the users traffic or incurring costs, the service waits for Wifi access before transmitting any data. You may however force synchronization if required, using the provided `Synchronizer`.
+ An object of this class handles the lifecycle of starting and stopping data capturing.
  
  - Author: Klemens Muthmann
- - Version: 9.0.0
+ - Version: 9.1.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -69,8 +67,7 @@ public class DataCapturingService: NSObject {
     }()
 
     /**
-     The *CoreData* stack used to store, retrieve and update captured data to the local system until the App
-     can transmit it to a server.
+     The *CoreData* stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
      */
     let coreDataStack: CoreDataManager
 
@@ -98,8 +95,7 @@ public class DataCapturingService: NSObject {
     // MARK: - Initializers
 
     /**
-     Creates a new completely initialized `DataCapturingService` transmitting data
-     via the provided server connection and accessing data a certain amount of times per second.
+     Creates a new completely initialized `DataCapturingService` accessing data a certain amount of times per second.
 
      - Parameters:
         - sensorManager: An instance of `CMMotionManager`.
@@ -161,7 +157,7 @@ public class DataCapturingService: NSObject {
     }
 
     /**
-     Stops the currently running data capturing process or does nothing if the process is not
+     Stops the currently running or paused data capturing process or does nothing if the process is not
      running.
 
      - Throws:
@@ -170,16 +166,18 @@ public class DataCapturingService: NSObject {
      */
     public func stop() throws {
         try lifecycleQueue.sync {
-            guard !isPaused else {
-                throw DataCapturingError.isPaused
-            }
-            guard let currentMeasurement = currentMeasurement, isRunning else {
+            guard let currentMeasurement = currentMeasurement else {
                 os_log("Trying to stop a stopped service! Ignoring call to stop!", log: LOG, type: .default)
                 return
             }
 
+            guard isPaused || isRunning else {
+                fatalError("Trying to stop a not initialized service (not running and not paused)!")
+            }
+
+            // Inform about stopped event
             backgroundSynchronizationTimer?.setCancelHandler {
-                self.handler(.serviceStopped(measurement: self.currentMeasurement?.identifier), .success)
+                self.handler(.serviceStopped(measurement: currentMeasurement.identifier), .success)
             }
             stopCapturing()
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
@@ -188,11 +186,12 @@ public class DataCapturingService: NSObject {
             currentMeasurementEntity.synchronizable = true
             persistenceLayer.context?.saveRecursively()
             self.currentMeasurement = nil
+            isPaused = false
         }
     }
 
     /**
-     Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now. After using `pause()` you must call resume before you can call any other lifecycle method like `stop()`, for example.
+     Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now.
 
      - Throws:
         - `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.
@@ -243,7 +242,7 @@ public class DataCapturingService: NSObject {
 
      - Parameter savingEvery: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
      - Throws:
-        - PersistenceError If there is no such measurement.
+        - PersistenceError If there is no current measurement.
         - Some unspecified errors from within CoreData.
      */
     func startCapturing(savingEvery time: TimeInterval) throws {
@@ -307,11 +306,6 @@ public class DataCapturingService: NSObject {
      An internal helper method for stopping the capturing process.
      */
     func stopCapturing() {
-        guard isRunning else {
-            os_log("Trying to stop a non running service!", log: LOG, type: .info)
-            return
-        }
-
         motionManager.stopAccelerometerUpdates()
         DispatchQueue.main.async {
             self.coreLocationManager.stopUpdatingLocation()

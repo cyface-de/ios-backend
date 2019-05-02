@@ -13,7 +13,7 @@
     <a title="DataCapturing  Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="index.html">DataCapturing Docs</a> (72% documented)</p>
+        <p><a href="index.html">DataCapturing Docs</a> (74% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -36,7 +36,16 @@
                 <a href="Classes/AccelerationPointRemovalCleaner.html">AccelerationPointRemovalCleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="Classes/CoreDataManager.html">CoreDataManager</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/CoreDataMigrator.html">CoreDataMigrator</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
               </li>
               <li class="nav-group-task">
                 <a href="Classes/DataCapturingService.html">DataCapturingService</a>
@@ -86,6 +95,9 @@
             <a href="Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a href="Enums/CoreDataMigrationVersion.html">CoreDataMigrationVersion</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Enums/DataCapturingError.html">DataCapturingError</a>
               </li>
               <li class="nav-group-task">
@@ -98,13 +110,7 @@
                 <a href="Enums/MeasurementContext.html">MeasurementContext</a>
               </li>
               <li class="nav-group-task">
-                <a href="Enums/ServerConnectionError.html">ServerConnectionError</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="Enums/Status.html">Status</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Enums/SynchronizationError.html">SynchronizationError</a>
               </li>
             </ul>
           </li>
@@ -118,6 +124,9 @@
                 <a href="Protocols/Cleaner.html">Cleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="Protocols/CoreDataMigratorProtocol.html">CoreDataMigratorProtocol</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a>
               </li>
             </ul>
@@ -127,6 +136,9 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="Structs/AccelerationsFile.html">AccelerationsFile</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/ServerConnectionError.html">ServerConnectionError</a>
               </li>
             </ul>
           </li>
@@ -139,7 +151,8 @@
             <h1 id='cyface-ios-sdk' class='heading'>Cyface iOS - SDK</h1>
 
 <p><a href="https://bitrise.io/"><img src="https://app.bitrise.io/app/45ec21fd3b5a664b/status.svg?token=aE1ZWjYUkjxhAtYMX8bcCg" alt="CI: Bitrise"></a>
-<a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3"></a></p>
+<a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3"></a>
+<a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.0-blue.svg" alt="Swift 5.0"></a></p>
 <h2 id='introduction' class='heading'>Introduction</h2>
 
 <p>This is the Cyface SDK for iOS. It provides a framework you can use to continuously measure localized (i.e. annotated with GPS coordinates) sensor data from devices running iOS (i.e. iPhone).
@@ -165,36 +178,102 @@ The <code><a href="Classes/ServerConnection.html">ServerConnection</a></code> cl
 This should look similar to:</p>
 <pre class="highlight swift"><code><span class="c1">// 1</span>
 <span class="kd">import</span> <span class="kt">CoreMotion</span>
-<span class="o">...</span>
 <span class="c1">// 2</span>
-<span class="k">let</span> <span class="nv">persistence</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">PersistenceLayer</span><span class="p">(</span><span class="nv">withDistanceCalculator</span><span class="p">:</span> <span class="kt">DefaultDistanceCalculationStrategy</span><span class="p">())</span>
+<span class="kd">import</span> <span class="kt">CoreData</span>
+<span class="o">...</span>
 <span class="c1">// 3</span>
-<span class="k">let</span> <span class="nv">authenticator</span> <span class="o">=</span> <span class="kt">StaticAuthenticator</span><span class="p">()</span>
+<span class="k">let</span> <span class="nv">manager</span> <span class="o">=</span> <span class="kt">CoreDataManager</span><span class="p">(</span><span class="nv">storeType</span><span class="p">:</span> <span class="kt">NSSQLiteStoreType</span><span class="p">,</span> <span class="nv">migrator</span><span class="p">:</span> <span class="kt">CoreDataMigrator</span><span class="p">())</span>
+<span class="k">guard</span> <span class="k">let</span> <span class="nv">bundle</span> <span class="o">=</span> <span class="kt">Bundle</span><span class="p">(</span><span class="nv">identifier</span><span class="p">:</span> <span class="s">"de.cyface.DataCapturing"</span><span class="p">)</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nf">fatalError</span><span class="p">()</span>
+<span class="p">}</span>
+<span class="n">manager</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="nv">bundle</span><span class="p">:</span> <span class="n">bundle</span><span class="p">)</span>
 <span class="c1">// 4</span>
-<span class="k">let</span> <span class="nv">serverConnection</span> <span class="o">=</span> <span class="kt">ServerConnection</span><span class="p">(</span><span class="nv">apiURL</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="nv">authenticator</span><span class="p">:</span> <span class="n">authenticator</span><span class="p">)</span>
+<span class="k">let</span> <span class="nv">authenticator</span> <span class="o">=</span> <span class="kt">StaticAuthenticator</span><span class="p">()</span>
 <span class="c1">// 5</span>
-<span class="k">let</span> <span class="nv">sensorManager</span> <span class="o">=</span> <span class="kt">CMMotionManager</span><span class="p">()</span>
+<span class="k">let</span> <span class="nv">serverConnection</span> <span class="o">=</span> <span class="kt">ServerConnection</span><span class="p">(</span><span class="nv">apiURL</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="nv">authenticator</span><span class="p">:</span> <span class="n">authenticator</span><span class="p">,</span> <span class="nv">onManager</span><span class="p">:</span> <span class="n">manager</span><span class="p">)</span>
 <span class="c1">// 6</span>
-<span class="k">let</span> <span class="nv">updateInterval</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">let</span> <span class="nv">sensorManager</span> <span class="o">=</span> <span class="kt">CMMotionManager</span><span class="p">()</span>
 <span class="c1">// 7</span>
-<span class="k">let</span> <span class="nv">savingInterval</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="k">let</span> <span class="nv">updateInterval</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="c1">// 8</span>
-<span class="k">let</span> <span class="nv">handler</span> <span class="o">=</span> <span class="n">handler</span>
+<span class="k">let</span> <span class="nv">savingInterval</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="c1">// 9</span>
-<span class="k">let</span> <span class="nv">dcs</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">MovebisDataCapturingService</span><span class="p">(</span><span class="nv">connection</span><span class="p">:</span> <span class="n">serverConnection</span><span class="p">,</span> <span class="nv">sensorManager</span><span class="p">:</span> <span class="n">sensorManager</span><span class="p">,</span> <span class="nv">updateInterval</span><span class="p">:</span> <span class="n">updateInterval</span><span class="p">,</span> <span class="nv">savingInterval</span><span class="p">:</span> <span class="n">savingInterval</span><span class="p">,</span> <span class="nv">persistenceLayer</span><span class="p">:</span> <span class="n">persistence</span><span class="p">,</span> <span class="nv">eventHandler</span><span class="p">:</span> <span class="n">handler</span><span class="p">)</span>
+<span class="k">let</span> <span class="nv">handler</span> <span class="o">=</span> <span class="n">handler</span>
+<span class="c1">// 10</span>
+<span class="k">let</span> <span class="nv">dcs</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">MovebisDataCapturingService</span><span class="p">(</span><span class="nv">connection</span><span class="p">:</span> <span class="n">serverConnection</span><span class="p">,</span> <span class="nv">sensorManager</span><span class="p">:</span> <span class="n">sensorManager</span><span class="p">,</span> <span class="nv">updateInterval</span><span class="p">:</span> <span class="n">updateInterval</span><span class="p">,</span> <span class="nv">savingInterval</span><span class="p">:</span> <span class="n">savingInterval</span><span class="p">,</span> <span class="nv">dataManager</span><span class="p">:</span> <span class="n">manager</span><span class="p">,</span> <span class="nv">eventHandler</span><span class="p">:</span> <span class="n">handler</span><span class="p">)</span>
 </code></pre>
 
 <ol>
 <li>Import Apples <em>CoreMotion</em> framework, to be able to create a motion manager.</li>
-<li>Create a <code><a href="Classes/PersistenceLayer.html">PersistenceLayer</a></code> and provide a distance calculation strategy. Currently there is only the <code><a href="Classes/DefaultDistanceCalculationStrategy.html">DefaultDistanceCalculationStrategy</a></code> which uses the integrated distance calculation between locations as provided by Apple.</li>
+<li>Import Apples <em>CoreData</em> framework, to be able to create a <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code></li>
+<li>Create the <em>CoreData</em> stack in the form of a <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code>. Usually there should be only one instance of <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code>. Nothing bad will happen if you use multiple ones, except for an unnecessary resource overhead. **However be careful to avoid calling the <code>setup(bundle:)</code> method on different threads automatically. This might leave your data storage in a corrupted state or at least crash your app. Also provide the store type and a <code><a href="Classes/CoreDataMigrator.html">CoreDataMigrator</a></code>. The store type should be an <code>NSSQLiteStoreType</code> in production and might be an <code>NSInMemoryStoreType</code> in a test environment. If the <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code> encounters an old data store it will migrate this data store to the current version. If there is much data to convert, this can take some time and probably should be wrapped into a background thread.</li>
 <li>Create an <code><a href="Protocols/Authenticator.html">Authenticator</a></code> like explained under <em>Using an authenticator</em> below.</li>
-<li>Create a <code><a href="Classes/ServerConnection.html">ServerConnection</a></code> for measurement data transmission. Provide the URL of a Cyface or Movebis server endpoint and the <code><a href="Protocols/Authenticator.html">Authenticator</a></code>.</li>
+<li>Create a <code><a href="Classes/ServerConnection.html">ServerConnection</a></code> for measurement data transmission. Provide the URL of a Cyface or Movebis server endpoint, the <code><a href="Protocols/Authenticator.html">Authenticator</a></code> and the <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code>.</li>
 <li>Create <code>CMMotionManager</code> from the CoreMotion framework. This is responsible for capturing sensor data from your device.</li>
 <li>Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to caputre 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.</li>
 <li>Create a saving interval in seconds. The value 10 for example means that your data is saved to persistent storage every 10 seconds. This also means your currently captured measurement is updated every 10 seconds. Values like the measurement length are updated at this point as well. If you need to update your UI frequently you should set this to a low value. This however also puts a higher load on your database.</li>
 <li>Provide a handler for events occuring during data capturing. Possible events are explained below.</li>
 <li>Finally create the <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code> or <code><a href="Classes/MovebisDataCapturingService.html">MovebisDataCapturingService</a></code> as shown, providing the required parameters.</li>
 </ol>
+<h3 id='getting-the-currently-captured-measurement' class='heading'>Getting the currently captured measurement</h3>
+
+<p>If there is an active data capturing process - after a call to <code>DataCapturingService.start()</code> or  <code><a href="Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC6resumeyyKF">DataCapturingService.resume()</a></code>, you can access the current measurement via:</p>
+<pre class="highlight swift"><code><span class="k">if</span> <span class="k">let</span> <span class="nv">currentMeasurementIdentifier</span> <span class="o">=</span> <span class="n">dcs</span><span class="o">.</span><span class="n">currentMeasurement</span><span class="p">?</span><span class="o">.</span><span class="n">identifier</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">currentMeasurement</span> <span class="o">=</span> <span class="n">persistenceLayer</span><span class="o">.</span><span class="nf">load</span><span class="p">(</span><span class="nv">measurementIdentifiedBy</span><span class="p">:</span> <span class="n">currentMeasurementIdentifier</span><span class="p">)</span>
+    <span class="c1">// Use the measurement</span>
+<span class="p">}</span>
+</code></pre>
+<h3 id='getting-track-information-from-a-measurement' class='heading'>Getting Track information from a measurement</h3>
+
+<p>Each measurement is organized into multiple tracks, which are split if the <code><a href="Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC5pauseyyKF">DataCapturingService.pause()</a></code> and  <code><a href="Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC6resumeyyKF">DataCapturingService.resume()</a></code> is called.
+Each track contains an ordered list of geo locations.
+Accessing this information to display it on the screen should follow the pattern below:</p>
+<pre class="highlight swift"><code><span class="k">do</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">persistenceLayer</span> <span class="o">=</span> <span class="kt">PersistenceLayer</span><span class="p">(</span><span class="nv">onManager</span><span class="p">:</span> <span class="n">manager</span><span class="p">)</span>
+    <span class="n">persistenceLayer</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">persistenceLayer</span><span class="o">.</span><span class="nf">makeContext</span><span class="p">()</span>
+    <span class="k">let</span> <span class="nv">measurement</span> <span class="o">=</span> <span class="k">try</span> <span class="n">persistenceLayer</span><span class="o">.</span><span class="nf">load</span><span class="p">(</span><span class="nv">measurementIdentifiedBy</span><span class="p">:</span> <span class="n">measurement</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">tracks</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">tracks</span><span class="p">?</span><span class="o">.</span><span class="n">array</span> <span class="k">as?</span> <span class="p">[</span><span class="kt">Track</span><span class="p">]</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nf">fatalError</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">track</span> <span class="k">in</span> <span class="n">tracks</span> <span class="p">{</span>
+        <span class="k">guard</span> <span class="k">let</span> <span class="nv">locations</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">locations</span><span class="p">?</span><span class="o">.</span><span class="n">array</span> <span class="k">as?</span> <span class="p">[</span><span class="kt">GeoLocationMO</span><span class="p">]</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nf">fatalError</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="k">guard</span> <span class="o">!</span><span class="n">locations</span><span class="o">.</span><span class="n">isEmpty</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nf">os_log</span><span class="p">(</span><span class="s">"No locations to display!"</span><span class="p">)</span>
+        <span class="k">continue</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Transform the location model objects from the database to a thread safe representation.</span>
+    <span class="k">var</span> <span class="nv">localLocations</span> <span class="o">=</span> <span class="p">[</span><span class="kt">GeoLocation</span><span class="p">]()</span>
+    <span class="k">for</span> <span class="n">location</span> <span class="k">in</span> <span class="n">locations</span> <span class="p">{</span>
+        <span class="n">localLocations</span><span class="o">.</span><span class="nf">append</span><span class="p">(</span><span class="kt">GeoLocation</span><span class="p">(</span><span class="nv">latitude</span><span class="p">:</span> <span class="n">location</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="nv">longitude</span><span class="p">:</span> <span class="n">location</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="nv">accuracy</span><span class="p">:</span> <span class="n">location</span><span class="o">.</span><span class="n">accuracy</span><span class="p">,</span> <span class="nv">speed</span><span class="p">:</span> <span class="n">location</span><span class="o">.</span><span class="n">speed</span><span class="p">,</span> <span class="nv">timestamp</span><span class="p">:</span> <span class="n">location</span><span class="o">.</span><span class="n">timestamp</span><span class="p">))</span>
+    <span class="p">}</span>
+
+    <span class="kt">DispatchQueue</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">async</span> <span class="p">{</span> <span class="p">[</span><span class="k">weak</span> <span class="k">self</span><span class="p">]</span> <span class="k">in</span>
+        <span class="k">guard</span> <span class="k">let</span> <span class="nv">self</span> <span class="o">=</span> <span class="k">self</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span>
+        <span class="p">}</span>
+        <span class="c1">// Draw or refresh the UI.</span>
+    <span class="p">}</span>
+<span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+    <span class="nf">os_log</span><span class="p">(</span><span class="s">"Unable to load locations!"</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre>
+
+<p><strong>ATTENTION:</strong> Notice that all locations have been copied to new data objects. This is necessary, as <em>CoreData</em> objects are not thread safe and will loose all data upon usage on a different thread. You need to do this with all <em>CoreData</em> model objects before using them in your app. <em>CoreData</em> model objects currently are <code><a href="Classes/MeasurementMO.html">MeasurementMO</a></code>, <code><a href="Classes/Track.html">Track</a></code> and <code><a href="Classes/GeoLocationMO.html">GeoLocationMO</a></code>.</p>
+<h3 id='getting-the-length-of-a-measurement' class='heading'>Getting the length of a measurement</h3>
+
+<p>The Cyface SDK for iOS is capable of providing the length of a measurement in meters.
+To get access to this value you should either use the instance of <code><a href="Classes/PersistenceLayer.html">PersistenceLayer</a></code> that you have created, for the <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code> or create a new one on demand.
+Using that <code><a href="Classes/PersistenceLayer.html">PersistenceLayer</a></code> you can access the track length by loading a measurement, which looks similar to:</p>
+<pre class="highlight swift"><code><span class="n">persistenceLayer</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">persistenceLayer</span><span class="o">.</span><span class="nf">makeContext</span><span class="p">()</span>
+<span class="k">let</span> <span class="nv">measurement</span> <span class="o">=</span> <span class="k">try</span> <span class="n">persistenceLayer</span><span class="o">.</span><span class="nf">load</span><span class="p">(</span><span class="nv">measurementIdentifiedBy</span><span class="p">:</span> <span class="n">identifier</span><span class="p">)</span> 
+<span class="k">let</span> <span class="nv">trackLength</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">trackLength</span>
+</code></pre>
 <h3 id='using-an-authenticator' class='heading'>Using an Authenticator</h3>
 
 <p>The Cyface SDK for iOS transmits measurement data to a server. 
@@ -210,25 +289,16 @@ It should be supplied with an appropriate JWT token prior to the first authentic
 <p>As explained above each measurement contains one or several tracks. 
 On each use of the <code>pause</code> and <code>resume</code> lifecycle methods a new track is created. 
 To access the locations from a track, do something like the following.</p>
-<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">persistenceLayer</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">PersistenceLayer</span><span class="p">(</span><span class="nv">withDistanceCalculator</span><span class="p">:</span> <span class="kt">DefaultDistanceCalculationStrategy</span><span class="p">())</span>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">persistenceLayer</span> <span class="o">=</span> <span class="kt">PersistenceLayer</span><span class="p">(</span><span class="nv">onManager</span><span class="p">:</span> <span class="n">manager</span><span class="p">)</span>
 <span class="n">persistenceLayer</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">persistenceLayer</span><span class="o">.</span><span class="nf">makeContext</span><span class="p">()</span>
 <span class="k">let</span> <span class="nv">measurement</span> <span class="o">=</span> <span class="k">try</span> <span class="n">persistenceLayer</span><span class="o">.</span><span class="nf">load</span><span class="p">(</span><span class="nv">measurementIdentifiedBy</span><span class="p">:</span> <span class="n">measurementIdentifier</span><span class="p">)</span>
 <span class="k">if</span> <span class="k">let</span> <span class="nv">tracks</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">tracks</span> <span class="p">{</span>
     <span class="k">if</span> <span class="k">let</span> <span class="nv">locations</span> <span class="o">=</span> <span class="n">tracks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">locations</span> <span class="p">{</span>
-    <span class="k">for</span> <span class="n">location</span> <span class="k">in</span> <span class="n">locations</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="n">location</span> <span class="k">in</span> <span class="n">locations</span> <span class="p">{</span>
             <span class="nf">print</span><span class="p">(</span><span class="err">\</span><span class="p">(</span><span class="n">location</span><span class="p">))</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-<h3 id='getting-the-length-of-a-measurement' class='heading'>Getting the length of a measurement</h3>
-
-<p>The Cyface SDK for iOS is capable of providing the length of a measurement in meters.
-To get access to this value you should either use the instance of <code><a href="Classes/PersistenceLayer.html">PersistenceLayer</a></code> that you have created, for the <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code> or create a new one on demand.
-Using that <code><a href="Classes/PersistenceLayer.html">PersistenceLayer</a></code> you can access the track length by loading a measurement, which looks similar to:</p>
-<pre class="highlight swift"><code><span class="n">persistenceLayer</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">persistenceLayer</span><span class="o">.</span><span class="nf">makeContext</span><span class="p">()</span>
-<span class="k">let</span> <span class="nv">measurement</span> <span class="o">=</span> <span class="k">try</span> <span class="n">persistenceLayer</span><span class="o">.</span><span class="nf">load</span><span class="p">(</span><span class="nv">measurementIdentifiedBy</span><span class="p">:</span> <span class="n">identifier</span><span class="p">)</span> 
-<span class="k">let</span> <span class="nv">trackLength</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">trackLength</span>
 </code></pre>
 <h3 id='continuous-synchronization' class='heading'>Continuous synchronization</h3>
 
@@ -240,7 +310,7 @@ If one is found, synchronization for all unsynchronized measurements is executed
 Creating a synchronizer should look something like:</p>
 <pre class="highlight swift"><code><span class="k">let</span> <span class="nv">synchronizer</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">Synchronizer</span><span class="p">(</span>
 <span class="c1">// 1.</span>
-<span class="nv">persistenceLayer</span><span class="p">:</span> <span class="k">try</span> <span class="kt">PersistenceLayer</span><span class="p">(</span><span class="nv">withDistanceCalculator</span><span class="p">:</span> <span class="kt">DefaultDistanceCalculationStrategy</span><span class="p">()),</span> 
+<span class="nv">persistenceLayer</span><span class="p">:</span> <span class="kt">PersistenceLayer</span><span class="p">(</span><span class="nv">onManager</span><span class="p">:</span> <span class="n">manager</span><span class="p">),</span> 
 <span class="c1">// 2.</span>
 <span class="nv">cleaner</span><span class="p">:</span> <span class="kt">AccelerationPointRemovalCleaner</span><span class="p">(),</span> 
 <span class="c1">// 3.</span>
@@ -289,7 +359,7 @@ along with the Cyface SDK for iOS. If not, see <a href="http://www.gnu.org/licen
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-15)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-04-30)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

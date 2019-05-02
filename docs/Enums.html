@@ -13,7 +13,7 @@
     <a title="Enumerations  Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="index.html">DataCapturing Docs</a> (72% documented)</p>
+        <p><a href="index.html">DataCapturing Docs</a> (74% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -36,7 +36,16 @@
                 <a href="Classes/AccelerationPointRemovalCleaner.html">AccelerationPointRemovalCleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="Classes/CoreDataManager.html">CoreDataManager</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/CoreDataMigrator.html">CoreDataMigrator</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
               </li>
               <li class="nav-group-task">
                 <a href="Classes/DataCapturingService.html">DataCapturingService</a>
@@ -86,6 +95,9 @@
             <a href="Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a href="Enums/CoreDataMigrationVersion.html">CoreDataMigrationVersion</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Enums/DataCapturingError.html">DataCapturingError</a>
               </li>
               <li class="nav-group-task">
@@ -98,13 +110,7 @@
                 <a href="Enums/MeasurementContext.html">MeasurementContext</a>
               </li>
               <li class="nav-group-task">
-                <a href="Enums/ServerConnectionError.html">ServerConnectionError</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="Enums/Status.html">Status</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="Enums/SynchronizationError.html">SynchronizationError</a>
               </li>
             </ul>
           </li>
@@ -118,6 +124,9 @@
                 <a href="Protocols/Cleaner.html">Cleaner</a>
               </li>
               <li class="nav-group-task">
+                <a href="Protocols/CoreDataMigratorProtocol.html">CoreDataMigratorProtocol</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a>
               </li>
             </ul>
@@ -127,6 +136,9 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="Structs/AccelerationsFile.html">AccelerationsFile</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/ServerConnectionError.html">ServerConnectionError</a>
               </li>
             </ul>
           </li>
@@ -215,6 +227,7 @@ case geoLocationFixLost
 case geoLocationAcquired
 case lowDiskSpace
 case serviceStarted
+case serviceStopped
 case synchronizationFinished
 case synchronizationStarted
 </code></pre>
@@ -225,7 +238,7 @@ case synchronizationStarted
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    2.0.0
+    2.1.0
 
 </div>
 <div class="aside aside-since">
@@ -241,62 +254,6 @@ case synchronizationStarted
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">DataCapturingEvent</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing21ServerConnectionErrorO"></a>
-                    <a name="//apple_ref/swift/Enum/ServerConnectionError" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing21ServerConnectionErrorO">ServerConnectionError</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>An enumeration encapsulating errors used by server connections.</p>
-<pre class="highlight plaintext"><code>case authenticationNotSuccessful
-case notAuthenticated
-case serializationTimeout
-case missingInstallationIdentifier
-case missingMeasurementIdentifier
-case missingDeviceType
-case invalidResponse
-case unexpectedError
-</code></pre>
-<div class="aside aside-author">
-    <p class="aside-title">Author</p>
-    Klemens Muthmann
-
-</div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    3.1.0
-
-</div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    1.0.0
-
-</div>
-
-                        <a href="Enums/ServerConnectionError.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">ServerConnectionError</span><span class="p">:</span> <span class="kt">Error</span></code></pre>
 
                         </div>
                       </div>
@@ -366,9 +323,9 @@ case unexpectedError
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing20SynchronizationErrorO"></a>
-                    <a name="//apple_ref/swift/Enum/SynchronizationError" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing20SynchronizationErrorO">SynchronizationError</a>
+                    <a name="/s:13DataCapturing04CoreA16MigrationVersionO"></a>
+                    <a name="//apple_ref/swift/Enum/CoreDataMigrationVersion" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing04CoreA16MigrationVersionO">CoreDataMigrationVersion</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -376,9 +333,8 @@ case unexpectedError
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Enumeration of all the errors that might happen during data synchronization (except for <code><a href="Enums/ServerConnectionError.html">ServerConnectionError</a></code> cases).</p>
-<pre class="highlight plaintext"><code>case reachabilityNotInitialized
-</code></pre>
+                        <p>This is an enumeration of all version of the Cyface iOS data model used as part of the SDK.
+It is required to start migrations between the different versions.</p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -391,17 +347,17 @@ case unexpectedError
 </div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
-    2.3.0
+    4.0.0
 
 </div>
 
-                        <a href="Enums/SynchronizationError.html" class="slightly-smaller">See more</a>
+                        <a href="Enums/CoreDataMigrationVersion.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">SynchronizationError</span><span class="p">:</span> <span class="kt">Error</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">CoreDataMigrationVersion</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CaseIterable</span></code></pre>
 
                         </div>
                       </div>
@@ -510,7 +466,7 @@ case motorbike
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-03-15)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-04-30)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
