@@ -45,7 +45,7 @@ public class DataCapturingService: NSObject {
     public var currentMeasurement: MeasurementEntity?
 
     /// Locations are captured approximately once per second on most devices. If you would like to get fewer updates this parameter controls, how many events are skipped before one is reported to your handler. The default value is 1, which reports every event. To receive fewer events you could for example set it to 5 to only receive every fifth event.
-    public var locationUpdateRate = 1
+    public var locationUpdateSkipRate = 1
 
     /**
      Provides access to the devices geo location capturing hardware (such as GPS, GLONASS, GALILEO, etc.)
@@ -410,7 +410,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
                     self.handler(.geoLocationAcquired(position: geoLocation), .success)
                 }
             }
-            if geoLocationEventNumber == locationUpdateRate {
+            if geoLocationEventNumber == locationUpdateSkipRate {
                 geoLocationEventNumber = 0
             }
 
