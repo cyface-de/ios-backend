@@ -14,7 +14,7 @@
     <a title="DataCapturingService Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (74% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (75% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -163,7 +163,7 @@
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    9.1.0
+    9.2.0
 
 </div>
 <div class="aside aside-since">
@@ -258,6 +258,33 @@
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">currentMeasurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing0aB7ServiceC18locationUpdateRateSivp"></a>
+                    <a name="//apple_ref/swift/Property/locationUpdateRate" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC18locationUpdateRateSivp">locationUpdateRate</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Locations are captured approximately once per second on most devices. If you would like to get fewer updates this parameter controls, how many events are skipped before one is reported to your handler. The default value is 1, which reports every event. To receive fewer events you could for example set it to 5 to only receive every fifth event.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">locationUpdateRate</span> <span class="o">=</span> <span class="mi">1</span></code></pre>
 
                         </div>
                       </div>
@@ -464,8 +491,8 @@ running.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
     <ul>
-<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO8isPausedyA2CmF">DataCapturingError.isPaused</a></code> if the service was paused and thus stopping it makes no sense.</li>
-<li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO20noCurrentMeasurementyA2CmF">DataCapturingError.noCurrentMeasurement</a></code> If there is no measurement to stop.</li>
+<li><code>PersistenceError</code> If the currently captured measurement was not found in the database.</li>
+<li>Some unspecified errors from within <em>CoreData</em>.</li>
 </ul>
 
 </div>
@@ -607,11 +634,11 @@ running.</p>
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>The listener method that is informed about new geo locations.</p>
+<div class="aside aside-remark">
+    <p class="aside-title">Remark</p>
+    This function is one of the most critical parts of the <code>DataCapturingService</code>. It is called once per second and should not do any unncessary work.
 
-<ul>
-<li>manager: The location manager used.</li>
-<li>didUpdateLocation: An array of the updated locations.</li>
-</ul>
+</div>
 
                       </div>
                       <div class="declaration">
@@ -621,6 +648,37 @@ running.</p>
                           <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">locationManager</span><span class="p">(</span><span class="n">_</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CLLocationManager</span><span class="p">,</span> <span class="n">didUpdateLocations</span> <span class="nv">locations</span><span class="p">:</span> <span class="p">[</span><span class="kt">CLLocation</span><span class="p">])</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>manager</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The location manager used.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>didUpdateLocation</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>An array of the updated locations.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -662,7 +720,7 @@ running.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-05-02)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-05-03)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
