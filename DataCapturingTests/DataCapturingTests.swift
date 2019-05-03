@@ -26,7 +26,7 @@ import CoreData
  This test is intended to test capturing some data in isolation.
 
  - Author: Klemens Muthmann
- - Version: 2.0.1
+ - Version: 2.1.0
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {
@@ -288,5 +288,45 @@ class DataCapturingTests: XCTestCase {
             }
             oocut.saveCapturedData()
         }
+    }
+
+    /**
+     Tests whether using a reduced update interval for location update events, works as expected.
+
+     - Throws:
+        - `PersistenceError` If the currently captured measurement was not found in the database.
+        - Some unspecified errors from within *CoreData*.
+     */
+    func testWithLowerUpdateInterval_HappyPath() throws {
+        // Arrange
+        var updateCounter = 0
+        let async = expectation(description: "Geo Location events")
+        let testCapturingService = TestDataCapturingService(sensorManager: sensorManager, dataManager: coreDataStack) { (event, _) in
+                if case DataCapturingEvent.geoLocationAcquired(_) = event {
+                    updateCounter += 1
+                    if updateCounter == 2 {
+                        async.fulfill()
+                    }
+                }
+        }
+        testCapturingService.coreLocationManager = TestLocationManager()
+        testCapturingService.locationUpdateSkipRate = 5
+
+        // Act
+        try testCapturingService.start(inContext: .bike)
+
+        wait(for: [async], timeout: 20)
+        try testCapturingService.stop()
+
+        // Assert
+        XCTAssertEqual(updateCounter, 2)
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
+
+        guard let locationsCount = (try persistenceLayer.loadMeasurements()[0].tracks?.firstObject as? Track)?.locations?.count else {
+            fatalError("Unable to load created locations")
+        }
+        print(locationsCount)
+        XCTAssertTrue(locationsCount>=5)
     }
 }
