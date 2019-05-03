@@ -303,25 +303,6 @@ public class Synchronizer {
             }
         }
     }
-
-    /**
-     Checks if Cyface server is reachable via the network.
-     If `syncOnWiFiOnly` is `true` this returns `false` if no WiFi is available.
-     Otherwise it returns true if the Cyface server is available via any network connection.
-
-     - Parameter status: The current network status to check. This is provided by the `reachabilityManager`.
-     * /
-    private func isReachable(_ status: NetworkReachabilityManager.NetworkReachabilityStatus) -> Bool {
-        var ret = false
-
-            if self.syncOnWiFiOnly {
-                ret = NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) == status
-            } else {
-                ret = NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) == status || NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) == status
-            }
-
-        return ret
-    }*/
 }
 
 /**
