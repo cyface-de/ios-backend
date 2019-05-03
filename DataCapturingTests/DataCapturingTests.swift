@@ -310,7 +310,7 @@ class DataCapturingTests: XCTestCase {
                 }
         }
         testCapturingService.coreLocationManager = TestLocationManager()
-        testCapturingService.locationUpdateRate = 5
+        testCapturingService.locationUpdateSkipRate = 5
 
         // Act
         try testCapturingService.start(inContext: .bike)
