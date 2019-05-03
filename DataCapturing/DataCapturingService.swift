@@ -222,9 +222,9 @@ public class DataCapturingService: NSObject {
      Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
 
      - Throws:
-     - `DataCapturingError.notPaused`: If the service was not paused and thus resuming it makes no sense.
-     - `DataCapturingError.isRunning`: If the service was running and thus resuming it makes no sense.
-     - `DataCapturingError.noCurrentMeasurement`: If no current measurement is available while resuming data capturing.
+        - `DataCapturingError.notPaused`: If the service was not paused and thus resuming it makes no sense.
+        - `DataCapturingError.isRunning`: If the service was running and thus resuming it makes no sense.
+        - `DataCapturingError.noCurrentMeasurement`: If no current measurement is available while resuming data capturing.
      */
     public func resume() throws {
         try lifecycleQueue.sync {
