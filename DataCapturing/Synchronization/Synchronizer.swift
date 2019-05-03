@@ -31,7 +31,7 @@ import Alamofire
  For foreground synchronization use `syncChecked()`.
 
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 3.0.2
  - Since: 2.3.0
  */
 public class Synchronizer {
@@ -69,6 +69,10 @@ public class Synchronizer {
 
     /// A queue synchronizing access to the Alamofire `NetworkReachabilityManager`.
     private let isReachableCheckingQueue = DispatchQueue.global(qos: .background)
+
+    private var isReachableOnEthernetOrWifi = false
+
+    private var isReachable = false
 
     /**
      A flag indicating whether synchronization of data should only happen if the device is connected to a wireless local area network (Wifi).
@@ -122,56 +126,13 @@ public class Synchronizer {
     */
     public func syncChecked() {
         self.isReachableCheckingQueue.sync {
-            if isReachable(reachabilityManager!.networkReachabilityStatus) {
+            if syncOnWiFiOnly && isReachableOnEthernetOrWifi {
+                sync()
+            } else if !syncOnWiFiOnly && isReachable {
                 sync()
             }
         }
     }
-
-    /**
-     Starts background synchronization as prepared in this objects initializer.
-     */
-    public func activate() {
-        let host = Synchronizer.stripSchemeFrom(url: serverConnection.apiURL)
-        reachabilityManager = NetworkReachabilityManager(host: host)
-        // Initial sync
-        syncChecked()
-        reachabilityManager?.listener = { status in
-            self.syncChecked()
-        }
-        if !reachabilityManager!.startListening() {
-            fatalError("Unable to start listening for network reachability!")
-        }
-
-        dataSynchronizationTimer.resume()
-    }
-
-    /**
-     Removes the scheme "http://" or "https://" from the beginning of the URL.
-     This is required by the *Alamofire* `NetworkReachabilityManager`.
-
-     - Parameter url: The URL to remove the scheme from.
-    */
-    private static func stripSchemeFrom(url: URL) -> String {
-        let stringifiedURL = url.absoluteString
-        if stringifiedURL.hasPrefix("http://") {
-            return stringifiedURL.replacingOccurrences(of: "http://", with: "", options: .anchored)
-        } else if stringifiedURL.hasPrefix("https://") {
-            return stringifiedURL.replacingOccurrences(of: "https://", with: "", options: .anchored)
-        } else {
-            fatalError("Invalid URL used within Synchronizer!")
-        }
-    }
-
-    /**
-     Stops background synchronization.
-     */
-    public func deactivate() {
-        reachabilityManager?.stopListening()
-        dataSynchronizationTimer.suspend()
-    }
-
-    // MARK: - Internal Methods
 
     /**
      Synchronize all measurements now.
@@ -182,7 +143,7 @@ public class Synchronizer {
      However only one synchronization can be active at a given time.
      If you call this during an active synchronization it is going to return without doing anything.
      */
-    private func sync() {
+    public func sync() {
         serverSynchronizationQueue.async { [weak self] in
             guard let self = self else {
                 return
@@ -202,6 +163,63 @@ public class Synchronizer {
             } catch let error {
                 self.handle(synchronizableMeasurements: nil, status: .error(error))
             }
+        }
+    }
+
+    /**
+     Starts background synchronization as prepared in this objects initializer.
+     */
+    public func activate() {
+        let host = Synchronizer.stripSchemeFrom(url: serverConnection.apiURL)
+        reachabilityManager = NetworkReachabilityManager(host: host)
+        // Initial sync
+        syncChecked()
+        reachabilityManager?.listener = { status in
+            switch status {
+            case .reachable(.ethernetOrWiFi):
+                self.isReachableOnEthernetOrWifi = true
+                self.isReachable = true
+            case .reachable(.wwan):
+                self.isReachableOnEthernetOrWifi = false
+                self.isReachable = true
+            default:
+                self.isReachableOnEthernetOrWifi = true
+                self.isReachable = true
+            }
+
+            self.syncChecked()
+        }
+        if !reachabilityManager!.startListening() {
+            fatalError("Unable to start listening for network reachability!")
+        }
+
+        dataSynchronizationTimer.resume()
+    }
+
+    /**
+     Stops background synchronization.
+     */
+    public func deactivate() {
+        reachabilityManager?.stopListening()
+        dataSynchronizationTimer.suspend()
+    }
+
+    // MARK: - Internal Methods
+    
+    /**
+     Removes the scheme "http://" or "https://" from the beginning of the URL.
+     This is required by the *Alamofire* `NetworkReachabilityManager`.
+
+     - Parameter url: The URL to remove the scheme from.
+     */
+    private static func stripSchemeFrom(url: URL) -> String {
+        let stringifiedURL = url.absoluteString
+        if stringifiedURL.hasPrefix("http://") {
+            return stringifiedURL.replacingOccurrences(of: "http://", with: "", options: .anchored)
+        } else if stringifiedURL.hasPrefix("https://") {
+            return stringifiedURL.replacingOccurrences(of: "https://", with: "", options: .anchored)
+        } else {
+            fatalError("Invalid URL used within Synchronizer!")
         }
     }
 
@@ -284,25 +302,6 @@ public class Synchronizer {
                 self.synchronizationInProgress = false
             }
         }
-    }
-
-    /**
-     Checks if Cyface server is reachable via the network.
-     If `syncOnWiFiOnly` is `true` this returns `false` if no WiFi is available.
-     Otherwise it returns true if the Cyface server is available via any network connection.
-
-     - Parameter status: The current network status to check. This is provided by the `reachabilityManager`.
-     */
-    private func isReachable(_ status: NetworkReachabilityManager.NetworkReachabilityStatus) -> Bool {
-        var ret = false
-
-            if self.syncOnWiFiOnly {
-                ret = NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) == status
-            } else {
-                ret = NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.wwan) == status || NetworkReachabilityManager.NetworkReachabilityStatus.reachable(.ethernetOrWiFi) == status
-            }
-
-        return ret
     }
 }
 
