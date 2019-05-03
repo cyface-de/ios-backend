@@ -165,12 +165,7 @@ The framework is developed by the Cyface GmbH and mostly used to measure cycling
 A measurement might contain pauses and therefore is structured into several tracks.
 There is an API to control the capturing lifecycle via the <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code> class.
 There is also an API to access captured data via the <code><a href="Classes/PersistenceLayer.html">PersistenceLayer</a></code> class.
-The <code><a href="Classes/ServerConnection.html">ServerConnection</a></code> class finally is responsible for transmitting captured data to a Cyface server.</p>
-<h2 id='migration-notes' class='heading'>Migration Notes</h2>
-
-<ul>
-<li><a href="Documentation/4.0.0-MigrationGuid.md">4.0.0</a></li>
-</ul>
+The <code><a href="Classes/ServerConnection.html">ServerConnection</a></code> class is responsible for transmitting captured data to a Cyface server, while the Synchronizer makes sure this happens at convenient times and in regular intervals.</p>
 <h2 id='integration-in-your-app' class='heading'>Integration in your App</h2>
 <h3 id='creating-a-code-datacapturingservice-code' class='heading'>Creating a <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code></h3>
 
@@ -187,29 +182,23 @@ This should look similar to:</p>
     <span class="nf">fatalError</span><span class="p">()</span>
 <span class="p">}</span>
 <span class="n">manager</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="nv">bundle</span><span class="p">:</span> <span class="n">bundle</span><span class="p">)</span>
-<span class="c1">// 4</span>
-<span class="k">let</span> <span class="nv">authenticator</span> <span class="o">=</span> <span class="kt">StaticAuthenticator</span><span class="p">()</span>
-<span class="c1">// 5</span>
-<span class="k">let</span> <span class="nv">serverConnection</span> <span class="o">=</span> <span class="kt">ServerConnection</span><span class="p">(</span><span class="nv">apiURL</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="nv">authenticator</span><span class="p">:</span> <span class="n">authenticator</span><span class="p">,</span> <span class="nv">onManager</span><span class="p">:</span> <span class="n">manager</span><span class="p">)</span>
-<span class="c1">// 6</span>
+<span class="c1">// 4 </span>
 <span class="k">let</span> <span class="nv">sensorManager</span> <span class="o">=</span> <span class="kt">CMMotionManager</span><span class="p">()</span>
-<span class="c1">// 7</span>
+<span class="c1">// 5</span>
 <span class="k">let</span> <span class="nv">updateInterval</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="c1">// 8</span>
+<span class="c1">// 6</span>
 <span class="k">let</span> <span class="nv">savingInterval</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="c1">// 9</span>
+<span class="c1">// 7</span>
 <span class="k">let</span> <span class="nv">handler</span> <span class="o">=</span> <span class="n">handler</span>
-<span class="c1">// 10</span>
-<span class="k">let</span> <span class="nv">dcs</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">MovebisDataCapturingService</span><span class="p">(</span><span class="nv">connection</span><span class="p">:</span> <span class="n">serverConnection</span><span class="p">,</span> <span class="nv">sensorManager</span><span class="p">:</span> <span class="n">sensorManager</span><span class="p">,</span> <span class="nv">updateInterval</span><span class="p">:</span> <span class="n">updateInterval</span><span class="p">,</span> <span class="nv">savingInterval</span><span class="p">:</span> <span class="n">savingInterval</span><span class="p">,</span> <span class="nv">dataManager</span><span class="p">:</span> <span class="n">manager</span><span class="p">,</span> <span class="nv">eventHandler</span><span class="p">:</span> <span class="n">handler</span><span class="p">)</span>
+<span class="c1">// 8</span>
+<span class="k">let</span> <span class="nv">dcs</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">MovebisDataCapturingService</span><span class="p">(</span><span class="nv">sensorManager</span><span class="p">:</span> <span class="n">sensorManager</span><span class="p">,</span> <span class="nv">updateInterval</span><span class="p">:</span> <span class="n">updateInterval</span><span class="p">,</span> <span class="nv">savingInterval</span><span class="p">:</span> <span class="n">savingInterval</span><span class="p">,</span> <span class="nv">dataManager</span><span class="p">:</span> <span class="n">manager</span><span class="p">,</span> <span class="nv">eventHandler</span><span class="p">:</span> <span class="n">handler</span><span class="p">)</span>
 </code></pre>
 
 <ol>
 <li>Import Apples <em>CoreMotion</em> framework, to be able to create a motion manager.</li>
 <li>Import Apples <em>CoreData</em> framework, to be able to create a <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code></li>
-<li>Create the <em>CoreData</em> stack in the form of a <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code>. Usually there should be only one instance of <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code>. Nothing bad will happen if you use multiple ones, except for an unnecessary resource overhead. **However be careful to avoid calling the <code>setup(bundle:)</code> method on different threads automatically. This might leave your data storage in a corrupted state or at least crash your app. Also provide the store type and a <code><a href="Classes/CoreDataMigrator.html">CoreDataMigrator</a></code>. The store type should be an <code>NSSQLiteStoreType</code> in production and might be an <code>NSInMemoryStoreType</code> in a test environment. If the <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code> encounters an old data store it will migrate this data store to the current version. If there is much data to convert, this can take some time and probably should be wrapped into a background thread.</li>
-<li>Create an <code><a href="Protocols/Authenticator.html">Authenticator</a></code> like explained under <em>Using an authenticator</em> below.</li>
-<li>Create a <code><a href="Classes/ServerConnection.html">ServerConnection</a></code> for measurement data transmission. Provide the URL of a Cyface or Movebis server endpoint, the <code><a href="Protocols/Authenticator.html">Authenticator</a></code> and the <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code>.</li>
-<li>Create <code>CMMotionManager</code> from the CoreMotion framework. This is responsible for capturing sensor data from your device.</li>
+<li>Create the <em>CoreData</em> stack in the form of a <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code>. Usually there should be only one instance of <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code>. Nothing bad will happen if you use multiple ones, except for an unnecessary resource overhead. **However be careful to avoid calling the <code>setup(bundle:)</code> method on different threads concurrently. This might leave your data storage in a corrupted state or at least crash your app. Also provide the store type and a <code><a href="Classes/CoreDataMigrator.html">CoreDataMigrator</a></code>. The store type should be an <code>NSSQLiteStoreType</code> in production and might be an <code>NSInMemoryStoreType</code> in a test environment. If the <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code> encounters an old data store it will migrate this data store to the current version. If there is much data to convert, this can take some time and probably should be wrapped into a background thread.</li>
+<li>Create <code>CMMotionManager</code> from the <em>CoreMotion</em> framework. This is responsible for capturing sensor data from your device.</li>
 <li>Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to caputre 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.</li>
 <li>Create a saving interval in seconds. The value 10 for example means that your data is saved to persistent storage every 10 seconds. This also means your currently captured measurement is updated every 10 seconds. Values like the measurement length are updated at this point as well. If you need to update your UI frequently you should set this to a low value. This however also puts a higher load on your database.</li>
 <li>Provide a handler for events occuring during data capturing. Possible events are explained below.</li>
@@ -308,21 +297,29 @@ Do not forget to call <code><a href="Classes/Synchronizer.html#/s:13DataCapturin
 This starts a background process, that monitors the devices connectivity state and watches for an active WiFi connection.
 If one is found, synchronization for all unsynchronized measurements is executed.
 Creating a synchronizer should look something like:</p>
-<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">synchronizer</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">Synchronizer</span><span class="p">(</span>
-<span class="c1">// 1.</span>
-<span class="nv">persistenceLayer</span><span class="p">:</span> <span class="kt">PersistenceLayer</span><span class="p">(</span><span class="nv">onManager</span><span class="p">:</span> <span class="n">manager</span><span class="p">),</span> 
+<pre class="highlight swift"><code><span class="c1">// 1.</span>
+<span class="k">let</span> <span class="nv">url</span> <span class="o">=</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"http://localhost/api"</span><span class="p">)</span><span class="o">!</span>
 <span class="c1">// 2.</span>
-<span class="nv">cleaner</span><span class="p">:</span> <span class="kt">AccelerationPointRemovalCleaner</span><span class="p">(),</span> 
+<span class="k">let</span> <span class="nv">serverConnection</span> <span class="o">=</span> <span class="kt">ServerConnection</span><span class="p">(</span><span class="nv">apiURL</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="nv">authenticator</span><span class="p">:</span> <span class="n">authenticator</span><span class="p">,</span> <span class="nv">onManager</span><span class="p">:</span> <span class="n">manager</span><span class="p">)</span>
 <span class="c1">// 3.</span>
+<span class="k">let</span> <span class="nv">synchronizer</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">Synchronizer</span><span class="p">(</span>
+<span class="c1">// 4.</span>
+<span class="nv">coreDataStack</span><span class="p">:</span> <span class="n">manager</span><span class="p">,</span> 
+<span class="c1">// 5.</span>
+<span class="nv">cleaner</span><span class="p">:</span> <span class="kt">AccelerationPointRemovalCleaner</span><span class="p">(),</span> 
+<span class="c1">// 6.</span>
 <span class="nv">serverConnection</span><span class="p">:</span> <span class="n">serverConnection</span><span class="p">)</span> <span class="p">{</span> <span class="n">event</span><span class="p">,</span> <span class="n">status</span> <span class="k">in</span> 
     <span class="c1">// Handle .synchronizationFinished event for example by checking status for .success or .failure</span>
 <span class="p">}</span>
 </code></pre>
 
 <ol>
-<li>Create a <code><a href="Classes/PersistenceLayer.html">PersistenceLayer</a></code> which is used to check the database for synchronizable measurements. It is advisable to always create a new one, to avoid multi threading issues.</li>
+<li>Create the URL where your server is ready to receive data.</li>
+<li>Create a <code><a href="Classes/ServerConnection.html">ServerConnection</a></code> from the URL created in the previous step and add an authenticator and a manager as described above.</li>
+<li>Create the <code><a href="Classes/Synchronizer.html">Synchronizer</a></code> based on the following parameters.</li>
+<li>Preferrably use the same <code><a href="Classes/CoreDataManager.html">CoreDataManager</a></code> as described under setting up the <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code>.</li>
 <li>Create a <code><a href="Protocols/Cleaner.html">Cleaner</a></code> which cleanes the database after successful synchronization.</li>
-<li>Provide a <code><a href="Classes/ServerConnection.html">ServerConnection</a></code> used to transmit the synchronizable data.</li>
+<li>Provide the <code><a href="Classes/ServerConnection.html">ServerConnection</a></code> as created in step 2.</li>
 </ol>
 <h2 id='api-documentation' class='heading'>API Documentation</h2>
 
@@ -359,7 +356,7 @@ along with the Cyface SDK for iOS. If not, see <a href="http://www.gnu.org/licen
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-04-30)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-05-02)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
