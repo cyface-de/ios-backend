@@ -31,7 +31,7 @@ import Alamofire
  For foreground synchronization use `syncChecked()`.
 
  - Author: Klemens Muthmann
- - Version: 3.0.1
+ - Version: 3.0.2
  - Since: 2.3.0
  */
 public class Synchronizer {
@@ -128,7 +128,7 @@ public class Synchronizer {
         self.isReachableCheckingQueue.sync {
             if syncOnWiFiOnly && isReachableOnEthernetOrWifi {
                 sync()
-            } else if isReachable {
+            } else if !syncOnWiFiOnly && isReachable {
                 sync()
             }
         }
