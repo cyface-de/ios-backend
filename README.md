@@ -57,6 +57,15 @@ let dcs = try MovebisDataCapturingService(sensorManager: sensorManager, updateIn
 7. Provide a handler for events occuring during data capturing. Possible events are explained below.
 8. Finally create the `DataCapturingService` or `MovebisDataCapturingService` as shown, providing the required parameters.
 
+#### Configuring a DataCapturingService
+
+The `DataCapturingService` tries to get as many updates from a devices geo location sensor as possible.
+This usually means it will receive one update per second.
+If your UI does some heavy work on each update, you probably would like to receive fewer of them.
+This can be controlled by setting the `DataCapturingService.locationUpdateSkipRate` to an appropriate value.
+With a value of 2 for example it will only report every second update.
+Notice however that internally it will still run with the highest possible update rate.
+
 ### Getting the currently captured measurement
 
 If there is an active data capturing process - after a call to `DataCapturingService.start()` or  `DataCapturingService.resume()`, you can access the current measurement via:

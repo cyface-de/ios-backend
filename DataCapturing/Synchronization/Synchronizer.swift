@@ -205,7 +205,7 @@ public class Synchronizer {
     }
 
     // MARK: - Internal Methods
-    
+
     /**
      Removes the scheme "http://" or "https://" from the beginning of the URL.
      This is required by the *Alamofire* `NetworkReachabilityManager`.
