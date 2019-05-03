@@ -26,7 +26,7 @@ import os.log
  An object of this class handles the lifecycle of starting and stopping data capturing.
  
  - Author: Klemens Muthmann
- - Version: 9.1.0
+ - Version: 9.2.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -41,14 +41,11 @@ public class DataCapturingService: NSObject {
     /// `true` if data capturing was running but is currently paused; `false` otherwise.
     public var isPaused: Bool
 
-    /// A listener that is notified of important events during data capturing.
-    private var handler: ((DataCapturingEvent, Status) -> Void)
-
     /// The currently recorded `Measurement` or `nil` if there is no active recording.
     public var currentMeasurement: MeasurementEntity?
 
-    /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
-    private let motionManager: CMMotionManager
+    /// Locations are captured approximately once per second on most devices. If you would like to get fewer updates this parameter controls, how many events are skipped before one is reported to your handler. The default value is 1, which reports every event. To receive fewer events you could for example set it to 5 to only receive every fifth event.
+    public var locationUpdateRate = 1
 
     /**
      Provides access to the devices geo location capturing hardware (such as GPS, GLONASS, GALILEO, etc.)
@@ -80,6 +77,12 @@ public class DataCapturingService: NSObject {
     /// The background queue used to capture data.
     let capturingQueue = DispatchQueue.global(qos: .userInitiated)
 
+    /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
+    private let motionManager: CMMotionManager
+
+    /// A listener that is notified of important events during data capturing.
+    private var handler: ((DataCapturingEvent, Status) -> Void)
+
     /**
      A queue used to synchronize calls to the lifecycle methods `start`, `pause`, `resume` and `stop`.
      Using such a queue prevents successiv calls to these methods to interrupt each other.
@@ -91,6 +94,9 @@ public class DataCapturingService: NSObject {
 
     /// A timer called in regular intervals to save the captured data to the underlying database.
     private var backgroundSynchronizationTimer: DispatchSourceTimer!
+
+    /// The number of the current event. This is used to filter events based on `locationUpdateRate`.
+    private var geoLocationEventNumber = 0
 
     // MARK: - Initializers
 
@@ -161,8 +167,8 @@ public class DataCapturingService: NSObject {
      running.
 
      - Throws:
-        - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
-        - `DataCapturingError.noCurrentMeasurement` If there is no measurement to stop.
+        - `PersistenceError` If the currently captured measurement was not found in the database.
+        - Some unspecified errors from within *CoreData*.
      */
     public func stop() throws {
         try lifecycleQueue.sync {
@@ -368,9 +374,11 @@ extension DataCapturingService: CLLocationManagerDelegate {
     /**
      The listener method that is informed about new geo locations.
 
+     - Remark:
+        This function is one of the most critical parts of the `DataCapturingService`. It is called once per second and should not do any unncessary work.
      - Parameters:
-     - manager: The location manager used.
-     - didUpdateLocation: An array of the updated locations.
+        - manager: The location manager used.
+        - didUpdateLocation: An array of the updated locations.
      */
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 
@@ -378,21 +386,34 @@ extension DataCapturingService: CLLocationManagerDelegate {
             // Smooth the way by removing outlier coordinates.
             let howRecent = location.timestamp.timeIntervalSinceNow
             guard location.horizontalAccuracy < 20 && abs(howRecent) < 10 else { continue }
+            let timestamp = DataCapturingService.convertToUtcTimestamp(date: location.timestamp)
 
             let geoLocation = GeoLocation(
                 latitude: location.coordinate.latitude,
                 longitude: location.coordinate.longitude,
                 accuracy: location.horizontalAccuracy,
                 speed: location.speed,
-                timestamp: DataCapturingService.convertToUtcTimestamp(date: location.timestamp))
+                timestamp: timestamp)
 
             lifecycleQueue.async(flags: .barrier) {
                 self.locationsCache.append(geoLocation)
             }
 
-            DispatchQueue.main.async {
-                self.handler(.geoLocationAcquired(position: geoLocation), .success)
+            geoLocationEventNumber += 1
+            if geoLocationEventNumber == 1 {
+                // TODO: Actually the calling app should care for whether this happens on the main thread or not. Nevertheless it must be synchronized. It could be added to the lifecycleQueue to achieve this. Maybe with version 5.
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else {
+                        return
+                    }
+
+                    self.handler(.geoLocationAcquired(position: geoLocation), .success)
+                }
             }
+            if geoLocationEventNumber == locationUpdateRate {
+                geoLocationEventNumber = 0
+            }
+
         }
     }
 
