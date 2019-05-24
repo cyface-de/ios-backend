@@ -89,32 +89,6 @@ public class MovebisDataCapturingService: DataCapturingService {
         return manager
     }()
 
-    private let dataManager: CoreDataManager
-
-    // MARK: - Initializers
-
-    /**
-     Creates a new `MovebisDataCapturingService` with the ability capture location
-     when no data capturing runs.
-
-     - Parameters:
-        - connection: A connection to a Cyface API server.
-        - sensorManager: An instance of `CMMotionManager`.
-        There should be only one instance of this type in your application.
-        Since it seems to be impossible to create that instance inside a framework at the moment,
-        you have to provide it via this parameter.
-        - updateInterval: The accelerometer update interval in Hertz. Default value is 100 Hertz.
-        - savingInterval: The time between save operations during data capturing in seconds. Default value is 30 seconds.
-        - dataManager: The CoreData stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
-        - eventHandler: A handler for events occuring during data capturing.
-     - Throws:
-        - `SynchronizationError.reachabilityNotInitilized`: If the synchronizer was unable to initialize the reachability service that surveys the Wifi connection and starts synchronization if Wifi is available.
-     */
-    public init(connection serverConnection: ServerConnection, sensorManager manager: CMMotionManager, updateInterval: Double = 100, savingInterval: Double = 30, dataManager: CoreDataManager, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) throws {
-        self.dataManager = dataManager
-        super.init(sensorManager: manager, updateInterval: updateInterval, savingInterval: savingInterval, dataManager: dataManager, eventHandler: eventHandler)
-    }
-
     // MARK: - Methods
 
     /**
@@ -142,7 +116,7 @@ public class MovebisDataCapturingService: DataCapturingService {
         - Some unspecified errors from within CoreData.
      */
     public func loadInactiveMeasurements() throws -> [MeasurementMO] {
-        let persistenceLayer = PersistenceLayer(onManager: dataManager)
+        let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
         let ret = try persistenceLayer.loadMeasurements()
 
