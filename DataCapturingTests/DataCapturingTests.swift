@@ -329,4 +329,26 @@ class DataCapturingTests: XCTestCase {
         print(locationsCount)
         XCTAssertTrue(locationsCount>=5)
     }
+
+    func testStartPauseResumeStop_DistanceCalculationContainsLastSegment() throws {
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
+        try oocut.start(inContext: .bike)
+        guard let currentMeasurementIdentifier = oocut.currentMeasurement?.identifier else {
+            fatalError()
+        }
+
+        // TODO: Make it possible to inject geo locations to avoid these sleep calls.
+        sleep(2)
+        try oocut.pause()
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+        let trackLengthAfterPause = measurement.trackLength
+        try oocut.resume()
+        sleep(2)
+        try oocut.stop()
+        let measurementAfterStop = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+        let trackLengthAfterStop = measurementAfterStop.trackLength
+
+        XCTAssertTrue(trackLengthAfterStop>=trackLengthAfterPause)
+    }
 }

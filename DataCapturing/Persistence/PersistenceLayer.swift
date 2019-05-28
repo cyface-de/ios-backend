@@ -78,6 +78,9 @@ public class PersistenceLayer {
     /// Used to update a measurements length, each time new locations are added.
     private let distanceCalculator: DistanceCalculationStrategy
 
+    /// Used to mark new geo locations within a track as noise or clean
+    private let trackCleaner: TrackCleaner
+
     /// The current `NSManagedObjectContext` used by this persistence layer. This has to be reset if the layer is used on a different thread. If it is `nil` each method is going to use its own context, which can cause problems if model objects are used between those methods.
     public var context: NSManagedObjectContext?
 
@@ -90,8 +93,9 @@ public class PersistenceLayer {
         - withDistanceCalculator: An algorithm used to calculate the distance between geo locations.
         - manager: A manager for the CoreData stack use by this `PersistenceLayer`.
      */
-    public init(onManager manager: CoreDataManager, withDistanceCalculator: DistanceCalculationStrategy = DefaultDistanceCalculationStrategy()) {
+    public init(onManager manager: CoreDataManager, withDistanceCalculator: DistanceCalculationStrategy = DefaultDistanceCalculationStrategy(), withTrackCleaner: TrackCleaner = DefaultTrackCleaner()) {
         self.distanceCalculator = withDistanceCalculator
+        self.trackCleaner = withTrackCleaner
 
         self.manager = manager
     }
@@ -246,7 +250,7 @@ public class PersistenceLayer {
 
         let geoLocationFetchRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
         geoLocationFetchRequest.fetchLimit = 1
-        let maxTimestampInTrackPredicate = NSPredicate(format: "track==%@", track)
+        let maxTimestampInTrackPredicate = NSPredicate(format: "track==%@ AND isPartOfCleanedTrack==%@", track, true)
         geoLocationFetchRequest.predicate = maxTimestampInTrackPredicate
         geoLocationFetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
         geoLocationFetchRequest.resultType = .managedObjectResultType
@@ -261,13 +265,16 @@ public class PersistenceLayer {
             dbLocation.speed = location.speed
             dbLocation.timestamp = location.timestamp
             dbLocation.accuracy = location.accuracy
+            dbLocation.isPartOfCleanedTrack = trackCleaner.isValid(location: location)
             track.addToLocations(dbLocation)
 
-            if let lastCapturedLocation = lastCapturedLocation {
-                let delta = self.distanceCalculator.calculateDistance(from: lastCapturedLocation, to: dbLocation)
-                distance += delta
-            }
+            if dbLocation.isPartOfCleanedTrack {
+                if let lastCapturedLocation = lastCapturedLocation {
+                    let delta = self.distanceCalculator.calculateDistance(from: lastCapturedLocation, to: dbLocation)
+                    distance += delta
+                }
             lastCapturedLocation = dbLocation
+            }
         }
 
         measurement.trackLength += distance

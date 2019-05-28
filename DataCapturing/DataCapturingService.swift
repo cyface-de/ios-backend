@@ -47,7 +47,7 @@ public class DataCapturingService: NSObject {
     /// Locations are captured approximately once per second on most devices. If you would like to get fewer updates this parameter controls, how many events are skipped before one is reported to your handler. The default value is 1, which reports every event. To receive fewer events you could for example set it to 5 to only receive every fifth event.
     public var locationUpdateSkipRate: UInt = 1 {
         willSet(newValue) {
-            if(newValue==0) {
+            if newValue==0 {
                 fatalError("Invalid value 0 for locationUpdateSkipRate!")
             }
         }
@@ -389,9 +389,6 @@ extension DataCapturingService: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 
         for location in locations {
-            // Smooth the way by removing outlier coordinates.
-            let howRecent = location.timestamp.timeIntervalSinceNow
-            guard location.horizontalAccuracy < 20 && abs(howRecent) < 10 else { continue }
             let timestamp = DataCapturingService.convertToUtcTimestamp(date: location.timestamp)
 
             let geoLocation = GeoLocation(

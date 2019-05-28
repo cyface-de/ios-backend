@@ -149,6 +149,7 @@ public class Synchronizer {
                 return
             }
 
+            // TODO: This can lead to a crash as it is possible that two executions step over this.
             if self.synchronizationInProgress {
                 return
             } else {
