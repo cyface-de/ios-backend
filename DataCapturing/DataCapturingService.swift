@@ -26,7 +26,7 @@ import os.log
  An object of this class handles the lifecycle of starting and stopping data capturing.
  
  - Author: Klemens Muthmann
- - Version: 9.2.0
+ - Version: 9.3.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -103,6 +103,9 @@ public class DataCapturingService: NSObject {
 
     /// The number of the current event. This is used to filter events based on `locationUpdateRate`.
     private var geoLocationEventNumber = 0
+
+    /// Marks captured positions as valid (clean) or invalid (not clean). This removes outliers and jitter while standing.
+    private let trackCleaner = DefaultTrackCleaner()
 
     // MARK: - Initializers
 
@@ -254,7 +257,7 @@ public class DataCapturingService: NSObject {
 
      - Parameter savingEvery: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
      - Throws:
-        - PersistenceError If there is no current measurement.
+        - `PersistenceError` If there is no current measurement.
         - Some unspecified errors from within CoreData.
      */
     func startCapturing(savingEvery time: TimeInterval) throws {
@@ -391,12 +394,14 @@ extension DataCapturingService: CLLocationManagerDelegate {
         for location in locations {
             let timestamp = DataCapturingService.convertToUtcTimestamp(date: location.timestamp)
 
+            let isValid = trackCleaner.isValid(location: location)
             let geoLocation = GeoLocation(
                 latitude: location.coordinate.latitude,
                 longitude: location.coordinate.longitude,
                 accuracy: location.horizontalAccuracy,
                 speed: location.speed,
-                timestamp: timestamp)
+                timestamp: timestamp,
+                isValid: isValid)
 
             lifecycleQueue.async(flags: .barrier) {
                 self.locationsCache.append(geoLocation)

@@ -24,7 +24,7 @@ import Foundation
  It is required to start migrations between the different versions.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 4.0.0
  */
 public enum CoreDataMigrationVersion: String, CaseIterable {
@@ -38,6 +38,8 @@ public enum CoreDataMigrationVersion: String, CaseIterable {
     case version4 = "4"
     /// The fifth version of the model.
     case version5 = "5"
+    /// The sixth version of the model.
+    case version6 = "6"
 
     // MARK: - Current
 
@@ -64,6 +66,8 @@ public enum CoreDataMigrationVersion: String, CaseIterable {
         case .version4:
             return .version5
         case .version5:
+            return .version6
+        case .version6:
             return nil
         }
     }

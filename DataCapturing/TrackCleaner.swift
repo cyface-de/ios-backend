@@ -18,6 +18,7 @@
  */
 
 import Foundation
+import CoreLocation
 
 /**
  - Author: Klemens Muthmann
@@ -31,13 +32,13 @@ public protocol TrackCleaner {
 
      - Parameter location: The location to check for validity
      */
-    func isValid(location: GeoLocation) -> Bool
+    func isValid(location: CLLocation) -> Bool
 }
 
 /**
  - Author: Klemens Muthmann
  - Version: 1.0.0
- - Since: 1.0.0
+ - Since: 4.5.0
  */
 public class DefaultTrackCleaner: TrackCleaner {
     /// All geo locations captured while being slower than this value in meters per second are cleaned from the track.
@@ -52,7 +53,7 @@ public class DefaultTrackCleaner: TrackCleaner {
         // Nothing to do here.
     }
 
-    public func isValid(location: GeoLocation) -> Bool {
-        return location.speed > DefaultTrackCleaner.minimumSpeedInMetersPerSecond && location.accuracy > DefaultTrackCleaner.upperAccuracyBound
+    public func isValid(location: CLLocation) -> Bool {
+        return location.speed > DefaultTrackCleaner.minimumSpeedInMetersPerSecond && location.horizontalAccuracy < DefaultTrackCleaner.upperAccuracyBound && location.speed < DefaultTrackCleaner.maximumSpeedInMetersPerSecond
     }
 }
