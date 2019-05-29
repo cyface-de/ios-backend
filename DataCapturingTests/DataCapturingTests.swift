@@ -281,7 +281,7 @@ class DataCapturingTests: XCTestCase {
         oocut.currentMeasurement = MeasurementEntity(identifier: measurement.identifier, context: .bike)
 
         measure {
-            oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000)]
+            oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000, isValid: true)]
             oocut.accelerationsCache = []
             for i in 0...99 {
                 oocut.accelerationsCache.append(Acceleration(timestamp: 10_000 + Int64(i), x: 1.0, y: 1.0, z: 1.0))

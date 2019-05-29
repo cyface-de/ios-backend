@@ -51,7 +51,7 @@ class PersistenceTests: XCTestCase {
 
             fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
 
-            try oocut.save(locations: [GeoLocation(latitude: 51.052181, longitude: 13.728956, accuracy: 1.0, speed: 1.0, timestamp: 10_000), GeoLocation(latitude: 51.051837, longitude: 13.729010, accuracy: 1.0, speed: 1.0, timestamp: 10_001)], in: measurement)
+            try oocut.save(locations: [GeoLocation(latitude: 51.052181, longitude: 13.728956, accuracy: 1.0, speed: 1.0, timestamp: 10_000, isValid: true), GeoLocation(latitude: 51.051837, longitude: 13.729010, accuracy: 1.0, speed: 1.0, timestamp: 10_001, isValid: true)], in: measurement)
             try oocut.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], in: measurement)
 
         } catch let error {
@@ -131,7 +131,7 @@ class PersistenceTests: XCTestCase {
 
     /// Tests that writing some data to an existing measurement is successful.
     func testMergeDataToExistingMeasurement() {
-        let additionalLocation = GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 800, speed: 5.0, timestamp: 10_005)
+        let additionalLocation = GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 800, speed: 5.0, timestamp: 10_005, isValid: true)
         let additionalAccelerations = [
             Acceleration(timestamp: 10_005, x: 1.0, y: 1.0, z: 1.0),
             Acceleration(timestamp: 10_006, x: 1.0, y: 1.0, z: 1.0),
@@ -203,7 +203,7 @@ class PersistenceTests: XCTestCase {
         let expectedTrackLength = 83.57
         let distanceCalculationAccuracy = 0.01
 
-        let locations: [GeoLocation] = [GeoLocation(latitude: 51.051432, longitude: 13.729053, accuracy: 1.0, speed: 1.0, timestamp: 10_300)]
+        let locations: [GeoLocation] = [GeoLocation(latitude: 51.051432, longitude: 13.729053, accuracy: 1.0, speed: 1.0, timestamp: 10_300, isValid: true)]
 
         do {
             let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
@@ -230,7 +230,7 @@ class PersistenceTests: XCTestCase {
         XCTAssertEqual(locations.count, 2, "There should be two locations in the fixture measurement!")
 
         oocut.appendNewTrack(to: measurement)
-        try oocut.save(locations: [GeoLocation(latitude: 2.0, longitude: 2.0, accuracy: 1.0, speed: 10.0, timestamp: 5)], in: measurement)
+        try oocut.save(locations: [GeoLocation(latitude: 2.0, longitude: 2.0, accuracy: 1.0, speed: 10.0, timestamp: 5, isValid: true)], in: measurement)
 
         guard let tracksAfterRefresh = measurement.tracks?.array as? [Track] else {
             return XCTFail("Unable to load tracks!")

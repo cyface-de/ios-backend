@@ -251,7 +251,7 @@ class DataSetCreator {
         var locations = [GeoLocation]()
 
         for _ in 0..<countOfGeoLocations {
-            let location = GeoLocation(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: DataCapturingService.currentTimeInMillisSince1970())
+            let location = GeoLocation(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: DataCapturingService.currentTimeInMillisSince1970(), isValid: true)
 
             locations.append(location)
         }
