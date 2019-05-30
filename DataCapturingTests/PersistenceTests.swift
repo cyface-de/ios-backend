@@ -51,8 +51,8 @@ class PersistenceTests: XCTestCase {
 
             fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
 
-            try oocut.save(locations: [GeoLocation(latitude: 51.052181, longitude: 13.728956, accuracy: 1.0, speed: 1.0, timestamp: 10_000, isValid: true), GeoLocation(latitude: 51.051837, longitude: 13.729010, accuracy: 1.0, speed: 1.0, timestamp: 10_001, isValid: true)], in: measurement)
-            try oocut.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_001, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_002, x: 1.0, y: 1.0, z: 1.0)], in: measurement)
+            try oocut.save(locations: [PersistenceTests.location(latitude: 51.052181, longitude: 13.728956), PersistenceTests.location(latitude: 51.051837, longitude: 13.729010)], in: measurement)
+            try oocut.save(accelerations: [PersistenceTests.acceleration(), PersistenceTests.acceleration(), PersistenceTests.acceleration()], in: measurement)
 
         } catch let error {
             XCTFail("Unable to set up due to \(error.localizedDescription)")
@@ -131,17 +131,10 @@ class PersistenceTests: XCTestCase {
 
     /// Tests that writing some data to an existing measurement is successful.
     func testMergeDataToExistingMeasurement() {
-        let additionalLocation = GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 800, speed: 5.0, timestamp: 10_005, isValid: true)
-        let additionalAccelerations = [
-            Acceleration(timestamp: 10_005, x: 1.0, y: 1.0, z: 1.0),
-            Acceleration(timestamp: 10_006, x: 1.0, y: 1.0, z: 1.0),
-            Acceleration(timestamp: 10_007, x: 1.0, y: 1.0, z: 1.0)
-        ]
-
         do {
             let fixtureMeasurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
-            try oocut.save(locations: [additionalLocation], in: fixtureMeasurement)
-            try oocut.save(accelerations: additionalAccelerations, in: fixtureMeasurement)
+            try oocut.save(locations: [PersistenceTests.location()], in: fixtureMeasurement)
+            try oocut.save(accelerations: [PersistenceTests.acceleration(), PersistenceTests.acceleration(), PersistenceTests.acceleration()], in: fixtureMeasurement)
             let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
             XCTAssertEqual(try PersistenceLayer.collectGeoLocations(from: measurement).count, 3)
@@ -200,14 +193,16 @@ class PersistenceTests: XCTestCase {
 
     /// Tests that distance is successfully created if new locations are added to a measurement.
     func testDistanceWasAdded() {
-        let expectedTrackLength = 83.57
+        let expectedInitialTrackLength = 38.45660983580925
+        let expectedAddedTrackLength = 83.57
+        let expectedTrackLength = expectedInitialTrackLength + expectedAddedTrackLength
         let distanceCalculationAccuracy = 0.01
-
-        let locations: [GeoLocation] = [GeoLocation(latitude: 51.051432, longitude: 13.729053, accuracy: 1.0, speed: 1.0, timestamp: 10_300, isValid: true)]
 
         do {
             let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
-            try oocut.save(locations: locations, in: measurement)
+            XCTAssertEqual(measurement.trackLength, expectedInitialTrackLength)
+
+            try oocut.save(locations: [PersistenceTests.location(latitude: 51.051432, longitude: 13.729053)], in: measurement)
 
             XCTAssertEqual(measurement.trackLength, expectedTrackLength, accuracy: expectedTrackLength * distanceCalculationAccuracy, "Measurement length \(measurement.trackLength) should be within \(distanceCalculationAccuracy*100)% of \(expectedTrackLength).")
         } catch let error {
@@ -230,7 +225,7 @@ class PersistenceTests: XCTestCase {
         XCTAssertEqual(locations.count, 2, "There should be two locations in the fixture measurement!")
 
         oocut.appendNewTrack(to: measurement)
-        try oocut.save(locations: [GeoLocation(latitude: 2.0, longitude: 2.0, accuracy: 1.0, speed: 10.0, timestamp: 5, isValid: true)], in: measurement)
+        try oocut.save(locations: [PersistenceTests.location()], in: measurement)
 
         guard let tracksAfterRefresh = measurement.tracks?.array as? [Track] else {
             return XCTFail("Unable to load tracks!")
@@ -257,5 +252,40 @@ class PersistenceTests: XCTestCase {
         XCTAssertEqual(filteredMeasurements.count, 1)
         XCTAssertEqual(filteredMeasurements.first!.identifier, 1)
         XCTAssertTrue(filteredMeasurements.first!.trackLength > 0.0)
+    }
+
+    func testLoadCleanedTrack() throws {
+        let measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
+
+        oocut.appendNewTrack(to: measurement)
+        try oocut.save(locations: [PersistenceTests.location(), PersistenceTests.location(isValid: false), PersistenceTests.location()], in: measurement)
+
+        guard let track = measurement.tracks?.array.last as? Track else {
+            fatalError()
+        }
+        let cleanTrack = try oocut.loadClean(track: track)
+        XCTAssertEqual(cleanTrack.count, 2)
+    }
+
+    /**
+     Create fixture data to use during testing
+
+     - Parameters:
+        - latitude: The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion
+        - longitude: The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction
+        - accuracy: The estimated accuracy of the measurement in meters
+        - speed: The speed the device was moving during the measurement in meters per second
+        - timestamp: The time the measurement happened at in milliseconds since the 1st of january 1970
+        - isValid: Whether or not this is a valid location in a cleaned track
+     */
+    static func location(latitude: Double = 2.0, longitude: Double = 2.0, accuracy: Double = 1.0, speed: Double = 10.0, timestamp: Int64 = 5, isValid: Bool = true) -> GeoLocation {
+        return GeoLocation(latitude: latitude, longitude: longitude, accuracy: accuracy, speed: speed, timestamp: timestamp, isValid: isValid)
+    }
+
+    /**
+     Create fixture acceleration
+     */
+    static func acceleration() -> Acceleration {
+        return Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(), x: 1.0, y: 1.0, z: 1.0)
     }
 }
