@@ -28,10 +28,10 @@ import Foundation
  - SeeAlso: `DataCapturingService`, `PersistenceLayer.save(:[GeoLocation]:MeasurementEntity:(MeasurementMO?, Status) -> Void)`, `GeoLocationMO`
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 1.0.0
  */
-public class GeoLocation: CustomStringConvertible {
+public struct GeoLocation: CustomStringConvertible {
 
     // MARK: - Properties
 
@@ -45,26 +45,8 @@ public class GeoLocation: CustomStringConvertible {
     public let speed: Double
     /// The time the measurement happened at in milliseconds since the 1st of january 1970.
     public let timestamp: Int64
+    /// Whether or not this is a valid location in a cleaned track.
+    public let isValid: Bool
     /// A human readable description of this object.
     public var description: String { return "GeoLocation (latitude: \(latitude), longitude: \(longitude), accuracy: \(accuracy), speed: \(speed), timestamp: \(timestamp))" }
-
-    // MARK: - Initializers
-
-    /**
-     The default constructor, which initializes all properties to the provided values.
-
-     - Parameters:
-     - latitude: The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion.
-     - longitude: The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.
-     - accuracy: The estimated accuracy of the measurement in meters.
-     - speed: The speed the device was moving during the measurement in meters per second.
-     - timestamp: The time the measurement happened at in milliseconds since the 1st of january 1970.
-     */
-    public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: Int64) {
-        self.latitude = latitude
-        self.longitude = longitude
-        self.accuracy = accuracy
-        self.speed = speed
-        self.timestamp = timestamp
-    }
 }

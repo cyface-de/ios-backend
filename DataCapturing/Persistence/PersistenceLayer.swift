@@ -33,7 +33,7 @@ import os.log
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 5.0.1
+ - Version: 5.1.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
@@ -246,7 +246,7 @@ public class PersistenceLayer {
 
         let geoLocationFetchRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
         geoLocationFetchRequest.fetchLimit = 1
-        let maxTimestampInTrackPredicate = NSPredicate(format: "track==%@", track)
+        let maxTimestampInTrackPredicate = NSPredicate(format: "track==%@ AND isPartOfCleanedTrack==%@", track, NSNumber(value: true))
         geoLocationFetchRequest.predicate = maxTimestampInTrackPredicate
         geoLocationFetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
         geoLocationFetchRequest.resultType = .managedObjectResultType
@@ -261,13 +261,16 @@ public class PersistenceLayer {
             dbLocation.speed = location.speed
             dbLocation.timestamp = location.timestamp
             dbLocation.accuracy = location.accuracy
+            dbLocation.isPartOfCleanedTrack = location.isValid
             track.addToLocations(dbLocation)
 
-            if let lastCapturedLocation = lastCapturedLocation {
-                let delta = self.distanceCalculator.calculateDistance(from: lastCapturedLocation, to: dbLocation)
-                distance += delta
-            }
+            if dbLocation.isPartOfCleanedTrack {
+                if let lastCapturedLocation = lastCapturedLocation {
+                    let delta = self.distanceCalculator.calculateDistance(from: lastCapturedLocation, to: dbLocation)
+                    distance += delta
+                }
             lastCapturedLocation = dbLocation
+            }
         }
 
         measurement.trackLength += distance
@@ -315,6 +318,7 @@ public class PersistenceLayer {
         let fetchRequest: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         // The following needs to use an Objective-C number. That is why `measurementIdentifier` is wrapped in `NSNumber`
         fetchRequest.predicate = NSPredicate(format: "identifier==%@", NSNumber(value: identifier))
+        //fetchRequest.relationshipKeyPathsForPrefetching = ["tracks.locations"]
 
         let results = try context.fetch(fetchRequest)
         if results.count == 1 {
@@ -353,6 +357,24 @@ public class PersistenceLayer {
     public func loadMeasurements() throws -> [MeasurementMO] {
         let context = getContext()
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
+        let fetchResult = try context.fetch(request)
+        return fetchResult
+    }
+
+    /**
+     Provides only the valid locations within a cleaned geo location track. This excludes locations occuring because of geo location jitter and pauses.
+
+     - Parameter track: The track to load a cleaned track for
+     - Returns: The cleaned list of geo locations from that track
+     - Throws:
+        - Some unspecified error from within CoreData
+     */
+    public func loadClean(track: Track) throws -> [GeoLocationMO] {
+        let context = getContext()
+        let request: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
+        request.predicate = NSPredicate(format: "track==%@ AND isPartOfCleanedTrack==%@", track, NSNumber(value: true))
+        request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+        request.resultType = .managedObjectResultType
         let fetchResult = try context.fetch(request)
         return fetchResult
     }

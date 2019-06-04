@@ -36,8 +36,12 @@ class TestDataCapturingService: DataCapturingService {
     override func startCapturing(savingEvery time: TimeInterval) throws {
         try super.startCapturing(savingEvery: time)
         timer = DispatchSource.makeTimerSource()
-        timer!.setEventHandler {
-            let location = CLLocation(coordinate: CLLocationCoordinate2D(latitude: 10.0, longitude: 10.0), altitude: 10.0, horizontalAccuracy: 10.0, verticalAccuracy: 10.0, course: 1.0, speed: 2.0, timestamp: Date())
+        timer!.setEventHandler { [weak self] in
+            guard let self = self else {
+                return
+            }
+
+            let location = self.generateLocation()
             self.locationManager(CLLocationManager(), didUpdateLocations: [location])
         }
         timer!.schedule(deadline: .now(), repeating: 1)
@@ -48,5 +52,9 @@ class TestDataCapturingService: DataCapturingService {
         super.stopCapturing()
         timer?.cancel()
         timer = nil
+    }
+
+    private func generateLocation() -> CLLocation {
+        return CLLocation(coordinate: CLLocationCoordinate2D(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0)), altitude: Double.random(in: 0.0...8848.0), horizontalAccuracy: Double.random(in: 0.0...20.0), verticalAccuracy: Double.random(in: 0.0...20.0), course: Double.random(in: 0.0...1.0), speed: Double.random(in: 0.0...80.0), timestamp: Date())
     }
 }

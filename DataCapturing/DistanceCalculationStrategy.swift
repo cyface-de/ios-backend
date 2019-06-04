@@ -25,7 +25,7 @@ import CoreLocation
  Different implementations are possible.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 2.2.0
  */
 public protocol DistanceCalculationStrategy {
@@ -33,8 +33,8 @@ public protocol DistanceCalculationStrategy {
      Calculate the distance in meters between the provided `CLLocation` instances.
 
      - Parameters:
-     - from: The location to start the distance calculation from
-     - to: The location to calculate the distance to
+        - from: The location to start the distance calculation from
+        - to: The location to calculate the distance to
      */
     func calculateDistance(from previousLocation: CLLocation, to location: CLLocation) -> Double
 
@@ -42,10 +42,19 @@ public protocol DistanceCalculationStrategy {
      This is similar to `calculateDistance(:CLLocation,:CLLocation)` but accepts `GeoLocationMO` arguments.
 
      - Parameters:
-     - from: The location to start the distance calculation from
-     - to: The location to calculate the distance to
+        - from: The location to start the distance calculation from
+        - to: The location to calculate the distance to
      */
     func calculateDistance(from previousLocation: GeoLocationMO, to location: GeoLocationMO) -> Double
+
+    /**
+     Calculate the distance between two coordinate pairs
+
+     - Parameters:
+        - from: The source coordinate pair
+        - to: The target coordinate pair
+     */
+    func calculateDistance(from previousLocationLatLonCoordinates: (Double, Double), to locationLatLonCoordinates: (Double, Double)) -> Double
 }
 
 // MARK: - Implementation
@@ -75,5 +84,9 @@ public class DefaultDistanceCalculationStrategy: DistanceCalculationStrategy {
         let previousCLLocation = CLLocation(latitude: previousLocation.lat, longitude: previousLocation.lon)
         let clLocation = CLLocation(latitude: location.lat, longitude: location.lon)
         return calculateDistance(from: previousCLLocation, to: clLocation)
+    }
+
+    public func calculateDistance(from previousLocationLatLonCoordinates: (Double, Double), to locationLatLonCoordinates: (Double, Double)) -> Double {
+        return calculateDistance(from: CLLocation(latitude: previousLocationLatLonCoordinates.0, longitude: previousLocationLatLonCoordinates.1), to: CLLocation(latitude: locationLatLonCoordinates.0, longitude: locationLatLonCoordinates.1))
     }
 }

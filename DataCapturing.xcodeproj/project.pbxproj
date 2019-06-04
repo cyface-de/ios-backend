@@ -48,6 +48,7 @@
 		3D8FAD81222E913600D98D65 /* Track+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8FAD7B222E913500D98D65 /* Track+CoreDataProperties.swift */; };
 		3D8FAD82222E913600D98D65 /* GeoLocationMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8FAD7C222E913500D98D65 /* GeoLocationMO+CoreDataProperties.swift */; };
 		3D8FAD83222E913600D98D65 /* MeasurementMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8FAD7D222E913600D98D65 /* MeasurementMO+CoreDataProperties.swift */; };
+		3DA102B0229D38F400E27008 /* TrackCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DA102AF229D38F400E27008 /* TrackCleaner.swift */; };
 		3DF7E10021F60AB1007CFF83 /* PersistenceLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E0FF21F60AB1007CFF83 /* PersistenceLayer.swift */; };
 		3DF7E10721F60AFC007CFF83 /* CredentialsAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E10221F60AFB007CFF83 /* CredentialsAuthenticator.swift */; };
 		3DF7E10821F60AFC007CFF83 /* ServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E10321F60AFB007CFF83 /* ServerConnection.swift */; };
@@ -58,6 +59,7 @@
 		3DF7E136220C3974007CFF83 /* DistanceCalculationStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E135220C3974007CFF83 /* DistanceCalculationStrategy.swift */; };
 		3DF7E138220C3D42007CFF83 /* DistanceCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */; };
 		3DF7E174220F65EC007CFF83 /* Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E173220F65EC007CFF83 /* Status.swift */; };
+		3DFBF011229FBC7800C48618 /* TrackCleanerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DFBF010229FBC7800C48618 /* TrackCleanerTest.swift */; };
 		3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */; };
 		7FF23B8FE3F50F918F182109 /* Pods_DataCapturing_DataCapturingTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A390C666D826702A387F1CD /* Pods_DataCapturing_DataCapturingTests.framework */; };
 		93BDCD309E3AC506DFA0367A /* Pods_DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EA6D676458F65120939581D /* Pods_DataCapturing.framework */; };
@@ -119,6 +121,8 @@
 		3D8FAD7B222E913500D98D65 /* Track+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Track+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3D8FAD7C222E913500D98D65 /* GeoLocationMO+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GeoLocationMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3D8FAD7D222E913600D98D65 /* MeasurementMO+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MeasurementMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		3DA102AE229D374300E27008 /* 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 6.xcdatamodel; sourceTree = "<group>"; };
+		3DA102AF229D38F400E27008 /* TrackCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackCleaner.swift; sourceTree = "<group>"; };
 		3DF7E0FF21F60AB1007CFF83 /* PersistenceLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersistenceLayer.swift; sourceTree = "<group>"; };
 		3DF7E10221F60AFB007CFF83 /* CredentialsAuthenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CredentialsAuthenticator.swift; sourceTree = "<group>"; };
 		3DF7E10321F60AFB007CFF83 /* ServerConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerConnection.swift; sourceTree = "<group>"; };
@@ -133,6 +137,7 @@
 		3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistanceCalculationTests.swift; sourceTree = "<group>"; };
 		3DF7E173220F65EC007CFF83 /* Status.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
 		3DF85FD42270F88200A6C80A /* 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 5.xcdatamodel; sourceTree = "<group>"; };
+		3DFBF010229FBC7800C48618 /* TrackCleanerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackCleanerTest.swift; sourceTree = "<group>"; };
 		3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeasurementContext.swift; sourceTree = "<group>"; };
 		418D66E641571506040C7316 /* Pods-DataCapturing-DataCapturingTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing-DataCapturingTests.debug.xcconfig"; path = "Target Support Files/Pods-DataCapturing-DataCapturingTests/Pods-DataCapturing-DataCapturingTests.debug.xcconfig"; sourceTree = "<group>"; };
 		69089A881E653FB9864FB3D5 /* Pods-DataCapturing.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.debug.xcconfig"; path = "Target Support Files/Pods-DataCapturing/Pods-DataCapturing.debug.xcconfig"; sourceTree = "<group>"; };
@@ -210,6 +215,7 @@
 				3DF7E173220F65EC007CFF83 /* Status.swift */,
 				3D3A7DCF2258C9440019998A /* LocationManager.swift */,
 				3D3A7DE62268C7160019998A /* RepeatingTimer.swift */,
+				3DA102AF229D38F400E27008 /* TrackCleaner.swift */,
 			);
 			path = DataCapturing;
 			sourceTree = "<group>";
@@ -217,6 +223,7 @@
 		3D0BDEAE1FB1B951004EA25E /* DataCapturingTests */ = {
 			isa = PBXGroup;
 			children = (
+				3DFBF010229FBC7800C48618 /* TrackCleanerTest.swift */,
 				3D1D9A90224D4F420053B1B7 /* Resources */,
 				3D8E524B223EB220004D7E2B /* Support */,
 				3D8E5255223FDC8E004D7E2B /* DataMigrationTest.swift */,
@@ -578,6 +585,7 @@
 				3D8CC22020A6D89A0095CCD4 /* GeoLocation.swift in Sources */,
 				3D7EC16B2212ED0900F33E81 /* Synchronizer.swift in Sources */,
 				3D1D9A87224BAA8B0053B1B7 /* CoreDataMigrationVersion.swift in Sources */,
+				3DA102B0229D38F400E27008 /* TrackCleaner.swift in Sources */,
 				3D0BDEC61FB1C1AE004EA25E /* DiskConsumption.swift in Sources */,
 				3D1D9A8B224BB1CE0053B1B7 /* CoreDataMigrator.swift in Sources */,
 				3D8FAD7E222E913600D98D65 /* MeasurementMO+CoreDataClass.swift in Sources */,
@@ -605,6 +613,7 @@
 				3DF7E138220C3D42007CFF83 /* DistanceCalculationTests.swift in Sources */,
 				3D0BDEB01FB1B951004EA25E /* DataCapturingTests.swift in Sources */,
 				3D1D9A8F224D28190053B1B7 /* DataSetCreator.swift in Sources */,
+				3DFBF011229FBC7800C48618 /* TrackCleanerTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -855,13 +864,14 @@
 		3DF7E12F220C36BD007CFF83 /* CyfaceModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				3DA102AE229D374300E27008 /* 6.xcdatamodel */,
 				3DF85FD42270F88200A6C80A /* 5.xcdatamodel */,
 				3DF7E134220C374F007CFF83 /* 4.xcdatamodel */,
 				3DF7E130220C36BD007CFF83 /* 3.xcdatamodel */,
 				3DF7E131220C36BD007CFF83 /* CyfaceModel.xcdatamodel */,
 				3DF7E132220C36BD007CFF83 /* 2.xcdatamodel */,
 			);
-			currentVersion = 3DF85FD42270F88200A6C80A /* 5.xcdatamodel */;
+			currentVersion = 3DA102AE229D374300E27008 /* 6.xcdatamodel */;
 			path = CyfaceModel.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

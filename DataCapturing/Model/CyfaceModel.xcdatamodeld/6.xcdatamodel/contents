@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14490.99" systemVersion="18F132" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="GeoLocation" representedClassName="GeoLocationMO" syncable="YES">
+        <attribute name="accuracy" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="isPartOfCleanedTrack" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="lat" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="lon" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="speed" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="timestamp" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="track" maxCount="1" deletionRule="Nullify" destinationEntity="Track" inverseName="locations" inverseEntity="Track" syncable="YES"/>
+    </entity>
+    <entity name="Measurement" representedClassName="MeasurementMO" syncable="YES">
+        <attribute name="accelerationsCount" attributeType="Integer 32" minValueString="0" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="context" attributeType="String" defaultValueString="BICYCLE" syncable="YES"/>
+        <attribute name="identifier" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="synchronizable" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="synchronized" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="timestamp" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="trackLength" attributeType="Double" minValueString="0" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="tracks" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Track" inverseName="measurement" inverseEntity="Track" syncable="YES"/>
+    </entity>
+    <entity name="Track" representedClassName="Track" syncable="YES">
+        <relationship name="locations" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="GeoLocation" inverseName="track" inverseEntity="GeoLocation" syncable="YES"/>
+        <relationship name="measurement" maxCount="1" deletionRule="Nullify" destinationEntity="Measurement" inverseName="tracks" inverseEntity="Measurement" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="GeoLocation" positionX="-54" positionY="-9" width="128" height="150"/>
+        <element name="Measurement" positionX="-443" positionY="-72" width="128" height="165"/>
+        <element name="Track" positionX="-252" positionY="9" width="128" height="75"/>
+    </elements>
+</model>
