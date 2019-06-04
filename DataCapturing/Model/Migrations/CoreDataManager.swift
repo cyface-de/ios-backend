@@ -63,6 +63,8 @@ public class CoreDataManager {
     lazy var backgroundContext: NSManagedObjectContext = {
         let context = self.persistentContainer.newBackgroundContext()
         //context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        // This improves performance as long as we do not need to undo on the background context.
+        context.undoManager = nil
 
         return context
     }()

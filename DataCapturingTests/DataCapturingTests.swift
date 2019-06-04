@@ -281,7 +281,7 @@ class DataCapturingTests: XCTestCase {
         oocut.currentMeasurement = MeasurementEntity(identifier: measurement.identifier, context: .bike)
 
         measure {
-            oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000)]
+            oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000, isValid: true)]
             oocut.accelerationsCache = []
             for i in 0...99 {
                 oocut.accelerationsCache.append(Acceleration(timestamp: 10_000 + Int64(i), x: 1.0, y: 1.0, z: 1.0))
@@ -328,5 +328,27 @@ class DataCapturingTests: XCTestCase {
         }
         print(locationsCount)
         XCTAssertTrue(locationsCount>=5)
+    }
+
+    func testStartPauseResumeStop_DistanceCalculationContainsLastSegment() throws {
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
+        try oocut.start(inContext: .bike)
+        guard let currentMeasurementIdentifier = oocut.currentMeasurement?.identifier else {
+            fatalError()
+        }
+
+        // TODO: Make it possible to inject geo locations to avoid these sleep calls.
+        sleep(2)
+        try oocut.pause()
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+        let trackLengthAfterPause = measurement.trackLength
+        try oocut.resume()
+        sleep(2)
+        try oocut.stop()
+        let measurementAfterStop = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+        let trackLengthAfterStop = measurementAfterStop.trackLength
+
+        XCTAssertTrue(trackLengthAfterStop>=trackLengthAfterPause)
     }
 }

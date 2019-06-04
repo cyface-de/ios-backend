@@ -132,6 +132,25 @@ let measurement = try persistenceLayer.load(measurementIdentifiedBy: identifier)
 let trackLength = measurement.trackLength
 ```
 
+### Getting a cleaned track
+
+The Cyface SDK for iOS is capable of providing a track where locations with too much noise are cleaned away.
+Currently these are locations with an accuracy above 20.0 meters or a speed below 1 m/s (3.6 km/h) or above 100 m/s (360 km/h). 
+This is currently hard coded into the SDK but might change in a future release.
+
+```swift
+let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+persistenceLayer.context = persistenceLayer.makeContext()
+let measurement = persistenceLayer.load(measurementIdentifiedBy: identifier)
+guard let track = measurement.tracks?.array.last as? Track else {
+    fatalError()
+}
+let cleanTrack = try oocut.loadClean(track: track)
+```
+
+The `cleanTrack` is an array of `GeoLocationMO` instances.
+This array is not to be used on a different thread. Before using it you should copy all its values to main memory (or know how to use faults in CoreData).
+
 ### Using an Authenticator
 The Cyface SDK for iOS transmits measurement data to a server. 
 To authenticate with this server, the SDK uses an implementation of the `Authenticator`  class.
