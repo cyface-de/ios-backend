@@ -51,7 +51,7 @@ class PersistenceTests: XCTestCase {
 
             fixture = MeasurementEntity(identifier: measurement.identifier, context: MeasurementContext(rawValue: measurement.context!)!)
 
-            try oocut.save(locations: [PersistenceTests.location(latitude: 51.052181, longitude: 13.728956), PersistenceTests.location(latitude: 51.051837, longitude: 13.729010)], in: measurement)
+            try oocut.save(locations: [PersistenceTests.location(latitude: 51.052181, longitude: 13.728956, timestamp: 10_000), PersistenceTests.location(latitude: 51.051837, longitude: 13.729010, timestamp: 10_001)], in: measurement)
             try oocut.save(accelerations: [PersistenceTests.acceleration(), PersistenceTests.acceleration(), PersistenceTests.acceleration()], in: measurement)
 
         } catch let error {
@@ -194,7 +194,7 @@ class PersistenceTests: XCTestCase {
     /// Tests that distance is successfully created if new locations are added to a measurement.
     func testDistanceWasAdded() {
         let expectedInitialTrackLength = 38.45660983580925
-        let expectedAddedTrackLength = 83.57
+        let expectedAddedTrackLength = 45.0
         let expectedTrackLength = expectedInitialTrackLength + expectedAddedTrackLength
         let distanceCalculationAccuracy = 0.01
 
@@ -202,7 +202,8 @@ class PersistenceTests: XCTestCase {
             let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
             XCTAssertEqual(measurement.trackLength, expectedInitialTrackLength)
 
-            try oocut.save(locations: [PersistenceTests.location(latitude: 51.051432, longitude: 13.729053)], in: measurement)
+            let newLocationInput = [PersistenceTests.location(latitude: 51.051432, longitude: 13.729053, timestamp: 10_002)]
+            try oocut.save(locations: newLocationInput, in: measurement)
 
             XCTAssertEqual(measurement.trackLength, expectedTrackLength, accuracy: expectedTrackLength * distanceCalculationAccuracy, "Measurement length \(measurement.trackLength) should be within \(distanceCalculationAccuracy*100)% of \(expectedTrackLength).")
         } catch let error {
@@ -254,6 +255,7 @@ class PersistenceTests: XCTestCase {
         XCTAssertTrue(filteredMeasurements.first!.trackLength > 0.0)
     }
 
+    /// Tests that loading a cleaned track returns only the valid cleaned locations.
     func testLoadCleanedTrack() throws {
         let measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
 
