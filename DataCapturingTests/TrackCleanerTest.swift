@@ -59,8 +59,7 @@ class TrackCleanerTest: XCTestCase {
     }
 
     /// Tests that `TrackCleaner` is fast enough to be called for each new geo location
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
+    func testPerformance() {
         self.measure {
             _ = oocut.isValid(location: TrackCleanerTest.location())
         }

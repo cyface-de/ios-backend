@@ -26,7 +26,7 @@ import os.log
  An object of this class handles the lifecycle of starting and stopping data capturing.
  
  - Author: Klemens Muthmann
- - Version: 9.3.0
+ - Version: 9.3.1
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -36,10 +36,10 @@ public class DataCapturingService: NSObject {
     private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
 
     /// `true` if data capturing is running; `false` otherwise.
-    public var isRunning: Bool
+    public var isRunning = false
 
     /// `true` if data capturing was running but is currently paused; `false` otherwise.
-    public var isPaused: Bool
+    public var isPaused = false
 
     /// The currently recorded `Measurement` or `nil` if there is no active recording.
     public var currentMeasurement: MeasurementEntity?
@@ -128,13 +128,28 @@ public class DataCapturingService: NSObject {
         dataManager: CoreDataManager,
         eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) {
 
-        self.isRunning = false
-        self.isPaused = false
         coreDataStack = dataManager
         self.motionManager = manager
         motionManager.accelerometerUpdateInterval = 1.0 / interval
         self.handler = eventHandler
         self.savingInterval = time
+
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
+
+        do {
+            for measurement in try persistenceLayer.loadMeasurements() {
+                if !measurement.synchronizable && !measurement.synchronized {
+                    guard let contextString = measurement.context, let context = MeasurementContext(rawValue: contextString) else {
+                        fatalError("Unable to load context for measurement \(measurement.identifier)!")
+                    }
+                    currentMeasurement = MeasurementEntity(identifier: measurement.identifier, context: context)
+                    isPaused = true
+                }
+            }
+        } catch {
+            fatalError("Unable to load measurements from database!")
+        }
 
         super.init()
     }
