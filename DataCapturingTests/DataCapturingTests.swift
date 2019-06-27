@@ -35,8 +35,6 @@ class DataCapturingTests: XCTestCase {
     var oocut: TestDataCapturingService!
     /// The *CoreData* stack to access and check data create by lifecycle methods.
     var coreDataStack: CoreDataManager!
-    /// The mocked sensor manager used to simulate accelerometer updates.
-    var sensorManager: TestMotionManager!
 
     /// Initializes every test by creating a `TestDataCapturingService`.
     override func setUp() {
@@ -48,16 +46,14 @@ class DataCapturingTests: XCTestCase {
 
         coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
         coreDataStack.setup(bundle: bundle)
-        sensorManager = TestMotionManager()
-        oocut = TestDataCapturingService(sensorManager: sensorManager, dataManager: coreDataStack) { _, _ in }
-        oocut.coreLocationManager = TestLocationManager()
+
+        oocut = dataCapturingService(dataManager: coreDataStack)
     }
 
     /// Tears down the test environment.
     override func tearDown() {
         // Wait for write operations to have finished! This is necessary to delete the data again.
         oocut = nil
-        sensorManager = nil
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
         do {
@@ -301,7 +297,7 @@ class DataCapturingTests: XCTestCase {
         // Arrange
         var updateCounter = 0
         let async = expectation(description: "Geo Location events")
-        let testCapturingService = TestDataCapturingService(sensorManager: sensorManager, dataManager: coreDataStack) { (event, _) in
+        let testCapturingService = dataCapturingService(dataManager: coreDataStack) { (event, _) in
                 if case DataCapturingEvent.geoLocationAcquired(_) = event {
                     updateCounter += 1
                     if updateCounter == 2 {
@@ -350,5 +346,24 @@ class DataCapturingTests: XCTestCase {
         let trackLengthAfterStop = measurementAfterStop.trackLength
 
         XCTAssertTrue(trackLengthAfterStop>=trackLengthAfterPause)
+    }
+
+    func testResumeAfterLongPause_ShouldNotThrowAnException() throws {
+        try oocut.start(inContext: .bike)
+        try oocut.pause()
+
+        let newOocut = dataCapturingService(dataManager: coreDataStack)
+        do {
+            try newOocut.resume()
+        } catch {
+            XCTFail("Encountered exception \(error) on new instance.")
+        }
+        try newOocut.stop()
+    }
+
+    func dataCapturingService(sensorManager: CMMotionManager = TestMotionManager(), dataManager: CoreDataManager, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void) = {_,_ in }) -> TestDataCapturingService {
+        let ret = TestDataCapturingService(sensorManager: sensorManager, dataManager: dataManager, eventHandler: eventHandler)
+        ret.coreLocationManager = TestLocationManager()
+        return ret
     }
 }

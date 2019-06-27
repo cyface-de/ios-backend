@@ -49,4 +49,13 @@ public struct GeoLocation: CustomStringConvertible {
     public let isValid: Bool
     /// A human readable description of this object.
     public var description: String { return "GeoLocation (latitude: \(latitude), longitude: \(longitude), accuracy: \(accuracy), speed: \(speed), timestamp: \(timestamp))" }
+
+    public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: Int64, isValid: Bool = true) {
+        self.latitude = latitude
+        self.longitude = longitude
+        self.accuracy = accuracy
+        self.speed = speed
+        self.timestamp = timestamp
+        self.isValid = isValid
+    }
 }
