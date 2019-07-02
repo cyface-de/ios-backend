@@ -171,8 +171,11 @@ public class DataCapturingService: NSObject {
      */
     public func start(inContext context: MeasurementContext) throws {
         try lifecycleQueue.sync {
-            guard !isPaused else {
-                throw DataCapturingError.isPaused
+            if isPaused {
+                os_log("Starting data capturing on paused service. Finishing paused measurements and starting fresh. This is probably the result of a lifecycle error. ", log: LOG, type: .default)
+                if let currentMeasurement = currentMeasurement {
+                    try finish(measurement: currentMeasurement)
+                }
             }
 
             let timestamp = DataCapturingService.currentTimeInMillisSince1970()
@@ -210,11 +213,7 @@ public class DataCapturingService: NSObject {
                 self.handler(.serviceStopped(measurement: currentMeasurement.identifier), .success)
             }
             stopCapturing()
-            let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
-            let currentMeasurementEntity = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
-            currentMeasurementEntity.synchronizable = true
-            persistenceLayer.context?.saveRecursively()
+            try finish(measurement: currentMeasurement)
             self.currentMeasurement = nil
             isPaused = false
         }
@@ -376,6 +375,14 @@ public class DataCapturingService: NSObject {
         } catch let error {
             return os_log("Unable to save captured data. Error %@", log: self.LOG, type: .error, error.localizedDescription)
         }
+    }
+
+    private func finish(measurement: MeasurementEntity) throws {
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let currentMeasurementEntity = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
+        currentMeasurementEntity.synchronizable = true
+        persistenceLayer.context?.saveRecursively()
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
