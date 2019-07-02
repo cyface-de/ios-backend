@@ -326,6 +326,7 @@ class DataCapturingTests: XCTestCase {
         XCTAssertTrue(locationsCount>=5)
     }
 
+    /// Tests that the distance calculation always contains the last segment of a capturing run.
     func testStartPauseResumeStop_DistanceCalculationContainsLastSegment() throws {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
@@ -348,6 +349,7 @@ class DataCapturingTests: XCTestCase {
         XCTAssertTrue(trackLengthAfterStop>=trackLengthAfterPause)
     }
 
+    /// After the App has been paused very long iOS will kill it. This deletes the paused state in memory. This test checks that recreating this state from the database is successful.
     func testResumeAfterLongPause_ShouldNotThrowAnException() throws {
         try oocut.start(inContext: .bike)
         try oocut.pause()
@@ -361,7 +363,30 @@ class DataCapturingTests: XCTestCase {
         try newOocut.stop()
     }
 
-    func dataCapturingService(sensorManager: CMMotionManager = TestMotionManager(), dataManager: CoreDataManager, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void) = {_,_ in }) -> TestDataCapturingService {
+    /// In case there already is a paused measurement after App restart, starting should still be successful and just output a warning.
+    func testStartPausedService_FinishesPausedMeasurementAndThrowsNoException() throws {
+        try oocut.start(inContext: .bike)
+        try oocut.pause()
+
+        let newOocut = dataCapturingService(dataManager: coreDataStack)
+        XCTAssertTrue(newOocut.isPaused)
+        do {
+            try newOocut.start(inContext: .bike)
+        } catch {
+            XCTFail("Encountered exception \(error) on new instance.")
+        }
+        try newOocut.stop()
+    }
+
+    /**
+     Creates a new `DataCapturingService` initialized for testing, which means all sensors are mocked.
+
+     - Parameters:
+        - sensorManager: The iOS `CMMotionManager` to use. The default is a `TestMotionManager`, which prevents accessing the actual sensors and only returns random values.
+        - dataManager: A `CoreDataManager` used to access the database to write or read data.
+        - eventHandler: An `eventHandler` used to capture events from the created service. The default implementation is a no-op implementation throwing all events away.
+     */
+    func dataCapturingService(sensorManager: CMMotionManager = TestMotionManager(), dataManager: CoreDataManager, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void) = {_, _ in }) -> TestDataCapturingService {
         let ret = TestDataCapturingService(sensorManager: sensorManager, dataManager: dataManager, eventHandler: eventHandler)
         ret.coreLocationManager = TestLocationManager()
         return ret
