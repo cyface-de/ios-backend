@@ -25,7 +25,7 @@ import CoreData
  This class contains utility code used to create data stores in specific versions of the Cyface model.
 
  - Author: Klemens Muthmann
- - Version: 1.2.0
+ - Version: 2.0.0
  - Since: 4.0.0
  */
 class DataSetCreator {
@@ -159,22 +159,27 @@ class DataSetCreator {
         try context.save()
     }
 
+    /**
+     Creates data in the version 4 format of the Cyface database schema. This version added individual tracks to measurements
+
+     - Parameter in: The container to create the data in
+     */
     static func createV4Data(in container: NSPersistentContainer) throws {
         let context = container.newBackgroundContext()
 
         let measurement01 = createV4Measurement(450*100, "BICYCLE", Int64(1), false, Int64(10_000), 450.0, context)
         let trackOne = NSEntityDescription.insertNewObject(forEntityName: "Track", into: context)
-        let trackOneGeoLocations = createV4GeoLocations(200, Int64(10_000), trackOne, context)
+        let trackOneGeoLocations = createV4GeoLocations(200, Int64(10_000), trackOne, context, createV4GeoLocation)
         trackOne.setValue(NSOrderedSet(array: trackOneGeoLocations), forKey: "locations")
         trackOne.setValue(measurement01, forKey: "measurement")
         let trackTwo = NSEntityDescription.insertNewObject(forEntityName: "Track", into: context)
-        let trackTwoGeoLocations = createV4GeoLocations(250, 10_300, trackTwo, context)
+        let trackTwoGeoLocations = createV4GeoLocations(250, 10_300, trackTwo, context, createV4GeoLocation)
         trackTwo.setValue(NSOrderedSet(array: trackTwoGeoLocations), forKey: "locations")
         trackTwo.setValue(measurement01, forKey: "measurement")
 
         let measurement02 = createV4Measurement(300*100, "BICYCLE", Int64(2), false, Int64(20_000), 300, context)
         let trackForMeasurementTwo = NSEntityDescription.insertNewObject(forEntityName: "Track", into: context)
-        let trackForMeasurementTwoGeoLocations = createV4GeoLocations(300, Int64(20_000), trackForMeasurementTwo, context)
+        let trackForMeasurementTwoGeoLocations = createV4GeoLocations(300, Int64(20_000), trackForMeasurementTwo, context, createV4GeoLocation)
         trackForMeasurementTwo.setValue(NSOrderedSet(array: trackForMeasurementTwoGeoLocations), forKey: "locations")
         trackForMeasurementTwo.setValue(measurement02, forKey: "measurement")
 
@@ -213,21 +218,36 @@ class DataSetCreator {
         - startTimestamp: The timestamp used for the first instance in milliseconds since the 1st of january 1970. This is increased by 1 second per location.
         - track: The track entity these new locations are going to belong to. This `NSManagedObject` must be from the same `NSManagedObjectContext` as the one provided to this method.
         - context: The `NSManagedObjectContext` to use for instance creation. This must be a valid version 4 `NSManagedObjectContext`.
+        - locationCreator: A function to create one geo location.
      - Returns: An array containing `count` geo locations.
      */
-    static func createV4GeoLocations(_ count: Int, _ startTimestamp: Int64, _ track: NSManagedObject, _ context: NSManagedObjectContext) -> [NSManagedObject] {
+    static func createV4GeoLocations(_ count: Int64, _ startTimestamp: Int64, _ track: NSManagedObject, _ context: NSManagedObjectContext, _ locationCreator: (Int64,Int64, NSManagedObject, NSManagedObjectContext) -> NSManagedObject ) -> [NSManagedObject] {
         var ret = [NSManagedObject]()
         for i in 0..<count {
-            let geoLocation = NSEntityDescription.insertNewObject(forEntityName: "GeoLocation", into: context)
-            geoLocation.setPrimitiveValue(1.0, forKey: "accuracy")
-            geoLocation.setPrimitiveValue(52.0+0.01*Double(i), forKey: "lat")
-            geoLocation.setPrimitiveValue(13.7+0.01*Double(i), forKey: "lon")
-            geoLocation.setPrimitiveValue(1.0, forKey: "speed")
-            geoLocation.setPrimitiveValue(20_000+i, forKey: "timestamp")
-            geoLocation.setValue(track, forKey: "track")
+            let geoLocation = locationCreator(i, startTimestamp, track, context)
             ret.append(geoLocation)
         }
         return ret
+    }
+
+    /**
+     A function to create a single `GeoLocation` in the version 4 data format.
+
+     - Parameters:
+        - position: The position of the `GeoLocation` within the current `Track`.
+        - startTimestamp: The timestamp of the first `GeoLocation` in the current `Track` in milliseconds since the 1st of January 1970.
+        - track: The `Track` to add the `GeoLocation` to.
+        - context: The managed object context to save the newly created `GeoLocation` in.
+     */
+    static func createV4GeoLocation(position: Int64, startTimestamp: Int64, track: NSManagedObject, context: NSManagedObjectContext) -> NSManagedObject {
+        let geoLocation = NSEntityDescription.insertNewObject(forEntityName: "GeoLocation", into: context)
+        geoLocation.setPrimitiveValue(1.0, forKey: "accuracy")
+        geoLocation.setPrimitiveValue(52.0+0.01*Double(position), forKey: "lat")
+        geoLocation.setPrimitiveValue(13.7+0.01*Double(position), forKey: "lon")
+        geoLocation.setPrimitiveValue(1.0, forKey: "speed")
+        geoLocation.setPrimitiveValue(startTimestamp + position, forKey: "timestamp")
+        geoLocation.setValue(track, forKey: "track")
+        return geoLocation
     }
 
     /**
@@ -236,6 +256,7 @@ class DataSetCreator {
      - Parameters:
         - countOfGeoLocations: The amount of geo locations to create within the test measurement
         - countOfAccelerations: The amount of accelerations to create within the test measurement
+        - persistenceLayer: The `PersistenceLayer` used to create the fake measurement
      - Returns: The created test measurement
      - Throws:
         - Some unspecified errors from within CoreData.
@@ -265,5 +286,138 @@ class DataSetCreator {
         try persistenceLayer.save(accelerations: accelerations, in: measurement)
 
         return measurement
+    }
+}
+
+/**
+ The base protocol for all data set creators, starting from version 5.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 4.6.0
+ */
+protocol DataSetCreatorProtocol {
+
+    /**
+     Creates data within the provided `NSPersistentContainer`. This container must support the correct model version.
+
+     - Parameter in: The container to save the create data to.
+     */
+    func createData(in container: NSPersistentContainer) throws
+}
+
+/**
+ A data set creator creating a data set within an `NSPersistentContainer` of a version 5 database.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 4.6.0
+ */
+class DataSetCreatorV5: DataSetCreatorProtocol {
+
+    func createData(in container: NSPersistentContainer) throws {
+        let context = container.newBackgroundContext()
+        let measurement01 = createMeasurement(accelerationsCount: 10_000, vehicleContext: "BICYCLE", identifier: 1, synchronized: false, timestamp: DataCapturingService.currentTimeInMillisSince1970(), trackLength: 500, context: context)
+        let track0101 = appendTrack(to: measurement01, context: context)
+        createGeoLocations(count: 30, track: track0101, context: context, locationCreator: DataSetCreator.createV4GeoLocation)
+        let track0102 = appendTrack(to: measurement01, context: context)
+        createGeoLocations(count: 20, track: track0102, context: context, locationCreator: DataSetCreator.createV4GeoLocation)
+
+        let measurement02 = createMeasurement(accelerationsCount: 20_000, vehicleContext: "BICYCLE", identifier: 2, synchronized: false, timestamp: DataCapturingService.currentTimeInMillisSince1970(), trackLength: 700, context: context)
+        let track0201 = appendTrack(to: measurement02, context: context)
+        createGeoLocations(count: 40, track: track0201, context: context, locationCreator: DataSetCreator.createV4GeoLocation)
+
+        try context.save()
+    }
+
+    /**
+     Create a measurement in the version 5 data format.
+
+     - Parameters:
+        - accelerationsCount: The number of accelerations to "simulate" with the created measurement. These accelerations are not truly created, but the corresponding field is set to the provided value.
+        - vehicleContext: The vehicle the measurement was supposed to be done with.
+        - identifier: The identifier for the new measurement.
+        - synchronized: Whether the measurement is synchronized or not.
+        - timestamp: The time in milliseconds since the 1st of January 1970, when this measurement should have happended.
+        - trackLength: The summed up length of all tracks in the measurement in meters.
+        - context: A CoreData `NSManagedObjectContext` used to create and store the new measurement.
+     - Returns: An `NSManagedObject` representing the created measurement.
+     */
+    func createMeasurement(accelerationsCount: Int64, vehicleContext: String, identifier: Int64, synchronized: Bool, timestamp: Int64, trackLength: Double, context: NSManagedObjectContext) -> NSManagedObject {
+        let measurement = DataSetCreator.createV4Measurement(accelerationsCount, vehicleContext, identifier, synchronized, timestamp, trackLength, context)
+        measurement.setPrimitiveValue(false, forKey: "synchronizable")
+        return measurement
+    }
+
+    /**
+     Adds a track to the end of the list of tracks of an already created measurement.
+
+     - Parameters:
+        - to: The measurement to append the track to.
+        - context: The `NSManagedObjectContext` used to create and store the new track.
+     - Returns: The newly created track as an `NSManagedObject`.
+     */
+    func appendTrack(to measurement: NSManagedObject, context: NSManagedObjectContext) -> NSManagedObject {
+        let track = NSEntityDescription.insertNewObject(forEntityName: "Track", into: context)
+        track.setValue(measurement, forKey: "measurement")
+        return track
+    }
+
+    /**
+     Create a number of geo locations with random values and add them to the end of a track.
+
+     - Parameters:
+        - count: The number of geo locations to add
+        - track: The track to add the geo locations to
+        - context: An `NSManagedObjectContext` used to create and store the newly created geo locations. This context must also contain the provided track.
+        - locationCreator: A function creating individual geo locations.
+     */
+    func createGeoLocations(count: Int64, track: NSManagedObject, context: NSManagedObjectContext, locationCreator: (Int64, Int64, NSManagedObject, NSManagedObjectContext) -> NSManagedObject) {
+        let locations = DataSetCreator.createV4GeoLocations(40, DataCapturingService.currentTimeInMillisSince1970(), track, context, locationCreator)
+        track.setValue(NSOrderedSet(array: locations), forKey: "locations")
+    }
+}
+
+/**
+ A data set creator creating a data set within an `NSPersistentContainer` of a version 6 database.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 4.6.0
+ */
+class DataSetCreatorV6: DataSetCreatorProtocol {
+
+    /// A reference to version 5 data set creator used to create all the data that did not change.
+    private let dataSetCreatorV5 = DataSetCreatorV5()
+
+    func createData(in container: NSPersistentContainer) throws {
+        let context = container.newBackgroundContext()
+        let measurement01 = dataSetCreatorV5.createMeasurement(accelerationsCount: 10_000, vehicleContext: "BICYCLE", identifier: 1, synchronized: false, timestamp: DataCapturingService.currentTimeInMillisSince1970(), trackLength: 700, context: context)
+        let track0101 = dataSetCreatorV5.appendTrack(to: measurement01, context: context)
+        dataSetCreatorV5.createGeoLocations(count: 20, track: track0101, context: context, locationCreator: createGeoLocation)
+
+        let measurement02 = dataSetCreatorV5.createMeasurement(accelerationsCount: 20_000, vehicleContext: "BICYCLE", identifier: 2, synchronized: false, timestamp: DataCapturingService.currentTimeInMillisSince1970(), trackLength: 200, context: context)
+        let track0201 = dataSetCreatorV5.appendTrack(to: measurement02, context: context)
+        dataSetCreatorV5.createGeoLocations(count: 5, track: track0201, context: context, locationCreator: createGeoLocation)
+        let track0202 = dataSetCreatorV5.appendTrack(to: measurement02, context: context)
+        dataSetCreatorV5.createGeoLocations(count: 10, track: track0202, context: context, locationCreator: createGeoLocation)
+
+        try context.save()
+    }
+
+    /**
+     Create a single version 6 geo location.
+
+     - Parameters:
+        - position: The position of the new geo location within its track.
+        - startTimestamp: The start timestamp of the track.
+        - track: The track to add the new geo location to.
+        - context: An `NSManagedObjectContext` used to create and store the new geo location. This must be the same context, that created the track object.
+     - Returns: A new geo location as `NSManagedObject`.
+    */
+    func createGeoLocation(position: Int64, startTimestamp: Int64, track: NSManagedObject, context: NSManagedObjectContext) -> NSManagedObject {
+        let geoLocation = DataSetCreator.createV4GeoLocation(position: position, startTimestamp: startTimestamp, track: track, context: context)
+        geoLocation.setPrimitiveValue(true, forKey: "isPartOfCleanedTrack")
+        return geoLocation
     }
 }

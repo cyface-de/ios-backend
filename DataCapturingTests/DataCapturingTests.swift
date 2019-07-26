@@ -26,7 +26,7 @@ import CoreData
  This test is intended to test capturing some data in isolation.
 
  - Author: Klemens Muthmann
- - Version: 2.1.0
+ - Version: 2.2.0
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {
@@ -101,6 +101,7 @@ class DataCapturingTests: XCTestCase {
         XCTAssertTrue(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
         let prePauseCountOfMeasurements = try persistenceLayer.countMeasurements()
+        let measurementIdentifier = oocut.currentMeasurement!.identifier
 
         try oocut.pause()
         XCTAssertFalse(oocut.isRunning)
@@ -113,6 +114,14 @@ class DataCapturingTests: XCTestCase {
         try oocut.stop()
         XCTAssertFalse(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
+
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
+        let events = measurement.events!.array as! [Event]
+        XCTAssertEqual(events.count, 4)
+        XCTAssertEqual(events[0].typeEnum, .lifecycleStart)
+        XCTAssertEqual(events[1].typeEnum, .lifecyclePause)
+        XCTAssertEqual(events[2].typeEnum, .lifecycleResume)
+        XCTAssertEqual(events[3].typeEnum, .lifecycleStop)
     }
 
     func testStartPauseStop_HappyPath() throws {

@@ -2,13 +2,14 @@
 //  MeasurementMO+CoreDataProperties.swift
 //  DataCapturing
 //
-//  Created by Team Cyface on 24.04.19.
+//  Created by Team Cyface on 24.07.19.
 //  Copyright © 2019 Cyface GmbH. All rights reserved.
 //
 //
 
 import Foundation
 import CoreData
+
 
 extension MeasurementMO {
 
@@ -19,11 +20,47 @@ extension MeasurementMO {
     @NSManaged public var accelerationsCount: Int32
     @NSManaged public var context: String?
     @NSManaged public var identifier: Int64
+    @NSManaged public var synchronizable: Bool
     @NSManaged public var synchronized: Bool
     @NSManaged public var timestamp: Int64
     @NSManaged public var trackLength: Double
-    @NSManaged public var synchronizable: Bool
+    @NSManaged public var events: NSOrderedSet?
     @NSManaged public var tracks: NSOrderedSet?
+
+}
+
+// MARK: Generated accessors for events
+extension MeasurementMO {
+
+    @objc(insertObject:inEventsAtIndex:)
+    @NSManaged public func insertIntoEvents(_ value: Event, at idx: Int)
+
+    @objc(removeObjectFromEventsAtIndex:)
+    @NSManaged public func removeFromEvents(at idx: Int)
+
+    @objc(insertEvents:atIndexes:)
+    @NSManaged public func insertIntoEvents(_ values: [Event], at indexes: NSIndexSet)
+
+    @objc(removeEventsAtIndexes:)
+    @NSManaged public func removeFromEvents(at indexes: NSIndexSet)
+
+    @objc(replaceObjectInEventsAtIndex:withObject:)
+    @NSManaged public func replaceEvents(at idx: Int, with value: Event)
+
+    @objc(replaceEventsAtIndexes:withEvents:)
+    @NSManaged public func replaceEvents(at indexes: NSIndexSet, with values: [Event])
+
+    @objc(addEventsObject:)
+    @NSManaged public func addToEvents(_ value: Event)
+
+    @objc(removeEventsObject:)
+    @NSManaged public func removeFromEvents(_ value: Event)
+
+    @objc(addEvents:)
+    @NSManaged public func addToEvents(_ values: NSOrderedSet)
+
+    @objc(removeEvents:)
+    @NSManaged public func removeFromEvents(_ values: NSOrderedSet)
 
 }
 

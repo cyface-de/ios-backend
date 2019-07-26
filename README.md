@@ -179,6 +179,17 @@ if let tracks = measurement.tracks {
 }
 ```
 
+### Getting a log of lifecycle events
+If you need to know about past start, pause, resume and stop events you may retrieve them, by loading a measurement from a `PersistenceLayer`.
+The measurement provides the events as follows:
+
+```swift
+let loadedEvents = loadedMeasurement.events?.array as? [Event]
+```
+
+The list is ordered by the occurence time of the events.
+Each event provides a type, best retrieved from `Event.typeEnum` and the time of its occurrences as an `NSDate`.
+
 ### Continuous synchronization
 
 To keep measurements synchronized without user interaction, the Cyface SDK provides the `Synchronizer`.
