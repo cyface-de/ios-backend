@@ -33,7 +33,7 @@ import os.log
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 5.1.0
+ - Version: 5.2.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
@@ -140,7 +140,6 @@ public class PersistenceLayer {
      */
     func appendNewTrack(to measurement: MeasurementMO) {
         let context = getContext()
-        //container.performBackgroundTask { context in
         let measurementOnCurrentContext = migrate(measurement: measurement, to: context)
         if let trackDescription = NSEntityDescription.entity(forEntityName: "Track", in: context) {
             let track = Track.init(entity: trackDescription, insertInto: context)
@@ -152,7 +151,20 @@ public class PersistenceLayer {
         } else {
             fatalError("Unable to create Track. Something is seriously wrong with your CoreData configuration.")
         }
-        //}
+    }
+
+    /**
+     Creates a new `Event` at the current time.
+
+     - Parameter of: The type of the logged `Event`.
+     */
+    func createEvent(of type: EventType) -> Event {
+        let context = getContext()
+        let event = Event.init(context: context)
+        event.typeEnum = type
+        event.time = NSDate(timeIntervalSince1970: Double(DataCapturingService.currentTimeInMillisSince1970()) / 1000.0)
+
+        return event
     }
 
     /**
