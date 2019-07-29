@@ -25,7 +25,7 @@ import CoreData
  Tests that data migration between different versions of the Cyface data model are going to work as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 1.2.0
  - Since: 4.0.0
  */
 class DataMigrationTest: XCTestCase {
@@ -100,12 +100,46 @@ class DataMigrationTest: XCTestCase {
         try assertV4(onContext: context, withFirstLocationCount: 300, withSecondLocationCount: 200)
     }
 
+    /**
+     Tests a successful migration from version 4 to version 5.
+
+     - Throws:
+        - Some unspecified CoreData errors.
+     */
     func testMigrationV4ToV5() throws {
         // Arrange, Act
         let context = migrate(fromVersion: .version4, toVersion: .version5, usingTestData: "V4TestData.sqlite")
 
         // Assert
         try assertV5(onContext: context)
+    }
+
+    /**
+     Tests a successful migration from version 5 to version 6.
+
+     - Throws:
+        - Some unspecified CoreData errors.
+     */
+    func testMigrationV5ToV6() throws {
+        // Arrange, Act
+        let context = migrate(fromVersion: .version5, toVersion: .version6, usingTestData: "V5TestData.sqlite")
+
+        // Assert
+        try assertV6(onContext: context)
+    }
+
+    /**
+     Tests a successful migration from version 6 to version 7.
+
+     - Throws:
+        - Some unspecified CoreData errors.
+     */
+    func testMigrationV6ToV7() throws {
+        // Arrange, Act
+        let context = migrate(fromVersion: .version6, toVersion: .version7, usingTestData: "V6TestData.sqlite")
+
+        // Assert
+        try assertV7(onContext: context)
     }
 
     /**
@@ -122,6 +156,12 @@ class DataMigrationTest: XCTestCase {
         try assertV4(onContext: context, withFirstLocationCount: 100, withSecondLocationCount: 200)
     }
 
+    /**
+     Tests a successful migration from version 1 to version 5. This tests the whole update path in one go.
+
+     - Throws:
+        - Some unspecified CoreData errors.
+     */
     func testMigrationV1ToV5() throws {
         // Arrange, Act
         let context = migrate(fromVersion: .version1, toVersion: .version5, usingTestData: "V1TestData.sqlite")
@@ -254,6 +294,13 @@ class DataMigrationTest: XCTestCase {
         XCTAssertEqual(locationsFromTrackTwo.count, secondLocationCount)
     }
 
+    /**
+     Assert a successful migration to a version 5 database.
+
+     - Parameter onContext: The `NSManagedObjectContext` used to store the data to assert.
+     - Throws:
+        - Some unspecified *CoreData* errors.
+     */
     func assertV5(onContext context: NSManagedObjectContext) throws {
         let measurementFetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Measurement")
         let sort = NSSortDescriptor(key: "identifier", ascending: false)
@@ -263,6 +310,38 @@ class DataMigrationTest: XCTestCase {
         XCTAssertEqual(migratedMeasurements.count, 2)
         XCTAssertEqual(migratedMeasurements[0].primitiveValue(forKey: "synchronizable") as? Bool, true)
         XCTAssertEqual(migratedMeasurements[1].primitiveValue(forKey: "synchronizable") as? Bool, true)
+    }
+
+    /**
+    Assert a successful migration to a version 6 database.
+
+    - Parameter onContext: The `NSManagedObjectContext` used to store the data to assert.
+    - Throws:
+        - Some unspecified *CoreData* errors.
+     */
+    func assertV6(onContext context: NSManagedObjectContext) throws {
+        let geoLocationFetchRequest = NSFetchRequest<NSManagedObject>(entityName: "GeoLocation")
+        let migratedGeoLocations = try context.fetch(geoLocationFetchRequest)
+
+        XCTAssertTrue(migratedGeoLocations[0].primitiveValue(forKey: "isPartOfCleanedTrack") as! Bool)
+    }
+
+    /**
+     Assert a successful migration to a version 7 database.
+
+     - Parameter onContext: The `NSManagedObjectContext` used to store the data to assert.
+     - Throws:
+        - Some unspecified *CoreData* errors.
+    */
+    func assertV7(onContext context: NSManagedObjectContext) throws {
+        let measurementFetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Measurement")
+        let migratedMeasurements = try context.fetch(measurementFetchRequest)
+
+        XCTAssertEqual(migratedMeasurements.count, 2)
+        let events01 = (migratedMeasurements[0].value(forKey: "events") as! NSOrderedSet).array
+        XCTAssertEqual(events01.count, 0)
+        let events02 = (migratedMeasurements[1].value(forKey: "events") as! NSOrderedSet).array
+        XCTAssertEqual(events02.count, 0)
     }
 
     /**
@@ -278,9 +357,9 @@ class DataMigrationTest: XCTestCase {
 
         let migrator = CoreDataMigrator()
         let location = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let database = location.appendingPathComponent("V4TestData").appendingPathExtension("sqlite")
-        let container = loadContainer(from: "CyfaceModel", with: "4", from: "de.cyface.DataCapturing", at: database)
-        try DataSetCreator.createV4Data(in: container)
+        let database = location.appendingPathComponent("V6TestData").appendingPathExtension("sqlite")
+        let container = loadContainer(from: "CyfaceModel", with: "6", from: "de.cyface.DataCapturing", at: database)
+        try DataSetCreatorV5().createData(in: container)
 
         for store in container.persistentStoreCoordinator.persistentStores {
             try container.persistentStoreCoordinator.remove(store)

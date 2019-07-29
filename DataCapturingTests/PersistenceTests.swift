@@ -25,7 +25,7 @@ import CoreData
  Tests that using the `PersistenceLayer` works as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.1.2
+ - Version: 1.2.0
  - Since: 1.0.0
  */
 class PersistenceTests: XCTestCase {
@@ -267,6 +267,25 @@ class PersistenceTests: XCTestCase {
         }
         let cleanTrack = try oocut.loadClean(track: track)
         XCTAssertEqual(cleanTrack.count, 2)
+    }
+
+    /**
+     Tests the creation, storage and retrieval of `Event` objects in `CoreData`.
+    */
+    func testEventCreation_HappyPath() throws {
+        let measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
+
+        measurement.addToEvents(oocut.createEvent(of: .lifecycleStart))
+        sleep(1)
+        measurement.addToEvents(oocut.createEvent(of: .lifecycleStop))
+        oocut.context?.saveRecursively()
+
+        let loadedMeasurement = try oocut.load(measurementIdentifiedBy: measurement.identifier)
+        let loadedEvents = loadedMeasurement.events?.array as? [Event]
+        XCTAssertEqual(loadedEvents?[0].typeEnum, EventType.lifecycleStart)
+        XCTAssertEqual(loadedEvents?[1].typeEnum, EventType.lifecycleStop)
+        XCTAssertLessThan(Double(loadedMeasurement.timestamp) / 1000.0, (loadedEvents?[0].time!.timeIntervalSince1970)!)
+        XCTAssertLessThan(loadedEvents![0].time!.timeIntervalSince1970, loadedEvents![1].time!.timeIntervalSince1970)
     }
 
     /**

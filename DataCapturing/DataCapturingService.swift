@@ -26,7 +26,7 @@ import os.log
  An object of this class handles the lifecycle of starting and stopping data capturing.
  
  - Author: Klemens Muthmann
- - Version: 9.3.1
+ - Version: 9.4.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -181,10 +181,15 @@ public class DataCapturingService: NSObject {
             let timestamp = DataCapturingService.currentTimeInMillisSince1970()
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
+
             let measurement = try persistenceLayer.createMeasurement(at: timestamp, withContext: context)
+
             let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: context)
             self.currentMeasurement = measurementEntity
-            try startCapturing(savingEvery: savingInterval)
+            persistenceLayer.context?.saveRecursively()
+
+            try startCapturing(savingEvery: savingInterval, for: .lifecycleStart)
+
             handler(.serviceStarted(measurement: measurementEntity.identifier), .success)
         }
     }
@@ -236,8 +241,17 @@ public class DataCapturingService: NSObject {
                 throw DataCapturingError.isPaused
             }
 
+            guard let currentMeasurement = currentMeasurement else {
+                fatalError("No current measurement available in paused state!")
+            }
+
             stopCapturing()
             isPaused = true
+            let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+            persistenceLayer.context = persistenceLayer.makeContext()
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
+            measurement.addToEvents(persistenceLayer.createEvent(of: .lifecyclePause))
+            persistenceLayer.context?.saveRecursively()
         }
     }
 
@@ -259,7 +273,7 @@ public class DataCapturingService: NSObject {
                 throw DataCapturingError.isRunning
             }
 
-            try startCapturing(savingEvery: savingInterval)
+            try startCapturing(savingEvery: savingInterval, for: .lifecycleResume)
             isPaused = false
         }
     }
@@ -270,11 +284,12 @@ public class DataCapturingService: NSObject {
      Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
 
      - Parameter savingEvery: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
+     - Parameter event: The event causing this start call.
      - Throws:
         - `PersistenceError` If there is no current measurement.
         - Some unspecified errors from within CoreData.
      */
-    func startCapturing(savingEvery time: TimeInterval) throws {
+    func startCapturing(savingEvery time: TimeInterval, for event: EventType) throws {
         // Preconditions
         guard !isRunning else {
             return os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: LOG, type: .info)
@@ -288,6 +303,7 @@ public class DataCapturingService: NSObject {
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
         persistenceLayer.appendNewTrack(to: measurement)
+        measurement.addToEvents(persistenceLayer.createEvent(of: event))
         self.coreLocationManager.locationDelegate = self
 
         let queue = OperationQueue()
@@ -382,6 +398,7 @@ public class DataCapturingService: NSObject {
         persistenceLayer.context = persistenceLayer.makeContext()
         let currentMeasurementEntity = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
         currentMeasurementEntity.synchronizable = true
+        currentMeasurementEntity.addToEvents(persistenceLayer.createEvent(of: .lifecycleStop))
         persistenceLayer.context?.saveRecursively()
     }
 

@@ -25,7 +25,7 @@ import CoreLocation
  A `DataCapturingService` using mocked sensors to run, during tests.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 4.0.0
  */
 class TestDataCapturingService: DataCapturingService {
@@ -33,8 +33,8 @@ class TestDataCapturingService: DataCapturingService {
     /// The timer used to simulate location updates every second, like in the real app.
     var timer: DispatchSourceTimer?
 
-    override func startCapturing(savingEvery time: TimeInterval) throws {
-        try super.startCapturing(savingEvery: time)
+    override func startCapturing(savingEvery time: TimeInterval, for event: EventType) throws {
+        try super.startCapturing(savingEvery: time, for: event)
         timer = DispatchSource.makeTimerSource()
         timer!.setEventHandler { [weak self] in
             guard let self = self else {
@@ -54,6 +54,9 @@ class TestDataCapturingService: DataCapturingService {
         timer = nil
     }
 
+    /**
+     Generates a random location anywhere on earth.
+     */
     private func generateLocation() -> CLLocation {
         return CLLocation(coordinate: CLLocationCoordinate2D(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0)), altitude: Double.random(in: 0.0...8848.0), horizontalAccuracy: Double.random(in: 0.0...20.0), verticalAccuracy: Double.random(in: 0.0...20.0), course: Double.random(in: 0.0...1.0), speed: Double.random(in: 0.0...80.0), timestamp: Date())
     }
