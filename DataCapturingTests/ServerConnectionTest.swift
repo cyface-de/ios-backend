@@ -73,6 +73,7 @@ class ServerConnectionTest: XCTestCase {
                 XCTAssertTrue(decodedRequest.contains("length"))
                 XCTAssertTrue(decodedRequest.contains("locationCount"))
                 XCTAssertTrue(decodedRequest.contains("fileToUpload"))
+                XCTAssertTrue(decodedRequest.contains("vehicle"))
             } catch {
                 XCTFail("Unable to encode request! Error \(error)")
             }
