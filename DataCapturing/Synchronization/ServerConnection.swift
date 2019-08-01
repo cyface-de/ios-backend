@@ -32,7 +32,7 @@ import os.log
  This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
 
  - Author: Klemens Muthmann
- - Version: 7.0.0
+ - Version: 7.0.1
  - Since: 1.0.0
  */
 public class ServerConnection {
