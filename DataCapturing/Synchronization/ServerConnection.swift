@@ -32,7 +32,7 @@ import os.log
  This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
 
  - Author: Klemens Muthmann
- - Version: 7.0.0
+ - Version: 7.0.1
  - Since: 1.0.0
  */
 public class ServerConnection {
@@ -142,21 +142,21 @@ public class ServerConnection {
      Create a MultiPart/FormData request to transmit a measurement to a Cyface Collector server.
 
      - Parameters:
-        - request: The request to fill with data.
-        - for: The measurement to transmit.
+        - request: The request to fill with data
+        - for: The measurement to transmit
      - Throws:
-        - `ServerConnectionError.missingInstallationIdentifier` If there is no valid installation identifier to identify this SDK installation with a server.
-        - `ServerConnectionError.missingMeasurementIdentifier` If the current measurement has no valid device wide unique identifier.
-        - `ServerConnectionError.missingDeviceType` If the device type of this device could not be figured out.
-        - `PersistenceError.dataNotLoadable` If there is no such measurement.
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+        - `ServerConnectionError.missingInstallationIdentifier` If there is no valid installation identifier to identify this SDK installation with a server
+        - `ServerConnectionError.missingMeasurementIdentifier` If the current measurement has no valid device wide unique identifier
+        - `ServerConnectionError.missingDeviceType` If the device type of this device could not be figured out
+        - `PersistenceError.dataNotLoadable` If there is no such measurement
+        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData
         - `PersistenceError.modelNotLoabable` If the model is not loadable
-        - `PersistenceError.modelNotInitializable` If the model was loaded (so it is available) but can not be initialized.
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-        - `FileSupportError.notReadable` If the data file was not readable.
-        - Some unspecified errors from within CoreData.
-        - Some unspecified undocumented file system error if file was not accessible.
+        - `PersistenceError.modelNotInitializable` If the model was loaded (so it is available) but can not be initialized
+        - `SerializationError.missingData` If no track data was found
+        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases
+        - `FileSupportError.notReadable` If the data file was not readable
+        - Some unspecified errors from within CoreData
+        - Some unspecified undocumented file system error if file was not accessible
      */
     func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
         os_log("Creating request", log: ServerConnection.osLog, type: .default)
@@ -171,6 +171,29 @@ public class ServerConnection {
         request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
     }
 
+    /**
+     Adds the required meta data from a measurement to a multi part form request.
+
+     The transmitted data currently includes:
+     * startLocLat: The latitude of the first location
+     * startLocLon: The longitude of the first location
+     * startLocTs: The timestamp of the first location
+     * endLocLat: The latitude of the last location
+     * endLocLon: The longitude of the last location
+     * endLocTs: The timestamp of the last location
+     * deviceId: The world wide unqiue identifier of this device
+     * measurementId: The device wide unique identifier of the transmitted measurement
+     * deviceType: A string describing how this device identifies itself
+     * osVersion: The version of the operating system installed on this device
+     * appVersion: The version of the application running the Cyface SDK
+     * length: The track length of the measurement that is going to be transmitted
+     * locationCount: The number of locations in the track
+     * vehicle: The vehicle used to capture the track
+
+     - Parameters:
+        - request: The request to add the meta data to
+        - measurement: The measurement to take the meta data from
+     */
     func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
             fatalError("Installation identifier was missing!")
@@ -185,6 +208,10 @@ public class ServerConnection {
         let bundle = Bundle(for: type(of: self))
         guard let appVersion = (bundle.infoDictionary?["CFBundleShortVersionString"] as? String)?.data(using: String.Encoding.utf8) else {
             fatalError("Application version was missing!")
+        }
+
+        guard let vehicle = measurement.context?.data(using: String.Encoding.utf8) else {
+            fatalError("No type of vehicle provided for measurement!")
         }
 
         let length = String(measurement.trackLength).data(using: String.Encoding.utf8)!
@@ -216,6 +243,7 @@ public class ServerConnection {
         request.append(appVersion, withName: "appVersion")
         request.append(length, withName: "length")
         request.append(locationCountData, withName: "locationCount")
+        request.append(vehicle, withName: "vehicle")
     }
 
     /**
