@@ -1,6 +1,90 @@
 {
   "warnings": [
     {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/Event+CoreDataClass.swift",
+      "line": null,
+      "symbol": "Event",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/Event+CoreDataClass.swift",
+      "line": 13,
+      "symbol": "Event",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/Event+CoreDataProperties.swift",
+      "line": 15,
+      "symbol": "Event.fetchRequest()",
+      "symbol_kind": "source.lang.swift.decl.function.method.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/Event+CoreDataProperties.swift",
+      "line": 19,
+      "symbol": "Event.time",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/Event+CoreDataProperties.swift",
+      "line": 20,
+      "symbol": "Event.type",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/Event+CoreDataProperties.swift",
+      "line": 21,
+      "symbol": "Event.measurement",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/EventType.swift",
+      "line": 11,
+      "symbol": "EventType",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/EventType.swift",
+      "line": 12,
+      "symbol": "EventType.lifecycleStart",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/EventType.swift",
+      "line": 13,
+      "symbol": "EventType.lifecyclePause",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/EventType.swift",
+      "line": 14,
+      "symbol": "EventType.lifecycleResume",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/EventType.swift",
+      "line": 15,
+      "symbol": "EventType.lifecycleStop",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/GeoLocation.swift",
+      "line": 53,
+      "symbol": "GeoLocation.init(latitude:longitude:accuracy:speed:timestamp:isValid:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/GeoLocationMO+CoreDataClass.swift",
       "line": null,
       "symbol": "GeoLocationMO",
@@ -59,8 +143,22 @@
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/GeoLocationMO+CoreDataProperties.swift",
       "line": 23,
+      "symbol": "GeoLocationMO.isPartOfCleanedTrack",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/GeoLocationMO+CoreDataProperties.swift",
+      "line": 24,
       "symbol": "GeoLocationMO.track",
       "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataClass.swift",
+      "line": null,
+      "symbol": "MeasurementMO",
+      "symbol_kind": "source.lang.swift.decl.extension",
       "warning": "undocumented"
     },
     {
@@ -86,133 +184,210 @@
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 15,
+      "line": 16,
       "symbol": "MeasurementMO.fetchRequest()",
       "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 19,
+      "line": 20,
       "symbol": "MeasurementMO.accelerationsCount",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 20,
+      "line": 21,
       "symbol": "MeasurementMO.context",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 21,
+      "line": 22,
       "symbol": "MeasurementMO.identifier",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 22,
-      "symbol": "MeasurementMO.synchronized",
-      "symbol_kind": "source.lang.swift.decl.var.instance",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
       "line": 23,
-      "symbol": "MeasurementMO.timestamp",
-      "symbol_kind": "source.lang.swift.decl.var.instance",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 24,
-      "symbol": "MeasurementMO.trackLength",
-      "symbol_kind": "source.lang.swift.decl.var.instance",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 25,
       "symbol": "MeasurementMO.synchronizable",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 24,
+      "symbol": "MeasurementMO.synchronized",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 25,
+      "symbol": "MeasurementMO.timestamp",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
       "line": 26,
+      "symbol": "MeasurementMO.trackLength",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 27,
+      "symbol": "MeasurementMO.events",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 28,
       "symbol": "MeasurementMO.tracks",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 34,
+      "line": 36,
+      "symbol": "MeasurementMO.insertIntoEvents(_:at:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 39,
+      "symbol": "MeasurementMO.removeFromEvents(at:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 42,
+      "symbol": "MeasurementMO.insertIntoEvents(_:at:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 45,
+      "symbol": "MeasurementMO.removeFromEvents(at:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 48,
+      "symbol": "MeasurementMO.replaceEvents(at:with:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 51,
+      "symbol": "MeasurementMO.replaceEvents(at:with:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 54,
+      "symbol": "MeasurementMO.addToEvents(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 57,
+      "symbol": "MeasurementMO.removeFromEvents(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 60,
+      "symbol": "MeasurementMO.addToEvents(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 63,
+      "symbol": "MeasurementMO.removeFromEvents(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
+      "line": 71,
       "symbol": "MeasurementMO.insertIntoTracks(_:at:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 37,
+      "line": 74,
       "symbol": "MeasurementMO.removeFromTracks(at:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 40,
+      "line": 77,
       "symbol": "MeasurementMO.insertIntoTracks(_:at:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 43,
+      "line": 80,
       "symbol": "MeasurementMO.removeFromTracks(at:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 46,
+      "line": 83,
       "symbol": "MeasurementMO.replaceTracks(at:with:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 49,
+      "line": 86,
       "symbol": "MeasurementMO.replaceTracks(at:with:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 52,
+      "line": 89,
       "symbol": "MeasurementMO.addToTracks(_:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 55,
+      "line": 92,
       "symbol": "MeasurementMO.removeFromTracks(_:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 58,
+      "line": 95,
       "symbol": "MeasurementMO.addToTracks(_:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/cyface/Development/DataCapturing/DataCapturing/Model/MeasurementMO+CoreDataProperties.swift",
-      "line": 61,
+      "line": 98,
       "symbol": "MeasurementMO.removeFromTracks(_:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"

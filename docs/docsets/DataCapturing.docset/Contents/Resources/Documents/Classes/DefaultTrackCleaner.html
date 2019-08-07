@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>MeasurementContext Enumeration Reference</title>
+    <title>DefaultTrackCleaner Class Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Enum/MeasurementContext" class="dashAnchor"></a>
-    <a title="MeasurementContext Enumeration Reference"></a>
+    <a name="//apple_ref/swift/Class/DefaultTrackCleaner" class="dashAnchor"></a>
+    <a title="DefaultTrackCleaner Class Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">DataCapturing Docs</a> (67% documented)</p>
@@ -21,7 +21,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">DataCapturing Reference</a>
         <img id="carat" src="../img/carat.png" />
-        MeasurementContext Enumeration Reference
+        DefaultTrackCleaner Class Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -160,24 +160,26 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>MeasurementContext</h1>
+            <h1>DefaultTrackCleaner</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">MeasurementContext</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DefaultTrackCleaner</span><span class="p">:</span> <span class="kt"><a href="../Protocols/TrackCleaner.html">TrackCleaner</a></span></code></pre>
 
                 </div>
               </div>
-            <p>The context of this measurement. This is application specific and might be something like the vehicle used.</p>
-<pre class="highlight plaintext"><code>case leisure
-case work
-case shopping
-case car
-case bike
-case motorbike
-</code></pre>
-<div class="aside aside-todo">
-    <p class="aside-title">Todo</p>
-    Make this dynamic, instead of a static enum.
+            <div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    1.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    4.5.0
 
 </div>
 
@@ -188,9 +190,9 @@ case motorbike
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO7leisureyA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/leisure" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO7leisureyA2CmF">leisure</a>
+                    <a name="/s:13DataCapturing19DefaultTrackCleanerCACycfc"></a>
+                    <a name="//apple_ref/swift/Method/init()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing19DefaultTrackCleanerCACycfc">init()</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -198,30 +200,26 @@ case motorbike
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The measurement was taken during leisure time.</p>
+                        <p>Default no argument constructor made public</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">leisure</span> <span class="o">=</span> <span class="s">"FREIZEIT"</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">()</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO4workyA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/work" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO4workyA2CmF">work</a>
+                    <a name="/s:13DataCapturing12TrackCleanerP7isValid8locationSbSo10CLLocationC_tF"></a>
+                    <a name="//apple_ref/swift/Method/isValid(location:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing12TrackCleanerP7isValid8locationSbSo10CLLocationC_tF">isValid(location:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -229,138 +227,13 @@ case motorbike
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The measurement was taken while on the job or on the way to or from the job.</p>
-
+                        
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">work</span> <span class="o">=</span> <span class="s">"ARBEIT"</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO8shoppingyA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/shopping" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO8shoppingyA2CmF">shopping</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The measurement was taken while shopping</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">shopping</span> <span class="o">=</span> <span class="s">"EINKAUFEN"</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO3caryA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/car" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO3caryA2CmF">car</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The measurement was taken driving a car.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">car</span> <span class="o">=</span> <span class="s">"CAR"</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO4bikeyA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/bike" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO4bikeyA2CmF">bike</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The measurement was taken riding a bicycle.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">bike</span> <span class="o">=</span> <span class="s">"BICYCLE"</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO9motorbikeyA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/motorbike" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO9motorbikeyA2CmF">motorbike</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The measurement was taken riding a motorbike.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">motorbike</span> <span class="o">=</span> <span class="s">"MOTORBIKE"</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">isValid</span><span class="p">(</span><span class="nv">location</span><span class="p">:</span> <span class="kt">CLLocation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>

@@ -14,7 +14,7 @@
     <a title="MeasurementMO Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (75% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (67% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -55,13 +55,16 @@
                 <a href="../Classes/DefaultDistanceCalculationStrategy.html">DefaultDistanceCalculationStrategy</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Classes/DefaultTrackCleaner.html">DefaultTrackCleaner</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Classes/DeletionCleaner.html">DeletionCleaner</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/DiskConsumption.html">DiskConsumption</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/GeoLocation.html">GeoLocation</a>
+                <a href="../Classes/Event.html">Event</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
@@ -105,6 +108,9 @@
                 <a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Enums/EventType.html">EventType</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Enums/FileSupportError.html">FileSupportError</a>
               </li>
               <li class="nav-group-task">
@@ -130,6 +136,9 @@
               <li class="nav-group-task">
                 <a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a>
               </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/TrackCleaner.html">TrackCleaner</a>
+              </li>
             </ul>
           </li>
           <li class="nav-group-name">
@@ -137,6 +146,9 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="../Structs/AccelerationsFile.html">AccelerationsFile</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/GeoLocation.html">GeoLocation</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Structs/ServerConnectionError.html">ServerConnectionError</a>
@@ -272,6 +284,33 @@
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(py)synchronizable"></a>
+                    <a name="//apple_ref/swift/Property/synchronizable" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(py)synchronizable">synchronizable</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="k">var</span> <span class="nv">synchronizable</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(py)synchronized"></a>
                     <a name="//apple_ref/swift/Property/synchronized" class="dashAnchor"></a>
                     <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(py)synchronized">synchronized</a>
@@ -353,9 +392,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(py)synchronizable"></a>
-                    <a name="//apple_ref/swift/Property/synchronizable" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(py)synchronizable">synchronizable</a>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(py)events"></a>
+                    <a name="//apple_ref/swift/Property/events" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(py)events">events</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -370,7 +409,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="k">var</span> <span class="nv">synchronizable</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="k">var</span> <span class="nv">events</span><span class="p">:</span> <span class="kt">NSOrderedSet</span><span class="p">?</span></code></pre>
 
                         </div>
                       </div>
@@ -398,6 +437,280 @@
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="k">var</span> <span class="nv">tracks</span><span class="p">:</span> <span class="kt">NSOrderedSet</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)insertObject:inEventsAtIndex:"></a>
+                    <a name="//apple_ref/swift/Method/insertIntoEvents(_:at:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)insertObject:inEventsAtIndex:">insertIntoEvents(_:at:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="kd">func</span> <span class="nf">insertIntoEvents</span><span class="p">(</span><span class="n">_</span> <span class="nv">value</span><span class="p">:</span> <span class="kt"><a href="../Classes/Event.html">Event</a></span><span class="p">,</span> <span class="n">at</span> <span class="nv">idx</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)removeObjectFromEventsAtIndex:"></a>
+                    <a name="//apple_ref/swift/Method/removeFromEvents(at:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)removeObjectFromEventsAtIndex:">removeFromEvents(at:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="kd">func</span> <span class="nf">removeFromEvents</span><span class="p">(</span><span class="n">at</span> <span class="nv">idx</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)insertEvents:atIndexes:"></a>
+                    <a name="//apple_ref/swift/Method/insertIntoEvents(_:at:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)insertEvents:atIndexes:">insertIntoEvents(_:at:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="kd">func</span> <span class="nf">insertIntoEvents</span><span class="p">(</span><span class="n">_</span> <span class="nv">values</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Classes/Event.html">Event</a></span><span class="p">],</span> <span class="n">at</span> <span class="nv">indexes</span><span class="p">:</span> <span class="kt">NSIndexSet</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)removeEventsAtIndexes:"></a>
+                    <a name="//apple_ref/swift/Method/removeFromEvents(at:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)removeEventsAtIndexes:">removeFromEvents(at:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="kd">func</span> <span class="nf">removeFromEvents</span><span class="p">(</span><span class="n">at</span> <span class="nv">indexes</span><span class="p">:</span> <span class="kt">NSIndexSet</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)replaceObjectInEventsAtIndex:withObject:"></a>
+                    <a name="//apple_ref/swift/Method/replaceEvents(at:with:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)replaceObjectInEventsAtIndex:withObject:">replaceEvents(at:with:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="kd">func</span> <span class="nf">replaceEvents</span><span class="p">(</span><span class="n">at</span> <span class="nv">idx</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="n">with</span> <span class="nv">value</span><span class="p">:</span> <span class="kt"><a href="../Classes/Event.html">Event</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)replaceEventsAtIndexes:withEvents:"></a>
+                    <a name="//apple_ref/swift/Method/replaceEvents(at:with:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)replaceEventsAtIndexes:withEvents:">replaceEvents(at:with:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="kd">func</span> <span class="nf">replaceEvents</span><span class="p">(</span><span class="n">at</span> <span class="nv">indexes</span><span class="p">:</span> <span class="kt">NSIndexSet</span><span class="p">,</span> <span class="n">with</span> <span class="nv">values</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Classes/Event.html">Event</a></span><span class="p">])</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)addEventsObject:"></a>
+                    <a name="//apple_ref/swift/Method/addToEvents(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)addEventsObject:">addToEvents(_:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="kd">func</span> <span class="nf">addToEvents</span><span class="p">(</span><span class="n">_</span> <span class="nv">value</span><span class="p">:</span> <span class="kt"><a href="../Classes/Event.html">Event</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)removeEventsObject:"></a>
+                    <a name="//apple_ref/swift/Method/removeFromEvents(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)removeEventsObject:">removeFromEvents(_:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="kd">func</span> <span class="nf">removeFromEvents</span><span class="p">(</span><span class="n">_</span> <span class="nv">value</span><span class="p">:</span> <span class="kt"><a href="../Classes/Event.html">Event</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)addEvents:"></a>
+                    <a name="//apple_ref/swift/Method/addToEvents(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)addEvents:">addToEvents(_:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="kd">func</span> <span class="nf">addToEvents</span><span class="p">(</span><span class="n">_</span> <span class="nv">values</span><span class="p">:</span> <span class="kt">NSOrderedSet</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)removeEvents:"></a>
+                    <a name="//apple_ref/swift/Method/removeFromEvents(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@CM@DataCapturing@objc(cs)MeasurementMO(im)removeEvents:">removeFromEvents(_:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">@NSManaged</span> <span class="kd">public</span> <span class="kd">func</span> <span class="nf">removeFromEvents</span><span class="p">(</span><span class="n">_</span> <span class="nv">values</span><span class="p">:</span> <span class="kt">NSOrderedSet</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -683,7 +996,7 @@
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-05-03)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-08-07)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

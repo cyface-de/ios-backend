@@ -28,7 +28,7 @@ import Alamofire
 
  - Author: Klemens Muthmann
  - Since: 4.0.0
- - Version: 1.0.1
+ - Version: 1.0.2
  */
 class ServerConnectionTest: XCTestCase {
 
@@ -73,6 +73,7 @@ class ServerConnectionTest: XCTestCase {
                 XCTAssertTrue(decodedRequest.contains("length"))
                 XCTAssertTrue(decodedRequest.contains("locationCount"))
                 XCTAssertTrue(decodedRequest.contains("fileToUpload"))
+                XCTAssertTrue(decodedRequest.contains("vehicle"))
             } catch {
                 XCTFail("Unable to encode request! Error \(error)")
             }
