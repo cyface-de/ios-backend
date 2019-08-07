@@ -14,7 +14,7 @@
     <a title="DataCapturingService Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (75% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (67% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -55,13 +55,16 @@
                 <a href="../Classes/DefaultDistanceCalculationStrategy.html">DefaultDistanceCalculationStrategy</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Classes/DefaultTrackCleaner.html">DefaultTrackCleaner</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Classes/DeletionCleaner.html">DeletionCleaner</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/DiskConsumption.html">DiskConsumption</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/GeoLocation.html">GeoLocation</a>
+                <a href="../Classes/Event.html">Event</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
@@ -105,6 +108,9 @@
                 <a href="../Enums/DataCapturingEvent.html">DataCapturingEvent</a>
               </li>
               <li class="nav-group-task">
+                <a href="../Enums/EventType.html">EventType</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../Enums/FileSupportError.html">FileSupportError</a>
               </li>
               <li class="nav-group-task">
@@ -130,6 +136,9 @@
               <li class="nav-group-task">
                 <a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a>
               </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/TrackCleaner.html">TrackCleaner</a>
+              </li>
             </ul>
           </li>
           <li class="nav-group-name">
@@ -137,6 +146,9 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a href="../Structs/AccelerationsFile.html">AccelerationsFile</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Structs/GeoLocation.html">GeoLocation</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Structs/ServerConnectionError.html">ServerConnectionError</a>
@@ -163,7 +175,7 @@
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    9.2.0
+    9.4.0
 
 </div>
 <div class="aside aside-since">
@@ -203,7 +215,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isRunning</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isRunning</span> <span class="o">=</span> <span class="kc">false</span></code></pre>
 
                         </div>
                       </div>
@@ -230,7 +242,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isPaused</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isPaused</span> <span class="o">=</span> <span class="kc">false</span></code></pre>
 
                         </div>
                       </div>
@@ -267,9 +279,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing0aB7ServiceC18locationUpdateRateSivp"></a>
-                    <a name="//apple_ref/swift/Property/locationUpdateRate" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC18locationUpdateRateSivp">locationUpdateRate</a>
+                    <a name="/s:13DataCapturing0aB7ServiceC22locationUpdateSkipRateSuvp"></a>
+                    <a name="//apple_ref/swift/Property/locationUpdateSkipRate" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC22locationUpdateSkipRateSuvp">locationUpdateSkipRate</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -284,7 +296,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">locationUpdateRate</span> <span class="o">=</span> <span class="mi">1</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">locationUpdateSkipRate</span><span class="p">:</span> <span class="kt">UInt</span> <span class="o">=</span> <span class="mi">1</span></code></pre>
 
                         </div>
                       </div>
@@ -560,11 +572,13 @@ running.</p>
                         <p>Resumes the current data capturing with the data capturing measurement that was running when <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC5pauseyyKF">pause()</a></code> was called. A call to this method is only valid after a call to <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC5pauseyyKF">pause()</a></code>. It is going to fail if used after <code>start()</code> or <code><a href="../Classes/DataCapturingService.html#/s:13DataCapturing0aB7ServiceC4stopyyKF">stop()</a></code>.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    
-</div>
+    <ul>
 <li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO9notPausedyA2CmF">DataCapturingError.notPaused</a></code>: If the service was not paused and thus resuming it makes no sense.</li>
 <li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO9isRunningyA2CmF">DataCapturingError.isRunning</a></code>: If the service was running and thus resuming it makes no sense.</li>
 <li><code><a href="../Enums/DataCapturingError.html#/s:13DataCapturing0aB5ErrorO20noCurrentMeasurementyA2CmF">DataCapturingError.noCurrentMeasurement</a></code>: If no current measurement is available while resuming data capturing.</li>
+</ul>
+
+</div>
 
                       </div>
                       <div class="declaration">
@@ -720,7 +734,7 @@ running.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-05-03)</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-08-07)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>

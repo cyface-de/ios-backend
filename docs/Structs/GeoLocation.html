@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>MeasurementContext Enumeration Reference</title>
+    <title>GeoLocation Structure Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset='utf-8'>
@@ -10,8 +10,8 @@
     
   </head>
   <body>
-    <a name="//apple_ref/swift/Enum/MeasurementContext" class="dashAnchor"></a>
-    <a title="MeasurementContext Enumeration Reference"></a>
+    <a name="//apple_ref/swift/Struct/GeoLocation" class="dashAnchor"></a>
+    <a title="GeoLocation Structure Reference"></a>
     <header>
       <div class="content-wrapper">
         <p><a href="../index.html">DataCapturing Docs</a> (67% documented)</p>
@@ -21,7 +21,7 @@
       <p id="breadcrumbs">
         <a href="../index.html">DataCapturing Reference</a>
         <img id="carat" src="../img/carat.png" />
-        MeasurementContext Enumeration Reference
+        GeoLocation Structure Reference
       </p>
     </div>
     <div class="content-wrapper">
@@ -160,37 +160,59 @@
       <article class="main-content">
         <section>
           <section class="section">
-            <h1>MeasurementContext</h1>
+            <h1>GeoLocation</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">MeasurementContext</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">GeoLocation</span><span class="p">:</span> <span class="kt">CustomStringConvertible</span></code></pre>
 
                 </div>
               </div>
-            <p>The context of this measurement. This is application specific and might be something like the vehicle used.</p>
-<pre class="highlight plaintext"><code>case leisure
-case work
-case shopping
-case car
-case bike
-case motorbike
-</code></pre>
-<div class="aside aside-todo">
-    <p class="aside-title">Todo</p>
-    Make this dynamic, instead of a static enum.
+            <p>One geo location measurement provided by the system.</p>
+
+<p>Each measurement received by the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code> leads to the creation of one <code>GeoLocation</code> instance. They are kept in memory until saved to persistent storage.</p>
+<div class="aside aside-remark">
+    <p class="aside-title">Remark</p>
+    DO NOT confuse this class with <em>CoreData</em> generated model object <code><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></code>. Since the model object is not thread safe you should use an instance of this class if you hand data between processes.
+
+</div>
+<div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    <p><code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>, <code>PersistenceLayer.save(:[GeoLocation]:MeasurementEntity:(MeasurementMO?, Status) -&gt; Void)</code>, <code><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></code></p>
+
+</div>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    <p>Klemens Muthmann</p>
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    <p>1.1.0</p>
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    <p>1.0.0</p>
 
 </div>
 
           </section>
           <section class="section task-group-section">
             <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Properties"></a>
+                <a name="//apple_ref/swift/Section/Properties" class="dashAnchor"></a>
+                <a href="#/Properties">
+                  <h3 class="section-name">Properties</h3>
+                </a>
+              </div>
               <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO7leisureyA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/leisure" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO7leisureyA2CmF">leisure</a>
+                    <a name="/s:13DataCapturing11GeoLocationV8latitudeSdvp"></a>
+                    <a name="//apple_ref/swift/Property/latitude" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing11GeoLocationV8latitudeSdvp">latitude</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -198,30 +220,26 @@ case motorbike
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The measurement was taken during leisure time.</p>
+                        <p>The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">leisure</span> <span class="o">=</span> <span class="s">"FREIZEIT"</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">latitude</span><span class="p">:</span> <span class="kt">Double</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO4workyA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/work" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO4workyA2CmF">work</a>
+                    <a name="/s:13DataCapturing11GeoLocationV9longitudeSdvp"></a>
+                    <a name="//apple_ref/swift/Property/longitude" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing11GeoLocationV9longitudeSdvp">longitude</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -229,30 +247,26 @@ case motorbike
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The measurement was taken while on the job or on the way to or from the job.</p>
+                        <p>The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">work</span> <span class="o">=</span> <span class="s">"ARBEIT"</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">longitude</span><span class="p">:</span> <span class="kt">Double</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO8shoppingyA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/shopping" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO8shoppingyA2CmF">shopping</a>
+                    <a name="/s:13DataCapturing11GeoLocationV8accuracySdvp"></a>
+                    <a name="//apple_ref/swift/Property/accuracy" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing11GeoLocationV8accuracySdvp">accuracy</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -260,30 +274,26 @@ case motorbike
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The measurement was taken while shopping</p>
+                        <p>The estimated accuracy of the measurement in meters.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">shopping</span> <span class="o">=</span> <span class="s">"EINKAUFEN"</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">accuracy</span><span class="p">:</span> <span class="kt">Double</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO3caryA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/car" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO3caryA2CmF">car</a>
+                    <a name="/s:13DataCapturing11GeoLocationV5speedSdvp"></a>
+                    <a name="//apple_ref/swift/Property/speed" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing11GeoLocationV5speedSdvp">speed</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -291,30 +301,26 @@ case motorbike
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The measurement was taken driving a car.</p>
+                        <p>The speed the device was moving during the measurement in meters per second.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">car</span> <span class="o">=</span> <span class="s">"CAR"</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">speed</span><span class="p">:</span> <span class="kt">Double</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO4bikeyA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/bike" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO4bikeyA2CmF">bike</a>
+                    <a name="/s:13DataCapturing11GeoLocationV9timestamps5Int64Vvp"></a>
+                    <a name="//apple_ref/swift/Property/timestamp" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing11GeoLocationV9timestamps5Int64Vvp">timestamp</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -322,30 +328,26 @@ case motorbike
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The measurement was taken riding a bicycle.</p>
+                        <p>The time the measurement happened at in milliseconds since the 1st of january 1970.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">bike</span> <span class="o">=</span> <span class="s">"BICYCLE"</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">timestamp</span><span class="p">:</span> <span class="kt">Int64</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO9motorbikeyA2CmF"></a>
-                    <a name="//apple_ref/swift/Element/motorbike" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO9motorbikeyA2CmF">motorbike</a>
+                    <a name="/s:13DataCapturing11GeoLocationV7isValidSbvp"></a>
+                    <a name="//apple_ref/swift/Property/isValid" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing11GeoLocationV7isValidSbvp">isValid</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -353,14 +355,68 @@ case motorbike
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The measurement was taken riding a motorbike.</p>
+                        <p>Whether or not this is a valid location in a cleaned track.</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">motorbike</span> <span class="o">=</span> <span class="s">"MOTORBIKE"</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">isValid</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing11GeoLocationV11descriptionSSvp"></a>
+                    <a name="//apple_ref/swift/Property/description" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing11GeoLocationV11descriptionSSvp">description</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A human readable description of this object.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">description</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing11GeoLocationV8latitude9longitude8accuracy5speed9timestamp7isValidACSd_S3ds5Int64VSbtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(latitude:longitude:accuracy:speed:timestamp:isValid:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing11GeoLocationV8latitude9longitude8accuracy5speed9timestamp7isValidACSd_S3ds5Int64VSbtcfc">init(latitude:longitude:accuracy:speed:timestamp:isValid:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">latitude</span><span class="p">:</span> <span class="kt">Double</span><span class="p">,</span> <span class="nv">longitude</span><span class="p">:</span> <span class="kt">Double</span><span class="p">,</span> <span class="nv">accuracy</span><span class="p">:</span> <span class="kt">Double</span><span class="p">,</span> <span class="nv">speed</span><span class="p">:</span> <span class="kt">Double</span><span class="p">,</span> <span class="nv">timestamp</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">,</span> <span class="nv">isValid</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>

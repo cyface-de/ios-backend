@@ -235,7 +235,7 @@ See: https://github.com/realm/SwiftLint
 * Call `jazzy` from the terminal in the root folder.
 
 ## License
-Copyright 2017 Cyface GmbH
+Copyright 2017, 2018, 2019 Cyface GmbH
 
 This file is part of the Cyface SDK for iOS.
 
