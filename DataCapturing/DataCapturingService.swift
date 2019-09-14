@@ -273,8 +273,14 @@ public class DataCapturingService: NSObject {
                 throw DataCapturingError.isRunning
             }
 
+            guard let currentMeasurement = currentMeasurement else {
+                fatalError("No measurement to resume")
+            }
+
             try startCapturing(savingEvery: savingInterval, for: .lifecycleResume)
             isPaused = false
+
+            handler(.serviceResumed(measurement: currentMeasurement.identifier), .success)
         }
     }
 

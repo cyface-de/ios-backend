@@ -63,6 +63,12 @@ public enum DataCapturingEvent {
      */
     case serviceStarted(measurement: Int64?)
     /**
+     Used to notify the client application of a successful resume of the `DataCapturingService`.
+
+     - measurement: The device wide unique identifier of the measurement for which the service has resumed.
+    */
+    case serviceResumed(measurement: Int64?)
+    /**
      Used to notify the client application of a successful stop of the `DataCapturingService`.
 
      - measurement: The device wide unique identifier of the measurement for which the service has stopped.
