@@ -73,7 +73,11 @@ public class CredentialsAuthenticator: Authenticator {
             let jsonCredentials = try JSONSerialization.data(withJSONObject: ["username": username, "password": password])
             let url = authenticationEndpoint.appendingPathComponent("login")
 
-            Networking.sharedInstance.sessionManager.upload(jsonCredentials, to: url, method: .post, headers: nil).response { response in
+            let headers: HTTPHeaders = [
+                "Content-Type":"application/json",
+                "Accept": "*/*"
+            ]
+            let request = Networking.sharedInstance.sessionManager.upload(jsonCredentials, to: url, method: .post, headers: headers).response { response in
                 guard let httpResponse = response.response else {
                     os_log("Unable to unwrap authentication response!", log: CredentialsAuthenticator.log, type: OSLogType.error)
                     return onFailure(ServerConnectionError(type: .authenticationNotSuccessful, verboseDescription: "Unable to unwrap authentication response!", inMethodName: #function, inFileName: #file, atLineNumber: #line))
@@ -85,6 +89,7 @@ public class CredentialsAuthenticator: Authenticator {
                     onFailure(ServerConnectionError(type: .authenticationNotSuccessful, verboseDescription: "Authentication was not successful!", inMethodName: #function, inFileName: #file, atLineNumber: #line))
                 }
             }
+            request.resume()
         } catch let error {
             onFailure(error)
         }
