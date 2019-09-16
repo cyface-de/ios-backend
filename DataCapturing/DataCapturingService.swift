@@ -107,6 +107,34 @@ public class DataCapturingService: NSObject {
     /// Marks captured positions as valid (clean) or invalid (not clean). This removes outliers and jitter while standing.
     private let trackCleaner = DefaultTrackCleaner()
 
+    /// This is the maximum time between two location updates allowed before the service assumes that it does not have a valid location fix anymore.
+    private static let maxAllowedTimeBetweenGeoLocationUpdatesInMilliseconds = Int64(2_000)
+
+    /// The timestamp in UNIX timestamp format in milliseconds since the 1st of january 1970 of the last geo location update event.
+    private var previousGeoLocationUpdateTimeInMilliseconds: Int64?
+
+    /// The internal storage variable for the fix state.
+    private var _hasFix = false
+
+    /// The current state of the geo location fix with a geo location network (GPS, GLONASS, Galileo, etc.)
+    private var hasFix: Bool {
+        set {
+            guard newValue != _hasFix else {
+                return
+            }
+
+            if newValue {
+                handler(DataCapturingEvent.geoLocationFixAcquired, Status.success)
+            } else {
+                handler(DataCapturingEvent.geoLocationFixLost, Status.success)
+            }
+            _hasFix = newValue
+        }
+        get {
+            return _hasFix
+        }
+    }
+
     // MARK: - Initializers
 
     /**
@@ -273,8 +301,14 @@ public class DataCapturingService: NSObject {
                 throw DataCapturingError.isRunning
             }
 
+            guard let currentMeasurement = currentMeasurement else {
+                fatalError("No measurement to resume")
+            }
+
             try startCapturing(savingEvery: savingInterval, for: .lifecycleResume)
             isPaused = false
+
+            handler(.serviceResumed(measurement: currentMeasurement.identifier), .success)
         }
     }
 
@@ -335,6 +369,17 @@ public class DataCapturingService: NSObject {
             }
 
             self.saveCapturedData()
+
+            guard let previousGeoLocationUpdateTimeInMilliseconds = self.previousGeoLocationUpdateTimeInMilliseconds else {
+                self.hasFix = false
+                return
+            }
+
+            if DataCapturingService.currentTimeInMillisSince1970() - previousGeoLocationUpdateTimeInMilliseconds < DataCapturingService.maxAllowedTimeBetweenGeoLocationUpdatesInMilliseconds {
+                self.hasFix = true
+            } else {
+                self.hasFix = false
+            }
         }
 
         self.backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
@@ -432,6 +477,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
 
         for location in locations {
             let timestamp = DataCapturingService.convertToUtcTimestamp(date: location.timestamp)
+            previousGeoLocationUpdateTimeInMilliseconds = timestamp
 
             let isValid = trackCleaner.isValid(location: location)
             let geoLocation = GeoLocation(
@@ -473,5 +519,6 @@ extension DataCapturingService: CLLocationManagerDelegate {
      */
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         os_log("Location service failed with error: %@!", log: LOG, type: .error, error.localizedDescription)
+        hasFix = false
     }
 }
