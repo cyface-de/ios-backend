@@ -30,6 +30,7 @@ import Foundation
  - Version: 1.0.0
  - Since: 1.0.0
  */
+@available(*, deprecated, message: "Use Int64 for an identifier or MeasurementMO to represent a measurement from the database.")
 public class MeasurementEntity {
 
     // MARK: - Properties

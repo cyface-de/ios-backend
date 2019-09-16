@@ -26,9 +26,14 @@ import Foundation
  - Since: 4.6.1
  */
 public enum EventType: Int16 {
+    /// An event logged after the service has successfully started
     case lifecycleStart
+    /// An event logged after the service has successfully paused
     case lifecyclePause
+    /// An event logged after the service has successfully resumed
     case lifecycleResume
+    /// An event logged after the service has successfully stopped
     case lifecycleStop
+    /// An event logged each time the client changes the modality used to capture the current measurement
     case modalityTypeChange
 }

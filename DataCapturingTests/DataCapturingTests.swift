@@ -387,6 +387,7 @@ class DataCapturingTests: XCTestCase {
         try newOocut.stop()
     }
 
+    /// Tests that starting a new measurement and changing the modality during runtime, creates two change events.
     func testChangeModality_EventLogContainsTwoModalities() throws {
         // Act
         try oocut.start(inContext: .bike)
@@ -406,6 +407,7 @@ class DataCapturingTests: XCTestCase {
         XCTAssertEqual(modalityChangeEvents[0].value, Modality.car.rawValue)
     }
 
+    /// Tests that changing to the same modality twice does not produce a new modality change event.
     func testChangeModalityToSameModalityTwice_EventLogStillContainsOnlyTwoModalities() throws {
         // Act
         try oocut.start(inContext: .bike)
@@ -426,6 +428,7 @@ class DataCapturingTests: XCTestCase {
         XCTAssertEqual(modalityChangeEvents[0].value, Modality.car.rawValue)
     }
 
+    /// Tests that changing modality during a pause works as expected.
     func testChangeModalityWhilePaused_EventLogStillContainsModalityChange() throws {
         // Act
         try oocut.start(inContext: .bike)
