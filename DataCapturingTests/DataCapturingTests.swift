@@ -101,7 +101,7 @@ class DataCapturingTests: XCTestCase {
         XCTAssertTrue(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
         let prePauseCountOfMeasurements = try persistenceLayer.countMeasurements()
-        let measurementIdentifier = oocut.currentMeasurement!.identifier
+        let measurementIdentifier = oocut.currentMeasurement!
 
         try oocut.pause()
         XCTAssertFalse(oocut.isRunning)
@@ -117,11 +117,11 @@ class DataCapturingTests: XCTestCase {
 
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
         let events = measurement.events!.array as! [Event]
-        XCTAssertEqual(events.count, 4)
-        XCTAssertEqual(events[0].typeEnum, .lifecycleStart)
-        XCTAssertEqual(events[1].typeEnum, .lifecyclePause)
-        XCTAssertEqual(events[2].typeEnum, .lifecycleResume)
-        XCTAssertEqual(events[3].typeEnum, .lifecycleStop)
+        XCTAssertEqual(events.count, 5)
+        XCTAssertEqual(events[1].typeEnum, .lifecycleStart)
+        XCTAssertEqual(events[2].typeEnum, .lifecyclePause)
+        XCTAssertEqual(events[3].typeEnum, .lifecycleResume)
+        XCTAssertEqual(events[4].typeEnum, .lifecycleStop)
     }
 
     func testStartPauseStop_HappyPath() throws {
@@ -283,7 +283,7 @@ class DataCapturingTests: XCTestCase {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
-        oocut.currentMeasurement = MeasurementEntity(identifier: measurement.identifier, context: .bike)
+        oocut.currentMeasurement = measurement.identifier
 
         measure {
             oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000, isValid: true)]
@@ -340,7 +340,7 @@ class DataCapturingTests: XCTestCase {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
         try oocut.start(inContext: .bike)
-        guard let currentMeasurementIdentifier = oocut.currentMeasurement?.identifier else {
+        guard let currentMeasurementIdentifier = oocut.currentMeasurement else {
             fatalError()
         }
 
@@ -385,6 +385,66 @@ class DataCapturingTests: XCTestCase {
             XCTFail("Encountered exception \(error) on new instance.")
         }
         try newOocut.stop()
+    }
+
+    func testChangeModality_EventLogContainsTwoModalities() throws {
+        // Act
+        try oocut.start(inContext: .bike)
+        guard let currentMeasurementIdentifier = oocut.currentMeasurement else {
+            return XCTFail("Unable to load current measurement from running data capturing service!")
+        }
+        oocut.changeModality(to: .car)
+        try oocut.stop()
+
+        // Assert
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+        let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
+        XCTAssertEqual(modalityChangeEvents.count, 2)
+        XCTAssertEqual(modalityChangeEvents[1].value, Modality.bike.rawValue)
+        XCTAssertEqual(modalityChangeEvents[0].value, Modality.car.rawValue)
+    }
+
+    func testChangeModalityToSameModalityTwice_EventLogStillContainsOnlyTwoModalities() throws {
+        // Act
+        try oocut.start(inContext: .bike)
+        guard let currentMeasurementIdentifier = oocut.currentMeasurement else {
+            return XCTFail("Unable to load current measurement from running data capturing service!")
+        }
+        oocut.changeModality(to: .car)
+        oocut.changeModality(to: .car)
+        try oocut.stop()
+
+        // Assert
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+        let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
+        XCTAssertEqual(modalityChangeEvents.count, 2)
+        XCTAssertEqual(modalityChangeEvents[1].value, Modality.bike.rawValue)
+        XCTAssertEqual(modalityChangeEvents[0].value, Modality.car.rawValue)
+    }
+
+    func testChangeModalityWhilePaused_EventLogStillContainsModalityChange() throws {
+        // Act
+        try oocut.start(inContext: .bike)
+        guard let currentMeasurementIdentifier = oocut.currentMeasurement else {
+            return XCTFail("Unable to load current measurement from running data capturing service!")
+        }
+        try oocut.pause()
+        oocut.changeModality(to: .car)
+        try oocut.resume()
+        try oocut.stop()
+
+        // Assert
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+        let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
+        XCTAssertEqual(modalityChangeEvents.count, 2)
+        XCTAssertEqual(modalityChangeEvents[1].value, Modality.bike.rawValue)
+        XCTAssertEqual(modalityChangeEvents[0].value, Modality.car.rawValue)
     }
 
     /**

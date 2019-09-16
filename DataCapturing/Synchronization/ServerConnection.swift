@@ -95,7 +95,7 @@ public class ServerConnection {
         - onSuccess: The handler to call, when synchronization has succeeded. This handler is provided with the synchronized `MeasurementEntity`.
         - onFailure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The `MeasurementEntity` is the same as the one provided as parameter to this method.
      */
-    public func sync(measurement: MeasurementEntity, onSuccess success: @escaping ((MeasurementEntity) -> Void) = {_ in }, onFailure failure: @escaping ((MeasurementEntity, Error) -> Void) = {_, _ in }) {
+    public func sync(measurement: Int64, onSuccess success: @escaping ((Int64) -> Void) = {_ in }, onFailure failure: @escaping ((Int64, Error) -> Void) = {_, _ in }) {
 
         authenticator.authenticate(onSuccess: {jwtToken in
             self.onAuthenticated(token: jwtToken, measurement: measurement, onSuccess: success, onFailure: failure)
@@ -114,7 +114,7 @@ public class ServerConnection {
         - onSuccess: Called after successful data transmission with information about which measurement was transmitted.
         - onFailure: Called after a failed data transmission with information about which measurement failed and the error.
      */
-    func onAuthenticated(token: String, measurement: MeasurementEntity, onSuccess: @escaping (MeasurementEntity) -> Void, onFailure: @escaping (MeasurementEntity, Error) -> Void) {
+    func onAuthenticated(token: String, measurement: Int64, onSuccess: @escaping (Int64) -> Void, onFailure: @escaping (Int64, Error) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
         let headers: HTTPHeaders = [
             "Authorization": "Bearer \(token)",
@@ -158,17 +158,23 @@ public class ServerConnection {
         - Some unspecified errors from within CoreData
         - Some unspecified undocumented file system error if file was not accessible
      */
-    func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
+    func create(request: MultipartFormData, for measurement: Int64) throws {
         os_log("Creating request", log: ServerConnection.osLog, type: .default)
         // Load and serialize measurement synchronously.
         let persistenceLayer = PersistenceLayer(onManager: manager)
         persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
+        guard let modalityRawValue = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)[0].value else {
+            fatalError("Invalid modality change event with no value encountered!")
+        }
+        guard let initialModality = Modality(rawValue: modalityRawValue) else {
+            fatalError("Unable to create modality from raw value \(modalityRawValue)!")
+        }
 
-        try addMetaData(to: request, for: measurement)
+        try addMetaData(to: request, for: measurement, withInitialModality: initialModality)
 
         let payloadUrl = try write(measurement)
-        request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+        request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement).cyf", mimeType: "application/octet-stream")
     }
 
     /**
@@ -193,8 +199,9 @@ public class ServerConnection {
      - Parameters:
         - request: The request to add the meta data to
         - measurement: The measurement to take the meta data from
+        - initialModality: The modality selected at the start of the measurement
      */
-    func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO) throws {
+    func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO, withInitialModality initialModality: Modality) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
             fatalError("Installation identifier was missing!")
         }
@@ -210,7 +217,7 @@ public class ServerConnection {
             fatalError("Application version was missing!")
         }
 
-        guard let vehicle = measurement.context?.data(using: String.Encoding.utf8) else {
+        guard let vehicle = initialModality.rawValue.data(using: String.Encoding.utf8) else {
             fatalError("No type of vehicle provided for measurement!")
         }
 
@@ -258,7 +265,7 @@ public class ServerConnection {
      - Throws:
         - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
      */
-    func onEncodingComplete(for measurement: MeasurementEntity, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
+    func onEncodingComplete(for measurement: Int64, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((Int64) -> Void), onFailure failure: @escaping ((Int64, Error) -> Void)) throws {
         os_log("encoding complete", log: ServerConnection.osLog, type: .default)
         switch result {
         case .success(let upload, _, _):

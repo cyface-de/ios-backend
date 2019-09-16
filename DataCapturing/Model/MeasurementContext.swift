@@ -32,7 +32,7 @@ import Foundation
  ```
  - Todo: Make this dynamic, instead of a static enum.
  */
-public enum MeasurementContext: String {
+public enum Modality: String {
     /// The measurement was taken during leisure time.
     case leisure = "FREIZEIT"
     /// The measurement was taken while on the job or on the way to or from the job.
