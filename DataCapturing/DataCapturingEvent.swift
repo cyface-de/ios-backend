@@ -81,11 +81,11 @@ public enum DataCapturingEvent {
 
      - measurement: The measurement which finished synchronization.
      */
-    case synchronizationFinished(measurement: MeasurementEntity)
+    case synchronizationFinished(measurement: Int64)
     /**
      Occurs when the synchronization of a measurement has started.
 
      - measurement: The measurement the gets synchronized.
      */
-    case synchronizationStarted(measurement: MeasurementEntity)
+    case synchronizationStarted(measurement: Int64)
 }

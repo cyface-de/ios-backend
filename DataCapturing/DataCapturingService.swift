@@ -41,8 +41,9 @@ public class DataCapturingService: NSObject {
     /// `true` if data capturing was running but is currently paused; `false` otherwise.
     public var isPaused = false
 
+    // TODO: This should probably be a MeasurementMO which is checked for fault on each call. In addition it might be a good idea to merge the DataCapturingService into the MeasurementMO class, since it only represents the behaviour of the measurement
     /// The currently recorded `Measurement` or `nil` if there is no active recording.
-    public var currentMeasurement: MeasurementEntity?
+    public var currentMeasurement: Int64?
 
     /// Locations are captured approximately once per second on most devices. If you would like to get fewer updates this parameter controls, how many events are skipped before one is reported to your handler. The default value is 1, which reports every event. To receive fewer events you could for example set it to 5 to only receive every fifth event.
     public var locationUpdateSkipRate: UInt = 1 {
@@ -168,10 +169,7 @@ public class DataCapturingService: NSObject {
         do {
             for measurement in try persistenceLayer.loadMeasurements() {
                 if !measurement.synchronizable && !measurement.synchronized {
-                    guard let contextString = measurement.context, let context = MeasurementContext(rawValue: contextString) else {
-                        fatalError("Unable to load context for measurement \(measurement.identifier)!")
-                    }
-                    currentMeasurement = MeasurementEntity(identifier: measurement.identifier, context: context)
+                    currentMeasurement = measurement.identifier
                     isPaused = true
                 }
             }
@@ -197,7 +195,7 @@ public class DataCapturingService: NSObject {
      - Throws:
         - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
-    public func start(inContext context: MeasurementContext) throws {
+    public func start(inContext context: Modality) throws {
         try lifecycleQueue.sync {
             if isPaused {
                 os_log("Starting data capturing on paused service. Finishing paused measurements and starting fresh. This is probably the result of a lifecycle error. ", log: LOG, type: .default)
@@ -212,13 +210,12 @@ public class DataCapturingService: NSObject {
 
             let measurement = try persistenceLayer.createMeasurement(at: timestamp, withContext: context)
 
-            let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: context)
-            self.currentMeasurement = measurementEntity
+            self.currentMeasurement = measurement.identifier
             persistenceLayer.context?.saveRecursively()
 
             try startCapturing(savingEvery: savingInterval, for: .lifecycleStart)
 
-            handler(.serviceStarted(measurement: measurementEntity.identifier), .success)
+            handler(.serviceStarted(measurement: measurement.identifier), .success)
         }
     }
 
@@ -243,7 +240,7 @@ public class DataCapturingService: NSObject {
 
             // Inform about stopped event
             backgroundSynchronizationTimer?.setCancelHandler {
-                self.handler(.serviceStopped(measurement: currentMeasurement.identifier), .success)
+                self.handler(.serviceStopped(measurement: currentMeasurement), .success)
             }
             stopCapturing()
             try finish(measurement: currentMeasurement)
@@ -277,7 +274,7 @@ public class DataCapturingService: NSObject {
             isPaused = true
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
             measurement.addToEvents(persistenceLayer.createEvent(of: .lifecyclePause))
             persistenceLayer.context?.saveRecursively()
         }
@@ -308,7 +305,43 @@ public class DataCapturingService: NSObject {
             try startCapturing(savingEvery: savingInterval, for: .lifecycleResume)
             isPaused = false
 
-            handler(.serviceResumed(measurement: currentMeasurement.identifier), .success)
+            handler(.serviceResumed(measurement: currentMeasurement), .success)
+        }
+    }
+
+    /**
+     Changes the current modality of the measurement. This can happen if the user switches for example from a bicycle to a car.
+     If the new modality is the same as the old one, the method returns without doing anything.
+
+     - Parameter to: The modality context to switch to.
+     */
+    public func changeModality(to modality: Modality) {
+        lifecycleQueue.sync {
+            guard let currentMeasurementIdentifier = currentMeasurement else {
+                return
+            }
+
+            let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+            persistenceLayer.context = persistenceLayer.makeContext()
+
+            do {
+                let currentMeasurementMO = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+
+                let existingModalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: currentMeasurementMO)
+                guard let lastModalityChangeEvent = existingModalityChangeEvents.first else {
+                    fatalError("No valid modality change event!")
+                }
+
+                if lastModalityChangeEvent.value == modality.rawValue {
+                    return
+                }
+
+                let event = persistenceLayer.createEvent(of: .modalityTypeChange, withValue: modality.rawValue)
+                currentMeasurementMO.addToEvents(event)
+                persistenceLayer.context?.saveRecursively()
+            } catch {
+                fatalError("Unable to load measurement identified by \(currentMeasurementIdentifier)!")
+            }
         }
     }
 
@@ -335,7 +368,7 @@ public class DataCapturingService: NSObject {
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
         persistenceLayer.appendNewTrack(to: measurement)
         measurement.addToEvents(persistenceLayer.createEvent(of: event))
         self.coreLocationManager.locationDelegate = self
@@ -426,7 +459,7 @@ public class DataCapturingService: NSObject {
 
             let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
 
             try persistenceLayer.save(locations: localLocationsCache, in: measurement)
             try persistenceLayer.save(accelerations: localAccelerationsCache, in: measurement)
@@ -438,10 +471,16 @@ public class DataCapturingService: NSObject {
         }
     }
 
-    private func finish(measurement: MeasurementEntity) throws {
+    /**
+     Finishes the provided measurement if still open and marks this event in the list of events.
+     This method does not check if the measurement is already finished, so be careful to only call it on non finished measurements.
+
+     - Parameter measurement: The device wide unique identifier of the measurement to finish.
+     */
+    private func finish(measurement: Int64) throws {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
-        let currentMeasurementEntity = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
+        let currentMeasurementEntity = try persistenceLayer.load(measurementIdentifiedBy: measurement)
         currentMeasurementEntity.synchronizable = true
         currentMeasurementEntity.addToEvents(persistenceLayer.createEvent(of: .lifecycleStop))
         persistenceLayer.context?.saveRecursively()

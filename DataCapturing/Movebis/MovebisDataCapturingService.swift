@@ -123,7 +123,7 @@ public class MovebisDataCapturingService: DataCapturingService {
         // Filter active measurement if any.
         if let currentMeasurement = currentMeasurement {
             return ret.filter { measurement in
-                return measurement.identifier != currentMeasurement.identifier
+                return measurement.identifier != currentMeasurement
             }
         } else {
             return ret

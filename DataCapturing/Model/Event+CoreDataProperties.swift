@@ -1,14 +1,14 @@
 //
 //  Event+CoreDataProperties.swift
-//  DataCapturing
+//  
 //
-//  Created by Team Cyface on 24.07.19.
-//  Copyright © 2019 Cyface GmbH. All rights reserved.
+//  Created by Team Cyface on 14.09.19.
 //
 //
 
 import Foundation
 import CoreData
+
 
 extension Event {
 
@@ -18,6 +18,7 @@ extension Event {
 
     @NSManaged public var time: NSDate?
     @NSManaged public var type: Int16
+    @NSManaged public var value: String?
     @NSManaged public var measurement: MeasurementMO?
 
     var typeEnum: EventType {

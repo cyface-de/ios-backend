@@ -3,6 +3,7 @@
     <entity name="Event" representedClassName="Event" syncable="YES">
         <attribute name="time" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="type" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="value" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="measurement" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Measurement" inverseName="events" inverseEntity="Measurement" syncable="YES"/>
     </entity>
     <entity name="GeoLocation" representedClassName="GeoLocationMO" syncable="YES">
@@ -16,7 +17,6 @@
     </entity>
     <entity name="Measurement" representedClassName="MeasurementMO" syncable="YES">
         <attribute name="accelerationsCount" attributeType="Integer 32" minValueString="0" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
-        <attribute name="context" attributeType="String" defaultValueString="BICYCLE" syncable="YES"/>
         <attribute name="identifier" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="synchronizable" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="synchronized" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
@@ -30,9 +30,9 @@
         <relationship name="measurement" maxCount="1" deletionRule="Nullify" destinationEntity="Measurement" inverseName="tracks" inverseEntity="Measurement" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Event" positionX="-252" positionY="18" width="128" height="90"/>
+        <element name="Event" positionX="-252" positionY="18" width="128" height="105"/>
         <element name="GeoLocation" positionX="-54" positionY="-9" width="128" height="150"/>
-        <element name="Measurement" positionX="-443" positionY="-72" width="128" height="180"/>
+        <element name="Measurement" positionX="-443" positionY="-72" width="128" height="165"/>
         <element name="Track" positionX="-252" positionY="9" width="128" height="75"/>
     </elements>
 </model>

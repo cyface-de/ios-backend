@@ -52,7 +52,7 @@ class ServerConnectionTest: XCTestCase {
         let data = MultipartFormData()
         do {
             // Act
-            try oocut.create(request: data, for: MeasurementEntity(identifier: measurement.identifier, context: .bike))
+            try oocut.create(request: data, for: measurement.identifier)
 
             // Assert
             do {

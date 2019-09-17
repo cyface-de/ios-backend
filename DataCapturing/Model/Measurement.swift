@@ -30,6 +30,7 @@ import Foundation
  - Version: 1.0.0
  - Since: 1.0.0
  */
+@available(*, deprecated, message: "Use Int64 for an identifier or MeasurementMO to represent a measurement from the database.")
 public class MeasurementEntity {
 
     // MARK: - Properties
@@ -38,7 +39,7 @@ public class MeasurementEntity {
     public let identifier: Int64
 
     /// The context of this measurement. This is application specific and might be something like the vehicle used.
-    public let measurementContext: MeasurementContext
+    public let measurementContext: Modality
 
     // MARK: - Initializers
 
@@ -49,7 +50,7 @@ public class MeasurementEntity {
      - identifier: The device wide unique identifier of this measurement.
      - context: The context of this measurement. This is application specific and might be something like the vehicle used.
      */
-    public init(identifier: Int64, context: MeasurementContext) {
+    public init(identifier: Int64, context: Modality) {
         self.identifier = identifier
         self.measurementContext = context
     }

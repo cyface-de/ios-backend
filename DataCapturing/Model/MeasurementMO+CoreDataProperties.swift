@@ -1,9 +1,8 @@
 //
 //  MeasurementMO+CoreDataProperties.swift
-//  DataCapturing
+//  
 //
-//  Created by Team Cyface on 24.07.19.
-//  Copyright © 2019 Cyface GmbH. All rights reserved.
+//  Created by Team Cyface on 14.09.19.
 //
 //
 
@@ -18,7 +17,6 @@ extension MeasurementMO {
     }
 
     @NSManaged public var accelerationsCount: Int32
-    @NSManaged public var context: String?
     @NSManaged public var identifier: Int64
     @NSManaged public var synchronizable: Bool
     @NSManaged public var synchronized: Bool
