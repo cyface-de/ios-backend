@@ -403,8 +403,8 @@ class DataCapturingTests: XCTestCase {
         let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
         let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
         XCTAssertEqual(modalityChangeEvents.count, 2)
-        XCTAssertEqual(modalityChangeEvents[1].value, Modality.bike.rawValue)
-        XCTAssertEqual(modalityChangeEvents[0].value, Modality.car.rawValue)
+        XCTAssertEqual(modalityChangeEvents[0].value, Modality.bike.rawValue)
+        XCTAssertEqual(modalityChangeEvents[1].value, Modality.car.rawValue)
     }
 
     /// Tests that changing to the same modality twice does not produce a new modality change event.
@@ -424,8 +424,8 @@ class DataCapturingTests: XCTestCase {
         let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
         let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
         XCTAssertEqual(modalityChangeEvents.count, 2)
-        XCTAssertEqual(modalityChangeEvents[1].value, Modality.bike.rawValue)
-        XCTAssertEqual(modalityChangeEvents[0].value, Modality.car.rawValue)
+        XCTAssertEqual(modalityChangeEvents[0].value, Modality.bike.rawValue)
+        XCTAssertEqual(modalityChangeEvents[1].value, Modality.car.rawValue)
     }
 
     /// Tests that changing modality during a pause works as expected.
@@ -446,8 +446,8 @@ class DataCapturingTests: XCTestCase {
         let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
         let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
         XCTAssertEqual(modalityChangeEvents.count, 2)
-        XCTAssertEqual(modalityChangeEvents[1].value, Modality.bike.rawValue)
-        XCTAssertEqual(modalityChangeEvents[0].value, Modality.car.rawValue)
+        XCTAssertEqual(modalityChangeEvents[0].value, Modality.bike.rawValue)
+        XCTAssertEqual(modalityChangeEvents[1].value, Modality.car.rawValue)
     }
 
     /**

@@ -289,8 +289,8 @@ class PersistenceTests: XCTestCase {
         XCTAssertEqual(loadedEvents?[0].typeEnum, EventType.modalityTypeChange)
         XCTAssertEqual(loadedEvents?[1].typeEnum, EventType.lifecycleStart)
         XCTAssertEqual(loadedEvents?[2].typeEnum, EventType.lifecycleStop)
-        XCTAssertLessThan(Double(loadedMeasurement.timestamp) / 1000.0, (loadedEvents?[1].time!.timeIntervalSince1970)!)
-        XCTAssertLessThan(loadedEvents![1].time!.timeIntervalSince1970, loadedEvents![2].time!.timeIntervalSince1970)
+        XCTAssertLessThanOrEqual(Double(loadedMeasurement.timestamp) / 1_000.0, (loadedEvents?[1].time!.timeIntervalSince1970)!)
+        XCTAssertLessThanOrEqual(loadedEvents![1].time!.timeIntervalSince1970, loadedEvents![2].time!.timeIntervalSince1970)
     }
 
     /**
