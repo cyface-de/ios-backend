@@ -544,6 +544,23 @@ public class PersistenceLayer {
         }
         return ret
     }
+
+    public static func traverseTracks(ofMeasurement measurement: MeasurementMO, call closure: (Track, GeoLocationMO) -> Void) {
+        guard let tracks = measurement.tracks?.array as? [Track] else {
+            fatalError()
+        }
+
+        for track in tracks {
+            guard let locations = track.locations?.array as? [GeoLocationMO] else {
+                fatalError()
+            }
+
+            guard !locations.isEmpty else {
+                continue
+            }
+            locations.forEach{ location in closure(track, location) }
+        }
+    }
 }
 
 /**
