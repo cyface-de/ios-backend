@@ -163,7 +163,7 @@ public class PersistenceLayer {
         - of: The type of the logged `Event`.
         - withValue: An optional value providing further information about the event
      */
-    func createEvent(of type: EventType, withValue: String? = nil) -> Event {
+    public func createEvent(of type: EventType, withValue: String? = nil) -> Event {
         let context = getContext()
         let event = Event.init(context: context)
         event.typeEnum = type
