@@ -571,7 +571,7 @@ extension NSManagedObjectContext {
     /**
      Saves this context and all parent contexts if there are changes.
      */
-    func saveRecursively() {
+    public func saveRecursively() {
         performAndWait {
             if self.hasChanges {
                 self.saveThisAndParentContexts()
