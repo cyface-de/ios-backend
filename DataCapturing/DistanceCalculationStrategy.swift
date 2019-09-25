@@ -51,8 +51,8 @@ public protocol DistanceCalculationStrategy {
      Calculate the distance between two coordinate pairs
 
      - Parameters:
-        - from: The source coordinate pair
-        - to: The target coordinate pair
+        - from: The source coordinate pair, where the first element is the latitude and the second is longitude
+        - to: The target coordinate pair, where the first element is the latitude and the second is longitude
      */
     func calculateDistance(from previousLocationLatLonCoordinates: (Double, Double), to locationLatLonCoordinates: (Double, Double)) -> Double
 }
