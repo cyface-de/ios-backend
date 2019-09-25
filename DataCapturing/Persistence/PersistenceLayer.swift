@@ -217,6 +217,17 @@ public class PersistenceLayer {
     }
 
     /**
+     Deletes one event from the database.
+
+     - Parameter event: The event to delete
+     */
+    public func delete(event: Event) {
+        let context = getContext()
+        context.delete(event)
+        context.saveRecursively()
+    }
+
+    /**
      Strips the provided measurement of all accelerations.
      
      - Parameter measurement: The measurement to strip of accelerations
