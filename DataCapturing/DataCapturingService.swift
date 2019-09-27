@@ -328,7 +328,7 @@ public class DataCapturingService: NSObject {
                 let currentMeasurementMO = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
 
                 let existingModalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: currentMeasurementMO)
-                guard let lastModalityChangeEvent = existingModalityChangeEvents.first else {
+                guard let lastModalityChangeEvent = existingModalityChangeEvents.last else {
                     fatalError("No valid modality change event!")
                 }
 

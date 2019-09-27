@@ -421,8 +421,10 @@ public class PersistenceLayer {
      */
     public func loadEvents(typed type: EventType, forMeasurement measurement: MeasurementMO) throws -> [Event] {
         let context = getContext()
+        let measurement = migrate(measurement: measurement, to: context)
         let request: NSFetchRequest<Event> = Event.fetchRequest()
         request.predicate = NSPredicate(format: "type == %@ AND measurement == %@", argumentArray: [type.rawValue, measurement])
+        request.sortDescriptors = [NSSortDescriptor(key: "time", ascending: true)]
         let fetchResult = try context.fetch(request)
         return fetchResult
     }
