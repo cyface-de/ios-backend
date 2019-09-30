@@ -33,7 +33,7 @@ import os.log
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 5.2.0
+ - Version: 5.3.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
@@ -545,6 +545,13 @@ public class PersistenceLayer {
         return ret
     }
 
+    /**
+     Traverses all tracks captured as part of a measurement and provides each track and geo location to a callback.
+
+     - Parameters:
+        - ofMeasurement: The measurement to traverse the tracks for
+        - call: A callback function receiving the track and geo location pairs
+     */
     public static func traverseTracks(ofMeasurement measurement: MeasurementMO, call closure: (Track, GeoLocationMO) -> Void) {
         guard let tracks = measurement.tracks?.array as? [Track] else {
             fatalError()

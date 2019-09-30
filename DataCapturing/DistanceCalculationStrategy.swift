@@ -25,7 +25,7 @@ import CoreLocation
  Different implementations are possible.
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 1.1.1
  - Since: 2.2.0
  */
 public protocol DistanceCalculationStrategy {
