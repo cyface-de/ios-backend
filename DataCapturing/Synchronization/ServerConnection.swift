@@ -117,6 +117,7 @@ public class ServerConnection {
     func onAuthenticated(token: String, measurement: Int64, onSuccess: @escaping (Int64) -> Void, onFailure: @escaping (Int64, Error) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
         let headers: HTTPHeaders = [
+            "accept": "*/*",
             "Authorization": "Bearer \(token)",
             "Content-type": "multipart/form-data"
         ]
