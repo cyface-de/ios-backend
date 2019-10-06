@@ -32,6 +32,13 @@ import Alamofire
  */
 class ServerConnectionTest: XCTestCase {
 
+    var coreDataStack: CoreDataManager!
+
+    override func setUp() {
+        coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+        coreDataStack.setup(bundle: Bundle(identifier: "de.cyface.DataCapturing")!)
+    }
+
     /**
      Tests that creating a common multi part server request works as expected and creates the expected meta data.
      */
@@ -41,8 +48,6 @@ class ServerConnectionTest: XCTestCase {
             fatalError()
         }
         let authenticator = StaticAuthenticator()
-        let coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
-        coreDataStack.setup(bundle: Bundle(identifier: "de.cyface.DataCapturing")!)
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try DataSetCreator.fakeMeasurement(countOfGeoLocations: 10, countOfAccelerations: 1_000, persistenceLayer: persistenceLayer)
@@ -83,5 +88,52 @@ class ServerConnectionTest: XCTestCase {
         } catch {
             XCTFail("Unexpected error \(error)")
         }
+    }
+
+    /**
+     This test, tries to upload some data to a Cyface server. It should usually be ignored, since it requires an actual server to run.
+
+     To enable this test you need to exchange the `backgroundSessionManager` in `ServerConnection` by a regular `sessionManager` and remove (or comment) the `backgroundSessionManager` in the `Networking` class. The reason for this is, that a simulator is incable of background uploads.
+
+     - Throws: some unspecified errors from within *CoreData*
+     */
+    func ignore_testUploadMeasurement_HappyPath() throws {
+        let url = URL(string: "http://localhost:8080")!.appendingPathComponent("api").appendingPathComponent("v2")
+        let authenticator = CredentialsAuthenticator(authenticationEndpoint: url)
+        authenticator.username = "admin"
+        authenticator.password = "secret"
+        let serverConnection = ServerConnection(apiURL: url, authenticator: authenticator, onManager: coreDataStack)
+
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let measurement = try persistenceLayer.createMeasurement(at: 10_000, withContext: .bike)
+        persistenceLayer.appendNewTrack(to: measurement)
+        try persistenceLayer.save(locations: [geoLocation(), geoLocation()], in: measurement)
+        try persistenceLayer.save(accelerations: [acceleration(), acceleration()], in: measurement)
+
+        let measurementIdentifier = measurement.identifier
+        let promise = expectation(description: "Expect call to return 201.")
+        serverConnection.sync(measurement: measurement.identifier, onSuccess: {synchronizedMeasurement in
+            do {
+                let updatedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: synchronizedMeasurement)
+                XCTAssertEqual(synchronizedMeasurement, measurementIdentifier)
+                promise.fulfill()
+            } catch {
+                fatalError()
+            }
+        }, onFailure: {_, status in
+            XCTFail("Error. Status Code was \(status).")
+            promise.fulfill()
+        })
+
+        wait(for: [promise], timeout: 6000)
+    }
+
+    func geoLocation() -> GeoLocation {
+        return GeoLocation(latitude: Double.random(in: -90.0 ... 90.0), longitude: Double.random(in: 0.0 ..< 360.0), accuracy: Double.random(in: 2.0 ... 15.0), speed: Double.random(in: 0.0 ... 10.0), timestamp: Int64.random(in: 0 ... INT64_MAX))
+    }
+
+    func acceleration() -> Acceleration {
+        return Acceleration(timestamp: Int64.random(in: 0 ... INT64_MAX), x: Double.random(in: 0.0 ... 40.0), y: Double.random(in: 0.0 ... 40.0), z: Double.random(in: 0.0 ... 40.0))
     }
 }
