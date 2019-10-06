@@ -225,7 +225,10 @@ public class ServerConnection {
         }
 
         let length = String(measurement.trackLength).data(using: String.Encoding.utf8)!
-        let locationCount = try PersistenceLayer.collectGeoLocations(from: measurement).count
+
+        let persistenceLayer = PersistenceLayer(onManager: manager)
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let locationCount = try persistenceLayer.countGeoLocations(forMeasurement: measurement)
         let locationCountData = String(locationCount).data(using: String.Encoding.utf8)!
 
             if let startLocationRaw = (measurement.tracks?.firstObject as? Track)?.locations?.firstObject as? GeoLocationMO {
