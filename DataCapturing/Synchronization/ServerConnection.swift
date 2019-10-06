@@ -175,7 +175,7 @@ public class ServerConnection {
 
         try addMetaData(to: request, for: measurement, withInitialModality: initialModality)
 
-        let payloadUrl = URL(fileURLWithPath: "/Users/cyface/m.cyf")//try write(measurement)
+        let payloadUrl = try write(measurement)
         let fileName = "\(self.installationIdentifier)_\(measurement.identifier).ccyf"
         request.append(payloadUrl, withName: "fileToUpload", fileName: fileName, mimeType: "application/octet-stream")
     }
