@@ -130,6 +130,7 @@ public class ServerConnection {
                 os_log("Encoding data failed! Error %{PUBLIC}@", log: ServerConnection.osLog, type: .error, error.localizedDescription)
             }
         }
+        os_log("Transmitting measurement to URL %{PUBLIC}@!", log: ServerConnection.osLog, type: .debug, url.absoluteString)
         Networking.sharedInstance.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
             do {
                 try self.onEncodingComplete(for: measurement, with: encodingResult, onSuccess: onSuccess, onFailure: onFailure)
