@@ -33,7 +33,7 @@ import os.log
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 5.2.0
+ - Version: 5.3.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
@@ -163,7 +163,7 @@ public class PersistenceLayer {
         - of: The type of the logged `Event`.
         - withValue: An optional value providing further information about the event
      */
-    func createEvent(of type: EventType, withValue: String? = nil) -> Event {
+    public func createEvent(of type: EventType, withValue: String? = nil) -> Event {
         let context = getContext()
         let event = Event.init(context: context)
         event.typeEnum = type
@@ -213,6 +213,17 @@ public class PersistenceLayer {
             let object = try context.existingObject(with: measurement.objectID)
             context.delete(object)
         }
+        context.saveRecursively()
+    }
+
+    /**
+     Deletes one event from the database.
+
+     - Parameter event: The event to delete
+     */
+    public func delete(event: Event) {
+        let context = getContext()
+        context.delete(event)
         context.saveRecursively()
     }
 
@@ -533,6 +544,30 @@ public class PersistenceLayer {
         }
         return ret
     }
+
+    /**
+     Traverses all tracks captured as part of a measurement and provides each track and geo location to a callback.
+
+     - Parameters:
+        - ofMeasurement: The measurement to traverse the tracks for
+        - call: A callback function receiving the track and geo location pairs
+     */
+    public static func traverseTracks(ofMeasurement measurement: MeasurementMO, call closure: (Track, GeoLocationMO) -> Void) {
+        guard let tracks = measurement.tracks?.array as? [Track] else {
+            fatalError()
+        }
+
+        for track in tracks {
+            guard let locations = track.locations?.array as? [GeoLocationMO] else {
+                fatalError()
+            }
+
+            guard !locations.isEmpty else {
+                continue
+            }
+            locations.forEach{ location in closure(track, location) }
+        }
+    }
 }
 
 /**
@@ -543,7 +578,7 @@ extension NSManagedObjectContext {
     /**
      Saves this context and all parent contexts if there are changes.
      */
-    func saveRecursively() {
+    public func saveRecursively() {
         performAndWait {
             if self.hasChanges {
                 self.saveThisAndParentContexts()
