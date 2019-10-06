@@ -33,12 +33,6 @@ import Foundation
  - Todo: Make this dynamic, instead of a static enum.
  */
 public enum Modality: String {
-    /// The measurement was taken during leisure time.
-    case leisure = "FREIZEIT"
-    /// The measurement was taken while on the job or on the way to or from the job.
-    case work = "ARBEIT"
-    /// The measurement was taken while shopping
-    case shopping = "EINKAUFEN"
     /// The measurement was taken driving a car.
     case car = "CAR"
     /// The measurement was taken riding a bicycle.
