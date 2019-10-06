@@ -455,6 +455,22 @@ public class PersistenceLayer {
     }
 
     /**
+     Counts the number of geo locations from a certain measurement.
+
+     - Parameter measurement: The measurement to count the geo locations for
+     - Returns: The count of locations measured in the measurement
+     */
+    public func countGeoLocations(forMeasurement measurement: MeasurementMO) throws -> Int {
+        let context = getContext()
+
+        let locationRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
+        locationRequest.predicate = NSPredicate(format: "track.measurement = %@", measurement)
+
+        let count = try context.count(for: locationRequest)
+        return count
+    }
+
+    /**
      Migrates a `MeasurementMO` instance to a new `NSManagedObjectContext`. Calling this method is always required if there is a new context.
 
      - Parameters:
