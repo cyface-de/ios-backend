@@ -35,7 +35,7 @@ class SerializationTest: XCTestCase {
     /// A `PersistenceLayer` instance used to load and store data for testing purposes.
     var persistenceLayer: PersistenceLayer!
     /// A `MeasurementEntity` holding a test measurement to serialize and deserialize.
-    var fixture: MeasurementEntity!
+    var fixture: Int64!
     /// A manager for handling the CoreData stack.
     var coreDataStack: CoreDataManager!
 
@@ -55,7 +55,7 @@ class SerializationTest: XCTestCase {
             let measurement = try persistenceLayer.createMeasurement(at: 1, withContext: .bike)
             persistenceLayer.appendNewTrack(to: measurement)
 
-            fixture = MeasurementEntity(identifier: measurement.identifier, context: .bike)
+            fixture = measurement.identifier
             try persistenceLayer.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true)], in: measurement)
             try persistenceLayer.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)], in: measurement)
 
@@ -81,7 +81,7 @@ class SerializationTest: XCTestCase {
      */
     func testUncompressedSerialization() {
         do {
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture.identifier)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
             let res = try oocut.serialize(measurement)
 
             XCTAssertEqual(res.count, 222)
@@ -105,7 +105,7 @@ class SerializationTest: XCTestCase {
      */
     func testCompressedSerialization() {
         do {
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture.identifier)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
             let res = try oocut.serializeCompressed(measurement)
 
             let uncompressedData = res.inflate()
@@ -139,12 +139,10 @@ class SerializationTest: XCTestCase {
      Tests that geo location serialization works as expected for `GeoLocation` instances. This test runs isolated from all other serializations.
      */
     func testSerializeGeoLocations() {
-        let measurementIdentifier = fixture.identifier
-
         var timestamp: [UInt32] = []
         var accuracy: [UInt16] = []
         do {
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
 
             let locations = try PersistenceLayer.collectGeoLocations(from: measurement)
 
@@ -175,7 +173,7 @@ class SerializationTest: XCTestCase {
             XCTAssert(accuracy[1] == 200)
             XCTAssert(accuracy[2] == 200)
         } catch let error {
-            XCTFail("Unable to serialize measurement \(measurementIdentifier). Error \(error)")
+            XCTFail("Unable to serialize measurement \(fixture). Error \(error)")
         }
     }
 

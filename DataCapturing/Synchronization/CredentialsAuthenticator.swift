@@ -74,7 +74,7 @@ public class CredentialsAuthenticator: Authenticator {
             let url = authenticationEndpoint.appendingPathComponent("login")
 
             let headers: HTTPHeaders = [
-                "Content-Type":"application/json",
+                "Content-Type": "application/json",
                 "Accept": "*/*"
             ]
             let request = Networking.sharedInstance.sessionManager.upload(jsonCredentials, to: url, method: .post, headers: headers).response { response in

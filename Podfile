@@ -4,7 +4,7 @@ target 'DataCapturing' do
   use_frameworks!
 
   # Used for network traffic
-  pod 'Alamofire', '~> 4.8.2'
+  pod 'Alamofire', '~> 4.9.0'
   # A wrapper for the complicated ObjectiveC compression API.
   pod 'DataCompression', '~> 3.4.0'
 
