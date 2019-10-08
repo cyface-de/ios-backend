@@ -132,7 +132,7 @@ public class ServerConnection {
             }
         }
         os_log("Transmitting measurement to URL %{PUBLIC}@!", log: ServerConnection.osLog, type: .debug, url.absoluteString)
-        Networking.sharedInstance.sessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
+        Networking.sharedInstance.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
             do {
                 try self.onEncodingComplete(for: measurement, with: encodingResult, onSuccess: onSuccess, onFailure: onFailure)
             } catch {
@@ -299,23 +299,6 @@ public class ServerConnection {
             throw error
         }
     }
-
-    /**
-     Write the provided `measurement` to a file for background synchronization
-
-     - Parameter measurement: The measurement to serialize as a file.
-     - Returns: The url of the file containing the measurement data.
-     - Throws:
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-        - `FileSupportError.notReadable` If the data file was not readable.
-        - Some unspecified undocumented file system error if file was not accessible.
-     */
-    /*private func appendFile(for objectLoader: (() -> NSManagedObject)) throws -> URL {
-        let payloadWriter = PayloadWriter()
-        let object = objectLoader()
-        return try payloadWriter.write(serializable: object, to: measurement.identifier)
-    }*/
 }
 
 /**

@@ -223,7 +223,7 @@ class AccelerationSerializer: BinarySerializer {
  - Version: 1.0.0
  */
 class GeoLocationSerializer: BinarySerializer {
-    /// Binds the `Serializeble from the `BinarySerializer` protocol to an array of geo locations.
+    /// Binds the `Serializeble` from the `BinarySerializer` protocol to an array of geo locations.
     typealias Serializable = [GeoLocationMO]
 
     /**
@@ -273,8 +273,22 @@ class GeoLocationSerializer: BinarySerializer {
  */
 public class EventsSerializer: BinarySerializer {
 
+    /// Binds the `Serializable` from the `BinarySerializer` to an array of `Event` instances.
     typealias Serializable = [Event]
 
+    /**
+     Serializes an array of `Event` instaces to a binary representation of the form:
+     - 2 Bytes: File version. Currently 1
+     - 8 Bytes: Number of events saved
+     - For each event:
+            - 8 Bytes: Timestamp
+            - 2 Bytes: A number representing the type of event
+            - 2 Bytes: Number of bytes used by the value
+            - X Bytes: The event value.
+
+     - Parameter serializable: The array of events to serialize
+     - Returns: The binary representation of the `Event` array.
+     */
     func serialize(serializable events: [Event]) throws -> Data {
         var ret = [UInt8]()
         let byteOrder = ByteOrder.bigEndian
@@ -317,15 +331,15 @@ public class EventsSerializer: BinarySerializer {
     private func translateType(of event: Event) -> Int16 {
         switch event.typeEnum {
         case .lifecycleStart:
-                return 1;
+                return 1
         case .lifecycleStop:
-                return 2;
+                return 2
         case .lifecycleResume:
-                return 3;
+                return 3
         case .lifecyclePause:
-                return 4;
+                return 4
         case .modalityTypeChange:
-                return 5;
+                return 5
         }
     }
 }

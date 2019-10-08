@@ -177,7 +177,9 @@ class SerializationTest: XCTestCase {
         }
     }
 
-    func testEventSerialization() throws {
+    /// Tests that serialization to an events file works as expected
+    func testEventSerialization_HappyPath() throws {
+        // Arrange
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
 
         guard let events = measurement.events?.array as? [Event] else {
@@ -185,8 +187,11 @@ class SerializationTest: XCTestCase {
         }
 
         let eventsSerializer = EventsSerializer()
+
+        // Act
         let eventsData = try eventsSerializer.serialize(serializable: events)
 
+        // Assert
         let sizeOfHeaderInBytes = 10
         let sizeOfOneEventWithoutValue = 12
         let sizeOfBicycleValue = 7
