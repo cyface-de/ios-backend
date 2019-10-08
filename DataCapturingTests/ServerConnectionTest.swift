@@ -97,7 +97,7 @@ class ServerConnectionTest: XCTestCase {
 
      - Throws: some unspecified errors from within *CoreData*
      */
-    func ignore_testUploadMeasurement_HappyPath() throws {
+    func testUploadMeasurement_HappyPath() throws {
         let url = URL(string: "http://localhost:8080")!.appendingPathComponent("api").appendingPathComponent("v2")
         let authenticator = CredentialsAuthenticator(authenticationEndpoint: url)
         authenticator.username = "admin"

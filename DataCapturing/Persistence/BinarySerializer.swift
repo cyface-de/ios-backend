@@ -82,6 +82,7 @@ extension BinarySerializer {
 
         return compressed
     }
+    
 }
 
 /*
@@ -100,6 +101,10 @@ class MeasurementSerializer: BinarySerializer {
     typealias Serializable = MeasurementMO
     /// The byte order used to serialize data to Cyface binary format.
     static let byteOrder = ByteOrder.bigEndian
+    /// Serializer to transform acceleration objects
+    let accelerationsFile = AccelerationsFile()
+    /// Serializer to transform geo location objects
+    let geoLocationsSerializer = GeoLocationSerializer()
 
     /**
      Serializes the provided `measurement` into its Cyface Binary Format specification in the form:
@@ -125,7 +130,15 @@ class MeasurementSerializer: BinarySerializer {
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(0)))
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(0)))
 
-        return Data(dataArray)
+        var ret = Data(dataArray)
+
+        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: geoLocations)
+        let serializedAccelerations = try accelerationsFile.data(for: measurement)
+
+        ret.append(serializedGeoLocations)
+        ret.append(serializedAccelerations)
+
+        return ret
     }
 }
 
@@ -252,61 +265,68 @@ class GeoLocationSerializer: BinarySerializer {
 }
 
 /**
- Transforms measurement data into the Cyface binary format used for transmission via the network.
- 
- - Author: Klemens Muthmann
- - Version: 1.1.0
- - Since: 1.0.0
- */
-public class CyfaceBinaryFormatSerializer {
-    /// Serializer to transform measurement objects
-    let measurementSerializer = MeasurementSerializer()
-    /// Serializer to transform acceleration objects
-    let accelerationsFile = AccelerationsFile()
-    /// Serializer to transform geo location objects
-    let geoLocationsSerializer = GeoLocationSerializer()
-    /**
-     Serializes the provided `measurement` and compresses the returned data using RFC-1951 Deflate algorithm.
-     
-     - Parameter measurement: The `measurement` to serialize.
-     - Returns: The serialized measurement in the compressed Cyface binary format
-     - Throws:
-        - `SerializationError.compressionFailed` if compression was not successful.
-     */
-    public func serializeCompressed(_ measurement: MeasurementMO) throws -> Data {
-        let res = try serialize(measurement)
+ Serializes a list of events to an events file.
 
-        guard let compressed = res.deflate() else {
-            throw SerializationError.compressionFailed
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 5.0.0
+ */
+public class EventsSerializer: BinarySerializer {
+
+    typealias Serializable = [Event]
+
+    func serialize(serializable events: [Event]) throws -> Data {
+        var ret = [UInt8]()
+        let byteOrder = ByteOrder.bigEndian
+
+        // Add Header
+        // Transfer File format version
+        ret.append(contentsOf: byteOrder.convertToBytes(Int16(1)))
+        // Count of events
+        ret.append(contentsOf: byteOrder.convertToBytes(events.count))
+
+        // Add all the events
+        for event in events {
+            // event timestamp; 8 bytes
+            let timestamp = Int64(event.time!.timeIntervalSince1970 * 1_000)
+            ret.append(contentsOf: byteOrder.convertToBytes(timestamp))
+            // event type: 2 bytes
+            let type = translateType(of: event)
+            ret.append(contentsOf: byteOrder.convertToBytes(type))
+            // bytes required for the value and the value: 2 + X bytes
+            if let serializableValue = event.value?.data(using: .utf8) {
+                let serializableValueLengthInBytes = Int16(serializableValue.count)
+                ret.append(contentsOf: byteOrder.convertToBytes(serializableValueLengthInBytes))
+                ret.append(contentsOf: serializableValue)
+            } else {
+                ret.append(contentsOf: byteOrder.convertToBytes(Int16(0)))
+            }
         }
 
-        return compressed
+        return Data(ret)
     }
 
     /**
-     Serializes the provided measurement into the Cyface binary format.
-     
-     - Parameter measurement: The `measurement` to serialize.
-     - Returns: The serialized measurement in Cyface binary format.
-     - Throws:
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-        - `FileSupportError.notReadable` If the data file was not readable.
-        - Some unspecified undocumented file system error if file was not accessible.
+     This method translates an events type to a serializable `Int16` representation.
+
+     Altough this is technically not necessary it makes it easier to synchronize the serialization with the Android client, by making the numbers used for each type explicit.
+
+     - Parameter of: The `Event` to translate the type for
+     - Returns: The serializable representation of the provided `Event` type.
      */
-    func serialize(_ measurement: MeasurementMO) throws -> Data {
-        let serializedMeasurement = try measurementSerializer.serialize(serializable: measurement)
-        let geoLocations = try PersistenceLayer.collectGeoLocations(from: measurement)
-
-        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: geoLocations)
-        let serializedAccelerations = try accelerationsFile.data(for: measurement)
-
-        var ret = Data()
-        ret.append(serializedMeasurement)
-        ret.append(serializedGeoLocations)
-        ret.append(serializedAccelerations)
-
-        return ret
+    private func translateType(of event: Event) -> Int16 {
+        switch event.typeEnum {
+        case .lifecycleStart:
+                return 1;
+        case .lifecycleStop:
+                return 2;
+        case .lifecycleResume:
+                return 3;
+        case .lifecyclePause:
+                return 4;
+        case .modalityTypeChange:
+                return 5;
+        }
     }
 }
 

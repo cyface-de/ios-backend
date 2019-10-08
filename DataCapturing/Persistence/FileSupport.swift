@@ -268,9 +268,44 @@ struct MeasurementFile: FileSupport {
         - Some unspecified undocumented file system error if file was not accessible.
      */
     func data(from serializable: MeasurementMO) throws -> Data? {
-        let serializer = CyfaceBinaryFormatSerializer()
+        let serializer = MeasurementSerializer()
 
-        return try serializer.serializeCompressed(serializable)
+        return try serializer.serializeCompressed(serializable: serializable)
+    }
+}
+
+/**
+ Represents a file with events from a measurement
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 5.0.0
+ */
+struct EventsFile: FileSupport {
+
+    typealias Serializable = [Event]
+
+    let serializer = EventsSerializer()
+
+    var fileName: String {
+        return "events"
+    }
+
+    var fileExtension: String {
+        return "cyfe"
+    }
+
+    func write(serializable: [Event], to measurement: Int64) throws -> URL {
+        // Serialization in the form (timestamp: long, eventType: short, valuesLength: short, values: [bytes])
+        let data = try serializer.serializeCompressed(serializable: serializable)
+
+        let filePath = try path(for: measurement)
+
+        let measurementFileHandle = try FileHandle(forWritingTo: filePath)
+        defer { measurementFileHandle.closeFile() }
+        measurementFileHandle.write(data)
+
+        return filePath
     }
 }
 

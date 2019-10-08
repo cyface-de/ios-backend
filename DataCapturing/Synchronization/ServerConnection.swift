@@ -20,6 +20,7 @@
 import Foundation
 import Alamofire
 import os.log
+import CoreData
 
 /**
  Realizes a connection to a Cyface Collector server.
@@ -131,7 +132,7 @@ public class ServerConnection {
             }
         }
         os_log("Transmitting measurement to URL %{PUBLIC}@!", log: ServerConnection.osLog, type: .debug, url.absoluteString)
-        Networking.sharedInstance.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
+        Networking.sharedInstance.sessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
             do {
                 try self.onEncodingComplete(for: measurement, with: encodingResult, onSuccess: onSuccess, onFailure: onFailure)
             } catch {
@@ -172,12 +173,21 @@ public class ServerConnection {
         guard let initialModality = Modality(rawValue: modalityRawValue) else {
             fatalError("Unable to create modality from raw value \(modalityRawValue)!")
         }
+        guard let events = measurement.events?.array as? [Event] else {
+            fatalError("Unable to load events for measurement \(measurement.identifier)")
+        }
 
         try addMetaData(to: request, for: measurement, withInitialModality: initialModality)
 
-        let payloadUrl = try write(measurement)
-        let fileName = "\(self.installationIdentifier)_\(measurement.identifier).ccyf"
-        request.append(payloadUrl, withName: "fileToUpload", fileName: fileName, mimeType: "application/octet-stream")
+        let measurementFileWriter = MeasurementFile()
+        let measurementFileURL = try measurementFileWriter.write(serializable: measurement, to: measurement.identifier)
+        let measurementFileName = "\(self.installationIdentifier)_\(measurement.identifier).ccyf"
+        request.append(measurementFileURL, withName: "fileToUpload", fileName: measurementFileName, mimeType: "application/octet-stream")
+
+        let eventFileWriter = EventsFile()
+        let eventFileURL = try eventFileWriter.write(serializable: events, to: measurement.identifier)
+        let eventFileName = "\(self.installationIdentifier)_\(measurement.identifier)_.ccyfe"
+        request.append(eventFileURL, withName: "eventsFile", fileName: eventFileName, mimeType: "application/octet-stream")
     }
 
     /**
@@ -301,10 +311,11 @@ public class ServerConnection {
         - `FileSupportError.notReadable` If the data file was not readable.
         - Some unspecified undocumented file system error if file was not accessible.
      */
-    private func write(_ measurement: MeasurementMO) throws -> URL {
-        let measurementFile = MeasurementFile()
-        return try measurementFile.write(serializable: measurement, to: measurement.identifier)
-    }
+    /*private func appendFile(for objectLoader: (() -> NSManagedObject)) throws -> URL {
+        let payloadWriter = PayloadWriter()
+        let object = objectLoader()
+        return try payloadWriter.write(serializable: object, to: measurement.identifier)
+    }*/
 }
 
 /**

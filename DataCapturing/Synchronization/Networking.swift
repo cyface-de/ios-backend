@@ -36,7 +36,7 @@ class Networking {
     /// The Alamofire session manager used to transmit data to and receive responses from a Cyface server.
     var sessionManager: Alamofire.SessionManager
     /// An Alamofire session manaager used for background data transmission.
-    var backgroundSessionManager: Alamofire.SessionManager
+    //var backgroundSessionManager: Alamofire.SessionManager
 
     // MARK: - Initializers
 
@@ -58,6 +58,6 @@ class Networking {
         let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
         sessionConfiguration.isDiscretionary = true // Let the system decide when it is convenient.
 
-        self.backgroundSessionManager = Alamofire.SessionManager(configuration: sessionConfiguration)
+        //self.backgroundSessionManager = Alamofire.SessionManager(configuration: sessionConfiguration)
     }
 }
