@@ -263,7 +263,7 @@ class DataSetCreator {
         - Some internal file system error on failure of accessing the acceleration file at the required path.
      */
     static func fakeMeasurement(countOfGeoLocations: Int, countOfAccelerations: Int, persistenceLayer: PersistenceLayer) throws -> MeasurementMO {
-        let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
+        let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: "BICYCLE")
         measurement.accelerationsCount = Int32(countOfAccelerations)
         measurement.synchronized = false
         measurement.trackLength = Double.random(in: 0..<10_000.0)

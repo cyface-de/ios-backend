@@ -34,6 +34,8 @@ class PersistenceTests: XCTestCase {
     var oocut: PersistenceLayer!
     /// Some test data.
     var fixture: Int64!
+    /// The default mode of transportation used for tests.
+    let defaultMode = "BICYCLE"
 
     /// Initializes the test enviroment by saving some test data to the test `PersistenceLayer`.
     override func setUp() {
@@ -46,7 +48,7 @@ class PersistenceTests: XCTestCase {
             manager.setup(bundle: bundle)
             oocut = PersistenceLayer(onManager: manager)
             oocut.context = oocut.makeContext()
-            let measurement = try oocut.createMeasurement(at: 10_000, withContext: .bike)
+            let measurement = try oocut.createMeasurement(at: 10_000, inMode: defaultMode)
             oocut.appendNewTrack(to: measurement)
 
             fixture = measurement.identifier
@@ -76,7 +78,7 @@ class PersistenceTests: XCTestCase {
      */
     func testCreateMeasurement() {
         do {
-            let secondMeasurement = try oocut.createMeasurement(at: 10_001, withContext: .bike)
+            let secondMeasurement = try oocut.createMeasurement(at: 10_001, inMode: defaultMode)
 
             let secondMeasurementIdentifier = secondMeasurement.identifier
             XCTAssertEqual(secondMeasurementIdentifier, fixture+1)
@@ -84,7 +86,7 @@ class PersistenceTests: XCTestCase {
             XCTAssertEqual(events.count, 1)
 
             try oocut.delete(measurement: secondMeasurement.identifier)
-            let thirdMeasurement = try oocut.createMeasurement(at: Int64(10_002), withContext: Modality.bike)
+            let thirdMeasurement = try oocut.createMeasurement(at: Int64(10_002), inMode: defaultMode)
 
             XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
         } catch let error {
@@ -154,7 +156,7 @@ class PersistenceTests: XCTestCase {
             XCTAssertEqual(measurement.identifier, fixture)
             let events = try oocut.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
             XCTAssertEqual(events.count, 1)
-            XCTAssertEqual(events[0].value, Modality.bike.rawValue)
+            XCTAssertEqual(events[0].value, defaultMode)
             XCTAssertEqual(try PersistenceLayer.collectGeoLocations(from: measurement).count, 2)
             XCTAssertEqual(measurement.accelerationsCount, 3)
         } catch let error {
@@ -245,7 +247,7 @@ class PersistenceTests: XCTestCase {
 
     /// Tests code to load only inactive (all measurements except the one currently captured) measurements in isolation.
     func testLoadInactiveMeasurements() throws {
-        let secondMeasurement = try oocut.createMeasurement(at: 20_000, withContext: .bike)
+        let secondMeasurement = try oocut.createMeasurement(at: 20_000, inMode: defaultMode)
         let secondMeasurementIdentifier = secondMeasurement.identifier
         let measurements = try oocut.loadMeasurements()
 
@@ -261,7 +263,7 @@ class PersistenceTests: XCTestCase {
 
     /// Tests that loading a cleaned track returns only the valid cleaned locations.
     func testLoadCleanedTrack() throws {
-        let measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
+        let measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: defaultMode)
 
         oocut.appendNewTrack(to: measurement)
         try oocut.save(locations: [PersistenceTests.location(), PersistenceTests.location(isValid: false), PersistenceTests.location()], in: measurement)
@@ -277,7 +279,7 @@ class PersistenceTests: XCTestCase {
      Tests the creation, storage and retrieval of `Event` objects in `CoreData`.
     */
     func testEventCreation_HappyPath() throws {
-        let measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
+        let measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: defaultMode)
 
         measurement.addToEvents(oocut.createEvent(of: .lifecycleStart))
         sleep(1)

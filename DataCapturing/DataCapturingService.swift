@@ -190,12 +190,12 @@ public class DataCapturingService: NSObject {
      If an error happened during this process, it is provided as part of this handlers `Status` argument.
      
      - Parameters:
-        - context: The `MeasurementContext` to use for the newly created measurement.
+        - modality: The mode of transportation to use for the newly created measurement. This should be something like "car" or "bicycle".
      
      - Throws:
         - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
-    public func start(inContext context: Modality) throws {
+    public func start(inMode modality: String) throws {
         try lifecycleQueue.sync {
             if isPaused {
                 os_log("Starting data capturing on paused service. Finishing paused measurements and starting fresh. This is probably the result of a lifecycle error. ", log: LOG, type: .default)
@@ -208,7 +208,7 @@ public class DataCapturingService: NSObject {
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
 
-            let measurement = try persistenceLayer.createMeasurement(at: timestamp, withContext: context)
+            let measurement = try persistenceLayer.createMeasurement(at: timestamp, inMode: modality)
 
             self.currentMeasurement = measurement.identifier
             persistenceLayer.context?.saveRecursively()
@@ -310,12 +310,12 @@ public class DataCapturingService: NSObject {
     }
 
     /**
-     Changes the current modality of the measurement. This can happen if the user switches for example from a bicycle to a car.
+     Changes the current mode of transportation of the measurement. This can happen if the user switches for example from a bicycle to a car.
      If the new modality is the same as the old one, the method returns without doing anything.
 
      - Parameter to: The modality context to switch to.
      */
-    public func changeModality(to modality: Modality) {
+    public func changeModality(to modality: String) {
         lifecycleQueue.sync {
             guard let currentMeasurementIdentifier = currentMeasurement else {
                 return
@@ -332,11 +332,11 @@ public class DataCapturingService: NSObject {
                     fatalError("No valid modality change event!")
                 }
 
-                if lastModalityChangeEvent.value == modality.rawValue {
+                if lastModalityChangeEvent.value == modality {
                     return
                 }
 
-                let event = persistenceLayer.createEvent(of: .modalityTypeChange, withValue: modality.rawValue)
+                let event = persistenceLayer.createEvent(of: .modalityTypeChange, withValue: modality)
                 currentMeasurementMO.addToEvents(event)
                 persistenceLayer.context?.saveRecursively()
             } catch {

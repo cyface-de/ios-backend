@@ -167,11 +167,8 @@ public class ServerConnection {
         let persistenceLayer = PersistenceLayer(onManager: manager)
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
-        guard let modalityRawValue = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)[0].value else {
+        guard let initialModality = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)[0].value else {
             fatalError("Invalid modality change event with no value encountered!")
-        }
-        guard let initialModality = Modality(rawValue: modalityRawValue) else {
-            fatalError("Unable to create modality from raw value \(modalityRawValue)!")
         }
         guard let events = measurement.events?.array as? [Event] else {
             fatalError("Unable to load events for measurement \(measurement.identifier)")
@@ -214,7 +211,7 @@ public class ServerConnection {
         - measurement: The measurement to take the meta data from
         - initialModality: The modality selected at the start of the measurement
      */
-    func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO, withInitialModality initialModality: Modality) throws {
+    func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO, withInitialModality initialModality: String) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
             fatalError("Installation identifier was missing!")
         }
@@ -230,7 +227,7 @@ public class ServerConnection {
             fatalError("Application version was missing!")
         }
 
-        guard let vehicle = initialModality.rawValue.data(using: String.Encoding.utf8) else {
+        guard let vehicle = initialModality.data(using: String.Encoding.utf8) else {
             fatalError("No type of vehicle provided for measurement!")
         }
 
