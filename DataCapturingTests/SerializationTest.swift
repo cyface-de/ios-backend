@@ -31,7 +31,7 @@ import CoreData
 class SerializationTest: XCTestCase {
 
     /// The object of the class under test
-    var oocut: CyfaceBinaryFormatSerializer!
+    var oocut: MeasurementSerializer!
     /// A `PersistenceLayer` instance used to load and store data for testing purposes.
     var persistenceLayer: PersistenceLayer!
     /// A `MeasurementEntity` holding a test measurement to serialize and deserialize.
@@ -42,7 +42,7 @@ class SerializationTest: XCTestCase {
     /// Initializes the test data set and `PersistenceLayer` with some test data.
     override func setUp() {
         super.setUp()
-        oocut = CyfaceBinaryFormatSerializer()
+        oocut = MeasurementSerializer()
 
         do {
             guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
@@ -82,7 +82,7 @@ class SerializationTest: XCTestCase {
     func testUncompressedSerialization() {
         do {
             let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
-            let res = try oocut.serialize(measurement)
+            let res = try oocut.serialize(serializable: measurement)
 
             XCTAssertEqual(res.count, 222)
             // Data Format Version
@@ -106,7 +106,7 @@ class SerializationTest: XCTestCase {
     func testCompressedSerialization() {
         do {
             let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
-            let res = try oocut.serializeCompressed(measurement)
+            let res = try oocut.serializeCompressed(serializable: measurement)
 
             let uncompressedData = res.inflate()
 
@@ -131,7 +131,7 @@ class SerializationTest: XCTestCase {
      */
     func skip_testSerializeBigDataSet() throws {
         let measurement = try DataSetCreator.fakeMeasurement(countOfGeoLocations: 36_000, countOfAccelerations: 3_600_000, persistenceLayer: persistenceLayer)
-        let data = try oocut.serialize(measurement)
+        let data = try oocut.serialize(serializable: measurement)
         try data.write(to: URL(fileURLWithPath: "/Users/cyface/data.cyf"))
     }
 
@@ -146,7 +146,7 @@ class SerializationTest: XCTestCase {
 
             let locations = try PersistenceLayer.collectGeoLocations(from: measurement)
 
-            let serializedData = try self.oocut.serialize(measurement)
+            let serializedData = try self.oocut.serialize(serializable: measurement)
             let sizeOfHeaderInBytes = 18
             let sizeOfOneGeoLocationInBytes = 36
 
@@ -175,6 +175,28 @@ class SerializationTest: XCTestCase {
         } catch let error {
             XCTFail("Unable to serialize measurement \(fixture). Error \(error)")
         }
+    }
+
+    /// Tests that serialization to an events file works as expected
+    func testEventSerialization_HappyPath() throws {
+        // Arrange
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
+
+        guard let events = measurement.events?.array as? [Event] else {
+            fatalError()
+        }
+
+        let eventsSerializer = EventsSerializer()
+
+        // Act
+        let eventsData = try eventsSerializer.serialize(serializable: events)
+
+        // Assert
+        let sizeOfHeaderInBytes = 10
+        let sizeOfOneEventWithoutValue = 12
+        let sizeOfBicycleValue = 7
+
+        XCTAssertEqual(eventsData.count, sizeOfHeaderInBytes + events.count * sizeOfOneEventWithoutValue + sizeOfBicycleValue)
     }
 
     /**

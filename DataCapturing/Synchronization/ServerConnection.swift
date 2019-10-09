@@ -20,6 +20,7 @@
 import Foundation
 import Alamofire
 import os.log
+import CoreData
 
 /**
  Realizes a connection to a Cyface Collector server.
@@ -172,12 +173,21 @@ public class ServerConnection {
         guard let initialModality = Modality(rawValue: modalityRawValue) else {
             fatalError("Unable to create modality from raw value \(modalityRawValue)!")
         }
+        guard let events = measurement.events?.array as? [Event] else {
+            fatalError("Unable to load events for measurement \(measurement.identifier)")
+        }
 
         try addMetaData(to: request, for: measurement, withInitialModality: initialModality)
 
-        let payloadUrl = try write(measurement)
-        let fileName = "\(self.installationIdentifier)_\(measurement.identifier).ccyf"
-        request.append(payloadUrl, withName: "fileToUpload", fileName: fileName, mimeType: "application/octet-stream")
+        let measurementFileWriter = MeasurementFile()
+        let measurementFileURL = try measurementFileWriter.write(serializable: measurement, to: measurement.identifier)
+        let measurementFileName = "\(self.installationIdentifier)_\(measurement.identifier).ccyf"
+        request.append(measurementFileURL, withName: "fileToUpload", fileName: measurementFileName, mimeType: "application/octet-stream")
+
+        let eventFileWriter = EventsFile()
+        let eventFileURL = try eventFileWriter.write(serializable: events, to: measurement.identifier)
+        let eventFileName = "\(self.installationIdentifier)_\(measurement.identifier)_.ccyfe"
+        request.append(eventFileURL, withName: "eventsFile", fileName: eventFileName, mimeType: "application/octet-stream")
     }
 
     /**
@@ -288,22 +298,6 @@ public class ServerConnection {
         case .failure(let error):
             throw error
         }
-    }
-
-    /**
-     Write the provided `measurement` to a file for background synchronization
-
-     - Parameter measurement: The measurement to serialize as a file.
-     - Returns: The url of the file containing the measurement data.
-     - Throws:
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-        - `FileSupportError.notReadable` If the data file was not readable.
-        - Some unspecified undocumented file system error if file was not accessible.
-     */
-    private func write(_ measurement: MeasurementMO) throws -> URL {
-        let measurementFile = MeasurementFile()
-        return try measurementFile.write(serializable: measurement, to: measurement.identifier)
     }
 }
 
