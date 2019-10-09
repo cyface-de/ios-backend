@@ -221,7 +221,7 @@ class DataSetCreator {
         - locationCreator: A function to create one geo location.
      - Returns: An array containing `count` geo locations.
      */
-    static func createV4GeoLocations(_ count: Int64, _ startTimestamp: Int64, _ track: NSManagedObject, _ context: NSManagedObjectContext, _ locationCreator: (Int64,Int64, NSManagedObject, NSManagedObjectContext) -> NSManagedObject ) -> [NSManagedObject] {
+    static func createV4GeoLocations(_ count: Int64, _ startTimestamp: Int64, _ track: NSManagedObject, _ context: NSManagedObjectContext, _ locationCreator: (Int64, Int64, NSManagedObject, NSManagedObjectContext) -> NSManagedObject ) -> [NSManagedObject] {
         var ret = [NSManagedObject]()
         for i in 0..<count {
             let geoLocation = locationCreator(i, startTimestamp, track, context)

@@ -581,7 +581,7 @@ public class PersistenceLayer {
             guard !locations.isEmpty else {
                 continue
             }
-            locations.forEach{ location in closure(track, location) }
+            locations.forEach { location in closure(track, location) }
         }
     }
 }

@@ -191,20 +191,20 @@ public class ServerConnection {
      Adds the required meta data from a measurement to a multi part form request.
 
      The transmitted data currently includes:
-     * startLocLat: The latitude of the first location
-     * startLocLon: The longitude of the first location
-     * startLocTs: The timestamp of the first location
-     * endLocLat: The latitude of the last location
-     * endLocLon: The longitude of the last location
-     * endLocTs: The timestamp of the last location
-     * deviceId: The world wide unqiue identifier of this device
-     * measurementId: The device wide unique identifier of the transmitted measurement
-     * deviceType: A string describing how this device identifies itself
-     * osVersion: The version of the operating system installed on this device
-     * appVersion: The version of the application running the Cyface SDK
-     * length: The track length of the measurement that is going to be transmitted
-     * locationCount: The number of locations in the track
-     * vehicle: The vehicle used to capture the track
+     * **startLocLat:** The latitude of the first location
+     * **startLocLon:** The longitude of the first location
+     * **startLocTs:** The timestamp of the first location
+     * **endLocLat:** The latitude of the last location
+     * **endLocLon:** The longitude of the last location
+     * **endLocTs:** The timestamp of the last location
+     * **deviceId:** The world wide unqiue identifier of this device
+     * **measurementId:** The device wide unique identifier of the transmitted measurement
+     * **deviceType:** A string describing how this device identifies itself
+     * **osVersion:** The version of the operating system installed on this device
+     * **appVersion:** The version of the application running the Cyface SDK
+     * **length:** The track length of the measurement that is going to be transmitted
+     * **locationCount:** The number of locations in the track
+     * **vehicle:** The vehicle used to capture the track
 
      - Parameters:
         - request: The request to add the meta data to

@@ -82,7 +82,6 @@ extension BinarySerializer {
 
         return compressed
     }
-    
 }
 
 /*

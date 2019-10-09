@@ -118,7 +118,9 @@ class DataCapturingTests: XCTestCase {
         XCTAssertFalse(oocut.isPaused)
 
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
-        let events = measurement.events!.array as! [Event]
+        guard let events = measurement.events?.array as? [Event] else {
+            fatalError()
+        }
         XCTAssertEqual(events.count, 5)
         XCTAssertEqual(events[1].typeEnum, .lifecycleStart)
         XCTAssertEqual(events[2].typeEnum, .lifecyclePause)
