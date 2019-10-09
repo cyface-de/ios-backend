@@ -471,6 +471,15 @@ public class DataCapturingService: NSObject {
         persistenceLayer.context?.saveRecursively()
     }
 
+    /**
+        The handler provided to *CoreMotion* for handling new accelerations.
+
+        See `CMAccelerometerHandler` in the Apple documentation for futher information.
+
+     - Parameters:
+        - data: The new accelerometer data in any is available or `nil` otherwise.
+        - error: An error or `nil` if no error occured.
+     */
     private func handleAccelerometerUpdate(_ data: CMAccelerometerData?, _ error: Error?) {
         if let error = error as? CMError {
             os_log("Accelerometer error: %@", log: log, type: .error, error.rawValue)
