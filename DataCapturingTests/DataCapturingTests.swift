@@ -35,6 +35,8 @@ class DataCapturingTests: XCTestCase {
     var oocut: TestDataCapturingService!
     /// The *CoreData* stack to access and check data create by lifecycle methods.
     var coreDataStack: CoreDataManager!
+    /// The default mode of transportation used for testing.
+    let defaultMode = "BICYCLE"
 
     /// Initializes every test by creating a `TestDataCapturingService`.
     override func setUp() {
@@ -75,7 +77,7 @@ class DataCapturingTests: XCTestCase {
         - `DataCapturingError.isPaused` if the service was paused and thus starting or stopping it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
     func testStartStop_HappyPath() throws {
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         XCTAssertTrue(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
         try oocut.stop()
@@ -97,7 +99,7 @@ class DataCapturingTests: XCTestCase {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
 
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         XCTAssertTrue(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
         let prePauseCountOfMeasurements = try persistenceLayer.countMeasurements()
@@ -116,7 +118,9 @@ class DataCapturingTests: XCTestCase {
         XCTAssertFalse(oocut.isPaused)
 
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
-        let events = measurement.events!.array as! [Event]
+        guard let events = measurement.events?.array as? [Event] else {
+            fatalError()
+        }
         XCTAssertEqual(events.count, 5)
         XCTAssertEqual(events[1].typeEnum, .lifecycleStart)
         XCTAssertEqual(events[2].typeEnum, .lifecyclePause)
@@ -129,7 +133,7 @@ class DataCapturingTests: XCTestCase {
         persistenceLayer.context = persistenceLayer.makeContext()
         let preStartCountOfMeasurements = try persistenceLayer.countMeasurements()
 
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         XCTAssertTrue(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
         let postStartCountOfMeasurements = try persistenceLayer.countMeasurements()
@@ -151,10 +155,10 @@ class DataCapturingTests: XCTestCase {
         - `DataCapturingError.isPaused` if the service was paused and thus starting or stopping it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
     func testDoubleStart() throws {
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         XCTAssertTrue(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         XCTAssertTrue(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
         try oocut.stop()
@@ -173,7 +177,7 @@ class DataCapturingTests: XCTestCase {
         - `DataCapturingError.noCurrentMeasurement`: If no current measurement is available while resuming data capturing.
      */
     func testDoubleResume() throws {
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         XCTAssertTrue(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
         try oocut.pause()
@@ -203,7 +207,7 @@ class DataCapturingTests: XCTestCase {
         - `DataCapturingError.noCurrentMeasurement`: If no current measurement is available while resuming data capturing.
      */
     func testDoublePause() throws {
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         XCTAssertTrue(oocut.isRunning)
         try oocut.pause()
         XCTAssertFalse(oocut.isRunning)
@@ -229,7 +233,7 @@ class DataCapturingTests: XCTestCase {
         - `DataCapturingError.isPaused` if the service was paused and thus stopping it makes no sense.
      */
     func testDoubleStop() throws {
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         XCTAssertTrue(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
         try oocut.stop()
@@ -282,7 +286,7 @@ class DataCapturingTests: XCTestCase {
     func testLifecyclePerformance() throws {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), withContext: .bike)
+        let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: defaultMode)
         oocut.currentMeasurement = measurement.identifier
 
         measure {
@@ -318,7 +322,7 @@ class DataCapturingTests: XCTestCase {
         testCapturingService.locationUpdateSkipRate = 5
 
         // Act
-        try testCapturingService.start(inContext: .bike)
+        try testCapturingService.start(inMode: defaultMode)
 
         wait(for: [async], timeout: 20)
         try testCapturingService.stop()
@@ -339,7 +343,7 @@ class DataCapturingTests: XCTestCase {
     func testStartPauseResumeStop_DistanceCalculationContainsLastSegment() throws {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         guard let currentMeasurementIdentifier = oocut.currentMeasurement else {
             fatalError()
         }
@@ -360,7 +364,7 @@ class DataCapturingTests: XCTestCase {
 
     /// After the App has been paused very long iOS will kill it. This deletes the paused state in memory. This test checks that recreating this state from the database is successful.
     func testResumeAfterLongPause_ShouldNotThrowAnException() throws {
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         try oocut.pause()
 
         let newOocut = dataCapturingService(dataManager: coreDataStack)
@@ -374,13 +378,13 @@ class DataCapturingTests: XCTestCase {
 
     /// In case there already is a paused measurement after App restart, starting should still be successful and just output a warning.
     func testStartPausedService_FinishesPausedMeasurementAndThrowsNoException() throws {
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         try oocut.pause()
 
         let newOocut = dataCapturingService(dataManager: coreDataStack)
         XCTAssertTrue(newOocut.isPaused)
         do {
-            try newOocut.start(inContext: .bike)
+            try newOocut.start(inMode: defaultMode)
         } catch {
             XCTFail("Encountered exception \(error) on new instance.")
         }
@@ -390,11 +394,11 @@ class DataCapturingTests: XCTestCase {
     /// Tests that starting a new measurement and changing the modality during runtime, creates two change events.
     func testChangeModality_EventLogContainsTwoModalities() throws {
         // Act
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         guard let currentMeasurementIdentifier = oocut.currentMeasurement else {
             return XCTFail("Unable to load current measurement from running data capturing service!")
         }
-        oocut.changeModality(to: .car)
+        oocut.changeModality(to: "CAR")
         try oocut.stop()
 
         // Assert
@@ -403,19 +407,19 @@ class DataCapturingTests: XCTestCase {
         let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
         let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
         XCTAssertEqual(modalityChangeEvents.count, 2)
-        XCTAssertEqual(modalityChangeEvents[0].value, Modality.bike.rawValue)
-        XCTAssertEqual(modalityChangeEvents[1].value, Modality.car.rawValue)
+        XCTAssertEqual(modalityChangeEvents[0].value, defaultMode)
+        XCTAssertEqual(modalityChangeEvents[1].value, "CAR")
     }
 
     /// Tests that changing to the same modality twice does not produce a new modality change event.
     func testChangeModalityToSameModalityTwice_EventLogStillContainsOnlyTwoModalities() throws {
         // Act
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         guard let currentMeasurementIdentifier = oocut.currentMeasurement else {
             return XCTFail("Unable to load current measurement from running data capturing service!")
         }
-        oocut.changeModality(to: .car)
-        oocut.changeModality(to: .car)
+        oocut.changeModality(to: "CAR")
+        oocut.changeModality(to: "CAR")
         try oocut.stop()
 
         // Assert
@@ -424,19 +428,19 @@ class DataCapturingTests: XCTestCase {
         let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
         let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
         XCTAssertEqual(modalityChangeEvents.count, 2)
-        XCTAssertEqual(modalityChangeEvents[0].value, Modality.bike.rawValue)
-        XCTAssertEqual(modalityChangeEvents[1].value, Modality.car.rawValue)
+        XCTAssertEqual(modalityChangeEvents[0].value, defaultMode)
+        XCTAssertEqual(modalityChangeEvents[1].value, "CAR")
     }
 
     /// Tests that changing modality during a pause works as expected.
     func testChangeModalityWhilePaused_EventLogStillContainsModalityChange() throws {
         // Act
-        try oocut.start(inContext: .bike)
+        try oocut.start(inMode: defaultMode)
         guard let currentMeasurementIdentifier = oocut.currentMeasurement else {
             return XCTFail("Unable to load current measurement from running data capturing service!")
         }
         try oocut.pause()
-        oocut.changeModality(to: .car)
+        oocut.changeModality(to: "CAR")
         try oocut.resume()
         try oocut.stop()
 
@@ -446,8 +450,8 @@ class DataCapturingTests: XCTestCase {
         let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
         let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
         XCTAssertEqual(modalityChangeEvents.count, 2)
-        XCTAssertEqual(modalityChangeEvents[0].value, Modality.bike.rawValue)
-        XCTAssertEqual(modalityChangeEvents[1].value, Modality.car.rawValue)
+        XCTAssertEqual(modalityChangeEvents[0].value, defaultMode)
+        XCTAssertEqual(modalityChangeEvents[1].value, "CAR")
     }
 
     /**

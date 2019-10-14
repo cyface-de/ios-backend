@@ -167,11 +167,8 @@ public class ServerConnection {
         let persistenceLayer = PersistenceLayer(onManager: manager)
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
-        guard let modalityRawValue = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)[0].value else {
+        guard let initialModality = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)[0].value else {
             fatalError("Invalid modality change event with no value encountered!")
-        }
-        guard let initialModality = Modality(rawValue: modalityRawValue) else {
-            fatalError("Unable to create modality from raw value \(modalityRawValue)!")
         }
         guard let events = measurement.events?.array as? [Event] else {
             fatalError("Unable to load events for measurement \(measurement.identifier)")
@@ -194,27 +191,27 @@ public class ServerConnection {
      Adds the required meta data from a measurement to a multi part form request.
 
      The transmitted data currently includes:
-     * startLocLat: The latitude of the first location
-     * startLocLon: The longitude of the first location
-     * startLocTs: The timestamp of the first location
-     * endLocLat: The latitude of the last location
-     * endLocLon: The longitude of the last location
-     * endLocTs: The timestamp of the last location
-     * deviceId: The world wide unqiue identifier of this device
-     * measurementId: The device wide unique identifier of the transmitted measurement
-     * deviceType: A string describing how this device identifies itself
-     * osVersion: The version of the operating system installed on this device
-     * appVersion: The version of the application running the Cyface SDK
-     * length: The track length of the measurement that is going to be transmitted
-     * locationCount: The number of locations in the track
-     * vehicle: The vehicle used to capture the track
+     * **startLocLat:** The latitude of the first location
+     * **startLocLon:** The longitude of the first location
+     * **startLocTs:** The timestamp of the first location
+     * **endLocLat:** The latitude of the last location
+     * **endLocLon:** The longitude of the last location
+     * **endLocTs:** The timestamp of the last location
+     * **deviceId:** The world wide unqiue identifier of this device
+     * **measurementId:** The device wide unique identifier of the transmitted measurement
+     * **deviceType:** A string describing how this device identifies itself
+     * **osVersion:** The version of the operating system installed on this device
+     * **appVersion:** The version of the application running the Cyface SDK
+     * **length:** The track length of the measurement that is going to be transmitted
+     * **locationCount:** The number of locations in the track
+     * **vehicle:** The vehicle used to capture the track
 
      - Parameters:
         - request: The request to add the meta data to
         - measurement: The measurement to take the meta data from
         - initialModality: The modality selected at the start of the measurement
      */
-    func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO, withInitialModality initialModality: Modality) throws {
+    func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO, withInitialModality initialModality: String) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
             fatalError("Installation identifier was missing!")
         }
@@ -230,7 +227,7 @@ public class ServerConnection {
             fatalError("Application version was missing!")
         }
 
-        guard let vehicle = initialModality.rawValue.data(using: String.Encoding.utf8) else {
+        guard let vehicle = initialModality.data(using: String.Encoding.utf8) else {
             fatalError("No type of vehicle provided for measurement!")
         }
 

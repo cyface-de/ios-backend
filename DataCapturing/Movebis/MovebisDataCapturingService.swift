@@ -101,7 +101,7 @@ public class MovebisDataCapturingService: DataCapturingService {
         - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()` if you want to continue.
      */
     public func start() throws {
-        return try start(inContext: .bike)
+        return try start(inMode: "BICYCLE")
     }
 
     /**

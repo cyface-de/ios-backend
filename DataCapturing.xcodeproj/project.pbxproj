@@ -41,7 +41,6 @@
 		3D80A16122E9F55300204F4F /* V5TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3D80A15F22E9F55200204F4F /* V5TestData.sqlite */; };
 		3D80A16222E9F55300204F4F /* V6TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3D80A16022E9F55200204F4F /* V6TestData.sqlite */; };
 		3D8CC22020A6D89A0095CCD4 /* GeoLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */; };
-		3D8CC22120A6D89A0095CCD4 /* Measurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */; };
 		3D8CC22220A6D89A0095CCD4 /* Acceleration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8CC21F20A6D89A0095CCD4 /* Acceleration.swift */; };
 		3D8E524D223EB240004D7E2B /* TestMotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8E524C223EB240004D7E2B /* TestMotionManager.swift */; };
 		3D8E524F223EB2A1004D7E2B /* TestDataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8E524E223EB2A1004D7E2B /* TestDataCapturingService.swift */; };
@@ -67,7 +66,6 @@
 		3DF7E138220C3D42007CFF83 /* DistanceCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */; };
 		3DF7E174220F65EC007CFF83 /* Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF7E173220F65EC007CFF83 /* Status.swift */; };
 		3DFBF011229FBC7800C48618 /* TrackCleanerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DFBF010229FBC7800C48618 /* TrackCleanerTest.swift */; };
-		3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */; };
 		D2D5CAFAA50410E279AFD68A /* Pods_DataCapturing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 347460620C6EBD86E3597667 /* Pods_DataCapturing.framework */; };
 		F2B63546A145AD699B9FDB39 /* Pods_DataCapturing_DataCapturingTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 19E048D7A427F6EB1291772C /* Pods_DataCapturing_DataCapturingTests.framework */; };
 /* End PBXBuildFile section */
@@ -123,7 +121,6 @@
 		3D80A15F22E9F55200204F4F /* V5TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V5TestData.sqlite; sourceTree = "<group>"; };
 		3D80A16022E9F55200204F4F /* V6TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V6TestData.sqlite; sourceTree = "<group>"; };
 		3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeoLocation.swift; sourceTree = "<group>"; };
-		3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Measurement.swift; sourceTree = "<group>"; };
 		3D8CC21F20A6D89A0095CCD4 /* Acceleration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Acceleration.swift; sourceTree = "<group>"; };
 		3D8E524C223EB240004D7E2B /* TestMotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestMotionManager.swift; sourceTree = "<group>"; };
 		3D8E524E223EB2A1004D7E2B /* TestDataCapturingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDataCapturingService.swift; sourceTree = "<group>"; };
@@ -156,7 +153,6 @@
 		3DF7E137220C3D42007CFF83 /* DistanceCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistanceCalculationTests.swift; sourceTree = "<group>"; };
 		3DF7E173220F65EC007CFF83 /* Status.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
 		3DFBF010229FBC7800C48618 /* TrackCleanerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackCleanerTest.swift; sourceTree = "<group>"; };
-		3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeasurementContext.swift; sourceTree = "<group>"; };
 		9C47B96C86E0AD5460F3B4F3 /* Pods-DataCapturing-DataCapturingTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing-DataCapturingTests.release.xcconfig"; path = "Target Support Files/Pods-DataCapturing-DataCapturingTests/Pods-DataCapturing-DataCapturingTests.release.xcconfig"; sourceTree = "<group>"; };
 		DD6F08973CC8F6A77D785136 /* Pods-DataCapturing.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.release.xcconfig"; path = "Target Support Files/Pods-DataCapturing/Pods-DataCapturing.release.xcconfig"; sourceTree = "<group>"; };
 		F5A3FFADD6E840965E61BA6C /* Pods-DataCapturing.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataCapturing.debug.xcconfig"; path = "Target Support Files/Pods-DataCapturing/Pods-DataCapturing.debug.xcconfig"; sourceTree = "<group>"; };
@@ -332,8 +328,6 @@
 				3D80A15822E84F5500204F4F /* Event+CoreDataProperties.swift */,
 				3D8CC21F20A6D89A0095CCD4 /* Acceleration.swift */,
 				3D8CC21D20A6D89A0095CCD4 /* GeoLocation.swift */,
-				3D8CC21E20A6D89A0095CCD4 /* Measurement.swift */,
-				3DFDE26620BD945900A7D6E3 /* MeasurementContext.swift */,
 				3D80A15D22E8589F00204F4F /* EventType.swift */,
 			);
 			path = Model;
@@ -627,8 +621,6 @@
 				3D1505EE213EA68D002994D2 /* DataCapturingError.swift in Sources */,
 				3D3A7DE72268C7160019998A /* RepeatingTimer.swift in Sources */,
 				3DF7E10921F60AFC007CFF83 /* StaticAuthenticator.swift in Sources */,
-				3DFDE26720BD945900A7D6E3 /* MeasurementContext.swift in Sources */,
-				3D8CC22120A6D89A0095CCD4 /* Measurement.swift in Sources */,
 				3D1D9A89224BACF20053B1B7 /* CoreDataMigrationStep.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

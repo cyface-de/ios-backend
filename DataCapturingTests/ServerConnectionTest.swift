@@ -106,7 +106,7 @@ class ServerConnectionTest: XCTestCase {
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try persistenceLayer.createMeasurement(at: 10_000, withContext: .bike)
+        let measurement = try persistenceLayer.createMeasurement(at: 10_000, inMode: "BICYCLE")
         persistenceLayer.appendNewTrack(to: measurement)
         try persistenceLayer.save(locations: [geoLocation(), geoLocation()], in: measurement)
         try persistenceLayer.save(accelerations: [acceleration(), acceleration()], in: measurement)

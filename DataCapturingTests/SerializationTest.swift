@@ -52,7 +52,7 @@ class SerializationTest: XCTestCase {
             coreDataStack.setup(bundle: bundle)
             persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
-            let measurement = try persistenceLayer.createMeasurement(at: 1, withContext: .bike)
+            let measurement = try persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
             persistenceLayer.appendNewTrack(to: measurement)
 
             fixture = measurement.identifier

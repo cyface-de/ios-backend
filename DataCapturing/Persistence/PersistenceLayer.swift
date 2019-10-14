@@ -103,12 +103,12 @@ public class PersistenceLayer {
 
      - Parameters:
         - at: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
-        - withContext: The measurement context the new measurement is created in.
+        - inMode: The transportation mode the new measurement is created in.
      - Returns: The newly created model object for the measurement.
      - Throws:
-        - Some unspecified errors from within CoreData.
+        - Some unspecified errors from within *CoreData*.
      */
-    func createMeasurement(at timestamp: Int64, withContext mContext: Modality) throws -> MeasurementMO {
+    func createMeasurement(at timestamp: Int64, inMode mode: String) throws -> MeasurementMO {
         let context = getContext()
         // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
         var identifier = self.nextIdentifier
@@ -122,7 +122,7 @@ public class PersistenceLayer {
             measurement.identifier = identifier
             measurement.synchronized = false
             measurement.synchronizable = false
-            let initialModalityChange = createEvent(of: .modalityTypeChange, withValue: mContext.rawValue)
+            let initialModalityChange = createEvent(of: .modalityTypeChange, withValue: mode)
             initialModalityChange.measurement = measurement
             measurement.addToEvents(initialModalityChange)
             print("saving")
@@ -581,7 +581,7 @@ public class PersistenceLayer {
             guard !locations.isEmpty else {
                 continue
             }
-            locations.forEach{ location in closure(track, location) }
+            locations.forEach { location in closure(track, location) }
         }
     }
 }
