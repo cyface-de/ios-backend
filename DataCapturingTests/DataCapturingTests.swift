@@ -26,7 +26,7 @@ import CoreData
  This test is intended to test capturing some data in isolation.
 
  - Author: Klemens Muthmann
- - Version: 2.2.0
+ - Version: 2.3.0
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {

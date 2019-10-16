@@ -28,7 +28,7 @@ import os.log
  If no `username` or `password` is available the function will call its failure handler with the `ServerConnectionError.Category.notAuthenticated`.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.0.1
  - Since: 2.0.0
  */
 public class CredentialsAuthenticator: Authenticator {

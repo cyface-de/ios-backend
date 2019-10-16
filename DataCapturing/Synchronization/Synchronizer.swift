@@ -31,7 +31,7 @@ import Alamofire
  For foreground synchronization use `syncChecked()`.
 
  - Author: Klemens Muthmann
- - Version: 3.0.2
+ - Version: 4.0.0
  - Since: 2.3.0
  */
 public class Synchronizer {

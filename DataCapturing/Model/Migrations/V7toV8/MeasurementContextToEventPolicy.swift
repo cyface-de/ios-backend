@@ -21,9 +21,11 @@ import Foundation
 import CoreData
 
 /**
+ Transforms the transporation mode, saved inside the measurement up to version 7 into an events as required by the model starting with version 8.
+
  - Author: Klemens Muthmann
  - Version: 1.0.0
- - Since: 2.0.0
+ - Since: 5.0.0
  */
 class MeasurementContextToEventPolicy: NSEntityMigrationPolicy {
     override func createDestinationInstances(forSource sInstance: NSManagedObject, in mapping: NSEntityMapping, manager: NSMigrationManager) throws {

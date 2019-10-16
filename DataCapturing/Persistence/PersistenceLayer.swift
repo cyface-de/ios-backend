@@ -33,7 +33,7 @@ import os.log
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 5.3.0
+ - Version: 6.0.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
