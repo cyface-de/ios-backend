@@ -10,10 +10,11 @@
     
   </head>
   <body>
+    <a name="//apple_ref/swift/Section/Enumerations" class="dashAnchor"></a>
     <a title="Enumerations  Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="index.html">DataCapturing Docs</a> (67% documented)</p>
+        <p><a href="index.html">DataCapturing Docs</a> (69% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -45,9 +46,6 @@
                 <a href="Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
               </li>
               <li class="nav-group-task">
-                <a href="Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="Classes/DataCapturingService.html">DataCapturingService</a>
               </li>
               <li class="nav-group-task">
@@ -66,10 +64,10 @@
                 <a href="Classes/Event.html">Event</a>
               </li>
               <li class="nav-group-task">
-                <a href="Classes/GeoLocationMO.html">GeoLocationMO</a>
+                <a href="Classes.html#/s:13DataCapturing16EventsSerializerC">EventsSerializer</a>
               </li>
               <li class="nav-group-task">
-                <a href="Classes/MeasurementEntity.html">MeasurementEntity</a>
+                <a href="Classes/GeoLocationMO.html">GeoLocationMO</a>
               </li>
               <li class="nav-group-task">
                 <a href="Classes/MeasurementMO.html">MeasurementMO</a>
@@ -113,10 +111,15 @@
                 <a href="Enums/FileSupportError.html">FileSupportError</a>
               </li>
               <li class="nav-group-task">
-                <a href="Enums/MeasurementContext.html">MeasurementContext</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="Enums/Status.html">Status</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Extensions/NSManagedObjectContext.html">NSManagedObjectContext</a>
               </li>
             </ul>
           </li>
@@ -169,9 +172,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing6StatusO"></a>
-                    <a name="//apple_ref/swift/Enum/Status" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing6StatusO">Status</a>
+                    <a name="/s:13DataCapturing0aB5ErrorO"></a>
+                    <a name="//apple_ref/swift/Enum/DataCapturingError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB5ErrorO">DataCapturingError</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -179,35 +182,36 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The status returned by asynchronous callback handlers.</p>
-
-<p>This tells the caller, whether an asynchronous call has been successful or not and if not it provides further information about the <code>Error</code>. This is required, since an asynchronous call can not throw an <code>Error</code> to the calling thread.</p>
-<pre class="highlight plaintext"><code> case success
- case error(Error)
+                        <p>An enumeration for all errors caused by capturing data.</p>
+<pre class="highlight swift"><code><span class="k">case</span> <span class="n">isPaused</span>
+<span class="k">case</span> <span class="n">notPaused</span>
+<span class="k">case</span> <span class="n">isRunning</span>
+<span class="k">case</span> <span class="n">notRunning</span>
+<span class="k">case</span> <span class="n">noCurrentMeasurement</span>
 </code></pre>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
 
 </div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    1.0.0
-
-</div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
-    2.2.0
+    1.2.0
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    1.2.0
 
 </div>
 
-                        <a href="Enums/Status.html" class="slightly-smaller">See more</a>
+                        <a href="Enums/DataCapturingError.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">Status</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">DataCapturingError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
 
                         </div>
                       </div>
@@ -234,14 +238,14 @@
                         <p>Events occuring during capturing and transmitting data.</p>
 
 <p>These events may be received by a closure provided to the <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code> on calling start.</p>
-<pre class="highlight plaintext"><code>case geoLocationFixAcquired
-case geoLocationFixLost
-case geoLocationAcquired
-case lowDiskSpace
-case serviceStarted
-case serviceStopped
-case synchronizationFinished
-case synchronizationStarted
+<pre class="highlight swift"><code><span class="k">case</span> <span class="n">geoLocationFixAcquired</span>
+<span class="k">case</span> <span class="n">geoLocationFixLost</span>
+<span class="k">case</span> <span class="n">geoLocationAcquired</span>
+<span class="k">case</span> <span class="n">lowDiskSpace</span>
+<span class="k">case</span> <span class="n">serviceStarted</span>
+<span class="k">case</span> <span class="n">serviceStopped</span>
+<span class="k">case</span> <span class="n">synchronizationFinished</span>
+<span class="k">case</span> <span class="n">synchronizationStarted</span>
 </code></pre>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
@@ -265,7 +269,7 @@ case synchronizationStarted
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">DataCapturingEvent</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">DataCapturingEvent</span></code></pre>
 
                         </div>
                       </div>
@@ -289,48 +293,7 @@ case synchronizationStarted
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
-
-                        <a href="Enums/EventType.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">EventType</span><span class="p">:</span> <span class="kt">Int16</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Implementation"></a>
-                <a name="//apple_ref/swift/Section/Implementation" class="dashAnchor"></a>
-                <a href="#/Implementation">
-                  <h3 class="section-name">Implementation</h3>
-                </a>
-              </div>
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing16FileSupportErrorO"></a>
-                    <a name="//apple_ref/swift/Enum/FileSupportError" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing16FileSupportErrorO">FileSupportError</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Errors created by the Cyface SDK associated with accessing the file system.</p>
-<pre class="highlight plaintext"><code>case notReadable
-</code></pre>
+                        <p>Provides a listing of all the events, that might occur during a data capturing run. These events are saved with a timestamp of their occurrence, to reconstruct them for later use.</p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -338,22 +301,22 @@ case synchronizationStarted
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    1.0.0
+    1.1.0
 
 </div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
-    2.0.0
+    4.6.1
 
 </div>
 
-                        <a href="Enums/FileSupportError.html" class="slightly-smaller">See more</a>
+                        <a href="Enums/EventType.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">FileSupportError</span><span class="p">:</span> <span class="kt">Error</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">EventType</span> <span class="p">:</span> <span class="kt">Int16</span></code></pre>
 
                         </div>
                       </div>
@@ -401,7 +364,7 @@ It is required to start migrations between the different versions.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">CoreDataMigrationVersion</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CaseIterable</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">CoreDataMigrationVersion</span> <span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CaseIterable</span></code></pre>
 
                         </div>
                       </div>
@@ -411,13 +374,20 @@ It is required to start migrations between the different versions.</p>
               </ul>
             </div>
             <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Implementation"></a>
+                <a name="//apple_ref/swift/Section/Implementation" class="dashAnchor"></a>
+                <a href="#/Implementation">
+                  <h3 class="section-name">Implementation</h3>
+                </a>
+              </div>
               <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing0aB5ErrorO"></a>
-                    <a name="//apple_ref/swift/Enum/DataCapturingError" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing0aB5ErrorO">DataCapturingError</a>
+                    <a name="/s:13DataCapturing16FileSupportErrorO"></a>
+                    <a name="//apple_ref/swift/Enum/FileSupportError" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing16FileSupportErrorO">FileSupportError</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -425,36 +395,32 @@ It is required to start migrations between the different versions.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>An enumeration for all errors caused by capturing data.</p>
-<pre class="highlight plaintext"><code>case isPaused
-case notPaused
-case isRunning
-case notRunning
-case noCurrentMeasurement
+                        <p>Errors created by the Cyface SDK associated with accessing the file system.</p>
+<pre class="highlight swift"><code><span class="k">case</span> <span class="n">notReadable</span>
 </code></pre>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
 
 </div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    1.2.0
-
-</div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    1.2.0
+    1.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    2.0.0
 
 </div>
 
-                        <a href="Enums/DataCapturingError.html" class="slightly-smaller">See more</a>
+                        <a href="Enums/FileSupportError.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">DataCapturingError</span><span class="p">:</span> <span class="kt">Error</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">FileSupportError</span> <span class="p">:</span> <span class="kt">Error</span></code></pre>
 
                         </div>
                       </div>
@@ -468,9 +434,9 @@ case noCurrentMeasurement
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing18MeasurementContextO"></a>
-                    <a name="//apple_ref/swift/Enum/MeasurementContext" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing18MeasurementContextO">MeasurementContext</a>
+                    <a name="/s:13DataCapturing6StatusO"></a>
+                    <a name="//apple_ref/swift/Enum/Status" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing6StatusO">Status</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -478,27 +444,35 @@ case noCurrentMeasurement
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The context of this measurement. This is application specific and might be something like the vehicle used.</p>
-<pre class="highlight plaintext"><code>case leisure
-case work
-case shopping
-case car
-case bike
-case motorbike
+                        <p>The status returned by asynchronous callback handlers.</p>
+
+<p>This tells the caller, whether an asynchronous call has been successful or not and if not it provides further information about the <code>Error</code>. This is required, since an asynchronous call can not throw an <code>Error</code> to the calling thread.</p>
+<pre class="highlight swift"><code> <span class="k">case</span> <span class="n">success</span>
+ <span class="k">case</span> <span class="nf">error</span><span class="p">(</span><span class="kt">Error</span><span class="p">)</span>
 </code></pre>
-<div class="aside aside-todo">
-    <p class="aside-title">Todo</p>
-    Make this dynamic, instead of a static enum.
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    1.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    2.2.0
 
 </div>
 
-                        <a href="Enums/MeasurementContext.html" class="slightly-smaller">See more</a>
+                        <a href="Enums/Status.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">MeasurementContext</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">Status</span></code></pre>
 
                         </div>
                       </div>
@@ -510,8 +484,8 @@ case motorbike
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-08-07)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-10-16)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.11.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

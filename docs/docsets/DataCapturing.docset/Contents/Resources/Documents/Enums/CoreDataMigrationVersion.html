@@ -14,7 +14,7 @@
     <a title="CoreDataMigrationVersion Enumeration Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (67% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (69% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -46,9 +46,6 @@
                 <a href="../Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
               </li>
               <li class="nav-group-task">
@@ -67,10 +64,10 @@
                 <a href="../Classes/Event.html">Event</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
+                <a href="../Classes.html#/s:13DataCapturing16EventsSerializerC">EventsSerializer</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/MeasurementEntity.html">MeasurementEntity</a>
+                <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/MeasurementMO.html">MeasurementMO</a>
@@ -114,10 +111,15 @@
                 <a href="../Enums/FileSupportError.html">FileSupportError</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Enums/MeasurementContext.html">MeasurementContext</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Enums/Status.html">Status</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/NSManagedObjectContext.html">NSManagedObjectContext</a>
               </li>
             </ul>
           </li>
@@ -163,7 +165,7 @@
             <h1>CoreDataMigrationVersion</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">CoreDataMigrationVersion</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CaseIterable</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">CoreDataMigrationVersion</span> <span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="kt">CaseIterable</span></code></pre>
 
                 </div>
               </div>
@@ -202,24 +204,20 @@ It is required to start migrations between the different versions.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The first and oldest version of the model.</p>
+                        <p>The first and oldest version of the model</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">version1</span> <span class="o">=</span> <span class="s">"CyfaceModel"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">version1</span> <span class="o">=</span> <span class="s">"CyfaceModel"</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
@@ -233,24 +231,20 @@ It is required to start migrations between the different versions.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The second version of the model.</p>
+                        <p>The second version of the model</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">version2</span> <span class="o">=</span> <span class="s">"2"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">version2</span> <span class="o">=</span> <span class="s">"2"</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
@@ -264,24 +258,20 @@ It is required to start migrations between the different versions.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The third version of the model.</p>
+                        <p>The third version of the model</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">version3</span> <span class="o">=</span> <span class="s">"3"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">version3</span> <span class="o">=</span> <span class="s">"3"</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
@@ -295,24 +285,20 @@ It is required to start migrations between the different versions.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The fourth version of the model.</p>
+                        <p>The fourth version of the model</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">version4</span> <span class="o">=</span> <span class="s">"4"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">version4</span> <span class="o">=</span> <span class="s">"4"</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
@@ -326,24 +312,20 @@ It is required to start migrations between the different versions.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The fifth version of the model.</p>
+                        <p>The fifth version of the model</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">version5</span> <span class="o">=</span> <span class="s">"5"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">version5</span> <span class="o">=</span> <span class="s">"5"</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
@@ -357,24 +339,20 @@ It is required to start migrations between the different versions.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The sixth version of the model.</p>
+                        <p>The sixth version of the model</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">version6</span> <span class="o">=</span> <span class="s">"6"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">version6</span> <span class="o">=</span> <span class="s">"6"</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
@@ -388,14 +366,41 @@ It is required to start migrations between the different versions.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The seventh version of the model.</p>
+                        <p>The seventh version of the model</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">version7</span> <span class="o">=</span> <span class="s">"7"</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">version7</span> <span class="o">=</span> <span class="s">"7"</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing04CoreA16MigrationVersionO8version8yA2CmF"></a>
+                    <a name="//apple_ref/swift/Element/version8" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing04CoreA16MigrationVersionO8version8yA2CmF">version8</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The eight version of the model</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">version8</span> <span class="o">=</span> <span class="s">"8"</span></code></pre>
 
                         </div>
                       </div>
@@ -407,8 +412,8 @@ It is required to start migrations between the different versions.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-08-07)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-10-16)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.11.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>
