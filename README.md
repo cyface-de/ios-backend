@@ -57,6 +57,20 @@ let dcs = try MovebisDataCapturingService(sensorManager: sensorManager, updateIn
 7. Provide a handler for events occuring during data capturing. Possible events are explained below.
 8. Finally create the `DataCapturingService` or `MovebisDataCapturingService` as shown, providing the required parameters.
 
+### The Data Capturing Lifecycle
+
+The lifecycle of capturing a measurement is controlled by the four methods `start(inMode:)`, `pause()`, `resume()` and `stop()`.
+They may be called in arbitrary order and will do as their name promises.
+
+#### Setting and Changing Transportation Modes
+
+The mode of transporation used to caputre a measurement must be provided the the `start(inMode:)` method.
+This is a simple string that is transferred as is to the server.
+Typical transporation modes are "bicycle", "car" and "motorbike".
+
+To change the transportation mode during a measurement, call `changeModality(to:)`.
+For example call `dataCapturingService.changeModality(to: "CAR")`, to change the used transportation mode to a car.
+
 #### Configuring a DataCapturingService
 
 The `DataCapturingService` tries to get as many updates from a devices geo location sensor as possible.
@@ -118,7 +132,10 @@ do {
     os_log("Unable to load locations!")
 }
 ```
-**ATTENTION:** Notice that all locations have been copied to new data objects. This is necessary, as *CoreData* objects are not thread safe and will loose all data upon usage on a different thread. You need to do this with all *CoreData* model objects before using them in your app. *CoreData* model objects currently are `MeasurementMO`, `Track` and `GeoLocationMO`.
+**ATTENTION:** Notice that all locations have been copied to new data objects. 
+This is necessary, as *CoreData* objects are not thread safe and will loose all data upon usage on a different thread. 
+You need to do this with all *CoreData* model objects before using them in your app. 
+*CoreData* model objects currently are `MeasurementMO`, `Event`, `Track` and `GeoLocationMO`.
 
 ### Getting the length of a measurement
 
