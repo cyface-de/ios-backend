@@ -14,7 +14,7 @@
     <a title="DataCapturingEvent Enumeration Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (67% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (69% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -46,9 +46,6 @@
                 <a href="../Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
               </li>
               <li class="nav-group-task">
@@ -67,10 +64,10 @@
                 <a href="../Classes/Event.html">Event</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
+                <a href="../Classes.html#/s:13DataCapturing16EventsSerializerC">EventsSerializer</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/MeasurementEntity.html">MeasurementEntity</a>
+                <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/MeasurementMO.html">MeasurementMO</a>
@@ -114,10 +111,15 @@
                 <a href="../Enums/FileSupportError.html">FileSupportError</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Enums/MeasurementContext.html">MeasurementContext</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Enums/Status.html">Status</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/NSManagedObjectContext.html">NSManagedObjectContext</a>
               </li>
             </ul>
           </li>
@@ -163,21 +165,21 @@
             <h1>DataCapturingEvent</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">DataCapturingEvent</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">DataCapturingEvent</span></code></pre>
 
                 </div>
               </div>
             <p>Events occuring during capturing and transmitting data.</p>
 
 <p>These events may be received by a closure provided to the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code> on calling start.</p>
-<pre class="highlight plaintext"><code>case geoLocationFixAcquired
-case geoLocationFixLost
-case geoLocationAcquired
-case lowDiskSpace
-case serviceStarted
-case serviceStopped
-case synchronizationFinished
-case synchronizationStarted
+<pre class="highlight swift"><code><span class="k">case</span> <span class="n">geoLocationFixAcquired</span>
+<span class="k">case</span> <span class="n">geoLocationFixLost</span>
+<span class="k">case</span> <span class="n">geoLocationAcquired</span>
+<span class="k">case</span> <span class="n">lowDiskSpace</span>
+<span class="k">case</span> <span class="n">serviceStarted</span>
+<span class="k">case</span> <span class="n">serviceStopped</span>
+<span class="k">case</span> <span class="n">synchronizationFinished</span>
+<span class="k">case</span> <span class="n">synchronizationStarted</span>
 </code></pre>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
@@ -219,17 +221,13 @@ case synchronizationStarted
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">geoLocationFixAcquired</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">geoLocationFixAcquired</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
@@ -250,17 +248,13 @@ case synchronizationStarted
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="n">geoLocationFixLost</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="n">geoLocationFixLost</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
@@ -285,17 +279,13 @@ case synchronizationStarted
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="nf">geoLocationAcquired</span><span class="p">(</span><span class="nv">position</span><span class="p">:</span> <span class="kt"><a href="../Structs/GeoLocation.html">GeoLocation</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">geoLocationAcquired</span><span class="p">(</span><span class="nv">position</span><span class="p">:</span> <span class="kt"><a href="../Structs/GeoLocation.html">GeoLocation</a></span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
@@ -321,17 +311,13 @@ How much space is used and how much is available may be retrieved from <code>all
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="nf">lowDiskSpace</span><span class="p">(</span><span class="nv">allocation</span><span class="p">:</span> <span class="kt"><a href="../Classes/DiskConsumption.html">DiskConsumption</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">lowDiskSpace</span><span class="p">(</span><span class="nv">allocation</span><span class="p">:</span> <span class="kt"><a href="../Classes/DiskConsumption.html">DiskConsumption</a></span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
@@ -356,17 +342,44 @@ How much space is used and how much is available may be retrieved from <code>all
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="nf">serviceStarted</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">?)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">serviceStarted</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">?)</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing0aB5EventO14serviceResumedyACs5Int64VSg_tcACmF"></a>
+                    <a name="//apple_ref/swift/Element/serviceResumed(measurement:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB5EventO14serviceResumedyACs5Int64VSg_tcACmF">serviceResumed(measurement:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Used to notify the client application of a successful resume of the <code><a href="../Classes/DataCapturingService.html">DataCapturingService</a></code>.</p>
+
+<ul>
+<li>measurement: The device wide unique identifier of the measurement for which the service has resumed.</li>
+</ul>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">serviceResumed</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">?)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
                 <li class="item">
                   <div>
                     <code>
@@ -391,23 +404,19 @@ How much space is used and how much is available may be retrieved from <code>all
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="nf">serviceStopped</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">?)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">serviceStopped</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">?)</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing0aB5EventO23synchronizationFinishedyAcA17MeasurementEntityC_tcACmF"></a>
+                    <a name="/s:13DataCapturing0aB5EventO23synchronizationFinishedyACs5Int64V_tcACmF"></a>
                     <a name="//apple_ref/swift/Element/synchronizationFinished(measurement:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing0aB5EventO23synchronizationFinishedyAcA17MeasurementEntityC_tcACmF">synchronizationFinished(measurement:)</a>
+                    <a class="token" href="#/s:13DataCapturing0aB5EventO23synchronizationFinishedyACs5Int64V_tcACmF">synchronizationFinished(measurement:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -428,23 +437,19 @@ Please check with the local data storage using a <code><a href="../Classes/Persi
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="nf">synchronizationFinished</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">synchronizationFinished</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing0aB5EventO22synchronizationStartedyAcA17MeasurementEntityC_tcACmF"></a>
+                    <a name="/s:13DataCapturing0aB5EventO22synchronizationStartedyACs5Int64V_tcACmF"></a>
                     <a name="//apple_ref/swift/Element/synchronizationStarted(measurement:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing0aB5EventO22synchronizationStartedyAcA17MeasurementEntityC_tcACmF">synchronizationStarted(measurement:)</a>
+                    <a class="token" href="#/s:13DataCapturing0aB5EventO22synchronizationStartedyACs5Int64V_tcACmF">synchronizationStarted(measurement:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -463,7 +468,7 @@ Please check with the local data storage using a <code><a href="../Classes/Persi
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="k">case</span> <span class="nf">synchronizationStarted</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="k">case</span> <span class="nf">synchronizationStarted</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -475,8 +480,8 @@ Please check with the local data storage using a <code><a href="../Classes/Persi
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-08-07)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-10-16)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.11.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

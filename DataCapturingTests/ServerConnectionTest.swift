@@ -28,7 +28,7 @@ import Alamofire
 
  - Author: Klemens Muthmann
  - Since: 4.0.0
- - Version: 1.0.2
+ - Version: 1.1.0
  */
 class ServerConnectionTest: XCTestCase {
 

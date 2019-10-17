@@ -93,7 +93,7 @@ extension BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 1.0.1
+ - Version: 1.0.2
  */
 class MeasurementSerializer: BinarySerializer {
     /// Binds the Serializeable from the `BinarySerializer` protocol to a measurement.
@@ -219,7 +219,7 @@ class AccelerationSerializer: BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 1.0.0
+ - Version: 1.0.1
  */
 class GeoLocationSerializer: BinarySerializer {
     /// Binds the `Serializeble` from the `BinarySerializer` protocol to an array of geo locations.

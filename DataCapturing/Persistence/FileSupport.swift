@@ -208,7 +208,7 @@ public struct AccelerationsFile: FileSupport {
  Struct implementing the `FileSupport` protocol to serialize whole measurements to a file in Cyface binary format.
 
  - Author: Klemens Muthmann
- - Version: 2.0.1
+ - Version: 2.0.2
  - Since: 2.0.0
  */
 struct MeasurementFile: FileSupport {

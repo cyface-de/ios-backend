@@ -29,13 +29,14 @@ import Foundation
  case geoLocationAcquired
  case lowDiskSpace
  case serviceStarted
+ case serviceResumed
  case serviceStopped
  case synchronizationFinished
  case synchronizationStarted
  ```
  
  - Author: Klemens Muthmann
- - Version: 2.1.0
+ - Version: 3.0.0
  - Since: 1.0.0
  */
 public enum DataCapturingEvent {
