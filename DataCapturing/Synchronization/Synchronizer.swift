@@ -31,7 +31,7 @@ import Alamofire
  For foreground synchronization use `syncChecked()`.
 
  - Author: Klemens Muthmann
- - Version: 3.0.2
+ - Version: 4.0.0
  - Since: 2.3.0
  */
 public class Synchronizer {
@@ -244,17 +244,8 @@ public class Synchronizer {
         }
 
         for measurement in measurements {
-            guard let measurementContextString = measurement.context else {
-                fatalError("Synchronizer.handle(synchronizableMeasurements: \(String(describing: synchronizableMeasurements?.count)), \(status)): Unable to load measurement context from measurement \(measurement.identifier).")
-            }
-            guard let measurementContext = MeasurementContext(rawValue: measurementContextString) else {
-                fatalError("Synchronizer.handle(synchronizableMeasurements: \(String(describing: synchronizableMeasurements?.count)), \(status)): Invalid measurement context: \(measurementContextString) in database.")
-            }
-
-            let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: measurementContext)
-
-            handler(.synchronizationStarted(measurement: measurementEntity), .success)
-            serverConnection.sync(measurement: MeasurementEntity(identifier: measurement.identifier, context: measurementContext), onSuccess: successHandler, onFailure: failureHandler)
+            handler(.synchronizationStarted(measurement: measurement.identifier), .success)
+            serverConnection.sync(measurement: measurement.identifier, onSuccess: successHandler, onFailure: failureHandler)
         }
     }
 
@@ -263,7 +254,7 @@ public class Synchronizer {
 
      - Parameter measurement: The synchronized measurement.
      */
-    private func successHandler(measurement: MeasurementEntity) {
+    private func successHandler(measurement: Int64) {
         do {
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             try cleaner.clean(measurement: measurement, from: persistenceLayer)
@@ -282,8 +273,8 @@ public class Synchronizer {
         - measurement: The measurement for which the synchronization failed.
         - error: The error causing the failure.
      */
-    private func failureHandler(measurement: MeasurementEntity, error: Error) {
-        os_log("Unable to upload data for measurement: %@!", log: Synchronizer.log, type: .error, NSNumber(value: measurement.identifier))
+    private func failureHandler(measurement: Int64, error: Error) {
+        os_log("Unable to upload data for measurement: %@!", log: Synchronizer.log, type: .error, NSNumber(value: measurement))
         os_log("Error: %@", log: Synchronizer.log, type: .error, error.localizedDescription)
         handler(.synchronizationFinished(measurement: measurement), .error(error))
         synchronizationFinishedHandler()
@@ -327,7 +318,7 @@ public protocol Cleaner {
         - Some unspecified errors from within CoreData.
         - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
      */
-    func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer) throws
+    func clean(measurement: Int64, from persistenceLayer: PersistenceLayer) throws
 }
 
 /**
@@ -344,7 +335,7 @@ public class DeletionCleaner: Cleaner {
         // Nothing to do here
     }
 
-    public func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer) throws {
+    public func clean(measurement: Int64, from persistenceLayer: PersistenceLayer) throws {
         try persistenceLayer.delete(measurement: measurement)
     }
 }
@@ -363,7 +354,7 @@ public class AccelerationPointRemovalCleaner: Cleaner {
         // Nothing to do here
     }
 
-    public func clean(measurement: MeasurementEntity, from persistenceLayer: PersistenceLayer) throws {
+    public func clean(measurement: Int64, from persistenceLayer: PersistenceLayer) throws {
         try persistenceLayer.clean(measurement: measurement)
     }
 }

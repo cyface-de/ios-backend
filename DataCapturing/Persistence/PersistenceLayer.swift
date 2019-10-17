@@ -33,7 +33,7 @@ import os.log
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 5.2.0
+ - Version: 6.0.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
@@ -103,12 +103,12 @@ public class PersistenceLayer {
 
      - Parameters:
         - at: The time the measurement has been started at in milliseconds since the first of january 1970 (epoch).
-        - withContext: The measurement context the new measurement is created in.
+        - inMode: The transportation mode the new measurement is created in.
      - Returns: The newly created model object for the measurement.
      - Throws:
-        - Some unspecified errors from within CoreData.
+        - Some unspecified errors from within *CoreData*.
      */
-    func createMeasurement(at timestamp: Int64, withContext mContext: MeasurementContext) throws -> MeasurementMO {
+    func createMeasurement(at timestamp: Int64, inMode mode: String) throws -> MeasurementMO {
         let context = getContext()
         // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
         var identifier = self.nextIdentifier
@@ -122,7 +122,10 @@ public class PersistenceLayer {
             measurement.identifier = identifier
             measurement.synchronized = false
             measurement.synchronizable = false
-            measurement.context = mContext.rawValue
+            let initialModalityChange = createEvent(of: .modalityTypeChange, withValue: mode)
+            initialModalityChange.measurement = measurement
+            measurement.addToEvents(initialModalityChange)
+            print("saving")
             context.saveRecursively()
 
             context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
@@ -156,13 +159,16 @@ public class PersistenceLayer {
     /**
      Creates a new `Event` at the current time.
 
-     - Parameter of: The type of the logged `Event`.
+     - Parameters:
+        - of: The type of the logged `Event`.
+        - withValue: An optional value providing further information about the event
      */
-    func createEvent(of type: EventType) -> Event {
+    public func createEvent(of type: EventType, withValue: String? = nil) -> Event {
         let context = getContext()
         let event = Event.init(context: context)
         event.typeEnum = type
         event.time = NSDate(timeIntervalSince1970: Double(DataCapturingService.currentTimeInMillisSince1970()) / 1000.0)
+        event.value = withValue
 
         return event
     }
@@ -177,10 +183,10 @@ public class PersistenceLayer {
         - Some unspecified errors from within CoreData.
         - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
      */
-    public func delete(measurement: MeasurementEntity) throws {
+    public func delete(measurement: Int64) throws {
         let context = getContext()
-        let measurementIdentifier = measurement.identifier
-        guard let measurement = try load(measurementIdentifiedBy: measurement.identifier, from: context) else {
+        let measurementIdentifier = measurement
+        guard let measurement = try load(measurementIdentifiedBy: measurement, from: context) else {
             throw PersistenceError(type: .measurementNotLoadable(measurementIdentifier), verboseDescription: "Unable to load measurement \(measurementIdentifier) from context \(context.name ?? "no name")!", inMethodName: #function, inFileName: #file, atLineNumber: #line)
         }
 
@@ -211,6 +217,17 @@ public class PersistenceLayer {
     }
 
     /**
+     Deletes one event from the database.
+
+     - Parameter event: The event to delete
+     */
+    public func delete(event: Event) {
+        let context = getContext()
+        context.delete(event)
+        context.saveRecursively()
+    }
+
+    /**
      Strips the provided measurement of all accelerations.
      
      - Parameter measurement: The measurement to strip of accelerations
@@ -219,9 +236,9 @@ public class PersistenceLayer {
         - Some unspecified errors from within CoreData.
         - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
      */
-    func clean(measurement: MeasurementEntity) throws {
+    func clean(measurement: Int64) throws {
         let context = getContext()
-        let measurementIdentifier = measurement.identifier
+        let measurementIdentifier = measurement
         guard let measurement = try load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
             throw PersistenceError(type: .measurementNotLoadable(measurementIdentifier), verboseDescription: "Unable to load measurement \(measurementIdentifier) from context \(context.name ?? "no name")! Measurement does not exist!", inMethodName: #function, inFileName: #file, atLineNumber: #line)
         }
@@ -238,8 +255,8 @@ public class PersistenceLayer {
      Stores the provided `locations` to the most recent track in the measurement. Please make sure to call `appendNewTrack(:to)` with the same measurement at least once before using this method.
 
      - Parameters:
-     - locations: An array of `GeoLocation` instances, ordered by timestamp to store in the database.
-     - in: The measurement to store the `location` and `accelerations` to.
+        - locations: An array of `GeoLocation` instances, ordered by timestamp to store in the database.
+        - in: The measurement to store the `location` and `accelerations` to.
      - Throws:
         - `PersistenceError` If no valid `Track` was available.
         - Some unspecified errors from within CoreData.
@@ -408,6 +425,22 @@ public class PersistenceLayer {
     }
 
     /**
+     Retrieves the list of all events of a certain `EventType` belonging to a `MeasurementMO` from the database.
+
+     - Parameter typed: The `EventType` to load the `Event` objects for
+     - Parameter forMeasurement: The `MeasurementMO` object the loaded `Event` objects belong to
+     */
+    public func loadEvents(typed type: EventType, forMeasurement measurement: MeasurementMO) throws -> [Event] {
+        let context = getContext()
+        let measurement = migrate(measurement: measurement, to: context)
+        let request: NSFetchRequest<Event> = Event.fetchRequest()
+        request.predicate = NSPredicate(format: "type == %@ AND measurement == %@", argumentArray: [type.rawValue, measurement])
+        request.sortDescriptors = [NSSortDescriptor(key: "time", ascending: true)]
+        let fetchResult = try context.fetch(request)
+        return fetchResult
+    }
+
+    /**
      Counts the amount of measurements currently stored in the data store.
 
      - Returns: The count of measurements currently stored on this device.
@@ -418,6 +451,22 @@ public class PersistenceLayer {
         let context = getContext()
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         let count = try context.count(for: request)
+        return count
+    }
+
+    /**
+     Counts the number of geo locations from a certain measurement.
+
+     - Parameter measurement: The measurement to count the geo locations for
+     - Returns: The count of locations measured in the measurement
+     */
+    public func countGeoLocations(forMeasurement measurement: MeasurementMO) throws -> Int {
+        let context = getContext()
+
+        let locationRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
+        locationRequest.predicate = NSPredicate(format: "track.measurement = %@", measurement)
+
+        let count = try context.count(for: locationRequest)
         return count
     }
 
@@ -511,6 +560,30 @@ public class PersistenceLayer {
         }
         return ret
     }
+
+    /**
+     Traverses all tracks captured as part of a measurement and provides each track and geo location to a callback.
+
+     - Parameters:
+        - ofMeasurement: The measurement to traverse the tracks for
+        - call: A callback function receiving the track and geo location pairs
+     */
+    public static func traverseTracks(ofMeasurement measurement: MeasurementMO, call closure: (Track, GeoLocationMO) -> Void) {
+        guard let tracks = measurement.tracks?.array as? [Track] else {
+            fatalError()
+        }
+
+        for track in tracks {
+            guard let locations = track.locations?.array as? [GeoLocationMO] else {
+                fatalError()
+            }
+
+            guard !locations.isEmpty else {
+                continue
+            }
+            locations.forEach { location in closure(track, location) }
+        }
+    }
 }
 
 /**
@@ -521,7 +594,7 @@ extension NSManagedObjectContext {
     /**
      Saves this context and all parent contexts if there are changes.
      */
-    func saveRecursively() {
+    public func saveRecursively() {
         performAndWait {
             if self.hasChanges {
                 self.saveThisAndParentContexts()

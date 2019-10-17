@@ -10,10 +10,11 @@
     
   </head>
   <body>
+    <a name="//apple_ref/swift/Section/Classes" class="dashAnchor"></a>
     <a title="Classes  Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="index.html">DataCapturing Docs</a> (67% documented)</p>
+        <p><a href="index.html">DataCapturing Docs</a> (69% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -45,9 +46,6 @@
                 <a href="Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
               </li>
               <li class="nav-group-task">
-                <a href="Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="Classes/DataCapturingService.html">DataCapturingService</a>
               </li>
               <li class="nav-group-task">
@@ -66,10 +64,10 @@
                 <a href="Classes/Event.html">Event</a>
               </li>
               <li class="nav-group-task">
-                <a href="Classes/GeoLocationMO.html">GeoLocationMO</a>
+                <a href="Classes.html#/s:13DataCapturing16EventsSerializerC">EventsSerializer</a>
               </li>
               <li class="nav-group-task">
-                <a href="Classes/MeasurementEntity.html">MeasurementEntity</a>
+                <a href="Classes/GeoLocationMO.html">GeoLocationMO</a>
               </li>
               <li class="nav-group-task">
                 <a href="Classes/MeasurementMO.html">MeasurementMO</a>
@@ -113,10 +111,15 @@
                 <a href="Enums/FileSupportError.html">FileSupportError</a>
               </li>
               <li class="nav-group-task">
-                <a href="Enums/MeasurementContext.html">MeasurementContext</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="Enums/Status.html">Status</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Extensions/NSManagedObjectContext.html">NSManagedObjectContext</a>
               </li>
             </ul>
           </li>
@@ -169,175 +172,6 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing04CoreA7ManagerC"></a>
-                    <a name="//apple_ref/swift/Class/CoreDataManager" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing04CoreA7ManagerC">CoreDataManager</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>A class for objects representing a <em>CoreData</em> stack.
-Please call <code>setup(bundle:)</code> before using an object of this class.
-That call will run data migration if necessary and might take some time depending on the amount of data that must be migrated.
-So it might be a good idea to run <code>setup(bundle:)</code> on a background thread.</p>
-<div class="aside aside-author">
-    <p class="aside-title">Author</p>
-    Klemens Muthmann
-
-</div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    1.0.0
-
-</div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    4.0.0
-
-</div>
-<div class="aside aside-attention">
-    <p class="aside-title">Attention</p>
-    Do not load or save any data before the call to <code>setup(bundle:)</code> has finished.
-
-</div>
-
-                        <a href="Classes/CoreDataManager.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">CoreDataManager</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing24CredentialsAuthenticatorC"></a>
-                    <a name="//apple_ref/swift/Class/CredentialsAuthenticator" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing24CredentialsAuthenticatorC">CredentialsAuthenticator</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>An authenticator using a combination of <code>username</code> and <code>password</code> to authenticate against a Cyface data collector server.</p>
-
-<p>After creation of an instance of this class you need to provide a <code>username</code> and a <code>password</code>, before calling <code>authenticate</code>()<code>.
-If no</code>username<code>or</code>password<code>is available the function will call its failure handler with the</code>ServerConnectionError.Category.notAuthenticated`.</p>
-<div class="aside aside-author">
-    <p class="aside-title">Author</p>
-    Klemens Muthmann
-
-</div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    2.0.0
-
-</div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    2.0.0
-
-</div>
-
-                        <a href="Classes/CredentialsAuthenticator.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">CredentialsAuthenticator</span><span class="p">:</span> <span class="kt"><a href="Protocols/Authenticator.html">Authenticator</a></span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@M@DataCapturing@objc(cs)Track"></a>
-                    <a name="//apple_ref/swift/Class/Track" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@DataCapturing@objc(cs)Track">Track</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                        <a href="Classes/Track.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">Track</span><span class="p">:</span> <span class="kt">NSManagedObject</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@M@DataCapturing@objc(cs)MeasurementMO"></a>
-                    <a name="//apple_ref/swift/Class/MeasurementMO" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@DataCapturing@objc(cs)MeasurementMO">MeasurementMO</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Undocumented</p>
-
-                        <a href="Classes/MeasurementMO.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">MeasurementMO</span><span class="p">:</span> <span class="kt">NSManagedObject</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
                     <a name="/c:@M@DataCapturing@objc(cs)DataCapturingService"></a>
                     <a name="//apple_ref/swift/Class/DataCapturingService" class="dashAnchor"></a>
                     <a class="token" href="#/c:@M@DataCapturing@objc(cs)DataCapturingService">DataCapturingService</a>
@@ -371,7 +205,7 @@ If no</code>username<code>or</code>password<code>is available the function will 
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DataCapturingService</span><span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DataCapturingService</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                         </div>
                       </div>
@@ -385,9 +219,9 @@ If no</code>username<code>or</code>password<code>is available the function will 
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@DataCapturing@objc(cs)GeoLocationMO"></a>
-                    <a name="//apple_ref/swift/Class/GeoLocationMO" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@DataCapturing@objc(cs)GeoLocationMO">GeoLocationMO</a>
+                    <a name="/s:13DataCapturing15DiskConsumptionC"></a>
+                    <a name="//apple_ref/swift/Class/DiskConsumption" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing15DiskConsumptionC">DiskConsumption</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -395,47 +229,7 @@ If no</code>username<code>or</code>password<code>is available the function will 
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
-
-                        <a href="Classes/GeoLocationMO.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">GeoLocationMO</span><span class="p">:</span> <span class="kt">NSManagedObject</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing16PersistenceLayerC"></a>
-                    <a name="//apple_ref/swift/Class/PersistenceLayer" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC">PersistenceLayer</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and accelerations.</p>
-
-<p>All entities produced by a <code>PersistenceLayer</code> are not thread save and thus should not be used outside the calling thread.
-If multiple calls to this API are necessary, it is necessary to set an <code>NSManagedObjectContext</code> for the property <code><a href="Classes/PersistenceLayer.html#/s:13DataCapturing16PersistenceLayerC7contextSo22NSManagedObjectContextCSgvp">PersistenceLayer.context</a></code>.
-The creation of this context needs to be carried out on the same thread as the API calls.</p>
-
-<p>A valid usage pattern is to create a new <code>PersistenceLayer</code> instance as part of a custom method accessing the data storage and initialize the API. Using a <code>PersistenceLayer</code> as global state can result in strange errors resulting from CoreData.</p>
-
-<p>Read access is public while manipulation of the data stored is restricted to the framework.</p>
+                        <p>Objects of this class represent the current disk (or rather SD card) space used and available.</p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -443,22 +237,25 @@ The creation of this context needs to be carried out on the same thread as the A
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    5.2.0
-
-</div>
+    1.0.0
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
     1.0.0
 
 </div>
 
-                        <a href="Classes/PersistenceLayer.html" class="slightly-smaller">See more</a>
+</div>
+
+<p>This space is mostly filled with unsynchronized <code>Measurement</code>s.
+To avoid filling up the users SD card it is advisable to delte <code>Measurement</code>s as soon as they use up too much space.</p>
+
+                        <a href="Classes/DiskConsumption.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">PersistenceLayer</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DiskConsumption</span></code></pre>
 
                         </div>
                       </div>
@@ -512,112 +309,7 @@ The creation of this context needs to be carried out on the same thread as the A
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DefaultDistanceCalculationStrategy</span><span class="p">:</span> <span class="kt"><a href="Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a></span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@M@DataCapturing@objc(cs)MovebisDataCapturingService"></a>
-                    <a name="//apple_ref/swift/Class/MovebisDataCapturingService" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@DataCapturing@objc(cs)MovebisDataCapturingService">MovebisDataCapturingService</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>A <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code> implementation that provides the ability to capture locations
-before an actual measurement has been started.</p>
-
-<p>To receive the updates set the <code>preCapturingLocationDelegate</code>.
-The instance you provide will receive the updates.</p>
-<div class="aside aside-author">
-    <p class="aside-title">Author</p>
-    Klemens Muthmann
-
-</div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    4.2.2
-
-</div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    1.0.0
-
-</div>
-
-                        <a href="Classes/MovebisDataCapturingService.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">MovebisDataCapturingService</span><span class="p">:</span> <span class="kt"><a href="Classes/DataCapturingService.html">DataCapturingService</a></span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Implementation2"></a>
-                <a name="//apple_ref/swift/Section/Implementation" class="dashAnchor"></a>
-                <a href="#/Implementation2">
-                  <h3 class="section-name">Implementation</h3>
-                </a>
-              </div>
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing28CyfaceBinaryFormatSerializerC"></a>
-                    <a name="//apple_ref/swift/Class/CyfaceBinaryFormatSerializer" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing28CyfaceBinaryFormatSerializerC">CyfaceBinaryFormatSerializer</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Transforms measurement data into the Cyface binary format used for transmission via the network.</p>
-<div class="aside aside-author">
-    <p class="aside-title">Author</p>
-    Klemens Muthmann
-
-</div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    1.1.0
-
-</div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    1.0.0
-
-</div>
-
-                        <a href="Classes/CyfaceBinaryFormatSerializer.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">CyfaceBinaryFormatSerializer</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DefaultDistanceCalculationStrategy</span> <span class="p">:</span> <span class="kt"><a href="Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a></span></code></pre>
 
                         </div>
                       </div>
@@ -671,61 +363,7 @@ The instance you provide will receive the updates.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">Acceleration</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <ul>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing16ServerConnectionC"></a>
-                    <a name="//apple_ref/swift/Class/ServerConnection" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing16ServerConnectionC">ServerConnection</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Realizes a connection to a Cyface Collector server.</p>
-
-<p>An object of this class realizes a connection between an iOS app capturing some data and a Cyface Collector server receiving that data.
-The data is transmitted using HTTPS in chunks of one measurement.
-The transmission format is compressed Cyface binary format.
-The cyface binary format is created by a <code><a href="Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a></code>.</p>
-
-<p>This implementation follows code published here: <a href="https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63">https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63</a></p>
-<div class="aside aside-author">
-    <p class="aside-title">Author</p>
-    Klemens Muthmann
-
-</div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    7.0.1
-
-</div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    1.0.0
-
-</div>
-
-                        <a href="Classes/ServerConnection.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">ServerConnection</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">Acceleration</span></code></pre>
 
                         </div>
                       </div>
@@ -757,7 +395,8 @@ The cyface binary format is created by a <code><a href="Classes/CyfaceBinaryForm
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">Event</span><span class="p">:</span> <span class="kt">NSManagedObject</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span><span class="p">(</span><span class="kt">Event</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">Event</span> <span class="p">:</span> <span class="kt">NSManagedObject</span></code></pre>
 
                         </div>
                       </div>
@@ -771,9 +410,9 @@ The cyface binary format is created by a <code><a href="Classes/CyfaceBinaryForm
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing12SynchronizerC"></a>
-                    <a name="//apple_ref/swift/Class/Synchronizer" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing12SynchronizerC">Synchronizer</a>
+                    <a name="/c:@M@DataCapturing@objc(cs)GeoLocationMO"></a>
+                    <a name="//apple_ref/swift/Class/GeoLocationMO" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@DataCapturing@objc(cs)GeoLocationMO">GeoLocationMO</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -781,122 +420,16 @@ The cyface binary format is created by a <code><a href="Classes/CyfaceBinaryForm
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.</p>
+                        <p>Undocumented</p>
 
-<p>An object of this call can be used to synchronize data either in the foreground or in the background.
-Background synchronization happens only if the synchronizing device has an active Wifi connection.
-To activate background synchronization you need to call the <code>activate</code> method.
-Background synchronization is called as soon as WiFi becomes available or every 60 minutes.
-For foreground synchronization use <code>syncChecked()</code>.</p>
-<div class="aside aside-author">
-    <p class="aside-title">Author</p>
-    Klemens Muthmann
-
-</div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    3.0.2
-
-</div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    2.3.0
-
-</div>
-
-                        <a href="Classes/Synchronizer.html" class="slightly-smaller">See more</a>
+                        <a href="Classes/GeoLocationMO.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">Synchronizer</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing15DeletionCleanerC"></a>
-                    <a name="//apple_ref/swift/Class/DeletionCleaner" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing15DeletionCleanerC">DeletionCleaner</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>A cleaner removing each synchronized measurement from the database completely.</p>
-<div class="aside aside-author">
-    <p class="aside-title">Author</p>
-    Klemens Muthmann
-
-</div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    2.0.0
-
-</div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    2.3.0
-
-</div>
-
-                        <a href="Classes/DeletionCleaner.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DeletionCleaner</span><span class="p">:</span> <span class="kt"><a href="Protocols/Cleaner.html">Cleaner</a></span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:13DataCapturing31AccelerationPointRemovalCleanerC"></a>
-                    <a name="//apple_ref/swift/Class/AccelerationPointRemovalCleaner" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing31AccelerationPointRemovalCleanerC">AccelerationPointRemovalCleaner</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>A cleaner removing only the accelerations from each synchronized measurement, thus keeping the track information available.</p>
-<div class="aside aside-author">
-    <p class="aside-title">Author</p>
-    Klemens Muthmann
-
-</div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    2.0.0
-
-</div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    2.3.0
-
-</div>
-
-                        <a href="Classes/AccelerationPointRemovalCleaner.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">AccelerationPointRemovalCleaner</span><span class="p">:</span> <span class="kt"><a href="Protocols/Cleaner.html">Cleaner</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span><span class="p">(</span><span class="kt">GeoLocationMO</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">GeoLocationMO</span> <span class="p">:</span> <span class="kt">NSManagedObject</span></code></pre>
 
                         </div>
                       </div>
@@ -910,9 +443,9 @@ For foreground synchronization use <code>syncChecked()</code>.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing19DefaultTrackCleanerC"></a>
-                    <a name="//apple_ref/swift/Class/DefaultTrackCleaner" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing19DefaultTrackCleanerC">DefaultTrackCleaner</a>
+                    <a name="/c:@M@DataCapturing@objc(cs)MeasurementMO"></a>
+                    <a name="//apple_ref/swift/Class/MeasurementMO" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@DataCapturing@objc(cs)MeasurementMO">MeasurementMO</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -920,29 +453,16 @@ For foreground synchronization use <code>syncChecked()</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <div class="aside aside-author">
-    <p class="aside-title">Author</p>
-    Klemens Muthmann
+                        <p>Undocumented</p>
 
-</div>
-<div class="aside aside-version">
-    <p class="aside-title">Version</p>
-    1.0.0
-
-</div>
-<div class="aside aside-since">
-    <p class="aside-title">Since</p>
-    4.5.0
-
-</div>
-
-                        <a href="Classes/DefaultTrackCleaner.html" class="slightly-smaller">See more</a>
+                        <a href="Classes/MeasurementMO.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DefaultTrackCleaner</span><span class="p">:</span> <span class="kt"><a href="Protocols/TrackCleaner.html">TrackCleaner</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span><span class="p">(</span><span class="kt">MeasurementMO</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MeasurementMO</span> <span class="p">:</span> <span class="kt">NSManagedObject</span></code></pre>
 
                         </div>
                       </div>
@@ -956,9 +476,9 @@ For foreground synchronization use <code>syncChecked()</code>.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing15DiskConsumptionC"></a>
-                    <a name="//apple_ref/swift/Class/DiskConsumption" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing15DiskConsumptionC">DiskConsumption</a>
+                    <a name="/s:13DataCapturing04CoreA7ManagerC"></a>
+                    <a name="//apple_ref/swift/Class/CoreDataManager" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing04CoreA7ManagerC">CoreDataManager</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -966,7 +486,10 @@ For foreground synchronization use <code>syncChecked()</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Objects of this class represent the current disk (or rather SD card) space used and available.</p>
+                        <p>A class for objects representing a <em>CoreData</em> stack.
+Please call <code>setup(bundle:)</code> before using an object of this class.
+That call will run data migration if necessary and might take some time depending on the amount of data that must be migrated.
+So it might be a good idea to run <code>setup(bundle:)</code> on a background thread.</p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
     Klemens Muthmann
@@ -975,24 +498,26 @@ For foreground synchronization use <code>syncChecked()</code>.</p>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
     1.0.0
+
+</div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
-    1.0.0
+    4.0.0
+
+</div>
+<div class="aside aside-attention">
+    <p class="aside-title">Attention</p>
+    Do not load or save any data before the call to <code>setup(bundle:)</code> has finished.
 
 </div>
 
-</div>
-
-<p>This space is mostly filled with unsynchronized <code>Measurement</code>s.
-To avoid filling up the users SD card it is advisable to delte <code>Measurement</code>s as soon as they use up too much space.</p>
-
-                        <a href="Classes/DiskConsumption.html" class="slightly-smaller">See more</a>
+                        <a href="Classes/CoreDataManager.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DiskConsumption</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">CoreDataManager</span></code></pre>
 
                         </div>
                       </div>
@@ -1039,7 +564,303 @@ To avoid filling up the users SD card it is advisable to delte <code>Measurement
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">CoreDataMigrator</span><span class="p">:</span> <span class="kt"><a href="Protocols/CoreDataMigratorProtocol.html">CoreDataMigratorProtocol</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">CoreDataMigrator</span> <span class="p">:</span> <span class="kt"><a href="Protocols/CoreDataMigratorProtocol.html">CoreDataMigratorProtocol</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@DataCapturing@objc(cs)Track"></a>
+                    <a name="//apple_ref/swift/Class/Track" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@DataCapturing@objc(cs)Track">Track</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Classes/Track.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span><span class="p">(</span><span class="kt">Track</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">Track</span> <span class="p">:</span> <span class="kt">NSManagedObject</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@DataCapturing@objc(cs)MovebisDataCapturingService"></a>
+                    <a name="//apple_ref/swift/Class/MovebisDataCapturingService" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@DataCapturing@objc(cs)MovebisDataCapturingService">MovebisDataCapturingService</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code> implementation that provides the ability to capture locations
+before an actual measurement has been started.</p>
+
+<p>To receive the updates set the <code>preCapturingLocationDelegate</code>.
+The instance you provide will receive the updates.</p>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    4.2.2
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    1.0.0
+
+</div>
+
+                        <a href="Classes/MovebisDataCapturingService.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">MovebisDataCapturingService</span> <span class="p">:</span> <span class="kt"><a href="Classes/DataCapturingService.html">DataCapturingService</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Implementation2"></a>
+                <a name="//apple_ref/swift/Section/Implementation" class="dashAnchor"></a>
+                <a href="#/Implementation2">
+                  <h3 class="section-name">Implementation</h3>
+                </a>
+              </div>
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing16EventsSerializerC"></a>
+                    <a name="//apple_ref/swift/Class/EventsSerializer" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing16EventsSerializerC">EventsSerializer</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Serializes a list of events to an events file.</p>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    1.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    5.0.0
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">EventsSerializer</span> <span class="p">:</span> <span class="kt">BinarySerializer</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing16PersistenceLayerC"></a>
+                    <a name="//apple_ref/swift/Class/PersistenceLayer" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC">PersistenceLayer</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and accelerations.</p>
+
+<p>All entities produced by a <code>PersistenceLayer</code> are not thread save and thus should not be used outside the calling thread.
+If multiple calls to this API are necessary, it is necessary to set an <code>NSManagedObjectContext</code> for the property <code><a href="Classes/PersistenceLayer.html#/s:13DataCapturing16PersistenceLayerC7contextSo22NSManagedObjectContextCSgvp">PersistenceLayer.context</a></code>.
+The creation of this context needs to be carried out on the same thread as the API calls.</p>
+
+<p>A valid usage pattern is to create a new <code>PersistenceLayer</code> instance as part of a custom method accessing the data storage and initialize the API. Using a <code>PersistenceLayer</code> as global state can result in strange errors resulting from CoreData.</p>
+
+<p>Read access is public while manipulation of the data stored is restricted to the framework.</p>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    5.3.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    1.0.0
+
+</div>
+
+                        <a href="Classes/PersistenceLayer.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">PersistenceLayer</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing24CredentialsAuthenticatorC"></a>
+                    <a name="//apple_ref/swift/Class/CredentialsAuthenticator" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing24CredentialsAuthenticatorC">CredentialsAuthenticator</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>An authenticator using a combination of <code>username</code> and <code>password</code> to authenticate against a Cyface data collector server.</p>
+
+<p>After creation of an instance of this class you need to provide a <code>username</code> and a <code>password</code>, before calling <code>authenticate</code>()<code>.
+If no</code>username<code>or</code>password<code>is available the function will call its failure handler with the</code>ServerConnectionError.Category.notAuthenticated`.</p>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    2.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    2.0.0
+
+</div>
+
+                        <a href="Classes/CredentialsAuthenticator.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">CredentialsAuthenticator</span> <span class="p">:</span> <span class="kt"><a href="Protocols/Authenticator.html">Authenticator</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing16ServerConnectionC"></a>
+                    <a name="//apple_ref/swift/Class/ServerConnection" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing16ServerConnectionC">ServerConnection</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Realizes a connection to a Cyface Collector server.</p>
+
+<p>An object of this class realizes a connection between an iOS app capturing some data and a Cyface Collector server receiving that data.
+The data is transmitted using HTTPS in chunks of one measurement.
+The transmission format is compressed Cyface binary format.
+The cyface binary format is created by a <code>CyfaceBinaryFormatSerializer</code>.</p>
+
+<p>This implementation follows code published here: <a href="https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63">https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63</a></p>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    7.0.1
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    1.0.0
+
+</div>
+
+                        <a href="Classes/ServerConnection.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">ServerConnection</span></code></pre>
 
                         </div>
                       </div>
@@ -1092,7 +913,7 @@ If this is not the case, API calls based on this authenticator are going to fail
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">StaticAuthenticator</span><span class="p">:</span> <span class="kt"><a href="Protocols/Authenticator.html">Authenticator</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">StaticAuthenticator</span> <span class="p">:</span> <span class="kt"><a href="Protocols/Authenticator.html">Authenticator</a></span></code></pre>
 
                         </div>
                       </div>
@@ -1106,9 +927,9 @@ If this is not the case, API calls based on this authenticator are going to fail
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing17MeasurementEntityC"></a>
-                    <a name="//apple_ref/swift/Class/MeasurementEntity" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing17MeasurementEntityC">MeasurementEntity</a>
+                    <a name="/s:13DataCapturing12SynchronizerC"></a>
+                    <a name="//apple_ref/swift/Class/Synchronizer" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing12SynchronizerC">Synchronizer</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -1116,37 +937,168 @@ If this is not the case, API calls based on this authenticator are going to fail
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Represents one measurement carried out by the Cyface SDK.</p>
+                        <p>An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.</p>
 
-<p>A measurement is a track of geo locations and associated accelerations.</p>
-<div class="aside aside-remark">
-    <p class="aside-title">Remark</p>
-    <p>DO NOT confuse this class with CoreData generated model object <code><a href="Classes/MeasurementMO.html">MeasurementMO</a></code>. Since the model object is not thread safe you should use an instance of this class if you hand data between processes.</p>
-
-</div>
+<p>An object of this call can be used to synchronize data either in the foreground or in the background.
+Background synchronization happens only if the synchronizing device has an active Wifi connection.
+To activate background synchronization you need to call the <code>activate</code> method.
+Background synchronization is called as soon as WiFi becomes available or every 60 minutes.
+For foreground synchronization use <code>syncChecked()</code>.</p>
 <div class="aside aside-author">
     <p class="aside-title">Author</p>
-    <p>Klemens Muthmann</p>
+    Klemens Muthmann
 
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    <p>1.0.0</p>
+    3.0.2
 
 </div>
 <div class="aside aside-since">
     <p class="aside-title">Since</p>
-    <p>1.0.0</p>
+    2.3.0
 
 </div>
 
-                        <a href="Classes/MeasurementEntity.html" class="slightly-smaller">See more</a>
+                        <a href="Classes/Synchronizer.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">MeasurementEntity</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">Synchronizer</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing15DeletionCleanerC"></a>
+                    <a name="//apple_ref/swift/Class/DeletionCleaner" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing15DeletionCleanerC">DeletionCleaner</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A cleaner removing each synchronized measurement from the database completely.</p>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    2.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    2.3.0
+
+</div>
+
+                        <a href="Classes/DeletionCleaner.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DeletionCleaner</span> <span class="p">:</span> <span class="kt"><a href="Protocols/Cleaner.html">Cleaner</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing31AccelerationPointRemovalCleanerC"></a>
+                    <a name="//apple_ref/swift/Class/AccelerationPointRemovalCleaner" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing31AccelerationPointRemovalCleanerC">AccelerationPointRemovalCleaner</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>A cleaner removing only the accelerations from each synchronized measurement, thus keeping the track information available.</p>
+<div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    2.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    2.3.0
+
+</div>
+
+                        <a href="Classes/AccelerationPointRemovalCleaner.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">AccelerationPointRemovalCleaner</span> <span class="p">:</span> <span class="kt"><a href="Protocols/Cleaner.html">Cleaner</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing19DefaultTrackCleanerC"></a>
+                    <a name="//apple_ref/swift/Class/DefaultTrackCleaner" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing19DefaultTrackCleanerC">DefaultTrackCleaner</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-author">
+    <p class="aside-title">Author</p>
+    Klemens Muthmann
+
+</div>
+<div class="aside aside-version">
+    <p class="aside-title">Version</p>
+    1.0.0
+
+</div>
+<div class="aside aside-since">
+    <p class="aside-title">Since</p>
+    4.5.0
+
+</div>
+
+                        <a href="Classes/DefaultTrackCleaner.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DefaultTrackCleaner</span> <span class="p">:</span> <span class="kt"><a href="Protocols/TrackCleaner.html">TrackCleaner</a></span></code></pre>
 
                         </div>
                       </div>
@@ -1158,8 +1110,8 @@ If this is not the case, API calls based on this authenticator are going to fail
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-08-07)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-10-16)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.11.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

@@ -20,6 +20,7 @@
 import Foundation
 import Alamofire
 import os.log
+import CoreData
 
 /**
  Realizes a connection to a Cyface Collector server.
@@ -32,7 +33,7 @@ import os.log
  This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
 
  - Author: Klemens Muthmann
- - Version: 7.0.1
+ - Version: 8.0.0
  - Since: 1.0.0
  */
 public class ServerConnection {
@@ -95,7 +96,7 @@ public class ServerConnection {
         - onSuccess: The handler to call, when synchronization has succeeded. This handler is provided with the synchronized `MeasurementEntity`.
         - onFailure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The `MeasurementEntity` is the same as the one provided as parameter to this method.
      */
-    public func sync(measurement: MeasurementEntity, onSuccess success: @escaping ((MeasurementEntity) -> Void) = {_ in }, onFailure failure: @escaping ((MeasurementEntity, Error) -> Void) = {_, _ in }) {
+    public func sync(measurement: Int64, onSuccess success: @escaping ((Int64) -> Void) = {_ in }, onFailure failure: @escaping ((Int64, Error) -> Void) = {_, _ in }) {
 
         authenticator.authenticate(onSuccess: {jwtToken in
             self.onAuthenticated(token: jwtToken, measurement: measurement, onSuccess: success, onFailure: failure)
@@ -114,9 +115,10 @@ public class ServerConnection {
         - onSuccess: Called after successful data transmission with information about which measurement was transmitted.
         - onFailure: Called after a failed data transmission with information about which measurement failed and the error.
      */
-    func onAuthenticated(token: String, measurement: MeasurementEntity, onSuccess: @escaping (MeasurementEntity) -> Void, onFailure: @escaping (MeasurementEntity, Error) -> Void) {
+    func onAuthenticated(token: String, measurement: Int64, onSuccess: @escaping (Int64) -> Void, onFailure: @escaping (Int64, Error) -> Void) {
         let url = apiURL.appendingPathComponent("measurements")
         let headers: HTTPHeaders = [
+            "accept": "*/*",
             "Authorization": "Bearer \(token)",
             "Content-type": "multipart/form-data"
         ]
@@ -129,6 +131,7 @@ public class ServerConnection {
                 os_log("Encoding data failed! Error %{PUBLIC}@", log: ServerConnection.osLog, type: .error, error.localizedDescription)
             }
         }
+        os_log("Transmitting measurement to URL %{PUBLIC}@!", log: ServerConnection.osLog, type: .debug, url.absoluteString)
         Networking.sharedInstance.backgroundSessionManager.upload(multipartFormData: encode, usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold, to: url, method: .post, headers: headers, encodingCompletion: {encodingResult in
             do {
                 try self.onEncodingComplete(for: measurement, with: encodingResult, onSuccess: onSuccess, onFailure: onFailure)
@@ -158,43 +161,57 @@ public class ServerConnection {
         - Some unspecified errors from within CoreData
         - Some unspecified undocumented file system error if file was not accessible
      */
-    func create(request: MultipartFormData, for measurement: MeasurementEntity) throws {
+    func create(request: MultipartFormData, for measurement: Int64) throws {
         os_log("Creating request", log: ServerConnection.osLog, type: .default)
         // Load and serialize measurement synchronously.
         let persistenceLayer = PersistenceLayer(onManager: manager)
         persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
+        guard let initialModality = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)[0].value else {
+            fatalError("Invalid modality change event with no value encountered!")
+        }
+        guard let events = measurement.events?.array as? [Event] else {
+            fatalError("Unable to load events for measurement \(measurement.identifier)")
+        }
 
-        try addMetaData(to: request, for: measurement)
+        try addMetaData(to: request, for: measurement, withInitialModality: initialModality)
 
-        let payloadUrl = try write(measurement)
-        request.append(payloadUrl, withName: "fileToUpload", fileName: "\(self.installationIdentifier)_\(measurement.identifier).cyf", mimeType: "application/octet-stream")
+        let measurementFileWriter = MeasurementFile()
+        let measurementFileURL = try measurementFileWriter.write(serializable: measurement, to: measurement.identifier)
+        let measurementFileName = "\(self.installationIdentifier)_\(measurement.identifier).ccyf"
+        request.append(measurementFileURL, withName: "fileToUpload", fileName: measurementFileName, mimeType: "application/octet-stream")
+
+        let eventFileWriter = EventsFile()
+        let eventFileURL = try eventFileWriter.write(serializable: events, to: measurement.identifier)
+        let eventFileName = "\(self.installationIdentifier)_\(measurement.identifier)_.ccyfe"
+        request.append(eventFileURL, withName: "eventsFile", fileName: eventFileName, mimeType: "application/octet-stream")
     }
 
     /**
      Adds the required meta data from a measurement to a multi part form request.
 
      The transmitted data currently includes:
-     * startLocLat: The latitude of the first location
-     * startLocLon: The longitude of the first location
-     * startLocTs: The timestamp of the first location
-     * endLocLat: The latitude of the last location
-     * endLocLon: The longitude of the last location
-     * endLocTs: The timestamp of the last location
-     * deviceId: The world wide unqiue identifier of this device
-     * measurementId: The device wide unique identifier of the transmitted measurement
-     * deviceType: A string describing how this device identifies itself
-     * osVersion: The version of the operating system installed on this device
-     * appVersion: The version of the application running the Cyface SDK
-     * length: The track length of the measurement that is going to be transmitted
-     * locationCount: The number of locations in the track
-     * vehicle: The vehicle used to capture the track
+     * **startLocLat:** The latitude of the first location
+     * **startLocLon:** The longitude of the first location
+     * **startLocTs:** The timestamp of the first location
+     * **endLocLat:** The latitude of the last location
+     * **endLocLon:** The longitude of the last location
+     * **endLocTs:** The timestamp of the last location
+     * **deviceId:** The world wide unqiue identifier of this device
+     * **measurementId:** The device wide unique identifier of the transmitted measurement
+     * **deviceType:** A string describing how this device identifies itself
+     * **osVersion:** The version of the operating system installed on this device
+     * **appVersion:** The version of the application running the Cyface SDK
+     * **length:** The track length of the measurement that is going to be transmitted
+     * **locationCount:** The number of locations in the track
+     * **vehicle:** The vehicle used to capture the track
 
      - Parameters:
         - request: The request to add the meta data to
         - measurement: The measurement to take the meta data from
+        - initialModality: The modality selected at the start of the measurement
      */
-    func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO) throws {
+    func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO, withInitialModality initialModality: String) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
             fatalError("Installation identifier was missing!")
         }
@@ -210,12 +227,15 @@ public class ServerConnection {
             fatalError("Application version was missing!")
         }
 
-        guard let vehicle = measurement.context?.data(using: String.Encoding.utf8) else {
+        guard let vehicle = initialModality.data(using: String.Encoding.utf8) else {
             fatalError("No type of vehicle provided for measurement!")
         }
 
         let length = String(measurement.trackLength).data(using: String.Encoding.utf8)!
-        let locationCount = try PersistenceLayer.collectGeoLocations(from: measurement).count
+
+        let persistenceLayer = PersistenceLayer(onManager: manager)
+        persistenceLayer.context = persistenceLayer.makeContext()
+        let locationCount = try persistenceLayer.countGeoLocations(forMeasurement: measurement)
         let locationCountData = String(locationCount).data(using: String.Encoding.utf8)!
 
             if let startLocationRaw = (measurement.tracks?.firstObject as? Track)?.locations?.firstObject as? GeoLocationMO {
@@ -258,7 +278,7 @@ public class ServerConnection {
      - Throws:
         - Some unspecified undocumented error if encoding has failed. But even if no error is thrown encoding might have failed. There is currently no way in Alamofire to know for sure.
      */
-    func onEncodingComplete(for measurement: MeasurementEntity, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((MeasurementEntity) -> Void), onFailure failure: @escaping ((MeasurementEntity, Error) -> Void)) throws {
+    func onEncodingComplete(for measurement: Int64, with result: SessionManager.MultipartFormDataEncodingResult, onSuccess success: @escaping ((Int64) -> Void), onFailure failure: @escaping ((Int64, Error) -> Void)) throws {
         os_log("encoding complete", log: ServerConnection.osLog, type: .default)
         switch result {
         case .success(let upload, _, _):
@@ -275,22 +295,6 @@ public class ServerConnection {
         case .failure(let error):
             throw error
         }
-    }
-
-    /**
-     Write the provided `measurement` to a file for background synchronization
-
-     - Parameter measurement: The measurement to serialize as a file.
-     - Returns: The url of the file containing the measurement data.
-     - Throws:
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-        - `FileSupportError.notReadable` If the data file was not readable.
-        - Some unspecified undocumented file system error if file was not accessible.
-     */
-    private func write(_ measurement: MeasurementMO) throws -> URL {
-        let measurementFile = MeasurementFile()
-        return try measurementFile.write(serializable: measurement, to: measurement.identifier)
     }
 }
 

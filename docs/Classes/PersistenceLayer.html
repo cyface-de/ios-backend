@@ -14,7 +14,7 @@
     <a title="PersistenceLayer Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (67% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (69% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -46,9 +46,6 @@
                 <a href="../Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
               </li>
               <li class="nav-group-task">
@@ -67,10 +64,10 @@
                 <a href="../Classes/Event.html">Event</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
+                <a href="../Classes.html#/s:13DataCapturing16EventsSerializerC">EventsSerializer</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/MeasurementEntity.html">MeasurementEntity</a>
+                <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/MeasurementMO.html">MeasurementMO</a>
@@ -114,10 +111,15 @@
                 <a href="../Enums/FileSupportError.html">FileSupportError</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Enums/MeasurementContext.html">MeasurementContext</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Enums/Status.html">Status</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/NSManagedObjectContext.html">NSManagedObjectContext</a>
               </li>
             </ul>
           </li>
@@ -163,7 +165,7 @@
             <h1>PersistenceLayer</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">PersistenceLayer</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">PersistenceLayer</span></code></pre>
 
                 </div>
               </div>
@@ -183,7 +185,7 @@ The creation of this context needs to be carried out on the same thread as the A
 </div>
 <div class="aside aside-version">
     <p class="aside-title">Version</p>
-    5.2.0
+    5.3.0
 
 </div>
 <div class="aside aside-since">
@@ -223,7 +225,7 @@ The creation of this context needs to be carried out on the same thread as the A
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">context</span><span class="p">:</span> <span class="kt">NSManagedObjectContext</span><span class="p">?</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">context</span><span class="p">:</span> <span class="kt">NSManagedObjectContext</span><span class="p">?</span></code></pre>
 
                         </div>
                       </div>
@@ -261,7 +263,7 @@ The creation of this context needs to be carried out on the same thread as the A
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">onManager</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt"><a href="../Classes/CoreDataManager.html">CoreDataManager</a></span><span class="p">,</span> <span class="nv">withDistanceCalculator</span><span class="p">:</span> <span class="kt"><a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a></span> <span class="o">=</span> <span class="kt"><a href="../Classes/DefaultDistanceCalculationStrategy.html">DefaultDistanceCalculationStrategy</a></span><span class="p">())</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">onManager</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt"><a href="../Classes/CoreDataManager.html">CoreDataManager</a></span><span class="p">,</span> <span class="nv">withDistanceCalculator</span><span class="p">:</span> <span class="kt"><a href="../Protocols/DistanceCalculationStrategy.html">DistanceCalculationStrategy</a></span> <span class="o">=</span> <span class="kt"><a href="../Classes/DefaultDistanceCalculationStrategy.html">DefaultDistanceCalculationStrategy</a></span><span class="p">())</span></code></pre>
 
                         </div>
                       </div>
@@ -313,9 +315,67 @@ The creation of this context needs to be carried out on the same thread as the A
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing16PersistenceLayerC6delete11measurementyAA17MeasurementEntityC_tKF"></a>
+                    <a name="/s:13DataCapturing16PersistenceLayerC11createEvent2of9withValueAA0F0CAA0F4TypeO_SSSgtF"></a>
+                    <a name="//apple_ref/swift/Method/createEvent(of:withValue:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC11createEvent2of9withValueAA0F0CAA0F4TypeO_SSSgtF">createEvent(of:withValue:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Creates a new <code><a href="../Classes/Event.html">Event</a></code> at the current time.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">createEvent</span><span class="p">(</span><span class="n">of</span> <span class="nv">type</span><span class="p">:</span> <span class="kt"><a href="../Enums/EventType.html">EventType</a></span><span class="p">,</span> <span class="nv">withValue</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/Event.html">Event</a></span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>of</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The type of the logged <code><a href="../Classes/Event.html">Event</a></code>.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>withValue</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>An optional value providing further information about the event</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing16PersistenceLayerC6delete11measurementys5Int64V_tKF"></a>
                     <a name="//apple_ref/swift/Method/delete(measurement:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC6delete11measurementyAA17MeasurementEntityC_tKF">delete(measurement:)</a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC6delete11measurementys5Int64V_tKF">delete(measurement:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -339,7 +399,7 @@ The creation of this context needs to be carried out on the same thread as the A
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">delete</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">delete</span><span class="p">(</span><span class="nv">measurement</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">)</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>
@@ -356,6 +416,52 @@ The creation of this context needs to be carried out on the same thread as the A
                               <td>
                                 <div>
                                   <p>The measurement to delete from the data storage.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing16PersistenceLayerC6delete5eventyAA5EventC_tF"></a>
+                    <a name="//apple_ref/swift/Method/delete(event:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC6delete5eventyAA5EventC_tF">delete(event:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Deletes one event from the database.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">delete</span><span class="p">(</span><span class="nv">event</span><span class="p">:</span> <span class="kt"><a href="../Classes/Event.html">Event</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>event</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The event to delete</p>
                                 </div>
                               </td>
                             </tr>
@@ -404,7 +510,7 @@ The creation of this context needs to be carried out on the same thread as the A
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">load</span><span class="p">(</span><span class="n">measurementIdentifiedBy</span> <span class="nv">identifier</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">load</span><span class="p">(</span><span class="n">measurementIdentifiedBy</span> <span class="nv">identifier</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span></code></pre>
 
                         </div>
                       </div>
@@ -461,7 +567,7 @@ The creation of this context needs to be carried out on the same thread as the A
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">loadMeasurements</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">]</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">loadMeasurements</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
@@ -499,7 +605,7 @@ The creation of this context needs to be carried out on the same thread as the A
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">loadClean</span><span class="p">(</span><span class="nv">track</span><span class="p">:</span> <span class="kt"><a href="../Classes/Track.html">Track</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></span><span class="p">]</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">loadClean</span><span class="p">(</span><span class="nv">track</span><span class="p">:</span> <span class="kt"><a href="../Classes/Track.html">Track</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
@@ -556,13 +662,71 @@ The creation of this context needs to be carried out on the same thread as the A
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">loadSynchronizableMeasurements</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">]</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">loadSynchronizableMeasurements</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
                       <div>
                         <h4>Return Value</h4>
                         <p>An array containing all the not synchronized measurements.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing16PersistenceLayerC10loadEvents5typed14forMeasurementSayAA5EventCGAA0J4TypeO_AA0I2MOCtKF"></a>
+                    <a name="//apple_ref/swift/Method/loadEvents(typed:forMeasurement:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC10loadEvents5typed14forMeasurementSayAA5EventCGAA0J4TypeO_AA0I2MOCtKF">loadEvents(typed:forMeasurement:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Retrieves the list of all events of a certain <code><a href="../Enums/EventType.html">EventType</a></code> belonging to a <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code> from the database.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">loadEvents</span><span class="p">(</span><span class="n">typed</span> <span class="nv">type</span><span class="p">:</span> <span class="kt"><a href="../Enums/EventType.html">EventType</a></span><span class="p">,</span> <span class="n">forMeasurement</span> <span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/Event.html">Event</a></span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>typed</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The <code><a href="../Enums/EventType.html">EventType</a></code> to load the <code><a href="../Classes/Event.html">Event</a></code> objects for</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>forMeasurement</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The <code><a href="../Classes/MeasurementMO.html">MeasurementMO</a></code> object the loaded <code><a href="../Classes/Event.html">Event</a></code> objects belong to</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -594,13 +758,63 @@ The creation of this context needs to be carried out on the same thread as the A
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">countMeasurements</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Int</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">countMeasurements</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Int</span></code></pre>
 
                         </div>
                       </div>
                       <div>
                         <h4>Return Value</h4>
                         <p>The count of measurements currently stored on this device.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing16PersistenceLayerC17countGeoLocations14forMeasurementSiAA0I2MOC_tKF"></a>
+                    <a name="//apple_ref/swift/Method/countGeoLocations(forMeasurement:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC17countGeoLocations14forMeasurementSiAA0I2MOC_tKF">countGeoLocations(forMeasurement:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Counts the number of geo locations from a certain measurement.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">countGeoLocations</span><span class="p">(</span><span class="n">forMeasurement</span> <span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Int</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>measurement</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The measurement to count the geo locations for</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The count of locations measured in the measurement</p>
                       </div>
                     </section>
                   </div>
@@ -636,7 +850,7 @@ The creation of this context needs to be carried out on the same thread as the A
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">makeContext</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">NSManagedObjectContext</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">makeContext</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">NSManagedObjectContext</span></code></pre>
 
                         </div>
                       </div>
@@ -675,7 +889,7 @@ The creation of this context needs to be carried out on the same thread as the A
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">collectGeoLocations</span><span class="p">(</span><span class="n">from</span> <span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></span><span class="p">]</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">collectGeoLocations</span><span class="p">(</span><span class="n">from</span> <span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
@@ -728,7 +942,7 @@ To ease this task, this method can be used to make a collection of measurement i
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">extractIdentifiers</span><span class="p">(</span><span class="n">from</span> <span class="nv">measurements</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">])</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt">Int64</span><span class="p">]</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">extractIdentifiers</span><span class="p">(</span><span class="n">from</span> <span class="nv">measurements</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">])</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt">Int64</span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
@@ -758,13 +972,71 @@ To ease this task, this method can be used to make a collection of measurement i
                     </section>
                   </div>
                 </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing16PersistenceLayerC14traverseTracks13ofMeasurement4callyAA0H2MOC_yAA5TrackC_AA011GeoLocationJ0CtXEtFZ"></a>
+                    <a name="//apple_ref/swift/Method/traverseTracks(ofMeasurement:call:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing16PersistenceLayerC14traverseTracks13ofMeasurement4callyAA0H2MOC_yAA5TrackC_AA011GeoLocationJ0CtXEtFZ">traverseTracks(ofMeasurement:call:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Traverses all tracks captured as part of a measurement and provides each track and geo location to a callback.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">traverseTracks</span><span class="p">(</span><span class="n">ofMeasurement</span> <span class="nv">measurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementMO.html">MeasurementMO</a></span><span class="p">,</span> <span class="n">call</span> <span class="nv">closure</span><span class="p">:</span> <span class="p">(</span><span class="kt"><a href="../Classes/Track.html">Track</a></span><span class="p">,</span> <span class="kt"><a href="../Classes/GeoLocationMO.html">GeoLocationMO</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>ofMeasurement</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The measurement to traverse the tracks for</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>call</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A callback function receiving the track and geo location pairs</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
               </ul>
             </div>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-08-07)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-10-16)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.11.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

@@ -24,28 +24,30 @@ import Foundation
  It is required to start migrations between the different versions.
 
  - Author: Klemens Muthmann
- - Version: 1.2.0
+ - Version: 1.3.0
  - Since: 4.0.0
  */
 public enum CoreDataMigrationVersion: String, CaseIterable {
-    /// The first and oldest version of the model.
+    /// The first and oldest version of the model
     case version1 = "CyfaceModel"
-    /// The second version of the model.
+    /// The second version of the model
     case version2 = "2"
-    /// The third version of the model.
+    /// The third version of the model
     case version3 = "3"
-    /// The fourth version of the model.
+    /// The fourth version of the model
     case version4 = "4"
-    /// The fifth version of the model.
+    /// The fifth version of the model
     case version5 = "5"
-    /// The sixth version of the model.
+    /// The sixth version of the model
     case version6 = "6"
-    /// The seventh version of the model.
+    /// The seventh version of the model
     case version7 = "7"
+    /// The eight version of the model
+    case version8 = "8"
 
     // MARK: - Current
 
-    /// The currently used model version.
+    /// The currently used model version
     static var current: CoreDataMigrationVersion {
         guard let current = allCases.last else {
             fatalError("No model versions found")
@@ -72,6 +74,8 @@ public enum CoreDataMigrationVersion: String, CaseIterable {
         case .version6:
             return .version7
         case .version7:
+            return .version8
+        case .version8:
             return nil
         }
     }

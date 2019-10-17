@@ -25,7 +25,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'DataCapturing'
-  s.version          = '4.6.1'
+  s.version          = '5.0.0'
   s.summary          = 'Framework used to continuously capture data from all available sensors on an iOS device and transmit it to a Cyface-API compatible server.'
 
 # This description is used to generate tags and improve search results.
@@ -63,7 +63,7 @@ This framework can be included by your App if you are going to capture sensor da
   
   # The following transitive dependencies are used by this project:
   # This one is used to handle network traffic like multipart requests
-  s.dependency 'Alamofire', '~> 4.8.2'
+  s.dependency 'Alamofire', '~> 4.9.0'
   # A wrapper for the complicated ObjectiveC compression API.
   s.dependency 'DataCompression', '~> 3.4.0'
 

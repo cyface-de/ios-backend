@@ -26,14 +26,14 @@ import os.log
  An object of this class handles the lifecycle of starting and stopping data capturing.
  
  - Author: Klemens Muthmann
- - Version: 9.4.0
+ - Version: 10.0.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
 
     // MARK: - Properties
     /// Data used to identify log messages created by this component.
-    private let LOG = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
+    private let log = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
 
     /// `true` if data capturing is running; `false` otherwise.
     public var isRunning = false
@@ -41,8 +41,9 @@ public class DataCapturingService: NSObject {
     /// `true` if data capturing was running but is currently paused; `false` otherwise.
     public var isPaused = false
 
+    // TODO: This should probably be a MeasurementMO which is checked for fault on each call. In addition it might be a good idea to merge the DataCapturingService into the MeasurementMO class, since it only represents the behaviour of the measurement
     /// The currently recorded `Measurement` or `nil` if there is no active recording.
-    public var currentMeasurement: MeasurementEntity?
+    public var currentMeasurement: Int64?
 
     /// Locations are captured approximately once per second on most devices. If you would like to get fewer updates this parameter controls, how many events are skipped before one is reported to your handler. The default value is 1, which reports every event. To receive fewer events you could for example set it to 5 to only receive every fifth event.
     public var locationUpdateSkipRate: UInt = 1 {
@@ -107,6 +108,34 @@ public class DataCapturingService: NSObject {
     /// Marks captured positions as valid (clean) or invalid (not clean). This removes outliers and jitter while standing.
     private let trackCleaner = DefaultTrackCleaner()
 
+    /// This is the maximum time between two location updates allowed before the service assumes that it does not have a valid location fix anymore.
+    private static let maxAllowedTimeBetweenLocationUpdatesInMillis = Int64(2_000)
+
+    /// The timestamp in UNIX timestamp format in milliseconds since the 1st of january 1970 of the last geo location update event.
+    private var prevLocationUpdateTimeInMillis: Int64?
+
+    /// The internal storage variable for the fix state.
+    private var _hasFix = false
+
+    /// The current state of the geo location fix with a geo location network (GPS, GLONASS, Galileo, etc.)
+    private var hasFix: Bool {
+        set {
+            guard newValue != _hasFix else {
+                return
+            }
+
+            if newValue {
+                handler(DataCapturingEvent.geoLocationFixAcquired, Status.success)
+            } else {
+                handler(DataCapturingEvent.geoLocationFixLost, Status.success)
+            }
+            _hasFix = newValue
+        }
+        get {
+            return _hasFix
+        }
+    }
+
     // MARK: - Initializers
 
     /**
@@ -140,10 +169,7 @@ public class DataCapturingService: NSObject {
         do {
             for measurement in try persistenceLayer.loadMeasurements() {
                 if !measurement.synchronizable && !measurement.synchronized {
-                    guard let contextString = measurement.context, let context = MeasurementContext(rawValue: contextString) else {
-                        fatalError("Unable to load context for measurement \(measurement.identifier)!")
-                    }
-                    currentMeasurement = MeasurementEntity(identifier: measurement.identifier, context: context)
+                    currentMeasurement = measurement.identifier
                     isPaused = true
                 }
             }
@@ -164,15 +190,15 @@ public class DataCapturingService: NSObject {
      If an error happened during this process, it is provided as part of this handlers `Status` argument.
      
      - Parameters:
-        - context: The `MeasurementContext` to use for the newly created measurement.
+        - modality: The mode of transportation to use for the newly created measurement. This should be something like "car" or "bicycle".
      
      - Throws:
         - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
-    public func start(inContext context: MeasurementContext) throws {
+    public func start(inMode modality: String) throws {
         try lifecycleQueue.sync {
             if isPaused {
-                os_log("Starting data capturing on paused service. Finishing paused measurements and starting fresh. This is probably the result of a lifecycle error. ", log: LOG, type: .default)
+                os_log("Starting data capturing on paused service. Finishing paused measurements and starting fresh. This is probably the result of a lifecycle error. ", log: log, type: .default)
                 if let currentMeasurement = currentMeasurement {
                     try finish(measurement: currentMeasurement)
                 }
@@ -182,15 +208,14 @@ public class DataCapturingService: NSObject {
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
 
-            let measurement = try persistenceLayer.createMeasurement(at: timestamp, withContext: context)
+            let measurement = try persistenceLayer.createMeasurement(at: timestamp, inMode: modality)
 
-            let measurementEntity = MeasurementEntity(identifier: measurement.identifier, context: context)
-            self.currentMeasurement = measurementEntity
+            self.currentMeasurement = measurement.identifier
             persistenceLayer.context?.saveRecursively()
 
             try startCapturing(savingEvery: savingInterval, for: .lifecycleStart)
 
-            handler(.serviceStarted(measurement: measurementEntity.identifier), .success)
+            handler(.serviceStarted(measurement: measurement.identifier), .success)
         }
     }
 
@@ -205,7 +230,7 @@ public class DataCapturingService: NSObject {
     public func stop() throws {
         try lifecycleQueue.sync {
             guard let currentMeasurement = currentMeasurement else {
-                os_log("Trying to stop a stopped service! Ignoring call to stop!", log: LOG, type: .default)
+                os_log("Trying to stop a stopped service! Ignoring call to stop!", log: log, type: .default)
                 return
             }
 
@@ -215,7 +240,7 @@ public class DataCapturingService: NSObject {
 
             // Inform about stopped event
             backgroundSynchronizationTimer?.setCancelHandler {
-                self.handler(.serviceStopped(measurement: currentMeasurement.identifier), .success)
+                self.handler(.serviceStopped(measurement: currentMeasurement), .success)
             }
             stopCapturing()
             try finish(measurement: currentMeasurement)
@@ -249,7 +274,7 @@ public class DataCapturingService: NSObject {
             isPaused = true
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
             measurement.addToEvents(persistenceLayer.createEvent(of: .lifecyclePause))
             persistenceLayer.context?.saveRecursively()
         }
@@ -273,8 +298,50 @@ public class DataCapturingService: NSObject {
                 throw DataCapturingError.isRunning
             }
 
+            guard let currentMeasurement = currentMeasurement else {
+                fatalError("No measurement to resume")
+            }
+
             try startCapturing(savingEvery: savingInterval, for: .lifecycleResume)
             isPaused = false
+
+            handler(.serviceResumed(measurement: currentMeasurement), .success)
+        }
+    }
+
+    /**
+     Changes the current mode of transportation of the measurement. This can happen if the user switches for example from a bicycle to a car.
+     If the new modality is the same as the old one, the method returns without doing anything.
+
+     - Parameter to: The modality context to switch to.
+     */
+    public func changeModality(to modality: String) {
+        lifecycleQueue.sync {
+            guard let currentMeasurementIdentifier = currentMeasurement else {
+                return
+            }
+
+            let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+            persistenceLayer.context = persistenceLayer.makeContext()
+
+            do {
+                let currentMeasurementMO = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+
+                let existingModalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: currentMeasurementMO)
+                guard let lastModalityChangeEvent = existingModalityChangeEvents.last else {
+                    fatalError("No valid modality change event!")
+                }
+
+                if lastModalityChangeEvent.value == modality {
+                    return
+                }
+
+                let event = persistenceLayer.createEvent(of: .modalityTypeChange, withValue: modality)
+                currentMeasurementMO.addToEvents(event)
+                persistenceLayer.context?.saveRecursively()
+            } catch {
+                fatalError("Unable to load measurement identified by \(currentMeasurementIdentifier)!")
+            }
         }
     }
 
@@ -292,7 +359,7 @@ public class DataCapturingService: NSObject {
     func startCapturing(savingEvery time: TimeInterval, for event: EventType) throws {
         // Preconditions
         guard !isRunning else {
-            return os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: LOG, type: .info)
+            return os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: log, type: .info)
         }
 
         guard let currentMeasurement = currentMeasurement else {
@@ -301,7 +368,7 @@ public class DataCapturingService: NSObject {
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
         persistenceLayer.appendNewTrack(to: measurement)
         measurement.addToEvents(persistenceLayer.createEvent(of: event))
         self.coreLocationManager.locationDelegate = self
@@ -310,22 +377,7 @@ public class DataCapturingService: NSObject {
         queue.qualityOfService = QualityOfService.userInitiated
         queue.underlyingQueue = self.capturingQueue
         if self.motionManager.isAccelerometerAvailable {
-            self.motionManager.startAccelerometerUpdates(to: queue) { data, _ in
-                guard let myData = data else {
-                    // Should only happen if the device accelerometer is broken or something similar. If this leads to problems we can substitute by a soft error handling such as a warning or something similar. However in such a case we might think everything works fine, while it really does not.
-                    fatalError("DataCapturingService.start(): No Accelerometer data available!")
-                }
-
-                let accValues = myData.acceleration
-                let acc = Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(),
-                                       x: accValues.x,
-                                       y: accValues.y,
-                                       z: accValues.z)
-                // Synchronize this write operation.
-                self.lifecycleQueue.async(flags: .barrier) {
-                    self.accelerationsCache.append(acc)
-                }
-            }
+            self.motionManager.startAccelerometerUpdates(to: queue, withHandler: handleAccelerometerUpdate)
         }
 
         self.backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.lifecycleQueue)
@@ -335,6 +387,17 @@ public class DataCapturingService: NSObject {
             }
 
             self.saveCapturedData()
+
+            guard let prevLocationUpdateTimeInMillis = self.prevLocationUpdateTimeInMillis else {
+                self.hasFix = false
+                return
+            }
+
+            if DataCapturingService.currentTimeInMillisSince1970() - prevLocationUpdateTimeInMillis < DataCapturingService.maxAllowedTimeBetweenLocationUpdatesInMillis {
+                self.hasFix = true
+            } else {
+                self.hasFix = false
+            }
         }
 
         self.backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
@@ -372,7 +435,7 @@ public class DataCapturingService: NSObject {
     func saveCapturedData() {
         do {
             guard let currentMeasurement = self.currentMeasurement else {
-                os_log("No current measurement to save the location to! Data capturing impossible.", log: LOG, type: .error)
+                os_log("No current measurement to save the location to! Data capturing impossible.", log: log, type: .error)
                 return
             }
 
@@ -381,7 +444,7 @@ public class DataCapturingService: NSObject {
 
             let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement.identifier)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
 
             try persistenceLayer.save(locations: localLocationsCache, in: measurement)
             try persistenceLayer.save(accelerations: localAccelerationsCache, in: measurement)
@@ -389,17 +452,53 @@ public class DataCapturingService: NSObject {
             self.accelerationsCache = [Acceleration]()
             self.locationsCache = [GeoLocation]()
         } catch let error {
-            return os_log("Unable to save captured data. Error %@", log: self.LOG, type: .error, error.localizedDescription)
+            return os_log("Unable to save captured data. Error %@", log: self.log, type: .error, error.localizedDescription)
         }
     }
 
-    private func finish(measurement: MeasurementEntity) throws {
+    /**
+     Finishes the provided measurement if still open and marks this event in the list of events.
+     This method does not check if the measurement is already finished, so be careful to only call it on non finished measurements.
+
+     - Parameter measurement: The device wide unique identifier of the measurement to finish.
+     */
+    private func finish(measurement: Int64) throws {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
-        let currentMeasurementEntity = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
+        let currentMeasurementEntity = try persistenceLayer.load(measurementIdentifiedBy: measurement)
         currentMeasurementEntity.synchronizable = true
         currentMeasurementEntity.addToEvents(persistenceLayer.createEvent(of: .lifecycleStop))
         persistenceLayer.context?.saveRecursively()
+    }
+
+    /**
+        The handler provided to *CoreMotion* for handling new accelerations.
+
+        See `CMAccelerometerHandler` in the Apple documentation for futher information.
+
+     - Parameters:
+        - data: The new accelerometer data in any is available or `nil` otherwise.
+        - error: An error or `nil` if no error occured.
+     */
+    private func handleAccelerometerUpdate(_ data: CMAccelerometerData?, _ error: Error?) {
+        if let error = error as? CMError {
+            os_log("Accelerometer error: %@", log: log, type: .error, error.rawValue)
+        }
+
+        guard let data = data else {
+            // Should only happen if the device accelerometer is broken or something similar. If this leads to problems we can substitute by a soft error handling such as a warning or something similar. However in such a case we might think everything works fine, while it really does not.
+            fatalError("DataCapturingService.start(): No Accelerometer data available!")
+        }
+
+        let accValues = data.acceleration
+        let acc = Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(),
+                               x: accValues.x,
+                               y: accValues.y,
+                               z: accValues.z)
+        // Synchronize this write operation.
+        self.lifecycleQueue.async(flags: .barrier) {
+            self.accelerationsCache.append(acc)
+        }
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
@@ -432,6 +531,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
 
         for location in locations {
             let timestamp = DataCapturingService.convertToUtcTimestamp(date: location.timestamp)
+            prevLocationUpdateTimeInMillis = timestamp
 
             let isValid = trackCleaner.isValid(location: location)
             let geoLocation = GeoLocation(
@@ -472,6 +572,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
      - didFailWithError: The reported error.
      */
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        os_log("Location service failed with error: %@!", log: LOG, type: .error, error.localizedDescription)
+        os_log("Location service failed with error: %@!", log: log, type: .error, error.localizedDescription)
+        hasFix = false
     }
 }

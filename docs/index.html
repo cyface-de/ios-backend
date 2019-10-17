@@ -13,7 +13,7 @@
     <a title="DataCapturing  Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="index.html">DataCapturing Docs</a> (67% documented)</p>
+        <p><a href="index.html">DataCapturing Docs</a> (69% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -45,9 +45,6 @@
                 <a href="Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
               </li>
               <li class="nav-group-task">
-                <a href="Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="Classes/DataCapturingService.html">DataCapturingService</a>
               </li>
               <li class="nav-group-task">
@@ -66,10 +63,10 @@
                 <a href="Classes/Event.html">Event</a>
               </li>
               <li class="nav-group-task">
-                <a href="Classes/GeoLocationMO.html">GeoLocationMO</a>
+                <a href="Classes.html#/s:13DataCapturing16EventsSerializerC">EventsSerializer</a>
               </li>
               <li class="nav-group-task">
-                <a href="Classes/MeasurementEntity.html">MeasurementEntity</a>
+                <a href="Classes/GeoLocationMO.html">GeoLocationMO</a>
               </li>
               <li class="nav-group-task">
                 <a href="Classes/MeasurementMO.html">MeasurementMO</a>
@@ -113,10 +110,15 @@
                 <a href="Enums/FileSupportError.html">FileSupportError</a>
               </li>
               <li class="nav-group-task">
-                <a href="Enums/MeasurementContext.html">MeasurementContext</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="Enums/Status.html">Status</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Extensions/NSManagedObjectContext.html">NSManagedObjectContext</a>
               </li>
             </ul>
           </li>
@@ -216,6 +218,18 @@ This should look similar to:</p>
 <li>Provide a handler for events occuring during data capturing. Possible events are explained below.</li>
 <li>Finally create the <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code> or <code><a href="Classes/MovebisDataCapturingService.html">MovebisDataCapturingService</a></code> as shown, providing the required parameters.</li>
 </ol>
+<h3 id='the-data-capturing-lifecycle' class='heading'>The Data Capturing Lifecycle</h3>
+
+<p>The lifecycle of capturing a measurement is controlled by the four methods <code>start(inMode:)</code>, <code>pause()</code>, <code>resume()</code> and <code>stop()</code>.
+They may be called in arbitrary order and will do as their name promises.</p>
+<h4 id='setting-and-changing-transportation-modes' class='heading'>Setting and Changing Transportation Modes</h4>
+
+<p>The mode of transporation used to caputre a measurement must be provided the the <code>start(inMode:)</code> method.
+This is a simple string that is transferred as is to the server.
+Typical transporation modes are <q>bicycle</q>, <q>car</q> and <q>motorbike</q>.</p>
+
+<p>To change the transportation mode during a measurement, call <code>changeModality(to:)</code>.
+For example call <code>dataCapturingService.changeModality(to: &quot;CAR&quot;)</code>, to change the used transportation mode to a car.</p>
 <h4 id='configuring-a-datacapturingservice' class='heading'>Configuring a DataCapturingService</h4>
 
 <p>The <code><a href="Classes/DataCapturingService.html">DataCapturingService</a></code> tries to get as many updates from a devices geo location sensor as possible.
@@ -273,7 +287,10 @@ Accessing this information to display it on the screen should follow the pattern
 <span class="p">}</span>
 </code></pre>
 
-<p><strong>ATTENTION:</strong> Notice that all locations have been copied to new data objects. This is necessary, as <em>CoreData</em> objects are not thread safe and will loose all data upon usage on a different thread. You need to do this with all <em>CoreData</em> model objects before using them in your app. <em>CoreData</em> model objects currently are <code><a href="Classes/MeasurementMO.html">MeasurementMO</a></code>, <code><a href="Classes/Track.html">Track</a></code> and <code><a href="Classes/GeoLocationMO.html">GeoLocationMO</a></code>.</p>
+<p><strong>ATTENTION:</strong> Notice that all locations have been copied to new data objects. 
+This is necessary, as <em>CoreData</em> objects are not thread safe and will loose all data upon usage on a different thread. 
+You need to do this with all <em>CoreData</em> model objects before using them in your app. 
+<em>CoreData</em> model objects currently are <code><a href="Classes/MeasurementMO.html">MeasurementMO</a></code>, <code><a href="Classes/Event.html">Event</a></code>, <code><a href="Classes/Track.html">Track</a></code> and <code><a href="Classes/GeoLocationMO.html">GeoLocationMO</a></code>.</p>
 <h3 id='getting-the-length-of-a-measurement' class='heading'>Getting the length of a measurement</h3>
 
 <p>The Cyface SDK for iOS is capable of providing the length of a measurement in meters.
@@ -320,7 +337,7 @@ To access the locations from a track, do something like the following.</p>
 <span class="k">if</span> <span class="k">let</span> <span class="nv">tracks</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">tracks</span> <span class="p">{</span>
     <span class="k">if</span> <span class="k">let</span> <span class="nv">locations</span> <span class="o">=</span> <span class="n">tracks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">locations</span> <span class="p">{</span>
         <span class="k">for</span> <span class="n">location</span> <span class="k">in</span> <span class="n">locations</span> <span class="p">{</span>
-            <span class="nf">print</span><span class="p">(</span><span class="err">\</span><span class="p">(</span><span class="n">location</span><span class="p">))</span>
+            <span class="nf">print</span><span class="p">(\(</span><span class="n">location</span><span class="p">))</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">}</span>
@@ -401,8 +418,8 @@ along with the Cyface SDK for iOS. If not, see <a href="http://www.gnu.org/licen
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-08-07)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-10-16)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.11.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>

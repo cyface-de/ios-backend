@@ -30,7 +30,7 @@ import os.log
  The instance you provide will receive the updates.
  
  - Author: Klemens Muthmann
- - Version: 4.2.2
+ - Version: 4.2.3
  - Since: 1.0.0
  */
 public class MovebisDataCapturingService: DataCapturingService {
@@ -101,7 +101,7 @@ public class MovebisDataCapturingService: DataCapturingService {
         - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()` if you want to continue.
      */
     public func start() throws {
-        return try start(inContext: .bike)
+        return try start(inMode: "BICYCLE")
     }
 
     /**
@@ -123,7 +123,7 @@ public class MovebisDataCapturingService: DataCapturingService {
         // Filter active measurement if any.
         if let currentMeasurement = currentMeasurement {
             return ret.filter { measurement in
-                return measurement.identifier != currentMeasurement.identifier
+                return measurement.identifier != currentMeasurement
             }
         } else {
             return ret

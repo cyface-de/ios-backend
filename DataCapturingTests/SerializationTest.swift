@@ -25,24 +25,24 @@ import CoreData
  Tests whether serialization and deserialization into and from the Cyface Binary Format works as expected
 
  - Author: Klemens Muthmann
- - Version: 1.0.6
+ - Version: 1.1.0
  - Since: 1.0.0
  */
 class SerializationTest: XCTestCase {
 
     /// The object of the class under test
-    var oocut: CyfaceBinaryFormatSerializer!
+    var oocut: MeasurementSerializer!
     /// A `PersistenceLayer` instance used to load and store data for testing purposes.
     var persistenceLayer: PersistenceLayer!
     /// A `MeasurementEntity` holding a test measurement to serialize and deserialize.
-    var fixture: MeasurementEntity!
+    var fixture: Int64!
     /// A manager for handling the CoreData stack.
     var coreDataStack: CoreDataManager!
 
     /// Initializes the test data set and `PersistenceLayer` with some test data.
     override func setUp() {
         super.setUp()
-        oocut = CyfaceBinaryFormatSerializer()
+        oocut = MeasurementSerializer()
 
         do {
             guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
@@ -52,10 +52,10 @@ class SerializationTest: XCTestCase {
             coreDataStack.setup(bundle: bundle)
             persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
-            let measurement = try persistenceLayer.createMeasurement(at: 1, withContext: .bike)
+            let measurement = try persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
             persistenceLayer.appendNewTrack(to: measurement)
 
-            fixture = MeasurementEntity(identifier: measurement.identifier, context: .bike)
+            fixture = measurement.identifier
             try persistenceLayer.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true)], in: measurement)
             try persistenceLayer.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)], in: measurement)
 
@@ -81,8 +81,8 @@ class SerializationTest: XCTestCase {
      */
     func testUncompressedSerialization() {
         do {
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture.identifier)
-            let res = try oocut.serialize(measurement)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
+            let res = try oocut.serialize(serializable: measurement)
 
             XCTAssertEqual(res.count, 222)
             // Data Format Version
@@ -105,8 +105,8 @@ class SerializationTest: XCTestCase {
      */
     func testCompressedSerialization() {
         do {
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture.identifier)
-            let res = try oocut.serializeCompressed(measurement)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
+            let res = try oocut.serializeCompressed(serializable: measurement)
 
             let uncompressedData = res.inflate()
 
@@ -131,7 +131,7 @@ class SerializationTest: XCTestCase {
      */
     func skip_testSerializeBigDataSet() throws {
         let measurement = try DataSetCreator.fakeMeasurement(countOfGeoLocations: 36_000, countOfAccelerations: 3_600_000, persistenceLayer: persistenceLayer)
-        let data = try oocut.serialize(measurement)
+        let data = try oocut.serialize(serializable: measurement)
         try data.write(to: URL(fileURLWithPath: "/Users/cyface/data.cyf"))
     }
 
@@ -139,16 +139,14 @@ class SerializationTest: XCTestCase {
      Tests that geo location serialization works as expected for `GeoLocation` instances. This test runs isolated from all other serializations.
      */
     func testSerializeGeoLocations() {
-        let measurementIdentifier = fixture.identifier
-
         var timestamp: [UInt32] = []
         var accuracy: [UInt16] = []
         do {
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
 
             let locations = try PersistenceLayer.collectGeoLocations(from: measurement)
 
-            let serializedData = try self.oocut.serialize(measurement)
+            let serializedData = try self.oocut.serialize(serializable: measurement)
             let sizeOfHeaderInBytes = 18
             let sizeOfOneGeoLocationInBytes = 36
 
@@ -175,8 +173,30 @@ class SerializationTest: XCTestCase {
             XCTAssert(accuracy[1] == 200)
             XCTAssert(accuracy[2] == 200)
         } catch let error {
-            XCTFail("Unable to serialize measurement \(measurementIdentifier). Error \(error)")
+            XCTFail("Unable to serialize measurement \(fixture). Error \(error)")
         }
+    }
+
+    /// Tests that serialization to an events file works as expected
+    func testEventSerialization_HappyPath() throws {
+        // Arrange
+        let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
+
+        guard let events = measurement.events?.array as? [Event] else {
+            fatalError()
+        }
+
+        let eventsSerializer = EventsSerializer()
+
+        // Act
+        let eventsData = try eventsSerializer.serialize(serializable: events)
+
+        // Assert
+        let sizeOfHeaderInBytes = 10
+        let sizeOfOneEventWithoutValue = 12
+        let sizeOfBicycleValue = 7
+
+        XCTAssertEqual(eventsData.count, sizeOfHeaderInBytes + events.count * sizeOfOneEventWithoutValue + sizeOfBicycleValue)
     }
 
     /**

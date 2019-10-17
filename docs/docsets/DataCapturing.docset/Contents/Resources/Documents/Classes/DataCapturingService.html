@@ -14,7 +14,7 @@
     <a title="DataCapturingService Class Reference"></a>
     <header>
       <div class="content-wrapper">
-        <p><a href="../index.html">DataCapturing Docs</a> (67% documented)</p>
+        <p><a href="../index.html">DataCapturing Docs</a> (69% documented)</p>
       </div>
     </header>
     <div class="content-wrapper">
@@ -46,9 +46,6 @@
                 <a href="../Classes/CredentialsAuthenticator.html">CredentialsAuthenticator</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/CyfaceBinaryFormatSerializer.html">CyfaceBinaryFormatSerializer</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Classes/DataCapturingService.html">DataCapturingService</a>
               </li>
               <li class="nav-group-task">
@@ -67,10 +64,10 @@
                 <a href="../Classes/Event.html">Event</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
+                <a href="../Classes.html#/s:13DataCapturing16EventsSerializerC">EventsSerializer</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Classes/MeasurementEntity.html">MeasurementEntity</a>
+                <a href="../Classes/GeoLocationMO.html">GeoLocationMO</a>
               </li>
               <li class="nav-group-task">
                 <a href="../Classes/MeasurementMO.html">MeasurementMO</a>
@@ -114,10 +111,15 @@
                 <a href="../Enums/FileSupportError.html">FileSupportError</a>
               </li>
               <li class="nav-group-task">
-                <a href="../Enums/MeasurementContext.html">MeasurementContext</a>
-              </li>
-              <li class="nav-group-task">
                 <a href="../Enums/Status.html">Status</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/NSManagedObjectContext.html">NSManagedObjectContext</a>
               </li>
             </ul>
           </li>
@@ -163,7 +165,7 @@
             <h1>DataCapturingService</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DataCapturingService</span><span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">DataCapturingService</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                 </div>
               </div>
@@ -215,7 +217,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isRunning</span> <span class="o">=</span> <span class="kc">false</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isRunning</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -242,7 +244,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isPaused</span> <span class="o">=</span> <span class="kc">false</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isPaused</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -252,9 +254,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing0aB7ServiceC18currentMeasurementAA0E6EntityCSgvp"></a>
+                    <a name="/s:13DataCapturing0aB7ServiceC18currentMeasurements5Int64VSgvp"></a>
                     <a name="//apple_ref/swift/Property/currentMeasurement" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC18currentMeasurementAA0E6EntityCSgvp">currentMeasurement</a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC18currentMeasurements5Int64VSgvp">currentMeasurement</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -269,7 +271,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">currentMeasurement</span><span class="p">:</span> <span class="kt"><a href="../Classes/MeasurementEntity.html">MeasurementEntity</a></span><span class="p">?</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">currentMeasurement</span><span class="p">:</span> <span class="kt">Int64</span><span class="p">?</span></code></pre>
 
                         </div>
                       </div>
@@ -296,7 +298,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">locationUpdateSkipRate</span><span class="p">:</span> <span class="kt">UInt</span> <span class="o">=</span> <span class="mi">1</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">locationUpdateSkipRate</span><span class="p">:</span> <span class="kt">UInt</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -334,7 +336,7 @@
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span>
     <span class="n">sensorManager</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CMMotionManager</span><span class="p">,</span>
     <span class="n">updateInterval</span> <span class="nv">interval</span><span class="p">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
     <span class="n">savingInterval</span> <span class="nv">time</span><span class="p">:</span> <span class="kt">TimeInterval</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
@@ -429,9 +431,9 @@ Since it seems to be impossible to create that instance inside a framework at th
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:13DataCapturing0aB7ServiceC5start9inContextyAA011MeasurementF0O_tKF"></a>
-                    <a name="//apple_ref/swift/Method/start(inContext:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC5start9inContextyAA011MeasurementF0O_tKF">start(inContext:)</a>
+                    <a name="/s:13DataCapturing0aB7ServiceC5start6inModeySS_tKF"></a>
+                    <a name="//apple_ref/swift/Method/start(inMode:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC5start6inModeySS_tKF">start(inMode:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -459,7 +461,7 @@ If an error happened during this process, it is provided as part of this handler
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">start</span><span class="p">(</span><span class="n">inContext</span> <span class="nv">context</span><span class="p">:</span> <span class="kt"><a href="../Enums/MeasurementContext.html">MeasurementContext</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">start</span><span class="p">(</span><span class="n">inMode</span> <span class="nv">modality</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>
@@ -470,12 +472,12 @@ If an error happened during this process, it is provided as part of this handler
                             <tr>
                               <td>
                                 <code>
-                                <em>context</em>
+                                <em>modality</em>
                                 </code>
                               </td>
                               <td>
                                 <div>
-                                  <p>The <code><a href="../Enums/MeasurementContext.html">MeasurementContext</a></code> to use for the newly created measurement.</p>
+                                  <p>The mode of transportation to use for the newly created measurement. This should be something like <q>car</q> or <q>bicycle</q>.</p>
                                 </div>
                               </td>
                             </tr>
@@ -514,7 +516,7 @@ running.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">stop</span><span class="p">()</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">stop</span><span class="p">()</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>
@@ -549,7 +551,7 @@ running.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">pause</span><span class="p">()</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">pause</span><span class="p">()</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>
@@ -585,9 +587,56 @@ running.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">resume</span><span class="p">()</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">resume</span><span class="p">()</span> <span class="k">throws</span></code></pre>
 
                         </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:13DataCapturing0aB7ServiceC14changeModality2toySS_tF"></a>
+                    <a name="//apple_ref/swift/Method/changeModality(to:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:13DataCapturing0aB7ServiceC14changeModality2toySS_tF">changeModality(to:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Changes the current mode of transportation of the measurement. This can happen if the user switches for example from a bicycle to a car.
+If the new modality is the same as the old one, the method returns without doing anything.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">changeModality</span><span class="p">(</span><span class="n">to</span> <span class="nv">modality</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>to</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The modality context to switch to.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -623,7 +672,7 @@ running.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">currentTimeInMillisSince1970</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Int64</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">currentTimeInMillisSince1970</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Int64</span></code></pre>
 
                         </div>
                       </div>
@@ -633,6 +682,13 @@ running.</p>
               </ul>
             </div>
             <div class="task-group">
+              <div class="task-name-container">
+                <a name="/CLLocationManagerDelegate"></a>
+                <a name="//apple_ref/swift/Section/CLLocationManagerDelegate" class="dashAnchor"></a>
+                <a href="#/CLLocationManagerDelegate">
+                  <h3 class="section-name">CLLocationManagerDelegate</h3>
+                </a>
+              </div>
               <ul>
                 <li class="item">
                   <div>
@@ -659,7 +715,7 @@ running.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">locationManager</span><span class="p">(</span><span class="n">_</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CLLocationManager</span><span class="p">,</span> <span class="n">didUpdateLocations</span> <span class="nv">locations</span><span class="p">:</span> <span class="p">[</span><span class="kt">CLLocation</span><span class="p">])</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">locationManager</span><span class="p">(</span><span class="n">_</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CLLocationManager</span><span class="p">,</span> <span class="n">didUpdateLocations</span> <span class="nv">locations</span><span class="p">:</span> <span class="p">[</span><span class="kt">CLLocation</span><span class="p">])</span></code></pre>
 
                         </div>
                       </div>
@@ -722,7 +778,7 @@ running.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">locationManager</span><span class="p">(</span><span class="n">_</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CLLocationManager</span><span class="p">,</span> <span class="n">didFailWithError</span> <span class="nv">error</span><span class="p">:</span> <span class="kt">Error</span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">locationManager</span><span class="p">(</span><span class="n">_</span> <span class="nv">manager</span><span class="p">:</span> <span class="kt">CLLocationManager</span><span class="p">,</span> <span class="n">didFailWithError</span> <span class="nv">error</span><span class="p">:</span> <span class="kt">Error</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -734,8 +790,8 @@ running.</p>
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-08-07)</p>
-          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+          <p>&copy; 2019 <a class="link" href="https://cyface.de" target="_blank" rel="external">Klemens Muthmann</a>. All rights reserved. (Last updated: 2019-10-16)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.11.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
         </section>
       </article>
     </div>
