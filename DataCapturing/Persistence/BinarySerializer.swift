@@ -101,7 +101,9 @@ class MeasurementSerializer: BinarySerializer {
     /// The byte order used to serialize data to Cyface binary format.
     static let byteOrder = ByteOrder.bigEndian
     /// Serializer to transform acceleration objects
-    let accelerationsFile = AccelerationsFile()
+    let accelerationsFile = SensorValueFile(fileExtension: SensorValueFile.compressedAccelerationsFileExtension)
+    let rotationsFile = SensorValueFile(fileExtension: SensorValueFile.compressedRotationsFileExtension)
+    let directionsFile = SensorValueFile(fileExtension: SensorValueFile.compressedDirectionsFileExtension)
     /// Serializer to transform geo location objects
     let geoLocationsSerializer = GeoLocationSerializer()
 
@@ -126,16 +128,20 @@ class MeasurementSerializer: BinarySerializer {
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(dataFormatVersion))
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(geoLocations.count)))
         dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(measurement.accelerationsCount)))
-        dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(0)))
-        dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(0)))
+        dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(measurement.rotationsCount)))
+        dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(measurement.directionsCount)))
 
         var ret = Data(dataArray)
 
         let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: geoLocations)
         let serializedAccelerations = try accelerationsFile.data(for: measurement)
+        let serializedRotations = try rotationsFile.data(for: measurement)
+        let serializedDirections = try directionsFile.data(for: measurement)
 
         ret.append(serializedGeoLocations)
         ret.append(serializedAccelerations)
+        ret.append(serializedRotations)
+        ret.append(serializedDirections)
 
         return ret
     }
@@ -148,9 +154,9 @@ class MeasurementSerializer: BinarySerializer {
  - Since: 2.0.0
  - Version: 1.0.0
  */
-class AccelerationSerializer: BinarySerializer {
+class SensorValueSerializer: BinarySerializer {
     /// Binds the Serializeable from the `BinarySerializer` protocol to an array of acceleration points.
-    typealias Serializable = [Acceleration]
+    typealias Serializable = [SensorValue]
 
     /**
      Serializes an array of accelerations into binary format of the form:
@@ -162,19 +168,19 @@ class AccelerationSerializer: BinarySerializer {
      - Parameter serializable: The array of accelerations to serialize.
      - Returns: An array of serialized bytes.
      */
-    func serialize(serializable accelerations: [Acceleration]) -> Data {
+    func serialize(serializable values: [SensorValue]) -> Data {
         var ret = [UInt8]()
         let byteOrder = ByteOrder.bigEndian
 
-        for acceleration in accelerations {
+        for value in values {
             // 8 Bytes
-            ret.append(contentsOf: byteOrder.convertToBytes(acceleration.timestamp))
+            //ret.append(contentsOf: byteOrder.convertToBytes(acceleration.timestamp))
             // 8 Bytes
-            ret.append(contentsOf: byteOrder.convertToBytes(acceleration.x.bitPattern))
+            ret.append(contentsOf: byteOrder.convertToBytes(value.x.bitPattern))
             // 8 Bytes
-            ret.append(contentsOf: byteOrder.convertToBytes(acceleration.y.bitPattern))
+            ret.append(contentsOf: byteOrder.convertToBytes(value.y.bitPattern))
             // 8 Bytes
-            ret.append(contentsOf: byteOrder.convertToBytes(acceleration.z.bitPattern))
+            ret.append(contentsOf: byteOrder.convertToBytes(value.z.bitPattern))
             // 32 Bytes
         }
 
@@ -191,13 +197,13 @@ class AccelerationSerializer: BinarySerializer {
      - Throws:
         - `SerializationError.invalidData` If there is not enough data for `count` of accelerations.
      */
-    func deserialize(data: Data, count: UInt32) throws -> [Acceleration] {
+    func deserialize(data: Data, count: UInt32) throws -> [SensorValue] {
         guard data.count == count*32 else {
             throw SerializationError.invalidData
         }
 
         let oneEntryInBytes = UInt32(32)
-        var ret: [Acceleration] = []
+        var ret: [SensorValue] = []
         for i in 0..<count {
             let startIndex = i*oneEntryInBytes
 
@@ -206,8 +212,8 @@ class AccelerationSerializer: BinarySerializer {
             let ay = try MeasurementSerializer.byteOrder.convertToDouble(data[startIndex+16..<startIndex+24])
             let az = try MeasurementSerializer.byteOrder.convertToDouble(data[startIndex+24..<startIndex+32])
 
-            let acceleration = Acceleration(timestamp: timestamp, x: ax, y: ay, z: az)
-            ret.append(acceleration)
+            let value = SensorValue(timestamp: Date(timeIntervalSince1970: Double(timestamp)/1_000), x: ax, y: ay, z: az)
+            ret.append(value)
         }
 
         return ret
@@ -296,7 +302,7 @@ public class EventsSerializer: BinarySerializer {
         // Transfer File format version
         ret.append(contentsOf: byteOrder.convertToBytes(Int16(1)))
         // Count of events
-        ret.append(contentsOf: byteOrder.convertToBytes(events.count))
+        ret.append(contentsOf: byteOrder.convertToBytes(Int32(events.count)))
 
         // Add all the events
         for event in events {

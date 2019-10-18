@@ -57,7 +57,7 @@ class SerializationTest: XCTestCase {
 
             fixture = measurement.identifier
             try persistenceLayer.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true)], in: measurement)
-            try persistenceLayer.save(accelerations: [Acceleration(timestamp: 10_000, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0), Acceleration(timestamp: 10_100, x: 1.0, y: 1.0, z: 1.0)], in: measurement)
+            try persistenceLayer.save(accelerations: [SensorValue(timestamp: Date(timeIntervalSince1970: 10_000.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0)], in: measurement)
 
         } catch let error {
             XCTFail("Unable to set up test since persistence layer could not be initialized due to \(error.localizedDescription)!")

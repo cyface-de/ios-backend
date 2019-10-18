@@ -119,12 +119,19 @@ extension FileSupport {
  - Version: 2.0.0
  - Since: 2.0.0
  */
-public struct AccelerationsFile: FileSupport {
+public struct SensorValueFile: FileSupport {
 
     // MARK: - Properties
 
+    public static let accelerationsFileExtension = "cyfa"
+    public static let compressedAccelerationsFileExtension = "ccyfa"
+    public static let rotationsFileExtension = "cyfr"
+    public static let compressedRotationsFileExtension = "ccyfr"
+    public static let directionsFileExtension = "cyfd"
+    public static let compressedDirectionsFileExtension = "ccyfd"
+
     /// A serializer to transform between `Acceleration` instances and the Cyface Binary Format.
-    let serializer = AccelerationSerializer()
+    let serializer = SensorValueSerializer()
 
     /// The file name for the file containing the acceleration values for one measurement.
     var fileName: String {
@@ -132,13 +139,11 @@ public struct AccelerationsFile: FileSupport {
     }
 
     /// File extension used for files containing accelerations.
-    var fileExtension: String {
-        return "cyfa"
-    }
+    let fileExtension: String
 
     /// Public initializer for external systems to access acceleration data.
-    public init() {
-        // Nothing to do here
+    public init(fileExtension: String) {
+        self.fileExtension = fileExtension
     }
 
     // MARK: - Methods
@@ -154,7 +159,7 @@ public struct AccelerationsFile: FileSupport {
      - Throws:
         - Some internal file system error on failure of creating the file at the required path.
      */
-    func write(serializable: [Acceleration], to measurement: Int64) throws -> URL {
+    func write(serializable: [SensorValue], to measurement: Int64) throws -> URL {
         let accelerationData = serializer.serialize(serializable: serializable)
         let accelerationFilePath = try path(for: measurement)
 
@@ -173,7 +178,7 @@ public struct AccelerationsFile: FileSupport {
      - Throws: If the file containing the accelerations was not readable.
      - Returns: An array of all the acceleration value from the provided measurement.
     */
-    public func load(from measurement: MeasurementMO) throws -> [Acceleration] {
+    public func load(from measurement: MeasurementMO) throws -> [SensorValue] {
         do {
             let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
             defer {fileHandle.closeFile()}

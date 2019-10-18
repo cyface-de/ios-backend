@@ -21,6 +21,7 @@ import Foundation
 
 /**
  A repeating timer implementation, that makes sure that calling resume and suspend on a timer is balanced.
+ Balanced means there is an equal amount of suspend and resume calls and each suspend is followed by a resume.
 
  This implementation is based on a <a href="https://medium.com/over-engineering/a-background-repeating-timer-in-swift-412cecfd2ef9">post from medium</a>.
 

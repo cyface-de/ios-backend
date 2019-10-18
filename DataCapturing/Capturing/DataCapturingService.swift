@@ -75,17 +75,13 @@ public class DataCapturingService: NSObject {
      */
     let coreDataStack: CoreDataManager
 
-    /// An in memory storage for accelerations, before they are written to disk.
-    var accelerationsCache = [Acceleration]()
-
     /// An in memory storage for geo locations, before they are written to disk.
     var locationsCache = [GeoLocation]()
 
     /// The background queue used to capture data.
     let capturingQueue = DispatchQueue.global(qos: .userInitiated)
 
-    /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
-    private let motionManager: CMMotionManager
+    private let sensorCapturer: SensorCapturer
 
     /// A listener that is notified of important events during data capturing.
     private var handler: ((DataCapturingEvent, Status) -> Void)
@@ -145,21 +141,27 @@ public class DataCapturingService: NSObject {
         - sensorManager: An instance of `CMMotionManager`.
      There should be only one instance of this type in your application.
      Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
-        - updateInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
+        - accelerometerInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
+        - gyroInterval: The gyroscope update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
+        - directionsInterval: The magnetometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
         - savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
         - dataManager: The `CoreData` stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
         - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
      */
     public init(
         sensorManager manager: CMMotionManager,
-        updateInterval interval: Double = 100,
+        accelerometerInterval: Double = 100,
+        gyroInterval: Double = 100,
+        directionsInterval: Double = 100,
         savingInterval time: TimeInterval = 30,
         dataManager: CoreDataManager,
         eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) {
 
         coreDataStack = dataManager
-        self.motionManager = manager
-        motionManager.accelerometerUpdateInterval = 1.0 / interval
+        manager.accelerometerUpdateInterval = 1.0 / accelerometerInterval
+        manager.gyroUpdateInterval = 1.0 / gyroInterval
+        manager.magnetometerUpdateInterval = 1.0 / directionsInterval
+        self.sensorCapturer = SensorCapturer(lifecycleQueue: lifecycleQueue, capturingQueue: capturingQueue, motionManager: manager)
         self.handler = eventHandler
         self.savingInterval = time
 
@@ -373,12 +375,7 @@ public class DataCapturingService: NSObject {
         measurement.addToEvents(persistenceLayer.createEvent(of: event))
         self.coreLocationManager.locationDelegate = self
 
-        let queue = OperationQueue()
-        queue.qualityOfService = QualityOfService.userInitiated
-        queue.underlyingQueue = self.capturingQueue
-        if self.motionManager.isAccelerometerAvailable {
-            self.motionManager.startAccelerometerUpdates(to: queue, withHandler: handleAccelerometerUpdate)
-        }
+        sensorCapturer.start()
 
         self.backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.lifecycleQueue)
         self.backgroundSynchronizationTimer.setEventHandler { [weak self] in
@@ -414,13 +411,13 @@ public class DataCapturingService: NSObject {
      An internal helper method for stopping the capturing process.
      */
     func stopCapturing() {
-        motionManager.stopAccelerometerUpdates()
+        sensorCapturer.stop()
         DispatchQueue.main.async {
             self.coreLocationManager.stopUpdatingLocation()
         }
         coreLocationManager.locationDelegate = nil
         backgroundSynchronizationTimer.cancel()
-            if !locationsCache.isEmpty || !accelerationsCache.isEmpty {
+            if !locationsCache.isEmpty || !sensorCapturer.isEmpty {
                 saveCapturedData()
             }
         isRunning = false
@@ -439,7 +436,9 @@ public class DataCapturingService: NSObject {
                 return
             }
 
-            let localAccelerationsCache = self.accelerationsCache
+            let localAccelerationsCache = sensorCapturer.accelerations
+            let localRotationsCache = sensorCapturer.rotations
+            let localDirectionsCache = sensorCapturer.directions
             let localLocationsCache = self.locationsCache
 
             let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
@@ -447,9 +446,13 @@ public class DataCapturingService: NSObject {
             let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
 
             try persistenceLayer.save(locations: localLocationsCache, in: measurement)
-            try persistenceLayer.save(accelerations: localAccelerationsCache, in: measurement)
 
-            self.accelerationsCache = [Acceleration]()
+            try persistenceLayer.save(accelerations: localAccelerationsCache, rotations: localRotationsCache, directions: localDirectionsCache, in: measurement)
+
+            sensorCapturer.accelerations.removeAll()
+            sensorCapturer.rotations.removeAll()
+            sensorCapturer.directions.removeAll()
+
             self.locationsCache = [GeoLocation]()
         } catch let error {
             return os_log("Unable to save captured data. Error %@", log: self.log, type: .error, error.localizedDescription)
@@ -491,14 +494,14 @@ public class DataCapturingService: NSObject {
         }
 
         let accValues = data.acceleration
-        let acc = Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(),
+        /*let acc = SensorValue(timestamp: DataCapturingService.currentTimeInMillisSince1970(),
                                x: accValues.x,
                                y: accValues.y,
                                z: accValues.z)
         // Synchronize this write operation.
         self.lifecycleQueue.async(flags: .barrier) {
             self.accelerationsCache.append(acc)
-        }
+        }*/
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
