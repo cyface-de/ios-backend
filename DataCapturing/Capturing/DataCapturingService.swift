@@ -510,7 +510,7 @@ public class DataCapturingService: NSObject {
     }
 
     /// Converts a `Data` object to a UTC milliseconds timestamp since january 1st 1970.
-    private static func convertToUtcTimestamp(date value: Date) -> Int64 {
+    public static func convertToUtcTimestamp(date value: Date) -> Int64 {
         return Int64(value.timeIntervalSince1970*1000.0)
     }
 }
