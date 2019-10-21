@@ -101,9 +101,9 @@ class MeasurementSerializer: BinarySerializer {
     /// The byte order used to serialize data to Cyface binary format.
     static let byteOrder = ByteOrder.bigEndian
     /// Serializer to transform acceleration objects
-    let accelerationsFile = SensorValueFile(fileExtension: SensorValueFile.compressedAccelerationsFileExtension)
-    let rotationsFile = SensorValueFile(fileExtension: SensorValueFile.compressedRotationsFileExtension)
-    let directionsFile = SensorValueFile(fileExtension: SensorValueFile.compressedDirectionsFileExtension)
+    let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
+    let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
+    let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
     /// Serializer to transform geo location objects
     let geoLocationsSerializer = GeoLocationSerializer()
 
@@ -191,8 +191,8 @@ class SensorValueSerializer: BinarySerializer {
      Deserializes the provided `data` into a `Serializable`. Only use this if your data is not compressed. Otherwise use `deserializeCompressed(:Data)`.
 
      - Parameters:
-     - data: The `data` to deserialize
-     - count: The amount of accelerations in `data`.
+        - data: The `data` to deserialize
+        - count: The amount of accelerations in `data`.
      - Returns: An object of type `Serializable` created from the provided `data`
      - Throws:
         - `SerializationError.invalidData` If there is not enough data for `count` of accelerations.

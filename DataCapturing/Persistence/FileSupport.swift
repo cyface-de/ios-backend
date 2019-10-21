@@ -120,15 +120,7 @@ extension FileSupport {
  - Since: 2.0.0
  */
 public struct SensorValueFile: FileSupport {
-
     // MARK: - Properties
-
-    public static let accelerationsFileExtension = "cyfa"
-    public static let compressedAccelerationsFileExtension = "ccyfa"
-    public static let rotationsFileExtension = "cyfr"
-    public static let compressedRotationsFileExtension = "ccyfr"
-    public static let directionsFileExtension = "cyfd"
-    public static let compressedDirectionsFileExtension = "ccyfd"
 
     /// A serializer to transform between `Acceleration` instances and the Cyface Binary Format.
     let serializer = SensorValueSerializer()
@@ -139,11 +131,14 @@ public struct SensorValueFile: FileSupport {
     }
 
     /// File extension used for files containing accelerations.
-    let fileExtension: String
+    var fileExtension: String {
+        return fileType.fileExtension
+    }
+    let fileType: SensorValueFileType
 
     /// Public initializer for external systems to access acceleration data.
-    public init(fileExtension: String) {
-        self.fileExtension = fileExtension
+    public init(fileType: SensorValueFileType) {
+        self.fileType = fileType
     }
 
     // MARK: - Methods
@@ -160,15 +155,15 @@ public struct SensorValueFile: FileSupport {
         - Some internal file system error on failure of creating the file at the required path.
      */
     func write(serializable: [SensorValue], to measurement: Int64) throws -> URL {
-        let accelerationData = serializer.serialize(serializable: serializable)
-        let accelerationFilePath = try path(for: measurement)
+        let sensorValueData = serializer.serialize(serializable: serializable)
+        let sensorValueFilePath = try path(for: measurement)
 
-        let fileHandle = try FileHandle(forWritingTo: accelerationFilePath)
+        let fileHandle = try FileHandle(forWritingTo: sensorValueFilePath)
         defer { fileHandle.closeFile()}
         fileHandle.seekToEndOfFile()
-        fileHandle.write(accelerationData)
+        fileHandle.write(sensorValueData)
 
-        return accelerationFilePath
+        return sensorValueFilePath
     }
 
     /**
@@ -183,7 +178,7 @@ public struct SensorValueFile: FileSupport {
             let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
             defer {fileHandle.closeFile()}
             let data = fileHandle.readDataToEndOfFile()
-            return try serializer.deserialize(data: data, count: UInt32(measurement.accelerationsCount))
+            return try serializer.deserialize(data: data, count: fileType.getCounter(measurement))
         } catch let error {
             throw FileSupportError.notReadable(cause: error)
         }
@@ -216,7 +211,7 @@ public struct SensorValueFile: FileSupport {
  - Version: 2.0.2
  - Since: 2.0.0
  */
-struct MeasurementFile: FileSupport {
+public struct MeasurementFile: FileSupport {
 
     // MARK: - Properties
 
@@ -349,4 +344,18 @@ public enum FileSupportError: Error {
      - cause: Another error, from system level, providing more detailed information.
      */
     case notReadable(cause: Error)
+}
+
+public class SensorValueFileType {
+    public static let accelerationValueType = SensorValueFileType(fileExtension: "cyfa", getCounter: {m in return UInt32(m.accelerationsCount)})
+    public static let rotationValueType = SensorValueFileType(fileExtension: "cyfr", getCounter: {m in return UInt32(m.rotationsCount)})
+    public static let directionValueType = SensorValueFileType(fileExtension: "cyfd", getCounter: {m in return UInt32(m.directionsCount)})
+
+    public let fileExtension: String
+    public let getCounter: (MeasurementMO) -> UInt32
+
+    private init(fileExtension: String, getCounter: @escaping (MeasurementMO) -> UInt32) {
+        self.fileExtension = fileExtension
+        self.getCounter = getCounter
+    }
 }

@@ -44,7 +44,7 @@ class FileSupportTest: XCTestCase {
         let context = persistenceLayer.makeContext()
         persistenceLayer.context = context
 
-        let events = fixture(context)
+        let events = eventFixture(context)
 
         // Act
         let eventsFilePath = try oocut.write(serializable: events, to: 1)
@@ -54,7 +54,7 @@ class FileSupportTest: XCTestCase {
     }
 
     /// The fixture of events to use for testing.
-    func fixture(_ context: NSManagedObjectContext) -> [Event] {
+    func eventFixture(_ context: NSManagedObjectContext) -> [Event] {
         let event1 = Event(context: context)
         let event2 = Event(context: context)
         let event3 = Event(context: context)
