@@ -495,14 +495,6 @@ public class DataCapturingService: NSObject {
         }
 
         let accValues = data.acceleration
-        /*let acc = SensorValue(timestamp: DataCapturingService.currentTimeInMillisSince1970(),
-                               x: accValues.x,
-                               y: accValues.y,
-                               z: accValues.z)
-        // Synchronize this write operation.
-        self.lifecycleQueue.async(flags: .barrier) {
-            self.accelerationsCache.append(acc)
-        }*/
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).

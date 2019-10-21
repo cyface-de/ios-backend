@@ -155,17 +155,17 @@ class MeasurementSerializer: BinarySerializer {
  - Version: 1.0.0
  */
 class SensorValueSerializer: BinarySerializer {
-    /// Binds the Serializeable from the `BinarySerializer` protocol to an array of acceleration points.
+    /// Binds the Serializeable from the `BinarySerializer` protocol to an array of sensor value points.
     typealias Serializable = [SensorValue]
 
     /**
-     Serializes an array of accelerations into binary format of the form:
+     Serializes an array of sensor values into binary format of the form:
      - 8 Bytes: timestamp as long
      - 8 Bytes: x as double
      - 8 Bytes: y as double
      - 8 Bytes: z as double
      
-     - Parameter serializable: The array of accelerations to serialize.
+     - Parameter serializable: The array of sensor values to serialize.
      - Returns: An array of serialized bytes.
      */
     func serialize(serializable values: [SensorValue]) -> Data {
@@ -192,10 +192,10 @@ class SensorValueSerializer: BinarySerializer {
 
      - Parameters:
         - data: The `data` to deserialize
-        - count: The amount of accelerations in `data`.
+        - count: The amount of sensor values in `data`.
      - Returns: An object of type `Serializable` created from the provided `data`
      - Throws:
-        - `SerializationError.invalidData` If there is not enough data for `count` of accelerations.
+        - `SerializationError.invalidData` If there is not enough data for `count` of sensor values.
      */
     func deserialize(data: Data, count: UInt32) throws -> [SensorValue] {
         guard data.count == count*32 else {
