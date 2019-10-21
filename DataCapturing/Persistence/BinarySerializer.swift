@@ -174,7 +174,7 @@ class SensorValueSerializer: BinarySerializer {
 
         for value in values {
             // 8 Bytes
-            //ret.append(contentsOf: byteOrder.convertToBytes(acceleration.timestamp))
+            ret.append(contentsOf: byteOrder.convertToBytes(DataCapturingService.convertToUtcTimestamp(date: value.timestamp)))
             // 8 Bytes
             ret.append(contentsOf: byteOrder.convertToBytes(value.x.bitPattern))
             // 8 Bytes
