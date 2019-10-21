@@ -12,13 +12,18 @@ import CoreMotion
 class TestMotionManager: CMMotionManager {
 
     var timer: DispatchSourceTimer?
+    let bootTime = Date()
 
     override func startAccelerometerUpdates(to queue: OperationQueue, withHandler handler: @escaping CMAccelerometerHandler) {
         timer = DispatchSource.makeTimerSource(queue: queue.underlyingQueue)
         timer!.setEventHandler {
-            queue.addOperation {
+            queue.addOperation { [weak self] in
+                guard let self = self else {
+                    return
+                }
+
                 let acceleration = CMAcceleration(x: 1.0, y: 1.0, z: 1.0)
-                let data = FakeAccelerometerData(acceleration: acceleration)
+                let data = FakeAccelerometerData(timestamp: TimeInterval(self.bootTime.timeIntervalSince(Date())),acceleration: acceleration)
                 //data?.acceleration = acceleration
                 handler(data, nil)
             }
@@ -43,9 +48,15 @@ class FakeAccelerometerData: CMAccelerometerData {
         return acc
     }
 
-    let acc: CMAcceleration
+    override var timestamp: TimeInterval {
+        return internalTimestamp
+    }
 
-    init(acceleration: CMAcceleration) {
+    let acc: CMAcceleration
+    let internalTimestamp: TimeInterval
+
+    init(timestamp: TimeInterval, acceleration: CMAcceleration) {
+        self.internalTimestamp = timestamp
         self.acc = acceleration
         super.init()
     }

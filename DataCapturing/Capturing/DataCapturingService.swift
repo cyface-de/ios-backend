@@ -81,7 +81,8 @@ public class DataCapturingService: NSObject {
     /// The background queue used to capture data.
     let capturingQueue = DispatchQueue.global(qos: .userInitiated)
 
-    private let sensorCapturer: SensorCapturer
+    /// An object that handles capturing of values from the smartphones sensors excluding geo locations (GPS, GLONASS, GALILEO, etc.).
+    let sensorCapturer: SensorCapturer
 
     /// A listener that is notified of important events during data capturing.
     private var handler: ((DataCapturingEvent, Status) -> Void)

@@ -192,7 +192,7 @@ class SerializationTest: XCTestCase {
         let eventsData = try eventsSerializer.serialize(serializable: events)
 
         // Assert
-        let sizeOfHeaderInBytes = 10
+        let sizeOfHeaderInBytes = 6
         let sizeOfOneEventWithoutValue = 12
         let sizeOfBicycleValue = 7
 
