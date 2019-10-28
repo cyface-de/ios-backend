@@ -291,9 +291,9 @@ class DataCapturingTests: XCTestCase {
 
         measure {
             oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000, isValid: true)]
-            oocut.accelerationsCache = []
+            oocut.sensorCapturer.accelerations = []
             for i in 0...99 {
-                oocut.accelerationsCache.append(Acceleration(timestamp: 10_000 + Int64(i), x: 1.0, y: 1.0, z: 1.0))
+                oocut.sensorCapturer.accelerations.append(SensorValue(timestamp: Date(timeInterval: TimeInterval(Int64(i)), since: Date(timeIntervalSince1970: TimeInterval(10_000))), x: 1.0, y: 1.0, z: 1.0))
             }
             oocut.saveCapturedData()
         }

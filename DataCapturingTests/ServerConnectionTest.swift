@@ -133,7 +133,7 @@ class ServerConnectionTest: XCTestCase {
         return GeoLocation(latitude: Double.random(in: -90.0 ... 90.0), longitude: Double.random(in: 0.0 ..< 360.0), accuracy: Double.random(in: 2.0 ... 15.0), speed: Double.random(in: 0.0 ... 10.0), timestamp: Int64.random(in: 0 ... INT64_MAX))
     }
 
-    func acceleration() -> Acceleration {
-        return Acceleration(timestamp: Int64.random(in: 0 ... INT64_MAX), x: Double.random(in: 0.0 ... 40.0), y: Double.random(in: 0.0 ... 40.0), z: Double.random(in: 0.0 ... 40.0))
+    func acceleration() -> SensorValue {
+        return SensorValue(timestamp: Date(timeIntervalSince1970: TimeInterval(Double.random(in: 0.0 ... 1571302762.0))), x: Double.random(in: 0.0 ... 40.0), y: Double.random(in: 0.0 ... 40.0), z: Double.random(in: 0.0 ... 40.0))
     }
 }

@@ -278,9 +278,9 @@ class DataSetCreator {
         }
         try persistenceLayer.save(locations: locations, in: measurement)
 
-        var accelerations = [Acceleration]()
+        var accelerations = [SensorValue]()
         for _ in 0..<countOfAccelerations {
-            let acceleration = Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(), x: Double.random(in: -10.0...10.0), y: Double.random(in: -10.0...10.0), z: Double.random(in: -10.0...10.0))
+            let acceleration = SensorValue(timestamp: Date(), x: Double.random(in: -10.0...10.0), y: Double.random(in: -10.0...10.0), z: Double.random(in: -10.0...10.0))
             accelerations.append(acceleration)
         }
         try persistenceLayer.save(accelerations: accelerations, in: measurement)

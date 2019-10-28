@@ -92,6 +92,7 @@ if let currentMeasurementIdentifier = dcs.currentMeasurement?.identifier {
 ```
 
 ### Getting Track information from a measurement
+
 Each measurement is organized into multiple tracks, which are split if the `DataCapturingService.pause()` and  `DataCapturingService.resume()` is called.
 Each track contains an ordered list of geo locations.
 Accessing this information to display it on the screen should follow the pattern below:
@@ -169,6 +170,7 @@ The `cleanTrack` is an array of `GeoLocationMO` instances.
 This array is not to be used on a different thread. Before using it you should copy all its values to main memory (or know how to use faults in CoreData).
 
 ### Using an Authenticator
+
 The Cyface SDK for iOS transmits measurement data to a server. 
 To authenticate with this server, the SDK uses an implementation of the `Authenticator`  class.
 There are two `Authenticator` implementations available.
@@ -179,6 +181,7 @@ It should be supplied with an appropriate JWT token prior to the first authentic
 The `CredentialsAuthenticator` retrieves a JWT token from the server directly and tries to refresh that token, if it has become invalid.
 
 ### Getting a track of locations
+
 As explained above each measurement contains one or several tracks. 
 On each use of the `pause` and `resume` lifecycle methods a new track is created. 
 To access the locations from a track, do something like the following.
@@ -197,6 +200,7 @@ if let tracks = measurement.tracks {
 ```
 
 ### Getting a log of lifecycle events
+
 If you need to know about past start, pause, resume and stop events you may retrieve them, by loading a measurement from a `PersistenceLayer`.
 The measurement provides the events as follows:
 

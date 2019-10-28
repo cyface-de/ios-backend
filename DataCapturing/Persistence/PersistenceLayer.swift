@@ -190,8 +190,12 @@ public class PersistenceLayer {
             throw PersistenceError(type: .measurementNotLoadable(measurementIdentifier), verboseDescription: "Unable to load measurement \(measurementIdentifier) from context \(context.name ?? "no name")!", inMethodName: #function, inFileName: #file, atLineNumber: #line)
         }
 
-        let accelerationFile = AccelerationsFile()
+        let accelerationFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
         try accelerationFile.remove(from: measurement)
+        let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
+        try rotationsFile.remove(from: measurement)
+        let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
+        try directionsFile.remove(from: measurement)
         context.delete(measurement)
         context.saveRecursively()
     }
@@ -206,10 +210,14 @@ public class PersistenceLayer {
     func delete() throws {
         let context = getContext()
         let measurements = try loadMeasurements()
-        let accelerationsFile = AccelerationsFile()
+        let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
+        let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
+        let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
 
         for measurement in measurements {
             try accelerationsFile.remove(from: measurement)
+            try rotationsFile.remove(from: measurement)
+            try directionsFile.remove(from: measurement)
             let object = try context.existingObject(with: measurement.objectID)
             context.delete(object)
         }
@@ -245,8 +253,12 @@ public class PersistenceLayer {
 
         measurement.synchronized = true
         measurement.accelerationsCount = 0
-        let accelerationsFile = AccelerationsFile()
+        let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
         try accelerationsFile.remove(from: measurement)
+        let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
+        try rotationsFile.remove(from: measurement)
+        let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
+        try directionsFile.remove(from: measurement)
 
         context.saveRecursively()
     }
@@ -310,22 +322,34 @@ public class PersistenceLayer {
     }
 
     /**
-     Stores the provided `accelerations` to the provided measurement.
+     Stores the provided `SensorValue`-objects to the provided measurement. The default value for each array is an empty array. This allows to store only one type of `SensorValue`.
 
      - Parameters:
-     - accelerations: An array of `Acceleration` instances to store.
-     - in: The measurement to store the `accelerations` to.
+        - accelerations: An array of acceleration `SensorValue` instances to store
+        - rotations: An array of rotation `SensorValue` instances to store
+        - directions: An array of direction `SensorValue` instances to store
+        - in: The measurement to store the `accelerations` to.
      - Throws:
         - Some internal file system error on failure of accessing the acceleration file at the required path.
      */
-    func save(accelerations: [Acceleration], in measurement: MeasurementMO) throws {
+    func save(accelerations: [SensorValue] = [], rotations: [SensorValue] = [], directions: [SensorValue] = [], in measurement: MeasurementMO) throws {
+
+        debugPrint("Storing \(accelerations.count) accelerations \(rotations.count) rotations and \(directions.count) directions.")
+
         let context = getContext()
 
         let measurement = migrate(measurement: measurement, to: context)
 
-        let accelerationsFile = AccelerationsFile()
+        let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
         _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
+        let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
+        _ = try rotationsFile.write(serializable: rotations, to: measurement.identifier)
+        let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
+        _ = try directionsFile.write(serializable: directions, to: measurement.identifier)
+
         measurement.accelerationsCount = measurement.accelerationsCount.advanced(by: accelerations.count)
+        measurement.rotationsCount = measurement.rotationsCount.advanced(by: rotations.count)
+        measurement.directionsCount = measurement.directionsCount.advanced(by: directions.count)
 
         context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         context.saveRecursively()
