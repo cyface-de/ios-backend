@@ -26,7 +26,7 @@ import os.log
  An object of this class handles the lifecycle of starting and stopping data capturing.
  
  - Author: Klemens Muthmann
- - Version: 10.0.0
+ - Version: 10.1.0
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {

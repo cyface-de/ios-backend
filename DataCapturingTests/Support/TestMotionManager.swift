@@ -25,7 +25,7 @@ import CoreMotion
  Instead of actual sensors this manager creates random values.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 2.0.0
  */
 class TestMotionManager: CMMotionManager {

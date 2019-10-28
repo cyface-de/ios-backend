@@ -27,8 +27,9 @@ import Foundation
  - SeeAlso: `DataCapturingService`, `PersistenceLayer::save(:[Acceleration]:MeasurementEntity:((MeasurementMO?, Status) -> Void))`
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 3.0.0
  - Since: 1.0.0
+ - Note: This was called  `Acceleration` in previous versions of the SDK.
  */
 public class SensorValue {
 

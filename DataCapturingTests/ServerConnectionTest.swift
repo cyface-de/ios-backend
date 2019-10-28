@@ -27,7 +27,7 @@ import Alamofire
  Tests that creating server connections works as expected.
 
  - Author: Klemens Muthmann
- - Since: 4.0.0
+ - Since: 4.0.1
  - Version: 1.1.0
  */
 class ServerConnectionTest: XCTestCase {

@@ -30,7 +30,7 @@ import Foundation
  ```
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 2.2.0
  */
 @available(swift, deprecated: 5.0.0, message: "There is a better solution provide by Swift natively beginning with Swift 5")
