@@ -20,7 +20,7 @@
 import Foundation
 
 /**
-The status returned by asynchronous callback handlers.
+ The status returned by asynchronous callback handlers.
 
  This tells the caller, whether an asynchronous call has been successful or not and if not it provides further information about the `Error`. This is required, since an asynchronous call can not throw an `Error` to the calling thread.
 
@@ -30,9 +30,10 @@ The status returned by asynchronous callback handlers.
  ```
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 2.2.0
  */
+@available(swift, deprecated: 5.0.0, message: "There is a better solution provide by Swift natively beginning with Swift 5")
 public enum Status {
     /// The status returned if an asynchronous callback has finished successfully.
     case success

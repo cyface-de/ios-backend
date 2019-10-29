@@ -25,7 +25,7 @@ import CoreData
  This class contains utility code used to create data stores in specific versions of the Cyface model.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.0.1
  - Since: 4.0.0
  */
 class DataSetCreator {
@@ -278,9 +278,9 @@ class DataSetCreator {
         }
         try persistenceLayer.save(locations: locations, in: measurement)
 
-        var accelerations = [Acceleration]()
+        var accelerations = [SensorValue]()
         for _ in 0..<countOfAccelerations {
-            let acceleration = Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(), x: Double.random(in: -10.0...10.0), y: Double.random(in: -10.0...10.0), z: Double.random(in: -10.0...10.0))
+            let acceleration = SensorValue(timestamp: Date(), x: Double.random(in: -10.0...10.0), y: Double.random(in: -10.0...10.0), z: Double.random(in: -10.0...10.0))
             accelerations.append(acceleration)
         }
         try persistenceLayer.save(accelerations: accelerations, in: measurement)

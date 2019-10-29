@@ -25,7 +25,7 @@ import CoreData
  Tests that using the `PersistenceLayer` works as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.2.1
+ - Version: 1.2.2
  - Since: 1.0.0
  */
 class PersistenceTests: XCTestCase {
@@ -313,7 +313,7 @@ class PersistenceTests: XCTestCase {
     /**
      Create fixture acceleration
      */
-    static func acceleration() -> Acceleration {
-        return Acceleration(timestamp: DataCapturingService.currentTimeInMillisSince1970(), x: 1.0, y: 1.0, z: 1.0)
+    static func acceleration() -> SensorValue {
+        return SensorValue(timestamp: Date(), x: 1.0, y: 1.0, z: 1.0)
     }
 }

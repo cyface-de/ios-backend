@@ -6,6 +6,13 @@ The versions adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 Since we did not use this format right from the start, early versions are not listed here.
 
+## [6.0.0] - 2019-10-28
+### Fixed
+* Binary format for events file has used a 64 bit integer for the count of events instead of a 32 bit one. This should be fixed now
+
+### Added
+* Enable additional sensor data to be captured. Additional sensors are gyroscope and magnetometer. Data from these sensors is uploaded to a Cyface server as well.
+
 ## [5.0.0] - 2019-10-16
 ### Fixed
 * Upload of measurement files to Cyface Server. This was producing a status code 500

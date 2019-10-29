@@ -113,82 +113,83 @@ extension FileSupport {
 }
 
 /**
- Struct implementing the `FileSupport` protocol to store accelerations to a file in Cyface binary format.
+ Struct implementing the `FileSupport` protocol to store sensor values to a file in Cyface binary format.
  
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 3.0.0
  - Since: 2.0.0
+ - Note: This class was called `AccelerationsFile` prior to SDK version 6.0.0.
  */
-public struct AccelerationsFile: FileSupport {
-
+public struct SensorValueFile: FileSupport {
     // MARK: - Properties
 
-    /// A serializer to transform between `Acceleration` instances and the Cyface Binary Format.
-    let serializer = AccelerationSerializer()
+    /// A serializer to transform between sensor values and the Cyface Binary Format.
+    let serializer = SensorValueSerializer()
 
-    /// The file name for the file containing the acceleration values for one measurement.
+    /// The file name for the file containing the sensor values for one measurement.
     var fileName: String {
         return "accel"
     }
 
     /// File extension used for files containing accelerations.
     var fileExtension: String {
-        return "cyfa"
+        return fileType.fileExtension
     }
+    let fileType: SensorValueFileType
 
-    /// Public initializer for external systems to access acceleration data.
-    public init() {
-        // Nothing to do here
+    /// Public initializer for external systems to access sensor value data.
+    public init(fileType: SensorValueFileType) {
+        self.fileType = fileType
     }
 
     // MARK: - Methods
 
     /**
-     Writes the provided accelerations to the provided measurement.
+     Writes the provided sensor values to the provided measurement.
      
 
      - Parameters:
-        - serializable: The array of `Acceleration` instances to write.
-        - to: The measurement to write the accelerations to.
+        - serializable: The array of sensor values to write.
+        - to: The measurement to write the sensor values to.
      - Returns: The file system URL of the file that was written to.
      - Throws:
         - Some internal file system error on failure of creating the file at the required path.
      */
-    func write(serializable: [Acceleration], to measurement: Int64) throws -> URL {
-        let accelerationData = serializer.serialize(serializable: serializable)
-        let accelerationFilePath = try path(for: measurement)
+    func write(serializable: [SensorValue], to measurement: Int64) throws -> URL {
+        let sensorValueData = serializer.serialize(serializable: serializable)
+        let sensorValueFilePath = try path(for: measurement)
 
-        let fileHandle = try FileHandle(forWritingTo: accelerationFilePath)
+        let fileHandle = try FileHandle(forWritingTo: sensorValueFilePath)
         defer { fileHandle.closeFile()}
         fileHandle.seekToEndOfFile()
-        fileHandle.write(accelerationData)
+        fileHandle.write(sensorValueData)
 
-        return accelerationFilePath
+        return sensorValueFilePath
     }
 
     /**
-     Loads all `Acceleration` instances from the provided measurement. This accesses the file system to get the data from the local acceleration storage file.
+     Loads all sensor values from the provided measurement. This accesses the file system to get the data from the local sensor value storage file.
 
-     - Parameter from: The measurement to load the accelerations from.
-     - Throws: If the file containing the accelerations was not readable.
-     - Returns: An array of all the acceleration value from the provided measurement.
+     - Parameter from: The measurement to load the sensor values from.
+     - Throws: If the file containing the sensor values was not readable.
+     - Returns: An array of all the sensor values from the provided measurement.
     */
-    public func load(from measurement: MeasurementMO) throws -> [Acceleration] {
+    public func load(from measurement: MeasurementMO) throws -> [SensorValue] {
         do {
             let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
             defer {fileHandle.closeFile()}
             let data = fileHandle.readDataToEndOfFile()
-            return try serializer.deserialize(data: data, count: UInt32(measurement.accelerationsCount))
+            return try serializer.deserialize(data: data, count: fileType.getCounter(measurement))
         } catch let error {
             throw FileSupportError.notReadable(cause: error)
         }
     }
 
     /**
-     Provides the binary data for the acceleration values of the provided measurement.
+     Provides the binary data for the sensor values of the provided measurement.
 
      - Parameter for: The measurement to provide data for.
-     - Returns: The serialized accelerations in Cyface Binary Format.
+     - Returns: The serialized sensor values in Cyface Binary Format.
      - Throws:
         - `FileSupportError.notReadable` If the data file was not readable.
         - Some unspecified undocumented file system error if file was not accessible.
@@ -208,10 +209,10 @@ public struct AccelerationsFile: FileSupport {
  Struct implementing the `FileSupport` protocol to serialize whole measurements to a file in Cyface binary format.
 
  - Author: Klemens Muthmann
- - Version: 2.0.2
+ - Version: 2.0.3
  - Since: 2.0.0
  */
-struct MeasurementFile: FileSupport {
+public struct MeasurementFile: FileSupport {
 
     // MARK: - Properties
 
@@ -344,4 +345,40 @@ public enum FileSupportError: Error {
      - cause: Another error, from system level, providing more detailed information.
      */
     case notReadable(cause: Error)
+}
+
+/**
+ One type of a sensor value file, such as a file for accelerations, rotations or directions.
+ This class may not be instantiated directly.
+ The only valid instances are provided as static properties.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 6.0.0
+ */
+public class SensorValueFileType {
+    /// A file type for acceleration files.
+    public static let accelerationValueType = SensorValueFileType(fileExtension: "cyfa", getCounter: {measurement in return UInt32(measurement.accelerationsCount)})
+    /// A file type for rotation files.
+    public static let rotationValueType = SensorValueFileType(fileExtension: "cyfr", getCounter: {measurement in return UInt32(measurement.rotationsCount)})
+    /// A file type for direction files.
+    public static let directionValueType = SensorValueFileType(fileExtension: "cyfd", getCounter: {measurement in return UInt32(measurement.directionsCount)})
+
+    /// The file extension of the represented file type.
+    public let fileExtension: String
+    /// A counter to get the amount of points within a file of this type from a measurement.
+    public let getCounter: (MeasurementMO) -> UInt32
+
+    /**
+     Creates a new completely initiailized `SensorValueFileType`.
+     This should never be called, since the only valid instances are pregenerated.
+
+     - Parameters:
+        - fileExtension: The file extension of the represented file type.
+        - getCounter: A counter to get the amount of points within a file of this type from a measurement.
+     */
+    private init(fileExtension: String, getCounter: @escaping (MeasurementMO) -> UInt32) {
+        self.fileExtension = fileExtension
+        self.getCounter = getCounter
+    }
 }
