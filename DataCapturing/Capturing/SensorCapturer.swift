@@ -26,7 +26,7 @@ import os.log
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
- - Since: 5.1.0
+ - Since: 6.0.0
  */
 class SensorCapturer {
 

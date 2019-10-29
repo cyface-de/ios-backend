@@ -25,7 +25,7 @@ import CoreData
  Tests that using the `PersistenceLayer` works as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.2.1
+ - Version: 1.2.2
  - Since: 1.0.0
  */
 class PersistenceTests: XCTestCase {

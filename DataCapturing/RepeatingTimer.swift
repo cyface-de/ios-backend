@@ -26,7 +26,7 @@ import Foundation
  This implementation is based on a <a href="https://medium.com/over-engineering/a-background-repeating-timer-in-swift-412cecfd2ef9">post from medium</a>.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 4.0.0
  */
 class RepeatingTimer {

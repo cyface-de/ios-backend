@@ -24,7 +24,7 @@ import Foundation
  It is required to start migrations between the different versions.
 
  - Author: Klemens Muthmann
- - Version: 1.3.0
+ - Version: 1.4.0
  - Since: 4.0.0
  */
 public enum CoreDataMigrationVersion: String, CaseIterable {

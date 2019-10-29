@@ -25,7 +25,7 @@ import CoreData
  This class contains utility code used to create data stores in specific versions of the Cyface model.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.0.1
  - Since: 4.0.0
  */
 class DataSetCreator {

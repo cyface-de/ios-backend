@@ -116,8 +116,9 @@ extension FileSupport {
  Struct implementing the `FileSupport` protocol to store sensor values to a file in Cyface binary format.
  
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 3.0.0
  - Since: 2.0.0
+ - Note: This class was called `AccelerationsFile` prior to SDK version 6.0.0.
  */
 public struct SensorValueFile: FileSupport {
     // MARK: - Properties
@@ -208,7 +209,7 @@ public struct SensorValueFile: FileSupport {
  Struct implementing the `FileSupport` protocol to serialize whole measurements to a file in Cyface binary format.
 
  - Author: Klemens Muthmann
- - Version: 2.0.2
+ - Version: 2.0.3
  - Since: 2.0.0
  */
 public struct MeasurementFile: FileSupport {
@@ -353,7 +354,7 @@ public enum FileSupportError: Error {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
- - Since: 5.1.0
+ - Since: 6.0.0
  */
 public class SensorValueFileType {
     /// A file type for acceleration files.

@@ -93,7 +93,7 @@ extension BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 1.0.2
+ - Version: 2.0.0
  */
 class MeasurementSerializer: BinarySerializer {
     /// Binds the Serializeable from the `BinarySerializer` protocol to a measurement.
@@ -152,7 +152,8 @@ class MeasurementSerializer: BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 1.0.0
+ - Version: 2.0.0
+ - Note: This class was called `AccelerationSerializer` in SDK version prior to 6.0.0.
  */
 class SensorValueSerializer: BinarySerializer {
     /// Binds the Serializeable from the `BinarySerializer` protocol to an array of sensor value points.
