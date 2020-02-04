@@ -6,6 +6,11 @@ The versions adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 Since we did not use this format right from the start, early versions are not listed here.
 
+## [6.0.1] - 2020-02-04
+### Fixed
+* Lifecycle should correctly restart now if implementing app crashed or was forced to shut down during a measurement
+* eventType from Event class is not visible to implementing apps
+
 ## [6.0.0] - 2019-10-28
 ### Fixed
 * Binary format for events file has used a 64 bit integer for the count of events instead of a 32 bit one. This should be fixed now
