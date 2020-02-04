@@ -205,6 +205,7 @@ public class DataCapturingService: NSObject {
                 if let currentMeasurement = currentMeasurement {
                     try finish(measurement: currentMeasurement)
                 }
+                self.isPaused = false
             }
 
             let timestamp = DataCapturingService.currentTimeInMillisSince1970()
