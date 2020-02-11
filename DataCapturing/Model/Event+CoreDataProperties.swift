@@ -31,7 +31,7 @@ extension Event {
     @NSManaged public var value: String?
     @NSManaged public var measurement: MeasurementMO?
 
-    var typeEnum: EventType {
+    public var typeEnum: EventType {
         get {
             return EventType(rawValue: type)!
         }
