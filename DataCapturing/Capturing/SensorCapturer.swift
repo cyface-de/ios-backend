@@ -32,6 +32,28 @@ class SensorCapturer {
 
     /// The log used to identify messages from this class.
     private static let log = OSLog(subsystem: "de.cyface", category: "SensorCapturer")
+    /// Internal storage for the kernel boot time, to avoid regular recalculation
+    private static var _kernelBootTime: Date?
+    /// Provides the boot time of the device. This is required to calculate the absolute timestamp of a sensor measurement.
+    private static var kernelBootTime: Date {
+        if _kernelBootTime == nil {
+            var mib = [ CTL_KERN, KERN_BOOTTIME ]
+            var bootTime = timeval()
+            var bootTimeSize = MemoryLayout<timeval>.size
+
+            if 0 != sysctl(&mib, UInt32(mib.count), &bootTime, &bootTimeSize, nil, 0) {
+                fatalError("Could not get boot time, errno: \(errno)")
+            }
+
+            _kernelBootTime = Date(timeIntervalSince1970: TimeInterval(Double(bootTime.tv_sec) + Double(bootTime.tv_usec)/1_000_000))
+        }
+
+        guard let kernelBootTimeCache = _kernelBootTime else {
+            fatalError("Kernel boot time was not calculated!")
+        }
+
+        return kernelBootTimeCache
+    }
 
     /// An in memory storage for accelerations, before they are written to disk.
     var accelerations = [SensorValue]()
@@ -77,8 +99,9 @@ class SensorCapturer {
             motionManager.startGyroUpdates(to: queue, withHandler: handle)
         }
 
-        if motionManager.isMagnetometerAvailable {
-            motionManager.startMagnetometerUpdates(to: queue, withHandler: handle)
+        if motionManager.isDeviceMotionAvailable {
+            motionManager.showsDeviceMovementDisplay = true
+            motionManager.startDeviceMotionUpdates(using: .xArbitraryCorrectedZVertical, to: queue, withHandler: handle)
         }
     }
 
@@ -86,7 +109,7 @@ class SensorCapturer {
     func stop() {
         motionManager.stopAccelerometerUpdates()
         motionManager.stopGyroUpdates()
-        motionManager.stopMagnetometerUpdates()
+        motionManager.stopDeviceMotionUpdates()
     }
 
     /**
@@ -109,7 +132,7 @@ class SensorCapturer {
         }
 
         let accValues = data.acceleration
-        let timestamp = Date(timeInterval: data.timestamp, since: kernelBootTime())
+        let timestamp = Date(timeInterval: data.timestamp, since: SensorCapturer.kernelBootTime)
         let acc = SensorValue(timestamp: timestamp,
                                x: accValues.x,
                                y: accValues.y,
@@ -139,7 +162,7 @@ class SensorCapturer {
         }
 
         let rotValues = data.rotationRate
-        let timestamp = Date(timeInterval: data.timestamp, since: kernelBootTime())
+        let timestamp = Date(timeInterval: data.timestamp, since: SensorCapturer.kernelBootTime)
         let rot = SensorValue(timestamp: timestamp, x: rotValues.x, y: rotValues.y, z: rotValues.z)
         lifecycleQueue.async (flags: .barrier) {
             self.rotations.append(rot)
@@ -147,44 +170,28 @@ class SensorCapturer {
     }
 
     /**
-       The handler provided to *CoreMotion* for handling new directions.
+       The handler provided to *CoreMotion* for handling device motion. This is mainly used to capture cleaned
 
-       See `CMMagnetometerHandler` in the Apple documentation for futher information.
+       See `CMDeviceMotionHandler` in the Apple documentation for futher information.
 
     - Parameters:
        - data: The new directional data, if any is available or `nil` otherwise.
        - error: An error or `nil` if no error occured.
     */
-    private func handle(_ data: CMMagnetometerData?, _ error: Error?) {
+    private func handle(_ data: CMDeviceMotion?, _ error: Error?) {
         if let error = error as? CMError {
-            os_log("Magnetometer error: %@", log: SensorCapturer.log, type: .error, error.rawValue)
+            os_log("Device Motion error: %@", log: SensorCapturer.log, type: .error, error.rawValue)
         }
 
         guard let data = data else {
-            fatalError("No Magnetometer data available!")
+            fatalError("No device motion data available!")
         }
 
         let dirValues = data.magneticField
-        let timestamp = Date(timeInterval: data.timestamp, since: kernelBootTime())
-        let dir = SensorValue(timestamp: timestamp, x: dirValues.x, y: dirValues.y, z: dirValues.z)
+        let timestamp = Date(timeInterval: data.timestamp, since: SensorCapturer.kernelBootTime)
+        let dir = SensorValue(timestamp: timestamp, x: dirValues.field.x, y: dirValues.field.y, z: dirValues.field.z)
         lifecycleQueue.async {
             self.directions.append(dir)
         }
-    }
-
-    /**
-        A function providing the boot time of the device. This is required to calculate the absolute timestamp of a sensor measurement.
-     */
-    func kernelBootTime() -> Date {
-
-        var mib = [ CTL_KERN, KERN_BOOTTIME ]
-        var bootTime = timeval()
-        var bootTimeSize = MemoryLayout<timeval>.size
-
-        if 0 != sysctl(&mib, UInt32(mib.count), &bootTime, &bootTimeSize, nil, 0) {
-            fatalError("Could not get boot time, errno: \(errno)")
-        }
-
-        return Date(timeIntervalSince1970: TimeInterval(Double(bootTime.tv_sec) + Double(bootTime.tv_usec)/1_000_000))
     }
 }
