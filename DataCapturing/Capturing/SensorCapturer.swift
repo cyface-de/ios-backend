@@ -48,11 +48,11 @@ class SensorCapturer {
             _kernelBootTime = Date(timeIntervalSince1970: TimeInterval(Double(bootTime.tv_sec) + Double(bootTime.tv_usec)/1_000_000))
         }
 
-        guard let _kernelBootTime = _kernelBootTime else {
+        guard let kernelBootTimeCache = _kernelBootTime else {
             fatalError("Kernel boot time was not calculated!")
         }
 
-        return _kernelBootTime
+        return kernelBootTimeCache
     }
 
     /// An in memory storage for accelerations, before they are written to disk.
