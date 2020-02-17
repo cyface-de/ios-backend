@@ -130,7 +130,7 @@ class SerializationTest: XCTestCase {
      This creates a really big test data set usable to test programs unpacking such a set. This test is skipped since it takes really long.
      */
     func skip_testSerializeBigDataSet() throws {
-        let measurement = try DataSetCreator.fakeMeasurement(countOfGeoLocations: 36_000, countOfAccelerations: 3_600_000, persistenceLayer: persistenceLayer)
+        let measurement = try FakeMeasurementImpl.fakeMeasurement(persistenceLayer: persistenceLayer).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 36_000).addAccelerations(countOfAccelerations: 3_600_000).build()
         let data = try oocut.serialize(serializable: measurement)
         try data.write(to: URL(fileURLWithPath: "/Users/cyface/data.cyf"))
     }

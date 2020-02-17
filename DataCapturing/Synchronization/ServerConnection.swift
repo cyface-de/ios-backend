@@ -237,24 +237,39 @@ public class ServerConnection {
         persistenceLayer.context = persistenceLayer.makeContext()
         let locationCount = try persistenceLayer.countGeoLocations(forMeasurement: measurement)
         let locationCountData = String(locationCount).data(using: String.Encoding.utf8)!
+        let tracks = measurement.tracks
 
-            if let startLocationRaw = (measurement.tracks?.firstObject as? Track)?.locations?.firstObject as? GeoLocationMO {
-                let startLocationLat = "\(startLocationRaw.lat)".data(using: String.Encoding.utf8)!
-                let startLocationLon = "\(startLocationRaw.lon)".data(using: String.Encoding.utf8)!
-                let startLocationTs = "\(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-                request.append(startLocationLat, withName: "startLocLat")
-                request.append(startLocationLon, withName: "startLocLon")
-                request.append(startLocationTs, withName: "startLocTs")
-            }
+        var startLocationRaw: GeoLocationMO?
+        var endLocationRaw: GeoLocationMO?
+        if let tracks = tracks {
+            for track in tracks {
+                if startLocationRaw == nil, let tracksFirstLocation = (track as? Track)?.locations?.firstObject as? GeoLocationMO {
+                    startLocationRaw = tracksFirstLocation
+                }
 
-            if let endLocationRaw = (measurement.tracks?.lastObject as? Track)?.locations?.lastObject as? GeoLocationMO {
-                let endLocationLat = "\(endLocationRaw.lat)".data(using: String.Encoding.utf8)!
-                let endLocationLon = "\(endLocationRaw.lon)".data(using: String.Encoding.utf8)!
-                let endLocationTs = "\(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-                request.append(endLocationLat, withName: "endLocLat")
-                request.append(endLocationLon, withName: "endLocLon")
-                request.append(endLocationTs, withName: "endLocTs")
+                if let tracksLastLocation = (track as? Track)?.locations?.lastObject as? GeoLocationMO {
+                    endLocationRaw = tracksLastLocation
+                }
             }
+        }
+
+        if let startLocationRaw = startLocationRaw {
+            let startLocationLat = "\(startLocationRaw.lat)".data(using: String.Encoding.utf8)!
+            let startLocationLon = "\(startLocationRaw.lon)".data(using: String.Encoding.utf8)!
+            let startLocationTs = "\(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+            request.append(startLocationLat, withName: "startLocLat")
+            request.append(startLocationLon, withName: "startLocLon")
+            request.append(startLocationTs, withName: "startLocTs")
+        }
+
+        if let endLocationRaw = endLocationRaw {
+            let endLocationLat = "\(endLocationRaw.lat)".data(using: String.Encoding.utf8)!
+            let endLocationLon = "\(endLocationRaw.lon)".data(using: String.Encoding.utf8)!
+            let endLocationTs = "\(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+            request.append(endLocationLat, withName: "endLocLat")
+            request.append(endLocationLon, withName: "endLocLon")
+            request.append(endLocationTs, withName: "endLocTs")
+        }
 
         request.append(deviceIdData, withName: "deviceId")
         request.append(measurementIdData, withName: "measurementId")

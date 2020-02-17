@@ -33,10 +33,17 @@ import Alamofire
 class ServerConnectionTest: XCTestCase {
 
     var coreDataStack: CoreDataManager!
+    var oocut: ServerConnection!
 
     override func setUp() {
         coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
         coreDataStack.setup(bundle: Bundle(identifier: "de.cyface.DataCapturing")!)
+
+        guard let url = URL(string: "http://localhost:8080/api/v2") else {
+            fatalError()
+        }
+        let authenticator = StaticAuthenticator()
+        self.oocut = ServerConnection(apiURL: url, authenticator: authenticator, onManager: coreDataStack)
     }
 
     /**
@@ -44,15 +51,9 @@ class ServerConnectionTest: XCTestCase {
      */
     func testCreateServerRequest_HappyPath() throws {
         // Arrange
-        guard let url = URL(string: "http://localhost:8080/api/v2") else {
-            fatalError()
-        }
-        let authenticator = StaticAuthenticator()
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try DataSetCreator.fakeMeasurement(countOfGeoLocations: 10, countOfAccelerations: 1_000, persistenceLayer: persistenceLayer)
-
-        let oocut = ServerConnection(apiURL: url, authenticator: authenticator, onManager: coreDataStack)
+        let measurement = try FakeMeasurementImpl.fakeMeasurement(persistenceLayer: persistenceLayer).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 10).addAccelerations(countOfAccelerations: 1_000).build()
 
         let data = MultipartFormData()
         do {
@@ -91,6 +92,39 @@ class ServerConnectionTest: XCTestCase {
     }
 
     /**
+        Tests that creating a multi part server request works even if the first and the last track of the measurement contain no data.
+     */
+    func testCreateMetaData_WithEmptyTracks() throws {
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+        let measurement = try FakeMeasurementImpl.fakeMeasurement(persistenceLayer: persistenceLayer).appendTrack().appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 10).addAccelerations(countOfAccelerations: 1_000).appendTrack().build()
+
+        let data = MultipartFormData()
+        do {
+            // Act
+            try oocut.create(request: data, for: measurement.identifier)
+
+            // Assert
+            do {
+                let formData = try data.encode()
+                let decodedRequest = String(decoding: formData, as: UTF8.self)
+                XCTAssertTrue(decodedRequest.contains("startLocLat"))
+                XCTAssertTrue(decodedRequest.contains("startLocLon"))
+                XCTAssertTrue(decodedRequest.contains("startLocTs"))
+                XCTAssertTrue(decodedRequest.contains("endLocLat"))
+                XCTAssertTrue(decodedRequest.contains("endLocLon"))
+                XCTAssertTrue(decodedRequest.contains("endLocTs"))
+            } catch {
+                XCTFail("Unable to encode request! Error \(error)")
+            }
+        } catch let error as PersistenceError {
+            _ = PersistenceError.handle(error: error)
+            XCTFail(error.verboseDescription)
+        } catch {
+            XCTFail("Unexpected error \(error)")
+        }
+    }
+
+    /**
      This test, tries to upload some data to a Cyface server. It should usually be ignored, since it requires an actual server to run.
 
      To enable this test you need to exchange the `backgroundSessionManager` in `ServerConnection` by a regular `sessionManager` and remove (or comment) the `backgroundSessionManager` in the `Networking` class. The reason for this is, that a simulator is incable of background uploads.
@@ -115,7 +149,7 @@ class ServerConnectionTest: XCTestCase {
         let promise = expectation(description: "Expect call to return 201.")
         serverConnection.sync(measurement: measurement.identifier, onSuccess: {synchronizedMeasurement in
             do {
-                let updatedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: synchronizedMeasurement)
+                _ = try persistenceLayer.load(measurementIdentifiedBy: synchronizedMeasurement)
                 XCTAssertEqual(synchronizedMeasurement, measurementIdentifier)
                 promise.fulfill()
             } catch {
