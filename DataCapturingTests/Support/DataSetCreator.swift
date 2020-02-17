@@ -249,44 +249,6 @@ class DataSetCreator {
         geoLocation.setValue(track, forKey: "track")
         return geoLocation
     }
-
-    /**
-     Create a measurement on the test persistence layer for serialization.
-
-     - Parameters:
-        - countOfGeoLocations: The amount of geo locations to create within the test measurement
-        - countOfAccelerations: The amount of accelerations to create within the test measurement
-        - persistenceLayer: The `PersistenceLayer` used to create the fake measurement
-     - Returns: The created test measurement
-     - Throws:
-        - Some unspecified errors from within CoreData.
-        - Some internal file system error on failure of accessing the acceleration file at the required path.
-     */
-    static func fakeMeasurement(countOfGeoLocations: Int, countOfAccelerations: Int, persistenceLayer: PersistenceLayer) throws -> MeasurementMO {
-        let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: "BICYCLE")
-        measurement.accelerationsCount = Int32(countOfAccelerations)
-        measurement.synchronized = false
-        measurement.trackLength = Double.random(in: 0..<10_000.0)
-
-        persistenceLayer.appendNewTrack(to: measurement)
-        var locations = [GeoLocation]()
-
-        for _ in 0..<countOfGeoLocations {
-            let location = GeoLocation(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: DataCapturingService.currentTimeInMillisSince1970(), isValid: true)
-
-            locations.append(location)
-        }
-        try persistenceLayer.save(locations: locations, in: measurement)
-
-        var accelerations = [SensorValue]()
-        for _ in 0..<countOfAccelerations {
-            let acceleration = SensorValue(timestamp: Date(), x: Double.random(in: -10.0...10.0), y: Double.random(in: -10.0...10.0), z: Double.random(in: -10.0...10.0))
-            accelerations.append(acceleration)
-        }
-        try persistenceLayer.save(accelerations: accelerations, in: measurement)
-
-        return measurement
-    }
 }
 
 /**

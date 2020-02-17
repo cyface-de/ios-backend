@@ -55,6 +55,7 @@
 		3D8FAD82222E913600D98D65 /* GeoLocationMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8FAD7C222E913500D98D65 /* GeoLocationMO+CoreDataProperties.swift */; };
 		3D8FAD83222E913600D98D65 /* MeasurementMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D8FAD7D222E913600D98D65 /* MeasurementMO+CoreDataProperties.swift */; };
 		3DA102B0229D38F400E27008 /* TrackCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DA102AF229D38F400E27008 /* TrackCleaner.swift */; };
+		3DBE27C623FA9E1D006E9A90 /* FakeMeasurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DBE27C523FA9E1D006E9A90 /* FakeMeasurement.swift */; };
 		3DF5636A232F53CD0093F92B /* CyfaceModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3DF56361232F53CC0093F92B /* CyfaceModel.xcdatamodeld */; };
 		3DF5636E232F53FD0093F92B /* V7toV8.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3DF5636C232F53FD0093F92B /* V7toV8.xcmappingmodel */; };
 		3DF5636F232F53FD0093F92B /* MeasurementContextToEventPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DF5636D232F53FD0093F92B /* MeasurementContextToEventPolicy.swift */; };
@@ -138,6 +139,7 @@
 		3D8FAD7C222E913500D98D65 /* GeoLocationMO+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GeoLocationMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3D8FAD7D222E913600D98D65 /* MeasurementMO+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MeasurementMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3DA102AF229D38F400E27008 /* TrackCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackCleaner.swift; sourceTree = "<group>"; };
+		3DBE27C523FA9E1D006E9A90 /* FakeMeasurement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeMeasurement.swift; sourceTree = "<group>"; };
 		3DF56362232F53CC0093F92B /* 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 5.xcdatamodel; sourceTree = "<group>"; };
 		3DF56363232F53CC0093F92B /* 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 3.xcdatamodel; sourceTree = "<group>"; };
 		3DF56364232F53CC0093F92B /* CyfaceModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CyfaceModel.xcdatamodel; sourceTree = "<group>"; };
@@ -311,6 +313,7 @@
 				3D8E524E223EB2A1004D7E2B /* TestDataCapturingService.swift */,
 				3D1D9A8E224D28190053B1B7 /* DataSetCreator.swift */,
 				3D3A7DD12258E39B0019998A /* TestLocationManager.swift */,
+				3DBE27C523FA9E1D006E9A90 /* FakeMeasurement.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -653,6 +656,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DBE27C623FA9E1D006E9A90 /* FakeMeasurement.swift in Sources */,
 				3D8E5256223FDC8E004D7E2B /* DataMigrationTest.swift in Sources */,
 				3D0511E7204D622700967898 /* SerializationTest.swift in Sources */,
 				3D8E524D223EB240004D7E2B /* TestMotionManager.swift in Sources */,
