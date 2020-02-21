@@ -6,6 +6,13 @@ The versions adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 Since we did not use this format right from the start, early versions are not listed here.
 
+## [6.1.0] - 2020-02-21
+### Fixed
+* If there is an empty track at the beginning or end of a measurement, the meta data about start and end location should be correct now
+
+### Changed
+* Magnetometer now uses calibrated API
+
 ## [6.0.1] - 2020-02-04
 ### Fixed
 * Lifecycle should correctly restart now if implementing app crashed or was forced to shut down during a measurement
