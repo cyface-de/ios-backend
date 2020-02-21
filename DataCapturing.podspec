@@ -25,7 +25,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'DataCapturing'
-  s.version          = '6.0.1'
+  s.version          = '6.1.0'
   s.summary          = 'Framework used to continuously capture data from all available sensors on an iOS device and transmit it to a Cyface-API compatible server.'
 
 # This description is used to generate tags and improve search results.
