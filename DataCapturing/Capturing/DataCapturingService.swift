@@ -203,7 +203,7 @@ public class DataCapturingService: NSObject {
             if isPaused {
                 os_log("Starting data capturing on paused service. Finishing paused measurements and starting fresh. This is probably the result of a lifecycle error. ", log: log, type: .default)
                 if let currentMeasurement = currentMeasurement {
-                    try finish(measurement: currentMeasurement)
+                    _ = try finish(measurement: currentMeasurement)
                 }
                 self.isPaused = false
             }
@@ -217,9 +217,9 @@ public class DataCapturingService: NSObject {
             self.currentMeasurement = measurement.identifier
             persistenceLayer.context?.saveRecursively()
 
-            try startCapturing(savingEvery: savingInterval, for: .lifecycleStart)
-
-            handler(.serviceStarted(measurement: measurement.identifier), .success)
+            if let event = try startCapturing(savingEvery: savingInterval, for: .lifecycleStart) {
+                handler(.serviceStarted(measurement: measurement.identifier, event: event), .success)
+            }
         }
     }
 
@@ -243,13 +243,11 @@ public class DataCapturingService: NSObject {
             }
 
             // Inform about stopped event
-            backgroundSynchronizationTimer?.setCancelHandler {
-                self.handler(.serviceStopped(measurement: currentMeasurement), .success)
-            }
             stopCapturing()
-            try finish(measurement: currentMeasurement)
+            let event = try finish(measurement: currentMeasurement)
             self.currentMeasurement = nil
             isPaused = false
+            self.handler(.serviceStopped(measurement: currentMeasurement, event: event), .success)
         }
     }
 
@@ -279,8 +277,11 @@ public class DataCapturingService: NSObject {
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
             let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
-            measurement.addToEvents(persistenceLayer.createEvent(of: .lifecyclePause))
+            let event = persistenceLayer.createEvent(of: .lifecyclePause)
+            measurement.addToEvents(event)
             persistenceLayer.context?.saveRecursively()
+
+            handler(.servicePaused(measurement: currentMeasurement,event: event), .success)
         }
     }
 
@@ -306,10 +307,11 @@ public class DataCapturingService: NSObject {
                 fatalError("No measurement to resume")
             }
 
-            try startCapturing(savingEvery: savingInterval, for: .lifecycleResume)
-            isPaused = false
+            if let startEvent = try startCapturing(savingEvery: savingInterval, for: .lifecycleResume) {
+                isPaused = false
 
-            handler(.serviceResumed(measurement: currentMeasurement), .success)
+                handler(.serviceResumed(measurement: currentMeasurement, event: startEvent), .success)
+            }
         }
     }
 
@@ -355,15 +357,17 @@ public class DataCapturingService: NSObject {
      Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
 
      - Parameter savingEvery: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
-     - Parameter event: The event causing this start call.
+     - Parameter eventType: The type of event causing this start call.
+     - Returns: The event with information about starting the data capturing service
      - Throws:
         - `PersistenceError` If there is no current measurement.
         - Some unspecified errors from within CoreData.
      */
-    func startCapturing(savingEvery time: TimeInterval, for event: EventType) throws {
+    func startCapturing(savingEvery time: TimeInterval, for eventType: EventType) throws -> Event? {
         // Preconditions
         guard !isRunning else {
-            return os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: log, type: .info)
+            os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: log, type: .info)
+            return nil
         }
 
         guard let currentMeasurement = currentMeasurement else {
@@ -374,7 +378,8 @@ public class DataCapturingService: NSObject {
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
         persistenceLayer.appendNewTrack(to: measurement)
-        measurement.addToEvents(persistenceLayer.createEvent(of: event))
+        let event = persistenceLayer.createEvent(of: eventType)
+        measurement.addToEvents(event)
         self.coreLocationManager.locationDelegate = self
 
         sensorCapturer.start()
@@ -407,6 +412,7 @@ public class DataCapturingService: NSObject {
         }
 
         self.isRunning = true
+        return event
     }
 
     /**
@@ -419,9 +425,9 @@ public class DataCapturingService: NSObject {
         }
         coreLocationManager.locationDelegate = nil
         backgroundSynchronizationTimer.cancel()
-            if !locationsCache.isEmpty || !sensorCapturer.isEmpty {
-                saveCapturedData()
-            }
+        if !locationsCache.isEmpty || !sensorCapturer.isEmpty {
+            saveCapturedData()
+        }
         isRunning = false
 
     }
@@ -465,37 +471,18 @@ public class DataCapturingService: NSObject {
      Finishes the provided measurement if still open and marks this event in the list of events.
      This method does not check if the measurement is already finished, so be careful to only call it on non finished measurements.
 
-     - Parameter measurement: The device wide unique identifier of the measurement to finish.
+     - Parameter measurement: The device wide unique identifier of the measurement to finish
+     - Returns: The event marking the finalization of the provided measurement
      */
-    private func finish(measurement: Int64) throws {
+    private func finish(measurement: Int64) throws -> Event {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
         let currentMeasurementEntity = try persistenceLayer.load(measurementIdentifiedBy: measurement)
         currentMeasurementEntity.synchronizable = true
-        currentMeasurementEntity.addToEvents(persistenceLayer.createEvent(of: .lifecycleStop))
+        let event = persistenceLayer.createEvent(of: .lifecycleStop)
+        currentMeasurementEntity.addToEvents(event)
         persistenceLayer.context?.saveRecursively()
-    }
-
-    /**
-        The handler provided to *CoreMotion* for handling new accelerations.
-
-        See `CMAccelerometerHandler` in the Apple documentation for futher information.
-
-     - Parameters:
-        - data: The new accelerometer data in any is available or `nil` otherwise.
-        - error: An error or `nil` if no error occured.
-     */
-    private func handleAccelerometerUpdate(_ data: CMAccelerometerData?, _ error: Error?) {
-        if let error = error as? CMError {
-            os_log("Accelerometer error: %@", log: log, type: .error, error.rawValue)
-        }
-
-        guard let data = data else {
-            // Should only happen if the device accelerometer is broken or something similar. If this leads to problems we can substitute by a soft error handling such as a warning or something similar. However in such a case we might think everything works fine, while it really does not.
-            fatalError("DataCapturingService.start(): No Accelerometer data available!")
-        }
-
-        let accValues = data.acceleration
+        return event
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).

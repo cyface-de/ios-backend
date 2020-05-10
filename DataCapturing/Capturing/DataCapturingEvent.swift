@@ -29,6 +29,7 @@ import Foundation
  case geoLocationAcquired
  case lowDiskSpace
  case serviceStarted
+ case servicePaused
  case serviceResumed
  case serviceStopped
  case synchronizationFinished
@@ -60,21 +61,31 @@ public enum DataCapturingEvent {
     /**
      Used to notify the client application of a successful start of the `DataCapturingService`.
 
-     - measurement: The device wide unique identifier of the measurement for which the service has started.
+     - measurement: The device wide unique identifier of the measurement for which the service has started
+     - event: The event stored for this service start
      */
-    case serviceStarted(measurement: Int64?)
+    case serviceStarted(measurement: Int64?, event: Event)
+    /**
+     Used to notify the client application of a successful pause of the `DataCapturingService`.
+
+     - measurement: The device wide unique identifier of the measurement for which the service has paused
+     - event: The event stored for this service pause
+     */
+    case servicePaused(measurement: Int64?, event: Event)
     /**
      Used to notify the client application of a successful resume of the `DataCapturingService`.
 
-     - measurement: The device wide unique identifier of the measurement for which the service has resumed.
+     - measurement: The device wide unique identifier of the measurement for which the service has resumed
+     - event: The event stored for this service resume
     */
-    case serviceResumed(measurement: Int64?)
+    case serviceResumed(measurement: Int64?, event: Event)
     /**
      Used to notify the client application of a successful stop of the `DataCapturingService`.
 
-     - measurement: The device wide unique identifier of the measurement for which the service has stopped.
+     - measurement: The device wide unique identifier of the measurement for which the service has stopped
+     - event: The event stored for this service stop
      */
-    case serviceStopped(measurement: Int64?)
+    case serviceStopped(measurement: Int64?, event: Event)
     /**
      Occurs if the `DataCapturingService` has finished synchronizing a measurement.
      This does not necessarily mean, that the synchronization was successful.
