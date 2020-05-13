@@ -37,6 +37,8 @@ class DataCapturingTests: XCTestCase {
     var coreDataStack: CoreDataManager!
     /// The default mode of transportation used for testing.
     let defaultMode = "BICYCLE"
+    /// An object for logging lifecycle events during tests and providing functionality to assert on them.
+    var testEventHandler: TestDataCapturingEventHandler!
 
     /// Initializes every test by creating a `TestDataCapturingService`.
     override func setUp() {
@@ -49,7 +51,8 @@ class DataCapturingTests: XCTestCase {
         coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
         coreDataStack.setup(bundle: bundle)
 
-        oocut = dataCapturingService(dataManager: coreDataStack)
+        testEventHandler = TestDataCapturingEventHandler()
+        oocut = dataCapturingService(dataManager: coreDataStack, eventHandler: testEventHandler.handle(event: status:))
     }
 
     /// Tears down the test environment.
@@ -83,6 +86,17 @@ class DataCapturingTests: XCTestCase {
         try oocut.stop()
         XCTAssertFalse(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
+        XCTAssert(testEventHandler.capturedEvents.count >= 2)
+        if case .serviceStarted(_, let event) = testEventHandler.capturedEvents.first! {
+            XCTAssertEqual(event.typeEnum, EventType.lifecycleStart)
+        } else {
+            XCTFail("Did not encounter start event as the first event!")
+        }
+        if case .serviceStopped(_, let event) = testEventHandler.capturedEvents.last! {
+            XCTAssertEqual(event.typeEnum, EventType.lifecycleStop)
+        } else {
+            XCTFail("Did not encounter stop event as the second event!")
+        }
     }
 
     /**

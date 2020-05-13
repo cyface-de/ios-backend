@@ -20,6 +20,7 @@
 		3D1251D323584BE60082D961 /* SensorCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1251D223584BE60082D961 /* SensorCapturer.swift */; };
 		3D1505EC213E9F3A002994D2 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		3D1505EE213EA68D002994D2 /* DataCapturingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1505ED213EA68D002994D2 /* DataCapturingError.swift */; };
+		3D1C942F246ACCFB003A1145 /* TestDataCapturingEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1C942E246ACCFA003A1145 /* TestDataCapturingEventHandler.swift */; };
 		3D1D9A87224BAA8B0053B1B7 /* CoreDataMigrationVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1D9A86224BAA8B0053B1B7 /* CoreDataMigrationVersion.swift */; };
 		3D1D9A89224BACF20053B1B7 /* CoreDataMigrationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1D9A88224BACF20053B1B7 /* CoreDataMigrationStep.swift */; };
 		3D1D9A8B224BB1CE0053B1B7 /* CoreDataMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1D9A8A224BB1CE0053B1B7 /* CoreDataMigrator.swift */; };
@@ -103,6 +104,7 @@
 		3D1251D223584BE60082D961 /* SensorCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorCapturer.swift; sourceTree = "<group>"; };
 		3D1251D82358F36B0082D961 /* 9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 9.xcdatamodel; sourceTree = "<group>"; };
 		3D1505ED213EA68D002994D2 /* DataCapturingError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCapturingError.swift; sourceTree = "<group>"; };
+		3D1C942E246ACCFA003A1145 /* TestDataCapturingEventHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDataCapturingEventHandler.swift; sourceTree = "<group>"; };
 		3D1D9A86224BAA8B0053B1B7 /* CoreDataMigrationVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMigrationVersion.swift; sourceTree = "<group>"; };
 		3D1D9A88224BACF20053B1B7 /* CoreDataMigrationStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMigrationStep.swift; sourceTree = "<group>"; };
 		3D1D9A8A224BB1CE0053B1B7 /* CoreDataMigrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMigrator.swift; sourceTree = "<group>"; };
@@ -314,6 +316,7 @@
 				3D1D9A8E224D28190053B1B7 /* DataSetCreator.swift */,
 				3D3A7DD12258E39B0019998A /* TestLocationManager.swift */,
 				3DBE27C523FA9E1D006E9A90 /* FakeMeasurement.swift */,
+				3D1C942E246ACCFA003A1145 /* TestDataCapturingEventHandler.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -657,6 +660,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3DBE27C623FA9E1D006E9A90 /* FakeMeasurement.swift in Sources */,
+				3D1C942F246ACCFB003A1145 /* TestDataCapturingEventHandler.swift in Sources */,
 				3D8E5256223FDC8E004D7E2B /* DataMigrationTest.swift in Sources */,
 				3D0511E7204D622700967898 /* SerializationTest.swift in Sources */,
 				3D8E524D223EB240004D7E2B /* TestMotionManager.swift in Sources */,

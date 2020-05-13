@@ -33,8 +33,8 @@ class TestDataCapturingService: DataCapturingService {
     /// The timer used to simulate location updates every second, like in the real app.
     var timer: DispatchSourceTimer?
 
-    override func startCapturing(savingEvery time: TimeInterval, for event: EventType) throws {
-        try super.startCapturing(savingEvery: time, for: event)
+    override func startCapturing(savingEvery time: TimeInterval, for event: EventType) throws -> Event? {
+        let event = try super.startCapturing(savingEvery: time, for: event)
         timer = DispatchSource.makeTimerSource()
         timer!.setEventHandler { [weak self] in
             guard let self = self else {
@@ -46,6 +46,7 @@ class TestDataCapturingService: DataCapturingService {
         }
         timer!.schedule(deadline: .now(), repeating: 1)
         timer!.resume()
+        return event
     }
 
     override func stopCapturing() {
