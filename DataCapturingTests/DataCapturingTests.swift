@@ -140,6 +140,44 @@ class DataCapturingTests: XCTestCase {
         XCTAssertEqual(events[2].typeEnum, .lifecyclePause)
         XCTAssertEqual(events[3].typeEnum, .lifecycleResume)
         XCTAssertEqual(events[4].typeEnum, .lifecycleStop)
+
+        XCTAssertTrue(testEventHandler.capturedEvents.count >= 4)
+        var startEventFound = false
+        var pauseEventFound = false
+        var resumeEventFound = false
+        var stopEventFound = false
+        for event in testEventHandler.capturedEvents {
+            switch event {
+            case .serviceStarted(measurement: measurementIdentifier, let startEvent):
+                XCTAssertEqual(startEvent.measurement?.identifier, measurementIdentifier)
+                XCTAssertFalse(pauseEventFound)
+                XCTAssertFalse(resumeEventFound)
+                XCTAssertFalse(stopEventFound)
+                startEventFound = true
+            case .servicePaused(measurement: measurementIdentifier, let pauseEvent):
+                XCTAssertEqual(pauseEvent.measurement?.identifier, measurementIdentifier)
+                XCTAssertTrue(startEventFound)
+                XCTAssertFalse(resumeEventFound)
+                XCTAssertFalse(stopEventFound)
+                pauseEventFound = true
+            case .serviceResumed(measurement: measurementIdentifier, let resumeEvent):
+                XCTAssertEqual(resumeEvent.measurement?.identifier, measurementIdentifier)
+                XCTAssertTrue(startEventFound)
+                XCTAssertTrue(pauseEventFound)
+                XCTAssertFalse(stopEventFound)
+                resumeEventFound = true
+            case .serviceStopped(measurement: measurementIdentifier, let stopEvent):
+                XCTAssertEqual(stopEvent.measurement?.identifier, measurementIdentifier)
+                XCTAssertTrue(startEventFound)
+                XCTAssertTrue(pauseEventFound)
+                XCTAssertTrue(resumeEventFound)
+                stopEventFound = true
+            default:
+                // Ignore all other events
+                XCTAssertTrue(true)
+            }
+        }
+        XCTAssertTrue(stopEventFound)
     }
 
     func testStartPauseStop_HappyPath() throws {
