@@ -180,18 +180,18 @@ class SensorCapturer {
     */
     private func handle(_ data: CMDeviceMotion?, _ error: Error?) {
         if let error = error as? CMError {
-            os_log("Device Motion error: %@", log: SensorCapturer.log, type: .error, error.rawValue)
+            return os_log("Device Motion error: %@", log: SensorCapturer.log, type: .error, error.rawValue)
         }
 
-        guard let data = data else {
-            fatalError("No device motion data available!")
-        }
-
-        let dirValues = data.magneticField
-        let timestamp = Date(timeInterval: data.timestamp, since: SensorCapturer.kernelBootTime)
-        let dir = SensorValue(timestamp: timestamp, x: dirValues.field.x, y: dirValues.field.y, z: dirValues.field.z)
-        lifecycleQueue.async {
-            self.directions.append(dir)
+        if let data = data {
+            let dirValues = data.magneticField
+            let timestamp = Date(timeInterval: data.timestamp, since: SensorCapturer.kernelBootTime)
+            let dir = SensorValue(timestamp: timestamp, x: dirValues.field.x, y: dirValues.field.y, z: dirValues.field.z)
+            lifecycleQueue.async {
+                self.directions.append(dir)
+            }
+        } else {
+            os_log("No device motion data available!", log:SensorCapturer.log, type: .error)
         }
     }
 }
