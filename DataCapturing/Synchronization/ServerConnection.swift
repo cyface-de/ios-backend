@@ -167,7 +167,11 @@ public class ServerConnection {
         let persistenceLayer = PersistenceLayer(onManager: manager)
         persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
-        guard let initialModality = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)[0].value else {
+        let modalityTypeChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
+        guard !modalityTypeChangeEvents.isEmpty else {
+            fatalError("No modality type information available!")
+        }
+        guard let initialModality = modalityTypeChangeEvents[0].value else {
             fatalError("Invalid modality change event with no value encountered!")
         }
         guard let events = measurement.events?.array as? [Event] else {
