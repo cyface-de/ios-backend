@@ -16,6 +16,8 @@ DerivedData/
 *.perspectivev3
 !default.perspectivev3
 xcuserdata/
+Example/Source/CyfaceCredentials.swift
+Example/env-vars.sh
 
 ## Other
 *.moved-aside

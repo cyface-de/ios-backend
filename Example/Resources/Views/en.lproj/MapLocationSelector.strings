@@ -1,0 +1,9 @@
+
+/* Class = "UIBarButtonItem"; title = "Cancel"; ObjectID = "WiL-tp-g77"; */
+"WiL-tp-g77.title" = "Cancel";
+
+/* Class = "UINavigationItem"; title = "Title"; ObjectID = "hjK-Xv-eSK"; */
+"hjK-Xv-eSK.title" = "Select Location";
+
+/* Class = "UIBarButtonItem"; title = "Select Vehicle"; ObjectID = "pcY-7n-ggm"; */
+"pcY-7n-ggm.title" = "Select Vehicle";

@@ -1,0 +1,10 @@
+/* A single strings file, whose title is specified in your preferences schema. The strings files provide the localized content to display to the user for each of your preferences. */
+
+"Group" = "Gruppo";
+"Name" = "Nominativo";
+"none given" = "Non assegnato";
+"Enabled" = "Abilitato";
+"Synchronize Data" = "Sincronizzare i dati";
+"Info" = "Info";
+"About" = "A proposito di";
+"Version of Privacy Policy Accepted" = "Informativa sulla privacy accettata";

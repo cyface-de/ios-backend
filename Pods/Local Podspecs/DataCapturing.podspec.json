@@ -1,0 +1,46 @@
+{
+  "name": "DataCapturing",
+  "version": "6.0.1",
+  "summary": "Framework used to continuously capture data from all available sensors on an iOS device and transmit it to a Cyface-API compatible server.",
+  "description": "This framework can be included by your App if you are going to capture sensor data and transmit that data to a Cyface-API server for further analysis.",
+  "homepage": "https://cyface.de",
+  "license": {
+    "type": "GPL",
+    "file": "../LICENSE"
+  },
+  "authors": "Cyface GmbH",
+  "source": {
+    "git": "https://github.com/cyface-de/ios-backend.git",
+    "tag": "6.0.1"
+  },
+  "social_media_url": "https://twitter.com/CyfaceDE",
+  "platforms": {
+    "ios": "12.4"
+  },
+  "swift_versions": "5.0",
+  "source_files": "Source/**/*{.h,.m,.swift}",
+  "resources": [
+    "Source/**/*{.xcdatamodeld,.xcdatamodel,.xcmappingmodel}"
+  ],
+  "frameworks": [
+    "CoreData",
+    "CoreLocation",
+    "CoreMotion"
+  ],
+  "dependencies": {
+    "Alamofire": [
+      "~> 4.9.0"
+    ],
+    "DataCompression": [
+      "~> 3.4.0"
+    ]
+  },
+  "testspecs": [
+    {
+      "name": "Tests",
+      "test_type": "unit",
+      "source_files": "Tests/**/*.swift"
+    }
+  ],
+  "swift_version": "5.0"
+}
