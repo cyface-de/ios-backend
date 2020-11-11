@@ -89,7 +89,13 @@ public class CoreDataMigrator: CoreDataMigratorProtocol {
             let destinationURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true).appendingPathComponent(UUID().uuidString)
 
             do {
-                try manager.migrateStore(from: currentURL, sourceType: NSSQLiteStoreType, options: nil, with: migrationStep.mappingModel, toDestinationURL: destinationURL, destinationType: NSSQLiteStoreType, destinationOptions: nil)
+                try manager.migrateStore(from: currentURL,
+                                         sourceType: NSSQLiteStoreType,
+                                         options: nil,
+                                         with: migrationStep.mappingModel,
+                                         toDestinationURL: destinationURL,
+                                         destinationType: NSSQLiteStoreType,
+                                         destinationOptions: nil)
             } catch let error {
                 fatalError("Migration failed from \(migrationStep.sourceModel) to \(migrationStep.destinationModel), error: \(error)")
             }
@@ -119,7 +125,8 @@ public class CoreDataMigrator: CoreDataMigratorProtocol {
      - Returns: An array of `CoreDataMigrationStep` instances ordered from the oldest to the newest.
      */
     private func migrationStepsForStore(at storeURL: URL, toVersion destinationVersion: CoreDataMigrationVersion, inBundle bundle: Bundle) -> [CoreDataMigrationStep] {
-        guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL), let sourceVersion = CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle) else {
+        guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL),
+            let sourceVersion = CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle) else {
             fatalError("Unknown store version at URL \(storeURL).")
         }
 
@@ -157,7 +164,8 @@ public class CoreDataMigrator: CoreDataMigratorProtocol {
         - inBundle: The bundle containing the store file.
      */
     func forceWALCheckpointingForStore(at storeURL: URL, inBundle bundle: Bundle) {
-        guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL), let currentModel = NSManagedObjectModel.compatibleModelForStoreMetadata(metadata, bundle) else {
+        guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL),
+            let currentModel = NSManagedObjectModel.compatibleModelForStoreMetadata(metadata, bundle) else {
             return
         }
 
@@ -203,7 +211,11 @@ extension NSPersistentStoreCoordinator {
     static func replaceStore(at targetURL: URL, withStoreAt sourceURL: URL) {
         do {
             let persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: NSManagedObjectModel())
-            try persistentStoreCoordinator.replacePersistentStore(at: targetURL, destinationOptions: nil, withPersistentStoreFrom: sourceURL, sourceOptions: nil, ofType: NSSQLiteStoreType)
+            try persistentStoreCoordinator.replacePersistentStore(at: targetURL,
+                                                                  destinationOptions: nil,
+                                                                  withPersistentStoreFrom: sourceURL,
+                                                                  sourceOptions: nil,
+                                                                  ofType: NSSQLiteStoreType)
         } catch let error {
             fatalError("Failed to replace persistent store at \(targetURL) with \(sourceURL), error: \(error)")
         }

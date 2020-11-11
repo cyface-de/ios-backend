@@ -49,7 +49,10 @@ struct CoreDataMigrationStep {
         let sourceModel = NSManagedObjectModel.managedObjectModel(forResource: sourceVersion.rawValue, inBundle: bundle)
         let destinationModel = NSManagedObjectModel.managedObjectModel(forResource: destinationVersion.rawValue, inBundle: bundle)
 
-        guard let mappingModel = CoreDataMigrationStep.mappingModel(fromSourceModel: sourceModel, toDestinationModel: destinationModel, inBundle: bundle) else {
+        guard let mappingModel = CoreDataMigrationStep.mappingModel(
+            fromSourceModel: sourceModel,
+            toDestinationModel: destinationModel,
+            inBundle: bundle) else {
             fatalError("Expected model mapping not present")
         }
 

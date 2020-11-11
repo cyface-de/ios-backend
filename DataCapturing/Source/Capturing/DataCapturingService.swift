@@ -116,6 +116,9 @@ public class DataCapturingService: NSObject {
 
     /// The current state of the geo location fix with a geo location network (GPS, GLONASS, Galileo, etc.)
     private var hasFix: Bool {
+        get {
+            return _hasFix
+        }
         set {
             guard newValue != _hasFix else {
                 return
@@ -127,9 +130,6 @@ public class DataCapturingService: NSObject {
                 handler(DataCapturingEvent.geoLocationFixLost, Status.success)
             }
             _hasFix = newValue
-        }
-        get {
-            return _hasFix
         }
     }
 
@@ -201,7 +201,12 @@ public class DataCapturingService: NSObject {
     public func start(inMode modality: String) throws {
         try lifecycleQueue.sync {
             if isPaused {
-                os_log("Starting data capturing on paused service. Finishing paused measurements and starting fresh. This is probably the result of a lifecycle error. ", log: log, type: .default)
+                os_log(
+                    """
+Starting data capturing on paused service. Finishing paused measurements and starting fresh. This is probably the result of a lifecycle error.
+""",
+                       log: log,
+                       type: .default)
                 if let currentMeasurement = currentMeasurement {
                     _ = try finish(measurement: currentMeasurement)
                 }
@@ -281,7 +286,7 @@ public class DataCapturingService: NSObject {
             measurement.addToEvents(event)
             persistenceLayer.context?.saveRecursively()
 
-            handler(.servicePaused(measurement: currentMeasurement,event: event), .success)
+            handler(.servicePaused(measurement: currentMeasurement, event: event), .success)
         }
     }
 
@@ -397,7 +402,8 @@ public class DataCapturingService: NSObject {
                 return
             }
 
-            if DataCapturingService.currentTimeInMillisSince1970() - prevLocationUpdateTimeInMillis < DataCapturingService.maxAllowedTimeBetweenLocationUpdatesInMillis {
+            let deltaTime = DataCapturingService.currentTimeInMillisSince1970() - prevLocationUpdateTimeInMillis
+            if deltaTime < DataCapturingService.maxAllowedTimeBetweenLocationUpdatesInMillis {
                 self.hasFix = true
             } else {
                 self.hasFix = false
@@ -455,7 +461,11 @@ public class DataCapturingService: NSObject {
 
             try persistenceLayer.save(locations: localLocationsCache, in: measurement)
 
-            try persistenceLayer.save(accelerations: localAccelerationsCache, rotations: localRotationsCache, directions: localDirectionsCache, in: measurement)
+            try persistenceLayer.save(
+                accelerations: localAccelerationsCache,
+                rotations: localRotationsCache,
+                directions: localDirectionsCache,
+                in: measurement)
 
             sensorCapturer.accelerations.removeAll()
             sensorCapturer.rotations.removeAll()

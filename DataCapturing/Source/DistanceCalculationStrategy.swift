@@ -87,6 +87,10 @@ public class DefaultDistanceCalculationStrategy: DistanceCalculationStrategy {
     }
 
     public func calculateDistance(from previousLocationLatLonCoordinates: (Double, Double), to locationLatLonCoordinates: (Double, Double)) -> Double {
-        return calculateDistance(from: CLLocation(latitude: previousLocationLatLonCoordinates.0, longitude: previousLocationLatLonCoordinates.1), to: CLLocation(latitude: locationLatLonCoordinates.0, longitude: locationLatLonCoordinates.1))
+        return calculateDistance(from: CLLocation(
+            latitude: previousLocationLatLonCoordinates.0,
+            longitude: previousLocationLatLonCoordinates.1),
+                                 to: CLLocation(latitude: locationLatLonCoordinates.0,
+                                                longitude: locationLatLonCoordinates.1))
     }
 }

@@ -52,7 +52,12 @@ public class StaticAuthenticator: Authenticator {
         if let jwtToken = jwtToken {
             onSuccess(jwtToken)
         } else {
-            onFailure(ServerConnectionError(type: .notAuthenticated, verboseDescription: "No JWT token provided for authentication.", inMethodName: #function, inFileName: #file, atLineNumber: #line))
+            onFailure(ServerConnectionError(
+                type: .notAuthenticated,
+                verboseDescription: "No JWT token provided for authentication.",
+                inMethodName: #function,
+                inFileName: #file,
+                atLineNumber: #line))
         }
     }
 }

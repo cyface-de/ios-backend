@@ -34,7 +34,8 @@ class TableCellViewModel {
             fatalError("Unable to load identifier from model!")
         }
 
-        return "\(NSLocalizedString("measurementInTableCell", comment: "Measurement string shown in the table with unsynchronized measuremens in the main view.")) \(identifier)"
+        let comment = "Measurement string shown in the table with unsynchronized measuremens in the main view."
+        return "\(NSLocalizedString("measurementInTableCell", comment: comment)) \(identifier)"
     }
     /// The length of the measurement as appearing in the user interface.
     var length: String {

@@ -54,6 +54,10 @@ public class DefaultTrackCleaner: TrackCleaner {
     }
 
     public func isValid(location: CLLocation) -> Bool {
-        return location.speed > DefaultTrackCleaner.minimumSpeedInMetersPerSecond && location.horizontalAccuracy < DefaultTrackCleaner.upperAccuracyBound && location.speed < DefaultTrackCleaner.maximumSpeedInMetersPerSecond
+        let isFastEnough = location.speed > DefaultTrackCleaner.minimumSpeedInMetersPerSecond
+        let isAccurateEnough = location.horizontalAccuracy < DefaultTrackCleaner.upperAccuracyBound
+        let isSlowEnough = location.speed < DefaultTrackCleaner.maximumSpeedInMetersPerSecond
+
+        return isFastEnough && isAccurateEnough && isSlowEnough
     }
 }

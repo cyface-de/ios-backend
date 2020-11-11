@@ -358,11 +358,17 @@ public enum FileSupportError: Error {
  */
 public class SensorValueFileType {
     /// A file type for acceleration files.
-    public static let accelerationValueType = SensorValueFileType(fileExtension: "cyfa", getCounter: {measurement in return UInt32(measurement.accelerationsCount)})
+    public static let accelerationValueType = SensorValueFileType(
+        fileExtension: "cyfa",
+        getCounter: {measurement in return UInt32(measurement.accelerationsCount)})
     /// A file type for rotation files.
-    public static let rotationValueType = SensorValueFileType(fileExtension: "cyfr", getCounter: {measurement in return UInt32(measurement.rotationsCount)})
+    public static let rotationValueType = SensorValueFileType(
+        fileExtension: "cyfr",
+        getCounter: {measurement in return UInt32(measurement.rotationsCount)})
     /// A file type for direction files.
-    public static let directionValueType = SensorValueFileType(fileExtension: "cyfd", getCounter: {measurement in return UInt32(measurement.directionsCount)})
+    public static let directionValueType = SensorValueFileType(
+        fileExtension: "cyfd",
+        getCounter: {measurement in return UInt32(measurement.directionsCount)})
 
     /// The file extension of the represented file type.
     public let fileExtension: String

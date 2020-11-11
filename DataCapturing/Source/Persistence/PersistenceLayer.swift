@@ -187,7 +187,12 @@ public class PersistenceLayer {
         let context = getContext()
         let measurementIdentifier = measurement
         guard let measurement = try load(measurementIdentifiedBy: measurement, from: context) else {
-            throw PersistenceError(type: .measurementNotLoadable(measurementIdentifier), verboseDescription: "Unable to load measurement \(measurementIdentifier) from context \(context.name ?? "no name")!", inMethodName: #function, inFileName: #file, atLineNumber: #line)
+            throw PersistenceError(
+                type: .measurementNotLoadable(measurementIdentifier),
+                verboseDescription: "Unable to load measurement \(measurementIdentifier) from context \(context.name ?? "no name")!",
+                inMethodName: #function,
+                inFileName: #file,
+                atLineNumber: #line)
         }
 
         let accelerationFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
@@ -248,7 +253,15 @@ public class PersistenceLayer {
         let context = getContext()
         let measurementIdentifier = measurement
         guard let measurement = try load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
-            throw PersistenceError(type: .measurementNotLoadable(measurementIdentifier), verboseDescription: "Unable to load measurement \(measurementIdentifier) from context \(context.name ?? "no name")! Measurement does not exist!", inMethodName: #function, inFileName: #file, atLineNumber: #line)
+            throw PersistenceError(
+                type: .measurementNotLoadable(measurementIdentifier),
+                verboseDescription:
+                """
+                Unable to load measurement \(measurementIdentifier) from context \(context.name ?? "no name")! Measurement does not exist!
+                """,
+                inMethodName: #function,
+                inFileName: #file,
+                atLineNumber: #line)
         }
 
         measurement.synchronized = true
@@ -282,7 +295,15 @@ public class PersistenceLayer {
         let measurement = migrate(measurement: measurement, to: context)
 
         guard let track = measurement.tracks?.lastObject as? Track else {
-            throw PersistenceError(type: .dataNotLoadable(measurement: measurement.identifier), verboseDescription: "Unable to load any track for measurement \(measurement.identifier)! Did you create a track before saving locations?", inMethodName: #function, inFileName: #file, atLineNumber: #line)
+            throw PersistenceError(
+                type: .dataNotLoadable(measurement: measurement.identifier),
+                verboseDescription:
+                """
+                Unable to load any track for measurement \(measurement.identifier)! Did you create a track before saving locations?
+                """,
+                inMethodName: #function,
+                inFileName: #file,
+                atLineNumber: #line)
         }
 
         let geoLocationFetchRequest: NSFetchRequest<GeoLocationMO> = GeoLocationMO.fetchRequest()
@@ -396,7 +417,12 @@ public class PersistenceLayer {
         if let measurement = try self.load(measurementIdentifiedBy: identifier, from: context) {
             return measurement
         } else {
-            throw PersistenceError(type: .measurementNotLoadable(identifier), verboseDescription: "Unable to load measurement \(identifier) from context \(context.name ?? "no name")! No such measurement!", inMethodName: #function, inFileName: #file, atLineNumber: #line)
+            throw PersistenceError(
+                type: .measurementNotLoadable(identifier),
+                verboseDescription: "Unable to load measurement \(identifier) from context \(context.name ?? "no name")! No such measurement!",
+                inMethodName: #function,
+                inFileName: #file,
+                atLineNumber: #line)
         }
     }
 
@@ -443,7 +469,8 @@ public class PersistenceLayer {
         let context = getContext()
         let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         // Fetch only not synchronized measurements
-        request.predicate = NSPredicate(format: "synchronized == %@ AND synchronizable == %@", argumentArray: [ NSNumber(value: false), NSNumber(value: true)])
+        request.predicate = NSPredicate(format: "synchronized == %@ AND synchronizable == %@",
+                                        argumentArray: [ NSNumber(value: false), NSNumber(value: true)])
         let fetchResult = try context.fetch(request)
         return fetchResult
     }
@@ -506,7 +533,12 @@ public class PersistenceLayer {
      */
     private func migrate(measurement: MeasurementMO, to context: NSManagedObjectContext) -> MeasurementMO {
         guard let migratedMeasurement = context.object(with: measurement.objectID) as? MeasurementMO else {
-            fatalError("CoreData was unable to migrate measurement \(measurement) to context \(context.name ?? "no name")! Something seems to be seriously wrong with your CoreData configuration.")
+            fatalError(
+                """
+                CoreData was unable to migrate measurement \(measurement) to context \(context.name ?? "no name")!
+                Something seems to be seriously wrong with your CoreData configuration.
+                """
+            )
         }
 
         return migratedMeasurement
@@ -520,7 +552,12 @@ public class PersistenceLayer {
      */
     private func getContext() -> NSManagedObjectContext {
         guard let context = self.context == nil ? manager.backgroundContext : self.context else {
-            fatalError("There has been no CoreData context and it was not possible to create a background context. Something seems to be seriously wrong with your CoreData configuration.")
+            fatalError(
+                """
+                There has been no CoreData context and it was not possible to create a background context.
+                Something seems to be seriously wrong with your CoreData configuration.
+                """
+            )
         }
 
         return context

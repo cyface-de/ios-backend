@@ -76,7 +76,10 @@ extension BinarySerializer {
         let res = try serialize(serializable: serializable)
 
         guard let compressed = res.deflate() else {
-            os_log("CyfaceBinaryFormatSerializer.serializeCompressed(serializable: %{PRIVATE}@): Unable to compress data.", log: OSLog.init(subsystem: "BinarySerializer", category: "de.cyface"), type: .error, String(describing: serializable))
+            os_log("Unable to compress data.",
+                   log: OSLog.init(subsystem: "BinarySerializer",
+                                   category: "de.cyface"),
+                   type: .error)
             throw SerializationError.decompressionFailed
         }
 
@@ -205,8 +208,8 @@ class SensorValueSerializer: BinarySerializer {
 
         let oneEntryInBytes = UInt32(32)
         var ret: [SensorValue] = []
-        for i in 0..<count {
-            let startIndex = i*oneEntryInBytes
+        for index in 0..<count {
+            let startIndex = index*oneEntryInBytes
 
             let timestamp = try MeasurementSerializer.byteOrder.convertToInt64(data[startIndex..<startIndex+8])
             let ax = try MeasurementSerializer.byteOrder.convertToDouble(data[startIndex+8..<startIndex+16])

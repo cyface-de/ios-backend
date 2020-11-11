@@ -164,7 +164,7 @@ class SensorCapturer {
         let rotValues = data.rotationRate
         let timestamp = Date(timeInterval: data.timestamp, since: SensorCapturer.kernelBootTime)
         let rot = SensorValue(timestamp: timestamp, x: rotValues.x, y: rotValues.y, z: rotValues.z)
-        lifecycleQueue.async (flags: .barrier) {
+        lifecycleQueue.async(flags: .barrier) {
             self.rotations.append(rot)
         }
     }
@@ -191,7 +191,7 @@ class SensorCapturer {
                 self.directions.append(dir)
             }
         } else {
-            os_log("No device motion data available!", log:SensorCapturer.log, type: .error)
+            os_log("No device motion data available!", log: SensorCapturer.log, type: .error)
         }
     }
 }
