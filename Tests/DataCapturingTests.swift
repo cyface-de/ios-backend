@@ -44,11 +44,8 @@ class DataCapturingTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
-            fatalError()
-        }
-
         coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+        let bundle = Bundle(for: type(of: coreDataStack))
         coreDataStack.setup(bundle: bundle)
 
         testEventHandler = TestDataCapturingEventHandler()

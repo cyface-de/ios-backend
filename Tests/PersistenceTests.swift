@@ -42,9 +42,7 @@ class PersistenceTests: XCTestCase {
         super.setUp()
         do {
             let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
-            guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
-                fatalError()
-            }
+            let bundle = Bundle(for: type(of: manager))
             manager.setup(bundle: bundle)
             oocut = PersistenceLayer(onManager: manager)
             oocut.context = oocut.makeContext()

@@ -14,6 +14,10 @@ class EventItemView: UITableViewCell {
 
     private var _viewModel: EventItemViewModel?
     public var viewModel: EventItemViewModel? {
+        get {
+            return _viewModel
+        }
+
         set {
             if let newValue = newValue {
                 textLabel?.text =  newValue.modalityChange
@@ -23,10 +27,6 @@ class EventItemView: UITableViewCell {
             } else {
                 _viewModel = nil
             }
-        }
-
-        get {
-            return _viewModel
         }
     }
 
@@ -73,7 +73,6 @@ struct EventItemModel {
             }
 
             self.modalityChange = Modality.from(dbValue: modalityValue)
-
 
             guard let time = events[position].time as Date? else {
                 fatalError("Encountered event without time!")

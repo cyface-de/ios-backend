@@ -20,7 +20,7 @@ The view controller showing the overview of unsynchronized measurements together
  - Since: 1.0.0
  */
 class ViewController: UIViewController {
-    
+
     // MARK: - Actions
     /**
      Called on each tap on the start button. This starts a measurement if non is running or continues a paused one, otherwise it should be disabled.
@@ -28,7 +28,7 @@ class ViewController: UIViewController {
      - Parameter sender: The `UIButton` instance that was tapped on
      */
     @IBAction func onStartTapped(_ sender: UIButton) {
-        guard let dc = dc else {
+        guard let dataCapturingService = dataCapturingService else {
             fatalError("ViewController.onStartTapped(\(sender.debugDescription)): No DataCapturingService available!")
         }
 
@@ -36,31 +36,31 @@ class ViewController: UIViewController {
         disableStopButton()
         disablePauseButton()
 
-        if dc.isPaused && !dc.isRunning {
+        if dataCapturingService.isPaused && !dataCapturingService.isRunning {
             do {
-                try dc.resume()
+                try dataCapturingService.resume()
             } catch {
                 fatalError("Unable to resume")
             }
             enablePauseButton()
             disablePlayButton()
             enableStopButton()
-        } else if !dc.isPaused && !dc.isRunning {
+        } else if !dataCapturingService.isPaused && !dataCapturingService.isRunning {
             guard let modalityValue = UserDefaults.standard.string(forKey: "de.cyface.settings.context") else {
                 fatalError("No modality set!")
             }
 
-            os_log("ViewController.onStartTapped(%@): Service was not running. Starting now!", log: ViewController.LOG, type: .info, sender.debugDescription)
+            os_log("Service was not running. Starting now!", log: ViewController.LOG, type: .info)
             do {
-                try dc.start(inMode: modalityValue)
+                try dataCapturingService.start(inMode: modalityValue)
             } catch {
                 fatalError("Unable to start.")
             }
 
         } else {
-            fatalError("ViewController.onStartTapped(\(sender)): Service is in invalid state: paused --> \(dc.isPaused), running --> \(dc.isRunning)" )
+            fatalError("Service is in invalid state: paused --> \(dataCapturingService.isPaused), running --> \(dataCapturingService.isRunning)" )
         }
-        
+
     }
     /**
      Called on each tap on the pause button. This pauses a running measurement, otherwise it should be disabled.
@@ -68,23 +68,25 @@ class ViewController: UIViewController {
      - Parameter sender: The `UIButton` instance that was tapped on
      */
     @IBAction func onPauseTapped(_ sender: UIButton) {
-        guard let dc = dc else {
-            fatalError("ViewController.onPauseTapped(\(sender.debugDescription)): No DataCapturingService available!")
+        guard let dataCapturingService = dataCapturingService else {
+            fatalError("No DataCapturingService available!")
         }
 
         disablePauseButton()
         enablePlayButton()
         enableStopButton()
 
-        if(dc.isRunning) {
-            os_log("ViewController.onPauseTapped(%@): Service was running. Pausing now!", log: ViewController.LOG, type: .info, sender.debugDescription)
+        if dataCapturingService.isRunning {
+            os_log("Service was running. Pausing now!", log: ViewController.LOG, type: .info)
             do {
-                try dc.pause()
+                try dataCapturingService.pause()
             } catch {
                 fatalError("Unable to pause.")
             }
         } else {
-            os_log("ViewController.onPauseTapped(%@):Service was not running. Not pausing!", log: ViewController.LOG, type: .info, sender.debugDescription)
+            os_log("Service was not running. Not pausing!",
+                   log: ViewController.LOG,
+                   type: .info)
         }
     }
     /**
@@ -93,7 +95,7 @@ class ViewController: UIViewController {
      - Parameter sender: The `UIButton` instance that was tapped on
      */
     @IBAction func onStopTapped(_ sender: UIButton) {
-        guard let dc = dc else {
+        guard let dataCapturingService = dataCapturingService else {
             fatalError("ViewController.onStopTapped(\(sender.debugDescription)): No DataCapturingService available!")
         }
 
@@ -101,16 +103,18 @@ class ViewController: UIViewController {
         enablePlayButton()
         disableStopButton()
 
-        if(dc.isRunning) {
-            os_log("ViewController.onStopTapped(%@): Service was running. Stopping now!", log: ViewController.LOG, type: .info, sender.debugDescription)
+        if dataCapturingService.isRunning {
+            os_log("Service was running. Stopping now!", log: ViewController.LOG, type: .info)
             do {
-                try dc.stop()
+                try dataCapturingService.stop()
             } catch {
                 fatalError("Unable to stop.")
             }
 
         } else {
-            os_log("ViewController.onStopTapped(%@): Service was not running. Not stopping!", log: ViewController.LOG, type: .info, sender.debugDescription)
+            os_log("ViewController.onStopTapped(%@): Service was not running. Not stopping!",
+                   log: ViewController.LOG,
+                   type: .info, sender.debugDescription)
         }
         measurementsOverview.reloadData()
     }
@@ -152,9 +156,9 @@ class ViewController: UIViewController {
     @IBOutlet weak var stopButton: UIButton!
     @IBOutlet weak var contextTabBar: UISegmentedControl!
     @IBOutlet weak var mainAreaStackView: UIStackView!
-    
+
     // MARK: - Properties
-    var dc: DataCapturingService?
+    var dataCapturingService: DataCapturingService?
 
     private lazy var synchronizer: Synchronizer = {
         guard let coreDataStack = appDelegate.coreDataStack else {
@@ -164,17 +168,20 @@ class ViewController: UIViewController {
             fatalError("Unable to load server connection!")
         }
 
-        let ret = Synchronizer(coreDataStack: coreDataStack, cleaner: DeletionCleaner(), serverConnection: serverConnection) { [weak self] event, status in
+        let ret = Synchronizer(
+        coreDataStack: coreDataStack,
+        cleaner: DeletionCleaner(),
+        serverConnection: serverConnection) { [weak self] event, status in
             guard let self = self else {
                 return
             }
             switch event {
-                case .synchronizationStarted(let measurementIdentifier):
-                    self.synchronizing(measurementIdentifier: measurementIdentifier, status: status)
-                case .synchronizationFinished(let measurementIdentifier):
-                    self.synchronized(measurementIdentifier: measurementIdentifier, status: status)
-                default:
-                    fatalError("Received an event which is not processable!")
+            case .synchronizationStarted(let measurementIdentifier):
+                self.synchronizing(measurementIdentifier: measurementIdentifier, status: status)
+            case .synchronizationFinished(let measurementIdentifier):
+                self.synchronized(measurementIdentifier: measurementIdentifier, status: status)
+            default:
+                fatalError("Received an event which is not processable!")
             }
         }
         return ret
@@ -187,11 +194,11 @@ class ViewController: UIViewController {
     /// A variable saving the previous state of the synchronizer toggle. Since it is not possible to observe a specific property, it is necessary to save this so we can see if the value has changed and activate or deactivate the synchronizer based on that information.
     private var synchronizerWasPreviouslyActivated: Bool = UserDefaults.standard.bool(forKey: AppDelegate.syncToggleKey)
     private var lifecycle: CapturingLifecycle!
-    
+
     // MARK: - Methods
     func handleDataCapturingEvent(event: DataCapturingEvent, status: Status) {
 
-        switch(event) {
+        switch event {
         case .serviceStarted(let measurementIdentifier, _):
             guard let measurementIdentifier = measurementIdentifier else {
                 fatalError()
@@ -209,7 +216,7 @@ class ViewController: UIViewController {
                 self.lifecycle.onGeoLocationAcquired()
             }
 
-        case .serviceStopped(_):
+        case .serviceStopped:
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
                     return
@@ -218,7 +225,7 @@ class ViewController: UIViewController {
                 self.lifecycle.onServiceStopped(synchronizer: self.synchronizer)
             }
 
-        case .servicePaused(_,_):
+        case .servicePaused:
             os_log("Service Paused", log: ViewController.LOG, type: .debug)
 
         case .serviceResumed(let measurementIdentifier, _):
@@ -263,7 +270,7 @@ class ViewController: UIViewController {
             case .success:
                 measurement.status = .uploadSuccessful
                 // TODO: Move the following code to a separate view class
-                let path = IndexPath(row:index,section:0)
+                let path = IndexPath(row: index, section: 0)
 
                 self.measurements.remove(at: path.row)
 
@@ -293,12 +300,14 @@ class ViewController: UIViewController {
     func synchronizing(measurementIdentifier: Int64, status: Status) {
         guard case .success = status else {
             if case .error(let error) = status {
-                os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Error status: @%", log: ViewController.LOG, type: .error, error.localizedDescription)
+                os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Error status: @%",
+                       log: ViewController.LOG,
+                       type: .error, error.localizedDescription)
             }
             return
         }
 
-        guard let (_,measurement) = findMeasurementCellViewModelBy(identifier: measurementIdentifier) else {
+        guard let (_, measurement) = findMeasurementCellViewModelBy(identifier: measurementIdentifier) else {
             fatalError("No measurement with identifier \(measurementIdentifier)")
         }
 
@@ -319,7 +328,7 @@ class ViewController: UIViewController {
         let synchronizerIsNotActive = UserDefaults.standard.bool(forKey: AppDelegate.syncToggleKey)
         if synchronizerIsNotActive && !synchronizerWasPreviouslyActivated {
             synchronizer.activate()
-        } else if !synchronizerIsNotActive && synchronizerWasPreviouslyActivated{
+        } else if !synchronizerIsNotActive && synchronizerWasPreviouslyActivated {
             synchronizer.deactivate()
         } else {
             // Probably some other setting has changed, so ignoring this call.
@@ -358,12 +367,15 @@ class ViewController: UIViewController {
     }
 
     func showOverlay(completion: (() -> Void)?) {
-        let alert = UIAlertController(title: nil, message: NSLocalizedString("Please wait...", comment: "Shown when loading the main view."), preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: nil,
+            message: NSLocalizedString("Please wait...", comment: "Shown when loading the main view."),
+            preferredStyle: .alert)
 
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.style = UIActivityIndicatorView.Style.gray
-        loadingIndicator.startAnimating();
+        loadingIndicator.startAnimating()
 
         alert.view.addSubview(loadingIndicator)
         present(alert, animated: true, completion: completion)
@@ -372,11 +384,11 @@ class ViewController: UIViewController {
     func hideOverlayView(completion: (() -> Void)?) {
         dismiss(animated: false, completion: completion)
     }
-    
+
     // MARK: - UIViewController
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         // Required for the extensions methods (see below) to fire appropriately.
         measurementsOverview.delegate = self
         measurementsOverview.dataSource = self
@@ -384,7 +396,7 @@ class ViewController: UIViewController {
         lifecycle = CapturingLifecycle(controller: self)
 
         let modalityValue = UserDefaults.standard.string(forKey: "de.cyface.settings.context")
-        switch(modalityValue) {
+        switch modalityValue {
         case Modality.car.dbValue:
             contextTabBar.selectedSegmentIndex = 0
         case Modality.bike.dbValue:
@@ -396,12 +408,15 @@ class ViewController: UIViewController {
         case Modality.train.dbValue:
             contextTabBar.selectedSegmentIndex = 4
         default:
-            os_log("ViewController.viewDidLoad(): Unsupported measurement context %{PUBLIC}@! This message is harmless if it occurs on the first App start!",log: OSLog.init(subsystem: "ViewController", category: "de.cyface"), type: .default, String(describing: modalityValue))
+            os_log("Unsupported measurement context %{PUBLIC}@! This message is harmless if it occurs on the first App start!",
+                   log: OSLog.init(subsystem: "ViewController",
+                                   category: "de.cyface"),
+                   type: .default, String(describing: modalityValue))
             contextTabBar.selectedSegmentIndex = 1
             UserDefaults.standard.set(Modality.bike.dbValue, forKey: "de.cyface.settings.context")
         }
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
@@ -423,7 +438,10 @@ class ViewController: UIViewController {
                     do {
                         // Init DataCapturingService
                         let motionManager = CMMotionManager()
-                        self.dc = DataCapturingService(sensorManager: motionManager, dataManager: coreDataStack, eventHandler: self.handleDataCapturingEvent)
+                        self.dataCapturingService = DataCapturingService(
+                            sensorManager: motionManager,
+                            dataManager: coreDataStack,
+                            eventHandler: self.handleDataCapturingEvent)
 
                         // TODO: Move this to a Table View Model
                         // Load the measurements to show
@@ -443,7 +461,6 @@ class ViewController: UIViewController {
                                 return
                             }
 
-
                             self.measurementsOverview.reloadData()
                         }
                     } catch {
@@ -456,7 +473,10 @@ class ViewController: UIViewController {
         if UserDefaults.standard.bool(forKey: AppDelegate.syncToggleKey) {
             synchronizer.activate()
         }
-        NotificationCenter.default.addObserver(self, selector: #selector(onSynchronizationToggleChanged(_:)), name: UserDefaults.didChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(onSynchronizationToggleChanged(_:)),
+                                               name: UserDefaults.didChangeNotification,
+                                               object: nil)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -466,31 +486,31 @@ class ViewController: UIViewController {
             synchronizer.deactivate()
         }
     }
-    
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
-        
+
         // Only continue if we have a segue identifier
-        guard let id = segue.identifier else {
-            fatalError("ViewController.prepare(\(segue.debugDescription),\(sender.debugDescription)): Tried to call segue without identifier!")
+        guard let segueIdentifier = segue.identifier else {
+            fatalError("Tried to call segue without identifier!")
         }
-        
+
         // Only continue with correct segue identifier
-        guard id == "ShowMeasurementDetailsSegue" else {
-            fatalError("ViewController.prepare(\(segue.debugDescription),\(sender.debugDescription)): Unknown segue \(id) called!")
+        guard segueIdentifier == "ShowMeasurementDetailsSegue" else {
+            fatalError("Unknown segue \(segueIdentifier) called!")
         }
-        
+
         // Only continue with correct segue destination
         guard let destination = segue.destination as? MeasurementDetailsViewController else {
-            fatalError("ViewController.prepare(\(segue.debugDescription),\(sender.debugDescription)): Unknow destination for segue \(id)!")
+            fatalError("Unknow destination for segue \(segueIdentifier)!")
         }
-        
+
         guard let senderCell = sender as? TableCellView else {
-            fatalError("ViewController.prepare(\(segue.debugDescription),\(sender.debugDescription)): Segue \(id) called from invalid sender element!")
+            fatalError("Segue \(segueIdentifier) called from invalid sender element!")
         }
-        
+
         guard let indexPath = measurementsOverview.indexPath(for: senderCell) else {
-            fatalError("ViewController.prepare(\(segue.debugDescription),\(sender.debugDescription)): The selected scell is not being displayed by the measurements overview table!")
+            fatalError("The selected cell is not being displayed by the measurements overview table!")
         }
 
         measurements[indexPath.row].sendTo(controller: destination)
@@ -501,12 +521,12 @@ class ViewController: UIViewController {
      Sets the pause, play and stop button to the correct state after this view controller appears on the screen.
      */
     private func initialButtonState() {
-        guard let dc = dc else {
+        guard let dataCapturingService = dataCapturingService else {
             fatalError("Expected initialized capturing service!")
         }
 
         // Check if there was a paused measurement and enable resuming it.
-        if dc.isPaused {
+        if dataCapturingService.isPaused {
             enableStopButton()
             disablePauseButton()
             enablePlayButton()
@@ -522,7 +542,7 @@ class ViewController: UIViewController {
      */
     private func set(mode: Modality) {
         UserDefaults.standard.set(mode.dbValue, forKey: "de.cyface.settings.context")
-        dc?.changeModality(to: mode.dbValue)
+        dataCapturingService?.changeModality(to: mode.dbValue)
     }
     /**
      Searches the array of  `TableCellViewModel` instances for the one displaying a `Measurement` with the provided `identifier`.
@@ -531,8 +551,8 @@ class ViewController: UIViewController {
      - TODO: This could be removed if there would be a proper table view model using a dictionary to store the `TableCellViewModel` instances
      - Returns: A tuple containing the index of the found view model and the view model itself or `nil` if no matching view model was found
      */
-    private func findMeasurementCellViewModelBy(identifier: Int64) -> (Int,TableCellViewModel)? {
-        for (index,measurement) in measurements.enumerated() {
+    private func findMeasurementCellViewModelBy(identifier: Int64) -> (Int, TableCellViewModel)? {
+        for (index, measurement) in measurements.enumerated() {
             if measurement.showsMeasurement(measurementIdentifier: identifier) {
                 return (index, measurement)
             }
@@ -543,30 +563,30 @@ class ViewController: UIViewController {
 
 // MARK: - UITableViewDelegate and UITableViewDataSource
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let viewModel = measurements[indexPath.row]
-        
+
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "measurementCell") as? TableCellView else {
-            fatalError("ViewController.tableView(\(tableView.debugDescription),\(indexPath.debugDescription)): Unable to find reusable cell for identifier \"measurementCell\".")
+            fatalError("Unable to find reusable cell for identifier \"measurementCell\".")
         }
 
         cell.configureFrom(viewModel: viewModel)
-        
+
         return cell
     }
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return measurements.count
     }
-    
+
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
-    
+
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
 
-        switch(editingStyle) {
+        switch editingStyle {
         case .delete:
                 let measurement = measurements[indexPath.row]
                 measurement.delete {

@@ -30,7 +30,8 @@ class CurrentMeasurementViewModel {
         guard let measurement = currentMeasurement.measurement else {
             fatalError("No current measurement!")
         }
-        let localizedMeasurement = NSLocalizedString("measurementTitleOnCurrentlyCapturedMeasurement", comment: "Title used for a measurement while showing information during capturing.")
+        let localizedMeasurement = NSLocalizedString("measurementTitleOnCurrentlyCapturedMeasurement",
+                                                     comment: "Title used for a measurement while showing information during capturing.")
         return "\(localizedMeasurement) \(measurement.identifier)"
     }
     /// The image to show for the current fix status
@@ -59,7 +60,7 @@ class CurrentMeasurementViewModel {
             return String(format: "%.2f km/h", 0.0)
         }
 
-        return String(format: "%.2f km/h",speed/3.6)
+        return String(format: "%.2f km/h", speed/3.6)
     }
     /// The current time elapsed capturing the active measurement
     var timestamp: String {

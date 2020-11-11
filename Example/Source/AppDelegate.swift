@@ -40,9 +40,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         registerDefaultsFromSettingsBundle()
         oldServerUrl = UserDefaults.standard.string(forKey: AppDelegate.serverURLKey)
 
-        NotificationCenter.default.addObserver(self, selector: #selector(onUploadServerUrlChanged(notification:)), name: UserDefaults.didChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(onUploadServerUrlChanged(notification:)),
+                                               name: UserDefaults.didChangeNotification,
+                                               object: nil)
 
-        DispatchQueue.global(qos: .userInitiated).async() { [weak self] in
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else {
                 return
             }
@@ -51,7 +54,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let bundle = Bundle(for: type(of: coreDataStack))
             coreDataStack.setup(bundle: bundle)
             self.coreDataStack = coreDataStack
-            
+
             self.serverConnection = self.createServerConnection()
 
             DispatchQueue.main.async {
@@ -88,10 +91,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     /// In the beginning the app needs to load default settings from the Settings.bundle. Only Apple knows why this is necessary and it seems like a pretty dirty hack, but the code does not work without this. This will hopefully be fixed in the future
     private func registerDefaultsFromSettingsBundle() {
         let settingsUrl = Bundle.main.url(forResource: "Settings", withExtension: "bundle")!.appendingPathComponent("Root.plist")
-        let settingsPlist = NSDictionary(contentsOf:settingsUrl)!
-        let preferences = settingsPlist["PreferenceSpecifiers"] as! [NSDictionary]
+        let settingsPlist = NSDictionary(contentsOf: settingsUrl)!
+        guard let preferences = settingsPlist["PreferenceSpecifiers"] as? [NSDictionary] else {
+            fatalError()
+        }
 
-        var defaultsToRegister = Dictionary<String, Any>()
+        var defaultsToRegister = [String: Any]()
 
         for preference in preferences {
             guard let key = preference["Key"] as? String else {

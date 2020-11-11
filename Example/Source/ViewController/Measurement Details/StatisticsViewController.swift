@@ -14,35 +14,35 @@ import os.log
 class StatisticsViewController: UIViewController {
     // MARK: - Outlets
     @IBOutlet weak var dataView: LineChartView!
-    
+
     // MARK: - Properties
     private static let LOG = OSLog(subsystem: "StatisticsViewController", category: "View")
     var measurement: Int64?
-    
+
     // MARK: - Initializers
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.initialize()
     }
-    
+
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         self.initialize()
     }
-    
+
     // MARK: - Methods
     private func initialize() {
         self.edgesForExtendedLayout = []
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         updateChartWithData()
     }
-    
+
     func updateChartWithData() {
         guard let entity = self.measurement else {
-            os_log("StatisticsViewController.updateChartWithData(): Measurement not yet initialized!", log: StatisticsViewController.LOG, type: .error)
+            os_log("Measurement not yet initialized!", log: StatisticsViewController.LOG, type: .error)
             return
         }
 
@@ -74,12 +74,12 @@ class StatisticsViewController: UIViewController {
                 self.dataView.data = chartData
             }
         } catch let error {
-            os_log("StatisticsViewController.updateChartWithData(): Unable to load accelerations! Error %@", log: StatisticsViewController.LOG, type: .error, error.localizedDescription)
+            os_log("Unable to load accelerations! Error %@", log: StatisticsViewController.LOG, type: .error, error.localizedDescription)
         }
     }
 }
 
 // MARK: - ChartViewDelegate
 extension StatisticsViewController: ChartViewDelegate {
-    
+
 }

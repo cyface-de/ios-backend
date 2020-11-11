@@ -61,7 +61,7 @@ class TableCellView: UITableViewCell {
             subview.removeFromSuperview()
         }
 
-        switch(status) {
+        switch status {
         case .uploading:
             debugPrint("Formatting table cell for synchronizing measurement!")
             let activityIndicatorView = UIActivityIndicatorView(style: .gray)
@@ -88,8 +88,22 @@ class TableCellView: UITableViewCell {
         subView.translatesAutoresizingMaskIntoConstraints = false
 
         measurementStatusView.addSubview(subView)
-        let centerXConstraint = NSLayoutConstraint(item: subView, attribute: .centerX, relatedBy: .equal, toItem: measurementStatusView, attribute: .centerX, multiplier: 1.0, constant: 0)
-        let centerYConstraint = NSLayoutConstraint(item: subView, attribute: .centerY, relatedBy: .equal, toItem: measurementStatusView, attribute: .centerY, multiplier: 1.0, constant: 0)
+        let centerXConstraint = NSLayoutConstraint(
+            item: subView,
+            attribute: .centerX,
+            relatedBy: .equal,
+            toItem: measurementStatusView,
+            attribute: .centerX,
+            multiplier: 1.0,
+            constant: 0)
+        let centerYConstraint = NSLayoutConstraint(
+            item: subView,
+            attribute: .centerY,
+            relatedBy: .equal,
+            toItem: measurementStatusView,
+            attribute: .centerY,
+            multiplier: 1.0,
+            constant: 0)
 
         measurementStatusView.addConstraints([centerXConstraint, centerYConstraint])
     }

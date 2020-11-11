@@ -20,7 +20,7 @@ import os.log
 class AccelerationPointTableViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     // MARK: - Outlets
     @IBOutlet weak var accelerationsTableView: UITableView!
-    
+
     // MARK: - Properties
     private static let LOG = OSLog(subsystem: "AccelerationPointTableViewController", category: "View")
     var accelerations: [SensorValue]?
@@ -30,7 +30,7 @@ class AccelerationPointTableViewController: UIViewController, UITableViewDataSou
     // MARK: - UIViewController
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         accelerationsTableView.dataSource = self
         accelerationsTableView.delegate = self
 
@@ -43,14 +43,14 @@ class AccelerationPointTableViewController: UIViewController, UITableViewDataSou
         guard accelerations==nil else {
             return
         }
-        
+
         activityIndicator.startAnimating()
         accelerationsTableView.separatorStyle = .none
 
         guard let entity = measurement else {
             fatalError()
         }
-        
+
         guard let coreDataStack = (UIApplication.shared.delegate as? AppDelegate)?.coreDataStack else {
             fatalError()
         }
@@ -77,15 +77,19 @@ class AccelerationPointTableViewController: UIViewController, UITableViewDataSou
                 self.accelerations = try accelerationFile.load(from: measurement)
 
             } catch let error {
-                os_log("AccelerationPointTableViewController.viewWillAppear(%@): Unable to initializer persistence layer! Error %@", log: AccelerationPointTableViewController.LOG, type: .error, "\(animated)", error.localizedDescription)
+                os_log("Unable to initializer persistence layer! Error %@",
+                       log: AccelerationPointTableViewController.LOG,
+                       type: .error, error.localizedDescription)
             }
         }
     }
-    
+
     // MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "AccelerationPointTableViewCell", for: indexPath)
-        let tableViewCell = cell as! AccelerationPointTableViewCell
+        guard let tableViewCell = cell as? AccelerationPointTableViewCell else {
+            fatalError()
+        }
         tableViewCell.set(accelerationPoint: accelerations![indexPath.row])
 
         return tableViewCell

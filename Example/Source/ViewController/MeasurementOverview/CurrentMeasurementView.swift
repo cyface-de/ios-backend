@@ -44,7 +44,9 @@ class CurrentMeasurementView: UIStackView {
         translatesAutoresizingMaskIntoConstraints = false
         measurementNameLabel.translatesAutoresizingMaskIntoConstraints = false
         let boldFont = UIFont(descriptor: UIFontDescriptor.preferredFontDescriptor(withTextStyle: .title1), size: 0)
-        measurementNameLabel.attributedText = NSAttributedString.init(string: viewModel.currentMeasurementLabel, attributes: [NSAttributedString.Key.font: boldFont])
+        measurementNameLabel.attributedText = NSAttributedString.init(
+            string: viewModel.currentMeasurementLabel,
+            attributes: [NSAttributedString.Key.font: boldFont])
         setColorFor(label: measurementNameLabel)
 
         axis = .vertical

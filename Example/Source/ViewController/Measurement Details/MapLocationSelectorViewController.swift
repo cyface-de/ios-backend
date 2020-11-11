@@ -27,7 +27,6 @@ class MapLocationSelectorViewController: UIViewController {
         self.presentingViewController?.dismiss(animated: true)
     }
 
-
     // MARK: - Properties
     var measurementIdentifier: Int64?
     var measurement: MeasurementMO?
@@ -44,7 +43,6 @@ class MapLocationSelectorViewController: UIViewController {
         mapWidget.delegate = geoLocationTrackDrawer
         recognizeTapsInMap()
     }
-    
 
     // MARK: - Navigation
 
@@ -56,7 +54,9 @@ class MapLocationSelectorViewController: UIViewController {
         - sender: The sender of the segue. In this class it will always be the "Select Vehicle" button.
      */
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let destination = segue.destination as! ModalitySelectorViewController
+        guard let destination = segue.destination as? ModalitySelectorViewController else {
+            fatalError()
+        }
 
         guard let selectedPoint = selectedPoint else {
             fatalError()
@@ -71,8 +71,12 @@ class MapLocationSelectorViewController: UIViewController {
         destination.behaviour = { modality in
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()
-            let migratedLocation = persistenceLayer.context?.object(with: selectedPoint.objectID) as! GeoLocationMO
-            let migratedMeasurement = persistenceLayer.context?.object(with: measurement.objectID) as! MeasurementMO
+            guard let migratedLocation = persistenceLayer.context?.object(with: selectedPoint.objectID) as? GeoLocationMO else {
+                fatalError()
+            }
+            guard let migratedMeasurement = persistenceLayer.context?.object(with: measurement.objectID) as? MeasurementMO else {
+                fatalError()
+            }
             let context = persistenceLayer.context!
 
             let event = Event(context: context)
@@ -83,7 +87,7 @@ class MapLocationSelectorViewController: UIViewController {
 
             context.saveRecursively()
             self.presentingViewController?.dismiss(animated: true)
-            if let mapViewController = self.mapViewController{
+            if let mapViewController = self.mapViewController {
                 mapViewController.eventsTableView.reloadData()
             }
         }
@@ -146,7 +150,7 @@ class MapLocationSelectorViewController: UIViewController {
         print("\(locationOnMap)")
 
         let point = MKMapPoint(locationOnMap)
-        let mapRect = MKMapRect(x: point.x, y: point.y, width: 0, height: 0);
+        let mapRect = MKMapRect(x: point.x, y: point.y, width: 0, height: 0)
         var closestPoint: GeoLocationMO?
 
         if polyline.intersects(mapRect) {
@@ -154,9 +158,10 @@ class MapLocationSelectorViewController: UIViewController {
             var previousSmallestDistance: Double = Double.greatestFiniteMagnitude
             let distanceCalculator = DefaultDistanceCalculationStrategy()
 
-
-            PersistenceLayer.traverseTracks(ofMeasurement: measurement) { track, location in
-                let distance = distanceCalculator.calculateDistance(from: (location.lat, location.lon), to: (locationOnMap.latitude, locationOnMap.longitude))
+            PersistenceLayer.traverseTracks(ofMeasurement: measurement) { _, location in
+                let distance = distanceCalculator.calculateDistance(
+                    from: (location.lat, location.lon),
+                    to: (locationOnMap.latitude, locationOnMap.longitude))
                 if distance < previousSmallestDistance {
                     closestPoint = location
                     previousSmallestDistance = distance

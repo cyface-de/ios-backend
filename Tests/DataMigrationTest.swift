@@ -47,9 +47,18 @@ class DataMigrationTest: XCTestCase {
         let oldResource = "3"
         let newResource = "4"
         let subdirectory = "CyfaceModel.momd"
-        let bundle = Bundle(identifier: "de.cyface.DataCapturing")
-        let oldMomURL = bundle?.url(forResource: oldResource, withExtension: "mom", subdirectory: subdirectory)
-        let newMomURL = bundle?.url(forResource: newResource, withExtension: "mom", subdirectory: subdirectory)
+
+        // We need the following rather complicated loop, since the DataCapturing Framework Bundle does not have an identifier.
+        let bundles = Bundle.allBundles
+        var bundle:Bundle? = nil
+        for it in bundles {
+            if it.path(forResource: "3", ofType: "mom") != nil {
+                bundle = it
+            }
+        }
+
+        let oldMomURL = bundle?.url(forResource: oldResource, withExtension: "mom")
+        let newMomURL = bundle?.url(forResource: newResource, withExtension: "mom")
         XCTAssertNotNil(oldMomURL)
         XCTAssertNotNil(newMomURL)
 
@@ -181,10 +190,8 @@ class DataMigrationTest: XCTestCase {
      */
     func migrate(fromVersion: CoreDataMigrationVersion, toVersion: CoreDataMigrationVersion, usingTestData testDatastore: String) -> NSManagedObjectContext {
         // Arrange
-        guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
-            fatalError()
-        }
         let migrator = CoreDataMigrator()
+        let bundle = Bundle(for: type(of: migrator))
         let datastore = FileManager.moveFileFromBundleToTempDirectory(filename: testDatastore)
         addTeardownBlock {
             FileManager.clearTempDirectoryContents()
@@ -398,6 +405,10 @@ class DataMigrationTest: XCTestCase {
             // Nothing to do here
         }
         return container
+    }
+
+    private func findModelBundle() {
+
     }
 }
 

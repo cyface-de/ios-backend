@@ -37,8 +37,8 @@ class ModalitySelectorViewController: UIViewController {
     }
 
     // MARK: - Properties
-    var behaviour: ((Modality) -> ())?
-    var cancelBehaviour: (() -> ())?
+    var behaviour: ((Modality) -> Void)?
+    var cancelBehaviour: (() -> Void)?
 
     private let viewModel = ModalitiesViewModel()
     private var selectModalityAlert: UIAlertController {
@@ -78,7 +78,6 @@ extension ModalitySelectorViewController: UITableViewDelegate, UITableViewDataSo
 
         return cell
     }
-
 
 }
 

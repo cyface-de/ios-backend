@@ -11,20 +11,20 @@ import DataCapturing
 import os.log
 
 class GpsPointTableViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-    
+
     // MARK: - Outlets
     @IBOutlet weak var gpsPointsTableView: UITableView!
-    
+
     // MARK: - Properties
     private static let log = OSLog(subsystem: "GpsPointTableViewController", category: "de.cyface")
     var locations: [GeoLocation]?
     var measurement: Int64?
     let activityIndicator = UIActivityIndicatorView(style: .gray)
-    
+
     // MARK: - UIViewController
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         gpsPointsTableView.delegate = self
         gpsPointsTableView.dataSource = self
         gpsPointsTableView.backgroundView = activityIndicator
@@ -48,7 +48,8 @@ class GpsPointTableViewController: UIViewController, UITableViewDataSource, UITa
         }
 
         DispatchQueue.global(qos: .userInteractive).async {
-            defer{OperationQueue.main.addOperation { [weak self] in
+            defer {
+                OperationQueue.main.addOperation { [weak self] in
                 guard let self = self else {
                     return
                 }
@@ -66,8 +67,14 @@ class GpsPointTableViewController: UIViewController, UITableViewDataSource, UITa
                 var locations = [GeoLocation]()
 
                 let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
-                PersistenceLayer.traverseTracks(ofMeasurement: measurement) {
-                    track, location in locations.append(GeoLocation(latitude: location.lat, longitude: location.lon, accuracy: location.accuracy, speed: location.speed, timestamp: location.timestamp, isValid: true))
+                PersistenceLayer.traverseTracks(ofMeasurement: measurement) {_, location in
+                    locations.append(GeoLocation(
+                        latitude: location.lat,
+                        longitude: location.lon,
+                        accuracy: location.accuracy,
+                        speed: location.speed,
+                        timestamp: location.timestamp,
+                        isValid: true))
                 }
                 self.locations = locations
             } catch let error {
@@ -76,7 +83,7 @@ class GpsPointTableViewController: UIViewController, UITableViewDataSource, UITa
         }
 
     }
-    
+
     // MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let locations=locations {
@@ -85,18 +92,20 @@ class GpsPointTableViewController: UIViewController, UITableViewDataSource, UITa
             return 0
         }
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
+
         let cell = tableView.dequeueReusableCell(withIdentifier: "GpsPointTableViewCell", for: indexPath)
         let geoLocation = locations![indexPath.row]
-        
-        let geoLocationCell = cell as! GpsPointTableViewCell
-        
+
+        guard let geoLocationCell = cell as? GpsPointTableViewCell else {
+            fatalError()
+        }
+
         geoLocationCell.timestampValueLabel.text = String(geoLocation.timestamp)
-        geoLocationCell.latitudeValueLabel.text = String(format:"%.2f", geoLocation.latitude)
-        geoLocationCell.longitudeValueLabel.text = String(format:"%.2f", geoLocation.longitude)
-        
+        geoLocationCell.latitudeValueLabel.text = String(format: "%.2f", geoLocation.latitude)
+        geoLocationCell.longitudeValueLabel.text = String(format: "%.2f", geoLocation.longitude)
+
         return cell
     }
 }

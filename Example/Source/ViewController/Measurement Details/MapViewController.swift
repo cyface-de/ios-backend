@@ -27,7 +27,7 @@ class MapViewController: UIViewController {
     // MARK: - Methods
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         guard let measurement = self.measurement else {
             fatalError("MapViewController.viewDidLoad(): Measurement for map view not yet properly initialized!")
         }
@@ -52,11 +52,15 @@ class MapViewController: UIViewController {
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier=="MapViewToMapLocationSelector" {
-            let destination = segue.destination as! MapLocationSelectorViewController
+            guard let destination = segue.destination as? MapLocationSelectorViewController else {
+                fatalError()
+            }
             destination.measurementIdentifier = measurement
             destination.mapViewController = self
         } else if segue.identifier=="MapViewToModalitySelector" {
-            let destination = segue.destination as! ModalitySelectorViewController
+            guard let destination = segue.destination as? ModalitySelectorViewController else {
+                fatalError()
+            }
             destination.behaviour = {[weak self] modality in
                 guard let self = self else {
                     return
@@ -128,7 +132,7 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
         guard let measurement = measurement else {
             fatalError("No Measurement configured!")
         }
-        
+
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         persistenceLayer.context = persistenceLayer.makeContext()
         do {
@@ -148,7 +152,7 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
 
-        switch(editingStyle) {
+        switch editingStyle {
         case .delete:
             do {
                 try deleteEvent(at: indexPath)

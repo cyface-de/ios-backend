@@ -46,8 +46,7 @@ This framework can be included by your App if you are going to capture sensor da
   s.dependency 'DataCompression', '~> 3.4.0'
 
   s.test_spec 'Tests' do |test_spec|
-    test_spec.source_files = 'Tests/**/*.swift'
-    #test_spec.dependency 'OCMock' # This dependency will only be linked with your tests.
+    test_spec.source_files = '../Tests/**/*.swift'
   end
 
 end

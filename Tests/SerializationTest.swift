@@ -45,10 +45,9 @@ class SerializationTest: XCTestCase {
         oocut = MeasurementSerializer()
 
         do {
-            guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
-                fatalError()
-            }
             coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            let bundle = Bundle(for: type(of: coreDataStack))
+
             coreDataStack.setup(bundle: bundle)
             persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             persistenceLayer.context = persistenceLayer.makeContext()

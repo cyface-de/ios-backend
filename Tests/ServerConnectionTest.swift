@@ -37,7 +37,7 @@ class ServerConnectionTest: XCTestCase {
 
     override func setUp() {
         coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
-        coreDataStack.setup(bundle: Bundle(identifier: "de.cyface.DataCapturing")!)
+        coreDataStack.setup(bundle: Bundle(for: type(of: coreDataStack)))
 
         guard let url = URL(string: "http://localhost:8080/api/v2") else {
             fatalError()

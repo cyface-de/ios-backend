@@ -14,7 +14,7 @@ class AccelerationPointTableViewCell: UITableViewCell {
     @IBOutlet weak var zValue: UILabel!
     @IBOutlet weak var xValue: UILabel!
     @IBOutlet weak var yValue: UILabel!
-    
+
     func set(accelerationPoint value: SensorValue) {
         let formattedTimestamp = DateFormatter.localizedString(from: value.timestamp, dateStyle: .short, timeStyle: .short)
         timestampValue.text = formattedTimestamp

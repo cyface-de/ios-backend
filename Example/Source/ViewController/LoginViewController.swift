@@ -18,12 +18,12 @@ import CoreMotion
  - Since: 1.0.0
  */
 class LoginViewController: UIViewController {
-    
+
     // MARK: - Outlets
     @IBOutlet weak var usernameTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var errorMessageLabel: UILabel!
-    
+
     // MARK: - Actions
     @IBAction func guestLoginButtonTapped(_ sender: UIButton) {
         print("test")
@@ -42,57 +42,56 @@ class LoginViewController: UIViewController {
     @IBAction func loginButtonTapped(_ sender: UIButton) {
         login()
     }
-    
+
     @IBAction func usernameEditted(_ sender: UITextField) {
         guard let text = sender.text else {
             fatalError("LoginViewController.usernameEditted(\(sender.debugDescription)): Unable to get username text from text field!")
         }
-        
+
         UserDefaults.standard.set(text, forKey: AppDelegate.usernameKey)
         authenticator.username = text
     }
-    
+
     @IBAction func passwordEditted(_ sender: UITextField) {
         guard let text = sender.text else {
             fatalError("LoginViewController.passwordEditted(\(sender.debugDescription)): Unable to get password text from text field!")
         }
-        
+
         UserDefaults.standard.set(text, forKey: AppDelegate.passwordKey)
         authenticator.password = text
     }
-    
-    
+
     // MARK: - Navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
-        
+
         // Only continue if we have a segue identifier
-        guard let id = segue.identifier else {
+        guard let segueIdentifier = segue.identifier else {
             fatalError("LoginViewController.prepare(\(segue.debugDescription),\(sender.debugDescription)): Tried to call segue without identifier!")
         }
-        
+
         // Only continue with correct segue identifier
-        guard id == "ShowMainViewSegue" else {
-            fatalError("LoginViewController.prepare(\(segue.debugDescription),\(sender.debugDescription)): Unknown segue \(id) called!")
+        guard segueIdentifier == "ShowMainViewSegue" else {
+            fatalError("LoginViewController.prepare(\(segue.debugDescription),\(sender.debugDescription)): Unknown segue \(segueIdentifier) called!")
         }
     }
-    
+
     // MARK: - Properties
 
     let alert: UIAlertController = {
         let message = NSLocalizedString("Authenticating...", comment: "")
         let ret = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-        
+
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.style = UIActivityIndicatorView.Style.gray
         loadingIndicator.startAnimating()
-        
+
         ret.view.addSubview(loadingIndicator)
-        
+
         return ret
     }()
-    
+
     // MARK: - Methods
     override func viewDidLoad() {
         super.viewDidLoad()

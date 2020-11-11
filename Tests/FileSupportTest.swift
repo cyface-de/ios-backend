@@ -34,10 +34,8 @@ class FileSupportTest: XCTestCase {
         // Arrange
         let oocut = EventsFile()
 
-        guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
-            fatalError()
-        }
         let coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+        let bundle = Bundle(for: type(of: coreDataStack))
         coreDataStack.setup(bundle: bundle)
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)

@@ -32,11 +32,15 @@ class CapturingLifecycle {
                     self.viewController.enablePauseButton()
                 }
             } catch {
-                return os_log("ViewController.handleDataCapturingEvent(event: .serviceStarted, status: .success): Error: %@", log: CapturingLifecycle.log, type: .error, error.localizedDescription)
+                return os_log("ViewController.handleDataCapturingEvent(event: .serviceStarted, status: .success): Error: %@",
+                              log: CapturingLifecycle.log,
+                              type: .error, error.localizedDescription)
             }
 
         case .error(let error):
-            os_log("ViewController.handleDataCapturingEvent(event: .serviceStarted, status: .error): Error: %@", log: CapturingLifecycle.log, type: .error, error.localizedDescription)
+            os_log("ViewController.handleDataCapturingEvent(event: .serviceStarted, status: .error): Error: %@",
+                   log: CapturingLifecycle.log,
+                   type: .error, error.localizedDescription)
         }
     }
 
@@ -54,10 +58,14 @@ class CapturingLifecycle {
             do {
                 try showCurrentMeasurementOverlay(in: appDelegate, for: measurementIdentifier)
             } catch {
-                return os_log("ViewController.handleDataCapturingEvent(event: .serviceResumed, status: .success): Error: %@", log: CapturingLifecycle.log, type: .error, error.localizedDescription)
+                return os_log("ViewController.handleDataCapturingEvent(event: .serviceResumed, status: .success): Error: %@",
+                              log: CapturingLifecycle.log,
+                              type: .error, error.localizedDescription)
             }
         case .error(let error):
-            os_log("ViewController.handleDataCapturingEvent(event: .serviceResumed, status: .error): Error: %@", log: CapturingLifecycle.log, type: .error, error.localizedDescription)
+            os_log("ViewController.handleDataCapturingEvent(event: .serviceResumed, status: .error): Error: %@",
+                   log: CapturingLifecycle.log,
+                   type: .error, error.localizedDescription)
         }
     }
 
@@ -139,12 +147,14 @@ class CapturingLifecycle {
 
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifiedBy)
 
-        os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Capturing measurement %@.", log: CapturingLifecycle.log, type: .info, "\(measurementIdentifiedBy)")
+        os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Capturing measurement %@.",
+               log: CapturingLifecycle.log,
+               type: .info, "\(measurementIdentifiedBy)")
 
         let currentMeasurement = MeasurementModel(coreDataStack)
 
         currentMeasurement.measurement = measurement
-        let currentMeasurementViewModel = CurrentMeasurementViewModel(currentMeasurement);
+        let currentMeasurementViewModel = CurrentMeasurementViewModel(currentMeasurement)
 
         viewController.mainAreaStackView.translatesAutoresizingMaskIntoConstraints = false
 

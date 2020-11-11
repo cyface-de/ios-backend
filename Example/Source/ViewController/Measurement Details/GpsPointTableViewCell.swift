@@ -12,5 +12,5 @@ class GpsPointTableViewCell: UITableViewCell {
     @IBOutlet weak var timestampValueLabel: UILabel!
     @IBOutlet weak var latitudeValueLabel: UILabel!
     @IBOutlet weak var longitudeValueLabel: UILabel!
-    
+
 }

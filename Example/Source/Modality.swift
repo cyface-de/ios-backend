@@ -9,7 +9,8 @@ import Foundation
 /**
  A class describing the differen modes of transportation available for capturing measurements.
 
- This class defines the transportation modes used by the Cyface app and creates a mapping between database identifier and representation inside the user interface for each modality.
+ This class defines the transportation modes used by the Cyface app.
+ It creates a mapping between database identifier and representation inside the user interface for each modality.
 
  This is not an enumeration intentionally.
 
@@ -19,15 +20,25 @@ import Foundation
  */
 public class Modality {
     /// The transportation mode used, when a car was used for transportation.
-    public static let car = Modality(dbValue: "CAR", uiString: NSLocalizedString("car", comment: "Transportation mode using cars"))
+    public static let car = Modality(
+        dbValue: "CAR",
+        uiString: NSLocalizedString("car", comment: "Transportation mode using cars"))
     /// The transporation mode used, when a bicycle was used for transportation.
-    public static let bike = Modality(dbValue: "BICYCLE", uiString: NSLocalizedString("bicycle", comment: "Transportation mode using bicycles"))
+    public static let bike = Modality(
+        dbValue: "BICYCLE",
+        uiString: NSLocalizedString("bicycle", comment: "Transportation mode using bicycles"))
     /// The transportation mode used when a measurement was captured while walking.
-    public static let walking = Modality(dbValue: "WALKING", uiString: NSLocalizedString("walking", comment: "Transportation mode where the user is walking"))
+    public static let walking = Modality(
+        dbValue: "WALKING",
+        uiString: NSLocalizedString("walking", comment: "Transportation mode where the user is walking"))
     /// The transportation mode used, when a bus was used for transportation.
-    public static let bus = Modality(dbValue: "BUS", uiString: NSLocalizedString("bus", comment: "Transportation mode using the bus"))
+    public static let bus = Modality(
+        dbValue: "BUS",
+        uiString: NSLocalizedString("bus", comment: "Transportation mode using the bus"))
     /// The transportation mode used, when a train was used for transportation.
-    public static let train = Modality(dbValue: "TRAIN", uiString: NSLocalizedString("train", comment: "Transportation mode using trains"))
+    public static let train = Modality(
+        dbValue: "TRAIN",
+        uiString: NSLocalizedString("train", comment: "Transportation mode using trains"))
 
     /// The database value used to store this transportation mode within the application database.
     public let dbValue: String

@@ -47,7 +47,6 @@ class GeoLocationTrackDrawer: NSObject {
             placeStartMarker(from: tracks, on: widget)
             placeEndMarker(from: tracks, on: widget)
 
-
             for track in tracks {
                 guard let locations = track.locations?.array as? [GeoLocationMO] else {
                     fatalError()
@@ -62,7 +61,13 @@ class GeoLocationTrackDrawer: NSObject {
                 // Transform the location model objects from the database to a thread safe representation.
                 var localLocations = [GeoLocation]()
                 for location in locations {
-                    localLocations.append(GeoLocation(latitude: location.lat, longitude: location.lon, accuracy: location.accuracy, speed: location.speed, timestamp: location.timestamp))
+                    localLocations.append(
+                        GeoLocation(
+                            latitude: location.lat,
+                            longitude: location.lon,
+                            accuracy: location.accuracy,
+                            speed: location.speed,
+                            timestamp: location.timestamp))
                 }
 
                 if let firstLocation = locations.first {
@@ -73,12 +78,12 @@ class GeoLocationTrackDrawer: NSObject {
                         return
                     }
 
-                    self.draw(path:localLocations, on: widget)
+                    self.draw(path: localLocations, on: widget)
                 }
             }
 
         } catch let error {
-            os_log("Unable to load locations! Error %@",log: GeoLocationTrackDrawer.log, type: .error, error.localizedDescription)
+            os_log("Unable to load locations! Error %@", log: GeoLocationTrackDrawer.log, type: .error, error.localizedDescription)
         }
     }
 
@@ -87,7 +92,12 @@ class GeoLocationTrackDrawer: NSObject {
             return
         }
 
-        let firstLocation = GeoLocation(latitude: firstTrackLocation.lat, longitude: firstTrackLocation.lon, accuracy: firstTrackLocation.accuracy, speed: firstTrackLocation.speed, timestamp: firstTrackLocation.timestamp)
+        let firstLocation = GeoLocation(
+            latitude: firstTrackLocation.lat,
+            longitude: firstTrackLocation.lon,
+            accuracy: firstTrackLocation.accuracy,
+            speed: firstTrackLocation.speed,
+            timestamp: firstTrackLocation.timestamp)
 
         DispatchQueue.main.async {
             self.place(firstLocation, "Start", on: map)
@@ -99,7 +109,12 @@ class GeoLocationTrackDrawer: NSObject {
             return
         }
 
-        let lastLocation = GeoLocation(latitude: lastTrackLocation.lat, longitude: lastTrackLocation.lon, accuracy: lastTrackLocation.accuracy, speed: lastTrackLocation.speed, timestamp: lastTrackLocation.timestamp)
+        let lastLocation = GeoLocation(
+            latitude: lastTrackLocation.lat,
+            longitude: lastTrackLocation.lon,
+            accuracy: lastTrackLocation.accuracy,
+            speed: lastTrackLocation.speed,
+            timestamp: lastTrackLocation.timestamp)
 
         DispatchQueue.main.async {
             self.place(lastLocation, "End", on: map)
@@ -107,19 +122,24 @@ class GeoLocationTrackDrawer: NSObject {
     }
 
     private func center(map: MKMapView, onLocation location: CLLocationCoordinate2D) {
-        let coordinateRegion = MKCoordinateRegion(center: location,
-                                                  latitudinalMeters: GeoLocationTrackDrawer.regionRadius, longitudinalMeters: GeoLocationTrackDrawer.regionRadius)
+        let coordinateRegion = MKCoordinateRegion(
+            center: location,
+            latitudinalMeters: GeoLocationTrackDrawer.regionRadius,
+            longitudinalMeters: GeoLocationTrackDrawer.regionRadius)
         map.setRegion(coordinateRegion, animated: true)
     }
 
     private func place(_ location: GeoLocation, _ title: String, on map: MKMapView) {
-        map.addAnnotation(CyfaceAnnotation(title: title, coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)))
+        map.addAnnotation(
+            CyfaceAnnotation(
+                title: title,
+                coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)))
     }
 
     private func draw(path locations: [GeoLocation], on map: MKMapView) {
         var points = [CLLocationCoordinate2D]()
         for location in locations {
-            points.append(CLLocationCoordinate2D(latitude:location.latitude, longitude:location.longitude))
+            points.append(CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude))
         }
 
         let polyline = MKPolyline(coordinates: &points, count: points.count)
