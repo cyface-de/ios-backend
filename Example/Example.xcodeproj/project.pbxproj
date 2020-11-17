@@ -16,7 +16,6 @@
 		3D6127602554A267007F6884 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3D6127552554A266007F6884 /* Localizable.strings */; };
 		3D6127612554A267007F6884 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3D6127592554A267007F6884 /* Localizable.strings */; };
 		3D6127632555955F007F6884 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D6127622555955E007F6884 /* WebKit.framework */; };
-		3D6127692555A612007F6884 /* env-vars.sh in Resources */ = {isa = PBXBuildFile; fileRef = 3D6127682555A612007F6884 /* env-vars.sh */; };
 		3D61276B2555A84D007F6884 /* CyfaceCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D61276A2555A84C007F6884 /* CyfaceCredentials.swift */; };
 		3DACE6822554642D00FA9A40 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DACE64E2554642C00FA9A40 /* Event.swift */; };
 		3DACE6832554642D00FA9A40 /* GeoLocationTrackDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DACE64F2554642C00FA9A40 /* GeoLocationTrackDrawer.swift */; };
@@ -514,7 +513,6 @@
 				3DACE69E2554642D00FA9A40 /* PrivacyPolicy.storyboard in Resources */,
 				3DACE6A22554642D00FA9A40 /* Cyface-LaunchScreen.storyboard in Resources */,
 				3D61275F2554A267007F6884 /* Localizable.strings in Resources */,
-				3D6127692555A612007F6884 /* env-vars.sh in Resources */,
 				3D61275E2554A267007F6884 /* privacy-policy-en.html in Resources */,
 				3D61275B2554A267007F6884 /* Settings.bundle in Resources */,
 				3D6127602554A267007F6884 /* Localizable.strings in Resources */,
