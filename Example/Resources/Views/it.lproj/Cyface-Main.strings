@@ -1,0 +1,84 @@
+
+/* Class = "UIButton"; normalTitle = "Edit"; ObjectID = "1A1-4z-SCx"; */
+"1A1-4z-SCx.normalTitle" = "Modifica";
+
+/* Class = "UILabel"; text = "Time"; ObjectID = "1mJ-Ca-dIr"; */
+"1mJ-Ca-dIr.text" = "Tempo";
+
+/* Class = "UITabBarItem"; title = "Graph"; ObjectID = "8xT-rI-nEK"; */
+"8xT-rI-nEK.title" = "Grafico";
+
+/* Class = "UIButton"; accessibilityLabel = "Guest Login"; ObjectID = "BK0-il-yuH"; */
+"BK0-il-yuH.accessibilityLabel" = "Login Ospite";
+
+/* Class = "UIButton"; normalTitle = "Guest Login"; ObjectID = "BK0-il-yuH"; */
+"BK0-il-yuH.normalTitle" = "Login Ospite";
+
+/* Class = "UIViewController"; title = "Cyface"; ObjectID = "BYZ-38-t0r"; */
+"BYZ-38-t0r.title" = "Cyface";
+
+/* Class = "UILabel"; text = "Latitude "; ObjectID = "ByY-A6-kcM"; */
+"ByY-A6-kcM.text" = "Latitudine ";
+
+/* Class = "UILabel"; text = "Measurement Name"; ObjectID = "CnQ-QJ-DZa"; */
+"CnQ-QJ-DZa.text" = "Nome della misurazione";
+
+/* Class = "UINavigationItem"; title = "Data Capturing"; ObjectID = "DKV-JP-iSp"; */
+"DKV-JP-iSp.title" = "Registrare i dati";
+
+/* Class = "UILabel"; text = "Distance"; ObjectID = "EIx-je-ncs"; */
+"EIx-je-ncs.text" = "Distanza";
+
+/* Class = "UITabBarItem"; title = "Data"; ObjectID = "G1N-G3-6ff"; */
+"G1N-G3-6ff.title" = "Dati";
+
+/* Class = "UILabel"; text = "Time"; ObjectID = "IKn-5i-Vi4"; */
+"IKn-5i-Vi4.text" = "Tempo";
+
+/* Class = "UILabel"; text = "X"; ObjectID = "Lez-g5-KrI"; */
+"Lez-g5-KrI.text" = "X";
+
+/* Class = "UILabel"; text = "Y"; ObjectID = "Qa7-yM-eXV"; */
+"Qa7-yM-eXV.text" = "Y";
+
+/* Class = "UISegmentedControl"; SYs-1I-8lx.segmentTitles[0] = "Car"; ObjectID = "SYs-1I-8lx"; */
+"SYs-1I-8lx.segmentTitles[0]" = "Auto";
+
+/* Class = "UISegmentedControl"; SYs-1I-8lx.segmentTitles[1] = "Bicycle"; ObjectID = "SYs-1I-8lx"; */
+"SYs-1I-8lx.segmentTitles[1]" = "Bici";
+
+/* Class = "UISegmentedControl"; SYs-1I-8lx.segmentTitles[2] = "Walking"; ObjectID = "SYs-1I-8lx"; */
+"SYs-1I-8lx.segmentTitles[2]" = "Piedi";
+
+/* Class = "UISegmentedControl"; SYs-1I-8lx.segmentTitles[3] = "Bus"; ObjectID = "SYs-1I-8lx"; */
+"SYs-1I-8lx.segmentTitles[3]" = "Autobus";
+
+/* Class = "UISegmentedControl"; SYs-1I-8lx.segmentTitles[4] = "Train"; ObjectID = "SYs-1I-8lx"; */
+"SYs-1I-8lx.segmentTitles[4]" = "Treno";
+
+/* Class = "UIButton"; normalTitle = "Login"; ObjectID = "V52-85-kOm"; */
+"V52-85-kOm.normalTitle" = "Accedi";
+
+/* Class = "UITextField"; placeholder = "Username"; ObjectID = "ZcE-Ew-8fB"; */
+"ZcE-Ew-8fB.placeholder" = "Nome utente";
+
+/* Class = "UITabBarItem"; title = "Map"; ObjectID = "dM9-pa-4ra"; */
+"dM9-pa-4ra.title" = "Mappa";
+
+/* Class = "UITextField"; placeholder = "Password"; ObjectID = "fek-jo-SQK"; */
+"fek-jo-SQK.placeholder" = "Password";
+
+/* Class = "UILabel"; text = "Not Uploaded"; ObjectID = "mjM-Gk-DqF"; */
+"mjM-Gk-DqF.text" = "Non caricato";
+
+/* Class = "UIButton"; normalTitle = "+"; ObjectID = "pxY-5V-aiM"; */
+"pxY-5V-aiM.normalTitle" = "+";
+
+/* Class = "UILabel"; text = "0.0 km"; ObjectID = "qF0-cR-9Z7"; */
+"qF0-cR-9Z7.text" = "0.0 km";
+
+/* Class = "UILabel"; text = "Longitude "; ObjectID = "uPc-c2-RVj"; */
+"uPc-c2-RVj.text" = "Longitudine ";
+
+/* Class = "UILabel"; text = "Z"; ObjectID = "v72-az-Oli"; */
+"v72-az-Oli.text" = "Z";

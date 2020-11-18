@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="0va-pP-iMG">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Modality Selector View Controller-->
+        <scene sceneID="vCO-Wn-q8e">
+            <objects>
+                <viewController storyboardIdentifier="ModalitySelector" modalPresentationStyle="overCurrentContext" useStoryboardIdentifierAsRestorationIdentifier="YES" id="0va-pP-iMG" customClass="ModalitySelectorViewController" customModule="Cyface" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="qvu-3i-Vwl">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BYc-LV-GS2">
+                                <rect key="frame" x="80" y="338" width="254" height="220"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please select vehicle" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Md-7z-L0e">
+                                        <rect key="frame" x="0.0" y="0.0" width="254" height="23"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="19"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="LiO-ix-ysO">
+                                        <rect key="frame" x="0.0" y="23" width="254" height="167"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    </tableView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Mb5-Re-W2n" userLabel="Cancel Button">
+                                        <rect key="frame" x="0.0" y="190" width="127" height="30"/>
+                                        <state key="normal" title="Cancel">
+                                            <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="tapCancel:" destination="0va-pP-iMG" eventType="touchUpInside" id="msb-YW-GU3"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kMz-w2-5aI" userLabel="OK Button">
+                                        <rect key="frame" x="127" y="190" width="127" height="30"/>
+                                        <state key="normal" title="OK">
+                                            <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="tapOK:" destination="0va-pP-iMG" eventType="touchUpInside" id="ixj-sm-DLU"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstItem="LiO-ix-ysO" firstAttribute="leading" secondItem="BYc-LV-GS2" secondAttribute="leading" id="6AY-h0-xTt"/>
+                                    <constraint firstAttribute="bottom" secondItem="Mb5-Re-W2n" secondAttribute="bottom" id="7IN-NN-YYt"/>
+                                    <constraint firstItem="0Md-7z-L0e" firstAttribute="leading" secondItem="BYc-LV-GS2" secondAttribute="leading" id="AdV-Kk-UMJ"/>
+                                    <constraint firstItem="Mb5-Re-W2n" firstAttribute="top" secondItem="LiO-ix-ysO" secondAttribute="bottom" id="ELN-Wo-6Bl"/>
+                                    <constraint firstItem="0Md-7z-L0e" firstAttribute="top" secondItem="BYc-LV-GS2" secondAttribute="top" id="EWz-Sq-pow"/>
+                                    <constraint firstAttribute="trailing" secondItem="kMz-w2-5aI" secondAttribute="trailing" id="I24-SZ-JtN"/>
+                                    <constraint firstItem="kMz-w2-5aI" firstAttribute="leading" secondItem="Mb5-Re-W2n" secondAttribute="trailing" id="ScC-Mh-BjF"/>
+                                    <constraint firstItem="kMz-w2-5aI" firstAttribute="top" secondItem="LiO-ix-ysO" secondAttribute="bottom" id="X2v-5y-vMU"/>
+                                    <constraint firstItem="Mb5-Re-W2n" firstAttribute="leading" secondItem="BYc-LV-GS2" secondAttribute="leading" id="agq-mG-Xot"/>
+                                    <constraint firstItem="Mb5-Re-W2n" firstAttribute="width" secondItem="kMz-w2-5aI" secondAttribute="width" id="eYh-h6-0n0"/>
+                                    <constraint firstItem="LiO-ix-ysO" firstAttribute="width" secondItem="BYc-LV-GS2" secondAttribute="width" id="iZM-FM-QAy"/>
+                                    <constraint firstAttribute="bottom" secondItem="kMz-w2-5aI" secondAttribute="bottom" id="ktK-ik-sXy"/>
+                                    <constraint firstItem="LiO-ix-ysO" firstAttribute="top" secondItem="0Md-7z-L0e" secondAttribute="bottom" id="yLq-Oe-FQn"/>
+                                    <constraint firstAttribute="trailing" secondItem="0Md-7z-L0e" secondAttribute="trailing" id="yOp-ff-4SX"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="0.66666666666666663" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="BYc-LV-GS2" firstAttribute="centerY" secondItem="qvu-3i-Vwl" secondAttribute="centerY" id="Dwb-aU-5de"/>
+                            <constraint firstItem="BYc-LV-GS2" firstAttribute="leading" secondItem="VEv-Py-n4P" secondAttribute="leading" constant="80" id="Ohw-xZ-hCA"/>
+                            <constraint firstItem="VEv-Py-n4P" firstAttribute="top" secondItem="BYc-LV-GS2" secondAttribute="bottom" constant="-514" id="UPa-ev-us2"/>
+                            <constraint firstItem="BYc-LV-GS2" firstAttribute="centerX" secondItem="qvu-3i-Vwl" secondAttribute="centerX" id="wbc-In-nfS"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="VEv-Py-n4P"/>
+                    </view>
+                    <connections>
+                        <outlet property="modalityTypesOverviewTable" destination="LiO-ix-ysO" id="4v7-UY-HuM"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="4cp-OH-f9h" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="115.94202898550725" y="116.51785714285714"/>
+        </scene>
+    </scenes>
+    <color key="tintColor" red="0.30450034139999999" green="0.41648191210000002" blue="0.24798864130000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+</document>

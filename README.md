@@ -11,7 +11,8 @@ The framework is developed by the Cyface GmbH and mostly used to measure cycling
 
 The framework provides three core features, which are *capturing data*, *accessing captured data for local display* and *transmitting captured data to a [Cyface server](https://github.com/cyface-de/data-collector)*.
 
-The core concept used in this framework is the *Measurement*. A measurement is one sequence of locations and sensor data and usually associated with a purpose like commute from or to work.
+The core concept used in this framework is the *Measurement*. 
+A measurement is one sequence of locations and sensor data and usually associated with a purpose like commute from or to work.
 A measurement might contain pauses and therefore is structured into several tracks.
 There is an API to control the capturing lifecycle via the `DataCapturingService` class.
 There is also an API to access captured data via the `PersistenceLayer` class.
@@ -50,9 +51,9 @@ let dcs = try MovebisDataCapturingService(sensorManager: sensorManager, updateIn
 
 1. Import Apples *CoreMotion* framework, to be able to create a motion manager.
 2. Import Apples *CoreData* framework, to be able to create a `CoreDataManager`
-3. Create the *CoreData* stack in the form of a `CoreDataManager`. Usually there should be only one instance of `CoreDataManager`. Nothing bad will happen if you use multiple ones, except for an unnecessary resource overhead. **However be careful to avoid calling the `setup(bundle:)` method on different threads concurrently. This might leave your data storage in a corrupted state or at least crash your app. Also provide the store type and a `CoreDataMigrator`. The store type should be an `NSSQLiteStoreType` in production and might be an `NSInMemoryStoreType` in a test environment. If the `CoreDataManager` encounters an old data store it will migrate this data store to the current version. If there is much data to convert, this can take some time and probably should be wrapped into a background thread.
+3. Create the *CoreData* stack in the form of a `CoreDataManager`. Usually there should be only one instance of `CoreDataManager`. Nothing bad will happen if you use multiple ones, except for an unnecessary resource overhead. **However be careful to avoid calling the `setup(bundle:)` method on different threads concurrently. This might leave your data storage in a corrupted state or at least crash your app.** Also provide the store type and a `CoreDataMigrator`. The store type should be an `NSSQLiteStoreType` in production and might be an `NSInMemoryStoreType` in a test environment. If the `CoreDataManager` encounters an old data store it will migrate this data store to the current version. If there is much data to convert, this can take some time and probably should be wrapped into a background thread.
 4. Create `CMMotionManager` from the *CoreMotion* framework. This is responsible for capturing sensor data from your device.
-5. Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to caputre 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.
+5. Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to capture 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.
 6. Create a saving interval in seconds. The value 10 for example means that your data is saved to persistent storage every 10 seconds. This also means your currently captured measurement is updated every 10 seconds. Values like the measurement length are updated at this point as well. If you need to update your UI frequently you should set this to a low value. This however also puts a higher load on your database.
 7. Provide a handler for events occuring during data capturing. Possible events are explained below.
 8. Finally create the `DataCapturingService` or `MovebisDataCapturingService` as shown, providing the required parameters.
@@ -64,9 +65,9 @@ They may be called in arbitrary order and will do as their name promises.
 
 #### Setting and Changing Transportation Modes
 
-The mode of transporation used to caputre a measurement must be provided the the `start(inMode:)` method.
+The mode of transporation used to capture a measurement must be provided to the `start(inMode:)` method.
 This is a simple string that is transferred as is to the server.
-Typical transporation modes are "bicycle", "car" and "motorbike".
+Typical transporation modes are "BICYCLE", "CAR" and "MOTORBIKE".
 
 To change the transportation mode during a measurement, call `changeModality(to:)`.
 For example call `dataCapturingService.changeModality(to: "CAR")`, to change the used transportation mode to a car.
@@ -256,7 +257,7 @@ See: https://github.com/realm/SwiftLint
 * Call `jazzy` from the terminal in the root folder.
 
 ## License
-Copyright 2017, 2018, 2019 Cyface GmbH
+Copyright 2017 - 2020 Cyface GmbH
 
 This file is part of the Cyface SDK for iOS.
 

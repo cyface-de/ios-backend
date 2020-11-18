@@ -1,16 +1,15 @@
-platform :ios, '11.0'
+workspace 'DataCapturing.xcworkspace'
+platform :ios, '12.4'
+use_frameworks!
 
-target 'DataCapturing' do
-  use_frameworks!
+target 'Example' do
+  project 'Example/Example.xcodeproj'
+  pod 'Charts', '~> 3.4.0'
+  pod 'DataCapturing', :path => './DataCapturing'
 
-  # Used for network traffic
-  pod 'Alamofire', '~> 4.9.0'
-  # A wrapper for the complicated ObjectiveC compression API.
-  pod 'DataCompression', '~> 3.4.0'
-
-  target 'DataCapturingTests' do
-    #inherit! :search_paths
+  target 'Tests' do
+    inherit! :search_paths
     # Pods for testing
+    pod 'DataCapturing', :path => './DataCapturing'
   end
-
 end

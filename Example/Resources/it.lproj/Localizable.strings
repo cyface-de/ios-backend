@@ -1,0 +1,78 @@
+/* 
+  Localizable.strings
+  Cyface
+
+  Created by Team Cyface on 10.10.19.
+  Copyright © 2019 Cyface GmbH. All rights reserved.
+*/
+/* No comment provided by engineer. */
+"Authenticating..." = "Autenticazione...";
+
+/* Transportation mode using bicycles */
+"bicycle" = "Bici";
+
+/* Transportation mode using bikes */
+"bike" = "Bici";
+
+/* Transportation mode using cars */
+"car" = "Auto";
+
+/* Transportation mode using the bus */
+"bus" = "Autobus";
+
+/* Transportation mode using trains */
+"train" = "Treno";
+
+/* Transportation mode where the user is walking */
+"walking" = "Piedi";
+
+/* No comment provided by engineer. */
+"Duration" = "Durata";
+
+/* Error shown on Authentication not successful! */
+"err_auth_failed" = "L'autenticazione non ha avuto successo!";
+
+/* No comment provided by engineer. */
+"GPS Fix" = "Settaggio GPS";
+
+/* No comment provided by engineer. */
+"Latitude" = "Latitudine";
+
+/* No comment provided by engineer. */
+"Longitude" = "Longitudine";
+
+/* No comment provided by engineer. */
+"measurementInTableCell" = "Misurazione";
+
+/* The message displayed on an alert notification, during the process of adding a new modality type, if no location was selected! */
+"noLocationSelectedMessage" = "Si prega di selezionare un luogo del percorso in cui è stato cambiato il mezzo di trasporto!";
+
+/* Displayed on an alert notification, during the process of adding a new modality type, if no location was selected! */
+"noLocationSelectedTitle" = "Errore: Nessuna posizione selezionata";
+
+/* Message of an alert dialog used to inform the user that he needs to select a transportation mode / modality, to create a modality change. */
+"nothingSelectedAlertMessage" = "Scegliere un mezzo di trasporto!";
+
+/* Title of an alert dialog used to inform the user that he needs to select a transportation mode / modality, to create a modality change. */
+"nothingSelectedAlertTitle" = "Errore: Nessun mezzo di trasporto selezionato";
+
+/* Shown to acknowledge an alert dialog! */
+"okAction" = "OK";
+
+/* No comment provided by engineer. */
+"Speed" = "Velocità";
+
+/* No comment provided by engineer. */
+"Trip Distance" = "Distanza di viaggio";
+
+/* No comment provided by engineer. */
+"Z-Axis Accelerations" = "Accelerazioni dell'asse Z";
+
+/*Title used on the individual details view for a measurement.*/
+"measurementInDetailsViewTitle" = "Misurazione";
+
+/* Title used for a measurement while showing information during capturing. */
+"measurementTitleOnCurrentlyCapturedMeasurement" = "Misurazione";
+
+/* Shown when loading the main view. */
+"Please wait..." = "Attendere per favore...";
