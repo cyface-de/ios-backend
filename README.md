@@ -20,7 +20,23 @@ The `ServerConnection` class is responsible for transmitting captured data to a 
 
 ## Integration in your App
 
+### Permissions
+
+To use the Cyface SDK permissions to capture the users location while using the app and additionally in the background are required.
+These permissions have to be declared as part of the App using the Cyface SDK.
+
+How to allow background location updates is described in the [Apple Developer Documentation](https://developer.apple.com/documentation/corelocation/getting_the_user_s_location/handling_location_events_in_the_background).
+
+Asking for the proper location capturing permissions is described in the [Apple Developer Documentation](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services) as well. 
+The App using the Cyface SDK is only required to provide the proper entries in the Info.plist.
+The code to ask for the proper permissions is executed by the SDK the first time it wants to fetch locations.
+This usually happens on the first call to `start()`.
+An App using the Cyface SDK requires at least "Location When In Use Usage Description" and "Location Always and When In Use Usage Description".
+
 ### Creating a `DataCapturingService`
+
+As explained above before using any data capturing the integrating App must have the appropriate permissions to use location tracking in the background.
+See the Apple documentation about background location updates for more information.
 
 To integrate the Cyface SDK for iOS into your own app you need to either create a `DataCapturingService` or a `MovebisDataCapturingService`.
 This should look similar to:
@@ -33,7 +49,7 @@ import CoreData
 ...
 // 3
 let manager = CoreDataManager(storeType: NSSQLiteStoreType, migrator: CoreDataMigrator())
-guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
+guard let bundle = Bundle(for: type(of: manager)) else {
     fatalError()
 }
 manager.setup(bundle: bundle)
@@ -257,7 +273,7 @@ See: https://github.com/realm/SwiftLint
 * Call `jazzy` from the terminal in the root folder.
 
 ## License
-Copyright 2017 - 2020 Cyface GmbH
+Copyright 2017 - 2021 Cyface GmbH
 
 This file is part of the Cyface SDK for iOS.
 
