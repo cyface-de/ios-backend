@@ -17,7 +17,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'DataCapturing'
-  s.version          = '6.0.1'
+  s.version          = '8.0.0'
   s.summary          = 'Framework used to continuously capture data from all available sensors on an iOS device and transmit it to a Cyface-API compatible server.'
 
   s.description      = <<-DESC
@@ -25,17 +25,17 @@ This framework can be included by your App if you are going to capture sensor da
                        DESC
 
   s.homepage              = 'https://cyface.de'
-  s.license               = { :type => 'GPL', :file => '../LICENSE' }
+  s.license               = { :type => 'GPL', :file => 'LICENSE' }
   s.authors               = 'Cyface GmbH'
   s.source                = { :git => 'https://github.com/cyface-de/ios-backend.git', :tag => s.version.to_s }
-  s.social_media_url    = 'https://twitter.com/CyfaceDE'
+  s.social_media_url      = 'https://twitter.com/CyfaceDE'
 
   s.platform	          = :ios, '12.4'
   s.ios.deployment_target = '12.4'
-  s.swift_version         = '5.0'
+  s.swift_version         = '5.3'
 
-  s.source_files = 'Source/**/*{.h,.m,.swift}'
-  s.resources = [ 'Source/**/*{.xcdatamodeld,.xcdatamodel,.xcmappingmodel}' ]
+  s.source_files = 'DataCapturing/Source/**/*{.h,.m,.swift}'
+  s.resources = 'DataCapturing/Source/**/*{.xcdatamodeld,.xcdatamodel,.xcmappingmodel}'
 
   s.frameworks = 'CoreData', 'CoreLocation', 'CoreMotion'
   
@@ -46,7 +46,7 @@ This framework can be included by your App if you are going to capture sensor da
   s.dependency 'DataCompression', '~> 3.4.0'
 
   s.test_spec 'Tests' do |test_spec|
-    test_spec.source_files = '../Tests/**/*.swift'
+    test_spec.source_files = 'Tests/**/*.swift'
   end
 
 end

@@ -125,8 +125,11 @@ public class CoreDataMigrator: CoreDataMigratorProtocol {
      - Returns: An array of `CoreDataMigrationStep` instances ordered from the oldest to the newest.
      */
     private func migrationStepsForStore(at storeURL: URL, toVersion destinationVersion: CoreDataMigrationVersion, inBundle bundle: Bundle) -> [CoreDataMigrationStep] {
-        guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL),
-            let sourceVersion = CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle) else {
+        guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL) else {
+            fatalError("Unable to load metadata for persistent store: \(storeURL).")
+        }
+        
+        guard let sourceVersion = CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle) else {
             fatalError("Unknown store version at URL \(storeURL).")
         }
 
