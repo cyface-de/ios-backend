@@ -24,7 +24,7 @@ class PrivacyPolicyViewController: UIViewController {
 
     // MARK: - Properties
     /// Tells the system which is the current version of the privacy policy. This is important to reshow the privacy policy if there happens to be an update to the text.
-    public static let currentPrivacyPolicyVersion = 1
+    public static let currentPrivacyPolicyVersion = 2
 
     // MARK: - UIViewController
     /// Displays the privacy policy after the view has loaded.
