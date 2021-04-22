@@ -62,7 +62,7 @@ public class CoreDataManager {
     /// Provides a background context usable on a background thread and accessing the data store managed by this stack.
     lazy var backgroundContext: NSManagedObjectContext = {
         let context = self.persistentContainer.newBackgroundContext()
-        //context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        // context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         // This improves performance as long as we do not need to undo on the background context.
         context.undoManager = nil
 

@@ -31,8 +31,8 @@ class ModalitySelectorViewController: UIViewController {
 
     @IBAction func tapCancel(_ sender: UIButton) {
             // This jumps back two view controllers to the beginning of the process
-        //self.presentingViewController?.presentingViewController?.dismiss(animated: true)
-        //presentingViewController?.dismiss(animated: true)
+        // self.presentingViewController?.presentingViewController?.dismiss(animated: true)
+        // presentingViewController?.dismiss(animated: true)
         cancelBehaviour!()
     }
 
