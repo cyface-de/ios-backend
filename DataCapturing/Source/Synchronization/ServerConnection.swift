@@ -128,6 +128,7 @@ public class ServerConnection {
             do {
                 try self.create(request: data, for: measurement)
             } catch let error {
+                // TODO: I should probably handle this error somehow instead of only logging it.
                 os_log("Encoding data failed! Error %{PUBLIC}@", log: ServerConnection.osLog, type: .error, error.localizedDescription)
             }
         }

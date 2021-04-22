@@ -128,7 +128,7 @@ public class CoreDataMigrator: CoreDataMigratorProtocol {
         guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL) else {
             fatalError("Unable to load metadata for persistent store: \(storeURL).")
         }
-        
+
         guard let sourceVersion = CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle) else {
             fatalError("Unknown store version at URL \(storeURL).")
         }

@@ -187,7 +187,7 @@ class ViewController: UIViewController {
         return ret
     }()
     var measurements: [TableCellViewModel] = []
-    //private var synchronizingMeasurements: [Int64] = []
+    // private var synchronizingMeasurements: [Int64] = []
     private static let LOG = OSLog(subsystem: "ViewController", category: "de.cyface")
     private var overlayView: UIView?
     private var activityIndicator: UIActivityIndicatorView?

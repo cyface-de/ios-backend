@@ -1,16 +1,16 @@
 PODS:
-  - Alamofire (4.9.0)
+  - Alamofire (4.9.1)
   - Charts (3.4.0):
     - Charts/Core (= 3.4.0)
   - Charts/Core (3.4.0)
-  - DataCapturing (6.0.1):
-    - Alamofire (~> 4.9.0)
+  - DataCapturing (8.0.0):
+    - Alamofire (~> 4.9.1)
     - DataCompression (~> 3.4.0)
   - DataCompression (3.4.0)
 
 DEPENDENCIES:
   - Charts (~> 3.4.0)
-  - DataCapturing (from `./DataCapturing`)
+  - DataCapturing (from `./`)
 
 SPEC REPOS:
   trunk:
@@ -20,14 +20,14 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   DataCapturing:
-    :path: "./DataCapturing"
+    :path: "./"
 
 SPEC CHECKSUMS:
-  Alamofire: afc3e7c6db61476cb45cdd23fed06bad03bbc321
+  Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   Charts: 74c9f256eaf0460c0c416522d1cf8c634ea6b286
-  DataCapturing: b82ed78a409c9d6ae08924bee5f81fca56613d8d
+  DataCapturing: f186e6a82cb0e51c05e0a1773c651384fdb928ba
   DataCompression: bd62a636afc19d8582b1772b136b772345a22f95
 
-PODFILE CHECKSUM: c482e631f6ae1925a225287d853707df97687c25
+PODFILE CHECKSUM: d1c79006cd2429ad2733440fd0ae5990020c3ce6
 
 COCOAPODS: 1.10.1

@@ -75,7 +75,10 @@ extension FileSupport {
         let libraryDirectory = FileManager.SearchPathDirectory.libraryDirectory
         let libraryDirectoryUrl = try fileManager.url(for: libraryDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
 
-        let measurementDirectoryPath = libraryDirectoryUrl.appendingPathComponent(root).appendingPathComponent(measurementDirectory).appendingPathComponent(String(measurementIdentifier))
+        let measurementDirectoryPath = libraryDirectoryUrl
+            .appendingPathComponent(root)
+            .appendingPathComponent(measurementDirectory)
+            .appendingPathComponent(String(measurementIdentifier))
         try fileManager.createDirectory(at: measurementDirectoryPath, withIntermediateDirectories: true)
 
         let filePath = measurementDirectoryPath.appendingPathComponent(fileName).appendingPathExtension(fileExtension)

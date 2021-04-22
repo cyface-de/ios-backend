@@ -25,6 +25,7 @@ This framework can be included by your App if you are going to capture sensor da
                        DESC
 
   s.homepage              = 'https://cyface.de'
+  # TODO: Podspecs do not support references to files in the parent folder. Thus this is invalid
   s.license               = { :type => 'GPL', :file => 'LICENSE' }
   s.authors               = 'Cyface GmbH'
   s.source                = { :git => 'https://github.com/cyface-de/ios-backend.git', :tag => s.version.to_s }
@@ -34,6 +35,7 @@ This framework can be included by your App if you are going to capture sensor da
   s.ios.deployment_target = '12.4'
   s.swift_version         = '5.3'
 
+  # TODO: It seems these files need to reside inside a folder DataCapturing (same name as framework). I guess we can do that although it will result in a weird DataCapturing/DataCapturing directory structure
   s.source_files = 'DataCapturing/Source/**/*{.h,.m,.swift}'
   s.resources = 'DataCapturing/Source/**/*{.xcdatamodeld,.xcdatamodel,.xcmappingmodel}'
 
@@ -41,10 +43,11 @@ This framework can be included by your App if you are going to capture sensor da
   
   # The following transitive dependencies are used by this project:
   # This one is used to handle network traffic like multipart requests
-  s.dependency 'Alamofire', '~> 4.9.0'
+  s.dependency 'Alamofire', '~> 4.9.1'
   # A wrapper for the complicated ObjectiveC compression API.
   s.dependency 'DataCompression', '~> 3.4.0'
 
+  # TODO: Podspecs do not support references to files in the parent folder. Thus this is invalid.
   s.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'Tests/**/*.swift'
   end

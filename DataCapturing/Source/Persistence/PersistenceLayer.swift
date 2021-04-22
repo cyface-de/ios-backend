@@ -392,7 +392,7 @@ public class PersistenceLayer {
         let fetchRequest: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
         // The following needs to use an Objective-C number. That is why `measurementIdentifier` is wrapped in `NSNumber`
         fetchRequest.predicate = NSPredicate(format: "identifier==%@", NSNumber(value: identifier))
-        //fetchRequest.relationshipKeyPathsForPrefetching = ["tracks.locations"]
+        // fetchRequest.relationshipKeyPathsForPrefetching = ["tracks.locations"]
 
         let results = try context.fetch(fetchRequest)
         if results.count == 1 {

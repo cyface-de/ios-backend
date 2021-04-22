@@ -30,7 +30,7 @@ class CurrentMeasurementView: UIStackView {
     /// A label showing the longitude of the last captured position
     var lastLonContent = UILabel()
 
-    //initWithFrame to init view from code
+    // initWithFrame to init view from code
     /**
      Creates a new display for the current measurement
 
@@ -108,7 +108,7 @@ class CurrentMeasurementView: UIStackView {
         super.init(frame: frame)
     }
 
-    //initWithCode to init view from xib or storyboard
+    // initWithCode to init view from xib or storyboard
     /**
      Initializer used for storiebords and XIB files. This should never be called directly.
 
