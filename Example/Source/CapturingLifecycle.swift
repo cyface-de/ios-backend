@@ -117,7 +117,8 @@ class CapturingLifecycle {
         self.currentMeasurementView = nil
 
         self.viewController.measurementsOverview.reloadData()
-        if UserDefaults.standard.bool(forKey: AppDelegate.syncToggleKey) { synchronizer.syncChecked()
+        if UserDefaults.standard.bool(forKey: AppDelegate.syncToggleKey) {
+            synchronizer.syncChecked()
         }
 
         os_log("Service stopped", log: CapturingLifecycle.log, type: .info)

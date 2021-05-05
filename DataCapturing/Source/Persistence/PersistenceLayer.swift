@@ -125,7 +125,6 @@ public class PersistenceLayer {
             let initialModalityChange = createEvent(of: .modalityTypeChange, withValue: mode)
             initialModalityChange.measurement = measurement
             measurement.addToEvents(initialModalityChange)
-            print("saving")
             context.saveRecursively()
 
             context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
@@ -287,6 +286,8 @@ public class PersistenceLayer {
         - Some unspecified errors from within CoreData.
      */
     func save(locations: [GeoLocation], in measurement: MeasurementMO) throws {
+        os_log("Storing %{PUBLIC}d locations to measurement %{PUBLIC}d!", log: PersistenceLayer.log, type: .debug, locations.count, measurement.identifier)
+        
         let context = getContext()
         guard let locationDescription = NSEntityDescription.entity(forEntityName: "GeoLocation", in: context) else {
             fatalError("Unable to create geo location description on context \(context.name ?? "no name")!")
@@ -317,7 +318,7 @@ public class PersistenceLayer {
         var distance = 0.0
 
         locations.forEach { location in
-            let dbLocation = GeoLocationMO.init(entity: locationDescription, insertInto: context)
+            let dbLocation = GeoLocationMO(entity: locationDescription, insertInto: context)
             dbLocation.lat = location.latitude
             dbLocation.lon = location.longitude
             dbLocation.speed = location.speed
@@ -340,6 +341,13 @@ public class PersistenceLayer {
         context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         context.saveRecursively()
         context.refresh(measurement, mergeChanges: true)
+        
+        os_log("Stored %{PUBLIC}d locations to measurement %{PUBLIC}d with calculated length of %{PUBLIC}f!",
+               log: PersistenceLayer.log,
+               type: .debug,
+               locations.count,
+               measurement.identifier,
+               measurement.trackLength)
     }
 
     /**

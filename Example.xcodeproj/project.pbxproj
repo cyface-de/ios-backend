@@ -234,9 +234,9 @@
 		3DACE6532554642D00FA9A40 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				3DACE6542554642D00FA9A40 /* ViewController.swift */,
 				3DACE6552554642D00FA9A40 /* MeasurementOverview */,
 				3DACE65C2554642D00FA9A40 /* Measurement Details */,
+				3DACE6542554642D00FA9A40 /* ViewController.swift */,
 				3DACE6672554642D00FA9A40 /* LoginViewController.swift */,
 				3DACE6682554642D00FA9A40 /* PrivacyPolicyViewController.swift */,
 			);

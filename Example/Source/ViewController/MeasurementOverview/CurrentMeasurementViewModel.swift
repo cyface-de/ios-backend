@@ -6,6 +6,7 @@
 
 import Foundation
 import DataCapturing
+import OSLog
 
 /**
  The view model for the currently active measurement display.
@@ -15,6 +16,8 @@ import DataCapturing
  - Since: 2.0.0
  */
 class CurrentMeasurementViewModel {
+    private static let log = OSLog(subsystem: "de.cyface", category: "CurrentMeasurementViewModel")
+    
     /// Formatter used to display the current measurement duration
     private var formatter: DateComponentsFormatter {
         let formatter = DateComponentsFormatter()
@@ -117,6 +120,12 @@ class CurrentMeasurementViewModel {
     }
 
     func finish() -> TableCellViewModel {
+        os_log(
+            "Displaying measurement %{PUBLIC}d with covered length: %{PUBLIC}f.",
+            log: CurrentMeasurementViewModel.log,
+            type: .debug,
+            currentMeasurement.identifier!,
+            currentMeasurement.distance!)
         return TableCellViewModel(model: currentMeasurement)
     }
 

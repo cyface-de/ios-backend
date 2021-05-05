@@ -33,7 +33,7 @@ public class DataCapturingService: NSObject {
 
     // MARK: - Properties
     /// Data used to identify log messages created by this component.
-    private let log = OSLog(subsystem: "DataCapturingService", category: "de.cyface")
+    private static let log = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
 
     /// `true` if data capturing is running; `false` otherwise.
     public var isRunning = false
@@ -205,8 +205,8 @@ public class DataCapturingService: NSObject {
                     """
 Starting data capturing on paused service. Finishing paused measurements and starting fresh. This is probably the result of a lifecycle error.
 """,
-                       log: log,
-                       type: .default)
+                    log: DataCapturingService.log,
+                       type: .error)
                 if let currentMeasurement = currentMeasurement {
                     _ = try finish(measurement: currentMeasurement)
                 }
@@ -223,6 +223,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             persistenceLayer.context?.saveRecursively()
 
             if let event = try startCapturing(savingEvery: savingInterval, for: .lifecycleStart) {
+                os_log("Started data capturing service for measurement %{PUBLIC}d.", log: DataCapturingService.log, type: .info, measurement.identifier)
                 handler(.serviceStarted(measurement: measurement.identifier, event: event), .success)
             }
         }
@@ -239,7 +240,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
     public func stop() throws {
         try lifecycleQueue.sync {
             guard let currentMeasurement = currentMeasurement else {
-                os_log("Trying to stop a stopped service! Ignoring call to stop!", log: log, type: .default)
+                os_log("Trying to stop a stopped service! Ignoring call to stop!", log: DataCapturingService.log, type: .error)
                 return
             }
 
@@ -252,6 +253,9 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             let event = try finish(measurement: currentMeasurement)
             self.currentMeasurement = nil
             isPaused = false
+
+            os_log("Stopped data capturing service for measurement %{PUBLIC}d.", log: DataCapturingService.log, type: .info, currentMeasurement)
+
             self.handler(.serviceStopped(measurement: currentMeasurement, event: event), .success)
         }
     }
@@ -286,6 +290,12 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             measurement.addToEvents(event)
             persistenceLayer.context?.saveRecursively()
 
+            os_log("Paused data capturing service for measurement %{PUBLIC}d.\ntDistance Covered: %{PUBLIC}f",
+                   log: DataCapturingService.log,
+                   type: .info,
+                   measurement.identifier,
+                   measurement.trackLength)
+            
             handler(.servicePaused(measurement: currentMeasurement, event: event), .success)
         }
     }
@@ -317,6 +327,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
                 handler(.serviceResumed(measurement: currentMeasurement, event: startEvent), .success)
             }
+            os_log("Resumed data capturing service for measurement %{PUBLIC}d.", log: DataCapturingService.log, type: .info, currentMeasurement)
         }
     }
 
@@ -371,7 +382,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
     func startCapturing(savingEvery time: TimeInterval, for eventType: EventType) throws -> Event? {
         // Preconditions
         guard !isRunning else {
-            os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: log, type: .info)
+            os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: DataCapturingService.log, type: .info)
             return nil
         }
 
@@ -446,7 +457,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
     func saveCapturedData() {
         do {
             guard let currentMeasurement = self.currentMeasurement else {
-                os_log("No current measurement to save the location to! Data capturing impossible.", log: log, type: .error)
+                os_log("No current measurement to save the location to! Data capturing impossible.", log: DataCapturingService.log, type: .error)
                 return
             }
 
@@ -473,7 +484,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
             self.locationsCache = [GeoLocation]()
         } catch let error {
-            return os_log("Unable to save captured data. Error %@", log: self.log, type: .error, error.localizedDescription)
+            return os_log("Unable to save captured data. Error %{PUBLIC}@", log: DataCapturingService.log, type: .error, error.localizedDescription)
         }
     }
 
@@ -566,7 +577,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
      - didFailWithError: The reported error.
      */
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        os_log("Location service failed with error: %@!", log: log, type: .error, error.localizedDescription)
+        os_log("Location service failed with error: %@!", log: DataCapturingService.log, type: .error, error.localizedDescription)
         hasFix = false
     }
 }

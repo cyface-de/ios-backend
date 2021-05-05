@@ -93,7 +93,13 @@ public class CredentialsAuthenticator: Authenticator {
                 method: .post,
                 headers: headers).response { response in
                 guard let httpResponse = response.response else {
-                    os_log("Unable to unwrap authentication response!", log: CredentialsAuthenticator.log, type: OSLogType.error)
+                    os_log(
+                        "Unable to unwrap authentication response at endpoint \"%@\" using credentials %@ / %@!",
+                        log: CredentialsAuthenticator.log,
+                        type: .error,
+                        url.absoluteString,
+                        username,
+                        password)
                     return onFailure(ServerConnectionError(
                         type: .authenticationNotSuccessful,
                         verboseDescription: "Unable to unwrap authentication response!",
@@ -105,6 +111,13 @@ public class CredentialsAuthenticator: Authenticator {
                 if httpResponse.statusCode==200, let authorizationValue = httpResponse.allHeaderFields["Authorization"] as? String {
                     onSuccess(authorizationValue)
                 } else {
+                    os_log(
+                        "Authentication not successful at endpoint \"%@\" using credentials %@ / %@",
+                        log: CredentialsAuthenticator.log,
+                        type: .info,
+                        url.absoluteString,
+                        username,
+                        password)
                     onFailure(ServerConnectionError(
                         type: .authenticationNotSuccessful,
                         verboseDescription: "Authentication was not successful!",
@@ -115,6 +128,7 @@ public class CredentialsAuthenticator: Authenticator {
             }
             request.resume()
         } catch let error {
+            os_log("Unable to serialize authentication body with credentials %@ /%@", log: CredentialsAuthenticator.log, type: .error, username, password)
             onFailure(error)
         }
     }

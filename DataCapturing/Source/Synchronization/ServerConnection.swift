@@ -99,8 +99,10 @@ public class ServerConnection {
     public func sync(measurement: Int64, onSuccess success: @escaping ((Int64) -> Void) = {_ in }, onFailure failure: @escaping ((Int64, Error) -> Void) = {_, _ in }) {
 
         authenticator.authenticate(onSuccess: {jwtToken in
+            os_log("Authenticated successfully to upload measurement %{PUBLIC}d.", log: ServerConnection.osLog, type: .info, measurement)
             self.onAuthenticated(token: jwtToken, measurement: measurement, onSuccess: success, onFailure: failure)
         }, onFailure: { error in
+            os_log("Failed to autenticate to upload measurement %{PUBLIC}d!", log: ServerConnection.osLog, type: .error, measurement)
             failure(measurement, error)
         })
 
