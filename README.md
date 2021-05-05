@@ -33,10 +33,51 @@ The code to ask for the proper permissions is executed by the SDK the first time
 This usually happens on the first call to `start()`.
 An App using the Cyface SDK requires at least "Location When In Use Usage Description" and "Location Always and When In Use Usage Description".
 
+### Setup an Application
+
+To store and retrieve data it is necessary to initialize the Cyface CoreDataStack.
+You should do this as early as possible during your application lifecycle.
+The most convenient place is inside your Applications `AppDelegate.application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool` method.
+There you should call:
+
+```swift
+// 1
+import DataCapturing
+// 2
+import CoreData
+// 3
+let manager = CoreDataManager()
+// 4
+guard let bundle = Bundle(for: type(of: manager)) else {
+    fatalError()
+}
+// 5
+manager.setup(bundle: bundle) {
+    // 6
+}
+```
+
+1. Import the *Cyface SDK*
+2. Import the *CoreData* Framework
+3. Create the *CoreData* stack in the form of a `CoreDataManager`. 
+   Usually there should be only one instance of `CoreDataManager`. 
+   You may optionally provide the store type and a `CoreDataMigrator`. 
+   The store type should be an `NSSQLiteStoreType` (default) in production and might be an `NSInMemoryStoreType` in a test environment. 
+   Please have a look at that classes documentation if you need to change the type of the storage for example.
+4. Get a handle on the bundle the `CoreDataManager` belongs to.
+5. Call setup on the `CoreDataManager`.
+   If the `CoreDataManager` encounters an old data store it will migrate this data store to the current version. 
+   If there is much data to convert, this can take some time and probably should be wrapped into a background thread. 
+   **Be especially careful to avoid calling the `setup(bundle:, completionClosure:)` method on different threads concurrently. 
+   This might leave your data storage in a corrupted state or at least crash your app.** 
+6. When the setup of the `CoreDataManager` was successfully completed this callback closure is called.
+   You should use it to continue with your application execution and for example present your main UI now.
+
 ### Creating a `DataCapturingService`
 
 As explained above before using any data capturing the integrating App must have the appropriate permissions to use location tracking in the background.
 See the Apple documentation about background location updates for more information.
+The must also be a `manager` instance of type `CoreDataManager` (see last section).
 
 To integrate the Cyface SDK for iOS into your own app you need to either create a `DataCapturingService` or a `MovebisDataCapturingService`.
 This should look similar to:
@@ -45,34 +86,27 @@ This should look similar to:
 // 1
 import CoreMotion
 // 2
-import CoreData
+import DataCapturing
 ...
-// 3
-let manager = CoreDataManager(storeType: NSSQLiteStoreType, migrator: CoreDataMigrator())
-guard let bundle = Bundle(for: type(of: manager)) else {
-    fatalError()
-}
-manager.setup(bundle: bundle)
-// 4 
+// 3 
 let sensorManager = CMMotionManager()
-// 5
+// 4
 let updateInterval = 100
-// 6
+// 5
 let savingInterval = 10
-// 7
+// 6
 let handler = handler
-// 8
+// 7
 let dcs = try MovebisDataCapturingService(sensorManager: sensorManager, updateInterval: updateInterval, savingInterval: savingInterval, dataManager: manager, eventHandler: handler)
 ```
 
 1. Import Apples *CoreMotion* framework, to be able to create a motion manager.
-2. Import Apples *CoreData* framework, to be able to create a `CoreDataManager`
-3. Create the *CoreData* stack in the form of a `CoreDataManager`. Usually there should be only one instance of `CoreDataManager`. Nothing bad will happen if you use multiple ones, except for an unnecessary resource overhead. **However be careful to avoid calling the `setup(bundle:)` method on different threads concurrently. This might leave your data storage in a corrupted state or at least crash your app.** Also provide the store type and a `CoreDataMigrator`. The store type should be an `NSSQLiteStoreType` in production and might be an `NSInMemoryStoreType` in a test environment. If the `CoreDataManager` encounters an old data store it will migrate this data store to the current version. If there is much data to convert, this can take some time and probably should be wrapped into a background thread.
-4. Create `CMMotionManager` from the *CoreMotion* framework. This is responsible for capturing sensor data from your device.
-5. Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to capture 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.
-6. Create a saving interval in seconds. The value 10 for example means that your data is saved to persistent storage every 10 seconds. This also means your currently captured measurement is updated every 10 seconds. Values like the measurement length are updated at this point as well. If you need to update your UI frequently you should set this to a low value. This however also puts a higher load on your database.
-7. Provide a handler for events occuring during data capturing. Possible events are explained below.
-8. Finally create the `DataCapturingService` or `MovebisDataCapturingService` as shown, providing the required parameters.
+2. Import the *Cyface SDK*, to be able to create a `DataCapturingService`.
+3. Create `CMMotionManager` from the *CoreMotion* framework. This is responsible for capturing sensor data from your device.
+4. Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to capture 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.
+5. Create a saving interval in seconds. The value 10 for example means that your data is saved to persistent storage every 10 seconds. This also means your currently captured measurement is updated every 10 seconds. Values like the measurement length are updated at this point as well. If you need to update your UI frequently you should set this to a low value. This however also puts a higher load on your database.
+6. Provide a handler for events occuring during data capturing. Possible events are explained below.
+7. Finally create the `DataCapturingService` or `MovebisDataCapturingService` as shown, providing the required parameters.
 
 ### The Data Capturing Lifecycle
 

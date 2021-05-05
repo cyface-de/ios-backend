@@ -50,15 +50,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 return
             }
 
-            let coreDataStack = CoreDataManager(storeType: NSSQLiteStoreType, migrator: CoreDataMigrator())
+            let coreDataStack = CoreDataManager()
             let bundle = Bundle(for: type(of: coreDataStack))
-            coreDataStack.setup(bundle: bundle)
-            self.coreDataStack = coreDataStack
+            coreDataStack.setup(bundle: bundle) {
+                self.coreDataStack = coreDataStack
 
-            self.serverConnection = self.createServerConnection()
+                self.serverConnection = self.createServerConnection()
 
-            DispatchQueue.main.async {
-                self.presentMainUI()
+                DispatchQueue.main.async {
+                    self.presentMainUI()
+                }
             }
         }
         return true

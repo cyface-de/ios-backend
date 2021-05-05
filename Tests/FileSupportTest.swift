@@ -33,22 +33,36 @@ class FileSupportTest: XCTestCase {
     func testEventFileWriting_HappyPath() throws {
         // Arrange
         let oocut = EventsFile()
+        let expectation = self.expectation(description: "Test completed after CoreData was initialized!")
 
         let coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
         let bundle = Bundle(for: type(of: coreDataStack))
-        coreDataStack.setup(bundle: bundle)
+        coreDataStack.setup(bundle: bundle) {
+            do {
+                let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+                let context = persistenceLayer.makeContext()
+                persistenceLayer.context = context
 
-        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        let context = persistenceLayer.makeContext()
-        persistenceLayer.context = context
+                let events = self.eventFixture(context)
 
-        let events = eventFixture(context)
+                // Act
+                let eventsFilePath = try oocut.write(serializable: events, to: 1)
 
-        // Act
-        let eventsFilePath = try oocut.write(serializable: events, to: 1)
-
-        // Assert
-        print(eventsFilePath)
+                // Assert
+                print(eventsFilePath)
+                expectation.fulfill()
+            } catch {
+                XCTFail("Unable to write serializable data.")
+            }
+        }
+        
+        waitForExpectations(timeout: 5) { error in
+            if let error = error {
+                XCTFail("Writing event file timed out. \(error)")
+            } else {
+                XCTFail()
+            }
+        }
     }
 
     /// The fixture of events to use for testing.

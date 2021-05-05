@@ -43,13 +43,25 @@ class DataCapturingTests: XCTestCase {
     /// Initializes every test by creating a `TestDataCapturingService`.
     override func setUp() {
         super.setUp()
+        let expectation = self.expectation(description: "CoreDataStack initialized successfully.")
 
         coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
         let bundle = Bundle(for: type(of: coreDataStack))
-        coreDataStack.setup(bundle: bundle)
+        coreDataStack.setup(bundle: bundle) {
 
-        testEventHandler = TestDataCapturingEventHandler()
-        oocut = dataCapturingService(dataManager: coreDataStack, eventHandler: testEventHandler.handle(event: status:))
+            self.testEventHandler = TestDataCapturingEventHandler()
+            self.oocut = self.dataCapturingService(dataManager: self.coreDataStack, eventHandler: self.testEventHandler.handle(event: status:))
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 5) { error in
+            if let error = error {
+                XCTFail("Unable to setup DataCapturingTests \(error)")
+            } else {
+                XCTFail("Unable to setup DataCapturingTests due to unknown reasons")
+            }
+        }
     }
 
     /// Tears down the test environment.

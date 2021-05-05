@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019-2021 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -22,14 +22,16 @@ import CoreData
 
 /**
  A class for objects representing a *CoreData* stack.
- Please call `setup(bundle:)` before using an object of this class.
+ Please call `setup(bundle:completionClosure:)` before using an object of this class.
  That call will run data migration if necessary and might take some time depending on the amount of data that must be migrated.
- So it might be a good idea to run `setup(bundle:)` on a background thread.
+ So it might be a good idea to run `setup(bundle:completionClosure:)` on a background thread.
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
  - Since: 4.0.0
- - Attention: Do not load or save any data before the call to `setup(bundle:)` has finished.
+ - Attention:
+    - You must call `setup(bundle:completionClosure:)` only once in your application. Usually this should happen in AddDelegate.application`
+    - Do not load or save any data before the call to `setup(bundle:completionClosure:)` has finished.
  */
 public class CoreDataManager {
 
@@ -82,7 +84,7 @@ public class CoreDataManager {
     /**
      Creates a new instance of the `CoreDataManager`.
 
-     - Attention: Please call `setup(bundle:)` before using the `NSManagedObjectContext` instances, provided by this instance.
+     - Attention: Please call `setup(bundle:completionClosure:)` before using the `NSManagedObjectContext` instances, provided by this instance.
      - Parameters:
      - storeType: The type of the store to use. In production this should usually be `NSSQLiteStoreType`. In a test environment you might use `NSInMemoryStoreType`. Both values are defined by *CoreData*.
      - migrator: An object to migrate between different Cyface model versions.
@@ -99,12 +101,14 @@ public class CoreDataManager {
 
      - Parameter bundle: The bundle containing the data model.
      */
-    public func setup(bundle: Bundle) {
+    public func setup(bundle: Bundle, completionClosure: @escaping () -> ()) {
         migrateStoreIfNeeded(bundle: bundle)
         self.persistentContainer.loadPersistentStores { _, error in
             guard error == nil else {
                 fatalError("Was unable to load store \(error.debugDescription).")
             }
+            
+            completionClosure()
         }
     }
 

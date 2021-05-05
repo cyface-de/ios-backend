@@ -36,14 +36,24 @@ class ServerConnectionTest: XCTestCase {
     var oocut: ServerConnection!
 
     override func setUp() {
+        let expectation = self.expectation(description: "CoreData stack started successfully!")
+        
         coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
-        coreDataStack.setup(bundle: Bundle(for: type(of: coreDataStack)))
-
-        guard let url = URL(string: "http://localhost:8080/api/v2") else {
-            fatalError()
+        coreDataStack.setup(bundle: Bundle(for: type(of: coreDataStack))) {
+                guard let url = URL(string: "http://localhost:8080/api/v2") else {
+                    fatalError()
+                }
+                let authenticator = StaticAuthenticator()
+                self.oocut = ServerConnection(apiURL: url, authenticator: authenticator, onManager: self.coreDataStack)
+                
+                expectation.fulfill()
         }
-        let authenticator = StaticAuthenticator()
-        self.oocut = ServerConnection(apiURL: url, authenticator: authenticator, onManager: coreDataStack)
+        
+        waitForExpectations(timeout: 5) { error in
+            if let error = error {
+                XCTFail("ServerConnectionTest timed out \(error)")
+            }
+        }
     }
 
     /**

@@ -43,23 +43,34 @@ class SerializationTest: XCTestCase {
     override func setUp() {
         super.setUp()
         oocut = MeasurementSerializer()
+        let expectation = self.expectation(description: "CoreDataStack started successfully.")
 
-        do {
-            coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
-            let bundle = Bundle(for: type(of: coreDataStack))
+        coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+        let bundle = Bundle(for: type(of: coreDataStack))
 
-            coreDataStack.setup(bundle: bundle)
-            persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
-            let measurement = try persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
-            persistenceLayer.appendNewTrack(to: measurement)
+        coreDataStack.setup(bundle: bundle) {
+            do {
+                self.persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
+                self.persistenceLayer.context = self.persistenceLayer.makeContext()
+                let measurement = try self.persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
+                self.persistenceLayer.appendNewTrack(to: measurement)
 
-            fixture = measurement.identifier
-            try persistenceLayer.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true)], in: measurement)
-            try persistenceLayer.save(accelerations: [SensorValue(timestamp: Date(timeIntervalSince1970: 10_000.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0)], in: measurement)
+                self.fixture = measurement.identifier
+                try self.persistenceLayer.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true)], in: measurement)
+                try self.persistenceLayer.save(accelerations: [SensorValue(timestamp: Date(timeIntervalSince1970: 10_000.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0)], in: measurement)
 
-        } catch let error {
-            XCTFail("Unable to set up test since persistence layer could not be initialized due to \(error.localizedDescription)!")
+                expectation.fulfill()
+            } catch let error {
+                XCTFail("Unable to set up test since persistence layer could not be initialized due to \(error.localizedDescription)!")
+            }
+        }
+        
+        waitForExpectations(timeout: 5) { error in
+            if let error = error {
+                XCTFail("Unable to setup SerializetionTest \(error)")
+            } else {
+                XCTFail("Unable to setup SerializationTest for unkown reasons!")
+            }
         }
     }
 
