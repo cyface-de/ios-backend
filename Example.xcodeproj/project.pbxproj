@@ -110,6 +110,7 @@
 		3DACE6802554642D00FA9A40 /* Cyface-LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Cyface-LaunchScreen.storyboard"; sourceTree = "<group>"; };
 		3DACE6812554642D00FA9A40 /* Strings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
 		58A112A9190F1C5294E83458 /* Pods-Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.release.xcconfig"; path = "Target Support Files/Pods-Example/Pods-Example.release.xcconfig"; sourceTree = "<group>"; };
+		AA7611BC2642C2A3007E1A68 /* SensorCapturerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorCapturerTest.swift; sourceTree = "<group>"; };
 		AD8822C6C3EECBBF739BC298 /* Pods_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4BD9F6602B53A4DD3C204E3 /* Pods-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.debug.xcconfig"; path = "Target Support Files/Pods-Example/Pods-Example.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
