@@ -59,8 +59,6 @@ class FileSupportTest: XCTestCase {
         waitForExpectations(timeout: 5) { error in
             if let error = error {
                 XCTFail("Writing event file timed out. \(error)")
-            } else {
-                XCTFail()
             }
         }
     }

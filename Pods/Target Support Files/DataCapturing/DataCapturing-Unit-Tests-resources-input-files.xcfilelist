@@ -1,0 +1,13 @@
+${PODS_ROOT}/Target Support Files/DataCapturing/DataCapturing-Unit-Tests-resources.sh
+${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld
+${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/2.xcdatamodel
+${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/3.xcdatamodel
+${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/4.xcdatamodel
+${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/5.xcdatamodel
+${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/6.xcdatamodel
+${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/7.xcdatamodel
+${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/8.xcdatamodel
+${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/9.xcdatamodel
+${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/CyfaceModel.xcdatamodel
+${PODS_ROOT}/../DataCapturing/Source/Model/Migrations/V3toV4/V3toV4.xcmappingmodel
+${PODS_ROOT}/../DataCapturing/Source/Model/Migrations/V7toV8/V7toV8.xcmappingmodel

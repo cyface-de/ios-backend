@@ -37,7 +37,7 @@
     {
       "name": "Tests",
       "test_type": "unit",
-      "source_files": "Tests/**/*.swift"
+      "source_files": "DataCapturing/Tests/**/*.swift"
     }
   ],
   "swift_version": "5.3"

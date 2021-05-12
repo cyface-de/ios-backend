@@ -49,7 +49,7 @@ This framework can be included by your App if you are going to capture sensor da
 
   # TODO: Podspecs do not support references to files in the parent folder. Thus this is invalid.
   s.test_spec 'Tests' do |test_spec|
-    test_spec.source_files = 'Tests/**/*.swift'
+    test_spec.source_files = 'DataCapturing/Tests/**/*.swift'
   end
 
 end

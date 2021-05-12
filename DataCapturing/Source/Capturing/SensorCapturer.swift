@@ -31,7 +31,7 @@ import os.log
 class SensorCapturer {
 
     /// The log used to identify messages from this class.
-    private static let log = OSLog(subsystem: "de.cyface", category: "SensorCapturer")
+    private static let log = OSLog(subsystem: "SensorCapturer", category: "de.cyface")
     /// Internal storage for the kernel boot time, to avoid regular recalculation
     private static var _kernelBootTime: Date?
     /// Provides the boot time of the device. This is required to calculate the absolute timestamp of a sensor measurement.

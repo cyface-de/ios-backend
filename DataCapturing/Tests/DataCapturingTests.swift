@@ -58,8 +58,6 @@ class DataCapturingTests: XCTestCase {
         waitForExpectations(timeout: 5) { error in
             if let error = error {
                 XCTFail("Unable to setup DataCapturingTests \(error)")
-            } else {
-                XCTFail("Unable to setup DataCapturingTests due to unknown reasons")
             }
         }
     }

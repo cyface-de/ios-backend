@@ -19,6 +19,7 @@
 
 import Foundation
 import CoreData
+import OSLog
 
 /**
  A class for objects representing a *CoreData* stack.
@@ -34,7 +35,7 @@ import CoreData
     - Do not load or save any data before the call to `setup(bundle:completionClosure:)` has finished.
  */
 public class CoreDataManager {
-
+    private static let log = OSLog(subsystem: "CoreDataManager", category: "de.cyface")
     /// An object to migrate between different Cyface model versions.
     let migrator: CoreDataMigratorProtocol
     /// The type of the store to use. In production this should usually be `NSSQLiteStoreType`. In a test environment you might use `NSInMemoryStoreType`. Both values are defined by *CoreData*.
@@ -42,6 +43,8 @@ public class CoreDataManager {
 
     /// The `NSPersistentContainer` used by this *CoreData* stack.
     lazy var persistentContainer: NSPersistentContainer = {
+        os_log("Creating persistent container", log: CoreDataManager.log, type: .info)
+        
         let momdName = "CyfaceModel"
         let bundle = Bundle(for: type(of: self))
         guard let modelURL = bundle.url(forResource: momdName, withExtension: "momd") else {
@@ -101,7 +104,7 @@ public class CoreDataManager {
 
      - Parameter bundle: The bundle containing the data model.
      */
-    public func setup(bundle: Bundle, completionClosure: @escaping () -> ()) {
+    public func setup(bundle: Bundle, completionClosure: @escaping () -> Void) {
         migrateStoreIfNeeded(bundle: bundle)
         self.persistentContainer.loadPersistentStores { _, error in
             guard error == nil else {

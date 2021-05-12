@@ -33,7 +33,7 @@ public class DataCapturingService: NSObject {
 
     // MARK: - Properties
     /// Data used to identify log messages created by this component.
-    private let log = OSLog(subsystem: "de.cyface", category: "DataCapturingService")
+    private let log = OSLog(subsystem: "DataCapturingService", category: "de.cyface")
 
     /// `true` if data capturing is running; `false` otherwise.
     public var isRunning = false

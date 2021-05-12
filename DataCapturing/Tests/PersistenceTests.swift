@@ -65,8 +65,6 @@ class PersistenceTests: XCTestCase {
             waitForExpectations(timeout: 5) { error in
                 if let error = error {
                     XCTFail("Unable to setup PersistenceTest \(error)")
-                } else {
-                    XCTFail("Unable to setup PersistenceTest for unkown reasons!")
                 }
             }
     }

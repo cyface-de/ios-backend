@@ -68,8 +68,6 @@ class SerializationTest: XCTestCase {
         waitForExpectations(timeout: 5) { error in
             if let error = error {
                 XCTFail("Unable to setup SerializetionTest \(error)")
-            } else {
-                XCTFail("Unable to setup SerializationTest for unkown reasons!")
             }
         }
     }
