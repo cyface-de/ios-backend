@@ -1,0 +1,4 @@
+${PODS_ROOT}/Target Support Files/DataCapturing/DataCapturing-Unit-Tests-frameworks.sh
+${BUILT_PRODUCTS_DIR}/DataCapturing/DataCapturing.framework
+${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework
+${BUILT_PRODUCTS_DIR}/DataCompression/DataCompression.framework

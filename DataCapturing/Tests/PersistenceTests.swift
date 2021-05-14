@@ -40,23 +40,33 @@ class PersistenceTests: XCTestCase {
     /// Initializes the test enviroment by saving some test data to the test `PersistenceLayer`.
     override func setUp() {
         super.setUp()
-        do {
+        let expectation = self.expectation(description: "CoreDataStack initialized successfully!")
+        
             let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
             let bundle = Bundle(for: type(of: manager))
-            manager.setup(bundle: bundle)
-            oocut = PersistenceLayer(onManager: manager)
-            oocut.context = oocut.makeContext()
-            let measurement = try oocut.createMeasurement(at: 10_000, inMode: defaultMode)
-            oocut.appendNewTrack(to: measurement)
+            manager.setup(bundle: bundle) {
+                do {
+                    self.oocut = PersistenceLayer(onManager: manager)
+                    self.oocut.context = self.oocut.makeContext()
+                    let measurement = try self.oocut.createMeasurement(at: 10_000, inMode: self.defaultMode)
+                    self.oocut.appendNewTrack(to: measurement)
 
-            fixture = measurement.identifier
+                    self.fixture = measurement.identifier
 
-            try oocut.save(locations: [PersistenceTests.location(latitude: 51.052181, longitude: 13.728956, timestamp: 10_000), PersistenceTests.location(latitude: 51.051837, longitude: 13.729010, timestamp: 10_001)], in: measurement)
-            try oocut.save(accelerations: [PersistenceTests.acceleration(), PersistenceTests.acceleration(), PersistenceTests.acceleration()], in: measurement)
+                    try self.oocut.save(locations: [PersistenceTests.location(latitude: 51.052181, longitude: 13.728956, timestamp: 10_000), PersistenceTests.location(latitude: 51.051837, longitude: 13.729010, timestamp: 10_001)], in: measurement)
+                    try self.oocut.save(accelerations: [PersistenceTests.acceleration(), PersistenceTests.acceleration(), PersistenceTests.acceleration()], in: measurement)
 
-        } catch let error {
-            XCTFail("Unable to set up due to \(error.localizedDescription)")
-        }
+                    expectation.fulfill()
+                } catch let error {
+                    XCTFail("Unable to set up due to \(error.localizedDescription)")
+                }
+            }
+            
+            waitForExpectations(timeout: 5) { error in
+                if let error = error {
+                    XCTFail("Unable to setup PersistenceTest \(error)")
+                }
+            }
     }
 
     /// Cleans the test enviroment by deleting all data.

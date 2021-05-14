@@ -36,7 +36,7 @@ public class CredentialsAuthenticator: Authenticator {
     // MARK: - Properties
 
     /// The logger used for objects of this class.
-    private static let log = OSLog(subsystem: "de.cyface", category: "CredentialsAuthenticator")
+    private static let log = OSLog(subsystem: "CredentialsAuthenticator", category: "de.cyface")
     /// The username used for authentication.
     public var username: String?
     /// The password used for authentication.

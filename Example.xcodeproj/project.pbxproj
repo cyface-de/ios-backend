@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0488EF68D7CBD28AD70B858A /* Pods_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C5DD87EF2C833EDA822B852 /* Pods_Tests.framework */; };
 		3D342F742554564B00E8EFA6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D342F732554564B00E8EFA6 /* Assets.xcassets */; };
 		3D61275B2554A267007F6884 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 3D61274C2554A266007F6884 /* Settings.bundle */; };
 		3D61275C2554A267007F6884 /* privacy-policy-de.html in Resources */ = {isa = PBXBuildFile; fileRef = 3D61274E2554A266007F6884 /* privacy-policy-de.html */; };
@@ -52,45 +51,13 @@
 		3DACE6A12554642D00FA9A40 /* Cyface-Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DACE67E2554642D00FA9A40 /* Cyface-Main.storyboard */; };
 		3DACE6A22554642D00FA9A40 /* Cyface-LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DACE6802554642D00FA9A40 /* Cyface-LaunchScreen.storyboard */; };
 		3DACE6A32554642D00FA9A40 /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DACE6812554642D00FA9A40 /* Strings.swift */; };
-		3DB688B3255AE37800406E41 /* ServerConnectionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB6889C255AE37800406E41 /* ServerConnectionTest.swift */; };
-		3DB688B4255AE37800406E41 /* SerializationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB6889D255AE37800406E41 /* SerializationTest.swift */; };
-		3DB688B5255AE37800406E41 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB6889E255AE37800406E41 /* PersistenceTests.swift */; };
-		3DB688B6255AE37800406E41 /* V2TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3DB688A0255AE37800406E41 /* V2TestData.sqlite */; };
-		3DB688B7255AE37800406E41 /* V5TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3DB688A1255AE37800406E41 /* V5TestData.sqlite */; };
-		3DB688B8255AE37800406E41 /* V4TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3DB688A2255AE37800406E41 /* V4TestData.sqlite */; };
-		3DB688B9255AE37800406E41 /* V3TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3DB688A3255AE37800406E41 /* V3TestData.sqlite */; };
-		3DB688BA255AE37800406E41 /* V1TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3DB688A4255AE37800406E41 /* V1TestData.sqlite */; };
-		3DB688BB255AE37800406E41 /* V6TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 3DB688A5255AE37800406E41 /* V6TestData.sqlite */; };
-		3DB688BC255AE37800406E41 /* DataCapturingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB688A6255AE37800406E41 /* DataCapturingTests.swift */; };
-		3DB688BD255AE37800406E41 /* FakeMeasurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB688A8255AE37800406E41 /* FakeMeasurement.swift */; };
-		3DB688BE255AE37800406E41 /* TestDataCapturingEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB688A9255AE37800406E41 /* TestDataCapturingEventHandler.swift */; };
-		3DB688BF255AE37800406E41 /* DataSetCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB688AA255AE37800406E41 /* DataSetCreator.swift */; };
-		3DB688C0255AE37800406E41 /* TestDataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB688AB255AE37800406E41 /* TestDataCapturingService.swift */; };
-		3DB688C1255AE37800406E41 /* TestMotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB688AC255AE37800406E41 /* TestMotionManager.swift */; };
-		3DB688C2255AE37800406E41 /* TestLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB688AD255AE37800406E41 /* TestLocationManager.swift */; };
-		3DB688C3255AE37800406E41 /* DistanceCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB688AE255AE37800406E41 /* DistanceCalculationTests.swift */; };
-		3DB688C4255AE37800406E41 /* TrackCleanerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB688AF255AE37800406E41 /* TrackCleanerTest.swift */; };
-		3DB688C5255AE37800406E41 /* FileSupportTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB688B0255AE37800406E41 /* FileSupportTest.swift */; };
-		3DB688C7255AE37800406E41 /* DataMigrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB688B2255AE37800406E41 /* DataMigrationTest.swift */; };
 		D6426E87305657CA76AB80B1 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD8822C6C3EECBBF739BC298 /* Pods_Example.framework */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		3D342F7E2554564B00E8EFA6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 3D342F5F2554564400E8EFA6 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3D342F662554564400E8EFA6;
-			remoteInfo = "Example-App";
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
-		3C5DD87EF2C833EDA822B852 /* Pods_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D342F672554564400E8EFA6 /* Cyface.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cyface.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D342F732554564B00E8EFA6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3D342F782554564B00E8EFA6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Example/Info.plist; sourceTree = "<group>"; };
-		3D342F7D2554564B00E8EFA6 /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D61274C2554A266007F6884 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		3D61274E2554A266007F6884 /* privacy-policy-de.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "privacy-policy-de.html"; sourceTree = "<group>"; };
 		3D61274F2554A266007F6884 /* privacy-policy-it.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "privacy-policy-it.html"; sourceTree = "<group>"; };
@@ -142,29 +109,6 @@
 		3DACE67F2554642D00FA9A40 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = "Base.lproj/Cyface-Main.storyboard"; sourceTree = "<group>"; };
 		3DACE6802554642D00FA9A40 /* Cyface-LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Cyface-LaunchScreen.storyboard"; sourceTree = "<group>"; };
 		3DACE6812554642D00FA9A40 /* Strings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
-		3DB6889C255AE37800406E41 /* ServerConnectionTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerConnectionTest.swift; sourceTree = "<group>"; };
-		3DB6889D255AE37800406E41 /* SerializationTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerializationTest.swift; sourceTree = "<group>"; };
-		3DB6889E255AE37800406E41 /* PersistenceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
-		3DB688A0255AE37800406E41 /* V2TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V2TestData.sqlite; sourceTree = "<group>"; };
-		3DB688A1255AE37800406E41 /* V5TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V5TestData.sqlite; sourceTree = "<group>"; };
-		3DB688A2255AE37800406E41 /* V4TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V4TestData.sqlite; sourceTree = "<group>"; };
-		3DB688A3255AE37800406E41 /* V3TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V3TestData.sqlite; sourceTree = "<group>"; };
-		3DB688A4255AE37800406E41 /* V1TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V1TestData.sqlite; sourceTree = "<group>"; };
-		3DB688A5255AE37800406E41 /* V6TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V6TestData.sqlite; sourceTree = "<group>"; };
-		3DB688A6255AE37800406E41 /* DataCapturingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCapturingTests.swift; sourceTree = "<group>"; };
-		3DB688A8255AE37800406E41 /* FakeMeasurement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FakeMeasurement.swift; sourceTree = "<group>"; };
-		3DB688A9255AE37800406E41 /* TestDataCapturingEventHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestDataCapturingEventHandler.swift; sourceTree = "<group>"; };
-		3DB688AA255AE37800406E41 /* DataSetCreator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataSetCreator.swift; sourceTree = "<group>"; };
-		3DB688AB255AE37800406E41 /* TestDataCapturingService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestDataCapturingService.swift; sourceTree = "<group>"; };
-		3DB688AC255AE37800406E41 /* TestMotionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestMotionManager.swift; sourceTree = "<group>"; };
-		3DB688AD255AE37800406E41 /* TestLocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestLocationManager.swift; sourceTree = "<group>"; };
-		3DB688AE255AE37800406E41 /* DistanceCalculationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DistanceCalculationTests.swift; sourceTree = "<group>"; };
-		3DB688AF255AE37800406E41 /* TrackCleanerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackCleanerTest.swift; sourceTree = "<group>"; };
-		3DB688B0255AE37800406E41 /* FileSupportTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileSupportTest.swift; sourceTree = "<group>"; };
-		3DB688B1255AE37800406E41 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3DB688B2255AE37800406E41 /* DataMigrationTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataMigrationTest.swift; sourceTree = "<group>"; };
-		433C6DA13561F52D2C4A205D /* Pods-Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tests.debug.xcconfig"; path = "Target Support Files/Pods-Tests/Pods-Tests.debug.xcconfig"; sourceTree = "<group>"; };
-		43B9DA998ABC1C6B0CCD2162 /* Pods-Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tests.release.xcconfig"; path = "Target Support Files/Pods-Tests/Pods-Tests.release.xcconfig"; sourceTree = "<group>"; };
 		58A112A9190F1C5294E83458 /* Pods-Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.release.xcconfig"; path = "Target Support Files/Pods-Example/Pods-Example.release.xcconfig"; sourceTree = "<group>"; };
 		AD8822C6C3EECBBF739BC298 /* Pods_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4BD9F6602B53A4DD3C204E3 /* Pods-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.debug.xcconfig"; path = "Target Support Files/Pods-Example/Pods-Example.debug.xcconfig"; sourceTree = "<group>"; };
@@ -180,14 +124,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3D342F7A2554564B00E8EFA6 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				0488EF68D7CBD28AD70B858A /* Pods_Tests.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -196,7 +132,6 @@
 			children = (
 				3D6127622555955E007F6884 /* WebKit.framework */,
 				AD8822C6C3EECBBF739BC298 /* Pods_Example.framework */,
-				3C5DD87EF2C833EDA822B852 /* Pods_Tests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -209,7 +144,6 @@
 				3D342F9B2554590200E8EFA6 /* Source */,
 				3D342F9A255458F500E8EFA6 /* Resources */,
 				3D342F682554564400E8EFA6 /* Products */,
-				3DB6889B255AE37800406E41 /* Tests */,
 				378A891A183152BBB9D4214C /* Frameworks */,
 				8CDF0D701864CB63D330310A /* Pods */,
 			);
@@ -219,7 +153,6 @@
 			isa = PBXGroup;
 			children = (
 				3D342F672554564400E8EFA6 /* Cyface.app */,
-				3D342F7D2554564B00E8EFA6 /* Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -356,57 +289,11 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		3DB6889B255AE37800406E41 /* Tests */ = {
-			isa = PBXGroup;
-			children = (
-				3DB6889C255AE37800406E41 /* ServerConnectionTest.swift */,
-				3DB6889D255AE37800406E41 /* SerializationTest.swift */,
-				3DB6889E255AE37800406E41 /* PersistenceTests.swift */,
-				3DB6889F255AE37800406E41 /* Resources */,
-				3DB688A6255AE37800406E41 /* DataCapturingTests.swift */,
-				3DB688A7255AE37800406E41 /* Support */,
-				3DB688AE255AE37800406E41 /* DistanceCalculationTests.swift */,
-				3DB688AF255AE37800406E41 /* TrackCleanerTest.swift */,
-				3DB688B0255AE37800406E41 /* FileSupportTest.swift */,
-				3DB688B1255AE37800406E41 /* Info.plist */,
-				3DB688B2255AE37800406E41 /* DataMigrationTest.swift */,
-			);
-			path = Tests;
-			sourceTree = "<group>";
-		};
-		3DB6889F255AE37800406E41 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				3DB688A0255AE37800406E41 /* V2TestData.sqlite */,
-				3DB688A1255AE37800406E41 /* V5TestData.sqlite */,
-				3DB688A2255AE37800406E41 /* V4TestData.sqlite */,
-				3DB688A3255AE37800406E41 /* V3TestData.sqlite */,
-				3DB688A4255AE37800406E41 /* V1TestData.sqlite */,
-				3DB688A5255AE37800406E41 /* V6TestData.sqlite */,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
-		3DB688A7255AE37800406E41 /* Support */ = {
-			isa = PBXGroup;
-			children = (
-				3DB688A8255AE37800406E41 /* FakeMeasurement.swift */,
-				3DB688A9255AE37800406E41 /* TestDataCapturingEventHandler.swift */,
-				3DB688AA255AE37800406E41 /* DataSetCreator.swift */,
-				3DB688AB255AE37800406E41 /* TestDataCapturingService.swift */,
-				3DB688AC255AE37800406E41 /* TestMotionManager.swift */,
-				3DB688AD255AE37800406E41 /* TestLocationManager.swift */,
-			);
-			path = Support;
-			sourceTree = "<group>";
-		};
 		8CDF0D701864CB63D330310A /* Pods */ = {
 			isa = PBXGroup;
 			children = (
 				B4BD9F6602B53A4DD3C204E3 /* Pods-Example.debug.xcconfig */,
 				58A112A9190F1C5294E83458 /* Pods-Example.release.xcconfig */,
-				433C6DA13561F52D2C4A205D /* Pods-Tests.debug.xcconfig */,
-				43B9DA998ABC1C6B0CCD2162 /* Pods-Tests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -435,26 +322,6 @@
 			productReference = 3D342F672554564400E8EFA6 /* Cyface.app */;
 			productType = "com.apple.product-type.application";
 		};
-		3D342F7C2554564B00E8EFA6 /* Tests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 3D342F942554564B00E8EFA6 /* Build configuration list for PBXNativeTarget "Tests" */;
-			buildPhases = (
-				05543D31191C242D8DD38169 /* [CP] Check Pods Manifest.lock */,
-				3D342F792554564B00E8EFA6 /* Sources */,
-				3D342F7A2554564B00E8EFA6 /* Frameworks */,
-				3D342F7B2554564B00E8EFA6 /* Resources */,
-				D970BBE125BA4E5806B7C4F7 /* [CP] Embed Pods Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				3D342F7F2554564B00E8EFA6 /* PBXTargetDependency */,
-			);
-			name = Tests;
-			productName = Tests;
-			productReference = 3D342F7D2554564B00E8EFA6 /* Tests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -468,10 +335,6 @@
 					3D342F662554564400E8EFA6 = {
 						CreatedOnToolsVersion = 11.5;
 						LastSwiftMigration = 1150;
-					};
-					3D342F7C2554564B00E8EFA6 = {
-						CreatedOnToolsVersion = 11.5;
-						TestTargetID = 3D342F662554564400E8EFA6;
 					};
 				};
 			};
@@ -491,7 +354,6 @@
 			projectRoot = "";
 			targets = (
 				3D342F662554564400E8EFA6 /* Example */,
-				3D342F7C2554564B00E8EFA6 /* Tests */,
 			);
 		};
 /* End PBXProject section */
@@ -521,44 +383,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3D342F7B2554564B00E8EFA6 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				3DB688B9255AE37800406E41 /* V3TestData.sqlite in Resources */,
-				3DB688B8255AE37800406E41 /* V4TestData.sqlite in Resources */,
-				3DB688B7255AE37800406E41 /* V5TestData.sqlite in Resources */,
-				3DB688B6255AE37800406E41 /* V2TestData.sqlite in Resources */,
-				3DB688BA255AE37800406E41 /* V1TestData.sqlite in Resources */,
-				3DB688BB255AE37800406E41 /* V6TestData.sqlite in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		05543D31191C242D8DD38169 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Tests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 		341F54C0117DB5FEC8ABF74E /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -618,23 +445,6 @@
 			shellPath = /bin/sh;
 			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint --path Example/Source --config .swiftlint.yml\n  \n  swiftlint --path DataCapturing/Source --config .swiftlint.yml\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
-		D970BBE125BA4E5806B7C4F7 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Tests/Pods-Tests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Tests/Pods-Tests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Tests/Pods-Tests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		E7CDED70173AF624DCF61191 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -688,36 +498,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3D342F792554564B00E8EFA6 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				3DB688C7255AE37800406E41 /* DataMigrationTest.swift in Sources */,
-				3DB688B5255AE37800406E41 /* PersistenceTests.swift in Sources */,
-				3DB688C3255AE37800406E41 /* DistanceCalculationTests.swift in Sources */,
-				3DB688C0255AE37800406E41 /* TestDataCapturingService.swift in Sources */,
-				3DB688BC255AE37800406E41 /* DataCapturingTests.swift in Sources */,
-				3DB688BF255AE37800406E41 /* DataSetCreator.swift in Sources */,
-				3DB688B4255AE37800406E41 /* SerializationTest.swift in Sources */,
-				3DB688BE255AE37800406E41 /* TestDataCapturingEventHandler.swift in Sources */,
-				3DB688C2255AE37800406E41 /* TestLocationManager.swift in Sources */,
-				3DB688C4255AE37800406E41 /* TrackCleanerTest.swift in Sources */,
-				3DB688C5255AE37800406E41 /* FileSupportTest.swift in Sources */,
-				3DB688BD255AE37800406E41 /* FakeMeasurement.swift in Sources */,
-				3DB688C1255AE37800406E41 /* TestMotionManager.swift in Sources */,
-				3DB688B3255AE37800406E41 /* ServerConnectionTest.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		3D342F7F2554564B00E8EFA6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3D342F662554564400E8EFA6 /* Example */;
-			targetProxy = 3D342F7E2554564B00E8EFA6 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		3D6127522554A266007F6884 /* Localizable.strings */ = {
@@ -980,52 +761,6 @@
 			};
 			name = Release;
 		};
-		3D342F952554564B00E8EFA6 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 433C6DA13561F52D2C4A205D /* Pods-Tests.debug.xcconfig */;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 45GZ5C9N64;
-				INFOPLIST_FILE = Tests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "de.cyface.Example-AppTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cyface.app/Cyface";
-			};
-			name = Debug;
-		};
-		3D342F962554564B00E8EFA6 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 43B9DA998ABC1C6B0CCD2162 /* Pods-Tests.release.xcconfig */;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 45GZ5C9N64;
-				INFOPLIST_FILE = Tests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "de.cyface.Example-AppTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cyface.app/Cyface";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1043,15 +778,6 @@
 			buildConfigurations = (
 				3D342F922554564B00E8EFA6 /* Debug */,
 				3D342F932554564B00E8EFA6 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		3D342F942554564B00E8EFA6 /* Build configuration list for PBXNativeTarget "Tests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				3D342F952554564B00E8EFA6 /* Debug */,
-				3D342F962554564B00E8EFA6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

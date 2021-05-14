@@ -38,6 +38,16 @@
                ReferencedContainer = "container:Example.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "0D58124234B7A86021E24A620627D3C2"
+               BuildableName = "DataCapturing-Unit-Tests.xctest"
+               BlueprintName = "DataCapturing-Unit-Tests"
+               ReferencedContainer = "container:Pods/Pods.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
