@@ -8,7 +8,7 @@ excluded:
 - Carthage
 - Pods
 - SwiftLint/Common/3rdPartyLib
-- Tests
+- DataCapturing/Tests
 line_length:
     warning: 150
     error: 200

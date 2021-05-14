@@ -181,7 +181,7 @@ class SerializationTest: XCTestCase {
             XCTAssert(accuracy[1] == 200)
             XCTAssert(accuracy[2] == 200)
         } catch let error {
-            XCTFail("Unable to serialize measurement \(fixture). Error \(error)")
+            XCTFail("Unable to serialize measurement \(String(describing: fixture)). Error \(error)")
         }
     }
 
