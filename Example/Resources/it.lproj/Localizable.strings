@@ -76,3 +76,15 @@
 
 /* Shown when loading the main view. */
 "Please wait..." = "Attendere per favore...";
+
+/* Shown to ask the user for a server address to upload captured data to. */
+"Server Address" = "Indirizzo del server";
+
+/* Shown as label for the accept button in the privacy policy dialog */
+"Accept" = "Accettare";
+
+/* Shown as title of the privacy policy view controller */
+"Privacy Policy" = "informativa sulla privacy";
+
+/* The title to display on this page! */
+"Upload Server Address" = "Indirizzo del server di caricamento";

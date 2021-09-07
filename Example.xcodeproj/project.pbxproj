@@ -43,14 +43,20 @@
 		3DACE6992554642D00FA9A40 /* PrivacyPolicyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DACE6682554642D00FA9A40 /* PrivacyPolicyViewController.swift */; };
 		3DACE69A2554642D00FA9A40 /* MapLocationSelector.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3DACE66A2554642D00FA9A40 /* MapLocationSelector.strings */; };
 		3DACE69B2554642D00FA9A40 /* Cyface-Main.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3DACE66C2554642D00FA9A40 /* Cyface-Main.strings */; };
-		3DACE69C2554642D00FA9A40 /* PrivacyPolicy.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3DACE66E2554642D00FA9A40 /* PrivacyPolicy.strings */; };
 		3DACE69D2554642D00FA9A40 /* ModalitySelector.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3DACE6702554642D00FA9A40 /* ModalitySelector.strings */; };
-		3DACE69E2554642D00FA9A40 /* PrivacyPolicy.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DACE6782554642D00FA9A40 /* PrivacyPolicy.storyboard */; };
 		3DACE69F2554642D00FA9A40 /* ModalitySelector.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DACE67A2554642D00FA9A40 /* ModalitySelector.storyboard */; };
 		3DACE6A02554642D00FA9A40 /* MapLocationSelector.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DACE67C2554642D00FA9A40 /* MapLocationSelector.storyboard */; };
 		3DACE6A12554642D00FA9A40 /* Cyface-Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DACE67E2554642D00FA9A40 /* Cyface-Main.storyboard */; };
 		3DACE6A22554642D00FA9A40 /* Cyface-LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3DACE6802554642D00FA9A40 /* Cyface-LaunchScreen.storyboard */; };
 		3DACE6A32554642D00FA9A40 /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DACE6812554642D00FA9A40 /* Strings.swift */; };
+		AAC5788A26E0ED0A00BF1CFC /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC5788926E0ED0A00BF1CFC /* Settings.swift */; };
+		AAC5788C26E0FE9700BF1CFC /* PrivacyPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC5788B26E0FE9700BF1CFC /* PrivacyPolicy.swift */; };
+		AAC5788F26E1015A00BF1CFC /* PrivacyPolicyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC5788E26E1015A00BF1CFC /* PrivacyPolicyViewModel.swift */; };
+		AAC5789226E1045400BF1CFC /* CyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC5789126E1045400BF1CFC /* CyButton.swift */; };
+		AAC5789426E109A300BF1CFC /* CyNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC5789326E109A300BF1CFC /* CyNavigationBar.swift */; };
+		AAD09FF226DFB22F007B2EEC /* AskForServerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD09FF126DFB22F007B2EEC /* AskForServerViewController.swift */; };
+		AAD09FF426DFB298007B2EEC /* AskForServerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD09FF326DFB298007B2EEC /* AskForServerViewModel.swift */; };
+		AAF0712B26E79B940094090D /* CyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAF0712A26E79B940094090D /* CyViewController.swift */; };
 		D6426E87305657CA76AB80B1 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD8822C6C3EECBBF739BC298 /* Pods_Example.framework */; };
 /* End PBXBuildFile section */
 
@@ -95,21 +101,25 @@
 		3DACE6682554642D00FA9A40 /* PrivacyPolicyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyViewController.swift; sourceTree = "<group>"; };
 		3DACE66B2554642D00FA9A40 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/MapLocationSelector.strings; sourceTree = "<group>"; };
 		3DACE66D2554642D00FA9A40 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = "de.lproj/Cyface-Main.strings"; sourceTree = "<group>"; };
-		3DACE66F2554642D00FA9A40 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/PrivacyPolicy.strings; sourceTree = "<group>"; };
 		3DACE6712554642D00FA9A40 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/ModalitySelector.strings; sourceTree = "<group>"; };
 		3DACE6722554642D00FA9A40 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/MapLocationSelector.strings; sourceTree = "<group>"; };
-		3DACE6732554642D00FA9A40 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/PrivacyPolicy.strings; sourceTree = "<group>"; };
 		3DACE6742554642D00FA9A40 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/MapLocationSelector.strings; sourceTree = "<group>"; };
 		3DACE6752554642D00FA9A40 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = "it.lproj/Cyface-Main.strings"; sourceTree = "<group>"; };
-		3DACE6762554642D00FA9A40 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/PrivacyPolicy.strings; sourceTree = "<group>"; };
 		3DACE6772554642D00FA9A40 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/ModalitySelector.strings; sourceTree = "<group>"; };
-		3DACE6792554642D00FA9A40 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/PrivacyPolicy.storyboard; sourceTree = "<group>"; };
 		3DACE67B2554642D00FA9A40 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/ModalitySelector.storyboard; sourceTree = "<group>"; };
 		3DACE67D2554642D00FA9A40 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MapLocationSelector.storyboard; sourceTree = "<group>"; };
 		3DACE67F2554642D00FA9A40 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = "Base.lproj/Cyface-Main.storyboard"; sourceTree = "<group>"; };
 		3DACE6802554642D00FA9A40 /* Cyface-LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Cyface-LaunchScreen.storyboard"; sourceTree = "<group>"; };
 		3DACE6812554642D00FA9A40 /* Strings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
 		58A112A9190F1C5294E83458 /* Pods-Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.release.xcconfig"; path = "Target Support Files/Pods-Example/Pods-Example.release.xcconfig"; sourceTree = "<group>"; };
+		AAC5788926E0ED0A00BF1CFC /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		AAC5788B26E0FE9700BF1CFC /* PrivacyPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicy.swift; sourceTree = "<group>"; };
+		AAC5788E26E1015A00BF1CFC /* PrivacyPolicyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyViewModel.swift; sourceTree = "<group>"; };
+		AAC5789126E1045400BF1CFC /* CyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyButton.swift; sourceTree = "<group>"; };
+		AAC5789326E109A300BF1CFC /* CyNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyNavigationBar.swift; sourceTree = "<group>"; };
+		AAD09FF126DFB22F007B2EEC /* AskForServerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskForServerViewController.swift; sourceTree = "<group>"; };
+		AAD09FF326DFB298007B2EEC /* AskForServerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskForServerViewModel.swift; sourceTree = "<group>"; };
+		AAF0712A26E79B940094090D /* CyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyViewController.swift; sourceTree = "<group>"; };
 		AD8822C6C3EECBBF739BC298 /* Pods_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4BD9F6602B53A4DD3C204E3 /* Pods-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.debug.xcconfig"; path = "Target Support Files/Pods-Example/Pods-Example.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -160,7 +170,6 @@
 		3D342F9A255458F500E8EFA6 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				3D6127572554A266007F6884 /* Base.lproj */,
 				3D6127582554A267007F6884 /* de.lproj */,
 				3D6127542554A266007F6884 /* en.lproj */,
 				3D6127512554A266007F6884 /* it.lproj */,
@@ -176,6 +185,9 @@
 		3D342F9B2554590200E8EFA6 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				AAC5789026E1043F00BF1CFC /* UIComponents */,
+				AAC5788826E0ECF300BF1CFC /* Model */,
+				3DACE6532554642D00FA9A40 /* ViewController */,
 				3D61276A2555A84C007F6884 /* CyfaceCredentials.swift */,
 				3DACE6502554642C00FA9A40 /* AppDelegate.swift */,
 				3DACE6522554642C00FA9A40 /* CapturingLifecycle.swift */,
@@ -183,7 +195,6 @@
 				3DACE64F2554642C00FA9A40 /* GeoLocationTrackDrawer.swift */,
 				3DACE6512554642C00FA9A40 /* Modality.swift */,
 				3DACE6812554642D00FA9A40 /* Strings.swift */,
-				3DACE6532554642D00FA9A40 /* ViewController */,
 				3DACE64D2554642C00FA9A40 /* Example-App-Bridging-Header.h */,
 			);
 			name = Source;
@@ -216,13 +227,6 @@
 			path = en.lproj;
 			sourceTree = "<group>";
 		};
-		3D6127572554A266007F6884 /* Base.lproj */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Base.lproj;
-			sourceTree = "<group>";
-		};
 		3D6127582554A267007F6884 /* de.lproj */ = {
 			isa = PBXGroup;
 			children = (
@@ -234,11 +238,12 @@
 		3DACE6532554642D00FA9A40 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				3DACE6542554642D00FA9A40 /* ViewController.swift */,
+				AAC5788D26E0FFF300BF1CFC /* AcceptPrivacyPolicyDialog */,
+				AAD09FF526DFB82F007B2EEC /* LoginDialog */,
+				AAD09FF026DFB1C5007B2EEC /* AskForServerDialog */,
 				3DACE6552554642D00FA9A40 /* MeasurementOverview */,
 				3DACE65C2554642D00FA9A40 /* Measurement Details */,
-				3DACE6672554642D00FA9A40 /* LoginViewController.swift */,
-				3DACE6682554642D00FA9A40 /* PrivacyPolicyViewController.swift */,
+				3DACE6542554642D00FA9A40 /* ViewController.swift */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -278,9 +283,7 @@
 			children = (
 				3DACE66A2554642D00FA9A40 /* MapLocationSelector.strings */,
 				3DACE66C2554642D00FA9A40 /* Cyface-Main.strings */,
-				3DACE66E2554642D00FA9A40 /* PrivacyPolicy.strings */,
 				3DACE6702554642D00FA9A40 /* ModalitySelector.strings */,
-				3DACE6782554642D00FA9A40 /* PrivacyPolicy.storyboard */,
 				3DACE67A2554642D00FA9A40 /* ModalitySelector.storyboard */,
 				3DACE67C2554642D00FA9A40 /* MapLocationSelector.storyboard */,
 				3DACE67E2554642D00FA9A40 /* Cyface-Main.storyboard */,
@@ -296,6 +299,51 @@
 				58A112A9190F1C5294E83458 /* Pods-Example.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		AAC5788826E0ECF300BF1CFC /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				AAC5788926E0ED0A00BF1CFC /* Settings.swift */,
+				AAC5788B26E0FE9700BF1CFC /* PrivacyPolicy.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		AAC5788D26E0FFF300BF1CFC /* AcceptPrivacyPolicyDialog */ = {
+			isa = PBXGroup;
+			children = (
+				3DACE6682554642D00FA9A40 /* PrivacyPolicyViewController.swift */,
+				AAC5788E26E1015A00BF1CFC /* PrivacyPolicyViewModel.swift */,
+			);
+			path = AcceptPrivacyPolicyDialog;
+			sourceTree = "<group>";
+		};
+		AAC5789026E1043F00BF1CFC /* UIComponents */ = {
+			isa = PBXGroup;
+			children = (
+				AAC5789126E1045400BF1CFC /* CyButton.swift */,
+				AAC5789326E109A300BF1CFC /* CyNavigationBar.swift */,
+				AAF0712A26E79B940094090D /* CyViewController.swift */,
+			);
+			path = UIComponents;
+			sourceTree = "<group>";
+		};
+		AAD09FF026DFB1C5007B2EEC /* AskForServerDialog */ = {
+			isa = PBXGroup;
+			children = (
+				AAD09FF126DFB22F007B2EEC /* AskForServerViewController.swift */,
+				AAD09FF326DFB298007B2EEC /* AskForServerViewModel.swift */,
+			);
+			path = AskForServerDialog;
+			sourceTree = "<group>";
+		};
+		AAD09FF526DFB82F007B2EEC /* LoginDialog */ = {
+			isa = PBXGroup;
+			children = (
+				3DACE6672554642D00FA9A40 /* LoginViewController.swift */,
+			);
+			path = LoginDialog;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -370,9 +418,7 @@
 				3DACE69B2554642D00FA9A40 /* Cyface-Main.strings in Resources */,
 				3DACE69A2554642D00FA9A40 /* MapLocationSelector.strings in Resources */,
 				3DACE69D2554642D00FA9A40 /* ModalitySelector.strings in Resources */,
-				3DACE69C2554642D00FA9A40 /* PrivacyPolicy.strings in Resources */,
 				3DACE6A02554642D00FA9A40 /* MapLocationSelector.storyboard in Resources */,
-				3DACE69E2554642D00FA9A40 /* PrivacyPolicy.storyboard in Resources */,
 				3DACE6A22554642D00FA9A40 /* Cyface-LaunchScreen.storyboard in Resources */,
 				3D61275F2554A267007F6884 /* Localizable.strings in Resources */,
 				3D61275E2554A267007F6884 /* privacy-policy-en.html in Resources */,
@@ -469,29 +515,37 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAC5788A26E0ED0A00BF1CFC /* Settings.swift in Sources */,
+				AAC5789226E1045400BF1CFC /* CyButton.swift in Sources */,
 				3DACE6872554642D00FA9A40 /* ViewController.swift in Sources */,
 				3DACE6962554642D00FA9A40 /* DataViewController.swift in Sources */,
 				3DACE6852554642D00FA9A40 /* Modality.swift in Sources */,
+				AAC5788F26E1015A00BF1CFC /* PrivacyPolicyViewModel.swift in Sources */,
 				3DACE6992554642D00FA9A40 /* PrivacyPolicyViewController.swift in Sources */,
 				3DACE6982554642D00FA9A40 /* LoginViewController.swift in Sources */,
 				3DACE6912554642D00FA9A40 /* ModalitySelectorViewController.swift in Sources */,
 				3DACE6882554642D00FA9A40 /* MeasurementCellStatus.swift in Sources */,
 				3DACE6A32554642D00FA9A40 /* Strings.swift in Sources */,
 				3DACE6892554642D00FA9A40 /* CurrentMeasurementViewModel.swift in Sources */,
+				AAC5788C26E0FE9700BF1CFC /* PrivacyPolicy.swift in Sources */,
 				3DACE6922554642D00FA9A40 /* GpsPointTableViewController.swift in Sources */,
 				3DACE6952554642D00FA9A40 /* AccelerationPointTableViewCell.swift in Sources */,
 				3DACE6862554642D00FA9A40 /* CapturingLifecycle.swift in Sources */,
+				AAF0712B26E79B940094090D /* CyViewController.swift in Sources */,
 				3DACE6842554642D00FA9A40 /* AppDelegate.swift in Sources */,
 				3DACE6972554642D00FA9A40 /* AccelerationPointTableViewController.swift in Sources */,
 				3DACE68B2554642D00FA9A40 /* MeasurementModel.swift in Sources */,
+				AAD09FF426DFB298007B2EEC /* AskForServerViewModel.swift in Sources */,
 				3DACE6932554642D00FA9A40 /* GpsPointTableViewCell.swift in Sources */,
 				3DACE68D2554642D00FA9A40 /* TableCellViewModel.swift in Sources */,
 				3DACE68A2554642D00FA9A40 /* TableCellView.swift in Sources */,
 				3DACE6942554642D00FA9A40 /* MeasurementDetailsViewController.swift in Sources */,
 				3D61276B2555A84D007F6884 /* CyfaceCredentials.swift in Sources */,
 				3DACE68C2554642D00FA9A40 /* CurrentMeasurementView.swift in Sources */,
+				AAD09FF226DFB22F007B2EEC /* AskForServerViewController.swift in Sources */,
 				3DACE6822554642D00FA9A40 /* Event.swift in Sources */,
 				3DACE6832554642D00FA9A40 /* GeoLocationTrackDrawer.swift in Sources */,
+				AAC5789426E109A300BF1CFC /* CyNavigationBar.swift in Sources */,
 				3DACE68E2554642D00FA9A40 /* StatisticsViewController.swift in Sources */,
 				3DACE6902554642D00FA9A40 /* MapViewController.swift in Sources */,
 				3DACE68F2554642D00FA9A40 /* MapLocationSelectorViewController.swift in Sources */,
@@ -544,16 +598,6 @@
 			name = "Cyface-Main.strings";
 			sourceTree = "<group>";
 		};
-		3DACE66E2554642D00FA9A40 /* PrivacyPolicy.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				3DACE66F2554642D00FA9A40 /* de */,
-				3DACE6732554642D00FA9A40 /* en */,
-				3DACE6762554642D00FA9A40 /* it */,
-			);
-			name = PrivacyPolicy.strings;
-			sourceTree = "<group>";
-		};
 		3DACE6702554642D00FA9A40 /* ModalitySelector.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -561,14 +605,6 @@
 				3DACE6772554642D00FA9A40 /* it */,
 			);
 			name = ModalitySelector.strings;
-			sourceTree = "<group>";
-		};
-		3DACE6782554642D00FA9A40 /* PrivacyPolicy.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				3DACE6792554642D00FA9A40 /* Base */,
-			);
-			name = PrivacyPolicy.storyboard;
 			sourceTree = "<group>";
 		};
 		3DACE67A2554642D00FA9A40 /* ModalitySelector.storyboard */ = {

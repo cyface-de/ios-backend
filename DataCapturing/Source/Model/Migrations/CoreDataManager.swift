@@ -44,7 +44,7 @@ public class CoreDataManager {
     /// The `NSPersistentContainer` used by this *CoreData* stack.
     lazy var persistentContainer: NSPersistentContainer = {
         os_log("Creating persistent container", log: CoreDataManager.log, type: .info)
-        
+
         let momdName = "CyfaceModel"
         let bundle = Bundle(for: type(of: self))
         guard let modelURL = bundle.url(forResource: momdName, withExtension: "momd") else {
@@ -110,7 +110,7 @@ public class CoreDataManager {
             guard error == nil else {
                 fatalError("Was unable to load store \(error.debugDescription).")
             }
-            
+
             completionClosure()
         }
     }
