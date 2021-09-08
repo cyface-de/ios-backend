@@ -30,31 +30,11 @@ import os.log
  */
 class SensorCapturer {
 
+    // MARK: - Constants
     /// The log used to identify messages from this class.
     private static let log = OSLog(subsystem: "SensorCapturer", category: "de.cyface")
-    /// Internal storage for the kernel boot time, to avoid regular recalculation
-    private static var _kernelBootTime: Date?
-    /// Provides the boot time of the device. This is required to calculate the absolute timestamp of a sensor measurement.
-    private static var kernelBootTime: Date {
-        if _kernelBootTime == nil {
-            var mib = [ CTL_KERN, KERN_BOOTTIME ]
-            var bootTime = timeval()
-            var bootTimeSize = MemoryLayout<timeval>.size
 
-            if 0 != sysctl(&mib, UInt32(mib.count), &bootTime, &bootTimeSize, nil, 0) {
-                fatalError("Could not get boot time, errno: \(errno)")
-            }
-
-            _kernelBootTime = Date(timeIntervalSince1970: TimeInterval(Double(bootTime.tv_sec) + Double(bootTime.tv_usec)/1_000_000))
-        }
-
-        guard let kernelBootTimeCache = _kernelBootTime else {
-            fatalError("Kernel boot time was not calculated!")
-        }
-
-        return kernelBootTimeCache
-    }
-
+    // MARK: - Properties
     /// An in memory storage for accelerations, before they are written to disk.
     var accelerations = [SensorValue]()
     /// An in memory storage for rotations, before they are written to disk.
@@ -72,6 +52,7 @@ class SensorCapturer {
         return accelerations.isEmpty && rotations.isEmpty && directions.isEmpty
     }
 
+    // MARK: - Initializers
     /**
      Creates a new `SensorCapturer` with the appropriate queues from the `DataCapturingService`.
 
@@ -86,6 +67,7 @@ class SensorCapturer {
         self.motionManager = motionManager
     }
 
+    // MARK: - Methods
     /// The the sensor capturing to the storage instances `accelertions`, `rotations` and `directions`.
     func start() {
         let queue = OperationQueue()
@@ -132,7 +114,7 @@ class SensorCapturer {
         }
 
         let accValues = data.acceleration
-        let timestamp = Date(timeInterval: data.timestamp, since: SensorCapturer.kernelBootTime)
+        let timestamp = Date()
         let acc = SensorValue(timestamp: timestamp,
                                x: accValues.x,
                                y: accValues.y,
@@ -162,7 +144,7 @@ class SensorCapturer {
         }
 
         let rotValues = data.rotationRate
-        let timestamp = Date(timeInterval: data.timestamp, since: SensorCapturer.kernelBootTime)
+        let timestamp = Date()
         let rot = SensorValue(timestamp: timestamp, x: rotValues.x, y: rotValues.y, z: rotValues.z)
         lifecycleQueue.async(flags: .barrier) {
             self.rotations.append(rot)
@@ -185,7 +167,7 @@ class SensorCapturer {
 
         if let data = data {
             let dirValues = data.magneticField
-            let timestamp = Date(timeInterval: data.timestamp, since: SensorCapturer.kernelBootTime)
+            let timestamp = Date()
             let dir = SensorValue(timestamp: timestamp, x: dirValues.field.x, y: dirValues.field.y, z: dirValues.field.z)
             lifecycleQueue.async {
                 self.directions.append(dir)
