@@ -52,7 +52,7 @@ class AskForServerViewController: CyViewController {
         return button
     }()
 
-    /// The title bar at the top of the screen showing a header text
+    /// The title bar at the top of the screen showing a header text.
     let titleBar: UINavigationBar = {
         let bar = CyNavigationBar()
         bar.title = "Upload Server Address"

@@ -141,10 +141,6 @@ class PrivacyPolicyViewController: CyViewController, PrivacyPolicyViewDelegate {
         webView.load(request as URLRequest)
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-    }
-
     /// Show the next view after the privacy policy has been accepted.
     func nextView() {
         appDelegate.presentMainUI()

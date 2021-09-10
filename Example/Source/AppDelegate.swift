@@ -80,11 +80,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
 
     /// Shows a dialog to the user asking for a valid server address to a Cyface collector service.
     private func showAskForServerDialog() {
-        /*if let rootViewController = window?.rootViewController {
-         guard type(of: rootViewController) != AskForServerViewController.self else {
-         return
-         }
-         }*/
         guard !isTypeOf(controller: window?.rootViewController, ofType: AskForServerViewController.self) else {
             return
         }

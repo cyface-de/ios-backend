@@ -74,10 +74,6 @@ class AskForServerViewModel: AskForServerViewModelDelegate {
 
     // MARK: - AskForServerViewModelDelegate
     func change(serverAddress: String?) throws {
-        debugPrint("===== Enter change =====")
-        defer {
-            debugPrint("===== Leave change =====")
-        }
         // check for valid server address, if so add it to settings and call back to view controller
         guard let serverAddress = serverAddress else {
             return
