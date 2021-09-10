@@ -88,3 +88,7 @@
 
 /* The title to display on this page! */
 "Upload Server Address" = "Indirizzo del server di caricamento";
+
+/* Error message shown if the user enters an invalid URL */
+"invalidUrlError" = "URL non valido";
+

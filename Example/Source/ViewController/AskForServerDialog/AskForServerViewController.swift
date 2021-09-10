@@ -60,6 +60,14 @@ class AskForServerViewController: CyViewController {
         return bar
     }()
 
+    /// A label showing error messages if a URL was not accepted.
+    let errorLabel: UILabel = {
+        let label = UILabel(frame: CGRect.zero)
+        label.textColor = UIColor.red
+
+        return label
+    }()
+
     /// The view model to back data, data validation and business logic of this view.
     let viewModel: AskForServerViewModelDelegate
 
@@ -87,8 +95,18 @@ class AskForServerViewController: CyViewController {
         do {
             try viewModel.change(serverAddress: serverAddressTextFieldContent)
         } catch {
-            print("Invalid URL: \(String(describing: serverAddressTextFieldContent))")
+            show(error: "\(NSLocalizedString("invalidUrlError", comment: "The error message shown to the user!"))")
         }
+    }
+
+    /**
+     Show an error message on the view.
+
+     - Parameter error: The message to show
+     */
+    private func show(error: String) {
+        self.errorLabel.text =  error
+        self.errorLabel.sizeToFit()
     }
 
     // MARK: - CyViewController
@@ -99,6 +117,7 @@ class AskForServerViewController: CyViewController {
         view.addSubview(titleBar)
 
         view.addSubview(serverAddressTextField)
+        view.addSubview(errorLabel)
         view.addSubview(okButton)
 
         titleBar.translatesAutoresizingMaskIntoConstraints = false
@@ -110,6 +129,11 @@ class AskForServerViewController: CyViewController {
         serverAddressTextField.topAnchor.constraint(equalTo: safeZone.centerYAnchor).isActive = true
         serverAddressTextField.leadingAnchor.constraint(equalTo: safeZone.leadingAnchor).isActive = true
         serverAddressTextField.trailingAnchor.constraint(equalTo: safeZone.trailingAnchor).isActive = true
+        errorLabel.translatesAutoresizingMaskIntoConstraints = false
+        errorLabel.topAnchor.constraint(equalTo: serverAddressTextField.bottomAnchor, constant: 10.0).isActive = true
+        errorLabel.leadingAnchor.constraint(greaterThanOrEqualTo: safeZone.leadingAnchor, constant: 10.0).isActive = true
+        errorLabel.trailingAnchor.constraint(lessThanOrEqualTo: safeZone.trailingAnchor, constant: 10.0).isActive = true
+        errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
 
         okButton.translatesAutoresizingMaskIntoConstraints = false
         okButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true

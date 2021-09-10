@@ -88,3 +88,6 @@
 
 /* The title to display on this page! */
 "Upload Server Address" = "Adresse des Upload-Servers";
+
+/* Error message shown if the user enters an invalid URL */
+"invalidUrlError" = "URL ungültig";
