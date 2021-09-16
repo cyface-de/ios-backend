@@ -46,7 +46,8 @@ public class SensorValue: CustomStringConvertible {
 
     /// Value in the device z direction, which is standing on the screen pointing towards you if the homebutton faces you.
     public let z: Double
-    
+
+    /// A human readable description of this object. This is required for debugging purposes.
     public var description: String { return "Sensor Value: (timestamp: \(timestamp), x: \(x), y: \(y), z: \(z))" }
 
     // MARK: - Initializers
