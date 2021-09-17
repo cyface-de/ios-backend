@@ -1,21 +1,21 @@
 /*
-* Copyright 2019 Cyface GmbH
-*
-* This file is part of the Cyface SDK for iOS.
-*
-* The Cyface SDK for iOS is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* The Cyface SDK for iOS is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright 2019 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import CoreMotion
@@ -62,10 +62,10 @@ class SensorCapturer {
     /**
      Creates a new `SensorCapturer` with the appropriate queues from the `DataCapturingService`.
 
-        - Parameters:
-            - lifecycleQueue: The queue running and synchronizing the data capturing lifecycle.
-            - capturingQueue: The queue running and synchronizing read and write operations to the sensor storage objects.
-            - motionManager: An instance of `CMMotionManager`. There should be only one instance of this type in your application.
+     - Parameters:
+     - lifecycleQueue: The queue running and synchronizing the data capturing lifecycle.
+     - capturingQueue: The queue running and synchronizing read and write operations to the sensor storage objects.
+     - motionManager: An instance of `CMMotionManager`. There should be only one instance of this type in your application.
      */
     init(lifecycleQueue: DispatchQueue, capturingQueue: DispatchQueue, motionManager: CMMotionManager) {
         self.lifecycleQueue = lifecycleQueue
@@ -105,13 +105,13 @@ class SensorCapturer {
     }
 
     /**
-        The handler provided to *CoreMotion* for handling new accelerations.
+     The handler provided to *CoreMotion* for handling new accelerations.
 
-        See `CMAccelerometerHandler` in the Apple documentation for futher information.
+     See `CMAccelerometerHandler` in the Apple documentation for futher information.
 
      - Parameters:
-        - data: The new accelerometer data, if any is available or `nil` otherwise.
-        - error: An error or `nil` if no error occured.
+     - data: The new accelerometer data, if any is available or `nil` otherwise.
+     - error: An error or `nil` if no error occured.
      */
     private func handle(_ data: CMAccelerometerData?, _ error: Error?) {
         if let error = error as? CMError {
@@ -131,9 +131,9 @@ class SensorCapturer {
         let accValues = data.acceleration
         let timestamp = Date()
         let acc = SensorValue(timestamp: timestamp,
-                               x: accValues.x,
-                               y: accValues.y,
-                               z: accValues.z)
+                              x: accValues.x,
+                              y: accValues.y,
+                              z: accValues.z)
         // Synchronize this write operation.
         self.lifecycleQueue.async(flags: .barrier) {
             self.accelerations.append(acc)
@@ -141,14 +141,14 @@ class SensorCapturer {
     }
 
     /**
-       The handler provided to *CoreMotion* for handling new rotations.
+     The handler provided to *CoreMotion* for handling new rotations.
 
-       See `CMGyroHandler` in the Apple documentation for futher information.
+     See `CMGyroHandler` in the Apple documentation for futher information.
 
-    - Parameters:
-       - data: The new rotations data, if any is available or `nil` otherwise.
-       - error: An error or `nil` if no error occured.
-    */
+     - Parameters:
+     - data: The new rotations data, if any is available or `nil` otherwise.
+     - error: An error or `nil` if no error occured.
+     */
     private func handle(_ data: CMGyroData?, _ error: Error?) {
         if let error = error as? CMError {
             os_log("Gyroscope error: %@", log: SensorCapturer.log, type: .error, error.rawValue)
@@ -171,14 +171,14 @@ class SensorCapturer {
     }
 
     /**
-       The handler provided to *CoreMotion* for handling device motion. This is mainly used to capture cleaned
+     The handler provided to *CoreMotion* for handling device motion. This is mainly used to capture cleaned
 
-       See `CMDeviceMotionHandler` in the Apple documentation for futher information.
+     See `CMDeviceMotionHandler` in the Apple documentation for futher information.
 
-    - Parameters:
-       - data: The new directional data, if any is available or `nil` otherwise.
-       - error: An error or `nil` if no error occured.
-    */
+     - Parameters:
+     - data: The new directional data, if any is available or `nil` otherwise.
+     - error: An error or `nil` if no error occured.
+     */
     private func handle(_ data: CMDeviceMotion?, _ error: Error?) {
         if let error = error as? CMError {
             return os_log("Device Motion error: %@", log: SensorCapturer.log, type: .error, error.rawValue)
