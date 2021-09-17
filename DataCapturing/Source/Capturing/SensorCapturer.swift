@@ -37,10 +37,16 @@ class SensorCapturer {
     // MARK: - Properties
     /// An in memory storage for accelerations, before they are written to disk.
     var accelerations = [SensorValue]()
+    /// The timestamp of the previously captured acceleration. This is stored to make sure all accelerations are captured in increasing order.
+    var previousCapturedAccelerationTimestamp: TimeInterval
     /// An in memory storage for rotations, before they are written to disk.
     var rotations = [SensorValue]()
+    /// The timestamp of the previously captured rotation. This is stored to make sure all rotations are captured in increasing order.
+    var previousCapturedRotationTimestamp: TimeInterval
     /// An in memory storage for directions, before they are written to disk.
     var directions = [SensorValue]()
+    /// The timestamp of the previously captured direction. This is stored to make sure all directions are captured in increasing order.
+    var previousCapturedDirectionTimestamp: TimeInterval
     /// The queue running and synchronizing the data capturing lifecycle.
     private let lifecycleQueue: DispatchQueue
     /// The queue running and synchronizing read and write operations to the sensor storage objects.
@@ -65,6 +71,10 @@ class SensorCapturer {
         self.lifecycleQueue = lifecycleQueue
         self.capturingQueue = capturingQueue
         self.motionManager = motionManager
+
+        self.previousCapturedAccelerationTimestamp = 0.0
+        self.previousCapturedRotationTimestamp = 0.0
+        self.previousCapturedDirectionTimestamp = 0.0
     }
 
     // MARK: - Methods
@@ -113,6 +123,11 @@ class SensorCapturer {
             fatalError("No Accelerometer data available!")
         }
 
+        guard previousCapturedAccelerationTimestamp < data.timestamp else {
+            return os_log("Accelerometer error: Received late value!", log: SensorCapturer.log, type: .error)
+        }
+        previousCapturedAccelerationTimestamp = data.timestamp
+
         let accValues = data.acceleration
         let timestamp = Date()
         let acc = SensorValue(timestamp: timestamp,
@@ -143,6 +158,10 @@ class SensorCapturer {
             fatalError("No Gyroscope data available!")
         }
 
+        guard previousCapturedRotationTimestamp < data.timestamp else {
+            return os_log("Gyroscope error: Received late value!", log: SensorCapturer.log, type: .error)
+        }
+
         let rotValues = data.rotationRate
         let timestamp = Date()
         let rot = SensorValue(timestamp: timestamp, x: rotValues.x, y: rotValues.y, z: rotValues.z)
@@ -165,15 +184,19 @@ class SensorCapturer {
             return os_log("Device Motion error: %@", log: SensorCapturer.log, type: .error, error.rawValue)
         }
 
-        if let data = data {
-            let dirValues = data.magneticField
-            let timestamp = Date()
-            let dir = SensorValue(timestamp: timestamp, x: dirValues.field.x, y: dirValues.field.y, z: dirValues.field.z)
-            lifecycleQueue.async {
-                self.directions.append(dir)
-            }
-        } else {
-            os_log("No device motion data available!", log: SensorCapturer.log, type: .error)
+        guard let data = data else {
+            return os_log("No device motion data available!", log: SensorCapturer.log, type: .error)
+        }
+
+        guard previousCapturedDirectionTimestamp < data.timestamp else {
+            return os_log("Device Motion error: Received late value!", log: SensorCapturer.log, type: .error)
+        }
+
+        let dirValues = data.magneticField
+        let timestamp = Date()
+        let dir = SensorValue(timestamp: timestamp, x: dirValues.field.x, y: dirValues.field.y, z: dirValues.field.z)
+        lifecycleQueue.async {
+            self.directions.append(dir)
         }
     }
 }
