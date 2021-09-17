@@ -1,63 +1,201 @@
-//
-//  AppDelegate.swift
-//  Cyface-Test
-//
-//  Created by Team Cyface on 06.11.17.
-//  Copyright © 2017 Cyface GmbH. All rights reserved.
-//
+/*
+ * Copyright 2017 - 2021 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import UIKit
 import DataCapturing
 import CoreData
 
-// TODO move url changing code to here and check that we are not in login view before presenting that view, but always update the server connections url.
+/**
+ This is the entry point of the Cyface iOS app.
+
+ One object of this class is created by the iOS system to start the Cyface iOS app.
+ This object manages all objects of which only one instance is required or allowed and forwards them to the appropriate view controllers.
+ It also starts the first `UIViewController`, initializes the database layer and connects to a Cyface data server.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener {
 
     // MARK: - Constants
-    static let syncToggleKey = "de.cyface.sync_toggle"
-    static let serverURLKey = "de.cyface.serverurl"
-    static let usernameKey = "de.cyface.login"
-    static let passwordKey = "de.cyface.password"
-    static let isAuthenticatedKey = "de.cyface.settings.loggedin"
-    static let highestAcceptedPrivacyPolicyKey = "de.cyface.settings.privacy_policy_version"
-    static let guestUsername = CyfaceCreds.clientId
-    static let guestPassword = CyfaceCreds.clientSecret
-    static let defaultServerURL = "https://s2.cyface.de/api/v2"
+    /// The name of the main storyboard file used by the Cyface iOS app
     static let mainStoryBoard = "Cyface-Main"
-    static let privacyPolicyStoryBoard = "PrivacyPolicy"
 
     // MARK: - Properties
+    /// The application window, showing all the views.
     var window: UIWindow?
+    /// The database access layer using iOS CoreData framework
     var coreDataStack: CoreDataManager?
+    /// A connection to a Cyface collector service.
     var serverConnection: ServerConnection?
+    /// An authenticator authenticating users to login to the app and upload data to a Cyface collector service if valid.
     var authenticator: CredentialsAuthenticator?
-    var oldServerUrl: String!
+    /// The persistent application settings. These includes hidden settings as well as those that can be customized using the systems settings app.
+    let settings = Settings()
+    /// The most recent version of the privacy policy
+    let currentPrivacyPolicyVersion = 2
 
+    // MARK: - Methods
+    /// A method that decides which view is the first to show to the user.
+    func presentMainUI() {
+        // newest privacy policy not accepted, so we need to show it and ask for acceptance
+        guard settings.highestAcceptedPrivacyPolicy == currentPrivacyPolicyVersion else {
+            showAcceptPrivacyPolicyDialog(currentPrivacyPolicyVersion)
+            return
+        }
+
+        // No Server provided in the settings so we ask for one.
+        guard let currentServerInSettings = settings.serverUrl, !currentServerInSettings.isEmpty else {
+            // show some dialog telling the user to enter the server url.
+            showAskForServerDialog()
+            return
+        }
+
+        self.serverConnection = self.createConnection(to: currentServerInSettings)
+
+        // Authenticated server is the one from the settings so we start directly without login, otherwise login screen is shown.
+        if settings.authenticatedServerUrl == currentServerInSettings {
+            showMeasurementDialog()
+        } else {
+            showLoginDialog()
+        }
+    }
+
+    /// Shows a dialog to the user asking for a valid server address to a Cyface collector service.
+    private func showAskForServerDialog() {
+        guard !isTypeOf(controller: window?.rootViewController, ofType: AskForServerViewController.self) else {
+            return
+        }
+
+        window?.rootViewController=AskForServerViewController(AskForServerViewModel(settings))
+        window?.makeKeyAndVisible()
+    }
+
+    /// Shows a dialog to the user asking to accept the Cyface privacy policy.
+    private func showAcceptPrivacyPolicyDialog(_ currentPrivacyPolicyVersion: Int) {
+        guard !isTypeOf(controller: window?.rootViewController, ofType: PrivacyPolicyViewController.self) else {
+            return
+        }
+
+        window?.rootViewController = PrivacyPolicyViewController(PrivacyPolicyViewModel(settings, currentPrivacyPolicyVersion))
+        window?.makeKeyAndVisible()
+    }
+
+    /// Shows a login dialog where the user can enter credentials to login to a Cyface collector service.
+    private func showLoginDialog() {
+        guard !isTypeOf(controller: window?.rootViewController, ofType: LoginViewController.self) else {
+            return
+        }
+
+        let storyboard = UIStoryboard(name: AppDelegate.mainStoryBoard, bundle: nil)
+        guard let loginViewController = storyboard.instantiateInitialViewController() as? LoginViewController else {
+            fatalError("Unable to cast main storyboard initial view controller to a LoginViewController!")
+        }
+        // TODO: This late dependency injection is not necessary if using a proper programmatical MVVM. Refactor the LoginViewController to follow that model!
+        loginViewController.model = settings
+        window?.rootViewController = loginViewController
+        window?.makeKeyAndVisible()
+    }
+
+    /// Shows the main dialog, with controls to start, stop, pause and resume data capturing as well as an overview of the measurements available.
+    private func showMeasurementDialog() {
+        guard !isTypeOf(controller: window?.rootViewController, ofType: ViewController.self) else {
+            return
+        }
+
+        let storyboard = UIStoryboard(name: AppDelegate.mainStoryBoard, bundle: nil)
+        guard let mainNavigationViewController = storyboard.instantiateViewController(withIdentifier: "CyfaceViewController") as? UINavigationController else {
+            fatalError("Wrong type for ViewController to show as main view controller. Must be of type ViewController")
+        }
+
+        guard let mainViewController = mainNavigationViewController.topViewController as? ViewController else {
+            fatalError()
+        }
+
+        mainViewController.settings = settings
+        window?.rootViewController = mainNavigationViewController
+        window?.makeKeyAndVisible()
+    }
+
+    /// Checks if a ViewController is already displayed on screen to avoid calling the same one over and over again.
+    private func isTypeOf(controller: UIViewController?, ofType controllerType: AnyClass) -> Bool {
+        guard let controller = controller else {
+            return false
+        }
+
+        if controller.isKind(of: UINavigationController.self) {
+            guard let navigationController = window?.rootViewController as? UINavigationController else {
+                fatalError()
+            }
+
+            guard let topViewController = navigationController.topViewController else {
+                return false
+            }
+
+            return topViewController.isKind(of: controllerType)
+        } else {
+            return controller.isKind(of: controllerType)
+        }
+    }
+
+    /**
+     Create the connection to a Cyface collector service
+
+     - Parameter to: The address of the collector service to connect to
+     */
+    private func createConnection(to server: String) -> ServerConnection? {
+        guard let coreDataStack = coreDataStack else {
+            fatalError()
+        }
+
+        let serverURL = URL(string: server)!
+
+        let authenticator = CredentialsAuthenticator(authenticationEndpoint: serverURL)
+        authenticator.username = settings.username
+        authenticator.password = settings.password
+        self.authenticator = authenticator
+        return ServerConnection(apiURL: serverURL, authenticator: authenticator, onManager: coreDataStack)
+    }
     // MARK: - UIApplicationDelegate
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        registerDefaultsFromSettingsBundle()
-        oldServerUrl = UserDefaults.standard.string(forKey: AppDelegate.serverURLKey)
-
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(onUploadServerUrlChanged(notification:)),
-                                               name: UserDefaults.didChangeNotification,
-                                               object: nil)
-
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else {
                 return
             }
 
+            self.settings.add(serverUrlChangedListener: self)
             let coreDataStack = CoreDataManager()
             let bundle = Bundle(for: type(of: coreDataStack))
-            coreDataStack.setup(bundle: bundle) {
+            coreDataStack.setup(bundle: bundle) { [weak self] in
+                guard let self = self else {
+                    return
+                }
                 self.coreDataStack = coreDataStack
 
-                self.serverConnection = self.createServerConnection()
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else {
+                        return
+                    }
 
-                DispatchQueue.main.async {
+                    self.window = UIWindow(frame: UIScreen.main.bounds)
                     self.presentMainUI()
                 }
             }
@@ -87,88 +225,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-    // MARK: - Methods
-    // FIXME: This hopefully changes in a future version of iOS
-    /// In the beginning the app needs to load default settings from the Settings.bundle. Only Apple knows why this is necessary and it seems like a pretty dirty hack, but the code does not work without this. This will hopefully be fixed in the future
-    private func registerDefaultsFromSettingsBundle() {
-        let settingsUrl = Bundle.main.url(forResource: "Settings", withExtension: "bundle")!.appendingPathComponent("Root.plist")
-        let settingsPlist = NSDictionary(contentsOf: settingsUrl)!
-        guard let preferences = settingsPlist["PreferenceSpecifiers"] as? [NSDictionary] else {
-            fatalError()
-        }
-
-        var defaultsToRegister = [String: Any]()
-
-        for preference in preferences {
-            guard let key = preference["Key"] as? String else {
-                NSLog("Key not fount")
-                continue
-            }
-
-            defaultsToRegister[key] = preference["DefaultValue"]
-        }
-        UserDefaults.standard.register(defaults: defaultsToRegister)
+    // MARK: - ServerUrlChangedListener
+    func toValidUrl() {
+        presentMainUI()
     }
 
-    private func presentMainUI() {
-        self.window = UIWindow(frame: UIScreen.main.bounds)
-
-        let storyboard = UIStoryboard(name: AppDelegate.mainStoryBoard, bundle: nil)
-        let privacyPolicyStoryboard = UIStoryboard(name: AppDelegate.privacyPolicyStoryBoard, bundle: nil)
-        let highestAcceptedPrivacyPolicyVersion = UserDefaults.standard.integer(forKey: AppDelegate.highestAcceptedPrivacyPolicyKey)
-
-        if highestAcceptedPrivacyPolicyVersion == PrivacyPolicyViewController.currentPrivacyPolicyVersion {
-            if UserDefaults.standard.bool(forKey: AppDelegate.isAuthenticatedKey) {
-                window?.rootViewController = storyboard.instantiateViewController(withIdentifier: "CyfaceViewController")
-            } else {
-                window?.rootViewController = storyboard.instantiateInitialViewController()
-            }
-        } else {
-            window?.rootViewController = privacyPolicyStoryboard.instantiateInitialViewController()
-        }
-        window?.makeKeyAndVisible()
-    }
-
-    private func createServerConnection() -> ServerConnection? {
-        // TODO test what happens if we delete the server URL altogether.
-        guard let serverURLString = UserDefaults.standard.string(forKey: AppDelegate.serverURLKey) else {
-            fatalError("Missing server URL!")
-        }
-
-        guard let coreDataStack = coreDataStack else {
-            fatalError()
-        }
-
-        let serverURL = URL(string: serverURLString)!
-
-        let authenticator = CredentialsAuthenticator(authenticationEndpoint: serverURL)
-        authenticator.username = UserDefaults.standard.string(forKey: AppDelegate.usernameKey)
-        authenticator.password = UserDefaults.standard.string(forKey: AppDelegate.passwordKey)
-        self.authenticator = authenticator
-        return ServerConnection(apiURL: serverURL, authenticator: authenticator, onManager: coreDataStack)
-    }
-
-    @objc
-    func onUploadServerUrlChanged(notification: NSNotification) {
-        debugPrint("Changed setting")
-        guard let newServerUrl = UserDefaults.standard.string(forKey: AppDelegate.serverURLKey) else {
-            fatalError("No server URL available in settings!")
-        }
-
-        if oldServerUrl != newServerUrl {
-            serverConnection?.apiURL = URL(string: newServerUrl)!
-            authenticator?.authenticationEndpoint = URL(string: newServerUrl)!
-            oldServerUrl = newServerUrl
-            UserDefaults.standard.set(false, forKey: AppDelegate.isAuthenticatedKey)
-            let storyBoard: UIStoryboard = UIStoryboard(name: AppDelegate.mainStoryBoard, bundle: nil)
-            let loginViewController = storyBoard.instantiateViewController(withIdentifier: "LoginViewController")
-            window?.rootViewController = loginViewController
-            window?.makeKeyAndVisible()
-        }
+    func toInvalidUrl() {
+        showAskForServerDialog()
     }
 }
 
+// MARK: - UIViewController
 extension UIViewController {
+    /// Provides the applications appDelegate to all the views. This must only be called on the main thread.
     var appDelegate: AppDelegate {
         guard let appDelegate = (UIApplication.shared.delegate as? AppDelegate) else {
             fatalError("Unable to load AppDelegate!")
@@ -176,6 +245,7 @@ extension UIViewController {
         return appDelegate
     }
 
+    /// Provides the applications authenticator to all the views. This must only be called on the main thread.
     var authenticator: CredentialsAuthenticator {
         guard let authenticator = appDelegate.authenticator  else {
             fatalError("Unable to load Authenticator!")
@@ -183,6 +253,7 @@ extension UIViewController {
         return authenticator
     }
 
+    /// Provides the applications CoreData stack to all the views. This must only be called on the main thread.
     var coreDataStack: CoreDataManager {
         guard let coreDataStack = appDelegate.coreDataStack  else {
             fatalError("Unable to load CoreDataStack!")
@@ -190,6 +261,7 @@ extension UIViewController {
         return coreDataStack
     }
 
+    /// Provides the applications CoreData stack to all the views. This must only be called on the main thread.
     var serverConnection: ServerConnection {
         guard let serverConnection = appDelegate.serverConnection  else {
             fatalError("Unable to load ServerConnection!")

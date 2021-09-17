@@ -1,15 +1,32 @@
-//
-//  CapturingLifecycle.swift
-//  Cyface
-//
-//  Created by Team Cyface on 07.06.19.
-//  Copyright © 2019 Cyface GmbH. All rights reserved.
-//
+/*
+ * Copyright 2019-2021 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import DataCapturing
 import os.log
 
+/**
+ Handles the Cyface SDK lifecycle events, caused by start, pause, resume and stop calls.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 class CapturingLifecycle {
 
     private static let log = OSLog(subsystem: "de.cyface", category: "CapturingLifecycle")
@@ -101,8 +118,9 @@ class CapturingLifecycle {
      Called each time the service has stopped successfully. This should only be called on the **MainThread**.
 
      - Parameter synchronizer: The synchronizer to used to transmit the stopped measurement to a Cyface server.
+     - Parameter synchronize: `true` if the app is currently set to synchronize data automatically; `false` otherwise. If `true` a final data synchronization is carried out before stopping the service.
      */
-    func onServiceStopped(synchronizer: Synchronizer) {
+    func onServiceStopped(synchronizer: Synchronizer, synchronize: Bool) {
         guard let currentMeasurementViewModel = currentMeasurementViewModel else {
             fatalError("Current Measurement view not initialized!")
         }
@@ -117,7 +135,8 @@ class CapturingLifecycle {
         self.currentMeasurementView = nil
 
         self.viewController.measurementsOverview.reloadData()
-        if UserDefaults.standard.bool(forKey: AppDelegate.syncToggleKey) { synchronizer.syncChecked()
+        if synchronize {
+            synchronizer.syncChecked()
         }
 
         os_log("Service stopped", log: CapturingLifecycle.log, type: .info)

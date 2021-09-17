@@ -43,8 +43,8 @@ class TableCellViewModel {
             fatalError("Unable to load distance from model!")
         }
 
-        let distanceInKilometers = distance / 1_000.0
-        return "\(TableCellViewModel.numberFormatter.string(from: NSNumber(floatLiteral: distanceInKilometers)) ?? "0.0") km"
+        let distanceInKilometers: NSNumber = NSNumber(value: distance / 1_000.0)
+        return "\(TableCellViewModel.numberFormatter.string(from: distanceInKilometers) ?? "0.0") km"
     }
     /// The status of the measurement of this cell.
     var status: MeasurementCellStatus {
