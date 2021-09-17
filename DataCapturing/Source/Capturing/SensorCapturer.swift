@@ -116,8 +116,8 @@ class SensorCapturer {
      - error: An error or `nil` if no error occured.
      */
     private func handle(_ data: CMAccelerometerData?, _ error: Error?) {
-        if let error = error as? CMError {
-            os_log("Accelerometer error: %@", log: SensorCapturer.log, type: .error, error.rawValue)
+        if let error = error {
+            return os_log("Accelerometer error: %@", log: SensorCapturer.log, type: .error, error.localizedDescription)
         }
 
         guard let data = data else {
@@ -152,8 +152,8 @@ class SensorCapturer {
      - error: An error or `nil` if no error occured.
      */
     private func handle(_ data: CMGyroData?, _ error: Error?) {
-        if let error = error as? CMError {
-            os_log("Gyroscope error: %@", log: SensorCapturer.log, type: .error, error.rawValue)
+        if let error = error {
+            return os_log("Gyroscope error: %@", log: SensorCapturer.log, type: .error, error.localizedDescription)
         }
 
         guard let data = data else {
@@ -182,8 +182,8 @@ class SensorCapturer {
      - error: An error or `nil` if no error occured.
      */
     private func handle(_ data: CMDeviceMotion?, _ error: Error?) {
-        if let error = error as? CMError {
-            return os_log("Device Motion error: %@", log: SensorCapturer.log, type: .error, error.rawValue)
+        if let error = error {
+            return os_log("Device Motion error: %@", log: SensorCapturer.log, type: .error, error.localizedDescription)
         }
 
         guard let data = data else {
