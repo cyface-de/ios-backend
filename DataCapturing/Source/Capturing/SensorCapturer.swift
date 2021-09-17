@@ -24,6 +24,8 @@ import os.log
 /**
  An instance of this class is responsible for capturing data from the motion sensors of the smartphone. Currently it supports capturing from accelerometer, gyroscope and magnetometer (compass).
 
+ There should be only one instance of this class used within the application.
+
  - Author: Klemens Muthmann
  - Version: 1.0.0
  - Since: 6.0.0
