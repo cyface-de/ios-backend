@@ -26,6 +26,11 @@ import os.log
 
  There should be only one instance of this class used within the application.
 
+ Timestamps for each sensor value are generated based on the current system time (by calling `Date()`).
+ This might cause a slight shift by a few nanoseconds or milliseconds from the actual time when the sensor has captured the event.
+ However using the timestamp provided by the event is impossible, since that timestamp is based on kernel boot time, which is not updated when the system sleeps.
+ Since there is no way of knowing how long the system has sleept in between the last boot and now, we cannot use kernel boot time to get an absolute data.
+
  - Author: Klemens Muthmann
  - Version: 1.0.0
  - Since: 6.0.0
