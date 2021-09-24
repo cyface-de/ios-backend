@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017 - 2021 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -26,7 +26,7 @@ import CoreData
  This test is intended to test capturing some data in isolation.
 
  - Author: Klemens Muthmann
- - Version: 2.3.1
+ - Version: 2.3.2
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {

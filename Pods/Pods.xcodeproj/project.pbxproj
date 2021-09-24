@@ -1870,6 +1870,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MARKETING_VERSION = 0.0.0;
 				MODULEMAP_FILE = "Target Support Files/DataCapturing/DataCapturing.modulemap";
 				PRODUCT_MODULE_NAME = DataCapturing;
 				PRODUCT_NAME = DataCapturing;
@@ -2099,6 +2100,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MARKETING_VERSION = 0.0.0;
 				MODULEMAP_FILE = "Target Support Files/DataCapturing/DataCapturing.modulemap";
 				PRODUCT_MODULE_NAME = DataCapturing;
 				PRODUCT_NAME = DataCapturing;

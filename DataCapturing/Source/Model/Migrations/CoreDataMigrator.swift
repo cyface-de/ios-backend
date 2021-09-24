@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019 - 2021 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -24,7 +24,7 @@ import CoreData
  A protocol implemented by classes responsible for migrating from old to new data models.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 4.0.0
  */
 public protocol CoreDataMigratorProtocol {

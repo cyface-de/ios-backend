@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017 - 2021 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -33,7 +33,7 @@ import os.log
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 6.1.0
+ - Version: 6.1.1
  - Since: 1.0.0
  */
 public class PersistenceLayer {

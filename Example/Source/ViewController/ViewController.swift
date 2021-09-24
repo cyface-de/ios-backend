@@ -29,7 +29,7 @@ The view controller showing the overview of unsynchronized measurements together
  This is still an MVC (Massive View Controller) until all the remining pieces of business logic are refactored out to their own view models. Of special importance is to remove all calls to the persistence layer from this view controller.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.1.0
  - Since: 1.0.0
  */
 class ViewController: UIViewController {

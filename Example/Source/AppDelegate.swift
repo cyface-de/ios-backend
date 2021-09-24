@@ -29,7 +29,8 @@ import CoreData
  It also starts the first `UIViewController`, initializes the database layer and connects to a Cyface data server.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
+ - Since: 1.0.0
  */
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener {

@@ -25,6 +25,7 @@ import Foundation
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 9.0.0
  */
 protocol PrivacyPolicyViewModelDelegate: AnyObject {
     // MARK: - Properties
