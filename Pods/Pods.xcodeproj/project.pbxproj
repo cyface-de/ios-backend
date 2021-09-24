@@ -1870,11 +1870,13 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MARKETING_VERSION = 9.0.0;
 				MODULEMAP_FILE = "Target Support Files/DataCapturing/DataCapturing.modulemap";
 				PRODUCT_MODULE_NAME = DataCapturing;
 				PRODUCT_NAME = DataCapturing;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
 				SWIFT_VERSION = 5.3;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -2099,11 +2101,13 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MARKETING_VERSION = 9.0.0;
 				MODULEMAP_FILE = "Target Support Files/DataCapturing/DataCapturing.modulemap";
 				PRODUCT_MODULE_NAME = DataCapturing;
 				PRODUCT_NAME = DataCapturing;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
 				SWIFT_VERSION = 5.3;
 				TARGETED_DEVICE_FAMILY = "1,2";
