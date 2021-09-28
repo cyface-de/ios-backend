@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Cyface GmbH
+ * Copyright 2018 - 2021 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -27,7 +27,7 @@ import Foundation
  - SeeAlso: `DataCapturingService`, `PersistenceLayer::save(:[Acceleration]:MeasurementEntity:((MeasurementMO?, Status) -> Void))`
 
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 3.1.0
  - Since: 1.0.0
  - Note: This was called  `Acceleration` in previous versions of the SDK.
  */

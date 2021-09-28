@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataCapturing - Status</title>
+    <link rel="stylesheet" type="text/css" href="/ios-backend/all.css" media="all" />
+</head>
+<body>
+    <header>
+        <a href="/ios-backend/">
+            <strong>
+                DataCapturing
+            </strong>
+            <span>Documentation</span>
+        </a>
+    </header>
+
+    <!--
+    <form class="search">
+        <input type="search" placeholder="Search" />
+    </form>
+    -->
+
+    <nav>
+        <div class="wrapper">
+            <h2>On This Page</h2>
+            <ol><li><a href="#enumeration cases">Enumeration Cases</a><ul><li class="case"><a href="#status.success">success</a></li><li class="case"><a href="#status.error">error</a></li></ul></li></ol>
+        </div>
+    </nav>
+
+    <main>
+        <article>
+            <h1>
+    <small>Enumeration</small>
+    <code class="name">Status</code>
+</h1>
+
+<div class="declaration">
+<pre class="highlight"><code><html><body><span class="attribute">@</span><span class="attribute">available</span>(<span class="variable">swift</span>, <span class="variable">deprecated</span>: <span class="number literal">5.0</span>.<span class="number literal">0</span>, <span class="variable">message</span>: <span class="string literal">"There is a better solution provide by Swift natively beginning with Swift 5"</span>)
+<span class="keyword">public</span> <span class="keyword">enum</span> <span class="type">Status</span>  </body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>The status returned by asynchronous callback handlers.</p>
+
+</div>
+<div class="discussion">
+    <p>This tells the caller, whether an asynchronous call has been successful or not and if not it provides further information about the <code>Error</code>. This is required, since an asynchronous call can not throw an <code>Error</code> to the calling thread.</p>
+
+<html><body><pre class="highlight"><code><span class="keyword">case</span> <span class="variable">success</span>
+<span class="keyword">case</span> <span class="variable">error</span>(<span class="type">Error</span>)
+</code></pre></body></html>
+<aside class="author" title="Author">
+    <p>Klemens Muthmann</p>
+
+</aside>
+<aside class="version" title="Version">
+    <p>1.0.1</p>
+
+</aside>
+<aside class="since" title="Since">
+    <p>2.2.0</p>
+
+</aside>
+</div>
+
+    <section id="enumeration cases">
+        <h2>Enumeration Cases</h2>
+
+        <div role="article" class="case" id="status.success">
+    <h3>
+        <code><a href="#status.success">success</a></code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">case</span> <span class="variable">success</span></body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>The status returned if an asynchronous callback has finished successfully.</p>
+
+</div>
+</div>
+<div role="article" class="case" id="status.error">
+    <h3>
+        <code><a href="#status.error">error</a></code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">case</span> <span class="variable">error</span>(<span class="type">Error</span>) </body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>The status returned if an asynchronous callback has finished with an error. Details about the error are available via the <code>Error</code> parameter.</p>
+
+</div>
+</div>
+    </section>
+
+
+
+        </article>
+    </main>
+
+    <footer>
+        <p>
+    Generated on <time datetime="2021-09-28T10:34:59+0200">September 28, 2021</time> using <a href="https://github.com/SwiftDocOrg/swift-doc">swift-doc</a> <span class="version">1.0.0-rc.1</span>.
+</p>
+    </footer>
+</body>
+</html>

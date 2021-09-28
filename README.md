@@ -296,15 +296,27 @@ serverConnection: serverConnection) { event, status in
 6. Provide the `ServerConnection` as created in step 2.
 
 ## API Documentation
-[See](docs/index.html)
+[See](https://cyface-de.github.io/ios-backend/)
 
 ## Building from Source
 Contains swiftlint
 See: https://github.com/realm/SwiftLint
 
 ### Creating the documentation
-* Install Jazzy
-* Call `jazzy` from the terminal in the root folder.
+* Install swift doc like described [here](https://github.com/SwiftDocOrg/swift-doc).
+* Call `swift doc generate DataCapturing/Source --module-name DataCapturing --output docs --format html --base-url /ios-backend/` from the terminal in the DataCapturing sub directory.
+
+## Releasing a new Version
+* Always work on a new branch based on main conforming to the pattern "release-<major>.<minor>.<fix>_PROJ-TASKNUMBER
+* Increase Version for DataCapturing Target and DataCapturing.podspec
+* If a new release to the AppStore should happen also increase version for example App
+* Create PR into release branch
+* Check Version and Since Tags on all added and changed files
+* Build Documentation
+* Check Readme (Is it up to date with the most recent changes?)
+* After approval merge into release and tag the merge commit with `git tag - <major>.<minor>.<fix>` appropriately
+* Make the tag to a release on Github and explain the changes following "Keeping a Changelog"
+
 
 ## License
 Copyright 2017 - 2021 Cyface GmbH

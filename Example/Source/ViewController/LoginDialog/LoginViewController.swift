@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 Cyface GmbH
+ * Copyright 2017 - 2021 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -25,7 +25,7 @@ import CoreMotion
  The `UIViewController` used to control the login view.
  
  - Author: Klemens Muthmann
- - Version: 1.0.2
+ - Version: 2.0.0
  - Since: 1.0.0
  */
 class LoginViewController: UIViewController {

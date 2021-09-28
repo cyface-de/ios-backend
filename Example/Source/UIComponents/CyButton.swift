@@ -24,6 +24,7 @@ A basic button pre styled to follow the Cyface UI guidelines.
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 9.0.0
  */
 class CyButton: UIButton {
 
