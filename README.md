@@ -296,15 +296,15 @@ serverConnection: serverConnection) { event, status in
 6. Provide the `ServerConnection` as created in step 2.
 
 ## API Documentation
-[See](docs/index.html)
+[See](https://cyface-de.github.io/ios-backend/)
 
 ## Building from Source
 Contains swiftlint
 See: https://github.com/realm/SwiftLint
 
 ### Creating the documentation
-* Install Jazzy
-* Call `jazzy` from the terminal in the root folder.
+* Install swift doc like described [here](https://github.com/SwiftDocOrg/swift-doc).
+* Call `swift doc generate DataCapturing/Source --module-name DataCapturing --output docs --format html --base-url /ios-backend/` from the terminal in the DataCapturing sub directory.
 
 ## Releasing a new Version
 * Always work on a new branch based on main conforming to the pattern "release-<major>.<minor>.<fix>_PROJ-TASKNUMBER
