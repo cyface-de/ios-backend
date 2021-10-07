@@ -1,4 +1,4 @@
-# Copyright 2018 - 2020 Cyface GmbH
+# Copyright 2018 - 2021 Cyface GmbH
 #
 # This file is part of the Cyface SDK for iOS.
 #
