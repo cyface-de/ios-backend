@@ -55,4 +55,8 @@ This framework can be included by your App if you are going to capture sensor da
     test_spec.source_files = 'DataCapturing/Tests/**/*.swift'
   end
 
+  s.test_spec 'ExampleUnitTests' do |example_unit_test_spec|
+    example_unit_test_spec.source_files = 'ExampleUnitTests/**/*.swift'
+  end
+
 end

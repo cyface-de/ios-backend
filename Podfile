@@ -7,9 +7,9 @@ target 'Example' do
   pod 'Charts', '~> 3.4.0'
   pod 'DataCapturing', :path => './', :testspecs => ['Tests']
 
-  #target 'Tests' do
-    #inherit! :search_paths
-    ## Pods for testing
-    #pod 'DataCapturing', :path => './'
-  #end
+  target 'ExampleUnitTests' do
+    inherit! :search_paths
+    # Pods for testing
+    pod 'DataCapturing', :path => './'
+  end
 end
