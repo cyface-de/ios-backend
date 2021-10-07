@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019-2021 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -19,20 +19,23 @@
 
 import Foundation
 import CoreData
+import OSLog
 
 /**
  A class for objects representing a *CoreData* stack.
- Please call `setup(bundle:)` before using an object of this class.
+ Please call `setup(bundle:completionClosure:)` before using an object of this class.
  That call will run data migration if necessary and might take some time depending on the amount of data that must be migrated.
- So it might be a good idea to run `setup(bundle:)` on a background thread.
+ So it might be a good idea to run `setup(bundle:completionClosure:)` on a background thread.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 4.0.0
- - Attention: Do not load or save any data before the call to `setup(bundle:)` has finished.
+ - Attention:
+    - You must call `setup(bundle:completionClosure:)` only once in your application. Usually this should happen in AddDelegate.application`
+    - Do not load or save any data before the call to `setup(bundle:completionClosure:)` has finished.
  */
 public class CoreDataManager {
-
+    private static let log = OSLog(subsystem: "CoreDataManager", category: "de.cyface")
     /// An object to migrate between different Cyface model versions.
     let migrator: CoreDataMigratorProtocol
     /// The type of the store to use. In production this should usually be `NSSQLiteStoreType`. In a test environment you might use `NSInMemoryStoreType`. Both values are defined by *CoreData*.
@@ -40,6 +43,8 @@ public class CoreDataManager {
 
     /// The `NSPersistentContainer` used by this *CoreData* stack.
     lazy var persistentContainer: NSPersistentContainer = {
+        os_log("Creating persistent container", log: CoreDataManager.log, type: .info)
+
         let momdName = "CyfaceModel"
         let bundle = Bundle(for: type(of: self))
         guard let modelURL = bundle.url(forResource: momdName, withExtension: "momd") else {
@@ -62,7 +67,7 @@ public class CoreDataManager {
     /// Provides a background context usable on a background thread and accessing the data store managed by this stack.
     lazy var backgroundContext: NSManagedObjectContext = {
         let context = self.persistentContainer.newBackgroundContext()
-        //context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        // context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         // This improves performance as long as we do not need to undo on the background context.
         context.undoManager = nil
 
@@ -82,7 +87,7 @@ public class CoreDataManager {
     /**
      Creates a new instance of the `CoreDataManager`.
 
-     - Attention: Please call `setup(bundle:)` before using the `NSManagedObjectContext` instances, provided by this instance.
+     - Attention: Please call `setup(bundle:completionClosure:)` before using the `NSManagedObjectContext` instances, provided by this instance.
      - Parameters:
      - storeType: The type of the store to use. In production this should usually be `NSSQLiteStoreType`. In a test environment you might use `NSInMemoryStoreType`. Both values are defined by *CoreData*.
      - migrator: An object to migrate between different Cyface model versions.
@@ -99,12 +104,14 @@ public class CoreDataManager {
 
      - Parameter bundle: The bundle containing the data model.
      */
-    public func setup(bundle: Bundle) {
+    public func setup(bundle: Bundle, completionClosure: @escaping () -> Void) {
         migrateStoreIfNeeded(bundle: bundle)
         self.persistentContainer.loadPersistentStores { _, error in
             guard error == nil else {
                 fatalError("Was unable to load store \(error.debugDescription).")
             }
+
+            completionClosure()
         }
     }
 

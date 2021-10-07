@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019 - 2021 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -24,7 +24,7 @@ import CoreData
  A protocol implemented by classes responsible for migrating from old to new data models.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 4.0.0
  */
 public protocol CoreDataMigratorProtocol {
@@ -125,8 +125,11 @@ public class CoreDataMigrator: CoreDataMigratorProtocol {
      - Returns: An array of `CoreDataMigrationStep` instances ordered from the oldest to the newest.
      */
     private func migrationStepsForStore(at storeURL: URL, toVersion destinationVersion: CoreDataMigrationVersion, inBundle bundle: Bundle) -> [CoreDataMigrationStep] {
-        guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL),
-            let sourceVersion = CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle) else {
+        guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL) else {
+            fatalError("Unable to load metadata for persistent store: \(storeURL).")
+        }
+
+        guard let sourceVersion = CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle) else {
             fatalError("Unknown store version at URL \(storeURL).")
         }
 

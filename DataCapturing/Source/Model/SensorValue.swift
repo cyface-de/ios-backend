@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Cyface GmbH
+ * Copyright 2018 - 2021 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -27,11 +27,11 @@ import Foundation
  - SeeAlso: `DataCapturingService`, `PersistenceLayer::save(:[Acceleration]:MeasurementEntity:((MeasurementMO?, Status) -> Void))`
 
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 3.1.0
  - Since: 1.0.0
  - Note: This was called  `Acceleration` in previous versions of the SDK.
  */
-public class SensorValue {
+public class SensorValue: CustomStringConvertible {
 
     // MARK: - Properties
 
@@ -46,6 +46,9 @@ public class SensorValue {
 
     /// Value in the device z direction, which is standing on the screen pointing towards you if the homebutton faces you.
     public let z: Double
+
+    /// A human readable description of this object. This is required for debugging purposes.
+    public var description: String { return "Sensor Value: (timestamp: \(timestamp), x: \(x), y: \(y), z: \(z))" }
 
     // MARK: - Initializers
 

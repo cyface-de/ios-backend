@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cyface GmbH
+ * Copyright 2018 - 2021 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -24,7 +24,7 @@ import os.log
  The protocol for writing accelerations to a file.
  
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.0.1
  - Since: 2.0.0
  */
 protocol FileSupport {
@@ -75,7 +75,10 @@ extension FileSupport {
         let libraryDirectory = FileManager.SearchPathDirectory.libraryDirectory
         let libraryDirectoryUrl = try fileManager.url(for: libraryDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
 
-        let measurementDirectoryPath = libraryDirectoryUrl.appendingPathComponent(root).appendingPathComponent(measurementDirectory).appendingPathComponent(String(measurementIdentifier))
+        let measurementDirectoryPath = libraryDirectoryUrl
+            .appendingPathComponent(root)
+            .appendingPathComponent(measurementDirectory)
+            .appendingPathComponent(String(measurementIdentifier))
         try fileManager.createDirectory(at: measurementDirectoryPath, withIntermediateDirectories: true)
 
         let filePath = measurementDirectoryPath.appendingPathComponent(fileName).appendingPathExtension(fileExtension)

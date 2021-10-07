@@ -1,8 +1,21 @@
-//
-// Copyright (C) 2017 - 2020 Cyface GmbH - All Rights Reserved
-// Unauthorized copying of this file, via any medium is strictly prohibited
-// Proprietary and confidential
-//
+/*
+ * Copyright 2017 - 2021 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import UIKit
 import DataCapturing
@@ -16,7 +29,7 @@ The view controller showing the overview of unsynchronized measurements together
  This is still an MVC (Massive View Controller) until all the remining pieces of business logic are refactored out to their own view models. Of special importance is to remove all calls to the persistence layer from this view controller.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.1.0
  - Since: 1.0.0
  */
 class ViewController: UIViewController {
@@ -187,15 +200,34 @@ class ViewController: UIViewController {
         return ret
     }()
     var measurements: [TableCellViewModel] = []
-    //private var synchronizingMeasurements: [Int64] = []
+    // private var synchronizingMeasurements: [Int64] = []
     private static let LOG = OSLog(subsystem: "ViewController", category: "de.cyface")
     private var overlayView: UIView?
     private var activityIndicator: UIActivityIndicatorView?
     /// A variable saving the previous state of the synchronizer toggle. Since it is not possible to observe a specific property, it is necessary to save this so we can see if the value has changed and activate or deactivate the synchronizer based on that information.
-    private var synchronizerWasPreviouslyActivated: Bool = UserDefaults.standard.bool(forKey: AppDelegate.syncToggleKey)
+    private var synchronizerWasPreviouslyActivated: Bool = false
     private var lifecycle: CapturingLifecycle!
+    /// Provides access to this apps system settings, some of which are hidden and some of which are presented via the iOS settings app.
+    var settings: Settings?
+    /// An internal unwrapped convenience variable for the system settings.
+    private var _settings: Settings {
+        guard let settings = settings else {
+            fatalError("Unable to load settings. ViewController was not properly initialized!")
+        }
+
+        return settings
+    }
 
     // MARK: - Methods
+    /**
+     This is the core method for handling all events returned by the Cyface SDK.
+
+     This method is called each time the Cyface SDK reports an event processable by the user interface.
+     Please see `DataCapturingEvent` enumeration for possible events.
+
+     - Parameter event: The event that triggered the call to this method
+     - Parameter status: The status of the received event. This is either `success` or `error`
+     */
     func handleDataCapturingEvent(event: DataCapturingEvent, status: Status) {
 
         switch event {
@@ -222,7 +254,7 @@ class ViewController: UIViewController {
                     return
                 }
 
-                self.lifecycle.onServiceStopped(synchronizer: self.synchronizer)
+                self.lifecycle.onServiceStopped(synchronizer: self.synchronizer, synchronize: self._settings.synchronizeData)
             }
 
         case .servicePaused:
@@ -325,7 +357,7 @@ class ViewController: UIViewController {
     @objc
     func onSynchronizationToggleChanged(_ notification: Notification) {
         // Activate and deactivate the synchronizer based on the property value.
-        let synchronizerIsNotActive = UserDefaults.standard.bool(forKey: AppDelegate.syncToggleKey)
+        let synchronizerIsNotActive = _settings.synchronizeData
         if synchronizerIsNotActive && !synchronizerWasPreviouslyActivated {
             synchronizer.activate()
         } else if !synchronizerIsNotActive && synchronizerWasPreviouslyActivated {
@@ -388,6 +420,8 @@ class ViewController: UIViewController {
     // MARK: - UIViewController
     override func viewDidLoad() {
         super.viewDidLoad()
+        // TODO: This should move into a proper constructor if this is changed to MVVM with programmatical UI
+        synchronizerWasPreviouslyActivated = _settings.synchronizeData
 
         // Required for the extensions methods (see below) to fire appropriately.
         measurementsOverview.delegate = self
@@ -470,7 +504,7 @@ class ViewController: UIViewController {
             }
         }
 
-        if UserDefaults.standard.bool(forKey: AppDelegate.syncToggleKey) {
+        if _settings.synchronizeData {
             synchronizer.activate()
         }
         NotificationCenter.default.addObserver(self,
@@ -482,7 +516,7 @@ class ViewController: UIViewController {
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
-        if UserDefaults.standard.bool(forKey: AppDelegate.syncToggleKey) {
+        if _settings.synchronizeData {
             synchronizer.deactivate()
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019 - 2021 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -28,7 +28,7 @@ import os.log
  If no `username` or `password` is available the function will call its failure handler with the `ServerConnectionError.Category.notAuthenticated`.
 
  - Author: Klemens Muthmann
- - Version: 2.0.1
+ - Version: 2.0.2
  - Since: 2.0.0
  */
 public class CredentialsAuthenticator: Authenticator {
@@ -36,7 +36,7 @@ public class CredentialsAuthenticator: Authenticator {
     // MARK: - Properties
 
     /// The logger used for objects of this class.
-    private static let log = OSLog(subsystem: "de.cyface", category: "CredentialsAuthenticator")
+    private static let log = OSLog(subsystem: "CredentialsAuthenticator", category: "de.cyface")
     /// The username used for authentication.
     public var username: String?
     /// The password used for authentication.

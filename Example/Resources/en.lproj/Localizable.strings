@@ -76,3 +76,18 @@
 
 /* Shown when loading the main view. */
 "Please wait..." = "Please wait...";
+
+/* Shown to ask the user for a server address to upload captured data to. */
+"Server Address" = "Server Address";
+
+/* Shown as label for the accept button in the privacy policy dialog */
+"Accept" = "Accept";
+
+/* Shown as title of the privacy policy view controller */
+"Privacy Policy" = "Privacy Policy";
+
+/* The title to display on this page! */
+"Upload Server Address" = "Upload Server Address";
+
+/* Error message shown if the user enters an invalid URL */
+"invalidUrlError" = "Invalid URL";

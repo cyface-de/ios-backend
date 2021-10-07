@@ -1,17 +1,28 @@
-//
-//  EventTypeSelectorViewController.swift
-//  Cyface
-//
-//  Created by Team Cyface on 22.09.19.
-//  Copyright © 2019 Cyface GmbH. All rights reserved.
-//
+/*
+ * Copyright 2019 - 2021 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import UIKit
 import DataCapturing
 
 /**
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 2.0.0
  */
 class ModalitySelectorViewController: UIViewController {
@@ -30,9 +41,7 @@ class ModalitySelectorViewController: UIViewController {
     }
 
     @IBAction func tapCancel(_ sender: UIButton) {
-            // This jumps back two view controllers to the beginning of the process
-        //self.presentingViewController?.presentingViewController?.dismiss(animated: true)
-        //presentingViewController?.dismiss(animated: true)
+        // This jumps back two view controllers to the beginning of the process
         cancelBehaviour!()
     }
 

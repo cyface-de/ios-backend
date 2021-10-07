@@ -1,8 +1,21 @@
-//
-// Copyright (C) 2018 - 2020 Cyface GmbH - All Rights Reserved
-// Unauthorized copying of this file, via any medium is strictly prohibited
-// Proprietary and confidential
-//
+/*
+ * Copyright 2018 - 2021 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import UIKit
@@ -11,7 +24,7 @@ import UIKit
  The view shown while a measurement is active
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 2.0.0
  */
 class CurrentMeasurementView: UIStackView {
@@ -30,7 +43,7 @@ class CurrentMeasurementView: UIStackView {
     /// A label showing the longitude of the last captured position
     var lastLonContent = UILabel()
 
-    //initWithFrame to init view from code
+    // initWithFrame to init view from code
     /**
      Creates a new display for the current measurement
 
@@ -108,7 +121,7 @@ class CurrentMeasurementView: UIStackView {
         super.init(frame: frame)
     }
 
-    //initWithCode to init view from xib or storyboard
+    // initWithCode to init view from xib or storyboard
     /**
      Initializer used for storiebords and XIB files. This should never be called directly.
 
