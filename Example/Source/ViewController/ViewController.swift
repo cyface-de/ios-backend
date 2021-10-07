@@ -284,23 +284,26 @@ class ViewController: UIViewController {
      */
     func synchronized(measurementIdentifier: Int64, status: Status) {
         debugPrint("Finishing synchronization for measurement \(measurementIdentifier).")
-        // Search the index of the synchronizing measurement in the list of shown measurements.
-        guard let (index, measurement) = self.findMeasurementCellViewModelBy(identifier: measurementIdentifier) else {
-            fatalError("No measurement with identifier \(measurementIdentifier)!")
-        }
-
-        guard measurement.status == .uploading else {
-            fatalError("Measurement in invalid state. Expected .uploading but got \(measurement.status)")
-        }
 
         DispatchQueue.main.async { [weak self] in
             guard let self = self else {
                 return
             }
 
+            // Search the index of the synchronizing measurement in the list of shown measurements.
+            guard let (index, measurement) = self.findMeasurementCellViewModelBy(identifier: measurementIdentifier) else {
+                fatalError("No measurement with identifier \(measurementIdentifier)!")
+            }
+
             switch status {
             case .success:
+
+                guard measurement.status == .uploading else {
+                    fatalError("Measurement in invalid state. Expected .uploading but got \(measurement.status)")
+                }
+
                 measurement.status = .uploadSuccessful
+
                 // TODO: Move the following code to a separate view class
                 let path = IndexPath(row: index, section: 0)
 
