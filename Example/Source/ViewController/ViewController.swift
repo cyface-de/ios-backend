@@ -446,22 +446,24 @@ class ViewController: UIViewController {
         case Modality.train.dbValue:
             contextTabBar.selectedSegmentIndex = 4
         default:
-            os_log("Unsupported measurement context %{PUBLIC}@! This message is harmless if it occurs on the first App start!",
-                   log: OSLog.init(subsystem: "ViewController",
-                                   category: "de.cyface"),
-                   type: .default, String(describing: modalityValue))
+            os_log("Unsupported measurement context %{PUBLIC}@! This message is harmless if it occurs on the first App start!", log: ViewController.LOG, type: .default, String(describing: modalityValue))
             contextTabBar.selectedSegmentIndex = 1
             UserDefaults.standard.set(Modality.bike.dbValue, forKey: "de.cyface.settings.context")
         }
     }
 
     override func viewDidAppear(_ animated: Bool) {
+        os_log("viewDidAppear", log: ViewController.LOG, type: .debug)
         super.viewDidAppear(animated)
 
         if measurements.isEmpty {
             showOverlay {
                 let coreDataStack = self.coreDataStack
-                DispatchQueue.global(qos: .userInteractive).async {
+                DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+                    guard let self = self else {
+                        return
+                    }
+
                     defer {
                         DispatchQueue.main.async { [weak self] in
                             guard let self = self else {
@@ -495,13 +497,18 @@ class ViewController: UIViewController {
                             self.measurements.append(cellViewModel)
                         }
 
-                        DispatchQueue.main.async { [weak self] in
+                        DispatchQueue.main.sync { [weak self] in
                             guard let self = self else {
                                 return
                             }
 
                             self.measurementsOverview.reloadData()
+                            if self._settings.synchronizeData {
+                                os_log("Starting Data Synchronization", log: ViewController.LOG, type: .debug)
+                                self.synchronizer.activate()
+                            }
                         }
+
                     } catch {
                         fatalError()
                     }
@@ -509,9 +516,6 @@ class ViewController: UIViewController {
             }
         }
 
-        if _settings.synchronizeData {
-            synchronizer.activate()
-        }
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(onSynchronizationToggleChanged(_:)),
                                                name: UserDefaults.didChangeNotification,
