@@ -333,6 +333,7 @@ class ViewController: UIViewController {
         - status: The status of the measurement, that is being synchronized.
      */
     func synchronizing(measurementIdentifier: Int64, status: Status) {
+        os_log("Synchronizing", log: ViewController.LOG, type: .debug)
         guard case .success = status else {
             if case .error(let error) = status {
                 os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Error status: @%",
@@ -346,7 +347,7 @@ class ViewController: UIViewController {
             fatalError("No measurement with identifier \(measurementIdentifier)")
         }
 
-        debugPrint("Starting synchronization for measurement \(measurement).")
+        os_log("Starting synchronization for measurement @%.", log: ViewController.LOG, type: .debug, measurement.measurementIdentifier)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else {
                 return
@@ -486,6 +487,7 @@ class ViewController: UIViewController {
                         persistenceLayer.context = persistenceLayer.makeContext()
                         let measurements = try persistenceLayer.loadSynchronizableMeasurements()
 
+                        os_log("Populating measurements", log: ViewController.LOG, type: .debug)
                         for measurement in measurements {
                             let model = MeasurementModel(coreDataStack)
                             model.measurement = measurement

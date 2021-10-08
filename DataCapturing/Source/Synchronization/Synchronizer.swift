@@ -171,6 +171,8 @@ public class Synchronizer {
      Starts background synchronization as prepared in this objects initializer.
      */
     public func activate() {
+        os_log("Activating Synchronization", log: Synchronizer.log, type: .debug)
+
         let host = Synchronizer.stripSchemeFrom(url: serverConnection.apiURL)
         reachabilityManager = NetworkReachabilityManager(host: host)
         // Initial sync
