@@ -74,7 +74,7 @@ class StatisticsViewController: UIViewController {
                 self.dataView.data = chartData
             }
         } catch let error {
-            os_log("Unable to load accelerations! Error %@", log: StatisticsViewController.LOG, type: .error, error.localizedDescription)
+            os_log("Unable to load accelerations! Error %{public}@", log: StatisticsViewController.LOG, type: .error, error.localizedDescription)
         }
     }
 }

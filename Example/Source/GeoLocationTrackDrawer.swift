@@ -83,7 +83,7 @@ class GeoLocationTrackDrawer: NSObject {
             }
 
         } catch let error {
-            os_log("Unable to load locations! Error %@", log: GeoLocationTrackDrawer.log, type: .error, error.localizedDescription)
+            os_log("Unable to load locations! Error %{public}@", log: GeoLocationTrackDrawer.log, type: .error, error.localizedDescription)
         }
     }
 

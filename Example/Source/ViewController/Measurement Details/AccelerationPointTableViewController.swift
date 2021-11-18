@@ -77,7 +77,7 @@ class AccelerationPointTableViewController: UIViewController, UITableViewDataSou
                 self.accelerations = try accelerationFile.load(from: measurement)
 
             } catch let error {
-                os_log("Unable to initializer persistence layer! Error %@",
+                os_log("Unable to initializer persistence layer! Error %{public}@",
                        log: AccelerationPointTableViewController.LOG,
                        type: .error, error.localizedDescription)
             }

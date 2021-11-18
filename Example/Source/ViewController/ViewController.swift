@@ -299,6 +299,10 @@ class ViewController: UIViewController {
             case .success:
 
                 guard measurement.status == .uploading else {
+                    os_log("Measurement view in invalid state. Expected .uploading but got %{public}@",
+                           log: ViewController.LOG,
+                           type: .error,
+                           measurement.status.description)
                     fatalError("Measurement in invalid state. Expected .uploading but got \(measurement.status)")
                 }
 
@@ -336,7 +340,7 @@ class ViewController: UIViewController {
         os_log("Synchronizing", log: ViewController.LOG, type: .debug)
         guard case .success = status else {
             if case .error(let error) = status {
-                os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Error status: @%",
+                os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Error status: %{public}@",
                        log: ViewController.LOG,
                        type: .error, error.localizedDescription)
             }
@@ -347,7 +351,7 @@ class ViewController: UIViewController {
             fatalError("No measurement with identifier \(measurementIdentifier)")
         }
 
-        os_log("Starting synchronization for measurement @%.", log: ViewController.LOG, type: .debug, measurement.measurementIdentifier)
+        os_log("Starting synchronization for measurement %{public}d.", log: ViewController.LOG, type: .debug, measurementIdentifier)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else {
                 return
@@ -446,7 +450,8 @@ class ViewController: UIViewController {
         case Modality.train.dbValue:
             contextTabBar.selectedSegmentIndex = 4
         default:
-            os_log("Unsupported measurement context %{PUBLIC}@! This message is harmless if it occurs on the first App start!", log: ViewController.LOG, type: .default, String(describing: modalityValue))
+            os_log("Unsupported measurement context %{public}@! This message is harmless if it occurs on the first App start!",
+                   log: ViewController.LOG, type: .default, String(describing: modalityValue))
             contextTabBar.selectedSegmentIndex = 1
             UserDefaults.standard.set(Modality.bike.dbValue, forKey: "de.cyface.settings.context")
         }

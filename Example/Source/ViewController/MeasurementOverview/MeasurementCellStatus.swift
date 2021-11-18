@@ -13,7 +13,7 @@ import Foundation
  - Since: 3.1.0
  - Version 1.0.0
  */
-enum MeasurementCellStatus {
+enum MeasurementCellStatus: CustomStringConvertible {
     /// The measurement is not synchronized yet and was not tried.
     case unsynchronized
     /// The measurement is currently synchronizing with the Cyface server.
@@ -22,4 +22,17 @@ enum MeasurementCellStatus {
     case uploadFailed
     /// The measurement was successfully synchronized.
     case uploadSuccessful
+
+    public var description: String {
+        switch self {
+        case .unsynchronized:
+            return ".unsychronized"
+        case .uploading:
+            return ".uploading"
+        case .uploadFailed:
+            return ".uploadFailed"
+        case .uploadSuccessful:
+            return ".uploadSuccessful"
+        }
+    }
 }

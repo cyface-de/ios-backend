@@ -276,8 +276,8 @@ public class Synchronizer {
         - error: The error causing the failure.
      */
     private func failureHandler(measurement: Int64, error: Error) {
-        os_log("Unable to upload data for measurement: %@!", log: Synchronizer.log, type: .error, NSNumber(value: measurement))
-        os_log("Error: %@", log: Synchronizer.log, type: .error, error.localizedDescription)
+        os_log("Unable to upload data for measurement: %d!", log: Synchronizer.log, type: .error, measurement)
+        os_log("Error: %{public}@", log: Synchronizer.log, type: .error, error.localizedDescription)
         handler(.synchronizationFinished(measurement: measurement), .error(error))
         synchronizationFinishedHandler()
     }
