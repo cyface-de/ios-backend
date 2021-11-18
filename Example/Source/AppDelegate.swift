@@ -109,7 +109,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
         guard let loginViewController = storyboard.instantiateInitialViewController() as? LoginViewController else {
             fatalError("Unable to cast main storyboard initial view controller to a LoginViewController!")
         }
-        // TODO: This late dependency injection is not necessary if using a proper programmatical MVVM. Refactor the LoginViewController to follow that model!
+        // TODO: This late dependency injection is not necessary if using a proper programmatical MVVM.
+        // Refactor the LoginViewController to follow that model!
         loginViewController.model = settings
         window?.rootViewController = loginViewController
         window?.makeKeyAndVisible()
@@ -122,7 +123,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
         }
 
         let storyboard = UIStoryboard(name: AppDelegate.mainStoryBoard, bundle: nil)
-        guard let mainNavigationViewController = storyboard.instantiateViewController(withIdentifier: "CyfaceViewController") as? UINavigationController else {
+        let instantiatedViewControler = storyboard.instantiateViewController(withIdentifier: "CyfaceViewController")
+        guard let mainNavigationViewController = instantiatedViewControler as? UINavigationController else {
             fatalError("Wrong type for ViewController to show as main view controller. Must be of type ViewController")
         }
 
