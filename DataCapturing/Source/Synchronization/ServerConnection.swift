@@ -97,10 +97,12 @@ public class ServerConnection {
         - onFailure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The `MeasurementEntity` is the same as the one provided as parameter to this method.
      */
     public func sync(measurement: Int64, onSuccess success: @escaping ((Int64) -> Void) = {_ in }, onFailure failure: @escaping ((Int64, Error) -> Void) = {_, _ in }) {
-
+        os_log("Starting synchronization of measurement %{public}d with Authentication against server!", log: ServerConnection.osLog, type: .debug, measurement)
         authenticator.authenticate(onSuccess: {jwtToken in
+            os_log("Authentication successful for measurement %{public}d.", log: ServerConnection.osLog, type: .debug, measurement)
             self.onAuthenticated(token: jwtToken, measurement: measurement, onSuccess: success, onFailure: failure)
         }, onFailure: { error in
+            os_log("Authentication failed for measurement %{public}d.", log: ServerConnection.osLog, type: .debug, measurement)
             failure(measurement, error)
         })
 
@@ -129,10 +131,10 @@ public class ServerConnection {
                 try self.create(request: data, for: measurement)
             } catch let error {
                 // TODO: I should probably handle this error somehow instead of only logging it.
-                os_log("Encoding data failed! Error %{PUBLIC}@", log: ServerConnection.osLog, type: .error, error.localizedDescription)
+                os_log("Encoding data failed! Error %{public}@", log: ServerConnection.osLog, type: .error, error.localizedDescription)
             }
         }
-        os_log("Transmitting measurement to URL %{PUBLIC}@!", log: ServerConnection.osLog, type: .debug, url.absoluteString)
+        os_log("Transmitting measurement to URL %{public}@!", log: ServerConnection.osLog, type: .debug, url.absoluteString)
         Networking.sharedInstance.backgroundSessionManager.upload(
             multipartFormData: encode,
             usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold,

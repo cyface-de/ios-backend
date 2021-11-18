@@ -473,7 +473,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
             self.locationsCache = [GeoLocation]()
         } catch let error {
-            return os_log("Unable to save captured data. Error %@", log: self.log, type: .error, error.localizedDescription)
+            return os_log("Unable to save captured data. Error %{public}@", log: self.log, type: .error, error.localizedDescription)
         }
     }
 
@@ -566,7 +566,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
      - didFailWithError: The reported error.
      */
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        os_log("Location service failed with error: %@!", log: log, type: .error, error.localizedDescription)
+        os_log("Location service failed with error: %{public}@!", log: log, type: .error, error.localizedDescription)
         hasFix = false
     }
 }

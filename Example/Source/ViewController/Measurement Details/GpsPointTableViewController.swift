@@ -78,7 +78,9 @@ class GpsPointTableViewController: UIViewController, UITableViewDataSource, UITa
                 }
                 self.locations = locations
             } catch let error {
-                os_log("Unable to load geo locations! Error %@", log: GpsPointTableViewController.log, type: .error, error.localizedDescription)
+                os_log("Unable to load geo locations! Error %{public}@",
+                       log: GpsPointTableViewController.log,
+                       type: .error, error.localizedDescription)
             }
         }
 

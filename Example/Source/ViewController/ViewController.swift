@@ -299,6 +299,10 @@ class ViewController: UIViewController {
             case .success:
 
                 guard measurement.status == .uploading else {
+                    os_log("Measurement view in invalid state. Expected .uploading but got %{public}@",
+                           log: ViewController.LOG,
+                           type: .error,
+                           measurement.status.description)
                     fatalError("Measurement in invalid state. Expected .uploading but got \(measurement.status)")
                 }
 
@@ -333,9 +337,10 @@ class ViewController: UIViewController {
         - status: The status of the measurement, that is being synchronized.
      */
     func synchronizing(measurementIdentifier: Int64, status: Status) {
+        os_log("Synchronizing", log: ViewController.LOG, type: .debug)
         guard case .success = status else {
             if case .error(let error) = status {
-                os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Error status: @%",
+                os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Error status: %{public}@",
                        log: ViewController.LOG,
                        type: .error, error.localizedDescription)
             }
@@ -346,7 +351,7 @@ class ViewController: UIViewController {
             fatalError("No measurement with identifier \(measurementIdentifier)")
         }
 
-        debugPrint("Starting synchronization for measurement \(measurement).")
+        os_log("Starting synchronization for measurement %{public}d.", log: ViewController.LOG, type: .debug, measurementIdentifier)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else {
                 return
@@ -445,22 +450,25 @@ class ViewController: UIViewController {
         case Modality.train.dbValue:
             contextTabBar.selectedSegmentIndex = 4
         default:
-            os_log("Unsupported measurement context %{PUBLIC}@! This message is harmless if it occurs on the first App start!",
-                   log: OSLog.init(subsystem: "ViewController",
-                                   category: "de.cyface"),
-                   type: .default, String(describing: modalityValue))
+            os_log("Unsupported measurement context %{public}@! This message is harmless if it occurs on the first App start!",
+                   log: ViewController.LOG, type: .default, String(describing: modalityValue))
             contextTabBar.selectedSegmentIndex = 1
             UserDefaults.standard.set(Modality.bike.dbValue, forKey: "de.cyface.settings.context")
         }
     }
 
     override func viewDidAppear(_ animated: Bool) {
+        os_log("viewDidAppear", log: ViewController.LOG, type: .debug)
         super.viewDidAppear(animated)
 
         if measurements.isEmpty {
             showOverlay {
                 let coreDataStack = self.coreDataStack
-                DispatchQueue.global(qos: .userInteractive).async {
+                DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+                    guard let self = self else {
+                        return
+                    }
+
                     defer {
                         DispatchQueue.main.async { [weak self] in
                             guard let self = self else {
@@ -486,6 +494,7 @@ class ViewController: UIViewController {
                         persistenceLayer.context = persistenceLayer.makeContext()
                         let measurements = try persistenceLayer.loadSynchronizableMeasurements()
 
+                        os_log("Populating measurements", log: ViewController.LOG, type: .debug)
                         for measurement in measurements {
                             let model = MeasurementModel(coreDataStack)
                             model.measurement = measurement
@@ -493,13 +502,18 @@ class ViewController: UIViewController {
                             self.measurements.append(cellViewModel)
                         }
 
-                        DispatchQueue.main.async { [weak self] in
+                        DispatchQueue.main.sync { [weak self] in
                             guard let self = self else {
                                 return
                             }
 
                             self.measurementsOverview.reloadData()
+                            if self._settings.synchronizeData {
+                                os_log("Starting Data Synchronization", log: ViewController.LOG, type: .debug)
+                                self.synchronizer.activate()
+                            }
                         }
+
                     } catch {
                         fatalError()
                     }
@@ -507,9 +521,6 @@ class ViewController: UIViewController {
             }
         }
 
-        if _settings.synchronizeData {
-            synchronizer.activate()
-        }
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(onSynchronizationToggleChanged(_:)),
                                                name: UserDefaults.didChangeNotification,
