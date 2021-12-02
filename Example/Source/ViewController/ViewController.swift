@@ -316,11 +316,11 @@ class ViewController: UIViewController {
                 self.measurementsOverview.beginUpdates()
                 self.measurementsOverview.deleteRows(at: [path], with: .automatic)
                 self.measurementsOverview.endUpdates()
-            case .error(let error as ServerConnectionError):
-                _ = ServerConnectionError.handle(error: error)
-                measurement.status = .uploadFailed
             case .error(let error):
-                print("Unexpected Error! \(error)")
+                os_log("Unable to synchronize data due to %{public}@",
+                       log: ViewController.LOG,
+                       type: .error,
+                       error.localizedDescription)
                 measurement.status = .uploadFailed
             }
 
