@@ -185,22 +185,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
             }
 
             self.settings.add(serverUrlChangedListener: self)
-            let coreDataStack = CoreDataManager()
-            let bundle = Bundle(for: type(of: coreDataStack))
-            coreDataStack.setup(bundle: bundle) { [weak self] in
-                guard let self = self else {
-                    return
-                }
-                self.coreDataStack = coreDataStack
-
-                DispatchQueue.main.async { [weak self] in
+            do {
+                let coreDataStack = try CoreDataManager()
+                let bundle = Bundle(for: type(of: coreDataStack))
+                try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
+                    if let error = error {
+                        fatalError("Unable to setup CoreData stack due to: \(error)")
+                    }
                     guard let self = self else {
                         return
                     }
+                    self.coreDataStack = coreDataStack
 
-                    self.window = UIWindow(frame: UIScreen.main.bounds)
-                    self.presentMainUI()
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else {
+                            return
+                        }
+
+                        self.window = UIWindow(frame: UIScreen.main.bounds)
+                        self.presentMainUI()
+                    }
                 }
+            } catch {
+                fatalError("Unable to setup CoreData stack due to: \(error)")
             }
         }
         return true

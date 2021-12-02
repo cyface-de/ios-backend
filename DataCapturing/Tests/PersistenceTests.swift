@@ -41,10 +41,13 @@ class PersistenceTests: XCTestCase {
     override func setUp() {
         super.setUp()
         let expectation = self.expectation(description: "CoreDataStack initialized successfully!")
-        
-            let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+
+        do {
+            let manager = try CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
             let bundle = Bundle(for: type(of: manager))
-            manager.setup(bundle: bundle) {
+            try manager.setup(bundle: bundle) { error in
+
+
                 do {
                     self.oocut = PersistenceLayer(onManager: manager)
                     self.oocut.context = self.oocut.makeContext()
@@ -61,6 +64,9 @@ class PersistenceTests: XCTestCase {
                     XCTFail("Unable to set up due to \(error.localizedDescription)")
                 }
             }
+        } catch {
+            XCTFail("Unable to initialize CoreData due to: \(error)")
+        }
             
             waitForExpectations(timeout: 5) { error in
                 if let error = error {

@@ -45,14 +45,25 @@ class DataCapturingTests: XCTestCase {
         super.setUp()
         let expectation = self.expectation(description: "CoreDataStack initialized successfully.")
 
-        coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
-        let bundle = Bundle(for: type(of: coreDataStack))
-        coreDataStack.setup(bundle: bundle) {
+        do {
+            coreDataStack = try CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            let bundle = Bundle(for: type(of: coreDataStack))
+            try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
+                if let error = error {
+                    XCTFail("Unable to setup CoreData stack due to \(error)")
+                }
 
-            self.testEventHandler = TestDataCapturingEventHandler()
-            self.oocut = self.dataCapturingService(dataManager: self.coreDataStack, eventHandler: self.testEventHandler.handle(event: status:))
-            
-            expectation.fulfill()
+                guard let self = self else {
+                    return
+                }
+
+                self.testEventHandler = TestDataCapturingEventHandler()
+                self.oocut = self.dataCapturingService(dataManager: self.coreDataStack, eventHandler: self.testEventHandler.handle(event: status:))
+
+                expectation.fulfill()
+            }
+        } catch {
+            XCTFail("Unable to setup CoreData stack due to \(error)")
         }
         
         waitForExpectations(timeout: 5) { error in
