@@ -103,11 +103,8 @@ class ServerConnectionTest: XCTestCase {
             } catch {
                 XCTFail("Unable to encode request! Error \(error)")
             }
-        } catch let error as PersistenceError {
-            _ = PersistenceError.handle(error: error)
-            XCTFail(error.verboseDescription)
         } catch {
-            XCTFail("Unexpected error \(error)")
+            XCTFail("Unexpected error \(error.localizedDescription)")
         }
     }
 
@@ -136,11 +133,8 @@ class ServerConnectionTest: XCTestCase {
             } catch {
                 XCTFail("Unable to encode request! Error \(error)")
             }
-        } catch let error as PersistenceError {
-            _ = PersistenceError.handle(error: error)
-            XCTFail(error.verboseDescription)
         } catch {
-            XCTFail("Unexpected error \(error)")
+            XCTFail("Unexpected error \(error.localizedDescription)")
         }
     }
 
