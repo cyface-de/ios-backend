@@ -73,24 +73,20 @@ public class CoreDataManager {
        - migrator: An object to migrate between different Cyface model versions.
      - Throws: `CoreDataError.invalidModelUrl`, `CoreDataError.modelNotAvailable`
      */
-    public init(storeType: String = NSSQLiteStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator()) throws {
+    public convenience init(storeType: String = NSSQLiteStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator()) throws {
+        let momdName = "CyfaceModel"
+        let mom = try CoreDataManager.loadModel()
+        self.init(storeType: storeType, migrator: migrator, modelName: momdName, model: mom)
+    }
+
+    init(storeType: String = NSInMemoryStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator(), modelName: String, model: NSManagedObjectModel) {
         self.storeType = storeType
         self.migrator = migrator
 
         // Initialize persistent container
         os_log("Creating persistent container", log: CoreDataManager.log, type: .info)
 
-        let momdName = "CyfaceModel"
-        let bundle = Bundle(for: type(of: self))
-        guard let modelURL = bundle.url(forResource: momdName, withExtension: "momd") else {
-            throw CoreDataError.invalidModelUrl(momdName)
-        }
-
-        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
-            throw CoreDataError.modelNotAvailable(modelURL)
-        }
-
-        persistentContainer = NSPersistentContainer(name: momdName, managedObjectModel: mom)
+        persistentContainer = NSPersistentContainer(name: modelName, managedObjectModel: model)
         let description = persistentContainer.persistentStoreDescriptions.first
         description?.shouldInferMappingModelAutomatically = false
         description?.shouldMigrateStoreAutomatically = false
@@ -110,6 +106,20 @@ public class CoreDataManager {
         self.persistentContainer.loadPersistentStores { _, error in
             completionClosure(error)
         }
+    }
+
+    public static func loadModel() throws -> NSManagedObjectModel {
+        let momdName = "CyfaceModel"
+        let bundle = Bundle(for: CoreDataManager.self)
+        guard let modelURL = bundle.url(forResource: momdName, withExtension: "momd") else {
+            throw CoreDataError.invalidModelUrl(momdName)
+        }
+
+        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
+            throw CoreDataError.modelNotAvailable(modelURL)
+        }
+
+        return mom
     }
 
     // MARK: - Loading

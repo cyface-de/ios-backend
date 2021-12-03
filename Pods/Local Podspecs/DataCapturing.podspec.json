@@ -20,6 +20,10 @@
   "swift_versions": "5.3",
   "source_files": "DataCapturing/Source/**/*{.h,.m,.swift}",
   "resources": "DataCapturing/Source/**/*{.xcdatamodeld,.xcdatamodel,.xcmappingmodel}",
+  "script_phases": {
+    "name": "Set version and build",
+    "script": "#!/bin/bash\n\n# Determine plist path\nplist=${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\n# Determine current version\nversion=$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' \"$plist\")\n# Get date of last commit\ncommitDate=$(date -r `git log -1 --date=short --pretty=format:%ct` +%Y%m%d)\n# Get current date/time\nbuildDate=$(date +%Y%m%d%H%M)\n\n# Set display version to existing version + commitDate\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $version-$commitDate\" \"$plist\"  # Version number\n\n# Set build number to current date/time\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildDate\" \"$plist\"  # Build number\n\necho \"Version: $version-$commitDate\"\necho \"Build:   $buildDate\"\n"
+  },
   "frameworks": [
     "CoreData",
     "CoreLocation",
@@ -37,12 +41,21 @@
     {
       "name": "Tests",
       "test_type": "unit",
-      "source_files": "DataCapturing/Tests/**/*.swift"
-    },
+      "source_files": "DataCapturing/Tests/**/*.swift",
+      "resources": "DataCapturing/Tests/**/*.sqlite"
+    }
+  ],
+  "appspecs": [
     {
-      "name": "ExampleUnitTests",
-      "test_type": "unit",
-      "source_files": "ExampleUnitTests/**/*.swift"
+      "name": "Cyface",
+      "source_files": "Example/Source/**/*.swift",
+      "testspecs": [
+        {
+          "name": "ExampleUnitTests",
+          "test_type": "unit",
+          "source_files": "ExampleUnitTests/**/*.swift"
+        }
+      ]
     }
   ],
   "swift_version": "5.3"

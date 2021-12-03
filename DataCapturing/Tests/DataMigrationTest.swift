@@ -46,7 +46,6 @@ class DataMigrationTest: XCTestCase {
     func testLoadMappingModel() throws {
         let oldResource = "3"
         let newResource = "4"
-        let subdirectory = "CyfaceModel.momd"
 
         // We need the following rather complicated loop, since the DataCapturing Framework Bundle does not have an identifier.
         let bundles = Bundle.allBundles
@@ -407,9 +406,6 @@ class DataMigrationTest: XCTestCase {
         return container
     }
 
-    private func findModelBundle() {
-
-    }
 }
 
 extension FileManager {

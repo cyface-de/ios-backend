@@ -28,6 +28,7 @@ import CoreData
  - Since: 6.0.0
  */
 class FileSupportTest: XCTestCase {
+    static let dataModel = try! CoreDataManager.loadModel()
 
     /// Tests that writing an events file works without further interruption.
     func testEventFileWriting_HappyPath() throws {
@@ -36,7 +37,7 @@ class FileSupportTest: XCTestCase {
         let expectation = self.expectation(description: "Test completed after CoreData was initialized!")
 
         do {
-            let coreDataStack = try CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            let coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: FileSupportTest.dataModel)
             let bundle = Bundle(for: type(of: coreDataStack))
             try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
                 if let error = error {
