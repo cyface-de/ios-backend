@@ -42,27 +42,7 @@ public class CoreDataManager {
     private let storeType: String
 
     /// The `NSPersistentContainer` used by this *CoreData* stack.
-    lazy var persistentContainer: NSPersistentContainer = {
-        os_log("Creating persistent container", log: CoreDataManager.log, type: .info)
-
-        let momdName = "CyfaceModel"
-        let bundle = Bundle(for: type(of: self))
-        guard let modelURL = bundle.url(forResource: momdName, withExtension: "momd") else {
-            fatalError("Unable to access CoreData model \(momdName)!")
-        }
-
-        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
-            fatalError("Unable to load managed object model from URL: \(modelURL)!")
-        }
-
-        let persistentContainer = NSPersistentContainer(name: momdName, managedObjectModel: mom)
-        let description = persistentContainer.persistentStoreDescriptions.first
-        description?.shouldInferMappingModelAutomatically = false
-        description?.shouldMigrateStoreAutomatically = false
-        description?.type = storeType
-
-        return persistentContainer
-    }()
+    var persistentContainer: NSPersistentContainer
 
     /// Provides a background context usable on a background thread and accessing the data store managed by this stack.
     lazy var backgroundContext: NSManagedObjectContext = {
@@ -89,12 +69,32 @@ public class CoreDataManager {
 
      - Attention: Please call `setup(bundle:completionClosure:)` before using the `NSManagedObjectContext` instances, provided by this instance.
      - Parameters:
-     - storeType: The type of the store to use. In production this should usually be `NSSQLiteStoreType`. In a test environment you might use `NSInMemoryStoreType`. Both values are defined by *CoreData*.
-     - migrator: An object to migrate between different Cyface model versions.
+       - storeType: The type of the store to use. In production this should usually be `NSSQLiteStoreType`. In a test environment you might use `NSInMemoryStoreType`. Both values are defined by *CoreData*.
+       - migrator: An object to migrate between different Cyface model versions.
+     - Throws: `CoreDataError.invalidModelUrl`, `CoreDataError.modelNotAvailable`
      */
-    public init(storeType: String = NSSQLiteStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator()) {
+    public init(storeType: String = NSSQLiteStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator()) throws {
         self.storeType = storeType
         self.migrator = migrator
+
+        // Initialize persistent container
+        os_log("Creating persistent container", log: CoreDataManager.log, type: .info)
+
+        let momdName = "CyfaceModel"
+        let bundle = Bundle(for: type(of: self))
+        guard let modelURL = bundle.url(forResource: momdName, withExtension: "momd") else {
+            throw CoreDataError.invalidModelUrl(momdName)
+        }
+
+        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
+            throw CoreDataError.modelNotAvailable(modelURL)
+        }
+
+        persistentContainer = NSPersistentContainer(name: momdName, managedObjectModel: mom)
+        let description = persistentContainer.persistentStoreDescriptions.first
+        description?.shouldInferMappingModelAutomatically = false
+        description?.shouldMigrateStoreAutomatically = false
+        description?.type = storeType
     }
 
     // MARK: - SetUp
@@ -103,15 +103,12 @@ public class CoreDataManager {
      Connects this `CoreDataManager` to the underlying storage, possibly migrating the data model to the current version.
 
      - Parameter bundle: The bundle containing the data model.
+     - Throws: `CoreDataError.missingModelUrl`
      */
-    public func setup(bundle: Bundle, completionClosure: @escaping () -> Void) {
-        migrateStoreIfNeeded(bundle: bundle)
+    public func setup(bundle: Bundle, completionClosure: @escaping (Error?) -> Void) throws {
+        try migrateStoreIfNeeded(bundle: bundle)
         self.persistentContainer.loadPersistentStores { _, error in
-            guard error == nil else {
-                fatalError("Was unable to load store \(error.debugDescription).")
-            }
-
-            completionClosure()
+            completionClosure(error)
         }
     }
 
@@ -121,14 +118,29 @@ public class CoreDataManager {
      Migrates the storage to the current version if required.
 
      - Parameter bundle: The bundle containing data and mapping models.
+     - Throws: `CoreDataError.missingModelUrl`
      */
-    private func migrateStoreIfNeeded(bundle: Bundle) {
+    private func migrateStoreIfNeeded(bundle: Bundle) throws {
         guard let storeURL = persistentContainer.persistentStoreDescriptions.first?.url else {
-            fatalError("PersistentContainer was not set up properly.")
+            throw CoreDataError.missingModelUrl
         }
 
         if migrator.requiresMigration(at: storeURL, toVersion: CoreDataMigrationVersion.current, inBundle: bundle) {
             migrator.migrateStore(at: storeURL, toVersion: CoreDataMigrationVersion.current, inBundle: bundle)
         }
+    }
+
+    /**
+        A collection of all the errors thrown by the `CoreDataManager`.
+
+     - Author: Klemens Muthmann
+     */
+    enum CoreDataError: Error {
+        /// If the URL to the CoreData model file can not be processed by the system. This should usually not happen, since it does not depend on user input. If you encounter this error you probably have an invalid build of the Cyface SDK.
+        case invalidModelUrl(String)
+        /// A CoreData persistent store was missing its model URL. This is not supposed to happen, unless you are starting data migration before initialization of the persistent store. Doing this is only possible if you are messing with the persistent store manually and circumventing Cyface interfaces.‚
+        case missingModelUrl
+        /// If the file containing the Cyface CoreData data model is not available. If you encounter this error, you probably have an invalid build of the Cyface SDK. The file should be under DataCapturing/Source/Model/CyfaceModel.xcdatamodeld.
+        case modelNotAvailable(URL)
     }
 }

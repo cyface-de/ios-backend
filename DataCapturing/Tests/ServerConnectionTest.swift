@@ -37,21 +37,31 @@ class ServerConnectionTest: XCTestCase {
 
     override func setUp() {
         let expectation = self.expectation(description: "CoreData stack started successfully!")
-        
-        coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
-        coreDataStack.setup(bundle: Bundle(for: type(of: coreDataStack))) {
-                guard let url = URL(string: "http://localhost:8080/api/v2") else {
-                    fatalError()
+
+        do {
+            coreDataStack = try CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            try coreDataStack.setup(bundle: Bundle(for: type(of: coreDataStack))) { [weak self] (error) in
+                if let error = error {
+                    XCTFail("Unable to setup CoreData stack due to: \(error).")
                 }
-                let authenticator = StaticAuthenticator()
-                self.oocut = ServerConnection(apiURL: url, authenticator: authenticator, onManager: self.coreDataStack)
-                
-                expectation.fulfill()
+                guard let self = self else {
+                    return
+                }
+                    guard let url = URL(string: "http://localhost:8080/api/v2") else {
+                        fatalError()
+                    }
+                    let authenticator = StaticAuthenticator()
+                    self.oocut = ServerConnection(apiURL: url, authenticator: authenticator, onManager: self.coreDataStack)
+
+                    expectation.fulfill()
+            }
+        } catch {
+            XCTFail("Unable to setup CoreData stack due to: \(error).")
         }
         
         waitForExpectations(timeout: 5) { error in
             if let error = error {
-                XCTFail("ServerConnectionTest timed out \(error)")
+                XCTFail("ServerConnectionTest timed out \(error).")
             }
         }
     }
@@ -93,11 +103,8 @@ class ServerConnectionTest: XCTestCase {
             } catch {
                 XCTFail("Unable to encode request! Error \(error)")
             }
-        } catch let error as PersistenceError {
-            _ = PersistenceError.handle(error: error)
-            XCTFail(error.verboseDescription)
         } catch {
-            XCTFail("Unexpected error \(error)")
+            XCTFail("Unexpected error \(error.localizedDescription)")
         }
     }
 
@@ -126,11 +133,8 @@ class ServerConnectionTest: XCTestCase {
             } catch {
                 XCTFail("Unable to encode request! Error \(error)")
             }
-        } catch let error as PersistenceError {
-            _ = PersistenceError.handle(error: error)
-            XCTFail(error.verboseDescription)
         } catch {
-            XCTFail("Unexpected error \(error)")
+            XCTFail("Unexpected error \(error.localizedDescription)")
         }
     }
 

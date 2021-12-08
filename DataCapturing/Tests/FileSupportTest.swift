@@ -35,25 +35,37 @@ class FileSupportTest: XCTestCase {
         let oocut = EventsFile()
         let expectation = self.expectation(description: "Test completed after CoreData was initialized!")
 
-        let coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
-        let bundle = Bundle(for: type(of: coreDataStack))
-        coreDataStack.setup(bundle: bundle) {
-            do {
-                let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-                let context = persistenceLayer.makeContext()
-                persistenceLayer.context = context
+        do {
+            let coreDataStack = try CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            let bundle = Bundle(for: type(of: coreDataStack))
+            try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
+                if let error = error {
+                    XCTFail("Unable to setup CoreData stack due to \(error).")
+                }
 
-                let events = self.eventFixture(context)
+                guard let self = self else {
+                    return
+                }
 
-                // Act
-                let eventsFilePath = try oocut.write(serializable: events, to: 1)
+                do {
+                    let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+                    let context = persistenceLayer.makeContext()
+                    persistenceLayer.context = context
 
-                // Assert
-                print(eventsFilePath)
-                expectation.fulfill()
-            } catch {
-                XCTFail("Unable to write serializable data.")
+                    let events = self.eventFixture(context)
+
+                    // Act
+                    let eventsFilePath = try oocut.write(serializable: events, to: 1)
+
+                    // Assert
+                    print(eventsFilePath)
+                    expectation.fulfill()
+                } catch {
+                    XCTFail("Unable to write serializable data.")
+                }
             }
+        } catch {
+            XCTFail("Unable to setup CoreData stack due to \(error)")
         }
         
         waitForExpectations(timeout: 5) { error in
