@@ -39,6 +39,7 @@ class DataCapturingTests: XCTestCase {
     let defaultMode = "BICYCLE"
     /// An object for logging lifecycle events during tests and providing functionality to assert on them.
     var testEventHandler: TestDataCapturingEventHandler!
+    static let dataModel = try! CoreDataManager.loadModel()
 
     /// Initializes every test by creating a `TestDataCapturingService`.
     override func setUp() {
@@ -46,7 +47,7 @@ class DataCapturingTests: XCTestCase {
         let expectation = self.expectation(description: "CoreDataStack initialized successfully.")
 
         do {
-            coreDataStack = try CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: DataCapturingTests.dataModel)
             let bundle = Bundle(for: type(of: coreDataStack))
             try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
                 if let error = error {

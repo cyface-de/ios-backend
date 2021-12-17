@@ -41,6 +41,8 @@ This framework can be included by your App if you are going to capture sensor da
   s.source_files = 'DataCapturing/Source/**/*{.h,.m,.swift}'
   s.resources = 'DataCapturing/Source/**/*{.xcdatamodeld,.xcdatamodel,.xcmappingmodel}'
 
+  s.script_phase = { :name => 'Set version and build', :script => "#!/bin/bash\n\n# Determine plist path\nplist=${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\n# Determine current version\nversion=$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' \"$plist\")\n# Get date of last commit\ncommitDate=$(date -r `git log -1 --date=short --pretty=format:%ct` +%Y%m%d)\n# Get current date/time\nbuildDate=$(date +%Y%m%d%H%M)\n\n# Set display version to existing version + commitDate\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $version-$commitDate\" \"$plist\"  # Version number\n\n# Set build number to current date/time\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildDate\" \"$plist\"  # Build number\n\necho \"Version: $version-$commitDate\"\necho \"Build:   $buildDate\"\n" }
+
   s.frameworks = 'CoreData', 'CoreLocation', 'CoreMotion'
   
   # The following transitive dependencies are used by this project:
@@ -53,10 +55,15 @@ This framework can be included by your App if you are going to capture sensor da
   # So make sure tests are always located on the same level or below the podspec.
   s.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'DataCapturing/Tests/**/*.swift'
+    test_spec.resources = 'DataCapturing/Tests/**/*.sqlite'
   end
 
-  s.test_spec 'ExampleUnitTests' do |example_unit_test_spec|
-    example_unit_test_spec.source_files = 'ExampleUnitTests/**/*.swift'
+
+  s.app_spec 'Cyface' do |app_spec|
+    app_spec.source_files = 'Example/Source/**/*.swift'
+    app_spec.test_spec 'ExampleUnitTests' do |example_unit_test_spec|
+      example_unit_test_spec.source_files = 'ExampleUnitTests/**/*.swift'
+    end
   end
 
 end

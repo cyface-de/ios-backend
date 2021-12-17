@@ -38,6 +38,7 @@ class SerializationTest: XCTestCase {
     var fixture: Int64!
     /// A manager for handling the CoreData stack.
     var coreDataStack: CoreDataManager!
+    static let dataModel = try! CoreDataManager.loadModel()
 
     /// Initializes the test data set and `PersistenceLayer` with some test data.
     override func setUp() {
@@ -46,7 +47,7 @@ class SerializationTest: XCTestCase {
         let expectation = self.expectation(description: "CoreDataStack started successfully.")
 
         do {
-            coreDataStack = try CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: SerializationTest.dataModel)
             let bundle = Bundle(for: type(of: coreDataStack))
 
             try coreDataStack.setup(bundle: bundle) { [weak self] (error) in

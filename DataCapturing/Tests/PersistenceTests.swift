@@ -36,6 +36,7 @@ class PersistenceTests: XCTestCase {
     var fixture: Int64!
     /// The default mode of transportation used for tests.
     let defaultMode = "BICYCLE"
+    static let dataModel = try! CoreDataManager.loadModel()
 
     /// Initializes the test enviroment by saving some test data to the test `PersistenceLayer`.
     override func setUp() {
@@ -43,7 +44,7 @@ class PersistenceTests: XCTestCase {
         let expectation = self.expectation(description: "CoreDataStack initialized successfully!")
 
         do {
-            let manager = try CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: PersistenceTests.dataModel)
             let bundle = Bundle(for: type(of: manager))
             try manager.setup(bundle: bundle) { error in
 

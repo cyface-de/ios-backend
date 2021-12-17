@@ -34,12 +34,13 @@ class ServerConnectionTest: XCTestCase {
 
     var coreDataStack: CoreDataManager!
     var oocut: ServerConnection!
+    static let dataModel = try! CoreDataManager.loadModel()
 
     override func setUp() {
         let expectation = self.expectation(description: "CoreData stack started successfully!")
 
         do {
-            coreDataStack = try CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+            coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: ServerConnectionTest.dataModel)
             try coreDataStack.setup(bundle: Bundle(for: type(of: coreDataStack))) { [weak self] (error) in
                 if let error = error {
                     XCTFail("Unable to setup CoreData stack due to: \(error).")
