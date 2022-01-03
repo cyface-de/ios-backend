@@ -389,8 +389,8 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
         sensorCapturer.start()
 
-        self.backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.lifecycleQueue)
-        self.backgroundSynchronizationTimer.setEventHandler { [weak self] in
+        let backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.lifecycleQueue)
+        backgroundSynchronizationTimer.setEventHandler { [weak self] in
             guard let self = self else {
                 return
             }
@@ -410,8 +410,9 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             }
         }
 
-        self.backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
-        self.backgroundSynchronizationTimer.activate()
+        backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
+        backgroundSynchronizationTimer.activate()
+        self.backgroundSynchronizationTimer = backgroundSynchronizationTimer
 
         DispatchQueue.main.async {
             self.coreLocationManager.startUpdatingLocation()
