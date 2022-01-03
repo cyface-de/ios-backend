@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2021 Cyface GmbH
+ * Copyright 2017 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -29,7 +29,7 @@ import CoreData
  It also starts the first `UIViewController`, initializes the database layer and connects to a Cyface data server.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.0.1
  - Since: 1.0.0
  */
 @UIApplicationMain

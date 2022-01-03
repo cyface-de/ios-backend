@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Cyface GmbH
+ * Copyright 2018 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -33,7 +33,7 @@ import CoreData
  This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
 
  - Author: Klemens Muthmann
- - Version: 8.0.1
+ - Version: 8.1.0
  - Since: 1.0.0
  */
 public class ServerConnection {
@@ -317,7 +317,7 @@ public class ServerConnection {
      A structure encapsulating errors used by server connections.
 
      - Author: Klemens Muthmann
-     - Version: 4.1.0
+     - Version: 5.0.0
      - Since: 1.0.0
      */
     public enum ServerConnectionError: Error {

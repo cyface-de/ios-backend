@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -29,7 +29,7 @@ import Foundation
  If this is not the case, API calls based on this authenticator are going to fail!
 
  - Author: Klemens Muthmann
- - Version: 1.1.1
+ - Version: 1.2.0
  - Since: 2.0.0
  */
 public class StaticAuthenticator: Authenticator {

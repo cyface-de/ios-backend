@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Cyface GmbH
+ * Copyright 2021 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -26,6 +26,7 @@ import DataCapturing
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 10.0.0
  */
 class ViewControllerTests: XCTestCase {
 
@@ -38,6 +39,11 @@ class ViewControllerTests: XCTestCase {
     }
 }
 
+/**
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 10.0.0
+ */
 enum TestError: Error {
     case test
 }

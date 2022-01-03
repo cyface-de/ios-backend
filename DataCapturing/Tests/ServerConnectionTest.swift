@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Cyface GmbH
+ * Copyright 2019 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -28,7 +28,7 @@ import Alamofire
 
  - Author: Klemens Muthmann
  - Since: 4.0.1
- - Version: 1.1.1
+ - Version: 1.1.2
  */
 class ServerConnectionTest: XCTestCase {
 

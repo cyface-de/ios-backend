@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2021 Cyface GmbH
+ * Copyright 2017 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -33,7 +33,7 @@ import os.log
  Read access is public while manipulation of the data stored is restricted to the framework.
  
  - Author: Klemens Muthmann
- - Version: 6.1.1
+ - Version: 6.2.0
  - Since: 1.0.0
  */
 public class PersistenceLayer {
@@ -605,7 +605,7 @@ public class PersistenceLayer {
      A structure for all the errors thrown by the `PersistenceLayer`.
 
      - Author: Klemens Muthmann
-     - Version: 2.0.0
+     - Version: 3.0.0
      - Since: 2.3.0
      */
     enum PersistenceError: Error {
