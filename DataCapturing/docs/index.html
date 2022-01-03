@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataCapturing - DataCapturing</title>
+    <link rel="stylesheet" type="text/css" href="/ios-backend/all.css" media="all" />
+</head>
+<body>
+    <header>
+        <a href="/ios-backend/">
+            <strong>
+                DataCapturing
+            </strong>
+            <span>Documentation</span>
+        </a>
+    </header>
+
+    <!--
+    <form class="search">
+        <input type="search" placeholder="Search" />
+    </form>
+    -->
+
+    <nav>
+        <div class="wrapper">
+            <h2>On This Page</h2>
+            <ol><li><a href="#classes">Classes</a></li><li><a href="#structures">Structures</a></li><li><a href="#enumerations">Enumerations</a></li><li><a href="#protocols">Protocols</a></li><li><a href="#extensions">Extensions</a></li></ol>
+        </div>
+    </nav>
+
+    <main>
+        <article>
+                <section id="classes">
+        <h2>Classes</h2>
+        <dl>
+            <dt class="class">
+    <a href="/ios-backend/DataCapturingService" title="class - DataCapturingService">
+        Data​Capturing​Service
+    </a>
+</dt>
+<dd>
+    <p>An object of this class handles the lifecycle of starting and stopping data capturing.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/DiskConsumption" title="class - DiskConsumption">
+        Disk​Consumption
+    </a>
+</dt>
+<dd>
+    <p>Objects of this class represent the current disk (or rather SD card) space used and available.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/DefaultDistanceCalculationStrategy" title="class - DefaultDistanceCalculationStrategy">
+        Default​Distance​Calculation​Strategy
+    </a>
+</dt>
+<dd>
+    <p>Calculates the distance between two locations based on the internal distance function provided by iOS.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/Event" title="class - Event">
+        Event
+    </a>
+</dt>
+<dd>
+    
+</dd>
+<dt class="class">
+    <a href="/ios-backend/GeoLocationMO" title="class - GeoLocationMO">
+        Geo​Location​MO
+    </a>
+</dt>
+<dd>
+    
+</dd>
+<dt class="class">
+    <a href="/ios-backend/MeasurementMO" title="class - MeasurementMO">
+        Measurement​MO
+    </a>
+</dt>
+<dd>
+    
+</dd>
+<dt class="class">
+    <a href="/ios-backend/CoreDataManager" title="class - CoreDataManager">
+        Core​Data​Manager
+    </a>
+</dt>
+<dd>
+    <p>A class for objects representing a <em>CoreData</em> stack.
+Please call <code>setup(bundle:completionClosure:)</code> before using an object of this class.
+That call will run data migration if necessary and might take some time depending on the amount of data that must be migrated.
+So it might be a good idea to run <code>setup(bundle:completionClosure:)</code> on a background thread.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/CoreDataMigrator" title="class - CoreDataMigrator">
+        Core​Data​Migrator
+    </a>
+</dt>
+<dd>
+    <p>An implementation of the <code>CoreDataMigratorProtocol</code> for the Cyface data model, as used by the Cyface iOS SDK.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/SensorValue" title="class - SensorValue">
+        Sensor​Value
+    </a>
+</dt>
+<dd>
+    <p>Represents one captured sensor value, such as an acceleration, rotation or direction measurement carried out by the system.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/Track" title="class - Track">
+        Track
+    </a>
+</dt>
+<dd>
+    
+</dd>
+<dt class="class">
+    <a href="/ios-backend/MovebisDataCapturingService" title="class - MovebisDataCapturingService">
+        Movebis​Data​Capturing​Service
+    </a>
+</dt>
+<dd>
+    <p>A <code>DataCapturingService</code> implementation that provides the ability to capture locations
+before an actual measurement has been started.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/EventsSerializer" title="class - EventsSerializer">
+        Events​Serializer
+    </a>
+</dt>
+<dd>
+    <p>Serializes a list of events to an events file.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/SensorValueFileType" title="class - SensorValueFileType">
+        Sensor​Value​File​Type
+    </a>
+</dt>
+<dd>
+    <p>One type of a sensor value file, such as a file for accelerations, rotations or directions.
+This class may not be instantiated directly.
+The only valid instances are provided as static properties.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/PersistenceLayer" title="class - PersistenceLayer">
+        Persistence​Layer
+    </a>
+</dt>
+<dd>
+    <p>An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and accelerations.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/CredentialsAuthenticator" title="class - CredentialsAuthenticator">
+        Credentials​Authenticator
+    </a>
+</dt>
+<dd>
+    <p>An authenticator using a combination of <code>username</code> and <code>password</code> to authenticate against a Cyface data collector server.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/ServerConnection" title="class - ServerConnection">
+        Server​Connection
+    </a>
+</dt>
+<dd>
+    <p>Realizes a connection to a Cyface Collector server.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/StaticAuthenticator" title="class - StaticAuthenticator">
+        Static​Authenticator
+    </a>
+</dt>
+<dd>
+    <p>A <code>StaticAuthenticator</code> always does authentication using the same Java Web Token (JWT).
+This token is provided as a fixed value and never changes.
+The creator of an object of this class needs to make sure, that the token is valid.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/Synchronizer" title="class - Synchronizer">
+        Synchronizer
+    </a>
+</dt>
+<dd>
+    <p>An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/DeletionCleaner" title="class - DeletionCleaner">
+        Deletion​Cleaner
+    </a>
+</dt>
+<dd>
+    <p>A cleaner removing each synchronized measurement from the database completely.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/AccelerationPointRemovalCleaner" title="class - AccelerationPointRemovalCleaner">
+        Acceleration​Point​Removal​Cleaner
+    </a>
+</dt>
+<dd>
+    <p>A cleaner removing only the accelerations from each synchronized measurement, thus keeping the track information available.</p>
+
+</dd>
+<dt class="class">
+    <a href="/ios-backend/DefaultTrackCleaner" title="class - DefaultTrackCleaner">
+        Default​Track​Cleaner
+    </a>
+</dt>
+<dd>
+    
+</dd>
+        </dl>
+    </section>
+    <section id="structures">
+        <h2>Structures</h2>
+        <dl>
+            <dt class="structure">
+    <a href="/ios-backend/GeoLocation" title="structure - GeoLocation">
+        Geo​Location
+    </a>
+</dt>
+<dd>
+    <p>One geo location measurement provided by the system.</p>
+
+</dd>
+<dt class="structure">
+    <a href="/ios-backend/SensorValueFile" title="structure - SensorValueFile">
+        Sensor​Value​File
+    </a>
+</dt>
+<dd>
+    <p>Struct implementing the <code>FileSupport</code> protocol to store sensor values to a file in Cyface binary format.</p>
+
+</dd>
+<dt class="structure">
+    <a href="/ios-backend/MeasurementFile" title="structure - MeasurementFile">
+        Measurement​File
+    </a>
+</dt>
+<dd>
+    <p>Struct implementing the <code>FileSupport</code> protocol to serialize whole measurements to a file in Cyface binary format.</p>
+
+</dd>
+        </dl>
+    </section>
+    <section id="enumerations">
+        <h2>Enumerations</h2>
+        <dl>
+            <dt class="enumeration">
+    <a href="/ios-backend/DataCapturingError" title="enumeration - DataCapturingError">
+        Data​Capturing​Error
+    </a>
+</dt>
+<dd>
+    <p>An enumeration for all errors caused by capturing data.</p>
+
+</dd>
+<dt class="enumeration">
+    <a href="/ios-backend/DataCapturingEvent" title="enumeration - DataCapturingEvent">
+        Data​Capturing​Event
+    </a>
+</dt>
+<dd>
+    <p>Events occuring during capturing and transmitting data.</p>
+
+</dd>
+<dt class="enumeration">
+    <a href="/ios-backend/EventType" title="enumeration - EventType">
+        Event​Type
+    </a>
+</dt>
+<dd>
+    <p>Provides a listing of all the events, that might occur during a data capturing run. These events are saved with a timestamp of their occurrence, to reconstruct them for later use.</p>
+
+</dd>
+<dt class="enumeration">
+    <a href="/ios-backend/CoreDataMigrationVersion" title="enumeration - CoreDataMigrationVersion">
+        Core​Data​Migration​Version
+    </a>
+</dt>
+<dd>
+    <p>This is an enumeration of all version of the Cyface iOS data model used as part of the SDK.
+It is required to start migrations between the different versions.</p>
+
+</dd>
+<dt class="enumeration">
+    <a href="/ios-backend/FileSupportError" title="enumeration - FileSupportError">
+        File​Support​Error
+    </a>
+</dt>
+<dd>
+    <p>Errors created by the Cyface SDK associated with accessing the file system.</p>
+
+</dd>
+<dt class="enumeration">
+    <a href="/ios-backend/Status" title="enumeration - Status">
+        Status
+    </a>
+</dt>
+<dd>
+    <p>The status returned by asynchronous callback handlers.</p>
+
+</dd>
+<dt class="enumeration">
+    <a href="/ios-backend/ServerConnection_ServerConnectionError" title="enumeration - ServerConnection.ServerConnectionError">
+        Server​Connection.​Server​Connection​Error
+    </a>
+</dt>
+<dd>
+    <p>A structure encapsulating errors used by server connections.</p>
+
+</dd>
+        </dl>
+    </section>
+    <section id="protocols">
+        <h2>Protocols</h2>
+        <dl>
+            <dt class="protocol">
+    <a href="/ios-backend/DistanceCalculationStrategy" title="protocol - DistanceCalculationStrategy">
+        Distance​Calculation​Strategy
+    </a>
+</dt>
+<dd>
+    <p>This protocol provides a way to calculate the distance between two geo locations in meters.
+Different implementations are possible.</p>
+
+</dd>
+<dt class="protocol">
+    <a href="/ios-backend/CoreDataMigratorProtocol" title="protocol - CoreDataMigratorProtocol">
+        Core​Data​Migrator​Protocol
+    </a>
+</dt>
+<dd>
+    <p>A protocol implemented by classes responsible for migrating from old to new data models.</p>
+
+</dd>
+<dt class="protocol">
+    <a href="/ios-backend/Authenticator" title="protocol - Authenticator">
+        Authenticator
+    </a>
+</dt>
+<dd>
+    <p>An <code>Authenticator</code> provides functionality to authenticate this app on a servoer for receiving the captured data.</p>
+
+</dd>
+<dt class="protocol">
+    <a href="/ios-backend/Cleaner" title="protocol - Cleaner">
+        Cleaner
+    </a>
+</dt>
+<dd>
+    <p>Implementations of this protocol are responsible for cleaning the database after a synchronization run.</p>
+
+</dd>
+<dt class="protocol">
+    <a href="/ios-backend/TrackCleaner" title="protocol - TrackCleaner">
+        Track​Cleaner
+    </a>
+</dt>
+<dd>
+    
+</dd>
+        </dl>
+    </section>
+<section id="extensions">
+    <h2>Extensions</h2>
+    <dl>
+    <dt class="extension">
+    <a href="/ios-backend/NSManagedObjectContext">NSManagedObjectContext</a>
+</dt>
+<dd></dd>
+    </dl>
+<section>
+        </article>
+    </main>
+
+    <footer>
+        <p>
+    Generated on <time datetime="2022-01-03T14:05:59+0100">January 3, 2022</time> using <a href="https://github.com/SwiftDocOrg/swift-doc">swift-doc</a> <span class="version">1.0.0-rc.1</span>.
+</p>
+    </footer>
+</body>
+</html>
