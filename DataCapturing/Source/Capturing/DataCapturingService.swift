@@ -97,7 +97,7 @@ public class DataCapturingService: NSObject {
     private let savingInterval: TimeInterval
 
     /// A timer called in regular intervals to save the captured data to the underlying database.
-    private var backgroundSynchronizationTimer: DispatchSourceTimer!
+    private var backgroundSynchronizationTimer: DispatchSourceTimer?
 
     /// The number of the current event. This is used to filter events based on `locationUpdateRate`.
     private var geoLocationEventNumber = 0
@@ -411,7 +411,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
         }
 
         self.backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
-        self.backgroundSynchronizationTimer.resume()
+        self.backgroundSynchronizationTimer.activate()
 
         DispatchQueue.main.async {
             self.coreLocationManager.startUpdatingLocation()
@@ -430,7 +430,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             self.coreLocationManager.stopUpdatingLocation()
         }
         coreLocationManager.locationDelegate = nil
-        backgroundSynchronizationTimer.cancel()
+        backgroundSynchronizationTimer?.cancel()
         if !locationsCache.isEmpty || !sensorCapturer.isEmpty {
             saveCapturedData()
         }
