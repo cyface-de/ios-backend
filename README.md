@@ -52,7 +52,7 @@ guard let bundle = Bundle(for: type(of: manager)) else {
     fatalError()
 }
 // 5
-manager.setup(bundle: bundle) {
+try manager.setup(bundle: bundle) {
     // 6
 }
 ```
