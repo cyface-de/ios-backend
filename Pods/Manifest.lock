@@ -1,18 +1,18 @@
 PODS:
   - Alamofire (4.9.1)
-  - Charts (3.4.0):
-    - Charts/Core (= 3.4.0)
-  - Charts/Core (3.4.0)
-  - DataCapturing (8.0.0):
+  - Charts (3.6.0):
+    - Charts/Core (= 3.6.0)
+  - Charts/Core (3.6.0)
+  - DataCapturing (0.0.0):
     - Alamofire (~> 4.9.1)
-    - DataCompression (~> 3.4.0)
-  - DataCapturing/Tests (8.0.0):
+    - DataCompression (~> 3.6.0)
+  - DataCapturing/Tests (0.0.0):
     - Alamofire (~> 4.9.1)
-    - DataCompression (~> 3.4.0)
-  - DataCompression (3.4.0)
+    - DataCompression (~> 3.6.0)
+  - DataCompression (3.6.0)
 
 DEPENDENCIES:
-  - Charts (~> 3.4.0)
+  - Charts (~> 3.6.0)
   - DataCapturing (from `./`)
   - DataCapturing/Tests (from `./`)
 
@@ -28,10 +28,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  Charts: 74c9f256eaf0460c0c416522d1cf8c634ea6b286
-  DataCapturing: 4eb770a93f61c6ce9f6241f312b4a5b29418c9a6
-  DataCompression: bd62a636afc19d8582b1772b136b772345a22f95
+  Charts: b1e3a1f5a1c9ba5394438ca3b91bd8c9076310af
+  DataCapturing: b3e88ba483e5152c406bac5558921ddbfd9a80cd
+  DataCompression: 06628f9c807b6f152e0da37635633f62fc51dc77
 
-PODFILE CHECKSUM: cdbe182810946019414db80e382e023b9d348bac
+PODFILE CHECKSUM: acbd711de16953ad19288baefa9e4e460a7cdab7
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.2

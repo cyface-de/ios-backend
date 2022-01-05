@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2021 Cyface GmbH
+ * Copyright 2017 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -26,7 +26,7 @@ import os.log
  An object of this class handles the lifecycle of starting and stopping data capturing.
  
  - Author: Klemens Muthmann
- - Version: 10.1.1
+ - Version: 10.1.2
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -97,7 +97,7 @@ public class DataCapturingService: NSObject {
     private let savingInterval: TimeInterval
 
     /// A timer called in regular intervals to save the captured data to the underlying database.
-    private var backgroundSynchronizationTimer: DispatchSourceTimer!
+    private var backgroundSynchronizationTimer: DispatchSourceTimer?
 
     /// The number of the current event. This is used to filter events based on `locationUpdateRate`.
     private var geoLocationEventNumber = 0
@@ -389,8 +389,8 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
         sensorCapturer.start()
 
-        self.backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.lifecycleQueue)
-        self.backgroundSynchronizationTimer.setEventHandler { [weak self] in
+        let backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.lifecycleQueue)
+        backgroundSynchronizationTimer.setEventHandler { [weak self] in
             guard let self = self else {
                 return
             }
@@ -410,8 +410,9 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             }
         }
 
-        self.backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
-        self.backgroundSynchronizationTimer.resume()
+        backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
+        backgroundSynchronizationTimer.activate()
+        self.backgroundSynchronizationTimer = backgroundSynchronizationTimer
 
         DispatchQueue.main.async {
             self.coreLocationManager.startUpdatingLocation()
@@ -430,7 +431,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             self.coreLocationManager.stopUpdatingLocation()
         }
         coreLocationManager.locationDelegate = nil
-        backgroundSynchronizationTimer.cancel()
+        backgroundSynchronizationTimer?.cancel()
         if !locationsCache.isEmpty || !sensorCapturer.isEmpty {
             saveCapturedData()
         }
@@ -473,7 +474,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
             self.locationsCache = [GeoLocation]()
         } catch let error {
-            return os_log("Unable to save captured data. Error %@", log: self.log, type: .error, error.localizedDescription)
+            return os_log("Unable to save captured data. Error %{public}@", log: self.log, type: .error, error.localizedDescription)
         }
     }
 
@@ -566,7 +567,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
      - didFailWithError: The reported error.
      */
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        os_log("Location service failed with error: %@!", log: log, type: .error, error.localizedDescription)
+        os_log("Location service failed with error: %{public}@!", log: log, type: .error, error.localizedDescription)
         hasFix = false
     }
 }

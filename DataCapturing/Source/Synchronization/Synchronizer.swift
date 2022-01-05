@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -31,7 +31,7 @@ import Alamofire
  For foreground synchronization use `syncChecked()`.
 
  - Author: Klemens Muthmann
- - Version: 4.0.0
+ - Version: 4.0.1
  - Since: 2.3.0
  */
 public class Synchronizer {
@@ -171,6 +171,8 @@ public class Synchronizer {
      Starts background synchronization as prepared in this objects initializer.
      */
     public func activate() {
+        os_log("Activating Synchronization", log: Synchronizer.log, type: .debug)
+
         let host = Synchronizer.stripSchemeFrom(url: serverConnection.apiURL)
         reachabilityManager = NetworkReachabilityManager(host: host)
         // Initial sync
@@ -274,8 +276,8 @@ public class Synchronizer {
         - error: The error causing the failure.
      */
     private func failureHandler(measurement: Int64, error: Error) {
-        os_log("Unable to upload data for measurement: %@!", log: Synchronizer.log, type: .error, NSNumber(value: measurement))
-        os_log("Error: %@", log: Synchronizer.log, type: .error, error.localizedDescription)
+        os_log("Unable to upload data for measurement: %d!", log: Synchronizer.log, type: .error, measurement)
+        os_log("Error: %{public}@", log: Synchronizer.log, type: .error, error.localizedDescription)
         handler(.synchronizationFinished(measurement: measurement), .error(error))
         synchronizationFinishedHandler()
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2021 Cyface GmbH
+ * Copyright 2017 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -29,7 +29,7 @@ import CoreData
  It also starts the first `UIViewController`, initializes the database layer and connects to a Cyface data server.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.0.1
  - Since: 1.0.0
  */
 @UIApplicationMain
@@ -109,7 +109,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
         guard let loginViewController = storyboard.instantiateInitialViewController() as? LoginViewController else {
             fatalError("Unable to cast main storyboard initial view controller to a LoginViewController!")
         }
-        // TODO: This late dependency injection is not necessary if using a proper programmatical MVVM. Refactor the LoginViewController to follow that model!
+        // TODO: This late dependency injection is not necessary if using a proper programmatical MVVM.
+        // Refactor the LoginViewController to follow that model!
         loginViewController.model = settings
         window?.rootViewController = loginViewController
         window?.makeKeyAndVisible()
@@ -122,7 +123,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
         }
 
         let storyboard = UIStoryboard(name: AppDelegate.mainStoryBoard, bundle: nil)
-        guard let mainNavigationViewController = storyboard.instantiateViewController(withIdentifier: "CyfaceViewController") as? UINavigationController else {
+        let instantiatedViewControler = storyboard.instantiateViewController(withIdentifier: "CyfaceViewController")
+        guard let mainNavigationViewController = instantiatedViewControler as? UINavigationController else {
             fatalError("Wrong type for ViewController to show as main view controller. Must be of type ViewController")
         }
 
@@ -183,22 +185,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
             }
 
             self.settings.add(serverUrlChangedListener: self)
-            let coreDataStack = CoreDataManager()
-            let bundle = Bundle(for: type(of: coreDataStack))
-            coreDataStack.setup(bundle: bundle) { [weak self] in
-                guard let self = self else {
-                    return
-                }
-                self.coreDataStack = coreDataStack
-
-                DispatchQueue.main.async { [weak self] in
+            do {
+                let coreDataStack = try CoreDataManager()
+                let bundle = Bundle(for: type(of: coreDataStack))
+                try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
+                    if let error = error {
+                        fatalError("Unable to setup CoreData stack due to: \(error)")
+                    }
                     guard let self = self else {
                         return
                     }
+                    self.coreDataStack = coreDataStack
 
-                    self.window = UIWindow(frame: UIScreen.main.bounds)
-                    self.presentMainUI()
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else {
+                            return
+                        }
+
+                        self.window = UIWindow(frame: UIScreen.main.bounds)
+                        self.presentMainUI()
+                    }
                 }
+            } catch {
+                fatalError("Unable to setup CoreData stack due to: \(error)")
             }
         }
         return true

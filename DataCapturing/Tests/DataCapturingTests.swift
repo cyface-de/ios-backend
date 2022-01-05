@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2021 Cyface GmbH
+ * Copyright 2017 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -26,7 +26,7 @@ import CoreData
  This test is intended to test capturing some data in isolation.
 
  - Author: Klemens Muthmann
- - Version: 2.3.2
+ - Version: 2.3.3
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {
@@ -39,20 +39,32 @@ class DataCapturingTests: XCTestCase {
     let defaultMode = "BICYCLE"
     /// An object for logging lifecycle events during tests and providing functionality to assert on them.
     var testEventHandler: TestDataCapturingEventHandler!
+    static let dataModel = try! CoreDataManager.loadModel()
 
     /// Initializes every test by creating a `TestDataCapturingService`.
     override func setUp() {
         super.setUp()
         let expectation = self.expectation(description: "CoreDataStack initialized successfully.")
 
-        coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
-        let bundle = Bundle(for: type(of: coreDataStack))
-        coreDataStack.setup(bundle: bundle) {
+        do {
+            coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: DataCapturingTests.dataModel)
+            let bundle = Bundle(for: type(of: coreDataStack))
+            try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
+                if let error = error {
+                    XCTFail("Unable to setup CoreData stack due to \(error)")
+                }
 
-            self.testEventHandler = TestDataCapturingEventHandler()
-            self.oocut = self.dataCapturingService(dataManager: self.coreDataStack, eventHandler: self.testEventHandler.handle(event: status:))
-            
-            expectation.fulfill()
+                guard let self = self else {
+                    return
+                }
+
+                self.testEventHandler = TestDataCapturingEventHandler()
+                self.oocut = self.dataCapturingService(dataManager: self.coreDataStack, eventHandler: self.testEventHandler.handle(event: status:))
+
+                expectation.fulfill()
+            }
+        } catch {
+            XCTFail("Unable to setup CoreData stack due to \(error)")
         }
         
         waitForExpectations(timeout: 5) { error in

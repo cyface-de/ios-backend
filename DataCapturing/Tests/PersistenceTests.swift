@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Cyface GmbH
+ * Copyright 2018 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -25,7 +25,7 @@ import CoreData
  Tests that using the `PersistenceLayer` works as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.2.3
+ - Version: 1.2.4
  - Since: 1.0.0
  */
 class PersistenceTests: XCTestCase {
@@ -36,15 +36,19 @@ class PersistenceTests: XCTestCase {
     var fixture: Int64!
     /// The default mode of transportation used for tests.
     let defaultMode = "BICYCLE"
+    static let dataModel = try! CoreDataManager.loadModel()
 
     /// Initializes the test enviroment by saving some test data to the test `PersistenceLayer`.
     override func setUp() {
         super.setUp()
         let expectation = self.expectation(description: "CoreDataStack initialized successfully!")
-        
-            let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator())
+
+        do {
+            let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: PersistenceTests.dataModel)
             let bundle = Bundle(for: type(of: manager))
-            manager.setup(bundle: bundle) {
+            try manager.setup(bundle: bundle) { error in
+
+
                 do {
                     self.oocut = PersistenceLayer(onManager: manager)
                     self.oocut.context = self.oocut.makeContext()
@@ -61,6 +65,9 @@ class PersistenceTests: XCTestCase {
                     XCTFail("Unable to set up due to \(error.localizedDescription)")
                 }
             }
+        } catch {
+            XCTFail("Unable to initialize CoreData due to: \(error)")
+        }
             
             waitForExpectations(timeout: 5) { error in
                 if let error = error {

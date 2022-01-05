@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Cyface GmbH
+ * Copyright 2019-2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -25,7 +25,7 @@ import os.log
  Handles the Cyface SDK lifecycle events, caused by start, pause, resume and stop calls.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since 6.0.0
  */
 class CapturingLifecycle {
@@ -50,13 +50,13 @@ class CapturingLifecycle {
                     self.viewController.enablePauseButton()
                 }
             } catch {
-                return os_log("ViewController.handleDataCapturingEvent(event: .serviceStarted, status: .success): Error: %@",
+                return os_log("ViewController.handleDataCapturingEvent(event: .serviceStarted, status: .success): Error: %{public}@",
                               log: CapturingLifecycle.log,
                               type: .error, error.localizedDescription)
             }
 
         case .error(let error):
-            os_log("ViewController.handleDataCapturingEvent(event: .serviceStarted, status: .error): Error: %@",
+            os_log("ViewController.handleDataCapturingEvent(event: .serviceStarted, status: .error): Error: %{public}@",
                    log: CapturingLifecycle.log,
                    type: .error, error.localizedDescription)
         }
@@ -76,12 +76,12 @@ class CapturingLifecycle {
             do {
                 try showCurrentMeasurementOverlay(in: appDelegate, for: measurementIdentifier)
             } catch {
-                return os_log("ViewController.handleDataCapturingEvent(event: .serviceResumed, status: .success): Error: %@",
+                return os_log("ViewController.handleDataCapturingEvent(event: .serviceResumed, status: .success): Error: %{public}@",
                               log: CapturingLifecycle.log,
                               type: .error, error.localizedDescription)
             }
         case .error(let error):
-            os_log("ViewController.handleDataCapturingEvent(event: .serviceResumed, status: .error): Error: %@",
+            os_log("ViewController.handleDataCapturingEvent(event: .serviceResumed, status: .error): Error: %{public}@",
                    log: CapturingLifecycle.log,
                    type: .error, error.localizedDescription)
         }
@@ -167,9 +167,9 @@ class CapturingLifecycle {
 
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifiedBy)
 
-        os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Capturing measurement %@.",
+        os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Capturing measurement %d.",
                log: CapturingLifecycle.log,
-               type: .info, "\(measurementIdentifiedBy)")
+               type: .info, measurementIdentifiedBy)
 
         let currentMeasurement = MeasurementModel(coreDataStack)
 

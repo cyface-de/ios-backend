@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -25,7 +25,7 @@ import CoreData
  Tests that data migration between different versions of the Cyface data model are going to work as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.2.0
+ - Version: 1.2.1
  - Since: 4.0.0
  */
 class DataMigrationTest: XCTestCase {
@@ -46,7 +46,6 @@ class DataMigrationTest: XCTestCase {
     func testLoadMappingModel() throws {
         let oldResource = "3"
         let newResource = "4"
-        let subdirectory = "CyfaceModel.momd"
 
         // We need the following rather complicated loop, since the DataCapturing Framework Bundle does not have an identifier.
         let bundles = Bundle.allBundles
@@ -407,9 +406,6 @@ class DataMigrationTest: XCTestCase {
         return container
     }
 
-    private func findModelBundle() {
-
-    }
 }
 
 extension FileManager {

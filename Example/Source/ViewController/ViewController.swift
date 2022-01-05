@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2021 Cyface GmbH
+ * Copyright 2017 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -29,7 +29,7 @@ The view controller showing the overview of unsynchronized measurements together
  This is still an MVC (Massive View Controller) until all the remining pieces of business logic are refactored out to their own view models. Of special importance is to remove all calls to the persistence layer from this view controller.
 
  - Author: Klemens Muthmann
- - Version: 2.1.0
+ - Version: 2.1.1
  - Since: 1.0.0
  */
 class ViewController: UIViewController {
@@ -284,23 +284,30 @@ class ViewController: UIViewController {
      */
     func synchronized(measurementIdentifier: Int64, status: Status) {
         debugPrint("Finishing synchronization for measurement \(measurementIdentifier).")
-        // Search the index of the synchronizing measurement in the list of shown measurements.
-        guard let (index, measurement) = self.findMeasurementCellViewModelBy(identifier: measurementIdentifier) else {
-            fatalError("No measurement with identifier \(measurementIdentifier)!")
-        }
-
-        guard measurement.status == .uploading else {
-            fatalError("Measurement in invalid state. Expected .uploading but got \(measurement.status)")
-        }
 
         DispatchQueue.main.async { [weak self] in
             guard let self = self else {
                 return
             }
 
+            // Search the index of the synchronizing measurement in the list of shown measurements.
+            guard let (index, measurement) = self.findMeasurementCellViewModelBy(identifier: measurementIdentifier) else {
+                fatalError("No measurement with identifier \(measurementIdentifier)!")
+            }
+
             switch status {
             case .success:
+
+                guard measurement.status == .uploading else {
+                    os_log("Measurement view in invalid state. Expected .uploading but got %{public}@",
+                           log: ViewController.LOG,
+                           type: .error,
+                           measurement.status.description)
+                    fatalError("Measurement in invalid state. Expected .uploading but got \(measurement.status)")
+                }
+
                 measurement.status = .uploadSuccessful
+
                 // TODO: Move the following code to a separate view class
                 let path = IndexPath(row: index, section: 0)
 
@@ -309,11 +316,11 @@ class ViewController: UIViewController {
                 self.measurementsOverview.beginUpdates()
                 self.measurementsOverview.deleteRows(at: [path], with: .automatic)
                 self.measurementsOverview.endUpdates()
-            case .error(let error as ServerConnectionError):
-                _ = ServerConnectionError.handle(error: error)
-                measurement.status = .uploadFailed
             case .error(let error):
-                print("Unexpected Error! \(error)")
+                os_log("Unable to synchronize data due to %{public}@",
+                       log: ViewController.LOG,
+                       type: .error,
+                       error.localizedDescription)
                 measurement.status = .uploadFailed
             }
 
@@ -330,9 +337,10 @@ class ViewController: UIViewController {
         - status: The status of the measurement, that is being synchronized.
      */
     func synchronizing(measurementIdentifier: Int64, status: Status) {
+        os_log("Synchronizing", log: ViewController.LOG, type: .debug)
         guard case .success = status else {
             if case .error(let error) = status {
-                os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Error status: @%",
+                os_log("ViewController.handleDataCapturingEvent(:DataCapturingEvent:Status): Error status: %{public}@",
                        log: ViewController.LOG,
                        type: .error, error.localizedDescription)
             }
@@ -343,7 +351,7 @@ class ViewController: UIViewController {
             fatalError("No measurement with identifier \(measurementIdentifier)")
         }
 
-        debugPrint("Starting synchronization for measurement \(measurement).")
+        os_log("Starting synchronization for measurement %{public}d.", log: ViewController.LOG, type: .debug, measurementIdentifier)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else {
                 return
@@ -442,22 +450,25 @@ class ViewController: UIViewController {
         case Modality.train.dbValue:
             contextTabBar.selectedSegmentIndex = 4
         default:
-            os_log("Unsupported measurement context %{PUBLIC}@! This message is harmless if it occurs on the first App start!",
-                   log: OSLog.init(subsystem: "ViewController",
-                                   category: "de.cyface"),
-                   type: .default, String(describing: modalityValue))
+            os_log("Unsupported measurement context %{public}@! This message is harmless if it occurs on the first App start!",
+                   log: ViewController.LOG, type: .default, String(describing: modalityValue))
             contextTabBar.selectedSegmentIndex = 1
             UserDefaults.standard.set(Modality.bike.dbValue, forKey: "de.cyface.settings.context")
         }
     }
 
     override func viewDidAppear(_ animated: Bool) {
+        os_log("viewDidAppear", log: ViewController.LOG, type: .debug)
         super.viewDidAppear(animated)
 
         if measurements.isEmpty {
             showOverlay {
                 let coreDataStack = self.coreDataStack
-                DispatchQueue.global(qos: .userInteractive).async {
+                DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+                    guard let self = self else {
+                        return
+                    }
+
                     defer {
                         DispatchQueue.main.async { [weak self] in
                             guard let self = self else {
@@ -483,6 +494,7 @@ class ViewController: UIViewController {
                         persistenceLayer.context = persistenceLayer.makeContext()
                         let measurements = try persistenceLayer.loadSynchronizableMeasurements()
 
+                        os_log("Populating measurements", log: ViewController.LOG, type: .debug)
                         for measurement in measurements {
                             let model = MeasurementModel(coreDataStack)
                             model.measurement = measurement
@@ -490,13 +502,18 @@ class ViewController: UIViewController {
                             self.measurements.append(cellViewModel)
                         }
 
-                        DispatchQueue.main.async { [weak self] in
+                        DispatchQueue.main.sync { [weak self] in
                             guard let self = self else {
                                 return
                             }
 
                             self.measurementsOverview.reloadData()
+                            if self._settings.synchronizeData {
+                                os_log("Starting Data Synchronization", log: ViewController.LOG, type: .debug)
+                                self.synchronizer.activate()
+                            }
                         }
+
                     } catch {
                         fatalError()
                     }
@@ -504,9 +521,6 @@ class ViewController: UIViewController {
             }
         }
 
-        if _settings.synchronizeData {
-            synchronizer.activate()
-        }
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(onSynchronizationToggleChanged(_:)),
                                                name: UserDefaults.didChangeNotification,

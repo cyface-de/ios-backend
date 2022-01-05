@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Cyface GmbH
+ * Copyright 2019 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -32,7 +32,7 @@ import os.log
  Since there is no way of knowing how long the system has sleept in between the last boot and now, we cannot use kernel boot time to get an absolute data.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.0.1
  - Since: 6.0.0
  */
 class SensorCapturer {
@@ -122,7 +122,7 @@ class SensorCapturer {
      */
     private func handle(_ data: CMAccelerometerData?, _ error: Error?) {
         if let error = error {
-            return os_log("Accelerometer error: %@", log: SensorCapturer.log, type: .error, error.localizedDescription)
+            return os_log("Accelerometer error: %{public}@", log: SensorCapturer.log, type: .error, error.localizedDescription)
         }
 
         guard let data = data else {
@@ -158,7 +158,7 @@ class SensorCapturer {
      */
     private func handle(_ data: CMGyroData?, _ error: Error?) {
         if let error = error {
-            return os_log("Gyroscope error: %@", log: SensorCapturer.log, type: .error, error.localizedDescription)
+            return os_log("Gyroscope error: %{public}@", log: SensorCapturer.log, type: .error, error.localizedDescription)
         }
 
         guard let data = data else {
@@ -188,7 +188,7 @@ class SensorCapturer {
      */
     private func handle(_ data: CMDeviceMotion?, _ error: Error?) {
         if let error = error {
-            return os_log("Device Motion error: %@", log: SensorCapturer.log, type: .error, error.localizedDescription)
+            return os_log("Device Motion error: %{public}@", log: SensorCapturer.log, type: .error, error.localizedDescription)
         }
 
         guard let data = data else {

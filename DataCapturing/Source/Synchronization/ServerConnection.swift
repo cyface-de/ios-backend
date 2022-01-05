@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Cyface GmbH
+ * Copyright 2018 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -33,7 +33,7 @@ import CoreData
  This implementation follows code published here: https://gist.github.com/toddhopkinson/60cae9e48e845ce02bcf526f388cfa63
 
  - Author: Klemens Muthmann
- - Version: 8.0.1
+ - Version: 8.1.0
  - Since: 1.0.0
  */
 public class ServerConnection {
@@ -97,10 +97,12 @@ public class ServerConnection {
         - onFailure: The handler to call, when the synchronization has failed. This handler provides an error status. The error contains the reason of the failure. The `MeasurementEntity` is the same as the one provided as parameter to this method.
      */
     public func sync(measurement: Int64, onSuccess success: @escaping ((Int64) -> Void) = {_ in }, onFailure failure: @escaping ((Int64, Error) -> Void) = {_, _ in }) {
-
+        os_log("Starting synchronization of measurement %{public}d with Authentication against server!", log: ServerConnection.osLog, type: .debug, measurement)
         authenticator.authenticate(onSuccess: {jwtToken in
+            os_log("Authentication successful for measurement %{public}d.", log: ServerConnection.osLog, type: .debug, measurement)
             self.onAuthenticated(token: jwtToken, measurement: measurement, onSuccess: success, onFailure: failure)
         }, onFailure: { error in
+            os_log("Authentication failed for measurement %{public}d.", log: ServerConnection.osLog, type: .debug, measurement)
             failure(measurement, error)
         })
 
@@ -127,12 +129,11 @@ public class ServerConnection {
             os_log("Encoding!", log: ServerConnection.osLog, type: OSLogType.default)
             do {
                 try self.create(request: data, for: measurement)
-            } catch let error {
-                // TODO: I should probably handle this error somehow instead of only logging it.
-                os_log("Encoding data failed! Error %{PUBLIC}@", log: ServerConnection.osLog, type: .error, error.localizedDescription)
+            } catch {
+                onFailure(measurement, error)
             }
         }
-        os_log("Transmitting measurement to URL %{PUBLIC}@!", log: ServerConnection.osLog, type: .debug, url.absoluteString)
+        os_log("Transmitting measurement to URL %{public}@!", log: ServerConnection.osLog, type: .debug, url.absoluteString)
         Networking.sharedInstance.backgroundSessionManager.upload(
             multipartFormData: encode,
             usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold,
@@ -154,19 +155,7 @@ public class ServerConnection {
      - Parameters:
         - request: The request to fill with data
         - for: The measurement to transmit
-     - Throws:
-        - `ServerConnectionError.missingInstallationIdentifier` If there is no valid installation identifier to identify this SDK installation with a server
-        - `ServerConnectionError.missingMeasurementIdentifier` If the current measurement has no valid device wide unique identifier
-        - `ServerConnectionError.missingDeviceType` If the device type of this device could not be figured out
-        - `PersistenceError.dataNotLoadable` If there is no such measurement
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData
-        - `PersistenceError.modelNotLoabable` If the model is not loadable
-        - `PersistenceError.modelNotInitializable` If the model was loaded (so it is available) but can not be initialized
-        - `SerializationError.missingData` If no track data was found
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases
-        - `FileSupportError.notReadable` If the data file was not readable
-        - Some unspecified errors from within CoreData
-        - Some unspecified undocumented file system error if file was not accessible
+     - Throws: `ServerConnectionError.modalityError`, `ServerConnectionError.measurementError`, `ServerConnectionError.dataError`, `PersistenceError.dataNotLoadable`, `PersistenceError.noContext`, `PersistenceError.modelNotLoabable`, `PersistenceError.modelNotInitializable`,  `SerializationError.missingData`,  `SerializationError.invalidData`,  `FileSupportError.notReadable`, Some unspecified errors from within CoreData, Some unspecified undocumented file system error if file was not accessible
      */
     func create(request: MultipartFormData, for measurement: Int64) throws {
         os_log("Creating request", log: ServerConnection.osLog, type: .default)
@@ -176,13 +165,13 @@ public class ServerConnection {
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
         let modalityTypeChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
         guard !modalityTypeChangeEvents.isEmpty else {
-            fatalError("No modality type information available!")
+            throw ServerConnectionError.modalityError("No modality type information available!")
         }
         guard let initialModality = modalityTypeChangeEvents[0].value else {
-            fatalError("Invalid modality change event with no value encountered!")
+            throw ServerConnectionError.modalityError("Invalid modality change event with no value encountered!")
         }
         guard let events = measurement.events?.array as? [Event] else {
-            fatalError("Unable to load events for measurement \(measurement.identifier)")
+            throw ServerConnectionError.measurementError(measurement.identifier)
         }
 
         try addMetaData(to: request, for: measurement, withInitialModality: initialModality)
@@ -221,25 +210,27 @@ public class ServerConnection {
         - request: The request to add the meta data to
         - measurement: The measurement to take the meta data from
         - initialModality: The modality selected at the start of the measurement
+
+     - Throws: `ServerConnectionError.dataError`
      */
     func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO, withInitialModality initialModality: String) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
-            fatalError("Installation identifier was missing!")
+            throw ServerConnectionError.dataError("Installation identifier was missing!")
         }
         guard let measurementIdData = String(measurement.identifier).data(using: String.Encoding.utf8) else {
-            fatalError("Measurement identifier was missing!")
+            throw ServerConnectionError.dataError("Measurement identifier was missing!")
         }
         guard let deviceTypeData = modelIdentifier.data(using: String.Encoding.utf8) else {
-            fatalError("Device model identifier was missing!")
+            throw ServerConnectionError.dataError("Device model identifier was missing!")
         }
 
         let bundle = Bundle(for: type(of: self))
         guard let appVersion = (bundle.infoDictionary?["CFBundleShortVersionString"] as? String)?.data(using: String.Encoding.utf8) else {
-            fatalError("Application version was missing!")
+            throw ServerConnectionError.dataError("Application version was missing!")
         }
 
         guard let vehicle = initialModality.data(using: String.Encoding.utf8) else {
-            fatalError("No type of vehicle provided for measurement!")
+            throw ServerConnectionError.dataError("No type of vehicle provided for measurement!")
         }
 
         let length = String(measurement.trackLength).data(using: String.Encoding.utf8)!
@@ -322,58 +313,24 @@ public class ServerConnection {
             throw error
         }
     }
-}
-
-/**
- A structure encapsulating errors used by server connections.
-
- - Author: Klemens Muthmann
- - Version: 4.1.0
- - Since: 1.0.0
- */
-public struct ServerConnectionError: Error {
     /**
-     ```
-     case authenticationNotSuccessful
-     case notAuthenticated
-     ```
+     A structure encapsulating errors used by server connections.
 
      - Author: Klemens Muthmann
-     - Version: 1.0.0
-     - Since: 4.0.0
+     - Version: 5.0.0
+     - Since: 1.0.0
      */
-    enum Category {
+    public enum ServerConnectionError: Error {
         /// If authentication was carried out but was not successful
-        case authenticationNotSuccessful
-        /// Error occuring if this client tried to communicate with the server without proper authentication.
-        case notAuthenticated
-    }
-    /// The `Category` of this error.
-    let type: Category
-    /// A human readable explanation for the error.
-    let verboseDescription: String
-    /// The name of the method this error has occured within.
-    let inMethodName: String
-    /// The name of the file this error has occured within.
-    let inFileName: String
-    /// The number of the line of code this error has occured within.
-    let atLineNumber: Int
-
-    /**
-     Handles a `ServerConnectionError` appropriately, by showing its details.
-
-     - Parameter error: The error to handle.
-     - Returns: The error description shown by this method call.
-     */
-    public static func handle(error: ServerConnectionError) -> String {
-        let readableError = """
-        \nERROR - operation: [\(error.type)];
-        reason: [\(error.verboseDescription)];
-        in method: [\(error.inMethodName)];
-        in file: [\(error.inFileName)];
-        at line: [\(error.atLineNumber)]\n
-        """
-        print(readableError)
-        return readableError
+        case authenticationNotSuccessful(String)
+        /// Error occuring if this client tried to communicate with the server without proper authentication
+        case notAuthenticated(String)
+        /// Thrown if modality type changes are inconsistent
+        case modalityError(String)
+        /// Thrown if measurement events are inconsistent
+        case measurementError(Int64)
+        /// Thrown if some measurement metadata was not encodable as an UTF-8 String
+        case dataError(String)
     }
 }
+

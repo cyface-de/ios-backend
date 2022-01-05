@@ -1,6 +1,6 @@
 {
   "name": "DataCapturing",
-  "version": "8.0.0",
+  "version": "0.0.0",
   "summary": "Framework used to continuously capture data from all available sensors on an iOS device and transmit it to a Cyface-API compatible server.",
   "description": "This framework can be included by your App if you are going to capture sensor data and transmit that data to a Cyface-API server for further analysis.",
   "homepage": "https://cyface.de",
@@ -11,7 +11,7 @@
   "authors": "Cyface GmbH",
   "source": {
     "git": "https://github.com/cyface-de/ios-backend.git",
-    "tag": "8.0.0"
+    "tag": "0.0.0"
   },
   "social_media_url": "https://twitter.com/CyfaceDE",
   "platforms": {
@@ -20,6 +20,10 @@
   "swift_versions": "5.3",
   "source_files": "DataCapturing/Source/**/*{.h,.m,.swift}",
   "resources": "DataCapturing/Source/**/*{.xcdatamodeld,.xcdatamodel,.xcmappingmodel}",
+  "script_phases": {
+    "name": "Set version and build",
+    "script": "#!/bin/bash\n\n# Determine plist path\nplist=${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\n# Determine current version\nversion=$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' \"$plist\")\n# Get date of last commit\ncommitDate=$(date -r `git log -1 --date=short --pretty=format:%ct` +%Y%m%d)\n# Get current date/time\nbuildDate=$(date +%Y%m%d%H%M)\n\n# Set display version to existing version + commitDate\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $version-$commitDate\" \"$plist\"  # Version number\n\n# Set build number to current date/time\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildDate\" \"$plist\"  # Build number\n\necho \"Version: $version-$commitDate\"\necho \"Build:   $buildDate\"\n"
+  },
   "frameworks": [
     "CoreData",
     "CoreLocation",
@@ -30,14 +34,28 @@
       "~> 4.9.1"
     ],
     "DataCompression": [
-      "~> 3.4.0"
+      "~> 3.6.0"
     ]
   },
   "testspecs": [
     {
       "name": "Tests",
       "test_type": "unit",
-      "source_files": "DataCapturing/Tests/**/*.swift"
+      "source_files": "DataCapturing/Tests/**/*.swift",
+      "resources": "DataCapturing/Tests/**/*.sqlite"
+    }
+  ],
+  "appspecs": [
+    {
+      "name": "Cyface",
+      "source_files": "Example/Source/**/*.swift",
+      "testspecs": [
+        {
+          "name": "ExampleUnitTests",
+          "test_type": "unit",
+          "source_files": "ExampleUnitTests/**/*.swift"
+        }
+      ]
     }
   ],
   "swift_version": "5.3"
