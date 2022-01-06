@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataCapturing - CoreDataManager</title>
+    <link rel="stylesheet" type="text/css" href="/ios-backend/all.css" media="all" />
+</head>
+<body>
+    <header>
+        <a href="/ios-backend/">
+            <strong>
+                DataCapturing
+            </strong>
+            <span>Documentation</span>
+        </a>
+    </header>
+
+    <!--
+    <form class="search">
+        <input type="search" placeholder="Search" />
+    </form>
+    -->
+
+    <nav>
+        <div class="wrapper">
+            <h2>On This Page</h2>
+            <ol><li><a href="#initializers">Initializers</a><ul><li class="initializer"><a href="#coredatamanager.init(storetype:migrator:)">init(store​Type:​migrator:​)</a></li></ul></li><li><a href="#methods">Methods</a><ul><li class="function"><a href="#coredatamanager.setup(bundle:completionclosure:)">setup(bundle:​completion​Closure:​)</a></li><li class="function"><a href="#coredatamanager.loadmodel()">load​Model()</a></li></ul></li></ol>
+        </div>
+    </nav>
+
+    <main>
+        <article>
+            <h1>
+    <small>Class</small>
+    <code class="name">Core​Data​Manager</code>
+</h1>
+
+<div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">public</span> <span class="keyword">class</span> <span class="type">CoreDataManager</span>  </body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>A class for objects representing a <em>CoreData</em> stack.
+Please call <code>setup(bundle:completionClosure:)</code> before using an object of this class.
+That call will run data migration if necessary and might take some time depending on the amount of data that must be migrated.
+So it might be a good idea to run <code>setup(bundle:completionClosure:)</code> on a background thread.</p>
+
+</div>
+<div class="discussion">
+    <aside class="author" title="Author">
+    <p>Klemens Muthmann</p>
+
+</aside>
+<aside class="version" title="Version">
+    <p>3.0.0</p>
+
+</aside>
+<aside class="since" title="Since">
+    <p>4.0.0</p>
+
+</aside>
+<aside class="attention" title="Attention">
+    <ul>
+<li>You must call <code>setup(bundle:completionClosure:)</code> only once in your application. Usually this should happen in AddDelegate.application`</li>
+<li>Do not load or save any data before the call to <code>setup(bundle:completionClosure:)</code> has finished.</li>
+</ul>
+
+</aside>
+</div>
+
+    <section id="initializers">
+        <h2>Initializers</h2>
+
+        <div role="article" class="initializer" id="coredatamanager.init(storetype:migrator:)">
+    <h3>
+        <code><a href="#coredatamanager.init(storetype:migrator:)">init(store​Type:​migrator:​)</a></code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">public</span> <span class="attribute">convenience</span> <span class="keyword">init</span>(<span class="variable">storeType</span>: <span class="type">String</span> = <span class="variable">NSSQLiteStoreType</span>, <span class="variable">migrator</span>: <a href="/ios-backend/CoreDataMigratorProtocol"><span class="type">CoreDataMigratorProtocol</span></a> = <span class="variable">CoreDataMigrator</span>()) <span class="keyword">throws</span>  </body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>Creates a new instance of the <code>CoreDataManager</code>.</p>
+
+</div>
+<div class="discussion">
+    <aside class="attention" title="Attention">
+    <p>Please call <code>setup(bundle:completionClosure:)</code> before using the <code>NSManagedObjectContext</code> instances, provided by this instance.</p>
+
+</aside>
+</div>
+<h4>Parameters</h4>
+
+<table class="parameters">
+  <thead hidden>
+  <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+  </tr>
+  </thead>
+  <tbody>
+    <tr>
+    <th>store​Type</th>
+    <td><code class="type">String</code></td>
+    <td><p>The type of the store to use. In production this should usually be <code>NSSQLiteStoreType</code>. In a test environment you might use <code>NSInMemoryStoreType</code>. Both values are defined by <em>CoreData</em>.</p>
+</td>
+</tr>
+<tr>
+    <th>migrator</th>
+    <td><code class="type">Core​Data​Migrator​Protocol</code></td>
+    <td><p>An object to migrate between different Cyface model versions.</p>
+</td>
+</tr>
+  </tbody>
+</table>
+  <h4>Throws</h4>
+  <p><code>CoreDataError.invalidModelUrl</code>, <code>CoreDataError.modelNotAvailable</code></p>
+
+</div>
+    </section>
+    <section id="methods">
+        <h2>Methods</h2>
+
+        <div role="article" class="function" id="coredatamanager.setup(bundle:completionclosure:)">
+    <h3>
+        <code><a href="#coredatamanager.setup(bundle:completionclosure:)">setup(bundle:​completion​Closure:​)</a></code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">public</span> <span class="keyword">func</span> <span class="function">setup</span>(<span class="variable">bundle</span>: <span class="type">Bundle</span>, <span class="variable">completionClosure</span>: <span class="attribute">@</span><span class="attribute">escaping</span> (<span class="type">Error</span>?) -&gt; <span class="type">Void</span>) <span class="keyword">throws</span>  </body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>Connects this <code>CoreDataManager</code> to the underlying storage, possibly migrating the data model to the current version.</p>
+
+</div>
+<h4>Parameters</h4>
+
+<table class="parameters">
+  <thead hidden>
+  <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+  </tr>
+  </thead>
+  <tbody>
+    <tr>
+    <th>bundle</th>
+    <td><code class="type">Bundle</code></td>
+    <td><p>The bundle containing the data model.</p>
+</td>
+</tr>
+  </tbody>
+</table>
+  <h4>Throws</h4>
+  <p><code>CoreDataError.missingModelUrl</code></p>
+
+</div>
+<div role="article" class="function" id="coredatamanager.loadmodel()">
+    <h3>
+        <code><a href="#coredatamanager.loadmodel()">load​Model()</a></code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">func</span> <span class="function">loadModel</span>() <span class="keyword">throws</span> -&gt; <span class="type">NSManagedObjectModel</span>  </body></html></code></pre>
+</div>
+</div>
+    </section>
+
+
+
+        </article>
+    </main>
+
+    <footer>
+        <p>
+    Generated on <time datetime="2022-01-03T14:05:59+0100">January 3, 2022</time> using <a href="https://github.com/SwiftDocOrg/swift-doc">swift-doc</a> <span class="version">1.0.0-rc.1</span>.
+</p>
+    </footer>
+</body>
+</html>

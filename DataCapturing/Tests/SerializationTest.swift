@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Cyface GmbH
+ * Copyright 2018 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -25,7 +25,7 @@ import CoreData
  Tests whether serialization and deserialization into and from the Cyface Binary Format works as expected
 
  - Author: Klemens Muthmann
- - Version: 1.1.2
+ - Version: 1.1.3
  - Since: 1.0.0
  */
 class SerializationTest: XCTestCase {

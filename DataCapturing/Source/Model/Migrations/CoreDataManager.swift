@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Cyface GmbH
+ * Copyright 2019 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -28,7 +28,7 @@ import OSLog
  So it might be a good idea to run `setup(bundle:completionClosure:)` on a background thread.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 3.0.0
  - Since: 4.0.0
  - Attention:
     - You must call `setup(bundle:completionClosure:)` only once in your application. Usually this should happen in AddDelegate.application`
@@ -144,6 +144,8 @@ public class CoreDataManager {
         A collection of all the errors thrown by the `CoreDataManager`.
 
      - Author: Klemens Muthmann
+     - Since: 10.0.0
+     - Version: 1.0.0
      */
     enum CoreDataError: Error {
         /// If the URL to the CoreData model file can not be processed by the system. This should usually not happen, since it does not depend on user input. If you encounter this error you probably have an invalid build of the Cyface SDK.

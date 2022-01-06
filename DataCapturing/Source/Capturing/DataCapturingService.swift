@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2021 Cyface GmbH
+ * Copyright 2017 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -26,7 +26,7 @@ import os.log
  An object of this class handles the lifecycle of starting and stopping data capturing.
  
  - Author: Klemens Muthmann
- - Version: 10.1.1
+ - Version: 10.1.2
  - Since: 1.0.0
  */
 public class DataCapturingService: NSObject {
@@ -389,8 +389,8 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
         sensorCapturer.start()
 
-        self.backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.lifecycleQueue)
-        self.backgroundSynchronizationTimer.setEventHandler { [weak self] in
+        let backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.lifecycleQueue)
+        backgroundSynchronizationTimer.setEventHandler { [weak self] in
             guard let self = self else {
                 return
             }
@@ -410,8 +410,9 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             }
         }
 
-        self.backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
-        self.backgroundSynchronizationTimer.activate()
+        backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
+        backgroundSynchronizationTimer.activate()
+        self.backgroundSynchronizationTimer = backgroundSynchronizationTimer
 
         DispatchQueue.main.async {
             self.coreLocationManager.startUpdatingLocation()

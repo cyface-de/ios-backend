@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataCapturing - Synchronizer</title>
+    <link rel="stylesheet" type="text/css" href="/ios-backend/all.css" media="all" />
+</head>
+<body>
+    <header>
+        <a href="/ios-backend/">
+            <strong>
+                DataCapturing
+            </strong>
+            <span>Documentation</span>
+        </a>
+    </header>
+
+    <!--
+    <form class="search">
+        <input type="search" placeholder="Search" />
+    </form>
+    -->
+
+    <nav>
+        <div class="wrapper">
+            <h2>On This Page</h2>
+            <ol><li><a href="#initializers">Initializers</a><ul><li class="initializer"><a href="#synchronizer.init(coredatastack:cleaner:serverconnection:handler:)">init(core​Data​Stack:​cleaner:​server​Connection:​handler:​)</a></li></ul></li><li><a href="#properties">Properties</a><ul><li class="variable"><a href="#synchronizer.synconwifionly">sync​OnWiFiOnly</a></li></ul></li><li><a href="#methods">Methods</a><ul><li class="function"><a href="#synchronizer.syncchecked()">sync​Checked()</a></li><li class="function"><a href="#synchronizer.sync()">sync()</a></li><li class="function"><a href="#synchronizer.activate()">activate()</a></li><li class="function"><a href="#synchronizer.deactivate()">deactivate()</a></li></ul></li></ol>
+        </div>
+    </nav>
+
+    <main>
+        <article>
+            <h1>
+    <small>Class</small>
+    <code class="name">Synchronizer</code>
+</h1>
+
+<div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">public</span> <span class="keyword">class</span> <span class="type">Synchronizer</span>  </body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.</p>
+
+</div>
+<div class="discussion">
+    <p>An object of this call can be used to synchronize data either in the foreground or in the background.
+Background synchronization happens only if the synchronizing device has an active Wifi connection.
+To activate background synchronization you need to call the <code>activate</code> method.
+Background synchronization is called as soon as WiFi becomes available or every 60 minutes.
+For foreground synchronization use <code>syncChecked()</code>.</p>
+
+<aside class="author" title="Author">
+    <p>Klemens Muthmann</p>
+
+</aside>
+<aside class="version" title="Version">
+    <p>4.0.1</p>
+
+</aside>
+<aside class="since" title="Since">
+    <p>2.3.0</p>
+
+</aside>
+</div>
+
+    <section id="initializers">
+        <h2>Initializers</h2>
+
+        <div role="article" class="initializer" id="synchronizer.init(coredatastack:cleaner:serverconnection:handler:)">
+    <h3>
+        <code><a href="#synchronizer.init(coredatastack:cleaner:serverconnection:handler:)">init(core​Data​Stack:​cleaner:​server​Connection:​handler:​)</a></code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">public</span> <span class="keyword">init</span>(<span class="variable">coreDataStack</span>: <a href="/ios-backend/CoreDataManager"><span class="type">CoreDataManager</span></a>, <span class="variable">cleaner</span>: <a href="/ios-backend/Cleaner"><span class="type">Cleaner</span></a>, <span class="variable">serverConnection</span>: <a href="/ios-backend/ServerConnection"><span class="type">ServerConnection</span></a>, <span class="variable">handler</span>: <span class="attribute">@</span><span class="attribute">escaping</span> (<a href="/ios-backend/DataCapturingEvent"><span class="type">DataCapturingEvent</span></a>, <a href="/ios-backend/Status"><span class="type">Status</span></a>) -&gt; <span class="type">Void</span>)  </body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>Initializer that sets the initial value of all the properties and prepares the background synchronization job.</p>
+
+</div>
+<h4>Parameters</h4>
+
+<table class="parameters">
+  <thead hidden>
+  <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+  </tr>
+  </thead>
+  <tbody>
+    <tr>
+    <th>core​Data​Stack</th>
+    <td><code class="type">Core​Data​Manager</code></td>
+    <td><p>Stack used to access <em>CoreData</em>.</p>
+</td>
+</tr>
+<tr>
+    <th>cleaner</th>
+    <td><code class="type">Cleaner</code></td>
+    <td><p>A strategy for cleaning the persistent storage after data synchronization.</p>
+</td>
+</tr>
+<tr>
+    <th>server​Connection</th>
+    <td><code class="type">Server​Connection</code></td>
+    <td><p>An authenticated connection to a Cyface API server.</p>
+</td>
+</tr>
+<tr>
+    <th>handler</th>
+    <td><code class="type">@escaping (Data​Capturing​Event, Status) -&gt; Void</code></td>
+    <td><p>The handler to call, when synchronization for a measurement has finished.</p>
+</td>
+</tr>
+  </tbody>
+</table>
+</div>
+    </section>
+    <section id="properties">
+        <h2>Properties</h2>
+
+        <div role="article" class="variable" id="synchronizer.synconwifionly">
+    <h3>
+        <code><a href="#synchronizer.synconwifionly">sync​OnWiFiOnly</a></code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">public</span> <span class="keyword">var</span> <span class="variable">syncOnWiFiOnly</span> = <span class="keyword">true</span></body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>A flag indicating whether synchronization of data should only happen if the device is connected to a wireless local area network (Wifi).</p>
+
+</div>
+<div class="discussion">
+    <p>If <code>true</code> data is only synchronized via Wifi; if <code>false</code> data is also synchronized via mobile network.
+The default setting is <code>true</code>.
+Setting this to <code>false</code> might put heavy load on the users device and deplete her or his data plan.</p>
+
+</div>
+</div>
+    </section>
+    <section id="methods">
+        <h2>Methods</h2>
+
+        <div role="article" class="function" id="synchronizer.syncchecked()">
+    <h3>
+        <code><a href="#synchronizer.syncchecked()">sync​Checked()</a></code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">public</span> <span class="keyword">func</span> <span class="function">syncChecked</span>()  </body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>Tries to synchronize all measurements after checking for a proper connection. If <code>syncOnWiFiOnly</code> is true, this will only work if the device is connected to a WiFi network.</p>
+
+</div>
+</div>
+<div role="article" class="function" id="synchronizer.sync()">
+    <h3>
+        <code><a href="#synchronizer.sync()">sync()</a></code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">public</span> <span class="keyword">func</span> <span class="function">sync</span>()  </body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>Synchronize all measurements now.</p>
+
+</div>
+<div class="discussion">
+    <p>The call is asynchronous, meaning it returns almost immediately, while the synchronization continues running inside its own thread.</p>
+
+<p>You may call this method multiple times in short succession.
+However only one synchronization can be active at a given time.
+If you call this during an active synchronization it is going to return without doing anything.</p>
+
+</div>
+</div>
+<div role="article" class="function" id="synchronizer.activate()">
+    <h3>
+        <code><a href="#synchronizer.activate()">activate()</a></code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">public</span> <span class="keyword">func</span> <span class="function">activate</span>()  </body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>Starts background synchronization as prepared in this objects initializer.</p>
+
+</div>
+</div>
+<div role="article" class="function" id="synchronizer.deactivate()">
+    <h3>
+        <code><a href="#synchronizer.deactivate()">deactivate()</a></code>
+    </h3>
+    <div class="declaration">
+<pre class="highlight"><code><html><body><span class="keyword">public</span> <span class="keyword">func</span> <span class="function">deactivate</span>()  </body></html></code></pre>
+</div>
+<div class="summary" role="doc-abstract">
+    <p>Stops background synchronization.</p>
+
+</div>
+</div>
+    </section>
+
+
+
+        </article>
+    </main>
+
+    <footer>
+        <p>
+    Generated on <time datetime="2022-01-03T14:05:59+0100">January 3, 2022</time> using <a href="https://github.com/SwiftDocOrg/swift-doc">swift-doc</a> <span class="version">1.0.0-rc.1</span>.
+</p>
+    </footer>
+</body>
+</html>

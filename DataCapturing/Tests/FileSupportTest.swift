@@ -1,5 +1,5 @@
 /*
-* Copyright 2019 - 2021 Cyface GmbH
+* Copyright 2019 - 2022 Cyface GmbH
 *
 * This file is part of the Cyface SDK for iOS.
 *
@@ -24,7 +24,7 @@ import CoreData
 
 /**
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 6.0.0
  */
 class FileSupportTest: XCTestCase {
