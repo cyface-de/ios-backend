@@ -76,7 +76,7 @@ public class PersistenceLayer {
      - Returns: The newly created model object for the measurement.
      - Throws: `PersistenceError.inconsistentState`
      */
-    func createMeasurement(at timestamp: Int64, inMode mode: String) throws -> Measurement {
+    func createMeasurement(at timestamp: UInt64, inMode mode: String) throws -> Measurement {
         return try manager.wrapInContextReturn { context in
             // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
             var identifier = try nextIdentifier()
@@ -85,7 +85,7 @@ public class PersistenceLayer {
             }
 
             let measurementMO = MeasurementMO(context: context)
-            measurementMO.timestamp = timestamp
+            measurementMO.timestamp = Int64(timestamp)
             measurementMO.identifier = identifier
             measurementMO.synchronized = false
             measurementMO.synchronizable = false
@@ -94,6 +94,8 @@ public class PersistenceLayer {
             var measurement = try Measurement(managedObject: measurementMO)
             _ = try createEvent(of: .modalityTypeChange, withValue: mode, parent: &measurement)
 
+            context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+            context.refresh(measurement, mergeChanges: true)
             return measurement
         }
     }
@@ -332,23 +334,35 @@ public class PersistenceLayer {
                 throw PersistenceError.measurementNotLoadable(measurement.identifier)
             }
 
-            let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
+        let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
+        let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
+        let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
+        if !accelerations.isEmpty {
+            do {
             _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
-            let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
-            _ = try rotationsFile.write(serializable: rotations, to: measurement.identifier)
-            let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
-            _ = try directionsFile.write(serializable: directions, to: measurement.identifier)
-
-            measurementMO.accelerationsCount = measurementMO.accelerationsCount.advanced(by: accelerations.count)
-            measurement.accelerationsCount = measurementMO.accelerationsCount
-            measurementMO.rotationsCount = measurementMO.rotationsCount.advanced(by: rotations.count)
-            measurement.rotationsCount = measurementMO.rotationsCount
-            measurementMO.directionsCount = measurementMO.directionsCount.advanced(by: directions.count)
-            measurement.directionsCount = measurementMO.directionsCount
-
-            try context.save()
+            } catch {
+                debugPrint("Unable to write data to file \(accelerationsFile.fileName)!")
+                throw error
+            }
         }
-    }
+
+        if !rotations.isEmpty {
+            do {
+                _ = try rotationsFile.write(serializable: rotations, to: measurement.identifier)
+            } catch {
+                debugPrint("Unable to write data to file \(rotationsFile.fileName)!")
+                throw error
+            }
+        }
+
+        if !directions.isEmpty {
+            do {
+            _ = try directionsFile.write(serializable: directions, to: measurement.identifier)
+            } catch {
+                debugPrint("Unable to write data to file \(directionsFile.fileName)!")
+                throw error
+            }
+        }
 
     /// Save the provided `Measurement` via CoreData
     public func save(measurement: Measurement) throws -> Measurement {
@@ -608,7 +622,7 @@ public class PersistenceLayer {
 
      - Parameters:
         - ofMeasurement: The measurement to traverse the tracks for
-        - call: A callback function receiving the track and geo location pairs
+        - call: A callback function receiving the track and geo location pairs. This might throw depending on implementation
      */
     public static func traverseTracks(ofMeasurement measurement: Measurement, call closure: (Track, GeoLocation) -> Void) {
         for track in measurement.tracks {

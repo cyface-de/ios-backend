@@ -35,6 +35,9 @@
     ],
     "DataCompression": [
       "~> 3.6.0"
+    ],
+    "SwiftProtobuf": [
+      "~> 1.18.0"
     ]
   },
   "testspecs": [

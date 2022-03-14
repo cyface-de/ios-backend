@@ -158,8 +158,8 @@ class MapLocationSelectorViewController: UIViewController {
 
             var previousSmallestDistance: Double = Double.greatestFiniteMagnitude
             let distanceCalculator = DefaultDistanceCalculationStrategy()
-
-            PersistenceLayer.traverseTracks(ofMeasurement: measurement) { _, location in
+            do {
+            try PersistenceLayer.traverseTracks(ofMeasurement: measurement) { _, location in
                 let distance = distanceCalculator.calculateDistance(
                     from: (location.latitude, location.longitude),
                     to: (locationOnMap.latitude, locationOnMap.longitude))
@@ -167,6 +167,9 @@ class MapLocationSelectorViewController: UIViewController {
                     closestPoint = location
                     previousSmallestDistance = distance
                 }
+            }
+            } catch {
+                fatalError("Unable to find closest point!")
             }
         }
         return closestPoint

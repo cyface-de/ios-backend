@@ -487,13 +487,13 @@ Starting data capturing on paused service. Finishing paused measurements and sta
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
-    public static func currentTimeInMillisSince1970() -> Int64 {
+    public static func currentTimeInMillisSince1970() -> UInt64 {
         return convertToUtcTimestamp(date: Date())
     }
 
     /// Converts a `Data` object to a UTC milliseconds timestamp since january 1st 1970.
-    public static func convertToUtcTimestamp(date value: Date) -> Int64 {
-        return Int64(value.timeIntervalSince1970*1000.0)
+    public static func convertToUtcTimestamp(date value: Date) -> UInt64 {
+        return UInt64(value.timeIntervalSince1970*1000.0)
     }
 }
 

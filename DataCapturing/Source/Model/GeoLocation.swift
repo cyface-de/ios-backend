@@ -46,7 +46,7 @@ public class GeoLocation: CustomStringConvertible {
     /// The speed the device was moving during the measurement in meters per second.
     public let speed: Double
     /// The time the measurement happened at in milliseconds since the 1st of january 1970.
-    public let timestamp: Int64
+    public let timestamp: UInt64
     /// Whether or not this is a valid location in a cleaned track.
     public let isValid: Bool
     /// The track this location belongs to

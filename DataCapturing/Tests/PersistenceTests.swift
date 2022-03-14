@@ -99,7 +99,7 @@ class PersistenceTests: XCTestCase {
             XCTAssertEqual(events.count, 1)
 
             try oocut.delete(measurement: secondMeasurement.identifier)
-            let thirdMeasurement = try oocut.createMeasurement(at: Int64(10_002), inMode: defaultMode)
+            let thirdMeasurement = try oocut.createMeasurement(at: UInt64(10_002), inMode: defaultMode)
 
             XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
         } catch let error {

@@ -9,6 +9,7 @@ excluded:
 - Pods
 - SwiftLint/Common/3rdPartyLib
 - DataCapturing/Tests
+- DataCapturing/Source/Persistence/measurement.pb.swift
 line_length:
     warning: 150
     error: 200

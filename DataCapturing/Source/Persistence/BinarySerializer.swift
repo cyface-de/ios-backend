@@ -22,7 +22,7 @@ import DataCompression
 import os.log
 
 /// The current version of the Cyface binary format.
-let dataFormatVersion: UInt16 = 1
+let dataFormatVersion: UInt32 = 2
 
 /**
  Protocol that must be fullfilled by a serializer to transform an object into the Cyface binary format. The associated type `Serializable` is a placeholder for the type of object to serialize and deserialize.
@@ -101,6 +101,8 @@ extension BinarySerializer {
 class MeasurementSerializer: BinarySerializer {
     /// The byte order used to serialize data to Cyface binary format.
     static let byteOrder = ByteOrder.bigEndian
+    static let centimetersInAMeter = 100.0
+    static let geoLocationAccuracy = 6
     /// Serializer to transform acceleration objects
     let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
     let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
@@ -122,29 +124,100 @@ class MeasurementSerializer: BinarySerializer {
         - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
      */
     func serialize(serializable measurement: Measurement) throws -> Data {
-        let geoLocations = try PersistenceLayer.collectGeoLocations(from: measurement)
+        var protosMeasurement = De_Cyface_Protos_Model_MeasurementBytes()
+        protosMeasurement.formatVersion = dataFormatVersion
+        if let events = measurement.events?.array as? [Event] {
+            protosMeasurement.events = serialize(events: events)
+        } else {
+            protosMeasurement.events = []
+        }
+        protosMeasurement.locationRecords = De_Cyface_Protos_Model_LocationRecords()
 
-        var dataArray = [UInt8]()
-        // add header
-        dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(dataFormatVersion))
-        dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(geoLocations.count)))
-        dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(measurement.accelerationsCount)))
-        dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(measurement.rotationsCount)))
-        dataArray.append(contentsOf: MeasurementSerializer.byteOrder.convertToBytes(UInt32(measurement.directionsCount)))
+        let firstTimestamp = UInt64DiffValue(start: UInt64(0))
+        let firstAccuracy = Int32DiffValue(start: Int32(0))
+        let firstLatitude = Int32DiffValue(start: Int32(0))
+        let firstLongitude = Int32DiffValue(start: Int32(0))
+        let firstSpeed = Int32DiffValue(start: Int32(0))
+        protosMeasurement.locationRecords.timestamp = []
+        protosMeasurement.locationRecords.speed = []
+        protosMeasurement.locationRecords.latitude = []
+        protosMeasurement.locationRecords.longitude = []
+        protosMeasurement.locationRecords.accuracy = []
 
-        var ret = Data(dataArray)
+        var records = protosMeasurement.locationRecords
+        try PersistenceLayer.traverseTracks(ofMeasurement: measurement) { _, location in
 
-        let serializedGeoLocations = geoLocationsSerializer.serialize(serializable: geoLocations)
-        let serializedAccelerations = try accelerationsFile.data(for: measurement)
-        let serializedRotations = try rotationsFile.data(for: measurement)
-        let serializedDirections = try directionsFile.data(for: measurement)
+            do {
+                records.timestamp.append(try firstTimestamp.diff(value: UInt64(location.timestamp)))
+            } catch {
+                throw SerializationError.nonSerializableLocationTimestamp(cause: error)
+            }
+            do {
+                records.accuracy.append(try firstAccuracy.diff(value: Int32(location.accuracy * MeasurementSerializer.centimetersInAMeter)))
+            } catch {
+                throw SerializationError.nonSerializableAccuracy(cause: error)
+            }
+            do {
+                records.latitude.append(try firstLatitude.diff(value: convert(coordinate: location.lat)))
+            } catch {
+                throw SerializationError.nonSerializableLatitude(cause: error)
+            }
+            do {
+                records.longitude.append(try firstLongitude.diff(value: convert(coordinate: location.lon)))
+            } catch {
+                throw SerializationError.nonSerializableLongitude(cause: error)
+            }
+            do {
+                records.speed.append(try firstSpeed.diff(value: Int32(location.speed * MeasurementSerializer.centimetersInAMeter)))
+            } catch {
+                throw SerializationError.nonSerializableSpeed(cause: error)
+            }
+        }
+        protosMeasurement.locationRecords = records
 
-        ret.append(serializedGeoLocations)
-        ret.append(serializedAccelerations)
-        ret.append(serializedRotations)
-        ret.append(serializedDirections)
+        let accelerationsData = try accelerationsFile.data(for: measurement)
+        protosMeasurement.accelerationsBinary = accelerationsData
+        let directionsData = try directionsFile.data(for: measurement)
+        protosMeasurement.directionsBinary = directionsData
+        let rotationsData = try rotationsFile.data(for: measurement)
+        protosMeasurement.rotationsBinary = rotationsData
 
+        return try protosMeasurement.serializedData()
+    }
+
+    private func serialize(events: [Event]) -> [De_Cyface_Protos_Model_Event] {
+        var ret = [De_Cyface_Protos_Model_Event]()
+        for event in events {
+            ret.append(De_Cyface_Protos_Model_Event.with {
+                if let time = event.time {
+                    $0.timestamp = DataCapturingService.convertToUtcTimestamp(date: time as Date)
+                }
+                if let value = event.value {
+                    $0.value = value
+                }
+                switch event.typeEnum {
+                case .lifecycleStart:
+                    $0.type = De_Cyface_Protos_Model_Event.EventType.lifecycleStart
+                case .lifecycleStop:
+                    $0.type = De_Cyface_Protos_Model_Event.EventType.lifecycleStop
+                case .lifecyclePause:
+                    $0.type = De_Cyface_Protos_Model_Event.EventType.lifecyclePause
+                case .lifecycleResume:
+                    $0.type = De_Cyface_Protos_Model_Event.EventType.lifecycleResume
+                case .modalityTypeChange:
+                    $0.type = De_Cyface_Protos_Model_Event.EventType.modalityTypeChange
+                }
+            })
+        }
         return ret
+    }
+
+    private func convert(coordinate: Double) -> Int32 {
+        var shifter = 1.0
+        for _ in 1...MeasurementSerializer.geoLocationAccuracy {
+            shifter *= 10.0
+        }
+        return Int32(coordinate*shifter)
     }
 }
 
@@ -157,6 +230,8 @@ class MeasurementSerializer: BinarySerializer {
  - Note: This class was called `AccelerationSerializer` in SDK version prior to 6.0.0.
  */
 class SensorValueSerializer: BinarySerializer {
+    private static let millimetersInAMeter = 1_000.0
+
     /**
      Serializes an array of sensor values into binary format of the form:
      - 8 Bytes: timestamp as long
@@ -166,56 +241,131 @@ class SensorValueSerializer: BinarySerializer {
      
      - Parameter serializable: The array of sensor values to serialize.
      - Returns: An array of serialized bytes.
+     - Throws: `BinarySerializationError.emptyData` if the provided `serializable` array is empty.
+     - Throws: `BinaryEncodingError` if encoding fails.
      */
-    func serialize(serializable values: [SensorValue]) -> Data {
-        var ret = [UInt8]()
-        let byteOrder = ByteOrder.bigEndian
+    func serialize(serializable values: [SensorValue]) throws -> Data {
+        guard !values.isEmpty else {
+            throw BinarySerializationError.emptyData
+        }
+        let timestampDiffValue = UInt64DiffValue(start: UInt64(0))
+        let xDiffValue = Int32DiffValue(start: Int32(0))
+        let yDiffValue = Int32DiffValue(start: Int32(0))
+        let zDiffValue = Int32DiffValue(start: Int32(0))
 
-        for value in values {
-            // 8 Bytes
-            ret.append(contentsOf: byteOrder.convertToBytes(DataCapturingService.convertToUtcTimestamp(date: value.timestamp)))
-            // 8 Bytes
-            ret.append(contentsOf: byteOrder.convertToBytes(value.x.bitPattern))
-            // 8 Bytes
-            ret.append(contentsOf: byteOrder.convertToBytes(value.y.bitPattern))
-            // 8 Bytes
-            ret.append(contentsOf: byteOrder.convertToBytes(value.z.bitPattern))
-            // 32 Bytes
+        var timestamps = [UInt64]()
+        var xValues = [Int32]()
+        var yValues = [Int32]()
+        var zValues = [Int32]()
+        for valueIndex in values.indices {
+            do {
+            timestamps.append(try timestampDiffValue.diff(value: DataCapturingService.convertToUtcTimestamp(date: values[valueIndex].timestamp)))
+            } catch {
+                throw SerializationError.nonSerializableSensorValueTimestamp(cause: error)
+            }
+            do {
+            xValues.append(try xDiffValue.diff(value: Int32(values[valueIndex].x*SensorValueSerializer.millimetersInAMeter)))
+            } catch {
+                throw SerializationError.nonSerializableXValue(cause: error)
+            }
+            do {
+            yValues.append(try yDiffValue.diff(value: Int32(values[valueIndex].y*SensorValueSerializer.millimetersInAMeter)))
+            } catch {
+                throw SerializationError.nonSerializableYValue(cause: error)
+            }
+            do {
+            zValues.append(try zDiffValue.diff(value: Int32(values[valueIndex].z*SensorValueSerializer.millimetersInAMeter)))
+            } catch {
+                throw SerializationError.nonSerializableZValue(cause: error)
+            }
         }
 
-        return Data(ret)
+        let accelerations = De_Cyface_Protos_Model_Accelerations.with {
+            $0.timestamp = timestamps
+            $0.x = xValues
+            $0.y = yValues
+            $0.z = zValues
+        }
+
+        let ret = De_Cyface_Protos_Model_AccelerationsBinary.with {
+            $0.accelerations = [accelerations]
+        }
+
+        return try ret.serializedData()
     }
 
     /**
-     Deserializes the provided `data` into a `Serializable`. Only use this if your data is not compressed. Otherwise use `deserializeCompressed(:Data)`.
+         Deserializes the provided `data` into a `Serializable`. Only use this if your data is not compressed. Otherwise use `deserializeCompressed(:Data)`.
+         - Parameters:
+            - data: The `data` to deserialize
+         - Returns: An object of type `Serializable` created from the provided `data`
 
-     - Parameters:
-        - data: The `data` to deserialize
-        - count: The amount of sensor values in `data`.
-     - Returns: An object of type `Serializable` created from the provided `data`
-     - Throws:
-        - `SerializationError.invalidData` If there is not enough data for `count` of sensor values.
-     */
-    func deserialize(data: Data, count: UInt32) throws -> [SensorValue] {
-        guard data.count == count*32 else {
-            throw SerializationError.invalidData
+         */
+        func deserialize(data: Data) throws -> [SensorValue] {
+
+            let deserializedValues = try De_Cyface_Protos_Model_AccelerationsBinary(serializedData: data)
+            var ret: [SensorValue] = []
+            for batch in deserializedValues.accelerations {
+                for accelerationsIndex in batch.timestamp.indices {
+                    let timestamp = batch.timestamp[accelerationsIndex]
+                        // TODO: Transform diff format
+                        let ax = Double(batch.x[accelerationsIndex])/1000.0
+                        let ay = Double(batch.y[accelerationsIndex])/1000.0
+                        let az = Double(batch.z[accelerationsIndex])/1000.0
+
+                    let value = SensorValue(timestamp: Date(timeIntervalSince1970: Double(timestamp)/1_000), x: ax, y: ay, z: az)
+                    ret.append(value)
+                }
+            }
+
+            return ret
         }
 
-        let oneEntryInBytes = UInt32(32)
-        var ret: [SensorValue] = []
-        for index in 0..<count {
-            let startIndex = index*oneEntryInBytes
+    public enum BinarySerializationError: Error {
+        case emptyData
+        case overflow
+    }
+}
 
-            let timestamp = try MeasurementSerializer.byteOrder.convertToInt64(data[startIndex..<startIndex+8])
-            let ax = try MeasurementSerializer.byteOrder.convertToDouble(data[startIndex+8..<startIndex+16])
-            let ay = try MeasurementSerializer.byteOrder.convertToDouble(data[startIndex+16..<startIndex+24])
-            let az = try MeasurementSerializer.byteOrder.convertToDouble(data[startIndex+24..<startIndex+32])
+class UInt64DiffValue {
+    var previousValue: UInt64
 
-            let value = SensorValue(timestamp: Date(timeIntervalSince1970: Double(timestamp)/1_000), x: ax, y: ay, z: az)
-            ret.append(value)
+    init(start: UInt64) {
+        previousValue = start
+    }
+
+    func diff(value: UInt64) throws -> UInt64 {
+        let ret = value.subtractingReportingOverflow(previousValue)
+        guard ret.overflow == false else {
+            throw UInt64DiffValueError.overflow(minuend: value, subtrahend: previousValue)
         }
+        previousValue = value
+        return ret.partialValue
+    }
 
-        return ret
+    enum UInt64DiffValueError: Error {
+        case overflow(minuend: UInt64, subtrahend: UInt64)
+    }
+}
+
+class Int32DiffValue {
+    var previousValue: Int32
+
+    init(start: Int32) {
+        previousValue = start
+    }
+
+    func diff(value: Int32) throws -> Int32 {
+        let ret = value.subtractingReportingOverflow(previousValue)
+        guard ret.overflow == false else {
+            throw Int32DiffValueError.overflow(minuend: value, subtrahend: previousValue)
+        }
+        previousValue = value
+        return ret.partialValue
+    }
+
+    enum Int32DiffValueError: Error {
+        case overflow(minuend: Int32, subtrahend: Int32)
     }
 }
 
@@ -386,6 +536,15 @@ enum SerializationError: Error {
     case missingData
     /// Thrown if the data read was no valid or some corrupted Cyface binray format.
     case invalidData
+    case nonSerializableSensorValueTimestamp(cause: Error)
+    case nonSerializableXValue(cause: Error)
+    case nonSerializableYValue(cause: Error)
+    case nonSerializableZValue(cause: Error)
+    case nonSerializableLocationTimestamp(cause: Error)
+    case nonSerializableAccuracy(cause: Error)
+    case nonSerializableSpeed(cause: Error)
+    case nonSerializableLatitude(cause: Error)
+    case nonSerializableLongitude(cause: Error)
 }
 
 /**

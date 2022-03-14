@@ -46,6 +46,7 @@ class SerializationTest: XCTestCase {
         super.setUp()
         oocut = MeasurementSerializer()
         let expectation = self.expectation(description: "CoreDataStack started successfully.")
+        var setUpError:Error?
 
         do {
             coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: SerializationTest.dataModel)
@@ -53,7 +54,8 @@ class SerializationTest: XCTestCase {
 
             try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
                 if let error = error {
-                    XCTFail("Unable to setup CoreData stack due to \(error)")
+                    setUpError = error
+                    return XCTFail("Unable to setup CoreData stack due to \(error)")
                 }
 
                 guard let self = self else {
@@ -69,19 +71,19 @@ class SerializationTest: XCTestCase {
                     try self.persistenceLayer.save(locations: [TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.0)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.1)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.2))], in: &measurement)
                     try self.persistenceLayer.save(accelerations: [SensorValue(timestamp: Date(timeIntervalSince1970: 10.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10.1), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10.2), x: 1.0, y: 1.0, z: 1.0)], in: &measurement)
 
-                    expectation.fulfill()
-                } catch let error {
+                } catch {
+                    setUpError = error
                     XCTFail("Unable to set up test since persistence layer could not be initialized due to \(error.localizedDescription)!")
                 }
+                expectation.fulfill()
             }
         } catch {
-            XCTFail("Unable to setup CoreData stack due to \(error).")
+            XCTFail("Unable to setup CoreData stack due to \(error.localizedDescription).")
         }
         
-        waitForExpectations(timeout: 5) { error in
-            if let error = error {
-                XCTFail("Unable to setup SerializetionTest \(error)")
-            }
+        wait(for: [expectation],timeout: 5.0)
+        if let error = setUpError {
+            XCTFail("Unable to setup SerializationTest \(error.localizedDescription)")
         }
     }
 
@@ -97,6 +99,50 @@ class SerializationTest: XCTestCase {
         super.tearDown()
     }
 
+    func testSerializeSensorValues() throws {
+        let sensorValueSerializer = SensorValueSerializer()
+
+        // 1
+        var firstBatch = try sensorValueSerializer.serialize(serializable: [SensorValue(timestamp: Date(timeIntervalSince1970: 10.000), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10.100), x: 1.1, y: 1.1, z: 1.1), SensorValue(timestamp: Date(timeIntervalSince1970: 10.200), x: -2.0, y: -2.0, z: -2.0)])
+
+        // 2
+        let secondBatch = try sensorValueSerializer.serialize(serializable: [SensorValue(timestamp: Date(timeIntervalSince1970: 10.300), x: 1.5, y: 1.5, z: 1.5), SensorValue(timestamp: Date(timeIntervalSince1970: 10.400), x: 1.2, y: 1.2, z: 1.2)])
+
+        // 3
+        var data = Data()
+        data.append(contentsOf: firstBatch)
+        data.append(contentsOf: secondBatch)
+
+
+        // 4
+        var measurementBytes = De_Cyface_Protos_Model_MeasurementBytes()
+        measurementBytes.formatVersion = 2
+        measurementBytes.accelerationsBinary = data
+
+        let deserializedMeasurement = try De_Cyface_Protos_Model_Measurement(serializedData: measurementBytes.serializedData())
+
+        XCTAssertEqual(deserializedMeasurement.accelerationsBinary.accelerations[0].z[0], 1000)
+        XCTAssertEqual(deserializedMeasurement.accelerationsBinary.accelerations[0].z[1], 100)
+        XCTAssertEqual(deserializedMeasurement.accelerationsBinary.accelerations[0].z[2], -3100)
+        XCTAssertEqual(deserializedMeasurement.accelerationsBinary.accelerations[0].timestamp[0],10_000)
+        XCTAssertEqual(deserializedMeasurement.accelerationsBinary.accelerations[0].timestamp[1],100)
+        XCTAssertEqual(deserializedMeasurement.accelerationsBinary.accelerations[0].timestamp[2],100)
+    }
+
+    func testSerializeEmptyMeasurement() throws {
+        let measurement = MeasurementMO(context: self.persistenceLayer.makeContext())
+        measurement.tracks = []
+        let res = try oocut.serialize(serializable: measurement)
+
+        let deserializedMeasurement = try De_Cyface_Protos_Model_Measurement(serializedData: res)
+
+        XCTAssertTrue(deserializedMeasurement.locationRecords.timestamp.isEmpty)
+        XCTAssertFalse(deserializedMeasurement.hasAccelerationsBinary)
+        XCTAssertFalse(deserializedMeasurement.hasCapturingLog)
+        XCTAssertFalse(deserializedMeasurement.hasDirectionsBinary)
+        XCTAssertFalse(deserializedMeasurement.hasRotationsBinary)
+    }
+
     /**
      Tests if serialization works for uncompressed data.
      */
@@ -105,18 +151,10 @@ class SerializationTest: XCTestCase {
             let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
             let res = try oocut.serialize(serializable: measurement)
 
-            XCTAssertEqual(res.count, 222)
-            // Data Format Version
-            XCTAssertEqual(res[0], 0)
-            XCTAssertEqual(res[1], 1)
-            // Count of Geo Locations
-            XCTAssertEqual(res[2], 0)
-            XCTAssertEqual(res[3], 0)
-            XCTAssertEqual(res[4], 0)
-            XCTAssertEqual(res[5], 3)
-            // Count of Accelerations
-            XCTAssertEqual(res[9], 3)
-        } catch let error {
+            let deserializedMeasurement = try De_Cyface_Protos_Model_Measurement(serializedData: res)
+            assert(fixture: deserializedMeasurement)
+
+        } catch {
             XCTFail("Error \(error.localizedDescription)")
         }
     }
@@ -130,21 +168,39 @@ class SerializationTest: XCTestCase {
             let res = try oocut.serializeCompressed(serializable: measurement)
 
             let uncompressedData = res.inflate()
+            guard let uncompressedData = uncompressedData else {
+                return XCTFail("Error unpacking zipped measurement!")
+            }
 
-            XCTAssertEqual(uncompressedData?.count, 222)
-            // Data Format Version
-            XCTAssertEqual(uncompressedData![0], 0)
-            XCTAssertEqual(uncompressedData![1], 1)
-            // Count of Geo Locations
-            XCTAssertEqual(uncompressedData![2], 0)
-            XCTAssertEqual(uncompressedData![3], 0)
-            XCTAssertEqual(uncompressedData![4], 0)
-            XCTAssertEqual(uncompressedData![5], 3)
-            // Count of Accelerations
-            XCTAssertEqual(uncompressedData![9], 3)
-        } catch let error {
-            XCTFail("Error \(error)")
+            assert(fixture: try De_Cyface_Protos_Model_Measurement(serializedData: uncompressedData))
+        } catch {
+            XCTFail("Error \(error.localizedDescription)")
         }
+    }
+
+    private func assert(fixture:De_Cyface_Protos_Model_Measurement) {
+        XCTAssertFalse(fixture.hasRotationsBinary)
+        XCTAssertFalse(fixture.hasCapturingLog)
+        XCTAssertFalse(fixture.hasDirectionsBinary)
+        XCTAssertTrue(fixture.hasLocationRecords)
+        XCTAssertTrue(fixture.hasAccelerationsBinary)
+
+        XCTAssertEqual(fixture.locationRecords.timestamp.count, 3)
+        XCTAssertEqual(fixture.locationRecords.timestamp[0], 10_000)
+        XCTAssertEqual(fixture.locationRecords.timestamp[1], 100)
+        XCTAssertEqual(fixture.locationRecords.timestamp[2], 0)
+        XCTAssertEqual(fixture.locationRecords.longitude[0], 1000000)
+        XCTAssertEqual(fixture.locationRecords.longitude[1], 0)
+        XCTAssertEqual(fixture.locationRecords.longitude[2], 0)
+
+        XCTAssertEqual(fixture.accelerationsBinary.accelerations.count, 1)
+        let firstAccelerationsBatch = fixture.accelerationsBinary.accelerations[0]
+        XCTAssertEqual(firstAccelerationsBatch.timestamp.count, 3)
+        XCTAssertEqual(firstAccelerationsBatch.timestamp[0], 10_000)
+        XCTAssertEqual(firstAccelerationsBatch.timestamp[1], 100)
+        XCTAssertEqual(firstAccelerationsBatch.timestamp[2], 0)
+
+        XCTAssertEqual(fixture.events.count, 3)
     }
 
     /**

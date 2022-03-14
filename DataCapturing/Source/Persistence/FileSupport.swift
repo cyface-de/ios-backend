@@ -155,15 +155,19 @@ public struct SensorValueFile: FileSupport {
         - serializable: The array of sensor values to write.
         - to: The measurement to write the sensor values to.
      - Returns: The file system URL of the file that was written to.
-     - Throws:
-        - Some internal file system error on failure of creating the file at the required path.
+     - Throws: Some internal file system error on failure of creating the file at the required path.
+     - Throws: `BinarySerializationError.emptyData` if the provided `serializable` array is empty.
+     - Throws: `BinaryEncodingError` if encoding fails.
      */
     func write(serializable: [SensorValue], to measurement: Int64) throws -> URL {
-        let sensorValueData = serializer.serialize(serializable: serializable)
+        let sensorValueData = try serializer.serialize(serializable: serializable)
         let sensorValueFilePath = try path(for: measurement)
 
         let fileHandle = try FileHandle(forWritingTo: sensorValueFilePath)
         defer { fileHandle.closeFile()}
+        guard FileManager.default.isWritableFile(atPath: sensorValueFilePath.path) else {
+            fatalError("Unable to write sensor data since file is not writable!")
+        }
         fileHandle.seekToEndOfFile()
         fileHandle.write(sensorValueData)
 
@@ -182,7 +186,7 @@ public struct SensorValueFile: FileSupport {
             let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
             defer {fileHandle.closeFile()}
             let data = fileHandle.readDataToEndOfFile()
-            return try serializer.deserialize(data: data, count: fileType.getCounter(measurement))
+            return try serializer.deserialize(data: data)
         } catch let error {
             throw FileSupportError.notReadable(cause: error)
         }
@@ -356,21 +360,16 @@ public enum FileSupportError: Error {
 public class SensorValueFileType {
     /// A file type for acceleration files.
     public static let accelerationValueType = SensorValueFileType(
-        fileExtension: "cyfa",
-        getCounter: {measurement in return UInt32(measurement.accelerationsCount)})
+        fileExtension: "cyfa")
     /// A file type for rotation files.
     public static let rotationValueType = SensorValueFileType(
-        fileExtension: "cyfr",
-        getCounter: {measurement in return UInt32(measurement.rotationsCount)})
+        fileExtension: "cyfr")
     /// A file type for direction files.
     public static let directionValueType = SensorValueFileType(
-        fileExtension: "cyfd",
-        getCounter: {measurement in return UInt32(measurement.directionsCount)})
+        fileExtension: "cyfd")
 
     /// The file extension of the represented file type.
     public let fileExtension: String
-    /// A counter to get the amount of points within a file of this type from a measurement.
-    public let getCounter: (Measurement) -> UInt32
 
     /**
      Creates a new completely initiailized `SensorValueFileType`.
@@ -378,10 +377,8 @@ public class SensorValueFileType {
 
      - Parameters:
         - fileExtension: The file extension of the represented file type.
-        - getCounter: A counter to get the amount of points within a file of this type from a measurement.
      */
-    private init(fileExtension: String, getCounter: @escaping (Measurement) -> UInt32) {
+    private init(fileExtension: String) {
         self.fileExtension = fileExtension
-        self.getCounter = getCounter
     }
 }
