@@ -155,15 +155,10 @@ public class ServerConnection {
      - Parameters:
         - request: The request to fill with data
         - for: The measurement to transmit
-     - Throws: `ServerConnectionError.modalityError`
-     - Throws: `ServerConnectionError.dataError`
-     - Throws: `PersistenceError.dataNotLoadable`
-     - Throws: `PersistenceError.noContext`,
-     - Throws: `PersistenceError.modelNotLoabable`
-     - Throws: `PersistenceError.modelNotInitializable`
-     - Throws: `SerializationError.missingData`
-     - Throws: `SerializationError.invalidData`,
-     - Throws: `FileSupportError.notReadable`
+     - Throws: `ServerConnectionError.modalityError` if the initial modality for the measurement was not set correctly. If this happens the measurement was probably not correctly created via this framework and something is seriously wrong.
+     - Throws: `ServerConnectionError.dataError` if important data for the provided `measurement` is missing from the database.
+     - Throws: `PersistenceError.measurementNotLoadable` if the measurement could not be retrieved from the database.
+     - Throws: `FileSupportError.notReadable` If the data to transmit from the database could not be serialized.
      - Throws: Some unspecified errors from within CoreData, Some unspecified undocumented file system error if file was not accessible
      */
     func create(request: MultipartFormData, for measurement: Int64) throws {
@@ -217,7 +212,7 @@ public class ServerConnection {
         - measurement: The measurement to take the meta data from
         - initialModality: The modality selected at the start of the measurement
 
-     - Throws: `ServerConnectionError.dataError`
+     - Throws: `ServerConnectionError.dataError` if important data for the provided `measurement` is missing from the database.
      */
     func addMetaData(to request: MultipartFormData, for measurement: Measurement, withInitialModality initialModality: String) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {

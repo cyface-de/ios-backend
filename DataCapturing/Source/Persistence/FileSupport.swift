@@ -64,8 +64,7 @@ extension FileSupport {
 
      - Parameter for: The measurement to create the path to the data file for.
      - Returns: The path to the file as an URL.
-     - Throws:
-        - Some internal file system error on failure of creating the file at the required path.
+     - Throws: Some internal file system error on failure of creating the file at the required path.
      */
     fileprivate func path(for measurement: Int64) throws -> URL {
         let measurementIdentifier = measurement
@@ -93,8 +92,7 @@ extension FileSupport {
      Removes the data file for the provided measurement. If this was the last or only data file it also deletes the folder containing the files for the measurement.
 
      - Parameter from: The measurement to delete the data from.
-     - Throws:
-        - Some internal file system error on failure of creating the file at the required path.
+     - Throws: Some internal file system error on failure of creating the file at the required path.
      */
     func remove(from measurement: Measurement) throws {
         let filePath = try path(for: measurement.identifier)
@@ -270,7 +268,7 @@ public struct MeasurementFile: FileSupport {
      - Returns: The data in the Cyface binary format.
      - Throws: `SerializationError.missingData` If no track data was found.
      - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-     - Throws: `FileSupportError.notReadable` If the data file was not readable.
+     - Throws: `FileSupportError.notReadable` If the data to write could not be read from the database.
      - Throws: Some unspecified undocumented file system error if file was not accessible.
      */
     func data(from serializable: Measurement) throws -> Data? {

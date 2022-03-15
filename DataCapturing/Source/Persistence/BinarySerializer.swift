@@ -66,10 +66,9 @@ extension BinarySerializer {
      Serializes and compresses the provided serializable and returns the serialized variant.
      
      - Parameter serializable: The object to serialize.
-     - Throws:
-        - `SerializationError.decompressionFailed` If decompressing the provided `Serializable` failed for some reason.
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+     - Throws: `SerializationError.compressionFailed` If compressing the provided `Serializable` failed for some reason.
+     - Throws: `SerializationError.missingData` If no track data was found.
+     - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
      - Returns: A compressed variant of the serialized data.
      */
     func serializeCompressed(serializable: Serializable) throws -> Data {
@@ -80,7 +79,7 @@ extension BinarySerializer {
                    log: OSLog.init(subsystem: "BinarySerializer",
                                    category: "de.cyface"),
                    type: .error)
-            throw SerializationError.decompressionFailed
+            throw SerializationError.compressionFailed
         }
 
         return compressed
@@ -323,7 +322,6 @@ class SensorValueSerializer: BinarySerializer {
 
     public enum BinarySerializationError: Error {
         case emptyData
-        case overflow
     }
 }
 
@@ -545,78 +543,4 @@ enum SerializationError: Error {
     case nonSerializableSpeed(cause: Error)
     case nonSerializableLatitude(cause: Error)
     case nonSerializableLongitude(cause: Error)
-}
-
-/**
- Enum used to specify the correct byte order. Apple uses little endian while Cyface uses big endian.
-
- ````
- case bigEndian
- case littleEndian
- ````
-
- - Author: Klemens Muthmann
- - Version: 1.0.1
- - Since: 2.3.0
- */
-enum ByteOrder {
-    /// Big endian byte order. The byte with the highest order is the first.
-    case bigEndian
-    /// little endian byte order. The byte with the lowest order is the first.
-    case littleEndian
-
-    /**
-     Converts the provided value into a byte representation.
-
-     - Parameters:
-     - value: The value to convert to a byte representation.
-     - inOrder: The byte order to use. Apple usually uses little endian, while the Cyface binary format is currently in big endian format, because that is the standard on Android and in the backend system.
-     - Returns: An array of bytes, representing the provided value.
-     */
-    func convertToBytes<T: BinaryInteger>(_ value: T) -> [UInt8] {
-        let ret = value.extractBytes()
-        return self == .bigEndian ? ret.reversed() : ret
-    }
-
-    /**
-     Converts the provided value into a 64 bit integer value.
-
-     - Parameter data: The data to convert.
-     - Returns: The converted `data` as a 64 bit integer.
-     - Throws:
-     - `SerializationError.invalidData` If the provided data is not exactly 8 byte long.
-     */
-    func convertToInt64(_ data: Data) throws -> Int64 {
-        guard data.count == 8 else {
-            throw SerializationError.invalidData
-        }
-
-        switch self {
-        case .bigEndian:
-            return Int64(bigEndian: data.withUnsafeBytes { $0.load(as: Int64.self) })
-        case .littleEndian:
-            return Int64(bigEndian: data.withUnsafeBytes { $0.load(as: Int64.self) })
-        }
-    }
-
-    /**
-     Converts the provided value into a double value.
-
-     - Parameter data: The data to convert.
-     - Returns: The converted `data` as a double.
-     - Throws:
-     - `SerializationError.invalidData` If the provided data is not exactly 8 byte long.
-     */
-    func convertToDouble(_ data: Data) throws -> Double {
-        guard data.count == 8 else {
-            throw SerializationError.invalidData
-        }
-
-        switch self {
-        case .bigEndian:
-            return Double(bitPattern: UInt64(bigEndian: data.withUnsafeBytes { $0.load(as: UInt64.self) }))
-        case .littleEndian:
-            return Double(bitPattern: UInt64(littleEndian: data.withUnsafeBytes { $0.load(as: UInt64.self) }))
-        }
-    }
 }
