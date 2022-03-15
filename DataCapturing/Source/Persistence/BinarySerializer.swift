@@ -98,16 +98,12 @@ extension BinarySerializer {
  - Version: 2.0.0
  */
 class MeasurementSerializer: BinarySerializer {
-    /// The byte order used to serialize data to Cyface binary format.
-    static let byteOrder = ByteOrder.bigEndian
     static let centimetersInAMeter = 100.0
     static let geoLocationAccuracy = 6
     /// Serializer to transform acceleration objects
     let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
     let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
     let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
-    /// Serializer to transform geo location objects
-    let geoLocationsSerializer = GeoLocationSerializer()
 
     /**
      Serializes the provided `measurement` into its Cyface Binary Format specification in the form:
@@ -367,126 +363,24 @@ class Int32DiffValue {
     }
 }
 
-/**
- A serializer for geo locations into the Cyface binary format representation
- 
- - Author: Klemens Muthmann
- - Since: 2.0.0
- - Version: 1.0.1
- */
-class GeoLocationSerializer: BinarySerializer {
-    /**
-     Serializes an array of geo locations into binary format of the form:
-     - 8 Bytes: timestamp as long
-     - 8 Bytes: latitude as double
-     - 8 Bytes: longitude as double
-     - 8 Bytes: speed as double
-     - 4 Bytes: accuracy as int
-     
-     - Parameter serializable: The array of locations to serialize.
-     - Returns: An array of serialized bytes.
-     */
-    func serialize(serializable locations: [GeoLocation]) -> Data {
-        var ret = [UInt8]()
-        let byteOrder = ByteOrder.bigEndian
+class Int32UnDiffValue {
+    var previousValue: Int32
 
-        for location in locations {
-            // 8 Bytes
-            let timestamp = location.timestamp
-            ret.append(contentsOf: byteOrder.convertToBytes(timestamp))
-            // 8 Bytes
-            let latBitPattern = location.latitude.bitPattern
-            ret.append(contentsOf: byteOrder.convertToBytes(latBitPattern))
-            // 8 Bytes
-            let lonBitPattern = location.longitude.bitPattern
-            ret.append(contentsOf: byteOrder.convertToBytes(lonBitPattern))
-            // 8 Bytes
-            let speedBitPattern = location.speed.bitPattern
-            ret.append(contentsOf: byteOrder.convertToBytes(speedBitPattern))
-            // 4 Bytes
-            let accuracy = UInt32(location.accuracy*100)
-            ret.append(contentsOf: byteOrder.convertToBytes(accuracy))
-            // = 36 Bytes
-        }
-
-        return Data(ret)
-    }
-}
-
-/**
- Serializes a list of events to an events file.
-
- - Author: Klemens Muthmann
- - Version: 1.0.0
- - Since: 5.0.0
- */
-public class EventsSerializer: BinarySerializer {
-
-    /**
-     Serializes an array of `Event` instaces to a binary representation of the form:
-     - 2 Bytes: File version. Currently 1
-     - 8 Bytes: Number of events saved
-     - For each event:
-            - 8 Bytes: Timestamp
-            - 2 Bytes: A number representing the type of event
-            - 2 Bytes: Number of bytes used by the value
-            - X Bytes: The event value.
-
-     - Parameter serializable: The array of events to serialize
-     - Returns: The binary representation of the `Event` array.
-     */
-    func serialize(serializable events: [Event]) throws -> Data {
-        var ret = [UInt8]()
-        let byteOrder = ByteOrder.bigEndian
-
-        // Add Header
-        // Transfer File format version
-        ret.append(contentsOf: byteOrder.convertToBytes(Int16(1)))
-        // Count of events
-        ret.append(contentsOf: byteOrder.convertToBytes(Int32(events.count)))
-
-        // Add all the events
-        for event in events {
-            // event timestamp; 8 bytes
-            let timestamp = Int64(event.time.timeIntervalSince1970 * 1_000)
-            ret.append(contentsOf: byteOrder.convertToBytes(timestamp))
-            // event type: 2 bytes
-            let type = translateType(of: event)
-            ret.append(contentsOf: byteOrder.convertToBytes(type))
-            // bytes required for the value and the value: 2 + X bytes
-            if let serializableValue = event.value?.data(using: .utf8) {
-                let serializableValueLengthInBytes = Int16(serializableValue.count)
-                ret.append(contentsOf: byteOrder.convertToBytes(serializableValueLengthInBytes))
-                ret.append(contentsOf: serializableValue)
-            } else {
-                ret.append(contentsOf: byteOrder.convertToBytes(Int16(0)))
-            }
-        }
-
-        return Data(ret)
+    init(start: Int32) {
+        previousValue = start
     }
 
-    /**
-     This method translates an events type to a serializable `Int16` representation.
-
-     Altough this is technically not necessary it makes it easier to synchronize the serialization with the Android client, by making the numbers used for each type explicit.
-
-     - Parameter of: The `Event` to translate the type for
-     - Returns: The serializable representation of the provided `Event` type.
-     */
-    private func translateType(of event: Event) -> Int16 {
-        switch event.type {
-        case .lifecycleStart:
-                return 1
-        case .lifecycleStop:
-                return 2
-        case .lifecycleResume:
-                return 3
-        case .lifecyclePause:
-                return 4
-        case .modalityTypeChange:
-                return 5
+    func undiff(value: Int32) throws -> Int32 {
+        let ret = previousValue.addingReportingOverflow(value)
+        guard !ret.overflow else {
+            throw Int32UnDiffValueError.overflow(firstSummand: previousValue, secondSummand: value)
         }
+        previousValue = value
+        return ret.partialValue
+    }
+
+    enum Int32UnDiffValueError: Error {
+        case overflow(firstSummand: Int32, secondSummand: Int32)
     }
 }
 

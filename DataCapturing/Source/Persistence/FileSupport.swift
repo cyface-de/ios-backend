@@ -274,55 +274,11 @@ public struct MeasurementFile: FileSupport {
     func data(from serializable: Measurement) throws -> Data? {
         let serializer = MeasurementSerializer()
 
-        return try serializer.serializeCompressed(serializable: serializable)
-    }
-}
-
-/**
- Represents a file with events from a measurement.
-
- - Author: Klemens Muthmann
- - Version: 1.0.0
- - Since: 5.0.0
- */
-struct EventsFile: FileSupport {
-
-    /// The serializer for the events.
-    let serializer = EventsSerializer()
-
-    /// The file name used for events files
-    var fileName: String {
-        return "events"
-    }
-
-    /// The extension used for events files
-    var fileExtension: String {
-        return "cyfe"
-    }
-
-    /**
-     Writes the events for a measurement to a file on disk and returns a URL pointing to that file.
-
-     - Parameters:
-        - serializable: The `Event` objects to serialize
-        - to: The identifier of the measurement to serialize for
-     - Returns: A URL pointing to the created `Event`-file
-     - Throws: `SerializationError.decompressionFailed`` If decompressing the provided Serializable failed for some reason.
-     - Throws: `SerializationError.missingData` If no track data was found.
-     - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-     - Throws: Some unspecified undocumented file system error if file was not accessible.
-     */
-    func write(serializable: [Event], to measurement: Int64) throws -> URL {
-        // Serialization in the form (timestamp: long, eventType: short, valuesLength: short, values: [bytes])
-        let data = try serializer.serializeCompressed(serializable: serializable)
-
-        let filePath = try path(for: measurement)
-
-        let measurementFileHandle = try FileHandle(forWritingTo: filePath)
-        defer { measurementFileHandle.closeFile() }
-        measurementFileHandle.write(data)
-
-        return filePath
+        do {
+            return try serializer.serializeCompressed(serializable: serializable)
+        } catch {
+            throw FileSupportError.notReadable(cause: error)
+        }
     }
 }
 

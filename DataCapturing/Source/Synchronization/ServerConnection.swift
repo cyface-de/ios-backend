@@ -173,7 +173,6 @@ public class ServerConnection {
         guard let initialModality = modalityTypeChangeEvents[0].value else {
             throw ServerConnectionError.modalityError("Invalid modality change event with no value encountered!")
         }
-        let events = measurement.events
 
         try addMetaData(to: request, for: measurement, withInitialModality: initialModality)
 
@@ -181,11 +180,6 @@ public class ServerConnection {
         let measurementFileURL = try measurementFileWriter.write(serializable: measurement, to: measurement.identifier)
         let measurementFileName = "\(self.installationIdentifier)_\(measurement.identifier).ccyf"
         request.append(measurementFileURL, withName: "fileToUpload", fileName: measurementFileName, mimeType: "application/octet-stream")
-
-        let eventFileWriter = EventsFile()
-        let eventFileURL = try eventFileWriter.write(serializable: events, to: measurement.identifier)
-        let eventFileName = "\(self.installationIdentifier)_\(measurement.identifier)_.ccyfe"
-        request.append(eventFileURL, withName: "eventsFile", fileName: eventFileName, mimeType: "application/octet-stream")
     }
 
     /**
