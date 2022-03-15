@@ -31,7 +31,7 @@
   ],
   "dependencies": {
     "Alamofire": [
-      "~> 4.9.1"
+      "~> 5.5.0"
     ],
     "DataCompression": [
       "~> 3.6.0"

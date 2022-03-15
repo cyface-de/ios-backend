@@ -114,39 +114,146 @@ public class ServerConnection {
      - Parameters:
         - token: The Java Web Token returned by the authentication process
         - measurement: The measurement to transmit.
+     // TODO: Remove those handlers, maybe?
         - onSuccess: Called after successful data transmission with information about which measurement was transmitted.
         - onFailure: Called after a failed data transmission with information about which measurement failed and the error.
      */
     func onAuthenticated(token: String, measurement: Int64, onSuccess: @escaping (Int64) -> Void, onFailure: @escaping (Int64, Error) -> Void) {
+        preRequest(token: token, measurementIdentifier: measurement, onSuccess: {[weak self] uploadLocation, metaData in
+            guard let self = self else {
+                os_log("ServerConnection was terminated before upload of measurement %{public}@ was finished. Aborting upload!", log: ServerConnection.osLog, type: .error, measurement)
+                return
+            }
+
+            try self.upload(token: token, metaData: metaData)
+        }, onFailure: {error in
+            onFailure(measurement, error)
+        })
+
+//        let url = apiURL.appendingPathComponent("measurements")
+//        let headers: HTTPHeaders = [
+//            "accept": "*/*",
+//            "Authorization": "Bearer \(token)",
+//            "Content-type": "multipart/form-data"
+//        ]
+//
+//        let encode: ((MultipartFormData) -> Void) = {data in
+//            os_log("Encoding!", log: ServerConnection.osLog, type: OSLogType.default)
+//            do {
+//                try self.create(request: data, for: measurement)
+//            } catch {
+//                onFailure(measurement, error)
+//            }
+//        }
+//        os_log("Transmitting measurement to URL %{public}@!", log: ServerConnection.osLog, type: .debug, url.absoluteString)
+//        Networking.sharedInstance.backgroundSessionManager.upload(
+//            multipartFormData: encode,
+//            usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold,
+//            to: url,
+//            method: .post,
+//            headers: headers,
+//            encodingCompletion: {encodingResult in
+//            do {
+//                try self.onEncodingComplete(for: measurement, with: encodingResult, onSuccess: onSuccess, onFailure: onFailure)
+//            } catch {
+//                onFailure(measurement, error)
+//            }
+//        })
+    }
+
+    private func preRequest(token: String, measurementIdentifier: Int64, onSuccess: @escaping (URL, MetaData) -> (), onFailure: @escaping (Error) -> ()) {
         let url = apiURL.appendingPathComponent("measurements")
+        let metaData = metaData(measurementIdentifier)
         let headers: HTTPHeaders = [
-            "accept": "*/*",
+            "Content-Type": "application/json; charset=UTF-8",
             "Authorization": "Bearer \(token)",
-            "Content-type": "multipart/form-data"
+            // TODO: Calculate valid upload length
+            "x-upload-content-length": "100"
         ]
 
-        let encode: ((MultipartFormData) -> Void) = {data in
-            os_log("Encoding!", log: ServerConnection.osLog, type: OSLogType.default)
-            do {
-                try self.create(request: data, for: measurement)
-            } catch {
-                onFailure(measurement, error)
+        AF.request(apiURL, method: .post, parameters: metaData, encoder: JSONParameterEncoder.default, headers: headers).response { [weak self] response in
+
+            guard let response = response.response else {
+                if let error = response.error {
+                    onFailure(ServerConnectionError.alamofireError(error))
+                } else {
+                    onFailure(ServerConnectionError.noResponse)
+                }
+                return
+            }
+
+            let status = response.statusCode
+            guard let location = response.headers["Location"] else {
+                onFailure(ServerConnectionError.noLocation)
+                return
+            }
+
+            if status == 200 {
+                if let uploadLocation = URL(string:location){
+                    onSuccess(uploadLocation, metaData)
+                } else {
+                    onFailure(ServerConnectionError.invalidUploadLocation(location))
+                }
+            } else {
+                onFailure(ServerConnectionError.requestFailed(httpStatusCode: status))
             }
         }
-        os_log("Transmitting measurement to URL %{public}@!", log: ServerConnection.osLog, type: .debug, url.absoluteString)
-        Networking.sharedInstance.backgroundSessionManager.upload(
-            multipartFormData: encode,
-            usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold,
-            to: url,
-            method: .post,
-            headers: headers,
-            encodingCompletion: {encodingResult in
-            do {
-                try self.onEncodingComplete(for: measurement, with: encodingResult, onSuccess: onSuccess, onFailure: onFailure)
-            } catch {
-                onFailure(measurement, error)
+    }
+
+    private func metaData(_ measurementIdentifier: Int64) -> MetaData {
+        // TODO: Add metadata loading from database
+        return MetaData()
+    }
+
+    private func data(_ measurementIdentifier: Int64) -> Data {
+        // TODO: Add data loading from database
+        return Data()
+    }
+
+    private func upload(token: String, measurementIdentifier: Int64, metaData: MetaData, uploadLocation: URL, onSuccess: (Int64) -> (), onFailure: (Error)->()) throws {
+        let data = data(measurementIdentifier)
+        let headers: HTTPHeaders = [
+            "Content-Type": "application/octet-stream",
+            // TODO: This probably must be adapted on upload resume
+            "Content-Length": String(data.count),
+            // TODO: Add correct content range based on server values for resume
+            "Content-Range": "bytes 0-\(data.count-1)/\(data.count)",
+            "Authorization": "Bearer \(token)",
+            "deviceId": metaData.deviceId,
+            "measurementId": String(metaData.measurementId),
+            "locationCount": String(metaData.locationCount),
+            "startLocLat": String(metaData.startLocLat),
+            "startLocLon": String(metaData.startLocLon),
+            "startLocTS": String(metaData.startLocTS),
+            "endLocLat": String(metaData.endLocLat),
+            "endLocLon": String(metaData.endLocLon),
+            "endLocTS": String(metaData.endLocTS),
+            "formatVersion": "2",
+            "deviceType": metaData.deviceType,
+            "osVersion": metaData.osVersion,
+            "appVersion": metaData.applicationVersion,
+            "length": String(metaData.length),
+            "modality": metaData.modality
+        ]
+
+        AF.upload(data, to: uploadLocation, method: .put, headers: headers).response { response in
+            guard let response = response.response else {
+                if let error = response.error {
+                    onFailure(error)
+                } else {
+                    onFailure(ServerConnectionError.noResponse)
+                }
+                return
             }
-        })
+
+            let status = response.statusCode
+
+            if status == 200 {
+                onSuccess(measurementIdentifier)
+            } else {
+                onFailure(ServerConnectionError.requestFailed(httpStatusCode: status))
+            }
+        }
     }
 
     /**
@@ -315,6 +422,28 @@ public class ServerConnection {
         case measurementError(Int64)
         /// Thrown if some measurement metadata was not encodable as an UTF-8 String
         case dataError(String)
+        case alamofireError(AFError)
+        case noResponse
+        case requestFailed(httpStatusCode: Int)
+        case noLocation
+        case invalidUploadLocation(String)
     }
 }
 
+struct MetaData: Encodable {
+    let locationCount: UInt64
+    let formatVersion: Int
+    let startLocLat: Double
+    let startLocLon: Double
+    let startLocTS: UInt64
+    let endLocLat: Double
+    let endLocLon: Double
+    let endLocTS: UInt64
+    let measurementId: UInt64
+    let deviceId: String
+    let deviceType: String
+    let osVersion: String
+    let applicationVersion: String
+    let length: Double
+    let modality: String
+}

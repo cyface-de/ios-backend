@@ -1,4 +1,4 @@
-# Copyright 2018 - 2021 Cyface GmbH
+# Copyright 2018 - 20222 Cyface GmbH
 #
 # This file is part of the Cyface SDK for iOS.
 #
@@ -47,7 +47,7 @@ This framework can be included by your App if you are going to capture sensor da
   
   # The following transitive dependencies are used by this project:
   # This one is used to handle network traffic like multipart requests
-  s.dependency 'Alamofire', '~> 4.9.1'
+  s.dependency 'Alamofire', '~> 5.5.0'
   # A wrapper for the complicated ObjectiveC compression API.
   s.dependency 'DataCompression', '~> 3.6.0'
   # Handle Protobuf Data Format
