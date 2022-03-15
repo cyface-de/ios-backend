@@ -294,19 +294,26 @@ class SensorValueSerializer: BinarySerializer {
          - Parameters:
             - data: The `data` to deserialize
          - Returns: An object of type `Serializable` created from the provided `data`
+         - Throws: `UInt64UnDiffValueError.overflow` if reversing the undiff format causes an unsigned 64 bit integer to overflow.
+         - Throws: `Int32UnDiffValueError.overflow` if reversing the undiff format causes a signed 32 bit integer to overflow.
 
          */
         func deserialize(data: Data) throws -> [SensorValue] {
 
             let deserializedValues = try De_Cyface_Protos_Model_AccelerationsBinary(serializedData: data)
             var ret: [SensorValue] = []
+
+            let timestampUnDiff = UInt64UnDiffValue(start: 0)
+            let axUnDiff = Int32UnDiffValue(start: 0)
+            let ayUnDiff = Int32UnDiffValue(start: 0)
+            let azUnDiff = Int32UnDiffValue(start: 0)
+
             for batch in deserializedValues.accelerations {
                 for accelerationsIndex in batch.timestamp.indices {
-                    let timestamp = batch.timestamp[accelerationsIndex]
-                        // TODO: Transform diff format
-                        let ax = Double(batch.x[accelerationsIndex])/1000.0
-                        let ay = Double(batch.y[accelerationsIndex])/1000.0
-                        let az = Double(batch.z[accelerationsIndex])/1000.0
+                    let timestamp = try timestampUnDiff.undiff(value: batch.timestamp[accelerationsIndex])
+                    let ax = Double(try axUnDiff.undiff(value: batch.x[accelerationsIndex]))/1000.0
+                    let ay = Double(try ayUnDiff.undiff(value: batch.y[accelerationsIndex]))/1000.0
+                    let az = Double(try azUnDiff.undiff(value: batch.z[accelerationsIndex]))/1000.0
 
                     let value = SensorValue(timestamp: Date(timeIntervalSince1970: Double(timestamp)/1_000), x: ax, y: ay, z: az)
                     ret.append(value)
@@ -330,7 +337,7 @@ class UInt64DiffValue {
 
     func diff(value: UInt64) throws -> UInt64 {
         let ret = value.subtractingReportingOverflow(previousValue)
-        guard ret.overflow == false else {
+        guard !ret.overflow else {
             throw UInt64DiffValueError.overflow(minuend: value, subtrahend: previousValue)
         }
         previousValue = value
@@ -339,6 +346,27 @@ class UInt64DiffValue {
 
     enum UInt64DiffValueError: Error {
         case overflow(minuend: UInt64, subtrahend: UInt64)
+    }
+}
+
+class UInt64UnDiffValue {
+    var previousValue: UInt64
+
+    init(start: UInt64) {
+        previousValue = start
+    }
+
+    func undiff(value: UInt64) throws -> UInt64 {
+        let ret = previousValue.addingReportingOverflow(value)
+        guard !ret.overflow else {
+            throw UInt64UnDiffValueError.overflow(firstSummand: previousValue, secondSummand: value)
+        }
+        previousValue = ret.partialValue
+        return ret.partialValue
+    }
+
+    enum UInt64UnDiffValueError: Error {
+        case overflow(firstSummand: UInt64, secondSummand: UInt64)
     }
 }
 
@@ -351,7 +379,7 @@ class Int32DiffValue {
 
     func diff(value: Int32) throws -> Int32 {
         let ret = value.subtractingReportingOverflow(previousValue)
-        guard ret.overflow == false else {
+        guard !ret.overflow else {
             throw Int32DiffValueError.overflow(minuend: value, subtrahend: previousValue)
         }
         previousValue = value
