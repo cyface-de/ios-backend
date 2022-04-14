@@ -109,7 +109,7 @@ public class DataCapturingService: NSObject {
     private static let maxAllowedTimeBetweenLocationUpdatesInMillis = TimeInterval(2.0)
 
     /// The timestamp of the last geo location update event.
-    private var prevLocationUpdateTimeInMillis: Date?
+    private var prevLocationUpdateTime: Date?
 
     /// The internal storage variable for the fix state.
     private var _hasFix = false
@@ -386,7 +386,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
             self.saveCapturedData()
 
-            guard let prevLocationUpdateTimeInMillis = self.prevLocationUpdateTimeInMillis else {
+            guard let prevLocationUpdateTimeInMillis = self.prevLocationUpdateTime else {
                 self.hasFix = false
                 return
             }
@@ -509,7 +509,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 
         for location in locations {
-            prevLocationUpdateTimeInMillis = location.timestamp
+            prevLocationUpdateTime = location.timestamp
 
             let isValid = trackCleaner.isValid(location: location)
             let geoLocation = LocationCacheEntry(
@@ -562,12 +562,12 @@ extension DataCapturingService: CLLocationManagerDelegate {
 
  */
 public struct LocationCacheEntry: Equatable, Hashable {
-    let latitude: Double
-    let longitude: Double
-    let accuracy: Double
-    let speed: Double
-    let timestamp: Date
-    let isValid: Bool
+    public let latitude: Double
+    public let longitude: Double
+    public let accuracy: Double
+    public let speed: Double
+    public let timestamp: Date
+    public let isValid: Bool
 
     func storeAsGeoLocation(to parent: inout Track) throws {
         _ = try GeoLocation(latitude: latitude, longitude: longitude, accuracy: accuracy, speed: speed, timestamp: DataCapturingService.convertToUtcTimestamp(date: timestamp), isValid: isValid, parent: &parent)
