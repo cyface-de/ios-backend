@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14903" systemVersion="19A583" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Event" representedClassName="Event" syncable="YES">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="20086" systemVersion="21E258" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Event" representedClassName="EventMO" syncable="YES">
         <attribute name="time" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="type" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="value" optional="YES" attributeType="String"/>
@@ -27,14 +27,14 @@
         <relationship name="events" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Event" inverseName="measurement" inverseEntity="Event"/>
         <relationship name="tracks" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Track" inverseName="measurement" inverseEntity="Track"/>
     </entity>
-    <entity name="Track" representedClassName="Track" syncable="YES">
+    <entity name="Track" representedClassName="TrackMO" syncable="YES">
         <relationship name="locations" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="GeoLocation" inverseName="track" inverseEntity="GeoLocation"/>
         <relationship name="measurement" maxCount="1" deletionRule="Nullify" destinationEntity="Measurement" inverseName="tracks" inverseEntity="Measurement"/>
     </entity>
     <elements>
-        <element name="Event" positionX="-252" positionY="18" width="128" height="105"/>
+        <element name="Event" positionX="-252" positionY="18" width="128" height="89"/>
         <element name="GeoLocation" positionX="-54" positionY="-9" width="128" height="150"/>
         <element name="Measurement" positionX="-443" positionY="-72" width="128" height="193"/>
-        <element name="Track" positionX="-252" positionY="9" width="128" height="75"/>
+        <element name="Track" positionX="-252" positionY="9" width="128" height="59"/>
     </elements>
 </model>
