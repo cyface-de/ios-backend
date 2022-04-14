@@ -47,7 +47,7 @@ public class CoreDataManager {
     /// Provides a background context usable on a background thread and accessing the data store managed by this stack.
     lazy var backgroundContext: NSManagedObjectContext = {
         let context = self.persistentContainer.newBackgroundContext()
-        // context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         // This improves performance as long as we do not need to undo on the background context.
         context.undoManager = nil
 
@@ -137,6 +137,43 @@ public class CoreDataManager {
 
         if migrator.requiresMigration(at: storeURL, toVersion: CoreDataMigrationVersion.current, inBundle: bundle) {
             migrator.migrateStore(at: storeURL, toVersion: CoreDataMigrationVersion.current, inBundle: bundle)
+        }
+    }
+
+    func wrapInContext(_ block: (NSManagedObjectContext) throws -> ()) throws {
+        var outerError: Error?
+
+        backgroundContext.performAndWait {
+            do {
+                try block(backgroundContext)
+            } catch {
+                outerError = error
+            }
+        }
+
+        if let unwrappedError = outerError {
+            throw unwrappedError
+        }
+    }
+
+    func wrapInContextReturn<T>(_ block: (NSManagedObjectContext) throws -> T) throws -> T {
+        var outerError: Error?
+        var ret: T?
+
+        backgroundContext.performAndWait {
+            do {
+                ret = try block(backgroundContext)
+            } catch {
+                outerError = error
+            }
+        }
+
+        if let unwrappedError = outerError {
+            throw unwrappedError
+        } else if let ret = ret {
+            return ret
+        } else {
+            fatalError()
         }
     }
 

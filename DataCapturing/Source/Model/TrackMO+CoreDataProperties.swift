@@ -20,10 +20,10 @@
 import Foundation
 import CoreData
 
-extension Track {
+extension TrackMO {
 
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Track> {
-        return NSFetchRequest<Track>(entityName: "Track")
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<TrackMO> {
+        return NSFetchRequest<TrackMO>(entityName: "Track")
     }
 
     @NSManaged public var locations: NSOrderedSet?
@@ -32,7 +32,7 @@ extension Track {
 }
 
 // MARK: Generated accessors for locations
-extension Track {
+extension TrackMO {
 
     @objc(insertObject:inLocationsAtIndex:)
     @NSManaged public func insertIntoLocations(_ value: GeoLocationMO, at idx: Int)

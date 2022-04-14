@@ -103,30 +103,4 @@ public class MovebisDataCapturingService: DataCapturingService {
     public func start() throws {
         return try start(inMode: "BICYCLE")
     }
-
-    /**
-     Loads only those measurements that are not captured at the moment.
-
-     This should be used to display all finished measurements in the UI.
-     Measurements are loaded from the database via CoreData and provided as `MeasurementMO` instances.
-     - Attention: The returned array contains CoreData `NSManagedObject` instances (or a instances of a subclass). `NSManagedObject` is not thread safe and looses all attribute values as soon as transfered to a different thread. Handle the objects in the returned array with care and copy all required values before using them from a different thread (like for example a callback or delegate).
-     - Returns: An array of measurements stored in the database without the one currently captured, if capturing is active.
-     - Throws:
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
-        - Some unspecified errors from within CoreData.
-     */
-    public func loadInactiveMeasurements() throws -> [MeasurementMO] {
-        let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
-        let ret = try persistenceLayer.loadMeasurements()
-
-        // Filter active measurement if any.
-        if let currentMeasurement = currentMeasurement {
-            return ret.filter { measurement in
-                return measurement.identifier != currentMeasurement
-            }
-        } else {
-            return ret
-        }
-    }
 }

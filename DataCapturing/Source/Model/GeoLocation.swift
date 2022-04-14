@@ -18,6 +18,7 @@
  */
 
 import Foundation
+import CoreData
 
 /**
  One geo location measurement provided by the system.
@@ -34,7 +35,7 @@ import Foundation
 public struct GeoLocation: CustomStringConvertible {
 
     // MARK: - Properties
-
+    var objectId: NSManagedObjectID?
     /// The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion.
     public let latitude: Double
     /// The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.
@@ -47,17 +48,25 @@ public struct GeoLocation: CustomStringConvertible {
     public let timestamp: Int64
     /// Whether or not this is a valid location in a cleaned track.
     public let isValid: Bool
+    public let track: Track
     /// A human readable description of this object.
     public var description: String {
         return "GeoLocation (latitude: \(latitude), longitude: \(longitude), accuracy: \(accuracy), speed: \(speed), timestamp: \(timestamp))"
     }
 
-    public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: Int64, isValid: Bool = true) {
+    init(managedObject: GeoLocationMO, parent: inout Track) throws {
+        try self.init(latitude: managedObject.lat, longitude: managedObject.lon, accuracy: managedObject.accuracy, speed: managedObject.speed, timestamp: managedObject.timestamp, isValid: managedObject.isPartOfCleanedTrack, parent: &parent)
+        self.objectId = managedObject.objectID
+    }
+
+    public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: Int64, isValid: Bool = true, parent: inout Track) throws {
         self.latitude = latitude
         self.longitude = longitude
         self.accuracy = accuracy
         self.speed = speed
         self.timestamp = timestamp
         self.isValid = isValid
+        self.track = parent
+        try parent.append(location: self)
     }
 }

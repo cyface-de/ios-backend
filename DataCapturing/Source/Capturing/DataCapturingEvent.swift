@@ -50,7 +50,7 @@ public enum DataCapturingEvent {
 
      - position: The new geo location position.
      */
-    case geoLocationAcquired(position: GeoLocation)
+    case geoLocationAcquired(position: LocationCacheEntry)
     /**
      Occurs each time the application runs out of space.
      How much space is used and how much is available may be retrieved from `allocation`.

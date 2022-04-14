@@ -41,7 +41,7 @@ public class DataCapturingService: NSObject {
     /// `true` if data capturing was running but is currently paused; `false` otherwise.
     public var isPaused = false
 
-    // TODO: This should probably be a MeasurementMO which is checked for fault on each call. In addition it might be a good idea to merge the DataCapturingService into the MeasurementMO class, since it only represents the behaviour of the measurement
+    // TODO: This should probably be a Measurement which is checked for fault on each call. In addition it might be a good idea to merge the DataCapturingService into the MeasurementMO class, since it only represents the behaviour of the measurement
     /// The currently recorded `Measurement` or `nil` if there is no active recording.
     public var currentMeasurement: Int64?
 
@@ -76,7 +76,7 @@ public class DataCapturingService: NSObject {
     let coreDataStack: CoreDataManager
 
     /// An in memory storage for geo locations, before they are written to disk.
-    var locationsCache = [GeoLocation]()
+    var locationsCache = [LocationCacheEntry]()
 
     /// The background queue used to capture data.
     let capturingQueue = DispatchQueue.global(qos: .userInitiated)
@@ -106,10 +106,10 @@ public class DataCapturingService: NSObject {
     private let trackCleaner = DefaultTrackCleaner()
 
     /// This is the maximum time between two location updates allowed before the service assumes that it does not have a valid location fix anymore.
-    private static let maxAllowedTimeBetweenLocationUpdatesInMillis = Int64(2_000)
+    private static let maxAllowedTimeBetweenLocationUpdatesInMillis = TimeInterval(2.0)
 
-    /// The timestamp in UNIX timestamp format in milliseconds since the 1st of january 1970 of the last geo location update event.
-    private var prevLocationUpdateTimeInMillis: Int64?
+    /// The timestamp of the last geo location update event.
+    private var prevLocationUpdateTimeInMillis: Date?
 
     /// The internal storage variable for the fix state.
     private var _hasFix = false
@@ -167,7 +167,6 @@ public class DataCapturingService: NSObject {
         self.savingInterval = time
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
         do {
             for measurement in try persistenceLayer.loadMeasurements() {
@@ -215,12 +214,10 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
             let timestamp = DataCapturingService.currentTimeInMillisSince1970()
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
 
             let measurement = try persistenceLayer.createMeasurement(at: timestamp, inMode: modality)
 
             self.currentMeasurement = measurement.identifier
-            persistenceLayer.context?.saveRecursively()
 
             if let event = try startCapturing(savingEvery: savingInterval, for: .lifecycleStart) {
                 handler(.serviceStarted(measurement: measurement.identifier, event: event), .success)
@@ -280,11 +277,8 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             stopCapturing()
             isPaused = true
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
-            let event = persistenceLayer.createEvent(of: .lifecyclePause)
-            measurement.addToEvents(event)
-            persistenceLayer.context?.saveRecursively()
+            var measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
+            let event = try persistenceLayer.createEvent(of: .lifecyclePause, parent: &measurement)
 
             handler(.servicePaused(measurement: currentMeasurement, event: event), .success)
         }
@@ -333,12 +327,11 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             }
 
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
 
             do {
-                let currentMeasurementMO = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+                var currentMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
 
-                let existingModalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: currentMeasurementMO)
+                let existingModalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: currentMeasurement)
                 guard let lastModalityChangeEvent = existingModalityChangeEvents.last else {
                     fatalError("No valid modality change event!")
                 }
@@ -347,9 +340,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
                     return
                 }
 
-                let event = persistenceLayer.createEvent(of: .modalityTypeChange, withValue: modality)
-                currentMeasurementMO.addToEvents(event)
-                persistenceLayer.context?.saveRecursively()
+                _ = try persistenceLayer.createEvent(of: .modalityTypeChange, withValue: modality, parent: &currentMeasurement)
             } catch {
                 fatalError("Unable to load measurement identified by \(currentMeasurementIdentifier)!")
             }
@@ -380,11 +371,9 @@ Starting data capturing on paused service. Finishing paused measurements and sta
         }
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
-        persistenceLayer.appendNewTrack(to: measurement)
-        let event = persistenceLayer.createEvent(of: eventType)
-        measurement.addToEvents(event)
+        var measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
+        try persistenceLayer.appendNewTrack(to: &measurement)
+        let event = try persistenceLayer.createEvent(of: eventType, parent: &measurement)
         self.coreLocationManager.locationDelegate = self
 
         sensorCapturer.start()
@@ -402,8 +391,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
                 return
             }
 
-            let deltaTime = DataCapturingService.currentTimeInMillisSince1970() - prevLocationUpdateTimeInMillis
-            if deltaTime < DataCapturingService.maxAllowedTimeBetweenLocationUpdatesInMillis {
+            if prevLocationUpdateTimeInMillis.timeIntervalSinceNow < DataCapturingService.maxAllowedTimeBetweenLocationUpdatesInMillis {
                 self.hasFix = true
             } else {
                 self.hasFix = false
@@ -457,22 +445,21 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             let localLocationsCache = self.locationsCache
 
             let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
+            var measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
 
-            try persistenceLayer.save(locations: localLocationsCache, in: measurement)
+            try persistenceLayer.save(locations: localLocationsCache, in: &measurement)
 
             try persistenceLayer.save(
                 accelerations: localAccelerationsCache,
                 rotations: localRotationsCache,
                 directions: localDirectionsCache,
-                in: measurement)
+                in: &measurement)
 
             sensorCapturer.accelerations.removeAll()
             sensorCapturer.rotations.removeAll()
             sensorCapturer.directions.removeAll()
 
-            self.locationsCache = [GeoLocation]()
+            self.locationsCache = [LocationCacheEntry]()
         } catch let error {
             return os_log("Unable to save captured data. Error %{public}@", log: self.log, type: .error, error.localizedDescription)
         }
@@ -487,12 +474,9 @@ Starting data capturing on paused service. Finishing paused measurements and sta
      */
     private func finish(measurement: Int64) throws -> Event {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
-        let currentMeasurementEntity = try persistenceLayer.load(measurementIdentifiedBy: measurement)
-        currentMeasurementEntity.synchronizable = true
-        let event = persistenceLayer.createEvent(of: .lifecycleStop)
-        currentMeasurementEntity.addToEvents(event)
-        persistenceLayer.context?.saveRecursively()
+        var currentMeasurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
+        currentMeasurement.synchronizable = true
+        let event = try persistenceLayer.createEvent(of: .lifecycleStop, parent: &currentMeasurement)
         return event
     }
 
@@ -525,16 +509,15 @@ extension DataCapturingService: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 
         for location in locations {
-            let timestamp = DataCapturingService.convertToUtcTimestamp(date: location.timestamp)
-            prevLocationUpdateTimeInMillis = timestamp
+            prevLocationUpdateTimeInMillis = location.timestamp
 
             let isValid = trackCleaner.isValid(location: location)
-            let geoLocation = GeoLocation(
+            let geoLocation = LocationCacheEntry(
                 latitude: location.coordinate.latitude,
                 longitude: location.coordinate.longitude,
                 accuracy: location.horizontalAccuracy,
                 speed: location.speed,
-                timestamp: timestamp,
+                timestamp: location.timestamp,
                 isValid: isValid)
 
             lifecycleQueue.async(flags: .barrier) {
@@ -569,5 +552,24 @@ extension DataCapturingService: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         os_log("Location service failed with error: %{public}@!", log: log, type: .error, error.localizedDescription)
         hasFix = false
+    }
+}
+
+/**
+ This struct exists to save time on a new location by just storing it away. It needs to be converted to a GeoLocation prior to persitent storage.
+
+ - Author: Klemens Muthmann
+
+ */
+public struct LocationCacheEntry: Equatable, Hashable {
+    let latitude: Double
+    let longitude: Double
+    let accuracy: Double
+    let speed: Double
+    let timestamp: Date
+    let isValid: Bool
+
+    func storeAsGeoLocation(to parent: inout Track) throws {
+        _ = try GeoLocation(latitude: latitude, longitude: longitude, accuracy: accuracy, speed: speed, timestamp: DataCapturingService.convertToUtcTimestamp(date: timestamp), isValid: isValid, parent: &parent)
     }
 }
