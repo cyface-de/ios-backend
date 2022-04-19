@@ -568,13 +568,17 @@ extension DataCapturingService: CLLocationManagerDelegate {
  - Author: Klemens Muthmann
 
  */
-public struct LocationCacheEntry: Equatable, Hashable {
+public struct LocationCacheEntry: Equatable, Hashable, CustomStringConvertible {
     public let latitude: Double
     public let longitude: Double
     public let accuracy: Double
     public let speed: Double
     public let timestamp: Date
     public let isValid: Bool
+
+    public var description: String {
+        return "LocationCacheEntry(latitude: \(latitude), longitude: \(longitude), accuracy: \(accuracy), speed: \(speed), timestamp: \(timestamp), isValid: \(isValid))"
+    }
 
     func storeAsGeoLocation(to parent: inout Track) throws {
         _ = try GeoLocation(latitude: latitude, longitude: longitude, accuracy: accuracy, speed: speed, timestamp: DataCapturingService.convertToUtcTimestamp(date: timestamp), isValid: isValid, parent: &parent)
