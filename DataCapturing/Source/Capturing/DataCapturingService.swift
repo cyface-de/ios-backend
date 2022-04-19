@@ -509,7 +509,14 @@ extension DataCapturingService: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 
         for location in locations {
-            prevLocationUpdateTime = location.timestamp
+            // Make sure locations are in order.
+            if let prevLocationUpdateTime = self.prevLocationUpdateTime {
+                guard prevLocationUpdateTime < location.timestamp else {
+                    os_log(.debug, log: log, "Skipping location update due to late location.")
+                    continue
+                }
+            }
+            self.prevLocationUpdateTime = location.timestamp
 
             let isValid = trackCleaner.isValid(location: location)
             let geoLocation = LocationCacheEntry(
