@@ -19,8 +19,7 @@ public struct Track {
 
         if let geoLocationMOs = managedObject.locations?.array as? [GeoLocationMO] {
             for geoLocationMO in geoLocationMOs {
-                let location = try GeoLocation(managedObject: geoLocationMO, parent: &self)
-                try append(location: location)
+                _ = try GeoLocation(managedObject: geoLocationMO, parent: &self)
             }
         }
     }
