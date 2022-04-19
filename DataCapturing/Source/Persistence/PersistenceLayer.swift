@@ -319,7 +319,7 @@ public class PersistenceLayer {
         debugPrint("Storing \(accelerations.count) accelerations \(rotations.count) rotations and \(directions.count) directions.")
 
             guard let measurementObjectId = measurement.objectId else {
-                throw PersistenceError.measurementNotLoadable(measurement.identifier)
+                throw PersistenceError.unsynchronizedMeasurement(identifier: measurement.identifier)
             }
 
             guard let measurementMO = try context.existingObject(with: measurementObjectId) as? MeasurementMO else {
@@ -606,5 +606,6 @@ public class PersistenceLayer {
         case dataNotLoadable(measurement: Int64)
         /// If it is impossible to load the last generated identifier. This can only happen if the system settings have been tempered with.
         case inconsistentState
+        case unsynchronizedMeasurement(identifier: Int64)
     }
 }
