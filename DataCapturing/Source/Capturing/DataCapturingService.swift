@@ -176,7 +176,7 @@ public class DataCapturingService: NSObject {
                 }
             }
         } catch {
-            fatalError("Unable to load measurements from database!")
+            fatalError("Unable to load measurements from database! Reason: \(error)")
         }
 
         super.init()
