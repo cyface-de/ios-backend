@@ -63,7 +63,6 @@ struct EventItemModel {
 
     init(measurement: MeasurementMO, coreDataStack: CoreDataManager, position: Int) {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
         do {
             let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)

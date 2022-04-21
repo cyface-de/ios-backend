@@ -163,7 +163,6 @@ class CapturingLifecycle {
             fatalError()
         }
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifiedBy)
 

@@ -29,7 +29,7 @@ class MeasurementModel {
 
                 if internalMeasurement.isFault {
                     let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-                    persistenceLayer.makeContext().refresh(internalMeasurement, mergeChanges: true)
+                    persistenceLayer.context.refresh(internalMeasurement, mergeChanges: true)
                 }
 
                 return internalMeasurement
@@ -93,7 +93,6 @@ class MeasurementModel {
     var modalities: [Modality] {
         do {
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
             let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement!)
             let modalities: [Modality] = events.map { event in
                 guard let rawValue = event.value else {
@@ -142,7 +141,6 @@ class MeasurementModel {
         }
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
         do {
             try persistenceLayer.delete(measurement: identifier)

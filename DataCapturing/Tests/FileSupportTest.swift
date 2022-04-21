@@ -50,10 +50,7 @@ class FileSupportTest: XCTestCase {
 
                 do {
                     let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-                    let context = persistenceLayer.makeContext()
-                    persistenceLayer.context = context
-
-                    let events = self.eventFixture(context)
+                    let events = try self.eventFixture(persistenceLayer)
 
                     // Act
                     let eventsFilePath = try oocut.write(serializable: events, to: 1)
@@ -77,26 +74,11 @@ class FileSupportTest: XCTestCase {
     }
 
     /// The fixture of events to use for testing.
-    func eventFixture(_ context: NSManagedObjectContext) -> [Event] {
-        let event1 = Event(context: context)
-        let event2 = Event(context: context)
-        let event3 = Event(context: context)
-        let measurement = MeasurementMO(context: context)
-        event1.measurement = measurement
-        event2.measurement = measurement
-        event3.measurement = measurement
-        event1.time = NSDate()
-        event2.time = NSDate()
-        event3.time = NSDate()
-        event1.typeEnum = .lifecycleStart
-        event2.typeEnum = .modalityTypeChange
-        event3.typeEnum = .lifecycleStop
-        event2.value = "BICYCLE"
-        measurement.addToEvents(event1)
-        measurement.addToEvents(event2)
-        measurement.addToEvents(event3)
-
-        context.saveRecursively()
+    func eventFixture(_ persistenceLayer: PersistenceLayer) throws -> [Event] {
+        var measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.convertToUtcTimestamp(date: Date()), inMode: "BICYCLE")
+        let event1 = try persistenceLayer.createEvent(of: .lifecycleStart, parent: &measurement)
+        let event2 = try persistenceLayer.createEvent(of: .modalityTypeChange, withValue: "BICYCLE", parent: &measurement)
+        let event3 = try persistenceLayer.createEvent(of: .lifecycleStop, parent: &measurement)
 
         return [event1, event2, event3]
     }

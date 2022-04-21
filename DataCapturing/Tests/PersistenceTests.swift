@@ -51,14 +51,13 @@ class PersistenceTests: XCTestCase {
 
                 do {
                     self.oocut = PersistenceLayer(onManager: manager)
-                    self.oocut.context = self.oocut.makeContext()
-                    let measurement = try self.oocut.createMeasurement(at: 10_000, inMode: self.defaultMode)
-                    self.oocut.appendNewTrack(to: measurement)
+                    var measurement = try self.oocut.createMeasurement(at: 10_000, inMode: self.defaultMode)
+                    try self.oocut.appendNewTrack(to: &measurement)
 
                     self.fixture = measurement.identifier
 
-                    try self.oocut.save(locations: [PersistenceTests.location(latitude: 51.052181, longitude: 13.728956, timestamp: 10_000), PersistenceTests.location(latitude: 51.051837, longitude: 13.729010, timestamp: 10_001)], in: measurement)
-                    try self.oocut.save(accelerations: [PersistenceTests.acceleration(), PersistenceTests.acceleration(), PersistenceTests.acceleration()], in: measurement)
+                    try self.oocut.save(locations: [TestFixture.location(latitude: 51.052181, longitude: 13.728956, timestamp: Date(timeIntervalSince1970: 10_000)), TestFixture.location(latitude: 51.051837, longitude: 13.729010, timestamp: Date(timeIntervalSince1970: 10_001))], in: &measurement)
+                    try self.oocut.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &measurement)
 
                     expectation.fulfill()
                 } catch let error {
@@ -151,9 +150,9 @@ class PersistenceTests: XCTestCase {
     /// Tests that writing some data to an existing measurement is successful.
     func testMergeDataToExistingMeasurement() {
         do {
-            let fixtureMeasurement = try oocut.load(measurementIdentifiedBy: fixture)
-            try oocut.save(locations: [PersistenceTests.location()], in: fixtureMeasurement)
-            try oocut.save(accelerations: [PersistenceTests.acceleration(), PersistenceTests.acceleration(), PersistenceTests.acceleration()], in: fixtureMeasurement)
+            var fixtureMeasurement = try oocut.load(measurementIdentifiedBy: fixture)
+            try oocut.save(locations: [TestFixture.randomLocation()], in: &fixtureMeasurement)
+            try oocut.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &fixtureMeasurement)
             let measurement = try oocut.load(measurementIdentifiedBy: fixture)
 
             XCTAssertEqual(try PersistenceLayer.collectGeoLocations(from: measurement).count, 3)
@@ -182,9 +181,9 @@ class PersistenceTests: XCTestCase {
     /// Tests that accessing only synchronizable measurements does not return everything.
     func testLoadSynchronizableMeasurements() {
         do {
-            let fixtureMeasurement = try oocut.load(measurementIdentifiedBy: fixture)
+            var fixtureMeasurement = try oocut.load(measurementIdentifiedBy: fixture)
             fixtureMeasurement.synchronizable = true
-            oocut.context?.saveRecursively()
+            try oocut.save(in: &fixtureMeasurement)
             let countOfLoadedMeasurementsPriorClean = try oocut.loadSynchronizableMeasurements().count
 
             try oocut.clean(measurement: fixture)
@@ -220,11 +219,11 @@ class PersistenceTests: XCTestCase {
         let distanceCalculationAccuracy = 0.01
 
         do {
-            let measurement = try oocut.load(measurementIdentifiedBy: fixture)
+            var measurement = try oocut.load(measurementIdentifiedBy: fixture)
             XCTAssertEqual(measurement.trackLength, expectedInitialTrackLength)
 
-            let newLocationInput = [PersistenceTests.location(latitude: 51.051432, longitude: 13.729053, timestamp: 10_002)]
-            try oocut.save(locations: newLocationInput, in: measurement)
+            let newLocationInput = [TestFixture.location(latitude: 51.051432, longitude: 13.729053, timestamp: Date(timeIntervalSince1970: 10_002))]
+            try oocut.save(locations: newLocationInput, in: &measurement)
 
             XCTAssertEqual(measurement.trackLength, expectedTrackLength, accuracy: expectedTrackLength * distanceCalculationAccuracy, "Measurement length \(measurement.trackLength) should be within \(distanceCalculationAccuracy*100)% of \(expectedTrackLength).")
         } catch let error {
@@ -234,29 +233,21 @@ class PersistenceTests: XCTestCase {
 
     /// Tests that geo locations are added successfully to tracks and can be loaded from them.
     func testLoadGeoLocationTracks() throws {
-        let measurement = try oocut.load(measurementIdentifiedBy: fixture)
+        var measurement = try oocut.load(measurementIdentifiedBy: fixture)
 
-        guard let tracks = measurement.tracks?.array as? [Track] else {
-            return XCTFail("Unable to load tracks!")
-        }
+        let tracks = measurement.tracks
         XCTAssertEqual(tracks.count, 1, "There should only be one track in the fixture measurement!")
 
-        guard let locations = tracks[0].locations?.array as? [GeoLocationMO] else {
-            return XCTFail("Unable to load geo locations!")
-        }
+        let locations = tracks[0].locations
         XCTAssertEqual(locations.count, 2, "There should be two locations in the fixture measurement!")
 
-        oocut.appendNewTrack(to: measurement)
-        try oocut.save(locations: [PersistenceTests.location()], in: measurement)
+        try oocut.appendNewTrack(to: &measurement)
+        try oocut.save(locations: [TestFixture.location()], in: &measurement)
 
-        guard let tracksAfterRefresh = measurement.tracks?.array as? [Track] else {
-            return XCTFail("Unable to load tracks!")
-        }
+        let tracksAfterRefresh = measurement.tracks
         XCTAssertEqual(tracksAfterRefresh.count, 2, "There should only be one track in the fixture measurement!")
 
-        guard let locationsInSecondTrack = tracksAfterRefresh[1].locations?.array as? [GeoLocationMO] else {
-            return XCTFail("Unable to load geo locations!")
-        }
+        let locationsInSecondTrack = tracksAfterRefresh[1].locations
         XCTAssertEqual(locationsInSecondTrack.count, 1, "There should be two locations in the fixture measurement!")
     }
 
@@ -278,15 +269,15 @@ class PersistenceTests: XCTestCase {
 
     /// Tests that loading a cleaned track returns only the valid cleaned locations.
     func testLoadCleanedTrack() throws {
-        let measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: defaultMode)
+        var measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: defaultMode)
 
-        oocut.appendNewTrack(to: measurement)
-        try oocut.save(locations: [PersistenceTests.location(), PersistenceTests.location(isValid: false), PersistenceTests.location()], in: measurement)
+        try oocut.appendNewTrack(to: &measurement)
+        try oocut.save(locations: [TestFixture.location(), TestFixture.location(isValid: false), TestFixture.location()], in: &measurement)
 
-        guard let track = measurement.tracks?.array.last as? Track else {
+        guard var track = measurement.tracks.last else {
             fatalError()
         }
-        let cleanTrack = try oocut.loadClean(track: track)
+        let cleanTrack = try oocut.loadClean(track: &track)
         XCTAssertEqual(cleanTrack.count, 2)
     }
 
@@ -294,41 +285,19 @@ class PersistenceTests: XCTestCase {
      Tests the creation, storage and retrieval of `Event` objects in `CoreData`.
     */
     func testEventCreation_HappyPath() throws {
-        let measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: defaultMode)
+        var measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: defaultMode)
 
-        measurement.addToEvents(oocut.createEvent(of: .lifecycleStart))
+
+        let lifecycleStartEvent = try oocut.createEvent(of: .lifecycleStart, parent: &measurement)
         sleep(1)
-        measurement.addToEvents(oocut.createEvent(of: .lifecycleStop))
-        oocut.context?.saveRecursively()
+        let lifecycleStopEvent = try oocut.createEvent(of: .lifecycleStop, parent: &measurement)
 
         let loadedMeasurement = try oocut.load(measurementIdentifiedBy: measurement.identifier)
-        let loadedEvents = loadedMeasurement.events?.array as? [Event]
-        XCTAssertEqual(loadedEvents?[0].typeEnum, EventType.modalityTypeChange)
-        XCTAssertEqual(loadedEvents?[1].typeEnum, EventType.lifecycleStart)
-        XCTAssertEqual(loadedEvents?[2].typeEnum, EventType.lifecycleStop)
-        XCTAssertLessThanOrEqual(Double(loadedMeasurement.timestamp) / 1_000.0, (loadedEvents?[1].time!.timeIntervalSince1970)!)
-        XCTAssertLessThanOrEqual(loadedEvents![1].time!.timeIntervalSince1970, loadedEvents![2].time!.timeIntervalSince1970)
-    }
-
-    /**
-     Create fixture data to use during testing
-
-     - Parameters:
-        - latitude: The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion
-        - longitude: The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction
-        - accuracy: The estimated accuracy of the measurement in meters
-        - speed: The speed the device was moving during the measurement in meters per second
-        - timestamp: The time the measurement happened at in milliseconds since the 1st of january 1970
-        - isValid: Whether or not this is a valid location in a cleaned track
-     */
-    static func location(latitude: Double = 2.0, longitude: Double = 2.0, accuracy: Double = 1.0, speed: Double = 10.0, timestamp: Int64 = 5, isValid: Bool = true) -> GeoLocation {
-        return GeoLocation(latitude: latitude, longitude: longitude, accuracy: accuracy, speed: speed, timestamp: timestamp, isValid: isValid)
-    }
-
-    /**
-     Create fixture acceleration
-     */
-    static func acceleration() -> SensorValue {
-        return SensorValue(timestamp: Date(), x: 1.0, y: 1.0, z: 1.0)
+        let loadedEvents = loadedMeasurement.events
+        XCTAssertEqual(loadedEvents[0].type, EventType.modalityTypeChange)
+        XCTAssertEqual(loadedEvents[1].type, lifecycleStartEvent.type)
+        XCTAssertEqual(loadedEvents[2].type, lifecycleStopEvent.type)
+        XCTAssertLessThanOrEqual(Double(loadedMeasurement.timestamp) / 1_000.0, loadedEvents[1].time.timeIntervalSince1970)
+        XCTAssertLessThanOrEqual(loadedEvents[1].time.timeIntervalSince1970, loadedEvents[2].time.timeIntervalSince1970)
     }
 }

@@ -17,7 +17,7 @@ import Foundation
  */
 public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
     /// The fake measurement currently built.
-    private var fakeMeasurement: MeasurementMO
+    private var fakeMeasurement: DataCapturing.Measurement
     /// The `PersistenceLayer` used to create the fake measurement.
     private let persistenceLayer: PersistenceLayer
 
@@ -28,13 +28,13 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
         - persistenceLayer: The `PersistenceLayer` used to create the fake measurement
         - measurement: The initial value for the faked measurement
      */
-    private init(persistenceLayer: PersistenceLayer, measurement: MeasurementMO) {
+    private init(persistenceLayer: PersistenceLayer, measurement: DataCapturing.Measurement) {
         self.persistenceLayer = persistenceLayer
         self.fakeMeasurement = measurement
     }
 
-    public func build() -> MeasurementMO {
-        return fakeMeasurement
+    public func build() throws -> DataCapturing.Measurement {
+        return try persistenceLayer.save(measurement: fakeMeasurement)
     }
 
     public func addGeoLocationsAnd(countOfGeoLocations: Int) throws -> FakeTrack {
@@ -69,14 +69,14 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
         - Some unspecified errors from within CoreData.
      */
     private func geoLocations(countOfGeoLocations: Int) throws {
-        var locations = [GeoLocation]()
+        var locations = [LocationCacheEntry]()
 
         for _ in 0..<countOfGeoLocations {
-            let location = GeoLocation(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: DataCapturingService.currentTimeInMillisSince1970(), isValid: true)
+            let location = LocationCacheEntry(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: Date(), isValid: true)
 
             locations.append(location)
         }
-        try persistenceLayer.save(locations: locations, in: fakeMeasurement)
+        try persistenceLayer.save(locations: locations, in: &fakeMeasurement)
     }
 
     /**
@@ -95,7 +95,7 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
             let acceleration = SensorValue(timestamp: Date(), x: Double.random(in: -10.0...10.0), y: Double.random(in: -10.0...10.0), z: Double.random(in: -10.0...10.0))
             accelerations.append(acceleration)
         }
-        try persistenceLayer.save(accelerations: accelerations, in: fakeMeasurement)
+        try persistenceLayer.save(accelerations: accelerations, in: &fakeMeasurement)
     }
 
     /**
@@ -108,7 +108,7 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
      */
     public static func fakeMeasurement(persistenceLayer: PersistenceLayer) throws -> FakeMeasurement {
 
-        let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: "BICYCLE")
+        var measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: "BICYCLE")
         measurement.synchronized = false
         measurement.trackLength = Double.random(in: 0..<10_000.0)
 
@@ -116,13 +116,13 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
         return ret
     }
 
-    public func appendTrack() -> FakeMeasurement {
-        persistenceLayer.appendNewTrack(to: fakeMeasurement)
+    public func appendTrack() throws -> FakeMeasurement {
+        try persistenceLayer.appendNewTrack(to: &fakeMeasurement)
         return self
     }
 
     public func appendTrackAnd() throws -> FakeTrack {
-        persistenceLayer.appendNewTrack(to: fakeMeasurement)
+        try persistenceLayer.appendNewTrack(to: &fakeMeasurement)
         return self
     }
 }
@@ -151,7 +151,7 @@ public protocol FakeMeasurement {
 
      - Returns: A completely intialized fake measurement
      */
-    func build() -> MeasurementMO
+    func build() throws -> DataCapturing.Measurement
 }
 
 /**

@@ -61,13 +61,12 @@ class SerializationTest: XCTestCase {
 
                 do {
                     self.persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
-                    self.persistenceLayer.context = self.persistenceLayer.makeContext()
-                    let measurement = try self.persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
-                    self.persistenceLayer.appendNewTrack(to: measurement)
+                    var measurement = try self.persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
+                    try self.persistenceLayer.appendNewTrack(to: &measurement)
 
                     self.fixture = measurement.identifier
-                    try self.persistenceLayer.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true)], in: measurement)
-                    try self.persistenceLayer.save(accelerations: [SensorValue(timestamp: Date(timeIntervalSince1970: 10_000.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0)], in: measurement)
+                    try self.persistenceLayer.save(locations: [TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10_000)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10_100)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10_100))], in: &measurement)
+                    try self.persistenceLayer.save(accelerations: [SensorValue(timestamp: Date(timeIntervalSince1970: 10_000.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0)], in: &measurement)
 
                     expectation.fulfill()
                 } catch let error {
@@ -150,8 +149,8 @@ class SerializationTest: XCTestCase {
     /**
      This creates a really big test data set usable to test programs unpacking such a set. This test is skipped since it takes really long.
      */
-    func skip_testSerializeBigDataSet() throws {
-        let measurement = try FakeMeasurementImpl.fakeMeasurement(persistenceLayer: persistenceLayer).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 36_000).addAccelerations(countOfAccelerations: 3_600_000).build()
+    func ignore_testSerializeBigDataSet() throws {
+        var measurement = try FakeMeasurementImpl.fakeMeasurement(persistenceLayer: persistenceLayer).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 36_000).addAccelerations(countOfAccelerations: 3_600_000).build()
         let data = try oocut.serialize(serializable: measurement)
         try data.write(to: URL(fileURLWithPath: "/Users/cyface/data.cyf"))
     }
@@ -203,9 +202,7 @@ class SerializationTest: XCTestCase {
         // Arrange
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
 
-        guard let events = measurement.events?.array as? [Event] else {
-            fatalError()
-        }
+        let events = measurement.events
 
         let eventsSerializer = EventsSerializer()
 

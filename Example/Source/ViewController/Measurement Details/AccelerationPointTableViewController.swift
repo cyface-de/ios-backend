@@ -80,7 +80,6 @@ class AccelerationPointTableViewController: UIViewController, UITableViewDataSou
 
             do {
                 let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-                persistenceLayer.context = persistenceLayer.makeContext()
 
                 let measurement = try persistenceLayer.load(measurementIdentifiedBy: entity)
 

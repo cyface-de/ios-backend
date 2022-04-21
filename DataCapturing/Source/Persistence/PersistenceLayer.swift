@@ -344,6 +344,20 @@ public class PersistenceLayer {
         }
     }
 
+    public func save(measurement: Measurement) throws -> Measurement {
+        try manager.wrapInContextReturn { context in
+            guard let objectId = measurement.objectId else {
+                throw PersistenceError.unsynchronizedMeasurement(identifier: measurement.identifier)
+            }
+
+            guard let managedObjectMeasurement = try context.existingObject(with: objectId) as? MeasurementMO else {
+                throw PersistenceError.dataNotLoadable(measurement: measurement.identifier)
+            }
+
+            return try Measurement(managedObject: managedObjectMeasurement)
+        }
+    }
+
     // MARK: - Database Read Only Methods
     /**
      Loads the data belonging to the provided `measurement` in the background an calls `onFinishedCall` with the data storage representation of that `measurement`. Using that represenation is not thread safe. Do not use it outside of the handler.

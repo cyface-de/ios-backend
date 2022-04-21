@@ -73,7 +73,6 @@ class ServerConnectionTest: XCTestCase {
     func testCreateServerRequest_HappyPath() throws {
         // Arrange
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try FakeMeasurementImpl.fakeMeasurement(persistenceLayer: persistenceLayer).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 10).addAccelerations(countOfAccelerations: 1_000).build()
 
         let data = MultipartFormData()
@@ -146,7 +145,7 @@ class ServerConnectionTest: XCTestCase {
 
      - Throws: some unspecified errors from within *CoreData*
      */
-    func ignore_testUploadMeasurement_HappyPath() throws {
+    func testUploadMeasurement_HappyPath() throws {
         let url = URL(string: "http://localhost:8080")!.appendingPathComponent("api").appendingPathComponent("v2")
         let authenticator = CredentialsAuthenticator(authenticationEndpoint: url)
         authenticator.username = "admin"
@@ -154,11 +153,10 @@ class ServerConnectionTest: XCTestCase {
         let serverConnection = ServerConnection(apiURL: url, authenticator: authenticator, onManager: coreDataStack)
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try persistenceLayer.createMeasurement(at: 10_000, inMode: "BICYCLE")
-        persistenceLayer.appendNewTrack(to: measurement)
-        try persistenceLayer.save(locations: [geoLocation(), geoLocation()], in: measurement)
-        try persistenceLayer.save(accelerations: [acceleration(), acceleration()], in: measurement)
+        var measurement = try persistenceLayer.createMeasurement(at: 10_000, inMode: "BICYCLE")
+        try persistenceLayer.appendNewTrack(to: &measurement)
+        try persistenceLayer.save(locations: [TestFixture.randomLocation(), TestFixture.randomLocation()], in: &measurement)
+        try persistenceLayer.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &measurement)
 
         let measurementIdentifier = measurement.identifier
         let promise = expectation(description: "Expect call to return 201.")
@@ -176,13 +174,5 @@ class ServerConnectionTest: XCTestCase {
         })
 
         wait(for: [promise], timeout: 6000)
-    }
-
-    func geoLocation() -> GeoLocation {
-        return GeoLocation(latitude: Double.random(in: -90.0 ... 90.0), longitude: Double.random(in: 0.0 ..< 360.0), accuracy: Double.random(in: 2.0 ... 15.0), speed: Double.random(in: 0.0 ... 10.0), timestamp: Int64.random(in: 0 ... INT64_MAX))
-    }
-
-    func acceleration() -> SensorValue {
-        return SensorValue(timestamp: Date(timeIntervalSince1970: TimeInterval(Double.random(in: 0.0 ... 1571302762.0))), x: Double.random(in: 0.0 ... 40.0), y: Double.random(in: 0.0 ... 40.0), z: Double.random(in: 0.0 ... 40.0))
     }
 }

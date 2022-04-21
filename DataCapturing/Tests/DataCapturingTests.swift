@@ -79,7 +79,6 @@ class DataCapturingTests: XCTestCase {
         // Wait for write operations to have finished! This is necessary to delete the data again.
         oocut = nil
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         do {
             // Handle this in its own thread to avoid race conditions.
             //try syncQueue.sync {
@@ -107,12 +106,12 @@ class DataCapturingTests: XCTestCase {
         XCTAssertFalse(oocut.isPaused)
         XCTAssert(testEventHandler.capturedEvents.count >= 2)
         if case .serviceStarted(_, let event) = testEventHandler.capturedEvents.first! {
-            XCTAssertEqual(event.typeEnum, EventType.lifecycleStart)
+            XCTAssertEqual(event.type, EventType.lifecycleStart)
         } else {
             XCTFail("Did not encounter start event as the first event!")
         }
         if case .serviceStopped(_, let event) = testEventHandler.capturedEvents.last! {
-            XCTAssertEqual(event.typeEnum, EventType.lifecycleStop)
+            XCTAssertEqual(event.type, EventType.lifecycleStop)
         } else {
             XCTFail("Did not encounter stop event as the second event!")
         }
@@ -130,7 +129,6 @@ class DataCapturingTests: XCTestCase {
      */
     func testStartPauseResumeStop_HappyPath() throws {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
         try oocut.start(inMode: defaultMode)
         XCTAssertTrue(oocut.isRunning)
@@ -151,14 +149,12 @@ class DataCapturingTests: XCTestCase {
         XCTAssertFalse(oocut.isPaused)
 
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
-        guard let events = measurement.events?.array as? [Event] else {
-            fatalError()
-        }
+        let events = measurement.events
         XCTAssertEqual(events.count, 5)
-        XCTAssertEqual(events[1].typeEnum, .lifecycleStart)
-        XCTAssertEqual(events[2].typeEnum, .lifecyclePause)
-        XCTAssertEqual(events[3].typeEnum, .lifecycleResume)
-        XCTAssertEqual(events[4].typeEnum, .lifecycleStop)
+        XCTAssertEqual(events[1].type, .lifecycleStart)
+        XCTAssertEqual(events[2].type, .lifecyclePause)
+        XCTAssertEqual(events[3].type, .lifecycleResume)
+        XCTAssertEqual(events[4].type, .lifecycleStop)
 
         XCTAssertTrue(testEventHandler.capturedEvents.count >= 4)
         var startEventFound = false
@@ -168,25 +164,25 @@ class DataCapturingTests: XCTestCase {
         for event in testEventHandler.capturedEvents {
             switch event {
             case .serviceStarted(measurement: measurementIdentifier, let startEvent):
-                XCTAssertEqual(startEvent.measurement?.identifier, measurementIdentifier)
+                XCTAssertEqual(startEvent.measurement.identifier, measurementIdentifier)
                 XCTAssertFalse(pauseEventFound)
                 XCTAssertFalse(resumeEventFound)
                 XCTAssertFalse(stopEventFound)
                 startEventFound = true
             case .servicePaused(measurement: measurementIdentifier, let pauseEvent):
-                XCTAssertEqual(pauseEvent.measurement?.identifier, measurementIdentifier)
+                XCTAssertEqual(pauseEvent.measurement.identifier, measurementIdentifier)
                 XCTAssertTrue(startEventFound)
                 XCTAssertFalse(resumeEventFound)
                 XCTAssertFalse(stopEventFound)
                 pauseEventFound = true
             case .serviceResumed(measurement: measurementIdentifier, let resumeEvent):
-                XCTAssertEqual(resumeEvent.measurement?.identifier, measurementIdentifier)
+                XCTAssertEqual(resumeEvent.measurement.identifier, measurementIdentifier)
                 XCTAssertTrue(startEventFound)
                 XCTAssertTrue(pauseEventFound)
                 XCTAssertFalse(stopEventFound)
                 resumeEventFound = true
             case .serviceStopped(measurement: measurementIdentifier, let stopEvent):
-                XCTAssertEqual(stopEvent.measurement?.identifier, measurementIdentifier)
+                XCTAssertEqual(stopEvent.measurement.identifier, measurementIdentifier)
                 XCTAssertTrue(startEventFound)
                 XCTAssertTrue(pauseEventFound)
                 XCTAssertTrue(resumeEventFound)
@@ -201,7 +197,6 @@ class DataCapturingTests: XCTestCase {
 
     func testStartPauseStop_HappyPath() throws {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         let preStartCountOfMeasurements = try persistenceLayer.countMeasurements()
 
         try oocut.start(inMode: defaultMode)
@@ -356,12 +351,11 @@ class DataCapturingTests: XCTestCase {
      */
     func testLifecyclePerformance() throws {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: defaultMode)
         oocut.currentMeasurement = measurement.identifier
 
         measure {
-            oocut.locationsCache = [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: 10_000, isValid: true)]
+            oocut.locationsCache = [LocationCacheEntry(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: Date(timeIntervalSince1970: 10_000), isValid: true)]
             oocut.sensorCapturer.accelerations = []
             for i in 0...99 {
                 oocut.sensorCapturer.accelerations.append(SensorValue(timestamp: Date(timeInterval: TimeInterval(Int64(i)), since: Date(timeIntervalSince1970: TimeInterval(10_000))), x: 1.0, y: 1.0, z: 1.0))
@@ -401,9 +395,8 @@ class DataCapturingTests: XCTestCase {
         // Assert
         XCTAssertEqual(updateCounter, 2)
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
-        guard let locationsCount = (try persistenceLayer.loadMeasurements()[0].tracks?.firstObject as? Track)?.locations?.count else {
+        guard let locationsCount = (try persistenceLayer.loadMeasurements()[0].tracks.first)?.locations.count else {
             fatalError("Unable to load created locations")
         }
         print(locationsCount)
@@ -413,7 +406,6 @@ class DataCapturingTests: XCTestCase {
     /// Tests that the distance calculation always contains the last segment of a capturing run.
     func testStartPauseResumeStop_DistanceCalculationContainsLastSegment() throws {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         try oocut.start(inMode: defaultMode)
         guard let currentMeasurementIdentifier = oocut.currentMeasurement else {
             fatalError()
@@ -474,7 +466,6 @@ class DataCapturingTests: XCTestCase {
 
         // Assert
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
         let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
         XCTAssertEqual(modalityChangeEvents.count, 2)
@@ -495,7 +486,6 @@ class DataCapturingTests: XCTestCase {
 
         // Assert
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
         let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
         XCTAssertEqual(modalityChangeEvents.count, 2)
@@ -517,7 +507,6 @@ class DataCapturingTests: XCTestCase {
 
         // Assert
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         let capturedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
         let modalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: capturedMeasurement)
         XCTAssertEqual(modalityChangeEvents.count, 2)
