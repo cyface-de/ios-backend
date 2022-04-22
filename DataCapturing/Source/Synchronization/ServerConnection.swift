@@ -234,7 +234,7 @@ public class ServerConnection {
 
         let locationCount = measurement.tracks.map({ track in track.locations.count}).reduce(0, {result, value in result+value})
         let locationCountData = String(locationCount).data(using: String.Encoding.utf8)!
-        let tracks = measurement.tracks
+        let tracks = measurement.tracks.filter({ track in !track.locations.isEmpty})
 
         if !tracks.isEmpty {
             let startLocationRaw = tracks[0].locations.first
