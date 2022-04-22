@@ -42,7 +42,7 @@ class EventItemView: UITableViewCell {
 class EventItemViewModel {
     let model: EventItemModel
 
-    init(measurement: MeasurementMO, coreDataStack: CoreDataManager, position: Int) {
+    init(measurement: DataCapturing.Measurement, coreDataStack: CoreDataManager, position: Int) {
         self.model = EventItemModel(measurement: measurement, coreDataStack: coreDataStack, position: position)
     }
 
@@ -61,7 +61,7 @@ struct EventItemModel {
 
     let timestamp: Date
 
-    init(measurement: MeasurementMO, coreDataStack: CoreDataManager, position: Int) {
+    init(measurement: DataCapturing.Measurement, coreDataStack: CoreDataManager, position: Int) {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
 
         do {

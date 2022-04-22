@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-public struct Measurement {
+public struct Measurement: Hashable, Equatable {
     var objectId: NSManagedObjectID?
     public var accelerationsCount: Int32
     public var rotationsCount: Int32
@@ -52,5 +52,13 @@ public struct Measurement {
         self.trackLength = trackLength
         self.events = events
         self.tracks = tracks
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(identifier)
+    }
+
+    public static func ==(lhs: Measurement, rhs: Measurement) -> Bool {
+        return lhs.identifier == rhs.identifier
     }
 }

@@ -75,13 +75,12 @@ class MapViewController: UIViewController {
                 }
 
                 let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
-                persistenceLayer.context = persistenceLayer.makeContext()
                 do {
                     let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
                     let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
-                    let eventToChange = events[indexPathForSelectedRow.row]
+                    var eventToChange = events[indexPathForSelectedRow.row]
                     eventToChange.value = modality.dbValue
-                    persistenceLayer.context?.saveRecursively()
+                    persistenceLayer.save(measurement: measurement)
                 } catch {
                     fatalError("Unable to load data from database")
                 }

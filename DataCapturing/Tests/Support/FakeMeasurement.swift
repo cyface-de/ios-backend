@@ -71,8 +71,9 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
     private func geoLocations(countOfGeoLocations: Int) throws {
         var locations = [LocationCacheEntry]()
 
-        for _ in 0..<countOfGeoLocations {
-            let location = LocationCacheEntry(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: Date(), isValid: true)
+        let startTime = Date()
+        for i in 0..<countOfGeoLocations {
+            let location = LocationCacheEntry(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: startTime.addingTimeInterval(Double(i)), isValid: true)
 
             locations.append(location)
         }

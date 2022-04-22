@@ -458,9 +458,10 @@ public class PersistenceLayer {
                 throw PersistenceError.inconsistentState
             }
 
-            let measurementMO = try context.existingObject(with: measurementObjectId)
             let request: NSFetchRequest = EventMO.fetchRequest()
-            request.predicate = NSPredicate(format: "type == %@ AND measurement == %@", type.rawValue, measurementMO)
+            let typePredicate = NSPredicate(format: "type == %d", type.rawValue)
+            let parentPredicate = NSPredicate(format: "measurement == %@", measurementObjectId)
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [typePredicate, parentPredicate])
             request.sortDescriptors = [NSSortDescriptor(key: "time", ascending: true)]
 
             var ret = [Event]()
