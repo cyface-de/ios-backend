@@ -153,10 +153,7 @@ class ServerConnectionTest: XCTestCase {
         let serverConnection = ServerConnection(apiURL: url, authenticator: authenticator, onManager: coreDataStack)
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        var measurement = try persistenceLayer.createMeasurement(at: 10_000, inMode: "BICYCLE")
-        try persistenceLayer.appendNewTrack(to: &measurement)
-        try persistenceLayer.save(locations: [TestFixture.randomLocation(), TestFixture.randomLocation()], in: &measurement)
-        try persistenceLayer.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &measurement)
+        let measurement = try FakeMeasurementImpl.fakeMeasurement(persistenceLayer: persistenceLayer).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 2).addAccelerations(countOfAccelerations: 2).build()
 
         let measurementIdentifier = measurement.identifier
         let promise = expectation(description: "Expect call to return 201.")

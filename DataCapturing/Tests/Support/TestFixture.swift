@@ -25,8 +25,8 @@ struct TestFixture {
         return LocationCacheEntry(latitude: latitude, longitude: longitude, accuracy: accuracy, speed: speed, timestamp: timestamp, isValid: isValid)
     }
 
-    static func randomLocation() -> LocationCacheEntry {
-        return LocationCacheEntry(latitude: Double.random(in: -90.0 ... 90.0), longitude: Double.random(in: 0.0 ..< 360.0), accuracy: Double.random(in: 2.0 ... 15.0), speed: Double.random(in: 0.0 ... 10.0), timestamp: Date(), isValid: true)
+    static func randomLocation(timestamp: Date = Date()) -> LocationCacheEntry {
+        return LocationCacheEntry(latitude: Double.random(in: -90.0 ... 90.0), longitude: Double.random(in: 0.0 ..< 360.0), accuracy: Double.random(in: 2.0 ... 15.0), speed: Double.random(in: 0.0 ... 10.0), timestamp: timestamp, isValid: true)
     }
 
     /**
