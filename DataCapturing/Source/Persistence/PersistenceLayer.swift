@@ -285,7 +285,7 @@ public class PersistenceLayer {
             var distance = 0.0
 
             try locations.forEach { location in
-                let geoLocation = try GeoLocation(
+                var geoLocation = try GeoLocation(
                     latitude: location.latitude,
                     longitude: location.longitude,
                     accuracy: location.accuracy,

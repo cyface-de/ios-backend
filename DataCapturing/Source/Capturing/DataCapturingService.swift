@@ -359,7 +359,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
         - `PersistenceError` If there is no current measurement.
         - Some unspecified errors from within CoreData.
      */
-    private func startCapturing(savingEvery time: TimeInterval, for eventType: EventType) throws -> Event? {
+    func startCapturing(savingEvery time: TimeInterval, for eventType: EventType) throws -> Event? {
         // Preconditions
         guard !isRunning else {
             os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: log, type: .info)
@@ -413,7 +413,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
     /**
      An internal helper method for stopping the capturing process.
      */
-    private func stopCapturing() {
+    func stopCapturing() {
         sensorCapturer.stop()
         DispatchQueue.main.async {
             self.coreLocationManager.stopUpdatingLocation()
@@ -432,7 +432,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
      This method saves all data from `accelerationsCache` and from `locationsCache` to the underlying data storage (database and file system) and cleans both caches.
      */
-    private func saveCapturedData() {
+    func saveCapturedData() {
         do {
             guard let currentMeasurement = self.currentMeasurement else {
                 os_log("No current measurement to save the location to! Data capturing impossible.", log: log, type: .error)
@@ -476,8 +476,13 @@ Starting data capturing on paused service. Finishing paused measurements and sta
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         var currentMeasurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
         currentMeasurement.synchronizable = true
-        let event = try persistenceLayer.createEvent(of: .lifecycleStop, parent: &currentMeasurement)
-        try persistenceLayer.save(measurement: currentMeasurement)
+        currentMeasurement.events.append(Event(time: Date(), type: .lifecycleStop, value: nil, measurement: currentMeasurement))
+        let savedMeasurement = try persistenceLayer.save(measurement: currentMeasurement)
+
+        guard let event = savedMeasurement.events.last else {
+            fatalError()
+        }
+
         return event
     }
 
