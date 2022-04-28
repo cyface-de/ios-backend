@@ -359,7 +359,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
         - `PersistenceError` If there is no current measurement.
         - Some unspecified errors from within CoreData.
      */
-    func startCapturing(savingEvery time: TimeInterval, for eventType: EventType) throws -> Event? {
+    private func startCapturing(savingEvery time: TimeInterval, for eventType: EventType) throws -> Event? {
         // Preconditions
         guard !isRunning else {
             os_log("DataCapturingService.startCapturing(): Trying to start DataCapturingService which is already running!", log: log, type: .info)
@@ -413,7 +413,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
     /**
      An internal helper method for stopping the capturing process.
      */
-    func stopCapturing() {
+    private func stopCapturing() {
         sensorCapturer.stop()
         DispatchQueue.main.async {
             self.coreLocationManager.stopUpdatingLocation()
@@ -432,7 +432,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
      This method saves all data from `accelerationsCache` and from `locationsCache` to the underlying data storage (database and file system) and cleans both caches.
      */
-    func saveCapturedData() {
+    private func saveCapturedData() {
         do {
             guard let currentMeasurement = self.currentMeasurement else {
                 os_log("No current measurement to save the location to! Data capturing impossible.", log: log, type: .error)
@@ -477,6 +477,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
         var currentMeasurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
         currentMeasurement.synchronizable = true
         let event = try persistenceLayer.createEvent(of: .lifecycleStop, parent: &currentMeasurement)
+        try persistenceLayer.save(measurement: currentMeasurement)
         return event
     }
 
@@ -581,13 +582,14 @@ public struct LocationCacheEntry: Equatable, Hashable, CustomStringConvertible {
     }
 
     func storeAsGeoLocation(to parent: inout Track) throws {
-        _ = try GeoLocation(
+        let location = try GeoLocation(
             latitude: latitude,
             longitude: longitude,
             accuracy: accuracy,
             speed: speed,
             timestamp: DataCapturingService.convertToUtcTimestamp(date: timestamp),
             isValid: isValid,
-            parent: &parent)
+            parent: parent)
+        parent.locations.append(location)
     }
 }

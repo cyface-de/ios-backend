@@ -62,11 +62,12 @@ public struct GeoLocation: CustomStringConvertible {
             speed: managedObject.speed,
             timestamp: managedObject.timestamp,
             isValid: managedObject.isPartOfCleanedTrack,
-            parent: &parent)
+            parent: parent)
         self.objectId = managedObject.objectID
     }
 
-    public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: Int64, isValid: Bool = true, parent: inout Track) throws {
+    // TODO parent sollte sich selbst darum kümmern, dass eine Location hinzugefügt wird.
+    public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: Int64, isValid: Bool = true, parent: Track) throws {
         self.latitude = latitude
         self.longitude = longitude
         self.accuracy = accuracy
@@ -74,6 +75,5 @@ public struct GeoLocation: CustomStringConvertible {
         self.timestamp = timestamp
         self.isValid = isValid
         self.track = parent
-        try parent.append(location: self)
     }
 }

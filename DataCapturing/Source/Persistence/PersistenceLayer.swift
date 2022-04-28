@@ -266,16 +266,17 @@ public class PersistenceLayer {
             guard let measurementMO = try load(measurementIdentifiedBy: measurement.identifier, from: context) else {
                 throw PersistenceError.measurementNotLoadable(measurement.identifier)
             }
-            guard let trackMO = measurementMO.tracks?.lastObject as? TrackMO else {
-                throw PersistenceError.dataNotLoadable(measurement: measurement.identifier)
-            }
+
             guard var track = measurement.tracks.last else {
                 throw PersistenceError.inconsistentState
+            }
+            guard let trackObjectId = track.objectId else {
+                throw PersistenceError.dataNotLoadable(measurement: measurement.identifier)
             }
 
             let geoLocationFetchRequest = GeoLocationMO.fetchRequest()
             geoLocationFetchRequest.fetchLimit = 1
-            let maxTimestampInTrackPredicate = NSPredicate(format: "track==%@ AND isPartOfCleanedTrack==%@", trackMO, NSNumber(value: true))
+            let maxTimestampInTrackPredicate = NSPredicate(format: "track==%@ AND isPartOfCleanedTrack==%@", trackObjectId, NSNumber(value: true))
             geoLocationFetchRequest.predicate = maxTimestampInTrackPredicate
             geoLocationFetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
             geoLocationFetchRequest.resultType = .managedObjectResultType
@@ -291,8 +292,9 @@ public class PersistenceLayer {
                     speed: location.speed,
                     timestamp: Int64(location.timestamp.timeIntervalSince1970 * 1000.0),
                     isValid: location.isValid,
-                    parent: &track)
-                let dbLocation = GeoLocationMO(location: geoLocation, parent: trackMO, context: context)
+                    parent: track)
+                track.locations.append(geoLocation)
+                let dbLocation = try GeoLocationMO(location: &geoLocation, context: context)
 
                 if dbLocation.isPartOfCleanedTrack {
                     if let lastCapturedLocation = lastCapturedLocation {
@@ -360,6 +362,8 @@ public class PersistenceLayer {
             guard let managedObjectMeasurement = try context.existingObject(with: objectId) as? MeasurementMO else {
                 throw PersistenceError.dataNotLoadable(measurement: measurement.identifier)
             }
+            try managedObjectMeasurement.update(from: measurement)
+            try context.save()
 
             return try Measurement(managedObject: managedObjectMeasurement)
         }
@@ -611,23 +615,23 @@ public class PersistenceLayer {
             track.locations.forEach { location in closure(track, location) }
         }
     }
+}
 
-    /**
-     A structure for all the errors thrown by the `PersistenceLayer`.
+/**
+ A structure for all the errors thrown by the `PersistenceLayer`.
 
-     - Author: Klemens Muthmann
-     - Version: 3.0.0
-     - Since: 2.3.0
-     */
-    enum PersistenceError: Error {
-        /// If a measurement was not loaded successfully.
-        case measurementNotLoadable(Int64)
-        /// If measurements could not be loaded in bulk.
-        case measurementsNotLoadable
-        /// If some data belonging to a measurement could not be loaded.
-        case dataNotLoadable(measurement: Int64)
-        /// If it is impossible to load the last generated identifier. This can only happen if the system settings have been tempered with.
-        case inconsistentState
-        case unsynchronizedMeasurement(identifier: Int64)
-    }
+ - Author: Klemens Muthmann
+ - Version: 3.0.0
+ - Since: 2.3.0
+ */
+public enum PersistenceError: Error {
+    /// If a measurement was not loaded successfully.
+    case measurementNotLoadable(Int64)
+    /// If measurements could not be loaded in bulk.
+    case measurementsNotLoadable
+    /// If some data belonging to a measurement could not be loaded.
+    case dataNotLoadable(measurement: Int64)
+    /// If it is impossible to load the last generated identifier. This can only happen if the system settings have been tempered with.
+    case inconsistentState
+    case unsynchronizedMeasurement(identifier: Int64)
 }
