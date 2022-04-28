@@ -55,7 +55,14 @@ public struct GeoLocation: CustomStringConvertible {
     }
 
     init(managedObject: GeoLocationMO, parent: inout Track) throws {
-        try self.init(latitude: managedObject.lat, longitude: managedObject.lon, accuracy: managedObject.accuracy, speed: managedObject.speed, timestamp: managedObject.timestamp, isValid: managedObject.isPartOfCleanedTrack, parent: &parent)
+        try self.init(
+            latitude: managedObject.lat,
+            longitude: managedObject.lon,
+            accuracy: managedObject.accuracy,
+            speed: managedObject.speed,
+            timestamp: managedObject.timestamp,
+            isValid: managedObject.isPartOfCleanedTrack,
+            parent: &parent)
         self.objectId = managedObject.objectID
     }
 

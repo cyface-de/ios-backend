@@ -80,14 +80,12 @@ class DataCapturingTests: XCTestCase {
         oocut = nil
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         do {
-            // Handle this in its own thread to avoid race conditions.
-            //try syncQueue.sync {
-                try persistenceLayer.delete()
-            //}
+            try persistenceLayer.delete()
         } catch {
             fatalError("\(error)")
         }
         coreDataStack = nil
+        testEventHandler = nil
         super.tearDown()
     }
 
@@ -98,20 +96,40 @@ class DataCapturingTests: XCTestCase {
         - `DataCapturingError.isPaused` if the service was paused and thus starting or stopping it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
      */
     func testStartStop_HappyPath() throws {
+        let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+
+        // Act on Start
         try oocut.start(inMode: defaultMode)
+
+        // Assert after start
         XCTAssertTrue(oocut.isRunning)
         XCTAssertFalse(oocut.isPaused)
-        try oocut.stop()
-        XCTAssertFalse(oocut.isRunning)
-        XCTAssertFalse(oocut.isPaused)
-        XCTAssert(testEventHandler.capturedEvents.count >= 2)
-        if case .serviceStarted(_, let event) = testEventHandler.capturedEvents.first! {
+        if case .serviceStarted(let measurementIdentifier, let event) = testEventHandler.capturedEvents.first! {
             XCTAssertEqual(event.type, EventType.lifecycleStart)
+            let measurementIdentifier = try XCTUnwrap(measurementIdentifier)
+            let runningMeasurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
+            XCTAssertFalse(runningMeasurement.synchronized)
+            XCTAssertFalse(runningMeasurement.synchronizable)
+            XCTAssertEqual(runningMeasurement.tracks.count, 1)
         } else {
             XCTFail("Did not encounter start event as the first event!")
         }
-        if case .serviceStopped(_, let event) = testEventHandler.capturedEvents.last! {
+        XCTAssertEqual(testEventHandler.capturedEvents.count, 1)
+
+        // Act on Stop
+        try oocut.stop()
+        // Assert after stop
+        XCTAssertFalse(oocut.isRunning)
+        XCTAssertFalse(oocut.isPaused)
+        // There might be a geoLocationFixAcquiredEvent here, but that is not sure. Therefore checking for greater or equal.
+        XCTAssertGreaterThanOrEqual(testEventHandler.capturedEvents.count, 2)
+        if case .serviceStopped(let measurementIdentifier, let event) = testEventHandler.capturedEvents.last! {
             XCTAssertEqual(event.type, EventType.lifecycleStop)
+            let measurementIdentifier = try XCTUnwrap(measurementIdentifier)
+            let stoppedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
+            XCTAssertTrue(stoppedMeasurement.synchronizable)
+            XCTAssertFalse(stoppedMeasurement.synchronized)
+            XCTAssertEqual(stoppedMeasurement.tracks.count, 1)
         } else {
             XCTFail("Did not encounter stop event as the second event!")
         }
@@ -193,6 +211,19 @@ class DataCapturingTests: XCTestCase {
             }
         }
         XCTAssertTrue(stopEventFound)
+    }
+
+    func testStartPauseResumeStopResumeStop() throws {
+        try oocut.start(inMode: defaultMode)
+        try oocut.pause()
+        try oocut.resume()
+        try oocut.stop()
+        do {
+            try self.oocut.resume()
+        } catch {
+            XCTAssertNotNil(error as? DataCapturingError)
+        }
+        try oocut.stop()
     }
 
     func testStartPauseStop_HappyPath() throws {

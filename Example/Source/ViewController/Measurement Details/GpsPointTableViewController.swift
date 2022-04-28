@@ -78,21 +78,9 @@ class GpsPointTableViewController: UIViewController, UITableViewDataSource, UITa
 
             do {
                 let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-                persistenceLayer.context = persistenceLayer.makeContext()
-
-                var locations = [GeoLocation]()
 
                 let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
-                PersistenceLayer.traverseTracks(ofMeasurement: measurement) {_, location in
-                    locations.append(GeoLocation(
-                        latitude: location.lat,
-                        longitude: location.lon,
-                        accuracy: location.accuracy,
-                        speed: location.speed,
-                        timestamp: location.timestamp,
-                        isValid: true))
-                }
-                self.locations = locations
+                self.locations = measurement.tracks.flatMap({track in track.locations})
             } catch let error {
                 os_log("Unable to load geo locations! Error %{public}@",
                        log: GpsPointTableViewController.log,

@@ -80,7 +80,8 @@ class MapViewController: UIViewController {
                     let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
                     var eventToChange = events[indexPathForSelectedRow.row]
                     eventToChange.value = modality.dbValue
-                    persistenceLayer.save(measurement: measurement)
+                    // TODO: This will not work, since the event inside the measurement is not updated.
+                    _ = try persistenceLayer.save(measurement: measurement)
                 } catch {
                     fatalError("Unable to load data from database")
                 }
@@ -109,11 +110,10 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
         do {
-            let measurementMO = try persistenceLayer.load(measurementIdentifiedBy: measurement)
-            let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurementMO)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
+            let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
 
             return events.count
         } catch {
@@ -133,10 +133,9 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         do {
-            let measurementMO = try persistenceLayer.load(measurementIdentifiedBy: measurement)
-            cell.viewModel = EventItemViewModel(measurement: measurementMO, coreDataStack: coreDataStack, position: indexPath.row)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
+            cell.viewModel = EventItemViewModel(measurement: measurement, coreDataStack: coreDataStack, position: indexPath.row)
         } catch {
             fatalError("Unable to initilize view model for event item cell view!")
         }
@@ -175,10 +174,9 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
 
         // TODO: This should probably happen in a model
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
         let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
         let event = events[index.row]
-        persistenceLayer.delete(event: event)
+        try persistenceLayer.delete(event: event)
     }
 }

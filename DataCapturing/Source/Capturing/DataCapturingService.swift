@@ -581,6 +581,13 @@ public struct LocationCacheEntry: Equatable, Hashable, CustomStringConvertible {
     }
 
     func storeAsGeoLocation(to parent: inout Track) throws {
-        _ = try GeoLocation(latitude: latitude, longitude: longitude, accuracy: accuracy, speed: speed, timestamp: DataCapturingService.convertToUtcTimestamp(date: timestamp), isValid: isValid, parent: &parent)
+        _ = try GeoLocation(
+            latitude: latitude,
+            longitude: longitude,
+            accuracy: accuracy,
+            speed: speed,
+            timestamp: DataCapturingService.convertToUtcTimestamp(date: timestamp),
+            isValid: isValid,
+            parent: &parent)
     }
 }

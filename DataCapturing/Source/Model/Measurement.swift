@@ -22,7 +22,15 @@ public struct Measurement: Hashable, Equatable {
     public var tracks: [Track]
 
     init(managedObject: MeasurementMO) throws {
-        self.init(identifier: managedObject.identifier, synchronizable: managedObject.synchronizable, synchronized: managedObject.synchronized, accelerationsCount: managedObject.accelerationsCount, rotationsCount: managedObject.rotationsCount, directionsCount: managedObject.directionsCount, timestamp: managedObject.timestamp, trackLength: managedObject.trackLength)
+        self.init(
+            identifier: managedObject.identifier,
+            synchronizable: managedObject.synchronizable,
+            synchronized: managedObject.synchronized,
+            accelerationsCount: managedObject.accelerationsCount,
+            rotationsCount: managedObject.rotationsCount,
+            directionsCount: managedObject.directionsCount,
+            timestamp: managedObject.timestamp,
+            trackLength: managedObject.trackLength)
         self.objectId = managedObject.objectID
 
         if let eventMOs = managedObject.events?.array as? [EventMO] {

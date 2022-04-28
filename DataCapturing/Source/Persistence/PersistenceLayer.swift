@@ -134,11 +134,11 @@ public class PersistenceLayer {
         - of: The type of the logged `Event`.
         - withValue: An optional value providing further information about the event
      */
-    public func createEvent(of type: EventType, withValue: String? = nil, parent: inout Measurement) throws -> Event {
+    public func createEvent(of type: EventType, withValue: String? = nil, timestamp: Date = Date(), parent: inout Measurement) throws -> Event {
         return try manager.wrapInContextReturn { context in
             let eventMO = EventMO(context: context)
             eventMO.typeEnum = type
-            eventMO.time = NSDate(timeIntervalSince1970: Double(DataCapturingService.currentTimeInMillisSince1970()) / 1000.0)
+            eventMO.time = timestamp as NSDate
             eventMO.value = withValue
             guard let measurementMO = try load(measurementIdentifiedBy: parent.identifier, from: context) else {
                 throw PersistenceError.inconsistentState
@@ -284,7 +284,14 @@ public class PersistenceLayer {
             var distance = 0.0
 
             try locations.forEach { location in
-                let geoLocation = try GeoLocation(latitude: location.latitude, longitude: location.longitude, accuracy: location.accuracy, speed: location.speed, timestamp: Int64(location.timestamp.timeIntervalSince1970 * 1000.0), isValid: location.isValid, parent: &track)
+                let geoLocation = try GeoLocation(
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    accuracy: location.accuracy,
+                    speed: location.speed,
+                    timestamp: Int64(location.timestamp.timeIntervalSince1970 * 1000.0),
+                    isValid: location.isValid,
+                    parent: &track)
                 let dbLocation = GeoLocationMO(location: geoLocation, parent: trackMO, context: context)
 
                 if dbLocation.isPartOfCleanedTrack {

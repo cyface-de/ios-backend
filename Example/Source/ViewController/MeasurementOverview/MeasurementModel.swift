@@ -16,9 +16,9 @@ import DataCapturing
  */
 class MeasurementModel {
     /// Internal storage for the current measurement database entity
-    private var internalMeasurement: MeasurementMO?
+    private var internalMeasurement: DataCapturing.Measurement?
     /// The database entity representing the current measurement
-    var measurement: MeasurementMO? {
+    var measurement: DataCapturing.Measurement? {
         get {
             if internalMeasurement==nil {
                 return nil
@@ -27,12 +27,13 @@ class MeasurementModel {
                     fatalError("Unable to access current measurement!")
                 }
 
-                if internalMeasurement.isFault {
-                    let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-                    persistenceLayer.context.refresh(internalMeasurement, mergeChanges: true)
+                let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+                do {
+                    self.internalMeasurement = try persistenceLayer.load(measurementIdentifiedBy: internalMeasurement.identifier)
+                    return internalMeasurement
+                } catch {
+                    fatalError("Unable to load measurement")
                 }
-
-                return internalMeasurement
             }
         }
         set {
@@ -55,11 +56,11 @@ class MeasurementModel {
     }
     /// The longitude of the most recent captured geo location
     var lastLon: Double? {
-        return mostRecentGeoLocation?.lon
+        return mostRecentGeoLocation?.longitude
     }
     /// The latitude of the most recent captured geo location
     var lastLat: Double? {
-        return mostRecentGeoLocation?.lat
+        return mostRecentGeoLocation?.latitude
     }
     /// The current modality context of the active measurement
     var context: Modality? {
@@ -78,12 +79,12 @@ class MeasurementModel {
         return measurement?.timestamp
     }
     /// The most recent geo location captured by the active measurement
-    var mostRecentGeoLocation: GeoLocationMO? {
-        guard let mostRecentTrack = measurement?.tracks?.array.last as? Track else {
+    var mostRecentGeoLocation: GeoLocation? {
+        guard let mostRecentTrack = measurement?.tracks.last else {
             fatalError()
         }
 
-        guard let mostRecentGeoLocation = mostRecentTrack.locations?.array.last as? GeoLocationMO else {
+        guard let mostRecentGeoLocation = mostRecentTrack.locations.last else {
             return nil
         }
 
@@ -125,7 +126,7 @@ class MeasurementModel {
         - coreDataStack: The stack used to access the `CoreData` stack to load the measurement data
         - measurement: The database object this model is based on
      */
-    public convenience init(_ coreDataStack: CoreDataManager, measurement: MeasurementMO) {
+    public convenience init(_ coreDataStack: CoreDataManager, measurement: DataCapturing.Measurement) {
         self.init(coreDataStack)
         self.measurement = measurement
     }

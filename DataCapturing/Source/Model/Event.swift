@@ -8,11 +8,11 @@
 import Foundation
 import CoreData
 
-public struct Event {
+public struct Event: CustomStringConvertible {
     var objectId: NSManagedObjectID?
     public let time: Date
     public let type: EventType
-    public let value: String?
+    public var value: String?
     public let measurement: Measurement
 
     init(managedObject: EventMO, parent: Measurement) {
@@ -28,5 +28,9 @@ public struct Event {
         self.type = type
         self.value = value
         self.measurement = measurement
+    }
+
+    public var description: String {
+        "Event(type: \(type), time: \(time), value: \(value), measurement: \(measurement.identifier))"
     }
 }
