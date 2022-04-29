@@ -256,6 +256,7 @@ class PersistenceTests: XCTestCase {
 
     /// Tests that loading a cleaned track returns only the valid cleaned locations.
     func testLoadCleanedTrack() throws {
+        // Arrange
         var measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: defaultMode)
 
         try oocut.appendNewTrack(to: &measurement)
@@ -264,7 +265,11 @@ class PersistenceTests: XCTestCase {
         guard var track = measurement.tracks.last else {
             fatalError()
         }
+
+        // Act
         let cleanTrack = try oocut.loadClean(track: &track)
+
+        // Assert
         XCTAssertEqual(cleanTrack.count, 2)
     }
 
@@ -272,12 +277,15 @@ class PersistenceTests: XCTestCase {
      Tests the creation, storage and retrieval of `Event` objects in `CoreData`.
     */
     func testEventCreation_HappyPath() throws {
+        // Arrange
         var measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: defaultMode)
 
+        // Act
         let lifecycleStartEvent = try oocut.createEvent(of: .lifecycleStart, parent: &measurement)
         sleep(1)
         let lifecycleStopEvent = try oocut.createEvent(of: .lifecycleStop, parent: &measurement)
 
+        // Assert
         let loadedMeasurement = try oocut.load(measurementIdentifiedBy: measurement.identifier)
         let loadedEvents = loadedMeasurement.events
         XCTAssertEqual(loadedEvents[0].type, EventType.modalityTypeChange)
@@ -288,13 +296,33 @@ class PersistenceTests: XCTestCase {
     }
 
     func testLoadEvent_HappyPath() throws {
+        // Act
         let events = try oocut.loadEvents(typed: .modalityTypeChange, forMeasurement: fixture)
 
+        // Assert
         XCTAssertEqual(events.count, 1)
         XCTAssertNotNil(events[0].objectId)
         XCTAssertEqual(events[0].type, .modalityTypeChange)
         XCTAssertEqual(events[0].measurement, fixture)
         XCTAssertEqual(events[0].value, "BICYCLE")
         XCTAssertTrue(events[0].time.timeIntervalSinceNow<0)
+    }
+
+    /// Assure that saving geo locations to a measurement actually stores them in the database.
+    func testSaveLocation_HappyPath() throws {
+        // Arrange
+        let currentDate = Date()
+        let locations = [TestFixture.randomLocation(timestamp: currentDate), TestFixture.randomLocation(timestamp: currentDate.addingTimeInterval(10.0)), TestFixture.randomLocation(timestamp: currentDate.addingTimeInterval(20))]
+
+        // Act
+        try oocut.save(locations: locations, in: &fixture)
+
+        // Assert
+        let loadedFixture = try oocut.load(measurementIdentifiedBy: fixture.identifier)
+        let loadedGeoLocations = try XCTUnwrap(loadedFixture.tracks.first?.locations)
+        XCTAssertEqual(loadedGeoLocations.count, 5)
+        let fixtureGeoLocations = try XCTUnwrap(fixture.tracks.first?.locations)
+        XCTAssertEqual(fixtureGeoLocations.count, 5)
+
     }
 }

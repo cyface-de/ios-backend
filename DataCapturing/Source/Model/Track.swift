@@ -8,18 +8,18 @@
 import Foundation
 import CoreData
 
-public struct Track {
+public class Track {
     var objectId: NSManagedObjectID?
     public var locations: [GeoLocation]
     let measurement: Measurement
 
-    init(managedObject: TrackMO, parent: Measurement) throws {
+    convenience init(managedObject: TrackMO, parent: Measurement) throws {
         self.init(parent: parent)
         self.objectId = managedObject.objectID
 
         if let geoLocationMOs = managedObject.locations?.array as? [GeoLocationMO] {
             for geoLocationMO in geoLocationMOs {
-                _ = try GeoLocation(managedObject: geoLocationMO, parent: &self)
+                try append(location: try GeoLocation(managedObject: geoLocationMO, parent: self))
             }
         }
     }
@@ -29,7 +29,7 @@ public struct Track {
         self.measurement = parent
     }
 
-    mutating func append(location: GeoLocation) throws {
+    func append(location: GeoLocation) throws {
         guard (locations.last?.timestamp ?? 0) < location.timestamp else {
             throw InconsistentData.locationOrderViolated
         }

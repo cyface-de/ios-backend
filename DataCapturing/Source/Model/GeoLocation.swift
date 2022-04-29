@@ -32,7 +32,7 @@ import CoreData
  - Version: 1.1.0
  - Since: 1.0.0
  */
-public struct GeoLocation: CustomStringConvertible {
+public class GeoLocation: CustomStringConvertible {
 
     // MARK: - Properties
     var objectId: NSManagedObjectID?
@@ -54,7 +54,7 @@ public struct GeoLocation: CustomStringConvertible {
         return "GeoLocation (latitude: \(latitude), longitude: \(longitude), accuracy: \(accuracy), speed: \(speed), timestamp: \(timestamp))"
     }
 
-    init(managedObject: GeoLocationMO, parent: inout Track) throws {
+    convenience init(managedObject: GeoLocationMO, parent: Track) throws {
         try self.init(
             latitude: managedObject.lat,
             longitude: managedObject.lon,

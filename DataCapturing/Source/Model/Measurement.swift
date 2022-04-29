@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-public struct Measurement: Hashable, Equatable {
+public class Measurement: Hashable, Equatable {
     var objectId: NSManagedObjectID?
     public var accelerationsCount: Int32
     public var rotationsCount: Int32
@@ -21,7 +21,7 @@ public struct Measurement: Hashable, Equatable {
     public var events: [Event]
     public var tracks: [Track]
 
-    init(managedObject: MeasurementMO) throws {
+    convenience init(managedObject: MeasurementMO) throws {
         self.init(
             identifier: managedObject.identifier,
             synchronizable: managedObject.synchronizable,

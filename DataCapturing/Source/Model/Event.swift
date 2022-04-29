@@ -8,14 +8,14 @@
 import Foundation
 import CoreData
 
-public struct Event: CustomStringConvertible {
+public class Event: CustomStringConvertible {
     var objectId: NSManagedObjectID?
     public let time: Date
     public let type: EventType
     public var value: String?
     public let measurement: Measurement
 
-    init(managedObject: EventMO, parent: Measurement) {
+    convenience init(managedObject: EventMO, parent: Measurement) {
         guard let managedObjectTimeAsDate = managedObject.time as? Date else {
             fatalError()
         }

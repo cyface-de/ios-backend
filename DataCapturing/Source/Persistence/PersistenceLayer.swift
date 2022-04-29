@@ -267,11 +267,11 @@ public class PersistenceLayer {
                 throw PersistenceError.measurementNotLoadable(measurement.identifier)
             }
 
-            guard var track = measurement.tracks.last else {
+            guard let track = measurement.tracks.last else {
                 throw PersistenceError.inconsistentState
             }
             guard let trackObjectId = track.objectId else {
-                throw PersistenceError.dataNotLoadable(measurement: measurement.identifier)
+                throw PersistenceError.nonPersistentTrackEncountered(track, measurement)
             }
 
             let geoLocationFetchRequest = GeoLocationMO.fetchRequest()
@@ -284,6 +284,10 @@ public class PersistenceLayer {
             var lastCapturedLocation = capturedLocations.first
             var distance = 0.0
 
+            guard let dbTrack = try context.existingObject(with: trackObjectId) as? TrackMO else {
+                throw PersistenceError.trackNotLoadable(track, measurement)
+            }
+
             try locations.forEach { location in
                 var geoLocation = try GeoLocation(
                     latitude: location.latitude,
@@ -295,6 +299,7 @@ public class PersistenceLayer {
                     parent: track)
                 track.locations.append(geoLocation)
                 let dbLocation = try GeoLocationMO(location: &geoLocation, context: context)
+                dbTrack.addToLocations(dbLocation)
 
                 if dbLocation.isPartOfCleanedTrack {
                     if let lastCapturedLocation = lastCapturedLocation {
@@ -427,7 +432,7 @@ public class PersistenceLayer {
 
             var ret = [GeoLocation]()
             for fetchResult in try context.fetch(request) {
-                let location = try GeoLocation(managedObject: fetchResult, parent: &track)
+                let location = try GeoLocation(managedObject: fetchResult, parent: track)
                 ret.append(location)
             }
             return ret
@@ -627,6 +632,10 @@ public class PersistenceLayer {
 public enum PersistenceError: Error {
     /// If a measurement was not loaded successfully.
     case measurementNotLoadable(Int64)
+    /// If a track from a measurement could not be loaded
+    case trackNotLoadable(Track, Measurement)
+    /// If a track was not persistent (i.e. had not valid objectId) at a place where only persistent tracks are valid
+    case nonPersistentTrackEncountered(Track, Measurement)
     /// If measurements could not be loaded in bulk.
     case measurementsNotLoadable
     /// If some data belonging to a measurement could not be loaded.
