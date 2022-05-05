@@ -18,23 +18,22 @@ import Foundation
 public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
     /// The fake measurement currently built.
     private var fakeMeasurement: DataCapturing.Measurement
-    /// The `PersistenceLayer` used to create the fake measurement.
-    private let persistenceLayer: PersistenceLayer
+    private var accelerations = [SensorValue]()
 
     /**
      Creates a new completely initialized object of this class. The constructor is private to make sure objects are only initialized via the static factory method.
 
-     - Parameters:
-        - persistenceLayer: The `PersistenceLayer` used to create the fake measurement
-        - measurement: The initial value for the faked measurement
+     - Parameters measurement: The initial value for the faked measurement
      */
-    private init(persistenceLayer: PersistenceLayer, measurement: DataCapturing.Measurement) {
-        self.persistenceLayer = persistenceLayer
+    private init(measurement: DataCapturing.Measurement) {
         self.fakeMeasurement = measurement
     }
 
-    public func build() throws -> DataCapturing.Measurement {
-        return try persistenceLayer.save(measurement: fakeMeasurement)
+    public func build(_ persistenceLayer: PersistenceLayer) throws -> DataCapturing.Measurement {
+        var synchronizedMeasurement = try persistenceLayer.save(measurement: fakeMeasurement)
+        try persistenceLayer.save(accelerations: accelerations, in: &synchronizedMeasurement)
+        return synchronizedMeasurement
+
     }
 
     public func addGeoLocationsAnd(countOfGeoLocations: Int) throws -> FakeTrack {
@@ -65,19 +64,19 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
      Internal method actually creating the fake test locations.
 
      - Parameter countOfGeoLocations: The amount of geo locations to create within the test measurement
-     - Throws:
-        - Some unspecified errors from within CoreData.
+     - Throws: `FakeMeasurementError.noTrackCreated` if trying to add a geo location without a proper track available. In such cases call `appendTrack` or `appendTrackAnd` before calling this method.
      */
     private func geoLocations(countOfGeoLocations: Int) throws {
-        var locations = [LocationCacheEntry]()
+        guard let track = fakeMeasurement.tracks.last else {
+            throw FakeMeasurementError.noTrackCreated
+        }
 
         let startTime = Date()
         for i in 0..<countOfGeoLocations {
-            let location = LocationCacheEntry(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: startTime.addingTimeInterval(Double(i)), isValid: true)
+            let location = try GeoLocation(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: DataCapturingService.convertToUtcTimestamp(date: startTime.addingTimeInterval(Double(i))), isValid: true, parent: track)
 
-            locations.append(location)
+            try track.append(location: location)
         }
-        try persistenceLayer.save(locations: locations, in: &fakeMeasurement)
     }
 
     /**
@@ -90,13 +89,10 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
      */
     private func accelerations(countOfAccelerations: Int) throws {
         fakeMeasurement.accelerationsCount = Int32(countOfAccelerations)
-        var accelerations = [SensorValue]()
 
         for _ in 0..<countOfAccelerations {
-            let acceleration = SensorValue(timestamp: Date(), x: Double.random(in: -10.0...10.0), y: Double.random(in: -10.0...10.0), z: Double.random(in: -10.0...10.0))
-            accelerations.append(acceleration)
+            accelerations.append(SensorValue(timestamp: Date(), x: Double.random(in: -10.0...10.0), y: Double.random(in: -10.0...10.0), z: Double.random(in: -10.0...10.0)))
         }
-        try persistenceLayer.save(accelerations: accelerations, in: &fakeMeasurement)
     }
 
     /**
@@ -107,23 +103,32 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
      - Throws:
         - Some unspecified errors from within CoreData.
      */
-    public static func fakeMeasurement(persistenceLayer: PersistenceLayer) throws -> FakeMeasurement {
+    public static func fakeMeasurement(identifier: Int64) throws -> FakeMeasurement {
 
-        var measurement = try persistenceLayer.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: "BICYCLE")
-        measurement.synchronized = false
-        measurement.trackLength = Double.random(in: 0..<10_000.0)
+        let currentTimestamp = DataCapturingService.currentTimeInMillisSince1970()
+        let measurement = DataCapturing.Measurement(
+            identifier: identifier,
+            synchronizable: false,
+            synchronized: false,
+            accelerationsCount: 0,
+            rotationsCount: 0,
+            directionsCount: 0,
+            timestamp: currentTimestamp,
+            trackLength: Double.random(in: 0..<10_000.0),
+            events: [], tracks: [])
+        measurement.append(event: Event(time: Date(timeIntervalSince1970: Double(currentTimestamp)/1_000.0), type: .modalityTypeChange, value: "BICYCLE", measurement: measurement))
 
-        let ret = FakeMeasurementImpl(persistenceLayer: persistenceLayer, measurement: measurement)
+        let ret = FakeMeasurementImpl(measurement: measurement)
         return ret
     }
 
     public func appendTrack() throws -> FakeMeasurement {
-        try persistenceLayer.appendNewTrack(to: &fakeMeasurement)
+        fakeMeasurement.append(track: Track(parent: fakeMeasurement))
         return self
     }
 
     public func appendTrackAnd() throws -> FakeTrack {
-        try persistenceLayer.appendNewTrack(to: &fakeMeasurement)
+        fakeMeasurement.append(track: Track(parent: fakeMeasurement))
         return self
     }
 }
@@ -149,10 +154,12 @@ public protocol FakeMeasurement {
     func appendTrack() throws -> FakeMeasurement
     /**
      Create the product of this builder.
+     Finishes the creation of the fake measurement by storing it to the database.
 
+     - Parameter persistenceLayer: A `PersistenceLayer` used to store the created measurement
      - Returns: A completely intialized fake measurement
      */
-    func build() throws -> DataCapturing.Measurement
+    func build(_ persistenceLayer: PersistenceLayer) throws -> DataCapturing.Measurement
 }
 
 /**
@@ -190,4 +197,9 @@ public protocol FakeTrack {
      - Returns: The current fake measurement builder
      */
     func addAccelerations(countOfAccelerations: Int) throws -> FakeMeasurement
+}
+
+enum FakeMeasurementError: Error {
+    /// If someone tried to add a location before adding a track.
+    case noTrackCreated
 }

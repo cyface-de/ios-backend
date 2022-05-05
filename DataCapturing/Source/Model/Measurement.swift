@@ -8,6 +8,7 @@
 import Foundation
 import CoreData
 
+// TODO: There probably need to be two kinds of Measurement instances (and other objects in that hierarchy). One is used to create new instances and one is used for already synchronized ones. The reason is, that refreshing the objectId via the context does not work, as the context changes the objectId as soon as a call to context.save() happens. -.-
 public class Measurement: Hashable, Equatable {
     var objectId: NSManagedObjectID?
     public var accelerationsCount: Int32
@@ -60,6 +61,14 @@ public class Measurement: Hashable, Equatable {
         self.trackLength = trackLength
         self.events = events
         self.tracks = tracks
+    }
+
+    func append(track: Track) {
+        tracks.append(track)
+    }
+
+    func append(event: Event) {
+        events.append(event)
     }
 
     public func hash(into hasher: inout Hasher) {

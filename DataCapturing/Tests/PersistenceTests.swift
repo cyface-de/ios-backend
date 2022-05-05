@@ -48,16 +48,15 @@ class PersistenceTests: XCTestCase {
             let bundle = Bundle(for: type(of: manager))
             try manager.setup(bundle: bundle) { error in
 
-
                 do {
                     self.oocut = PersistenceLayer(onManager: manager)
                     var measurement = try self.oocut.createMeasurement(at: 10_000, inMode: self.defaultMode)
+
                     try self.oocut.appendNewTrack(to: &measurement)
 
                     try self.oocut.save(locations: [TestFixture.location(latitude: 51.052181, longitude: 13.728956, timestamp: Date(timeIntervalSince1970: 10_000)), TestFixture.location(latitude: 51.051837, longitude: 13.729010, timestamp: Date(timeIntervalSince1970: 10_001))], in: &measurement)
                     try self.oocut.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &measurement)
-
-                    self.fixture = measurement
+                    self.fixture = try self.oocut.load(measurementIdentifiedBy: measurement.identifier)
 
                     expectation.fulfill()
                 } catch let error {
@@ -80,7 +79,7 @@ class PersistenceTests: XCTestCase {
         do {
             try oocut.delete()
         } catch {
-            fatalError()
+            fatalError("Unable to tear down persistence test. Reason: \(error)")
         }
         oocut = nil
         fixture = nil
@@ -179,7 +178,7 @@ class PersistenceTests: XCTestCase {
     func testLoadSynchronizableMeasurements() {
         do {
             fixture.synchronizable = true
-            try oocut.save(in: &fixture)
+            _ = try oocut.save(measurement: fixture)
             let countOfLoadedMeasurementsPriorClean = try oocut.loadSynchronizableMeasurements().count
 
             try oocut.clean(measurement: fixture.identifier)
@@ -260,7 +259,8 @@ class PersistenceTests: XCTestCase {
         var measurement = try oocut.createMeasurement(at: DataCapturingService.currentTimeInMillisSince1970(), inMode: defaultMode)
 
         try oocut.appendNewTrack(to: &measurement)
-        try oocut.save(locations: [TestFixture.location(), TestFixture.location(isValid: false), TestFixture.location()], in: &measurement)
+        let currentDate = Date()
+        try oocut.save(locations: [TestFixture.location(), TestFixture.location(timestamp: currentDate.addingTimeInterval(10.0), isValid: false), TestFixture.location(timestamp: currentDate.addingTimeInterval(20.0))], in: &measurement)
 
         guard var track = measurement.tracks.last else {
             fatalError()

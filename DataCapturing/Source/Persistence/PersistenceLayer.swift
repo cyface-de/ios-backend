@@ -297,7 +297,7 @@ public class PersistenceLayer {
                     timestamp: Int64(location.timestamp.timeIntervalSince1970 * 1000.0),
                     isValid: location.isValid,
                     parent: track)
-                track.locations.append(geoLocation)
+                try track.append(location: geoLocation)
                 let dbLocation = try GeoLocationMO(location: &geoLocation, context: context)
                 dbTrack.addToLocations(dbLocation)
 
@@ -360,17 +360,26 @@ public class PersistenceLayer {
 
     public func save(measurement: Measurement) throws -> Measurement {
         try manager.wrapInContextReturn { context in
-            guard let objectId = measurement.objectId else {
-                throw PersistenceError.unsynchronizedMeasurement(identifier: measurement.identifier)
-            }
+            if let objectId = measurement.objectId {
+                guard let managedObjectMeasurement = try context.existingObject(with: objectId) as? MeasurementMO else {
+                    throw PersistenceError.dataNotLoadable(measurement: measurement.identifier)
+                }
 
-            guard let managedObjectMeasurement = try context.existingObject(with: objectId) as? MeasurementMO else {
-                throw PersistenceError.dataNotLoadable(measurement: measurement.identifier)
-            }
-            try managedObjectMeasurement.update(from: measurement)
-            try context.save()
+                try managedObjectMeasurement.update(from: measurement)
+                try context.save()
 
-            return try Measurement(managedObject: managedObjectMeasurement)
+                return try Measurement(managedObject: managedObjectMeasurement)
+            } else {
+                let newManagedMeasurement = MeasurementMO(context: context)
+                newManagedMeasurement.identifier = measurement.identifier
+                newManagedMeasurement.timestamp = measurement.timestamp
+                measurement.objectId = newManagedMeasurement.objectID
+                try newManagedMeasurement.update(from: measurement)
+
+                try context.save()
+
+                return try Measurement(managedObject: newManagedMeasurement)
+            }
         }
     }
 
@@ -524,7 +533,7 @@ public class PersistenceLayer {
 
     /// The next identifier to assign to a new `Measurement`.
     /// - Throws: `PersistenceError.inconsistentState`
-    private func nextIdentifier() throws -> Int64 {
+    func nextIdentifier() throws -> Int64 {
         let persistentStore = manager.persistentContainer.persistentStoreCoordinator.persistentStores[0]
         let coordinator = manager.persistentContainer.persistentStoreCoordinator
 

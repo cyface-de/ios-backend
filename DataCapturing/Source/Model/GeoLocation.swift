@@ -63,10 +63,10 @@ public class GeoLocation: CustomStringConvertible {
             timestamp: managedObject.timestamp,
             isValid: managedObject.isPartOfCleanedTrack,
             parent: parent)
+        // TODO: This does not really work, as the objectId for new managed objects changes after they are written to the database (i.e. after the context is synchronized via context.save())
         self.objectId = managedObject.objectID
     }
 
-    // TODO parent sollte sich selbst darum kümmern, dass eine Location hinzugefügt wird.
     public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: Int64, isValid: Bool = true, parent: Track) throws {
         self.latitude = latitude
         self.longitude = longitude

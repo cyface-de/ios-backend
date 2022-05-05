@@ -32,7 +32,7 @@ extension EventMO {
         self.value = event.value
 
         guard let managedParentObjectId = event.measurement.objectId else {
-            throw PersistenceError.inconsistentState
+            throw PersistenceError.unsynchronizedMeasurement(identifier: event.measurement.identifier)
         }
 
         guard let context = managedObjectContext else {
@@ -40,7 +40,7 @@ extension EventMO {
         }
 
         guard let managedParent = try context.existingObject(with: managedParentObjectId) as? MeasurementMO else {
-            throw PersistenceError.inconsistentState
+            throw PersistenceError.measurementNotLoadable(event.measurement.identifier)
         }
 
         self.measurement = managedParent
