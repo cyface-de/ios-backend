@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Cyface GmbH
+ * Copyright 2018 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -241,11 +241,10 @@ public struct MeasurementFile: FileSupport {
         - serializable: The measurement to write.
         - to: The measurement to write to.
      - Returns: A file system URL pointing to the written file.
-     - Throws:
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-        - `FileSupportError.notReadable` If the data file was not readable.
-        - Some unspecified undocumented file system error if file was not accessible.
+     - Throws: `SerializationError.missingData` If no track data was found.
+     - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+     - Throws: `FileSupportError.notReadable` If the data file was not readable.
+     - Throws: Some unspecified undocumented file system error if file was not accessible.
     */
     func write(serializable: Measurement, to measurement: Int64) throws -> URL {
         let measurementData = try data(from: serializable)
@@ -261,15 +260,14 @@ public struct MeasurementFile: FileSupport {
     }
 
     /**
-     Creates a data representation from some `MeasurementMO` object.
+     Creates a data representation from some `Measurement` object.
 
      - Parameter from: A valid object to create a data in Cyface binary format representation for.
      - Returns: The data in the Cyface binary format.
-     - Throws:
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-        - `FileSupportError.notReadable` If the data file was not readable.
-        - Some unspecified undocumented file system error if file was not accessible.
+     - Throws: `SerializationError.missingData` If no track data was found.
+     - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+     - Throws: `FileSupportError.notReadable` If the data file was not readable.
+     - Throws: Some unspecified undocumented file system error if file was not accessible.
      */
     func data(from serializable: Measurement) throws -> Data? {
         let serializer = MeasurementSerializer()
@@ -301,17 +299,16 @@ struct EventsFile: FileSupport {
     }
 
     /**
-        Writes the events for a measurement to a file on disk and returns a URL pointing to that file.
+     Writes the events for a measurement to a file on disk and returns a URL pointing to that file.
 
      - Parameters:
         - serializable: The `Event` objects to serialize
         - to: The identifier of the measurement to serialize for
      - Returns: A URL pointing to the created `Event`-file
-     - Throws:
-        - `SerializationError.decompressionFailed`` If decompressing the provided Serializable failed for some reason.
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-        - Some unspecified undocumented file system error if file was not accessible.
+     - Throws: `SerializationError.decompressionFailed`` If decompressing the provided Serializable failed for some reason.
+     - Throws: `SerializationError.missingData` If no track data was found.
+     - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+     - Throws: Some unspecified undocumented file system error if file was not accessible.
      */
     func write(serializable: [Event], to measurement: Int64) throws -> URL {
         // Serialization in the form (timestamp: long, eventType: short, valuesLength: short, values: [bytes])

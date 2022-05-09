@@ -38,7 +38,8 @@ class SerializationTest: XCTestCase {
     var fixture: Int64!
     /// A manager for handling the CoreData stack.
     var coreDataStack: CoreDataManager!
-    static let dataModel = try! CoreDataManager.loadModel()
+    /// The `NSManagedObjectModel` used by the test.
+    static let dataModel = try! CoreDataManager.load()
 
     /// Initializes the test data set and `PersistenceLayer` with some test data.
     override func setUp() {

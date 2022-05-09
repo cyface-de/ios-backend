@@ -155,7 +155,16 @@ public class ServerConnection {
      - Parameters:
         - request: The request to fill with data
         - for: The measurement to transmit
-     - Throws: `ServerConnectionError.modalityError`, `ServerConnectionError.measurementError`, `ServerConnectionError.dataError`, `PersistenceError.dataNotLoadable`, `PersistenceError.noContext`, `PersistenceError.modelNotLoabable`, `PersistenceError.modelNotInitializable`,  `SerializationError.missingData`,  `SerializationError.invalidData`,  `FileSupportError.notReadable`, Some unspecified errors from within CoreData, Some unspecified undocumented file system error if file was not accessible
+     - Throws: `ServerConnectionError.modalityError`
+     - Throws: `ServerConnectionError.dataError`
+     - Throws: `PersistenceError.dataNotLoadable`
+     - Throws: `PersistenceError.noContext`,
+     - Throws: `PersistenceError.modelNotLoabable`
+     - Throws: `PersistenceError.modelNotInitializable`
+     - Throws: `SerializationError.missingData`
+     - Throws: `SerializationError.invalidData`,
+     - Throws: `FileSupportError.notReadable`
+     - Throws: Some unspecified errors from within CoreData, Some unspecified undocumented file system error if file was not accessible
      */
     func create(request: MultipartFormData, for measurement: Int64) throws {
         os_log("Creating request", log: ServerConnection.osLog, type: .default)

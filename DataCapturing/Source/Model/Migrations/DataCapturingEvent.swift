@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -101,6 +101,7 @@ public enum DataCapturingEvent: CustomStringConvertible {
      */
     case synchronizationStarted(measurement: Int64)
 
+    /// A stringyfied variant of this object, mostly used for human readable representation during debugging sessions.
     public var description: String {
         switch self {
         case .geoLocationFixAcquired: return "geoLocationFixAcquired"

@@ -559,8 +559,8 @@ extension DataCapturingService: CLLocationManagerDelegate {
      The listener method informed about error during location tracking. Just prints those errors to the log.
 
      - Parameters:
-     - manager: The location manager reporting the error.
-     - didFailWithError: The reported error.
+        - manager: The location manager reporting the error.
+        - didFailWithError: The reported error.
      */
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         os_log("Location service failed with error: %{public}@!", log: log, type: .error, error.localizedDescription)
@@ -568,24 +568,36 @@ extension DataCapturingService: CLLocationManagerDelegate {
     }
 }
 
+// TODO: Maybe remove this and split GeoLocation in one class storing all the data and another storing the reference to a measurement (in addition to a reference to the data storing class).
 /**
  This struct exists to save time on a new location by just storing it away. It needs to be converted to a GeoLocation prior to persitent storage.
 
  - Author: Klemens Muthmann
-
  */
 public struct LocationCacheEntry: Equatable, Hashable, CustomStringConvertible {
+    /// The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion.
     public let latitude: Double
+    /// The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.
     public let longitude: Double
+    /// The estimated accuracy of the measurement in meters.
     public let accuracy: Double
+    /// The speed the device was moving during the measurement in meters per second.
     public let speed: Double
+    /// The time the measurement happened at.
     public let timestamp: Date
+    /// Whether or not this is a valid location in a cleaned track.
     public let isValid: Bool
 
+    /// A stringified version of this object. This should mostly be used for pretty printing during debugging.
     public var description: String {
         return "LocationCacheEntry(latitude: \(latitude), longitude: \(longitude), accuracy: \(accuracy), speed: \(speed), timestamp: \(timestamp), isValid: \(isValid))"
     }
 
+    /**
+     Add this object as a new `GeoLocation` to a `Track`, which becomes the parent track. After this operation, this entry should be appended as a new `GeoLocation` to the end of the `parent`.
+
+     - Parameter parent: The `Track` to add this as a `GeoLocation` to
+     */
     func storeAsGeoLocation(to parent: inout Track) throws {
         let location = try GeoLocation(
             latitude: latitude,

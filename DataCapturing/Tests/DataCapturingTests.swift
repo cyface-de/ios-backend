@@ -39,7 +39,7 @@ class DataCapturingTests: XCTestCase {
     let defaultMode = "BICYCLE"
     /// An object for logging lifecycle events during tests and providing functionality to assert on them.
     var testEventHandler: TestDataCapturingEventHandler!
-    static let dataModel = try! CoreDataManager.loadModel()
+    static let dataModel = try! CoreDataManager.load()
 
     /// Initializes every test by creating a `TestDataCapturingService`.
     override func setUp() {

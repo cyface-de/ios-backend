@@ -36,7 +36,7 @@ class PersistenceTests: XCTestCase {
     var fixture: DataCapturing.Measurement!
     /// The default mode of transportation used for tests.
     let defaultMode = "BICYCLE"
-    static let dataModel = try! CoreDataManager.loadModel()
+    static let dataModel = try! CoreDataManager.load()
 
     /// Initializes the test enviroment by saving some test data to the test `PersistenceLayer`.
     override func setUp() {

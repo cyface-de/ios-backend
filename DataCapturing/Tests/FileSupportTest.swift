@@ -23,12 +23,14 @@ import CoreData
 @testable import DataCapturing
 
 /**
+Tests that reading and writing files works as expected.
+
  - Author: Klemens Muthmann
  - Version: 1.0.2
  - Since: 6.0.0
  */
 class FileSupportTest: XCTestCase {
-    static let dataModel = try! CoreDataManager.loadModel()
+    static let dataModel = try! CoreDataManager.load()
 
     /// Tests that writing an events file works without further interruption.
     func testEventFileWriting_HappyPath() throws {

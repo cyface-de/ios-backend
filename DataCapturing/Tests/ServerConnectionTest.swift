@@ -31,11 +31,14 @@ import Alamofire
  - Version: 1.1.2
  */
 class ServerConnectionTest: XCTestCase {
-
+    /// A CoreData stack used to load data to transmit from.
     var coreDataStack: CoreDataManager!
+    /// The object of the class under test.
     var oocut: ServerConnection!
-    static let dataModel = try! CoreDataManager.loadModel()
+    /// The CoreData data model used by this test.
+    static let dataModel = try! CoreDataManager.load()
 
+    /// Initial setup the server connection and the CoreData stack.
     override func setUp() {
         let expectation = self.expectation(description: "CoreData stack started successfully!")
 

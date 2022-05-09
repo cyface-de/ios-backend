@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 Cyface GmbH
+ * Copyright 2017 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
