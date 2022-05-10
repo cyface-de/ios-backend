@@ -61,11 +61,11 @@ public class CredentialsAuthenticator: Authenticator {
 
     public func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
         guard let username = username else {
-            return onFailure(ServerConnection.ServerConnectionError.notAuthenticated("Missing username!"))
+            return onFailure(ServerConnectionError.notAuthenticated("Missing username!"))
         }
 
         guard let password = password else {
-            return onFailure(ServerConnection.ServerConnectionError.notAuthenticated("Missing password!"))
+            return onFailure(ServerConnectionError.notAuthenticated("Missing password!"))
         }
 
         // Does this have the potential for some kind of injection attack?
@@ -77,20 +77,20 @@ public class CredentialsAuthenticator: Authenticator {
                 "Content-Type": "application/json",
                 "Accept": "*/*"
             ]
-            let request = Networking.sharedInstance.sessionManager.upload(
+            let request = AF.upload(
                 jsonCredentials,
                 to: url,
                 method: .post,
                 headers: headers).response { response in
                 guard let httpResponse = response.response else {
                     os_log("Unable to unwrap authentication response!", log: CredentialsAuthenticator.log, type: OSLogType.error)
-                    return onFailure(ServerConnection.ServerConnectionError.authenticationNotSuccessful("Unable to unwrap authentication response!"))
+                    return onFailure(ServerConnectionError.authenticationNotSuccessful("Unable to unwrap authentication response!"))
                 }
 
                 if httpResponse.statusCode==200, let authorizationValue = httpResponse.allHeaderFields["Authorization"] as? String {
                     onSuccess(authorizationValue)
                 } else {
-                    onFailure(ServerConnection.ServerConnectionError.authenticationNotSuccessful("Authentication was not successful!"))
+                    onFailure(ServerConnectionError.authenticationNotSuccessful("Authentication was not successful!"))
                 }
             }
             request.resume()

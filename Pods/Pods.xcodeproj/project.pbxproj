@@ -1145,6 +1145,55 @@
 			path = DataCapturing/Source/Movebis;
 			sourceTree = "<group>";
 		};
+		AA1B470427E37F97000D44F9 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				2178C751E9395D5FF887C233693812A1 /* Authenticator.swift */,
+				55840CE3E1D30975BEE94D5259D408C8 /* CredentialsAuthenticator.swift */,
+				D573D60E718BE22E527C147A2D1C5EE4 /* StaticAuthenticator.swift */,
+			);
+			path = Authentication;
+			sourceTree = "<group>";
+		};
+		AA1B470D27E3800B000D44F9 /* SessionsStorage */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = SessionsStorage;
+			sourceTree = "<group>";
+		};
+		AA1B470E27E38023000D44F9 /* Upload */ = {
+			isa = PBXGroup;
+			children = (
+				AA1B470527E37FBA000D44F9 /* UploadProcess.swift */,
+				AA1B470727E37FDB000D44F9 /* PreRequest.swift */,
+				AA1B470927E37FEA000D44F9 /* UploadRequest.swift */,
+				AA1B470B27E37FFF000D44F9 /* StatusRequest.swift */,
+				AA559E7A27F450C20059ED27 /* SessionRegistry.swift */,
+				AA559E7C27F4892D0059ED27 /* ServerConnectionError.swift */,
+				AA559E7E27F4948A0059ED27 /* MetaData.swift */,
+				AA559E8027F58C4C0059ED27 /* Upload.swift */,
+			);
+			path = Upload;
+			sourceTree = "<group>";
+		};
+		AA1B470F27E3D17B000D44F9 /* Synchronization */ = {
+			isa = PBXGroup;
+			children = (
+				AA1B471027E3D195000D44F9 /* Upload */,
+			);
+			path = Synchronization;
+			sourceTree = "<group>";
+		};
+		AA1B471027E3D195000D44F9 /* Upload */ = {
+			isa = PBXGroup;
+			children = (
+				D02EA5D0678179C97F54632C8E1CD8E1 /* ServerConnectionTest.swift */,
+				AA1B471127E3D1C5000D44F9 /* UploadProcessTest.swift */,
+			);
+			path = Upload;
+			sourceTree = "<group>";
+		};
 		B106B894E2E30B6AA88922B515D0493E /* Support Files */ = {
 			isa = PBXGroup;
 			children = (

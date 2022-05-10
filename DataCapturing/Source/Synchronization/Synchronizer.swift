@@ -47,7 +47,7 @@ public class Synchronizer {
     private let cleaner: Cleaner
 
     /// A connection to a Cyface server used to synchronize the data to.
-    private let serverConnection: ServerConnection
+    private let uploadProcess: UploadProcess
 
     /// Handles background synchronization of available `Measurement`s.
     var reachabilityManager: NetworkReachabilityManager?
@@ -94,10 +94,10 @@ public class Synchronizer {
         - serverConnection: An authenticated connection to a Cyface API server.
         - handler: The handler to call, when synchronization for a measurement has finished.
      */
-    public init(coreDataStack: CoreDataManager, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) {
+    public init(coreDataStack: CoreDataManager, cleaner: Cleaner, uploadProcess: UploadProcess, handler: @escaping (DataCapturingEvent, Status) -> Void) {
         self.coreDataStack = coreDataStack
         self.cleaner = cleaner
-        self.serverConnection = serverConnection
+        self.uploadProcess = uploadProcess
         self.handler = handler
         // Try to synchronize once per hour.
         dataSynchronizationTimer = RepeatingTimer(timeInterval: 60 * 60)
@@ -172,7 +172,8 @@ public class Synchronizer {
     public func activate() {
         os_log("Activating Synchronization", log: Synchronizer.log, type: .debug)
 
-        let host = Synchronizer.stripSchemeFrom(url: serverConnection.apiURL)
+        // TODO: Update Network Reachability to Alamofire 5
+        let host = Synchronizer.stripSchemeFrom(url: uploadProcess.apiURL)
         reachabilityManager = NetworkReachabilityManager(host: host)
         // Initial sync
         syncChecked()
@@ -246,7 +247,9 @@ public class Synchronizer {
 
         for measurement in measurements {
             handler(.synchronizationStarted(measurement: measurement.identifier), .success)
-            serverConnection.sync(measurement: measurement.identifier, onSuccess: successHandler, onFailure: failureHandler)
+            let upload = CoreDataBackedUpload(coreDataStack: coreDataStack, identifier: UInt64(measurement.identifier))
+            uploadProcess.upload(upload)
+                //.sync(measurement: measurement.identifier, onSuccess: successHandler, onFailure: failureHandler)
         }
     }
 
