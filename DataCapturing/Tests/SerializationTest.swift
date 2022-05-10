@@ -38,7 +38,8 @@ class SerializationTest: XCTestCase {
     var fixture: Int64!
     /// A manager for handling the CoreData stack.
     var coreDataStack: CoreDataManager!
-    static let dataModel = try! CoreDataManager.loadModel()
+    /// The `NSManagedObjectModel` used by the test.
+    static let dataModel = try! CoreDataManager.load()
 
     /// Initializes the test data set and `PersistenceLayer` with some test data.
     override func setUp() {
@@ -61,13 +62,12 @@ class SerializationTest: XCTestCase {
 
                 do {
                     self.persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
-                    self.persistenceLayer.context = self.persistenceLayer.makeContext()
-                    let measurement = try self.persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
-                    self.persistenceLayer.appendNewTrack(to: measurement)
+                    var measurement = try self.persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
+                    try self.persistenceLayer.appendNewTrack(to: &measurement)
 
                     self.fixture = measurement.identifier
-                    try self.persistenceLayer.save(locations: [GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_000, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true), GeoLocation(latitude: 1.0, longitude: 1.0, accuracy: 2.0, speed: 1.0, timestamp: 10_100, isValid: true)], in: measurement)
-                    try self.persistenceLayer.save(accelerations: [SensorValue(timestamp: Date(timeIntervalSince1970: 10_000.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10_100.0), x: 1.0, y: 1.0, z: 1.0)], in: measurement)
+                    try self.persistenceLayer.save(locations: [TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.0)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.1)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.2))], in: &measurement)
+                    try self.persistenceLayer.save(accelerations: [SensorValue(timestamp: Date(timeIntervalSince1970: 10.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10.1), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10.2), x: 1.0, y: 1.0, z: 1.0)], in: &measurement)
 
                     expectation.fulfill()
                 } catch let error {
@@ -150,8 +150,9 @@ class SerializationTest: XCTestCase {
     /**
      This creates a really big test data set usable to test programs unpacking such a set. This test is skipped since it takes really long.
      */
-    func skip_testSerializeBigDataSet() throws {
-        let measurement = try FakeMeasurementImpl.fakeMeasurement(persistenceLayer: persistenceLayer).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 36_000).addAccelerations(countOfAccelerations: 3_600_000).build()
+    func ignore_testSerializeBigDataSet() throws {
+        let nextIdentifier = try persistenceLayer.nextIdentifier()
+        let measurement = try FakeMeasurementImpl.fakeMeasurement(identifier: nextIdentifier).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 36_000).addAccelerations(countOfAccelerations: 3_600_000).build(persistenceLayer)
         let data = try oocut.serialize(serializable: measurement)
         try data.write(to: URL(fileURLWithPath: "/Users/cyface/data.cyf"))
     }
@@ -184,15 +185,15 @@ class SerializationTest: XCTestCase {
             }
 
             //print(serializedData.map { String(format: "%02x", $0) }.joined())
-            XCTAssert(timestamp.count == 3)
-            XCTAssert(timestamp[0] == 10_000)
-            XCTAssert(timestamp[1] == 10_100)
-            XCTAssert(timestamp[2] == 10_100)
+            XCTAssertEqual(timestamp.count, 3)
+            XCTAssertEqual(timestamp[0], 10_000)
+            XCTAssertEqual(timestamp[1], 10_100)
+            XCTAssertEqual(timestamp[2], 10_200)
 
-            XCTAssert(accuracy.count == 3)
-            XCTAssert(accuracy[0] == 200)
-            XCTAssert(accuracy[1] == 200)
-            XCTAssert(accuracy[2] == 200)
+            XCTAssertEqual(accuracy.count, 3)
+            XCTAssertEqual(accuracy[0], 200)
+            XCTAssertEqual(accuracy[1], 200)
+            XCTAssertEqual(accuracy[2], 200)
         } catch let error {
             XCTFail("Unable to serialize measurement \(String(describing: fixture)). Error \(error)")
         }
@@ -203,9 +204,7 @@ class SerializationTest: XCTestCase {
         // Arrange
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
 
-        guard let events = measurement.events?.array as? [Event] else {
-            fatalError()
-        }
+        let events = measurement.events
 
         let eventsSerializer = EventsSerializer()
 

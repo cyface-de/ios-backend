@@ -31,11 +31,14 @@ import Alamofire
  - Version: 1.1.2
  */
 class ServerConnectionTest: XCTestCase {
-
+    /// A CoreData stack used to load data to transmit from.
     var coreDataStack: CoreDataManager!
+    /// The object of the class under test.
     var oocut: ServerConnection!
-    static let dataModel = try! CoreDataManager.loadModel()
+    /// The CoreData data model used by this test.
+    static let dataModel = try! CoreDataManager.load()
 
+    /// Initial setup the server connection and the CoreData stack.
     override func setUp() {
         let expectation = self.expectation(description: "CoreData stack started successfully!")
 
@@ -73,8 +76,8 @@ class ServerConnectionTest: XCTestCase {
     func testCreateServerRequest_HappyPath() throws {
         // Arrange
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try FakeMeasurementImpl.fakeMeasurement(persistenceLayer: persistenceLayer).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 10).addAccelerations(countOfAccelerations: 1_000).build()
+        let identifier = try persistenceLayer.nextIdentifier()
+        let measurement = try FakeMeasurementImpl.fakeMeasurement(identifier: identifier).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 10).addAccelerations(countOfAccelerations: 1_000).build(persistenceLayer)
 
         let data = MultipartFormData()
         do {
@@ -114,7 +117,9 @@ class ServerConnectionTest: XCTestCase {
      */
     func testCreateMetaData_WithEmptyTracks() throws {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        let measurement = try FakeMeasurementImpl.fakeMeasurement(persistenceLayer: persistenceLayer).appendTrack().appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 10).addAccelerations(countOfAccelerations: 1_000).appendTrack().build()
+        // TODO: Track was not saved to db!!!
+        let identifier = try persistenceLayer.nextIdentifier()
+        let measurement = try FakeMeasurementImpl.fakeMeasurement(identifier: identifier).appendTrack().appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 10).addAccelerations(countOfAccelerations: 1_000).appendTrack().build(persistenceLayer)
 
         let data = MultipartFormData()
         do {
@@ -147,18 +152,15 @@ class ServerConnectionTest: XCTestCase {
      - Throws: some unspecified errors from within *CoreData*
      */
     func ignore_testUploadMeasurement_HappyPath() throws {
-        let url = URL(string: "http://localhost:8080")!.appendingPathComponent("api").appendingPathComponent("v2")
+        let url = URL(string: "http://192.168.2.113:8080")!.appendingPathComponent("api").appendingPathComponent("v2")
         let authenticator = CredentialsAuthenticator(authenticationEndpoint: url)
         authenticator.username = "admin"
         authenticator.password = "secret"
         let serverConnection = ServerConnection(apiURL: url, authenticator: authenticator, onManager: coreDataStack)
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
-        let measurement = try persistenceLayer.createMeasurement(at: 10_000, inMode: "BICYCLE")
-        persistenceLayer.appendNewTrack(to: measurement)
-        try persistenceLayer.save(locations: [geoLocation(), geoLocation()], in: measurement)
-        try persistenceLayer.save(accelerations: [acceleration(), acceleration()], in: measurement)
+        let identifier = try persistenceLayer.nextIdentifier()
+        let measurement = try FakeMeasurementImpl.fakeMeasurement(identifier: identifier).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 2).addAccelerations(countOfAccelerations: 2).build(persistenceLayer)
 
         let measurementIdentifier = measurement.identifier
         let promise = expectation(description: "Expect call to return 201.")
@@ -176,13 +178,5 @@ class ServerConnectionTest: XCTestCase {
         })
 
         wait(for: [promise], timeout: 6000)
-    }
-
-    func geoLocation() -> GeoLocation {
-        return GeoLocation(latitude: Double.random(in: -90.0 ... 90.0), longitude: Double.random(in: 0.0 ..< 360.0), accuracy: Double.random(in: 2.0 ... 15.0), speed: Double.random(in: 0.0 ... 10.0), timestamp: Int64.random(in: 0 ... INT64_MAX))
-    }
-
-    func acceleration() -> SensorValue {
-        return SensorValue(timestamp: Date(timeIntervalSince1970: TimeInterval(Double.random(in: 0.0 ... 1571302762.0))), x: Double.random(in: 0.0 ... 40.0), y: Double.random(in: 0.0 ... 40.0), z: Double.random(in: 0.0 ... 40.0))
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 Cyface GmbH
+ * Copyright 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -20,23 +20,12 @@
 import Foundation
 
 /**
- The status returned by asynchronous callback handlers.
-
- This tells the caller, whether an asynchronous call has been successful or not and if not it provides further information about the `Error`. This is required, since an asynchronous call can not throw an `Error` to the calling thread.
-
- ```
- case success
- case error(Error)
- ```
+An error thrown if some inconsistent data was encountered.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
- - Since: 2.2.0
+ - Version: 1.0.0
  */
-@available(swift, deprecated: 5.0.0, message: "Use Swift 5 Result or Swift 5.5 async/await")
-public enum Status {
-    /// The status returned if an asynchronous callback has finished successfully.
-    case success
-    /// The status returned if an asynchronous callback has finished with an error. Details about the error are available via the `Error` parameter.
-    case error(Error)
+public enum InconsistentData: Error {
+    /// If locations are not ordered by timestamp ascending.
+    case locationOrderViolated
 }

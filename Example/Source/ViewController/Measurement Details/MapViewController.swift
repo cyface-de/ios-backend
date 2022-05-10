@@ -1,10 +1,21 @@
-//
-//  MapViewController.swift
-//  Cyface-Test
-//
-//  Created by Team Cyface on 29.11.17.
-//  Copyright © 2017 Cyface GmbH. All rights reserved.
-//
+/*
+* Copyright 2017 - 2022 Cyface GmbH
+*
+* This file is part of the Cyface SDK for iOS.
+*
+* The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* The Cyface SDK for iOS is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 import UIKit
 import DataCapturing
@@ -75,13 +86,13 @@ class MapViewController: UIViewController {
                 }
 
                 let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
-                persistenceLayer.context = persistenceLayer.makeContext()
                 do {
                     let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
                     let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
-                    let eventToChange = events[indexPathForSelectedRow.row]
+                    var eventToChange = events[indexPathForSelectedRow.row]
                     eventToChange.value = modality.dbValue
-                    persistenceLayer.context?.saveRecursively()
+                    // TODO: This will not work, since the event inside the measurement is not updated.
+                    _ = try persistenceLayer.save(measurement: measurement)
                 } catch {
                     fatalError("Unable to load data from database")
                 }
@@ -110,11 +121,10 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
         do {
-            let measurementMO = try persistenceLayer.load(measurementIdentifiedBy: measurement)
-            let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurementMO)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
+            let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
 
             return events.count
         } catch {
@@ -134,10 +144,9 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         do {
-            let measurementMO = try persistenceLayer.load(measurementIdentifiedBy: measurement)
-            cell.viewModel = EventItemViewModel(measurement: measurementMO, coreDataStack: coreDataStack, position: indexPath.row)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
+            cell.viewModel = EventItemViewModel(measurement: measurement, coreDataStack: coreDataStack, position: indexPath.row)
         } catch {
             fatalError("Unable to initilize view model for event item cell view!")
         }
@@ -176,10 +185,9 @@ extension MapViewController: UITableViewDelegate, UITableViewDataSource {
 
         // TODO: This should probably happen in a model
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
         let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
         let event = events[index.row]
-        persistenceLayer.delete(event: event)
+        try persistenceLayer.delete(event: event)
     }
 }

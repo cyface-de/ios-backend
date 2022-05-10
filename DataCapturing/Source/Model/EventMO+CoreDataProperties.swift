@@ -20,23 +20,14 @@
 import Foundation
 import CoreData
 
-extension Event {
+extension EventMO {
 
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Event> {
-        return NSFetchRequest<Event>(entityName: "Event")
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<EventMO> {
+        return NSFetchRequest<EventMO>(entityName: "Event")
     }
 
     @NSManaged public var time: NSDate?
     @NSManaged public var type: Int16
     @NSManaged public var value: String?
     @NSManaged public var measurement: MeasurementMO?
-
-    public var typeEnum: EventType {
-        get {
-            return EventType(rawValue: type)!
-        }
-        set {
-            self.type = newValue.rawValue
-        }
-    }
 }

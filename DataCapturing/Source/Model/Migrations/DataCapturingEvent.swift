@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -40,7 +40,7 @@ import Foundation
  - Version: 3.0.0
  - Since: 1.0.0
  */
-public enum DataCapturingEvent {
+public enum DataCapturingEvent: CustomStringConvertible {
     /// Occurs everytime the `DataCapturingService` received a geo location fix and thus is able to track its position.
     case geoLocationFixAcquired
     /// Occurs everytime the `DataCapturingService` loses its geo location fix.
@@ -50,7 +50,7 @@ public enum DataCapturingEvent {
 
      - position: The new geo location position.
      */
-    case geoLocationAcquired(position: GeoLocation)
+    case geoLocationAcquired(position: LocationCacheEntry)
     /**
      Occurs each time the application runs out of space.
      How much space is used and how much is available may be retrieved from `allocation`.
@@ -100,4 +100,20 @@ public enum DataCapturingEvent {
      - measurement: The measurement the gets synchronized.
      */
     case synchronizationStarted(measurement: Int64)
+
+    /// A stringyfied variant of this object, mostly used for human readable representation during debugging sessions.
+    public var description: String {
+        switch self {
+        case .geoLocationFixAcquired: return "geoLocationFixAcquired"
+        case .geoLocationFixLost: return "geoLocationFixLost"
+        case .geoLocationAcquired(let location): return "geoLocationAcquired(\(location))"
+        case .lowDiskSpace(let allocation): return "lowDiskSpace(\(allocation))"
+        case .serviceStarted(let measurementIdentifier, let event): return "serviceStarted(\(measurementIdentifier), \(event))"
+        case .servicePaused(let measurementIdentifier, let event): return "servicePaused(\(measurementIdentifier), \(event))"
+        case .serviceResumed(let measurementIdentifier, let event): return "serviceResumed(\(measurementIdentifier), \(event))"
+        case .serviceStopped(let measurementIdentifier, let event): return "serviceStopped(\(measurementIdentifier), \(event))"
+        case .synchronizationFinished(let measurementIdentifier): return "synchronizationFinished(\(measurementIdentifier))"
+        case .synchronizationStarted(let measurementIdentifier): return "synchronizationStarted(\(measurementIdentifier))"
+        }
+    }
 }

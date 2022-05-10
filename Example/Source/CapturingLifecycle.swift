@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 Cyface GmbH
+ * Copyright 2019 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -163,7 +163,6 @@ class CapturingLifecycle {
             fatalError()
         }
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifiedBy)
 

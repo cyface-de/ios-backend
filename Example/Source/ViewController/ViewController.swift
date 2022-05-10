@@ -491,7 +491,6 @@ class ViewController: UIViewController {
                         // TODO: Move this to a Table View Model
                         // Load the measurements to show
                         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-                        persistenceLayer.context = persistenceLayer.makeContext()
                         let measurements = try persistenceLayer.loadSynchronizableMeasurements()
 
                         os_log("Populating measurements", log: ViewController.LOG, type: .debug)

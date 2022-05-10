@@ -20,7 +20,7 @@
 import Foundation
 import CoreData
 
-@objc(Event)
-public class Event: NSManagedObject {
+@objc(TrackMO)
+public class TrackMO: NSManagedObject {
 
 }

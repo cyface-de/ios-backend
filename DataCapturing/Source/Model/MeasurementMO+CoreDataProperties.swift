@@ -43,28 +43,28 @@ extension MeasurementMO {
 extension MeasurementMO {
 
     @objc(insertObject:inEventsAtIndex:)
-    @NSManaged public func insertIntoEvents(_ value: Event, at idx: Int)
+    @NSManaged public func insertIntoEvents(_ value: EventMO, at idx: Int)
 
     @objc(removeObjectFromEventsAtIndex:)
     @NSManaged public func removeFromEvents(at idx: Int)
 
     @objc(insertEvents:atIndexes:)
-    @NSManaged public func insertIntoEvents(_ values: [Event], at indexes: NSIndexSet)
+    @NSManaged public func insertIntoEvents(_ values: [EventMO], at indexes: NSIndexSet)
 
     @objc(removeEventsAtIndexes:)
     @NSManaged public func removeFromEvents(at indexes: NSIndexSet)
 
     @objc(replaceObjectInEventsAtIndex:withObject:)
-    @NSManaged public func replaceEvents(at idx: Int, with value: Event)
+    @NSManaged public func replaceEvents(at idx: Int, with value: EventMO)
 
     @objc(replaceEventsAtIndexes:withEvents:)
-    @NSManaged public func replaceEvents(at indexes: NSIndexSet, with values: [Event])
+    @NSManaged public func replaceEvents(at indexes: NSIndexSet, with values: [EventMO])
 
     @objc(addEventsObject:)
-    @NSManaged public func addToEvents(_ value: Event)
+    @NSManaged public func addToEvents(_ value: EventMO)
 
     @objc(removeEventsObject:)
-    @NSManaged public func removeFromEvents(_ value: Event)
+    @NSManaged public func removeFromEvents(_ value: EventMO)
 
     @objc(addEvents:)
     @NSManaged public func addToEvents(_ values: NSOrderedSet)
@@ -78,28 +78,28 @@ extension MeasurementMO {
 extension MeasurementMO {
 
     @objc(insertObject:inTracksAtIndex:)
-    @NSManaged public func insertIntoTracks(_ value: Track, at idx: Int)
+    @NSManaged public func insertIntoTracks(_ value: TrackMO, at idx: Int)
 
     @objc(removeObjectFromTracksAtIndex:)
     @NSManaged public func removeFromTracks(at idx: Int)
 
     @objc(insertTracks:atIndexes:)
-    @NSManaged public func insertIntoTracks(_ values: [Track], at indexes: NSIndexSet)
+    @NSManaged public func insertIntoTracks(_ values: [TrackMO], at indexes: NSIndexSet)
 
     @objc(removeTracksAtIndexes:)
     @NSManaged public func removeFromTracks(at indexes: NSIndexSet)
 
     @objc(replaceObjectInTracksAtIndex:withObject:)
-    @NSManaged public func replaceTracks(at idx: Int, with value: Track)
+    @NSManaged public func replaceTracks(at idx: Int, with value: TrackMO)
 
     @objc(replaceTracksAtIndexes:withTracks:)
-    @NSManaged public func replaceTracks(at indexes: NSIndexSet, with values: [Track])
+    @NSManaged public func replaceTracks(at indexes: NSIndexSet, with values: [TrackMO])
 
     @objc(addTracksObject:)
-    @NSManaged public func addToTracks(_ value: Track)
+    @NSManaged public func addToTracks(_ value: TrackMO)
 
     @objc(removeTracksObject:)
-    @NSManaged public func removeFromTracks(_ value: Track)
+    @NSManaged public func removeFromTracks(_ value: TrackMO)
 
     @objc(addTracks:)
     @NSManaged public func addToTracks(_ values: NSOrderedSet)

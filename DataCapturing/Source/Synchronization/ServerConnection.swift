@@ -155,13 +155,21 @@ public class ServerConnection {
      - Parameters:
         - request: The request to fill with data
         - for: The measurement to transmit
-     - Throws: `ServerConnectionError.modalityError`, `ServerConnectionError.measurementError`, `ServerConnectionError.dataError`, `PersistenceError.dataNotLoadable`, `PersistenceError.noContext`, `PersistenceError.modelNotLoabable`, `PersistenceError.modelNotInitializable`,  `SerializationError.missingData`,  `SerializationError.invalidData`,  `FileSupportError.notReadable`, Some unspecified errors from within CoreData, Some unspecified undocumented file system error if file was not accessible
+     - Throws: `ServerConnectionError.modalityError`
+     - Throws: `ServerConnectionError.dataError`
+     - Throws: `PersistenceError.dataNotLoadable`
+     - Throws: `PersistenceError.noContext`,
+     - Throws: `PersistenceError.modelNotLoabable`
+     - Throws: `PersistenceError.modelNotInitializable`
+     - Throws: `SerializationError.missingData`
+     - Throws: `SerializationError.invalidData`,
+     - Throws: `FileSupportError.notReadable`
+     - Throws: Some unspecified errors from within CoreData, Some unspecified undocumented file system error if file was not accessible
      */
     func create(request: MultipartFormData, for measurement: Int64) throws {
         os_log("Creating request", log: ServerConnection.osLog, type: .default)
         // Load and serialize measurement synchronously.
         let persistenceLayer = PersistenceLayer(onManager: manager)
-        persistenceLayer.context = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
         let modalityTypeChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
         guard !modalityTypeChangeEvents.isEmpty else {
@@ -170,9 +178,7 @@ public class ServerConnection {
         guard let initialModality = modalityTypeChangeEvents[0].value else {
             throw ServerConnectionError.modalityError("Invalid modality change event with no value encountered!")
         }
-        guard let events = measurement.events?.array as? [Event] else {
-            throw ServerConnectionError.measurementError(measurement.identifier)
-        }
+        let events = measurement.events
 
         try addMetaData(to: request, for: measurement, withInitialModality: initialModality)
 
@@ -213,7 +219,7 @@ public class ServerConnection {
 
      - Throws: `ServerConnectionError.dataError`
      */
-    func addMetaData(to request: MultipartFormData, for measurement: MeasurementMO, withInitialModality initialModality: String) throws {
+    func addMetaData(to request: MultipartFormData, for measurement: Measurement, withInitialModality initialModality: String) throws {
         guard let deviceIdData = installationIdentifier.data(using: String.Encoding.utf8) else {
             throw ServerConnectionError.dataError("Installation identifier was missing!")
         }
@@ -235,42 +241,31 @@ public class ServerConnection {
 
         let length = String(measurement.trackLength).data(using: String.Encoding.utf8)!
 
-        let persistenceLayer = PersistenceLayer(onManager: manager)
-        persistenceLayer.context = persistenceLayer.makeContext()
-        let locationCount = try persistenceLayer.countGeoLocations(forMeasurement: measurement)
+        let locationCount = measurement.tracks.map({ track in track.locations.count}).reduce(0, {result, value in result+value})
         let locationCountData = String(locationCount).data(using: String.Encoding.utf8)!
-        let tracks = measurement.tracks
+        let tracks = measurement.tracks.filter({ track in !track.locations.isEmpty})
 
-        var startLocationRaw: GeoLocationMO?
-        var endLocationRaw: GeoLocationMO?
-        if let tracks = tracks {
-            for track in tracks {
-                if startLocationRaw == nil, let tracksFirstLocation = (track as? Track)?.locations?.firstObject as? GeoLocationMO {
-                    startLocationRaw = tracksFirstLocation
-                }
+        if !tracks.isEmpty {
+            let startLocationRaw = tracks[0].locations.first
+            let endLocationRaw = tracks.last?.locations.last
 
-                if let tracksLastLocation = (track as? Track)?.locations?.lastObject as? GeoLocationMO {
-                    endLocationRaw = tracksLastLocation
-                }
+            if let startLocationRaw = startLocationRaw {
+                let startLocationLat = "\(startLocationRaw.latitude)".data(using: String.Encoding.utf8)!
+                let startLocationLon = "\(startLocationRaw.longitude)".data(using: String.Encoding.utf8)!
+                let startLocationTs = "\(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+                request.append(startLocationLat, withName: "startLocLat")
+                request.append(startLocationLon, withName: "startLocLon")
+                request.append(startLocationTs, withName: "startLocTs")
             }
-        }
 
-        if let startLocationRaw = startLocationRaw {
-            let startLocationLat = "\(startLocationRaw.lat)".data(using: String.Encoding.utf8)!
-            let startLocationLon = "\(startLocationRaw.lon)".data(using: String.Encoding.utf8)!
-            let startLocationTs = "\(startLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-            request.append(startLocationLat, withName: "startLocLat")
-            request.append(startLocationLon, withName: "startLocLon")
-            request.append(startLocationTs, withName: "startLocTs")
-        }
-
-        if let endLocationRaw = endLocationRaw {
-            let endLocationLat = "\(endLocationRaw.lat)".data(using: String.Encoding.utf8)!
-            let endLocationLon = "\(endLocationRaw.lon)".data(using: String.Encoding.utf8)!
-            let endLocationTs = "\(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
-            request.append(endLocationLat, withName: "endLocLat")
-            request.append(endLocationLon, withName: "endLocLon")
-            request.append(endLocationTs, withName: "endLocTs")
+            if let endLocationRaw = endLocationRaw {
+                let endLocationLat = "\(endLocationRaw.latitude)".data(using: String.Encoding.utf8)!
+                let endLocationLon = "\(endLocationRaw.longitude)".data(using: String.Encoding.utf8)!
+                let endLocationTs = "\(endLocationRaw.timestamp)".data(using: String.Encoding.utf8)!
+                request.append(endLocationLat, withName: "endLocLat")
+                request.append(endLocationLon, withName: "endLocLon")
+                request.append(endLocationTs, withName: "endLocTs")
+            }
         }
 
         request.append(deviceIdData, withName: "deviceId")
