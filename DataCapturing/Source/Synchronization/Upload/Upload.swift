@@ -1,12 +1,30 @@
-//
-//  Measurement.swift
-//  DataCapturing
-//
-//  Created by Klemens Muthmann on 31.03.22.
-//
+/*
+ * Copyright 2022 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 
+/**
+ An upload to a Cyface Data Collector server.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 protocol Upload {
     var failedUploadsCounter: Int {get set}
 
@@ -17,6 +35,12 @@ protocol Upload {
     func data() -> Data
 }
 
+/**
+ An upload to a Cyface Data Collector taking data from a CoreData source.
+
+ - author: Klemens Muthmann
+ - version 1.0.0
+ */
 class CoreDataBackedUpload: Upload {
     var coreDataStack: CoreDataManager
     var identifier: UInt64
@@ -76,7 +100,20 @@ class CoreDataBackedUpload: Upload {
 
             let (endLocationLat, endLocationLon, endLocationTs) = try endLocation()
 
-            let ret = MetaData(locationCount: UInt64(locationCount), formatVersion: Int(dataFormatVersion), startLocLat: startLocationLat, startLocLon: startLocationLon, startLocTS: startLocationTs, endLocLat: endLocationLat, endLocLon: endLocationLon, endLocTS: endLocationTs, measurementId: UInt64(measurement.identifier), osVersion: "iOS \(UIDevice.current.systemVersion)", applicationVersion: appVersion, length: length, modality: initialModality)
+            let ret = MetaData(
+                locationCount: UInt64(locationCount),
+                formatVersion: Int(dataFormatVersion),
+                startLocLat: startLocationLat,
+                startLocLon: startLocationLon,
+                startLocTS: startLocationTs,
+                endLocLat: endLocationLat,
+                endLocLon: endLocationLon,
+                endLocTS: endLocationTs,
+                measurementId: UInt64(measurement.identifier),
+                osVersion: "iOS \(UIDevice.current.systemVersion)",
+                applicationVersion: appVersion,
+                length: length,
+                modality: initialModality)
             metaDataCache = ret
             return ret
         }

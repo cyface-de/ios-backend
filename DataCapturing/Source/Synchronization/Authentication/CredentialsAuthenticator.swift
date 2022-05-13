@@ -24,7 +24,7 @@ import os.log
 /**
  An authenticator using a combination of `username` and `password` to authenticate against a Cyface data collector server.
 
- After creation of an instance of this class you need to provide a `username` and a `password`, before calling `authenticate`()`.
+ After creation of an instance of this class you need to provide a `username` and a `password`, before calling `authenticate()`.
  If no `username` or `password` is available the function will call its failure handler with the `ServerConnectionError.Category.notAuthenticated`.
 
  - Author: Klemens Muthmann
@@ -43,6 +43,8 @@ public class CredentialsAuthenticator: Authenticator {
     public var password: String?
     /// The location of the Cyface Collector API, used for authentication.
     public var authenticationEndpoint: URL
+    /// An Alamofire session to use for sending requests and receiving responses.
+    private let session: Session
 
     // MARK: - Initializers
 
@@ -52,9 +54,11 @@ public class CredentialsAuthenticator: Authenticator {
 
      - Parameters:
         - authenticationEndpoint: The location of the Cyface Collector API, used for authentication.
+        - session: An Alamofire session to use for sending requests and receiving responses.
      */
-    public required init(authenticationEndpoint: URL) {
+    public required init(authenticationEndpoint: URL, session: Session = AF) {
         self.authenticationEndpoint = authenticationEndpoint
+        self.session = session
     }
 
     // MARK: - Methods
@@ -77,11 +81,12 @@ public class CredentialsAuthenticator: Authenticator {
                 "Content-Type": "application/json",
                 "Accept": "*/*"
             ]
-            let request = AF.upload(
+            let request = session.upload(
                 jsonCredentials,
                 to: url,
                 method: .post,
-                headers: headers).response { response in
+                headers: headers)
+            request.response { response in
                 guard let httpResponse = response.response else {
                     os_log("Unable to unwrap authentication response!", log: CredentialsAuthenticator.log, type: OSLogType.error)
                     return onFailure(ServerConnectionError.authenticationNotSuccessful("Unable to unwrap authentication response!"))

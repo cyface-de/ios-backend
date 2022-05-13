@@ -254,4 +254,18 @@ class SerializationTest: XCTestCase {
             XCTFail("Unable to serialize measurement \(String(describing: fixture)). Error \(error)")
         }
     }
+
+    func testData() throws {
+        // Arrange
+        let fixtureMeasurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
+
+
+        // Act
+        let data = try oocut.serialize(serializable: fixtureMeasurement)
+        FileManager.default.createFile(atPath: "/Users/muthmann/serializedFixture.cyf", contents: data)
+        let loadedData = FileManager.default.contents(atPath: "/Users/muthmann/serializedFixture.cyf")
+
+        // Assert
+        XCTAssertEqual(data, loadedData)
+    }
 }

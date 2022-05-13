@@ -31,7 +31,7 @@ import Alamofire
  - Version: 1.1.2
  */
 class ServerConnectionTest: XCTestCase {
-    /// A CoreData stack used to load data to transmit from.
+/*
     var coreDataStack: CoreDataManager!
     /// The object of the class under test.
     var oocut: ServerConnection!
@@ -179,4 +179,12 @@ class ServerConnectionTest: XCTestCase {
 
         wait(for: [promise], timeout: 6000)
     }
+
+    func geoLocation() -> GeoLocation {
+        return GeoLocation(latitude: Double.random(in: -90.0 ... 90.0), longitude: Double.random(in: 0.0 ..< 360.0), accuracy: Double.random(in: 2.0 ... 15.0), speed: Double.random(in: 0.0 ... 10.0), timestamp: UInt64.random(in: 0 ... UINT64_MAX))
+    }
+
+    func acceleration() -> SensorValue {
+        return SensorValue(timestamp: Date(timeIntervalSince1970: TimeInterval(Double.random(in: 0.0 ... 1571302762.0))), x: Double.random(in: 0.0 ... 40.0), y: Double.random(in: 0.0 ... 40.0), z: Double.random(in: 0.0 ... 40.0))
+    }*/
 }

@@ -1,25 +1,36 @@
-//
-//  UploadProcess.swift
-//  DataCapturing
-//
-//  Created by Klemens Muthmann on 17.03.22.
-//
+/*
+ * Copyright 2022 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import Alamofire
 
 // TODO: Repeat Request after Authentication has failed
-// TODO: Repeat failed Requests a finite number of times, trying to restart on existing session
 
 public class UploadProcess {
-    let openSessions: SessionRegistry
+    var openSessions: SessionRegistry
     let apiUrl: URL
-    let onSuccess: (UInt64) -> ()
-    let onFailure: (UInt64, Error) -> ()
+    let onSuccess: (UInt64) -> Void
+    let onFailure: (UInt64, Error) -> Void
     let session: Session
     let authenticator: Authenticator
 
-    init(apiUrl: URL, session: Session, sessionRegistry: SessionRegistry, authenticator: Authenticator, onSuccess: @escaping (UInt64) -> (), onFailure: @escaping (UInt64, Error) -> ()) {
+    public init(apiUrl: URL, session: Session = AF, sessionRegistry: SessionRegistry, authenticator: Authenticator, onSuccess: @escaping (UInt64) -> Void, onFailure: @escaping (UInt64, Error) -> Void) {
         self.openSessions = sessionRegistry
         self.apiUrl = apiUrl
         self.onSuccess = onSuccess
@@ -40,7 +51,14 @@ public class UploadProcess {
         if let currentSession = openSessions.session(for: upload) {
             let statusRequest = StatusRequest(apiUrl: apiUrl, session: session)
 
-            statusRequest.request(authToken: authToken, sessionIdentifier: currentSession, upload: upload, onFinished: onSuccess, onResume: onSuccessfulStatusRequest, onAborted: onAbortedStatusRequest, onFailure: onFailure)
+            statusRequest.request(
+                authToken: authToken,
+                sessionIdentifier: currentSession,
+                upload: upload,
+                onFinished: onSuccess,
+                onResume: onSuccessfulStatusRequest,
+                onAborted: onAbortedStatusRequest,
+                onFailure: onFailure)
         } else {
             let preRequest = PreRequest(apiUrl: apiUrl, session: session)
 
@@ -49,9 +67,14 @@ public class UploadProcess {
     }
 
     private func onSuccessfulStatusRequest(authToken: String, sessionIdentifier: String, upload: Upload) {
-        let uploadRequest = UploadRequest(apiUrl: apiUrl, session: session)
+        let uploadRequest = UploadRequest(session: session)
 
-        uploadRequest.request(authToken: authToken, sessionIdentifier: sessionIdentifier, upload: upload, onSuccess: onSuccess, onFailure: onFailedUploadRequest)
+        uploadRequest.request(
+            authToken: authToken,
+            sessionIdentifier: sessionIdentifier,
+            upload: upload,
+            onSuccess: onSuccess,
+            onFailure: onFailedUploadRequest)
     }
 
     private func onAbortedStatusRequest(authToken: String, upload: Upload) {
@@ -61,9 +84,15 @@ public class UploadProcess {
     }
 
     private func onSuccessfulPreRequest(authToken: String, sessionIdentifier: String, upload: Upload) {
-        let uploadRequest = UploadRequest(apiUrl: apiUrl, session: session)
+        let uploadRequest = UploadRequest(session: session)
+        openSessions.register(session: sessionIdentifier, measurement: upload)
 
-        uploadRequest.request(authToken: authToken, sessionIdentifier: sessionIdentifier, upload: upload, onSuccess: onSuccess, onFailure: onFailedUploadRequest)
+        uploadRequest.request(
+            authToken: authToken,
+            sessionIdentifier: sessionIdentifier,
+            upload: upload,
+            onSuccess: onSuccess,
+            onFailure: onFailedUploadRequest)
     }
 
     private func onFailedUploadRequest(authToken: String, sessionIdentifier: String, upload: Upload, error: Error) {
@@ -76,7 +105,14 @@ public class UploadProcess {
         } else {
             let statusRequest = StatusRequest(apiUrl: apiUrl, session: session)
 
-            statusRequest.request(authToken: authToken, sessionIdentifier: sessionIdentifier, upload: upload, onFinished: onSuccess, onResume: onSuccessfulStatusRequest, onAborted: onAbortedStatusRequest, onFailure: onFailure)
+            statusRequest.request(
+                authToken: authToken,
+                sessionIdentifier: sessionIdentifier,
+                upload: upload,
+                onFinished: onSuccess,
+                onResume: onSuccessfulStatusRequest,
+                onAborted: onAbortedStatusRequest,
+                onFailure: onFailure)
         }
     }
 

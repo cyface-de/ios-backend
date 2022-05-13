@@ -1194,6 +1194,15 @@
 			path = Upload;
 			sourceTree = "<group>";
 		};
+		AAF36DEF282E3C8B00F7ED81 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AAF36DF0282E3CA100F7ED81 /* serializedFixture.cyf */,
+				AAF36DF2282E3D9400F7ED81 /* README.md */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		B106B894E2E30B6AA88922B515D0493E /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -1589,6 +1598,8 @@
 				E36821720957A160F2FBB303897E8822 /* V3TestData.sqlite in Resources */,
 				89B56A7ECFEC193B2C0C7B8B3676E7A8 /* V4TestData.sqlite in Resources */,
 				D44088FAC57CB429E7E352054D0D2B17 /* V5TestData.sqlite in Resources */,
+				AAF36DF1282E3CA100F7ED81 /* serializedFixture.cyf in Resources */,
+				AAF36DF3282E3D9400F7ED81 /* README.md in Resources */,
 				12AE5F33B52B3E29B6E8FEE99A6F2EBA /* V6TestData.sqlite in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

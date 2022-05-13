@@ -43,11 +43,14 @@ class PreRequest {
             let metaData = try upload.metaData()
             let data = upload.data()
 
-            var headers = metaData.asHeader
+            var headers: HTTPHeaders = []
             headers.add(name: "Content-Type", value: "application/json; charset=UTF-8")
             headers.add(name: "Authorization", value: "Bearer \(authToken)")
-            // TODO: Calculate valid upload length
             headers.add(name: "x-upload-content-length", value: "\(data.count)")
+            headers.add(name: "x-upload-content-type", value: "application/octet-stream")
+            headers.add(name: "Accept-Encoding", value: "gzip")
+            headers.add(name: "User-Agent", value: "Cyface-iOS-Client/\(metaData.applicationVersion) (gzip)")
+            headers.add(name: "Connection", value: "Keep-Alive")
 
             let measurementIdentifier = metaData.measurementId
 

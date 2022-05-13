@@ -55,15 +55,17 @@ struct MetaData: Encodable {
     let applicationVersion: String
     let length: Double
     let modality: String
+    let deviceId = installationIdentifier
+    let deviceType = modelIdentifier
 
     var asHeader: HTTPHeaders {
         var headers: HTTPHeaders = [
             "Content-Type": "application/octet-stream",
-            "deviceId": installationIdentifier,
+            "deviceId": deviceId,
             "measurementId": String(measurementId),
             "locationCount": String(locationCount),
-            "formatVersion": "2",
-            "deviceType": modelIdentifier,
+            "formatVersion": String(formatVersion),
+            "deviceType": deviceType,
             "osVersion": osVersion,
             "appVersion": applicationVersion,
             "length": String(length),

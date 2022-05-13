@@ -45,7 +45,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
     /// The database access layer using iOS CoreData framework
     var coreDataStack: CoreDataManager?
     /// A connection to a Cyface collector service.
-    var serverConnection: ServerConnection?
+    //var serverConnection: ServerConnection?
     /// An authenticator authenticating users to login to the app and upload data to a Cyface collector service if valid.
     var authenticator: CredentialsAuthenticator?
     /// The persistent application settings. These includes hidden settings as well as those that can be customized using the systems settings app.
@@ -69,7 +69,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
             return
         }
 
-        self.serverConnection = self.createConnection(to: currentServerInSettings)
+        //self.serverConnection = self.createConnection(to: currentServerInSettings)
 
         // Authenticated server is the one from the settings so we start directly without login, otherwise login screen is shown.
         if settings.authenticatedServerUrl == currentServerInSettings {
@@ -163,7 +163,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
 
      - Parameter to: The address of the collector service to connect to
      */
-    private func createConnection(to server: String) -> ServerConnection? {
+    /*private func createConnection(to server: String) -> ServerConnection? {
         guard let coreDataStack = coreDataStack else {
             fatalError()
         }
@@ -174,8 +174,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
         authenticator.username = settings.username
         authenticator.password = settings.password
         self.authenticator = authenticator
-        return ServerConnection(apiURL: serverURL, authenticator: authenticator, onManager: coreDataStack)
-    }
+
+let sessionRegistry = SessionRegistry()
+
+        return UploadProcess(apiUrl: serverURL, sessionRegistry: sessionRegistry, authenticator: authenticator, onSuccess: <#T##(UInt64) -> ()#>, onFailure: <#T##(UInt64, Error) -> ()#>)//ServerConnection(apiURL: serverURL, authenticator: authenticator, onManager: coreDataStack)
+    }*/
     // MARK: - UIApplicationDelegate
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -272,10 +275,10 @@ extension UIViewController {
     }
 
     /// Provides the applications CoreData stack to all the views. This must only be called on the main thread.
-    var serverConnection: ServerConnection {
+    /*var serverConnection: ServerConnection {
         guard let serverConnection = appDelegate.serverConnection  else {
             fatalError("Unable to load ServerConnection!")
         }
         return serverConnection
-    }
+    }*/
 }

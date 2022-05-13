@@ -27,11 +27,9 @@ import Alamofire
  */
 class UploadRequest {
     /// The URL to the Cyface API receiving the data.
-    let apiUrl: URL
     let session: Session
 
-    init(apiUrl: URL, session: Session) {
-        self.apiUrl = apiUrl
+    init(session: Session) {
         self.session = session
     }
 
@@ -44,8 +42,7 @@ class UploadRequest {
                 headers.add(name: "Content-Length", value: String(data.count-continueOnByte))
                 headers.add(name: "Content-Range", value: "bytes \(continueOnByte)-\(data.count-1)/\(data.count)")
 
-                let uploadLocation = apiUrl.appendingPathComponent("measurements").appendingPathComponent(sessionIdentifier)
-                session.upload(data[continueOnByte..<data.count], to: uploadLocation, method: .put, headers: headers).response { response in
+                session.upload(data[continueOnByte..<data.count], to: sessionIdentifier, method: .put, headers: headers).response { response in
                 guard let response = response.response else {
                     if let error = response.error {
                         onFailure(authToken, sessionIdentifier, upload, error)
