@@ -26,13 +26,17 @@ import Foundation
  - version: 1.0.0
  */
 protocol Upload {
+    /// The amount of failed uploads before retrying is stopped.
     var failedUploadsCounter: Int {get set}
 
+    /// The device wide unique identifier of the measurement to upload.
     var identifier: UInt64 { get }
 
+    /// Provide the upload meta data of the measurement to upload.
     func metaData() throws -> MetaData
 
-    func data() -> Data
+    /// Provide the actual data of the measurement to upload.
+    func data() throws -> Data
 }
 
 /**
@@ -119,12 +123,18 @@ class CoreDataBackedUpload: Upload {
         }
     }
 
-    func data() -> Data {
+    /// - throws: Either a `SerializationError` of serialization of the measurement failes for some reason or a CoreData error if loading the measurement fails.
+    func data() throws -> Data {
         if let ret = dataCache {
             return ret
         } else {
-            // TODO: Deserialize data here!!!
-            return Data()
+            let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+            persistenceLayer.context = persistenceLayer.makeContext()
+            let serializer = MeasurementSerializer()
+
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
+            let ret = try serializer.serializeCompressed(serializable: measurement)
+            return ret
         }
     }
 

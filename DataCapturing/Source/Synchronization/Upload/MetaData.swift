@@ -41,6 +41,12 @@ var installationIdentifier: String {
     }
 }
 
+/**
+ A measurement's meta data, required by the server to decide on whether to accept the upload or not.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 struct MetaData: Encodable {
     let locationCount: UInt64
     let formatVersion: Int

@@ -295,17 +295,42 @@ class PersistenceTests: XCTestCase {
         XCTAssertLessThanOrEqual(loadedEvents[1].time.timeIntervalSince1970, loadedEvents[2].time.timeIntervalSince1970)
     }
 
-    func testLoadEvent_HappyPath() throws {
-        // Act
-        let events = try oocut.loadEvents(typed: .modalityTypeChange, forMeasurement: fixture)
+    func testLoadUploadData() throws {
+        let coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: PersistenceTests.dataModel)
+        let bundle = Bundle(for: type(of: coreDataStack))
+        try coreDataStack.setup(bundle: bundle) { error in
+            do {
+                let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+                persistenceLayer.context = persistenceLayer.makeContext()
+                let measurement = try FakeMeasurementImpl.fakeMeasurement(persistenceLayer: persistenceLayer).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 3).addAccelerations(countOfAccelerations: 60).build()
 
-        // Assert
-        XCTAssertEqual(events.count, 1)
-        XCTAssertNotNil(events[0].objectId)
-        XCTAssertEqual(events[0].type, .modalityTypeChange)
-        XCTAssertEqual(events[0].measurement, fixture)
-        XCTAssertEqual(events[0].value, "BICYCLE")
-        XCTAssertTrue(events[0].time.timeIntervalSinceNow<0)
+                let oocut = CoreDataBackedUpload(coreDataStack: coreDataStack, identifier: 1)
+                let metaData = try oocut.metaData()
+                let data = try oocut.data()
+
+                XCTAssertEqual(data, try MeasurementSerializer().serializeCompressed(serializable: measurement))
+                XCTAssertEqual(metaData.measurementId, UInt64(measurement.identifier))
+                XCTAssertEqual(metaData.formatVersion, 2)
+                XCTAssertEqual(metaData.locationCount, 3)
+            } catch {
+                XCTFail("\(error)")
+            }
+        }
+    }
+
+    /**
+     Create fixture data to use during testing
+
+     - Parameters:
+        - latitude: The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion
+        - longitude: The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction
+        - accuracy: The estimated accuracy of the measurement in meters
+        - speed: The speed the device was moving during the measurement in meters per second
+        - timestamp: The time the measurement happened at in milliseconds since the 1st of january 1970
+        - isValid: Whether or not this is a valid location in a cleaned track
+     */
+    static func location(latitude: Double = 2.0, longitude: Double = 2.0, accuracy: Double = 1.0, speed: Double = 10.0, timestamp: UInt64 = 5, isValid: Bool = true) -> GeoLocation {
+        return GeoLocation(latitude: latitude, longitude: longitude, accuracy: accuracy, speed: speed, timestamp: timestamp, isValid: isValid)
     }
 
     /// Assure that saving geo locations to a measurement actually stores them in the database.

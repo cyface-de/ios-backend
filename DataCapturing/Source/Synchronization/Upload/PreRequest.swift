@@ -41,7 +41,7 @@ class PreRequest {
     func request(authToken: String, upload: Upload, onSuccess: @escaping (String, String, Upload) -> (), onFailure: @escaping (UInt64, Error) -> ()) {
         do {
             let metaData = try upload.metaData()
-            let data = upload.data()
+            let data = try upload.data()
 
             var headers: HTTPHeaders = []
             headers.add(name: "Content-Type", value: "application/json; charset=UTF-8")

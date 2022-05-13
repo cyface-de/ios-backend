@@ -32,7 +32,7 @@ class StatusRequest {
     func request(authToken: String, sessionIdentifier: String, upload: Upload, onFinished: @escaping (UInt64) -> (), onResume: @escaping (String, String, Upload) -> (), onAborted: @escaping (String, Upload) -> (), onFailure: @escaping (UInt64, Error) -> ()) {
         do {
             let metaData = try upload.metaData()
-            let data = upload.data()
+            let data = try upload.data()
 
             var headers = metaData.asHeader
             guard let host = apiUrl.host else {

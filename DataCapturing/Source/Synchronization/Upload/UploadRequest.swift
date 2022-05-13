@@ -36,7 +36,7 @@ class UploadRequest {
     func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0, onSuccess: @escaping (UInt64) -> (), onFailure: @escaping (String, String, Upload, Error) -> ()) {
             do {
                 let metaData = try upload.metaData()
-                let data = upload.data()
+                let data = try upload.data()
 
                 var headers = metaData.asHeader
                 headers.add(name: "Content-Length", value: String(data.count-continueOnByte))

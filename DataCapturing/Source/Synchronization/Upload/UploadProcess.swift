@@ -21,7 +21,12 @@ import Foundation
 import Alamofire
 
 // TODO: Repeat Request after Authentication has failed
+/**
+ A state machine for the complete upload process of a single measurement from this device to a Cyface Data Collector service.
 
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 public class UploadProcess {
     var openSessions: SessionRegistry
     let apiUrl: URL
