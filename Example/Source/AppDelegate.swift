@@ -69,6 +69,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
             return
         }
 
+        guard let serverURL = URL(string: currentServerInSettings) else {
+            showAskForServerDialog()
+            return
+        }
+
+        let authenticator = CredentialsAuthenticator(authenticationEndpoint: serverURL)
+        authenticator.username = settings.username
+        authenticator.password = settings.password
+        self.authenticator = authenticator
+
         //self.serverConnection = self.createConnection(to: currentServerInSettings)
 
         // Authenticated server is the one from the settings so we start directly without login, otherwise login screen is shown.
