@@ -59,7 +59,7 @@ class UploadRequest {
 
                 let status = response.statusCode
 
-                if status == 200 {
+                if status == 201 {
                     onSuccess(upload.identifier)
                 } else {
                     onFailure(authToken, sessionIdentifier, upload, ServerConnectionError.requestFailed(httpStatusCode: status))
