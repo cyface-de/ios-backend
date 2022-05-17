@@ -49,7 +49,10 @@ class StatusRequest {
             // ask where to continue, here: "how much of the 4 bytes upload did you receive?"
             // always send the total upload size, no matter if you did just sent a chunk
             headers.add(name: "Content-Range", value: "bytes */\(data.count)")
-            let requestUrl = apiUrl.appendingPathComponent("measurements").appendingPathComponent(sessionIdentifier)
+            guard let requestUrl = URL(string: sessionIdentifier) else {
+                onFailure(upload.identifier, ServerConnectionError.invalidUploadLocation(sessionIdentifier))
+                return
+            }
 
             session.request(requestUrl, method: .put).response { response in
                 guard let response = response.response else {

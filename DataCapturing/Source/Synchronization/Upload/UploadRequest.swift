@@ -19,6 +19,7 @@
 
 import Foundation
 import Alamofire
+import OSLog
 
 /**
  The actual upload requests sends captured data to a Cyface server.
@@ -28,12 +29,15 @@ import Alamofire
 class UploadRequest {
     /// The URL to the Cyface API receiving the data.
     let session: Session
+    /// The logger used by objects of this class.
+    let log: OSLog = OSLog(subsystem: "UploadRequest", category: "de.cyface")
 
     init(session: Session) {
         self.session = session
     }
 
     func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0, onSuccess: @escaping (UInt64) -> (), onFailure: @escaping (String, String, Upload, Error) -> ()) {
+        os_log("Uploading measurement %{public}d to session %{public}@.", log: log, type: .debug, upload.identifier, sessionIdentifier)
             do {
                 let metaData = try upload.metaData()
                 let data = try upload.data()
