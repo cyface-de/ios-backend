@@ -32,6 +32,7 @@ class UploadRequest {
     /// The logger used by objects of this class.
     let log: OSLog = OSLog(subsystem: "UploadRequest", category: "de.cyface")
 
+    /// Initialize the request using the provided Alamofire `Session` for execution.
     init(session: Session) {
         self.session = session
     }
