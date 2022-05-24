@@ -10,8 +10,10 @@ PODS:
   - DataCapturing/Tests (10.0.0):
     - Alamofire (~> 5.5.0)
     - DataCompression (~> 3.6.0)
+    - Mocker (~> 2.5.5)
     - SwiftProtobuf (~> 1.18.0)
   - DataCompression (3.6.0)
+  - Mocker (2.5.5)
   - SwiftProtobuf (1.18.0)
 
 DEPENDENCIES:
@@ -24,6 +26,7 @@ SPEC REPOS:
     - Alamofire
     - Charts
     - DataCompression
+    - Mocker
     - SwiftProtobuf
 
 EXTERNAL SOURCES:
@@ -35,6 +38,7 @@ SPEC CHECKSUMS:
   Charts: b1e3a1f5a1c9ba5394438ca3b91bd8c9076310af
   DataCapturing: 80dd746bbc6dd7de0a939b95815edcb09e4f6b56
   DataCompression: 06628f9c807b6f152e0da37635633f62fc51dc77
+  Mocker: 8c731a8104962f246cadf2b02556218e9edc1390
   SwiftProtobuf: c3c12645230d9b09c72267e0de89468c5543bd86
 
 PODFILE CHECKSUM: acbd711de16953ad19288baefa9e4e460a7cdab7

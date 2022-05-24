@@ -57,7 +57,8 @@ This framework can be included by your App if you are going to capture sensor da
   # So make sure tests are always located on the same level or below the podspec.
   s.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'DataCapturing/Tests/**/*.swift'
-    test_spec.resources = 'DataCapturing/Tests/**/*.sqlite'
+    test_spec.resources = 'DataCapturing/Tests/Resources/*.sqlite'
+    test_spec.dependency 'Mocker', '~> 2.5.5'
   end
 
 

@@ -45,7 +45,12 @@
       "name": "Tests",
       "test_type": "unit",
       "source_files": "DataCapturing/Tests/**/*.swift",
-      "resources": "DataCapturing/Tests/**/*.sqlite"
+      "resources": "DataCapturing/Tests/Resources/*.sqlite",
+      "dependencies": {
+        "Mocker": [
+          "~> 2.5.5"
+        ]
+      }
     }
   ],
   "appspecs": [
