@@ -22,7 +22,10 @@ import DataCompression
 import os.log
 
 /// The current version of the Cyface binary format.
-let dataFormatVersion: UInt32 = 2
+let dataFormatVersion: UInt16 = 2
+let dataFormatVersionBytes = withUnsafeBytes(of: dataFormatVersion.bigEndian) {
+    Data($0)
+}
 
 /**
  Protocol that must be fullfilled by a serializer to transform an object into the Cyface binary format. The associated type `Serializable` is a placeholder for the type of object to serialize and deserialize.
@@ -120,7 +123,7 @@ class MeasurementSerializer: BinarySerializer {
      */
     func serialize(serializable measurement: Measurement) throws -> Data {
         var protosMeasurement = De_Cyface_Protos_Model_MeasurementBytes()
-        protosMeasurement.formatVersion = dataFormatVersion
+        protosMeasurement.formatVersion = UInt32(dataFormatVersion)
         if let events = measurement.events?.array as? [Event] {
             protosMeasurement.events = serialize(events: events)
         } else {
@@ -176,8 +179,11 @@ class MeasurementSerializer: BinarySerializer {
         protosMeasurement.directionsBinary = directionsData
         let rotationsData = try rotationsFile.data(for: measurement)
         protosMeasurement.rotationsBinary = rotationsData
+        let serializedData = try protosMeasurement.serializedData()
+        var ret = Data(dataFormatVersionBytes)
+        ret.append(serializedData)
 
-        return try protosMeasurement.serializedData()
+        return ret
     }
 
     private func serialize(events: [Event]) -> [De_Cyface_Protos_Model_Event] {
