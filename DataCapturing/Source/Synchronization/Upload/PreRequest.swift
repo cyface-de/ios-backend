@@ -38,7 +38,7 @@ class PreRequest {
         self.session = session
     }
 
-    func request(authToken: String, upload: Upload, onSuccess: @escaping (String, String, Upload) -> (), onFailure: @escaping (UInt64, Error) -> ()) {
+    func request(authToken: String, upload: Upload, onSuccess: @escaping (String, String, Upload) -> Void, onFailure: @escaping (UInt64, Error) -> Void) {
         do {
             let metaData = try upload.metaData()
             let data = try upload.data()
@@ -54,7 +54,13 @@ class PreRequest {
 
             let measurementIdentifier = metaData.measurementId
 
-            session.request(apiUrl.appendingPathComponent("measurements"), method: .post, parameters: metaData, encoder: JSONParameterEncoder.default, headers: headers).response { response in
+            session.request(
+                apiUrl.appendingPathComponent("measurements"),
+                method: .post,
+                parameters: metaData,
+                encoder: JSONParameterEncoder.default,
+                headers: headers
+            ).response { response in
 
                 guard let response = response.response else {
                     if let error = response.error {

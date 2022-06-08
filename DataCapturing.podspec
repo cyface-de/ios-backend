@@ -51,7 +51,8 @@ This framework can be included by your App if you are going to capture sensor da
   # A wrapper for the complicated ObjectiveC compression API.
   s.dependency 'DataCompression', '~> 3.6.0'
   # Handle Protobuf Data Format
-  s.dependency 'SwiftProtobuf', '~> 1.18.0'
+  s.dependency 'SwiftProtobuf', '~> 1.19.0'
+  s.dependency 'Protos', '~> 1.0.0'
 
   # Podspecs do not support references to files in the parent folder.
   # So make sure tests are always located on the same level or below the podspec.

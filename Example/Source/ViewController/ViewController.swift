@@ -184,7 +184,12 @@ class ViewController: UIViewController {
         authenticator.username = settings?.username
         authenticator.password = settings?.password
 
-        let ret = Synchronizer(apiURL: serverURL, coreDataStack: coreDataStack, cleaner: DeletionCleaner(), authenticator: authenticator) { [weak self] event, status in
+        let ret = Synchronizer(
+            apiURL: serverURL,
+            coreDataStack: coreDataStack,
+            cleaner: DeletionCleaner(),
+            authenticator: authenticator
+        ) { [weak self] event, status in
             guard let self = self else {
                 return
             }

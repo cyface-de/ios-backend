@@ -145,7 +145,7 @@ public class CoreDataManager {
 
      - Throws: Any error thrown by the block is rethrown here.
      */
-    func wrapInContext(_ block: (NSManagedObjectContext) throws -> ()) throws {
+    func wrapInContext(_ block: (NSManagedObjectContext) throws -> Void) throws {
         var outerError: Error?
 
         backgroundContext.performAndWait {

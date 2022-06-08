@@ -1,0 +1,664 @@
+/*
+ * Copyright (C) 2021 Cyface GmbH - All Rights Reserved
+ *
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ */
+syntax = "proto3";
+
+/*
+ * More details on packages: https://developers.google.com/protocol-buffers/docs/proto3#packages
+ * And Style Guide Packages section: https://developers.google.com/protocol-buffers/docs/style#packages
+ */
+package de.cyface.protos.model;
+
+/*
+ * To generate own `.java` files for the top level classes/enums.
+ *
+ * More details on options: https://developers.google.com/protocol-buffers/docs/proto3#options
+ *
+ * Import messages:
+ * - In java you cannot import message types from other `.proto` files.
+ *   see https://developers.google.com/protocol-buffers/docs/proto3#importing_definitions
+ * - "Any" for arbitrary serialized messages as bytes without having their `proto` definitions
+ *   see https://developers.google.com/protocol-buffers/docs/proto3#any
+ */
+option java_multiple_files = true;
+
+/*
+ * A message type which wraps all data collected between a "start" and a "stop" lifecycle event.
+ *
+ * We are reserving field numbers 1-15 for high-frequent fields (> 10 Hz) that we might want to add later.
+ * - The `reserved` definition is not used, as "field numbers cannot be used by future users"
+ *   see https://developers.google.com/protocol-buffers/docs/proto3#updating
+ * - The following fields are not repeating: formatVersion, locationsRecords, accelerations/r./d., capturingLog
+ * - The following fields are expected less than 10 Hz: events, images, videos
+ *
+ * author Armin Schnabel
+ * Version 1.0.0
+ */
+message Measurement {
+  /*
+   * The API version of this `Measurement` message format. Messages with the same API-version are compatible.
+   *
+   * Using `32bit` as we expect the version to be and within the range of an `integer`.
+   *
+   * The value is encoded in the `uint` ProtoBuf format as we expect the version to be positive.
+   * Negative numbers are supported but encoded inefficiently in `uint` this data type, compared to `sint`.
+   *
+   * The current format API version is `2`.
+   */
+  uint32 format_version = 16;
+
+  /*
+   * Collection of geo-locations.
+   *
+   * We use a packed encoding here, so this is a non repeated field.
+   */
+  LocationRecords location_records = 17;
+
+  /*
+   * Acceleration data stored during capturing.
+   */
+  AccelerationsBinary accelerations_binary = 18;
+  /*
+   * Rotation data stored during capturing.
+   */
+  RotationsBinary rotations_binary = 19;
+  /*
+   * Direction data stored during capturing.
+   */
+  DirectionsBinary directions_binary = 20;
+
+  /*
+   * Collection of events.
+   *
+   * We use `repeated` as we don't expect as many events as e.g. sensor points.
+   * If we decide to store high-frequent events later on we can use a field number < 16 which only requires 1 Byte.
+   */
+  repeated Event events = 21;
+
+  /*
+   * The image files, optionally collected during a measurement. Usually FileType `JPG` (compressed) or `DNG` (raw).
+   *
+   * We expect a similar image rates of 1 Hz or less, so a 2-Byte field number was chosen.
+   *
+   * The image size is kilo- or megabytes and, thus, field number encoding size is only a small fraction so `repeated` was chosen.
+   */
+  repeated File images = 22;
+  /*
+   * The video files, optionally collected during a measurement. Usually FileType `MP4`.
+   *
+   * When a measurement is paused and resumed, multiple video files are collected per measurement - thus, `repeated`.
+   */
+  repeated File videos = 23;
+  /*
+   * Log file which is optionally captured during images capturing. Usually FileType `CSV`.
+   */
+  File capturing_log = 24;
+}
+
+/*
+ * This is a modified version of the message `Measurement` which allows to inject bytes from sensor data.
+ * This allows the Android SDK synchronization to merge the captured sensor data without parsing it.
+ *
+ * The only change which was made is replacing the data type of the sensor data fields with `bytes`.
+ *
+ * ATTENTION: Make sure this message is always compatible to the `Measurement` message!
+ */
+message MeasurementBytes {
+  /*
+   * The current format of the binary format version is `2`
+   */
+  uint32 format_version = 16;
+  /*
+   * Collection of geo-locations.
+   */
+  LocationRecords location_records = 17;
+  /*
+   * Acceleration data stored during capturing.
+   */
+  bytes accelerations_binary = 18;
+  /*
+   * Rotation data stored during capturing.
+   */
+  bytes rotations_binary = 19;
+  /*
+   * Direction data stored during capturing.
+   */
+  bytes directions_binary = 20;
+  /*
+   * Collection of events.
+   */
+  repeated Event events = 21;
+  /*
+   * The image files are usually of FileType `JPG` (compressed) or `DNG` (raw).
+   */
+  repeated File images = 22;
+  /*
+   * The video files are usually of FileType `MP4`.
+   */
+  repeated File videos = 23;
+  /*
+   * This field allows to attach this file which is usually a of FileType `CSV`.
+   */
+  File capturing_log = 24;
+}
+
+/*
+ * A message type which wraps the `Accelerations` batches captured in a `cyfa` file of a measurement.
+ *
+ * This allows to inject the bytes from a `cyfa` file on the client without parsing the data [DAT-642].
+ */
+message AccelerationsBinary {
+  /*
+   * Collection of acceleration point batches.
+   *
+   * The sensor points are stored in batches to simplify the client code.
+   */
+  repeated Accelerations accelerations = 1;
+}
+
+/*
+ * A message type which wraps the `Accelerations` batches captured in a `cyfa` file of a measurement.
+ *
+ * This allows to inject the bytes from a `cyfa` file on the client without parsing the data [DAT-642].
+ */
+message RotationsBinary {
+  /*
+   * Collection of rotation point batches.
+   *
+   * The sensor points are stored in batches to simplify the client code.
+   */
+  repeated Rotations rotations = 1;
+}
+
+/*
+ * A message type which wraps the `Accelerations` batches captured in a `cyfa` file of a measurement.
+ *
+ * This allows to inject the bytes from a `cyfa` file on the client without parsing the data [DAT-642].
+ */
+message DirectionsBinary {
+  /*
+   * Collection of direction point batches.
+   *
+   * The sensor points are stored in batches to simplify the client code.
+   */
+  repeated Directions directions = 1;
+}
+
+/*
+ * A message type which wraps all geo-locations captured for one measurement.
+ *
+ * Each field contains the ordered list of that attribute for all points.
+ * I.e. field1[4] and field2[4] belong to the same point.
+ *
+ * Reason why we don't use `repeated LocationRecord` (and the same for sensor data):
+ * - In proto3 repeated fields use the "packed" encoding by default.
+ *   A field with 0 elements is not appearing in the message.
+ *   A field with >0 elements and a "primitive numeric type" use a single key-value pair with "wire type 2(length-delimited)".
+ *   Fields with non-primitive types (like `LocationRecord` would be) encode the `key` for each repetition of `LocationRecord`.
+ *   Example: LR KV KV, LR KV ... with LR = field number of LocationRecord and KV is a key-value pair inside this record.
+ *   i.e.: LocationRecord{ts=1234567890123,lat=51012345,lon=13012345}, LocationRecord{ts=1000,lat=34,lon=54}
+ *   Bytes: 56-66 KiB (without/with elevations) for a measurement with 3600 Locations (and no sensor data)
+ * - We use a more efficient way: One LR-entry with multiple primitive `packed` fields.
+ *   Example: LR K V V V V V K V V V V V, i.e. we only have to encode the type "LocationRecord" once not for each record.
+ *   i.e: LocationRecords { ts=[1234567890123,1000,1000], lat=[51012345,34,35], lon=[13012345,54,55]}
+ *   Bytes: 32-49 KiB (without/with elevations) for a measurement with 3600 Locations (and no sensor data)
+ * - In this annotation each LR must have a ts/lat/lon/speed/accuracy or else this does not work.
+ *   Only for `elevation` we define a `Elevation` message type which can also have no value and would encoded: `E E KV` or `E KV E KV`
+ */
+message LocationRecords {
+  /*
+   * A Unix timestamp in milliseconds, in the offset/diff format. E.g.: 1234567890123,1000,1000,1000.
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Using `64bit` as the first timestamp is absolute and in milliseconds since 1970 and, thus, not an `integer`.
+   *
+   * The value is encoded in the `uint` ProtoBuf format as we expect the timestamps to be in order (ascending).
+   * Negative numbers are supported but encoded inefficiently in `uint` this data type, compared to `sint`.
+   */
+  repeated uint64 timestamp = 1;
+
+  /*
+   * The coordinate-part, in the offset/diff format. E.g.: 51.012345,51.012300 => 51_012345,-45
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Using `32bit` as the maximum value is the diff between -180 and +180 which is: 360_000_000 and within `integer` range.
+   *
+   * The value is encoded in the `sint` ProtoBuf format as the latitude can as likely decrease as increase (diff-format).
+   * Negative numbers are encoded more efficiently in this data type, compared to `uint`.
+   */
+  repeated sint32 latitude = 2;
+
+  /*
+   * The coordinate-part, in the offset/diff format. E.g.: 13.012300,13.012345 => 13_012300,45
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Using `32bit` as the maximum value is the diff between -90 and +90 which is: 180_000_000 and within `integer` range.
+   *
+   * The value is encoded in the `sint` ProtoBuf format as the longitude can as likely decrease as increase (diff-format).
+   * Negative numbers are encoded more efficiently in this data type, compared to `uint`.
+   */
+  repeated sint32 longitude = 3;
+
+  /*
+   * The elevations, in the same order as the other `repeated` `LocationRecords` fields.
+   *
+   * Using a complex type `Elevation` for elevations as we expect some elevations to be `null`. Due to the "collection"
+   * format of the `LocationRecords` we cannot use a `repeated sint32 elevation` field as this does not support `null` entries.
+   *
+   * Using a 1-byte field number (1-15) as this is a repeated complex field, i.e. these numbers are encoded for each elevation.
+   */
+  repeated Elevation elevation = 4;
+
+  /*
+   * The elevation. If existent, the `value` field must be set. If not, the `is_null` field must be set to true.
+   *
+   * The encoding should look like the following:
+   * - E 1 48000 E 1 100 E 1 -50 (scenario where all locations have elevations)
+   * - E 1 48000 E 2 1   E 1 100 (scenario where some locations have elevations)
+   * - 0 bytes                   (scenario without elevations)
+   */
+  message Elevation {
+    /*
+     * Elevation in cm above sea level, in the offset/diff format. E.g.: 480.0m, 481.0m, 480.5m => 480_00cm, 100cm, -50cm
+     *
+     * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+     *
+     * Using `32bit` i.e. we support a diff value up to ~2*10^9 cm which is ~ 20.000 km. The diff between mount everest
+     * and the dead sea is ~ [8848m;-414m] so we should be good when teleporting between dry and comfy places on earth for a while.
+     *
+     * The value is encoded in the `sint` ProtoBuf format as the longitude can as likely decrease as increase (diff-format).
+     * Negative numbers are encoded more efficiently in this data type, compared to `uint`.
+     */
+    sint32 value = 1;
+
+    /*
+     * This field is only encoded if no `value` is set (i.e. elevation `is_null`).
+     *
+     * We cannot just have the optional "value" field as we can't differentiate between default value (0) and unset (0)
+     */
+    bool is_null = 2;
+  }
+
+  /*
+   * Accuracy in cm (absolute value must be >= 0), in the offset/diff format. E.g.: 13.0m, 12.5m => 13_00cm, -50cm
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Using `32bit` i.e. we support a diff value up to ~2*10^9 cm which is ~ 20.000 km.
+   *
+   * The value is encoded in the `sint` ProtoBuf format as the longitude can as likely decrease as increase (diff-format).
+   * Negative numbers are encoded more efficiently in this data type, compared to `uint`.
+   *
+   * The likelihood of that accuracy to be correct is not stored as not all platforms provide this or provide this in different format.
+   * For some platform this is static, i.e. we can retrieve this information from the osVersion/osType field.
+   */
+  repeated sint32 accuracy = 5;
+
+  /*
+   * Speed in cm/s (absolute value should be >= 0), in the offset/diff format. E.g.: 11.0m/s, 10.5m/s => 11_00 cm/s, -50cm/s
+   * However, some platforms (Samsung?) recorded negative absolute speed values in the past. This is supported by the format.
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Using `32bit` i.e. we support a diff value up to ~2*10^9 cm/s which is ~ 20.000 km/s.
+   * As we capture the speed relative to the earth's rotation, we should be covering all manned aircraft, but not spacecrafts.
+   *
+   * The value is encoded in the `sint` ProtoBuf format as the longitude can as likely decrease as increase (diff-format).
+   * Negative numbers are encoded more efficiently in this data type, compared to `uint`.
+   */
+  repeated sint32 speed = 6;
+}
+
+/*
+ * A message type which wraps a batch of acceleration points captured for one measurement.
+ *
+ * Each field contains the ordered list of that attribute for all points.
+ * I.e. field1[4] and field2[4] belong to the same point.
+ *
+ * The first point is stored as absolute number, subsequent points in the offset-format to reduce the byte size.
+ *
+ * Reference phone, Pixel 3a, contains this sensor: https://www.bosch-sensortec.com/products/motion-sensors/imus/bmi160/
+ * - Bosch recommends the following sensor: https://www.bosch-sensortec.com/products/motion-sensors/imus/bmi270/
+ * - the sensitivity and value ranges are the same [DAT-646]
+ * - the sensitivity is 0.004790957 i.e. ~ 1/208.73 ... which is 1÷(16384 [from datasheet] ÷9,81 [g to m/s])×8 [8 bits per byte/digit]
+ * - Thus, we choose a unit value of 0.001 m/s^2, i.e 1mm/s^2.
+ */
+message Accelerations {
+  /*
+   * A Unix timestamp in milliseconds, in the offset/diff format. E.g.: 1234567890123,1000,1000,1000.
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Using `64bit` as the first timestamp is absolute and in milliseconds since 1970 and, thus, not an `integer`.
+   *
+   * The value is encoded in the `uint` ProtoBuf format as we expect the timestamps to be in order (ascending).
+   * Negative numbers are supported but encoded inefficiently in `uint` this data type, compared to `sint`.
+   */
+  repeated uint64 timestamp = 1;
+
+  /*
+   * Acceleration value of one axis in mm/s^2, in the offset/diff format. E.g.:
+   * Absolute numbers: -9, 359, -4_820 => Offset-format: -9, +359, -5_179
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Absolute values between +-16 m/s^2 are expected, i.e. +- 32_000 mm/s^2 diff.
+   * `32 bit` i.e. we support diffs up to ~2*10^9 mm/s^2 ~ 2.000 km/s^2. We should be fine here.
+   *
+   * Using `sint` as the one-axial-sensor-value can as likely decrease as increase - using the diff/offset format here.
+   * Negative numbers are encoded more efficiently in this data type, compared to `int32`.
+   */
+  repeated sint32 x = 2;
+  /*
+   * Acceleration value of one axis in mm/s^2, in the offset/diff format. E.g.:
+   * Absolute numbers: -9, 359, -4_820 => Offset-format: -9, +359, -5_179
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Absolute values between +-16 m/s^2 are expected, i.e. +- 32_000 mm/s^2 diff.
+   * `32 bit` i.e. we support diffs up to ~2*10^9 mm/s^2 ~ 2.000 km/s^2. We should be fine here.
+   *
+   * Using `sint` as the one-axial-sensor-value can as likely decrease as increase - using the diff/offset format here.
+   * Negative numbers are encoded more efficiently in this data type, compared to `int32`.
+   */
+  repeated sint32 y = 3;
+  /*
+   * Acceleration value of one axis in mm/s^2, in the offset/diff format. E.g.:
+   * Absolute numbers: -9, 359, -4_820 => Offset-format: -9, +359, -5_179
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Absolute values between +-16 m/s^2 are expected, i.e. +- 32_000 mm/s^2 diff.
+   * `32 bit` i.e. we support diffs up to ~2*10^9 mm/s^2 ~ 2.000 km/s^2. We should be fine here.
+   *
+   * Using `sint` as the one-axial-sensor-value can as likely decrease as increase - using the diff/offset format here.
+   * Negative numbers are encoded more efficiently in this data type, compared to `int32`.
+   */
+  repeated sint32 z = 4;
+}
+
+/*
+ * A message type which wraps a batch of rotation points captured for one measurement.
+ *
+ * Each field contains the ordered list of that attribute for all points.
+ * I.e. field1[4] and field2[4] belong to the same point.
+ *
+ * The first point is stored as absolute number, subsequent points in the offset-format to reduce the byte size.
+ *
+ * Reference phone, Pixel 3a, contains this sensor: https://www.bosch-sensortec.com/products/motion-sensors/imus/bmi160/
+ * - Bosch recommends the following sensor: https://www.bosch-sensortec.com/products/motion-sensors/imus/bmi270/
+ * - the sensitivity and value ranges are the same [DAT-646]
+ * - the sensitivity is 0.0010652635 rad/s. (e.g. the Tinkerforge IMU uses 1/16 °/s = 0.00109083078 rad/s)
+ * - not sure how to get the sensitivity from the `262.4 LSB/°/s` from the data sheet, though
+ * - Thus, we choose a unit value of 0.001 rad/s, i.e 1 rad/1000s (which would be 3.6 rad/h, but we don't use that unit).
+ */
+message Rotations {
+  /*
+   * A Unix timestamp in milliseconds, in the offset/diff format. E.g.: 1234567890123,1000,1000,1000.
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Using `64bit` as the first timestamp is absolute and in milliseconds since 1970 and, thus, not an `integer`.
+   *
+   * The value is encoded in the `uint` ProtoBuf format as we expect the timestamps to be in order (ascending).
+   * Negative numbers are supported but encoded inefficiently in `uint` this data type, compared to `sint`.
+   */
+  repeated uint64 timestamp = 1;
+
+  /*
+   * Rotation value of one axis in rad/1000s, in the offset/diff format. E.g.:
+   * Absolute values: 83, -51, 4.367 => Offset-format: 83, -134, 4_418
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Absolute values between +(-?) 2000 degrees/s are expected, i.e. +- 2*34.906585 rad/s, i.e. +-69_814 rad/1000s diff.
+   * `32 bit` i.e. we support diffs up to ~2*10^9 rad/1000s ~ 2*10^6 rad/s. We should be fine here.
+   *
+   * Using `sint` as the one-axial-sensor-value can as likely decrease as increase - using the diff/offset format here.
+   * Negative numbers are encoded more efficiently in this data type, compared to `int32`.
+   */
+  repeated sint32 x = 2;
+  /*
+   * Rotation value of one axis in rad/1000s, in the offset/diff format. E.g.:
+   * Absolute values: 83, -51, 4.367 => Offset-format: 83, -134, 4_418
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Absolute values between +(-?) 2000 degrees/s are expected, i.e. +- 2*34.906585 rad/s, i.e. +-69_814 rad/1000s diff.
+   * `32 bit` i.e. we support diffs up to ~2*10^9 rad/1000s ~ 2*10^6 rad/s. We should be fine here.
+   *
+   * Using `sint` as the one-axial-sensor-value can as likely decrease as increase - using the diff/offset format here.
+   * Negative numbers are encoded more efficiently in this data type, compared to `int32`.
+   */
+  repeated sint32 y = 3;
+  /*
+   * Rotation value of one axis in rad/1000s, in the offset/diff format. E.g.:
+   * Absolute values: 83, -51, 4.367 => Offset-format: 83, -134, 4_418
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Absolute values between +(-?) 2000 degrees/s are expected, i.e. +- 2*34.906585 rad/s, i.e. +-69_814 rad/1000s diff.
+   * `32 bit` i.e. we support diffs up to ~2*10^9 rad/1000s ~ 2*10^6 rad/s. We should be fine here.
+   *
+   * Using `sint` as the one-axial-sensor-value can as likely decrease as increase - using the diff/offset format here.
+   * Negative numbers are encoded more efficiently in this data type, compared to `int32`.
+   */
+  repeated sint32 z = 4;
+}
+
+/*
+ * A message type which wraps a batch of direction points captured for one measurement.
+ *
+ * Each field contains the ordered list of that attribute for all points.
+ * I.e. field1[4] and field2[4] belong to the same point.
+ *
+ * The first point is stored as absolute number, subsequent points in the offset-format to reduce the byte size.
+ *
+ * Reference phone, Pixel 3a, contains this sensor: akm, AK0991X Magnetometer, Version 20012 (no good data sheet found)
+ * - Another phones use https://www.digikey.de/catalog/en/partgroup/ak09915/65408, with 1/16 resolution (same as e.g. Tinkerforge)
+ * - the sensitivity is 0.15 µT. (e.g. Tinkerforge IMU uses 1/16 µT = 0.0625 µT)
+ * - Thus, we choose a unit value of 0.01 µT, i.e 1 µT/100 (which would be 10 nT, but we don't use that unit).
+ */
+message Directions {
+  /*
+   * A Unix timestamp in milliseconds, in the offset/diff format. E.g.: 1234567890123,1000,1000,1000.
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Using `64bit` as the first timestamp is absolute and in milliseconds since 1970 and, thus, not an `integer`.
+   *
+   * The value is encoded in the `uint` ProtoBuf format as we expect the timestamps to be in order (ascending).
+   * Negative numbers are supported but encoded inefficiently in `uint` this data type, compared to `sint`.
+   */
+  repeated uint64 timestamp = 1;
+
+  /*
+   * Direction value of one axis in µT/100, in the offset/diff format. E.g.:
+   * Absolute values: 67, -141, 42 => Offset-format: 67, -208, 183
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Absolute values between +- 4911.994 µT on Pixel 3a and +- 1300 µT on Tinkerforge are expected, i.e. +- 982_400 µT/100 diff.
+   * `32 bit` i.e. we support diffs up to ~2*10^9 µT/100 ~ 20 T so strong magnet as in the LHC/CERN are covered theoretically.
+   *
+   * The 10 nT (µT/100) unit does not cover you during travels between galaxies as you can't orientate by magnetic values
+   * due to the weak field there.
+   *
+   * Using `sint` as the one-axial-sensor-value can as likely decrease as increase - using the diff/offset format here.
+   * Negative numbers are encoded more efficiently in this data type, compared to `int32`.
+   */
+  repeated sint32 x = 2;
+  /*
+   * Direction value of one axis in µT/100, in the offset/diff format. E.g.:
+   * Absolute values: 67, -141, 42 => Offset-format: 67, -208, 183
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Absolute values between +- 4911.994 µT on Pixel 3a and +- 1300 µT on Tinkerforge are expected, i.e. +- 982_400 µT/100 diff.
+   * `32 bit` i.e. we support diffs up to ~2*10^9 µT/100 ~ 20 T so strong magnet as in the LHC/CERN are covered theoretically.
+   *
+   * The 10 nT (µT/100) unit does not cover you during travels between galaxies as you can't orientate by magnetic values
+   * due to the weak field there.
+   *
+   * Using `sint` as the one-axial-sensor-value can as likely decrease as increase - using the diff/offset format here.
+   * Negative numbers are encoded more efficiently in this data type, compared to `int32`.
+   */
+  repeated sint32 y = 3;
+  /*
+   * Direction value of one axis in µT/100, in the offset/diff format. E.g.:
+   * Absolute values: 67, -141, 42 => Offset-format: 67, -208, 183
+   *
+   * The offset/diff format encodes the data more efficiently, as the `varint` encoding is used.
+   *
+   * Absolute values between +- 4911.994 µT on Pixel 3a and +- 1300 µT on Tinkerforge are expected, i.e. +- 982_400 µT/100 diff.
+   * `32 bit` i.e. we support diffs up to ~2*10^9 µT/100 ~ 20 T so strong magnet as in the LHC/CERN are covered theoretically.
+   *
+   * The 10 nT (µT/100) unit does not cover you during travels between galaxies as you can't orientate by magnetic values
+   * due to the weak field there.
+   *
+   * Using `sint` as the one-axial-sensor-value can as likely decrease as increase - using the diff/offset format here.
+   * Negative numbers are encoded more efficiently in this data type, compared to `int32`.
+   */
+  repeated sint32 z = 4;
+}
+
+/*
+ * A message type which wraps data of one event captured, such as the `start` lifecycle event or a `modality change`.
+ *
+ * We store each event separately as we don't expect different event types to contain all fields.
+ * Fields like `timestamp`, `type` and `value` use a 1 Byte field number (1-15) as this field probably occurs in most events.
+ *
+ * If we do increase the frequency later on, we should also change the field number of `Measurement.events` to a 1 Byte number.
+ */
+message Event {
+  /*
+   * A Unix timestamp in milliseconds, as absolute values. E.g.: 1234567890123,1234567891123,...
+   *
+   * As we don't expect as many events as e.g. locations, we don't use the offset/diff variant here.
+   *
+   * Using `64bit` as the timestamp is absolute and in milliseconds since 1970 and, thus, not in the `integer` range.
+   *
+   * The value is encoded in the `uint` ProtoBuf format as we don't expect negative timestamps.
+   * Negative numbers are supported but encoded inefficiently in `uint` this data type, compared to `sint`.
+   */
+  uint64 timestamp = 1;
+
+  /*
+   * Type of the event captured which also helps to know which event fields to expect.
+   */
+  EventType type = 2;
+
+  /*
+   * Additional information. Dependent on the `EventType`.
+   *
+   * E.g.: the new value after a `MODALITY_TYPE_CHANGE` such as `BICYCLE`.
+   *
+   * Protobuf `strings` must always contain UTF-8 encoded (or 7-bit ASCII text), and cannot be longer than 2^32.
+   */
+  string value = 3;
+
+  /*
+   * Enum which helps to identify different types of event and to know which event fields to expect.
+   *
+   * Reserving 1-15 for events which we might want to add later which occur very frequently
+   *
+   * Our current events like lifecycle-button-presses or modality-type-changes only occur rarely
+   * An example for high-frequent event types could be e.g. debugging/crash events
+   *
+   * For more details and options like "alias" see: https://developers.google.com/protocol-buffers/docs/proto3#enum
+   */
+  enum EventType {
+    /*
+     * Default value.
+     *
+     * The 1st element of a proto enum must be 0. Following the Style Guide it's named enum_name_UNSPECIFIED.
+     */
+    EVENT_TYPE_UNSPECIFIED = 0;
+    /*
+     * Event captured when the user starts the data capturing (new `measurement`).
+     */
+    LIFECYCLE_START = 16;
+    /*
+     * Event captured when the user stops the data capturing (`measurement` finished).
+     */
+    LIFECYCLE_STOP = 17;
+    /*
+     * Event captured when the user resumes a paused `measurement`.
+     */
+    LIFECYCLE_RESUME = 18;
+    /*
+     * Event captured when the user pauses a `measurement`.
+     */
+    LIFECYCLE_PAUSE = 19;
+    /*
+     * Event captured when the user changes the `modality` type, e.g. changes from FOOT to BICYCLE.
+     */
+    MODALITY_TYPE_CHANGE = 20;
+  }
+}
+
+/*
+ * Message type which wraps a file which is collected during one measurement.
+ *
+ * Reserving 1 Byte field numbers 1-15 for `repeated` complex type field which we might want to add later.
+ */
+message File {
+  /*
+   * A Unix timestamp in milliseconds, as absolute values. E.g.: 1234567890123,1234567891123,...
+   *
+   * As we don't expect as many events as e.g. locations, we don't use the offset/diff variant here.
+   *
+   * Using `64bit` as the timestamp is absolute and in milliseconds since 1970 and, thus, not in the `integer` range.
+   *
+   * The value is encoded in the `uint` ProtoBuf format as we don't expect negative timestamps.
+   * Negative numbers are supported but encoded inefficiently in `uint` this data type, compared to `sint`.
+   */
+  uint64 timestamp = 16;
+
+  /*
+   * The type of the file represented by the binary data.
+   */
+  FileType type = 17;
+
+  /*
+   * The binary data of the file.
+   *
+   * "Any arbitrary sequence of bytes no longer than 2^32" https://developers.google.com/protocol-buffers/docs/proto3#scalar
+   */
+  bytes bytes = 18;
+
+  /*
+   * The type of the file represented by the binary data.
+   *
+   * The 1st element must be 0. Following the Style Guide it's named enum_name_UNSPECIFIED.
+   * For more details and options like "alias" see: https://developers.google.com/protocol-buffers/docs/proto3#enum
+   */
+  enum FileType {
+    /*
+     * Default value
+     */
+    FILE_TYPE_UNSPECIFIED = 0;
+    /*
+     * Compressed image, interpreted as images captured during the measurement, e.g. from Android.
+     */
+    JPG = 1;
+    /*
+     * Raw image, interpreted as images captured during the measurement, e.g. from Android.
+     */
+    DNG = 2;
+    /*
+     * Video, interpreted as a video captured during the measurement, e.g. from Android.
+     */
+    MP4 = 3;
+    /*
+     * Log file used e.g. to protocol the image capturing rates on Android.
+     */
+    CSV = 4;
+  }
+}

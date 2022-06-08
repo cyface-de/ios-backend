@@ -37,7 +37,7 @@ class UploadRequest {
         self.session = session
     }
 
-    func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0, onSuccess: @escaping (UInt64) -> (), onFailure: @escaping (String, String, Upload, Error) -> ()) {
+    func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0, onSuccess: @escaping (UInt64) -> Void, onFailure: @escaping (String, String, Upload, Error) -> Void) {
         os_log("Uploading measurement %{public}d to session %{public}@.", log: log, type: .debug, upload.identifier, sessionIdentifier)
             do {
                 let metaData = try upload.metaData()

@@ -22,7 +22,7 @@ import DataCapturing
 import MapKit
 import os.log
 
-// TODO check that having open one of these VC while changing the server url actually opens the login screen again.
+// TODO: check that having open one of these VC while changing the server url actually opens the login screen again.
 class MapViewController: UIViewController {
     // MARK: - Outlets
     @IBOutlet weak var mapWidget: MKMapView!
@@ -88,10 +88,8 @@ class MapViewController: UIViewController {
                 let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
                 do {
                     let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
-                    let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
-                    var eventToChange = events[indexPathForSelectedRow.row]
+                    let eventToChange = measurement.events[indexPathForSelectedRow.row]
                     eventToChange.value = modality.dbValue
-                    // TODO: This will not work, since the event inside the measurement is not updated.
                     _ = try persistenceLayer.save(measurement: measurement)
                 } catch {
                     fatalError("Unable to load data from database")

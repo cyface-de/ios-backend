@@ -130,7 +130,7 @@ class SerializationTest: XCTestCase {
     }
 
     func testSerializeEmptyMeasurement() throws {
-        let measurement = MeasurementMO(context: self.persistenceLayer.makeContext())
+        let measurement = Measurement(identifier: 1)
         measurement.tracks = []
         let res = try oocut.serialize(serializable: measurement)
 
@@ -211,48 +211,6 @@ class SerializationTest: XCTestCase {
         let measurement = try FakeMeasurementImpl.fakeMeasurement(identifier: nextIdentifier).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 36_000).addAccelerations(countOfAccelerations: 3_600_000).build(persistenceLayer)
         let data = try oocut.serialize(serializable: measurement)
         try data.write(to: URL(fileURLWithPath: "/Users/cyface/data.cyf"))
-    }
-
-    /**
-     Tests that geo location serialization works as expected for `GeoLocation` instances. This test runs isolated from all other serializations.
-     */
-    func testSerializeGeoLocations() {
-        var timestamp: [UInt32] = []
-        var accuracy: [UInt16] = []
-        do {
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
-
-            let locations = try PersistenceLayer.collectGeoLocations(from: measurement)
-
-            let serializedData = try self.oocut.serialize(serializable: measurement)
-            let sizeOfHeaderInBytes = 18
-            let sizeOfOneGeoLocationInBytes = 36
-
-            for index in 0..<locations.count {
-                let indexOffset = index * sizeOfOneGeoLocationInBytes + sizeOfHeaderInBytes
-                let timestampStartIndex = indexOffset
-                let timestampEndIndex = indexOffset + 8
-                let timestampData = serializedData[timestampStartIndex..<timestampEndIndex]
-                let accuracyStartIndex = indexOffset + 32
-                let accuracyEndIndex = indexOffset + 36
-                let accuracyData = serializedData[accuracyStartIndex..<accuracyEndIndex]
-                timestamp.append(self.dataToUInt32(data: Array(timestampData)))
-                accuracy.append(self.dataToUInt16(data: Array(accuracyData)))
-            }
-
-            //print(serializedData.map { String(format: "%02x", $0) }.joined())
-            XCTAssertEqual(timestamp.count, 3)
-            XCTAssertEqual(timestamp[0], 10_000)
-            XCTAssertEqual(timestamp[1], 10_100)
-            XCTAssertEqual(timestamp[2], 10_200)
-
-            XCTAssertEqual(accuracy.count, 3)
-            XCTAssertEqual(accuracy[0], 200)
-            XCTAssertEqual(accuracy[1], 200)
-            XCTAssertEqual(accuracy[2], 200)
-        } catch let error {
-            XCTFail("Unable to serialize measurement \(String(describing: fixture)). Error \(error)")
-        }
     }
 
     func testData() throws {

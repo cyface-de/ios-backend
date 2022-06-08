@@ -47,7 +47,7 @@ public class Measurement: Hashable, Equatable {
     /// A flag, marking this `Measurement` as either synchronized or not.
     public var synchronized: Bool
     /// The UNIX timestamp in milliseconds since the 1st of January 1970, when this measurement was started.
-    public let timestamp: Int64
+    public let timestamp: UInt64
     /// The calculated length of the `Measurement`. See `DistanceCalculationStrategy` for further details.
     public var trackLength: Double
     /// The user events that occurred during this `Measurement`.
@@ -71,7 +71,7 @@ public class Measurement: Hashable, Equatable {
             accelerationsCount: managedObject.accelerationsCount,
             rotationsCount: managedObject.rotationsCount,
             directionsCount: managedObject.directionsCount,
-            timestamp: managedObject.timestamp,
+            timestamp: UInt64(managedObject.timestamp),
             trackLength: managedObject.trackLength)
         self.objectId = managedObject.objectID
 
@@ -108,7 +108,7 @@ public class Measurement: Hashable, Equatable {
         - events: The user events that occurred during this `Measurement`.
         - tracks: The tracks containing all the data this `Measurement` has captured.
      */
-    init(identifier: Int64, synchronizable: Bool = false, synchronized: Bool = false, accelerationsCount: Int32 = 0, rotationsCount: Int32 = 0, directionsCount: Int32 = 0, timestamp: Int64 = DataCapturingService.currentTimeInMillisSince1970(), trackLength: Double = 0.0, events: [Event] = [Event](), tracks: [Track] = [Track]()) {
+    init(identifier: Int64, synchronizable: Bool = false, synchronized: Bool = false, accelerationsCount: Int32 = 0, rotationsCount: Int32 = 0, directionsCount: Int32 = 0, timestamp: UInt64 = DataCapturingService.currentTimeInMillisSince1970(), trackLength: Double = 0.0, events: [Event] = [Event](), tracks: [Track] = [Track]()) {
         self.identifier = identifier
         self.synchronizable = synchronizable
         self.synchronized = synchronized
@@ -145,7 +145,7 @@ public class Measurement: Hashable, Equatable {
     }
 
     /// Required by the `Equatable` protocol to compare two `Measurement` instances.
-    public static func ==(lhs: Measurement, rhs: Measurement) -> Bool {
+    public static func == (lhs: Measurement, rhs: Measurement) -> Bool {
         return lhs.identifier == rhs.identifier
     }
 }

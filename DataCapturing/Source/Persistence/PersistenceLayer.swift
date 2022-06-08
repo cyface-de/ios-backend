@@ -45,11 +45,6 @@ public class PersistenceLayer {
     /// Used to update a measurements length, each time new locations are added.
     private let distanceCalculator: DistanceCalculationStrategy
 
-    /// The current `NSManagedObjectContext` used by this persistence layer. This has to be reset if the layer is used on a different thread. If it is `nil` each method is going to use its own context, which can cause problems if model objects are used between those methods.
-    public var context: NSManagedObjectContext {
-        return manager.backgroundContext
-    }
-
     // MARK: - Initializers
 
     /**
@@ -94,8 +89,6 @@ public class PersistenceLayer {
             var measurement = try Measurement(managedObject: measurementMO)
             _ = try createEvent(of: .modalityTypeChange, withValue: mode, parent: &measurement)
 
-            context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
-            context.refresh(measurement, mergeChanges: true)
             return measurement
         }
     }
@@ -289,7 +282,7 @@ public class PersistenceLayer {
                     longitude: location.longitude,
                     accuracy: location.accuracy,
                     speed: location.speed,
-                    timestamp: Int64(location.timestamp.timeIntervalSince1970 * 1000.0),
+                    timestamp: UInt64(location.timestamp.timeIntervalSince1970 * 1000.0),
                     isValid: location.isValid,
                     parent: track)
                 try track.append(location: geoLocation)
@@ -324,7 +317,7 @@ public class PersistenceLayer {
     func save(accelerations: [SensorValue] = [], rotations: [SensorValue] = [], directions: [SensorValue] = [], in measurement: inout Measurement) throws {
         try manager.wrapInContext { context in
 
-        debugPrint("Storing \(accelerations.count) accelerations \(rotations.count) rotations and \(directions.count) directions.")
+            debugPrint("Storing \(accelerations.count) accelerations \(rotations.count) rotations and \(directions.count) directions.")
 
             guard let measurementObjectId = measurement.objectId else {
                 throw PersistenceError.unsynchronizedMeasurement(identifier: measurement.identifier)
@@ -334,35 +327,46 @@ public class PersistenceLayer {
                 throw PersistenceError.measurementNotLoadable(measurement.identifier)
             }
 
-        let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
-        let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
-        let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
-        if !accelerations.isEmpty {
-            do {
-            _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
-            } catch {
-                debugPrint("Unable to write data to file \(accelerationsFile.fileName)!")
-                throw error
+            let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
+            let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
+            let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
+            if !accelerations.isEmpty {
+                do {
+                    _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
+                } catch {
+                    debugPrint("Unable to write data to file \(accelerationsFile.fileName)!")
+                    throw error
+                }
             }
-        }
 
-        if !rotations.isEmpty {
-            do {
-                _ = try rotationsFile.write(serializable: rotations, to: measurement.identifier)
-            } catch {
-                debugPrint("Unable to write data to file \(rotationsFile.fileName)!")
-                throw error
+            if !rotations.isEmpty {
+                do {
+                    _ = try rotationsFile.write(serializable: rotations, to: measurement.identifier)
+                } catch {
+                    debugPrint("Unable to write data to file \(rotationsFile.fileName)!")
+                    throw error
+                }
             }
-        }
 
-        if !directions.isEmpty {
-            do {
-            _ = try directionsFile.write(serializable: directions, to: measurement.identifier)
-            } catch {
-                debugPrint("Unable to write data to file \(directionsFile.fileName)!")
-                throw error
+            if !directions.isEmpty {
+                do {
+                    _ = try directionsFile.write(serializable: directions, to: measurement.identifier)
+                } catch {
+                    debugPrint("Unable to write data to file \(directionsFile.fileName)!")
+                    throw error
+                }
             }
+
+            measurement.accelerationsCount = measurement.accelerationsCount.advanced(by: accelerations.count)
+            measurementMO.accelerationsCount = measurement.accelerationsCount
+            measurement.rotationsCount = measurement.rotationsCount.advanced(by: rotations.count)
+            measurementMO.rotationsCount = measurement.rotationsCount
+            measurement.directionsCount = measurement.directionsCount.advanced(by: accelerations.count)
+            measurementMO.directionsCount = measurement.directionsCount
+
+            try context.save()
         }
+    }
 
     /// Save the provided `Measurement` via CoreData
     public func save(measurement: Measurement) throws -> Measurement {
@@ -379,7 +383,7 @@ public class PersistenceLayer {
             } else {
                 let newManagedMeasurement = MeasurementMO(context: context)
                 newManagedMeasurement.identifier = measurement.identifier
-                newManagedMeasurement.timestamp = measurement.timestamp
+                newManagedMeasurement.timestamp = Int64(measurement.timestamp)
                 measurement.objectId = newManagedMeasurement.objectID
                 try newManagedMeasurement.update(from: measurement)
 
@@ -448,7 +452,7 @@ public class PersistenceLayer {
 
             var ret = [GeoLocation]()
             for fetchResult in try context.fetch(request) {
-                let location = try GeoLocation(managedObject: fetchResult, parent: track)
+                let location = GeoLocation(managedObject: fetchResult, parent: track)
                 ret.append(location)
             }
             return ret

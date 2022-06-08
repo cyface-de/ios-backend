@@ -241,13 +241,17 @@ public class Synchronizer {
             synchronizationInProgress = false
             return
         }
-        let uploadProcess = UploadProcess(apiUrl: apiURL, sessionRegistry: sessionRegistry, authenticator: authenticator, onSuccess: successHandler, onFailure: failureHandler)
+        let uploadProcess = UploadProcess(
+            apiUrl: apiURL,
+            sessionRegistry: sessionRegistry,
+            authenticator: authenticator,
+            onSuccess: successHandler,
+            onFailure: failureHandler)
 
         for measurement in measurements {
             handler(.synchronizationStarted(measurement: measurement.identifier), .success)
             let upload = CoreDataBackedUpload(coreDataStack: coreDataStack, identifier: UInt64(measurement.identifier))
             uploadProcess.upload(upload)
-                //.sync(measurement: measurement.identifier, onSuccess: successHandler, onFailure: failureHandler)
         }
     }
 

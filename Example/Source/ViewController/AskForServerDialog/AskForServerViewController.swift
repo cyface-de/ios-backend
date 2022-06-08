@@ -48,7 +48,7 @@ class AskForServerViewController: CyViewController {
         let button = CyButton()
         button.setTitle(NSLocalizedString("okAction", comment: "Shown to acknowledge an alert dialog!"), for: .normal)
 
-        button.addTarget(self, action: #selector(okClicked), for: .touchUpInside)
+        button.addTarget(AskForServerViewController.self, action: #selector(okClicked), for: .touchUpInside)
 
         return button
     }()

@@ -44,8 +44,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
     var window: UIWindow?
     /// The database access layer using iOS CoreData framework
     var coreDataStack: CoreDataManager?
-    /// A connection to a Cyface collector service.
-    //var serverConnection: ServerConnection?
     /// An authenticator authenticating users to login to the app and upload data to a Cyface collector service if valid.
     var authenticator: CredentialsAuthenticator?
     /// The persistent application settings. These includes hidden settings as well as those that can be customized using the systems settings app.
@@ -79,7 +77,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
         authenticator.password = settings.password
         self.authenticator = authenticator
 
-        //self.serverConnection = self.createConnection(to: currentServerInSettings)
+        // self.serverConnection = self.createConnection(to: currentServerInSettings)
 
         // Authenticated server is the one from the settings so we start directly without login, otherwise login screen is shown.
         if settings.authenticatedServerUrl == currentServerInSettings {

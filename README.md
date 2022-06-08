@@ -20,6 +20,9 @@ The `ServerConnection` class is responsible for transmitting captured data to a 
 
 ## Integration in your App
 
+### Integration
+
+
 ### Permissions
 
 To use the Cyface SDK permissions to capture the users location while using the app and additionally in the background are required.
@@ -299,6 +302,19 @@ serverConnection: serverConnection) { event, status in
 [See](https://cyface-de.github.io/ios-backend/)
 
 ## Building from Source
+
+### Generate Interface to Protocol Buffer
+We use protobuf to transmit data.
+Before this works you need to install the Swift Protobuf compiler for example using homebrew: 
+
+```
+brew install swift-protobuf
+```
+
+If this succeeds, code generation should work automatically.
+If any hicups occur, detailed information might be available from the [Swift Protobuf Github Page](https://github.com/apple/swift-protobuf/)
+
+### Linting
 Contains swiftlint
 See: https://github.com/realm/SwiftLint
 
@@ -319,7 +335,7 @@ See: https://github.com/realm/SwiftLint
 
 
 ## License
-Copyright 2017 - 2021 Cyface GmbH
+Copyright 2017 - 2022 Cyface GmbH
 
 This file is part of the Cyface SDK for iOS.
 

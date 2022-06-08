@@ -29,7 +29,7 @@ class StatusRequest {
         self.session = session
     }
 
-    func request(authToken: String, sessionIdentifier: String, upload: Upload, onFinished: @escaping (UInt64) -> (), onResume: @escaping (String, String, Upload) -> (), onAborted: @escaping (String, Upload) -> (), onFailure: @escaping (UInt64, Error) -> ()) {
+    func request(authToken: String, sessionIdentifier: String, upload: Upload, onFinished: @escaping (UInt64) -> Void, onResume: @escaping (String, String, Upload) -> Void, onAborted: @escaping (String, Upload) -> Void, onFailure: @escaping (UInt64, Error) -> Void) {
         do {
             let metaData = try upload.metaData()
             let data = try upload.data()

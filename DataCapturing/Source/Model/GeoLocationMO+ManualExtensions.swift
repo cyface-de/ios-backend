@@ -33,7 +33,7 @@ extension GeoLocationMO {
         self.track = managedParent
         self.isPartOfCleanedTrack = location.isValid
         self.speed = location.speed
-        self.timestamp = location.timestamp
+        self.timestamp = Int64(location.timestamp)
     }
 
 }

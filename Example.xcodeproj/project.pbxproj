@@ -398,6 +398,7 @@
 				3D342F652554564400E8EFA6 /* Resources */,
 				3D61276C255994F5007F6884 /* SwiftLint */,
 				ED496BE3628462BC7048DE49 /* [CP] Embed Pods Frameworks */,
+				10339BB55D35FDF41E958070 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -417,6 +418,7 @@
 				AA75B17C270DBD4100C05EBC /* Frameworks */,
 				AA75B17D270DBD4100C05EBC /* Resources */,
 				334CD197BF29876BB11D6EF6 /* [CP] Embed Pods Frameworks */,
+				CDF9F36D44E149CEDE06BACA /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -502,6 +504,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		10339BB55D35FDF41E958070 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Example/Pods-Example-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Example/Pods-Example-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Example/Pods-Example-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		334CD197BF29876BB11D6EF6 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -555,6 +574,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint --path Example/Source --config .swiftlint.yml\n  \n  swiftlint --path DataCapturing/Source --config .swiftlint.yml\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+		CDF9F36D44E149CEDE06BACA /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ExampleUnitTests/Pods-ExampleUnitTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ExampleUnitTests/Pods-ExampleUnitTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ExampleUnitTests/Pods-ExampleUnitTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		DD4CB5C46AAD92D9925D5EBE /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;

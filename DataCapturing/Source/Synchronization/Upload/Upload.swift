@@ -51,23 +51,17 @@ class CoreDataBackedUpload: Upload {
     var _identifier: Int64 {
         return Int64(identifier)
     }
-    var _measurement: MeasurementMO?
+    var _measurement: Measurement?
     var metaDataCache: MetaData?
     var dataCache: Data?
     var failedUploadsCounter = 0
 
-    private func measurement() throws -> MeasurementMO {
+    private func measurement() throws -> Measurement {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        let context = persistenceLayer.makeContext()
         if _measurement == nil {
             let loadedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
 
             _measurement = loadedMeasurement
-            return loadedMeasurement
-        } else if let loadedMeasurement = _measurement, loadedMeasurement.isFault {
-            context.refresh(loadedMeasurement, mergeChanges: true)
-            _measurement = loadedMeasurement
-
             return loadedMeasurement
         } else {
             guard let loadedMeasurement = _measurement else {
@@ -88,7 +82,6 @@ class CoreDataBackedUpload: Upload {
             return ret
         } else {
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            _ = persistenceLayer.makeContext()
             let (measurement, initialModality) = try measurement(identifier: _identifier)
 
             let bundle = Bundle(for: type(of: self))
@@ -129,7 +122,6 @@ class CoreDataBackedUpload: Upload {
             return ret
         } else {
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
             let serializer = MeasurementSerializer()
 
             let measurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
@@ -138,9 +130,8 @@ class CoreDataBackedUpload: Upload {
         }
     }
 
-    private func measurement(identifier: Int64) throws -> (MeasurementMO, String) {
+    private func measurement(identifier: Int64) throws -> (Measurement, String) {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        _ = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: identifier)
 
         let modalityTypeChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
@@ -156,33 +147,32 @@ class CoreDataBackedUpload: Upload {
 
     func startLocation() throws -> (Double?, Double?, UInt64?) {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        _ = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
 
-        guard let firstTrack = measurement.tracks?[0] as? Track else {
+        guard !measurement.tracks.isEmpty else {
             return (nil, nil, nil)
         }
-        guard let startLocation = firstTrack.locations?.firstObject as? GeoLocationMO else {
+        guard !measurement.tracks[0].locations.isEmpty else {
             return (nil, nil, nil)
         }
 
-        return (startLocation.lat, startLocation.lon, UInt64(startLocation.timestamp))
+        let startLocation = measurement.tracks[0].locations[0]
+        return (startLocation.latitude, startLocation.longitude, startLocation.timestamp)
     }
 
     func endLocation() throws -> (Double?, Double?, UInt64?) {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        _ = persistenceLayer.makeContext()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
 
-        guard let lastTrack = measurement.tracks?.lastObject as? Track else {
+        guard !measurement.tracks.isEmpty else {
             return (nil, nil, nil)
         }
 
-        guard let endLocation = lastTrack.locations?.lastObject as? GeoLocationMO else {
+        guard let endLocation = measurement.tracks.flatMap({track in track.locations}).last else {
             return (nil, nil, nil)
         }
 
-        return (endLocation.lat, endLocation.lon, UInt64(endLocation.timestamp))
+        return (endLocation.latitude, endLocation.longitude, endLocation.timestamp)
     }
 }
 

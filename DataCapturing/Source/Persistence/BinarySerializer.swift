@@ -22,7 +22,7 @@ import DataCompression
 import os.log
 
 /// The current version of the Cyface binary format.
-let dataFormatVersion: UInt16 = 2
+let dataFormatVersion: UInt16 = 3
 let dataFormatVersionBytes = withUnsafeBytes(of: dataFormatVersion.bigEndian) {
     Data($0)
 }
@@ -82,7 +82,7 @@ extension BinarySerializer {
                    log: OSLog.init(subsystem: "BinarySerializer",
                                    category: "de.cyface"),
                    type: .error)
-            throw SerializationError.compressionFailed
+            throw SerializationError.compressionFailed(data: res)
         }
 
         return compressed
@@ -124,11 +124,7 @@ class MeasurementSerializer: BinarySerializer {
     func serialize(serializable measurement: Measurement) throws -> Data {
         var protosMeasurement = De_Cyface_Protos_Model_MeasurementBytes()
         protosMeasurement.formatVersion = UInt32(dataFormatVersion)
-        if let events = measurement.events?.array as? [Event] {
-            protosMeasurement.events = serialize(events: events)
-        } else {
-            protosMeasurement.events = []
-        }
+        protosMeasurement.events = serialize(events: measurement.events)
         protosMeasurement.locationRecords = De_Cyface_Protos_Model_LocationRecords()
 
         let firstTimestamp = UInt64DiffValue(start: UInt64(0))
@@ -143,32 +139,37 @@ class MeasurementSerializer: BinarySerializer {
         protosMeasurement.locationRecords.accuracy = []
 
         var records = protosMeasurement.locationRecords
-        try PersistenceLayer.traverseTracks(ofMeasurement: measurement) { _, location in
+        for location in measurement.tracks.flatMap({track in track.locations}) {
+            let timestamp = location.timestamp
+            let accuracy = location.accuracy
+            let latitude = location.latitude
+            let longitude = location.longitude
+            let speed = location.speed
 
             do {
-                records.timestamp.append(try firstTimestamp.diff(value: UInt64(location.timestamp)))
+                records.timestamp.append(try firstTimestamp.diff(value: UInt64(timestamp)))
             } catch {
-                throw SerializationError.nonSerializableLocationTimestamp(cause: error)
+                throw SerializationError.nonSerializableLocationTimestamp(cause: error, timestamp: timestamp)
             }
             do {
-                records.accuracy.append(try firstAccuracy.diff(value: Int32(location.accuracy * MeasurementSerializer.centimetersInAMeter)))
+                records.accuracy.append(try firstAccuracy.diff(value: Int32(accuracy * MeasurementSerializer.centimetersInAMeter)))
             } catch {
-                throw SerializationError.nonSerializableAccuracy(cause: error)
+                throw SerializationError.nonSerializableAccuracy(cause: error, accuracy: accuracy)
             }
             do {
-                records.latitude.append(try firstLatitude.diff(value: convert(coordinate: location.lat)))
+                records.latitude.append(try firstLatitude.diff(value: convert(coordinate: latitude)))
             } catch {
-                throw SerializationError.nonSerializableLatitude(cause: error)
+                throw SerializationError.nonSerializableLatitude(cause: error, latitude: latitude)
             }
             do {
-                records.longitude.append(try firstLongitude.diff(value: convert(coordinate: location.lon)))
+                records.longitude.append(try firstLongitude.diff(value: convert(coordinate: longitude)))
             } catch {
-                throw SerializationError.nonSerializableLongitude(cause: error)
+                throw SerializationError.nonSerializableLongitude(cause: error, longitude: longitude)
             }
             do {
-                records.speed.append(try firstSpeed.diff(value: Int32(location.speed * MeasurementSerializer.centimetersInAMeter)))
+                records.speed.append(try firstSpeed.diff(value: Int32(speed * MeasurementSerializer.centimetersInAMeter)))
             } catch {
-                throw SerializationError.nonSerializableSpeed(cause: error)
+                throw SerializationError.nonSerializableSpeed(cause: error, speed: speed)
             }
         }
         protosMeasurement.locationRecords = records
@@ -190,13 +191,11 @@ class MeasurementSerializer: BinarySerializer {
         var ret = [De_Cyface_Protos_Model_Event]()
         for event in events {
             ret.append(De_Cyface_Protos_Model_Event.with {
-                if let time = event.time {
-                    $0.timestamp = DataCapturingService.convertToUtcTimestamp(date: time as Date)
-                }
+                $0.timestamp = DataCapturingService.convertToUtcTimestamp(date: event.time)
                 if let value = event.value {
                     $0.value = value
                 }
-                switch event.typeEnum {
+                switch event.type {
                 case .lifecycleStart:
                     $0.type = De_Cyface_Protos_Model_Event.EventType.lifecycleStart
                 case .lifecycleStop:
@@ -259,25 +258,30 @@ class SensorValueSerializer: BinarySerializer {
         var yValues = [Int32]()
         var zValues = [Int32]()
         for valueIndex in values.indices {
+            let timestamp = values[valueIndex].timestamp
+            let xValue = values[valueIndex].x
+            let yValue = values[valueIndex].y
+            let zValue = values[valueIndex].z
+            let utcTimestamp = DataCapturingService.convertToUtcTimestamp(date: timestamp)
             do {
-            timestamps.append(try timestampDiffValue.diff(value: DataCapturingService.convertToUtcTimestamp(date: values[valueIndex].timestamp)))
+                timestamps.append(try timestampDiffValue.diff(value: utcTimestamp))
             } catch {
-                throw SerializationError.nonSerializableSensorValueTimestamp(cause: error)
+                throw SerializationError.nonSerializableSensorValueTimestamp(cause: error, timestamp: timestamp)
             }
             do {
-            xValues.append(try xDiffValue.diff(value: Int32(values[valueIndex].x*SensorValueSerializer.millimetersInAMeter)))
+                xValues.append(try xDiffValue.diff(value: Int32(xValue*SensorValueSerializer.millimetersInAMeter)))
             } catch {
-                throw SerializationError.nonSerializableXValue(cause: error)
+                throw SerializationError.nonSerializableXValue(cause: error, value: xValue)
             }
             do {
-            yValues.append(try yDiffValue.diff(value: Int32(values[valueIndex].y*SensorValueSerializer.millimetersInAMeter)))
+                yValues.append(try yDiffValue.diff(value: Int32(yValue*SensorValueSerializer.millimetersInAMeter)))
             } catch {
-                throw SerializationError.nonSerializableYValue(cause: error)
+                throw SerializationError.nonSerializableYValue(cause: error, value: yValue)
             }
             do {
-            zValues.append(try zDiffValue.diff(value: Int32(values[valueIndex].z*SensorValueSerializer.millimetersInAMeter)))
+                zValues.append(try zDiffValue.diff(value: Int32(zValue*SensorValueSerializer.millimetersInAMeter)))
             } catch {
-                throw SerializationError.nonSerializableZValue(cause: error)
+                throw SerializationError.nonSerializableZValue(cause: error, value: zValue)
             }
         }
 
@@ -344,14 +348,10 @@ class UInt64DiffValue {
     func diff(value: UInt64) throws -> UInt64 {
         let ret = value.subtractingReportingOverflow(previousValue)
         guard !ret.overflow else {
-            throw UInt64DiffValueError.overflow(minuend: value, subtrahend: previousValue)
+            throw DiffValueError.int64DiffOverflow(minuend: value, subtrahend: previousValue)
         }
         previousValue = value
         return ret.partialValue
-    }
-
-    enum UInt64DiffValueError: Error {
-        case overflow(minuend: UInt64, subtrahend: UInt64)
     }
 }
 
@@ -365,14 +365,10 @@ class UInt64UnDiffValue {
     func undiff(value: UInt64) throws -> UInt64 {
         let ret = previousValue.addingReportingOverflow(value)
         guard !ret.overflow else {
-            throw UInt64UnDiffValueError.overflow(firstSummand: previousValue, secondSummand: value)
+            throw DiffValueError.int64SumOverflow(firstSummand: previousValue, secondSummand: value)
         }
         previousValue = ret.partialValue
         return ret.partialValue
-    }
-
-    enum UInt64UnDiffValueError: Error {
-        case overflow(firstSummand: UInt64, secondSummand: UInt64)
     }
 }
 
@@ -386,14 +382,10 @@ class Int32DiffValue {
     func diff(value: Int32) throws -> Int32 {
         let ret = value.subtractingReportingOverflow(previousValue)
         guard !ret.overflow else {
-            throw Int32DiffValueError.overflow(minuend: value, subtrahend: previousValue)
+            throw DiffValueError.int32DiffOverflow(minuend: value, subtrahend: previousValue)
         }
         previousValue = value
         return ret.partialValue
-    }
-
-    enum Int32DiffValueError: Error {
-        case overflow(minuend: Int32, subtrahend: Int32)
     }
 }
 
@@ -407,14 +399,10 @@ class Int32UnDiffValue {
     func undiff(value: Int32) throws -> Int32 {
         let ret = previousValue.addingReportingOverflow(value)
         guard !ret.overflow else {
-            throw Int32UnDiffValueError.overflow(firstSummand: previousValue, secondSummand: value)
+            throw DiffValueError.int32SumOverflow(firstSummand: previousValue, secondSummand: value)
         }
         previousValue = value
         return ret.partialValue
-    }
-
-    enum Int32UnDiffValueError: Error {
-        case overflow(firstSummand: Int32, secondSummand: Int32)
     }
 }
 
@@ -437,38 +425,4 @@ extension BinaryInteger {
 
         return ret
     }
-}
-
-/**
- An enumeration of all the possible errors thrown during serialization.
- 
- ````
- case compressionFailed
- case decompressionFailed
- case missingData
- case invalidData
- ````
-
- - Author: Klemens Muthmann
- - Version: 1.0.0
- - Since: 1.0.0
- */
-enum SerializationError: Error {
-    /// Thrown if compression of serialized data was not successful.
-    case compressionFailed
-    /// Thrown if decompression of serialized data was not successful.
-    case decompressionFailed
-    /// Thrown if data required for serialization or deserialization is missing.
-    case missingData
-    /// Thrown if the data read was no valid or some corrupted Cyface binray format.
-    case invalidData
-    case nonSerializableSensorValueTimestamp(cause: Error)
-    case nonSerializableXValue(cause: Error)
-    case nonSerializableYValue(cause: Error)
-    case nonSerializableZValue(cause: Error)
-    case nonSerializableLocationTimestamp(cause: Error)
-    case nonSerializableAccuracy(cause: Error)
-    case nonSerializableSpeed(cause: Error)
-    case nonSerializableLatitude(cause: Error)
-    case nonSerializableLongitude(cause: Error)
 }

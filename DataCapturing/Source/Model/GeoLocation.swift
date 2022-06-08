@@ -71,7 +71,7 @@ public class GeoLocation: CustomStringConvertible {
             longitude: managedObject.lon,
             accuracy: managedObject.accuracy,
             speed: managedObject.speed,
-            timestamp: managedObject.timestamp,
+            timestamp: UInt64(managedObject.timestamp),
             isValid: managedObject.isPartOfCleanedTrack,
             parent: parent)
         // TODO: This does not really work, as the objectId for new managed objects changes after they are written to the database (i.e. after the context is synchronized via context.save())
@@ -92,7 +92,7 @@ public class GeoLocation: CustomStringConvertible {
         - isValid: Whether or not this is a valid location in a cleaned track.
         - parent: The track this location belongs to
      */
-    public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: Int64, isValid: Bool = true, parent: Track) {
+    public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: UInt64, isValid: Bool = true, parent: Track) {
         self.latitude = latitude
         self.longitude = longitude
         self.accuracy = accuracy

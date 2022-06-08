@@ -65,7 +65,7 @@ public class MovebisDataCapturingService: DataCapturingService {
         let manager = CLLocationManager()
 
         // Do not start services that aren't available.
-        if !CLLocationManager.locationServicesEnabled() {
+        guard CLLocationManager.locationServicesEnabled() else {
             // Location services is not available.
             os_log("Location service not available!", log: MovebisDataCapturingService.log, type: .default)
             return manager
