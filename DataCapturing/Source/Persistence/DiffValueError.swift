@@ -25,55 +25,30 @@ import Foundation
  - author: Klemens Muthmann
  - version: 1.0.0
  */
-enum DiffValueError: Error {
-    case int32DiffOverflow(minuend: Int32, subtrahend: Int32)
-    case int64DiffOverflow(minuend: UInt64, subtrahend: UInt64)
-    case int32SumOverflow(firstSummand: Int32, secondSummand: Int32)
-    case int64SumOverflow(firstSummand: UInt64, secondSummand: UInt64)
+enum DiffValueError<T: FixedWidthInteger> : Error {
+    case diffOverflow(minuend: T, subtrahend: T)
+    case sumOverflow(firstSummand: T, secondSummand: T)
 }
 
 extension DiffValueError: LocalizedError {
     public var errorDescription: String? {
         switch self {
-        case .int32DiffOverflow(minuend: let minuend, subtrahend: let subtrahend):
-            let errorMessage =  NSLocalizedString(
-                "de.cyface.error.DiffValueError.int32DiffOverflow",
-                value: "Calculation of %d - %d caused a signed 32 bit integer overflow!",
-                comment: """
-Tell the user that there was an overflow while calculating the differential value for serialization! \
-The minuend and subtrahend of the calculation are provided as the first and second argument.
-""")
-            return String.localizedStringWithFormat(errorMessage, minuend, subtrahend)
-
-        case .int64DiffOverflow(minuend: let minuend, subtrahend: let subtrahend):
-            let errorMessage =  NSLocalizedString(
-                "de.cyface.error.DiffValueError.int64DiffOverflow",
-                value: "Calculation of %d - %d caused an unsigned 64-bit integer overflow!",
-                comment: """
-Tell the user that there was an overflow while calculating the differential value for serialization! \
-The minuend and subtrahend of the calculation are provided as the first and second argument.
-""")
-            return String.localizedStringWithFormat(errorMessage, minuend, subtrahend)
-
-        case .int32SumOverflow(firstSummand: let firstSummand, secondSummand: let secondSummand):
-            let errorMessage =  NSLocalizedString(
-                "de.cyface.error.DiffValueError.int32SumOverflow",
-                value: "Calculation of %d + %d caused an Int32 overflow!",
-                comment: """
-Tell the user that there was an overflow while resolving the differential value for deserialization! \
-The first and second summand of the calculation are provided as the first and second argument.
-""")
-            return String.localizedStringWithFormat(errorMessage, firstSummand, secondSummand)
-
-        case .int64SumOverflow(firstSummand: let firstSummand, secondSummand: let secondSummand):
-            let errorMessage =  NSLocalizedString(
-                "de.cyface.error.DiffValueError.int64SumOverflow",
-                value: "Calculation of %d + %d caused an unsigned 64-bit integer overflow!",
-                comment: """
-Tell the user that there was an overflow while resolving the differential value for deserialization! \
-The first and second summand of the calculation are provided as the first and second argument.
-""")
-            return String.localizedStringWithFormat(errorMessage, firstSummand, secondSummand)
+        case .diffOverflow(minuend: let minuend, subtrahend: let subtrahend):
+            let errorMessage = NSLocalizedString("de.cyface.error.DiffValueError.diffOverflow",
+                                                 value: "Calculation of %@ - %@ caused an overflow!",
+                                                 comment: """
+                Tell the user that there was an overflow while calculating the differential value for serialization!\
+                The minuend and subtrahend of the calculation are provided as the first and second argument.
+                """)
+            return String.localizedStringWithFormat(errorMessage, minuend.description, subtrahend.description)
+        case .sumOverflow(firstSummand: let firstSummand, secondSummand: let secondSummand):
+            let errorMessage = NSLocalizedString("de.cyface.error.DiffValueError.sumOverflow",
+                                                 value: "Calculation of %@ + %@ caused an overflow!",
+                                                 comment: """
+                Tell the user that there was an overflow while resolving the summed value for deserialization! \
+                The first and second summand of the calculation are provided as the first and second argument.
+                """)
+            return String.localizedStringWithFormat(errorMessage, firstSummand.description, secondSummand.description)
         }
     }
 }

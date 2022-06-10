@@ -127,11 +127,11 @@ class MeasurementSerializer: BinarySerializer {
         protosMeasurement.events = serialize(events: measurement.events)
         protosMeasurement.locationRecords = De_Cyface_Protos_Model_LocationRecords()
 
-        let firstTimestamp = UInt64DiffValue(start: UInt64(0))
-        let firstAccuracy = Int32DiffValue(start: Int32(0))
-        let firstLatitude = Int32DiffValue(start: Int32(0))
-        let firstLongitude = Int32DiffValue(start: Int32(0))
-        let firstSpeed = Int32DiffValue(start: Int32(0))
+        let firstTimestamp = DiffValue(start: Int64(0))
+        let firstAccuracy = DiffValue(start: Int32(0))
+        let firstLatitude = DiffValue(start: Int32(0))
+        let firstLongitude = DiffValue(start: Int32(0))
+        let firstSpeed = DiffValue(start: Int32(0))
         protosMeasurement.locationRecords.timestamp = []
         protosMeasurement.locationRecords.speed = []
         protosMeasurement.locationRecords.latitude = []
@@ -147,27 +147,32 @@ class MeasurementSerializer: BinarySerializer {
             let speed = location.speed
 
             do {
-                records.timestamp.append(try firstTimestamp.diff(value: UInt64(timestamp)))
+                let diffTimestamp = try firstTimestamp.diff(value: Int64(timestamp))
+                records.timestamp.append(diffTimestamp)
             } catch {
                 throw SerializationError.nonSerializableLocationTimestamp(cause: error, timestamp: timestamp)
             }
             do {
-                records.accuracy.append(try firstAccuracy.diff(value: Int32(accuracy * MeasurementSerializer.centimetersInAMeter)))
+                let diffAccuracy = try firstAccuracy.diff(value: Int32(accuracy * MeasurementSerializer.centimetersInAMeter))
+                records.accuracy.append(diffAccuracy)
             } catch {
                 throw SerializationError.nonSerializableAccuracy(cause: error, accuracy: accuracy)
             }
             do {
-                records.latitude.append(try firstLatitude.diff(value: convert(coordinate: latitude)))
+                let diffLatitude = try firstLatitude.diff(value: convert(coordinate: latitude))
+                records.latitude.append(diffLatitude)
             } catch {
                 throw SerializationError.nonSerializableLatitude(cause: error, latitude: latitude)
             }
             do {
-                records.longitude.append(try firstLongitude.diff(value: convert(coordinate: longitude)))
+                let diffLongitude = try firstLongitude.diff(value: convert(coordinate: longitude))
+                records.longitude.append(diffLongitude)
             } catch {
                 throw SerializationError.nonSerializableLongitude(cause: error, longitude: longitude)
             }
             do {
-                records.speed.append(try firstSpeed.diff(value: Int32(speed * MeasurementSerializer.centimetersInAMeter)))
+                let diffSpeed = try firstSpeed.diff(value: Int32(speed * MeasurementSerializer.centimetersInAMeter))
+                records.speed.append(diffSpeed)
             } catch {
                 throw SerializationError.nonSerializableSpeed(cause: error, speed: speed)
             }
@@ -248,12 +253,12 @@ class SensorValueSerializer: BinarySerializer {
         guard !values.isEmpty else {
             throw BinarySerializationError.emptyData
         }
-        let timestampDiffValue = UInt64DiffValue(start: UInt64(0))
-        let xDiffValue = Int32DiffValue(start: Int32(0))
-        let yDiffValue = Int32DiffValue(start: Int32(0))
-        let zDiffValue = Int32DiffValue(start: Int32(0))
+        let timestampDiffValue = DiffValue(start: Int64(0))
+        let xDiffValue = DiffValue(start: Int32(0))
+        let yDiffValue = DiffValue(start: Int32(0))
+        let zDiffValue = DiffValue(start: Int32(0))
 
-        var timestamps = [UInt64]()
+        var timestamps = [Int64]()
         var xValues = [Int32]()
         var yValues = [Int32]()
         var zValues = [Int32]()
@@ -264,7 +269,7 @@ class SensorValueSerializer: BinarySerializer {
             let zValue = values[valueIndex].z
             let utcTimestamp = DataCapturingService.convertToUtcTimestamp(date: timestamp)
             do {
-                timestamps.append(try timestampDiffValue.diff(value: utcTimestamp))
+                timestamps.append(try timestampDiffValue.diff(value: Int64(utcTimestamp)))
             } catch {
                 throw SerializationError.nonSerializableSensorValueTimestamp(cause: error, timestamp: timestamp)
             }
@@ -313,10 +318,10 @@ class SensorValueSerializer: BinarySerializer {
             let deserializedValues = try De_Cyface_Protos_Model_AccelerationsBinary(serializedData: data)
             var ret: [SensorValue] = []
 
-            let timestampUnDiff = UInt64UnDiffValue(start: 0)
-            let axUnDiff = Int32UnDiffValue(start: 0)
-            let ayUnDiff = Int32UnDiffValue(start: 0)
-            let azUnDiff = Int32UnDiffValue(start: 0)
+            let timestampUnDiff = DiffValue(start: Int64(0))
+            let axUnDiff = DiffValue(start: Int32(0))
+            let ayUnDiff = DiffValue(start: Int32(0))
+            let azUnDiff = DiffValue(start: Int32(0))
 
             for batch in deserializedValues.accelerations {
                 for accelerationsIndex in batch.timestamp.indices {
@@ -338,70 +343,28 @@ class SensorValueSerializer: BinarySerializer {
     }
 }
 
-class UInt64DiffValue {
-    var previousValue: UInt64
+class DiffValue<T: FixedWidthInteger> {
+    var previousValue: T
 
-    init(start: UInt64) {
+    init(start: T) {
         previousValue = start
     }
 
-    func diff(value: UInt64) throws -> UInt64 {
+    func diff(value: T) throws -> T {
         let ret = value.subtractingReportingOverflow(previousValue)
         guard !ret.overflow else {
-            throw DiffValueError.int64DiffOverflow(minuend: value, subtrahend: previousValue)
+            throw DiffValueError.diffOverflow(minuend: value, subtrahend: previousValue)
         }
         previousValue = value
         return ret.partialValue
     }
-}
 
-class UInt64UnDiffValue {
-    var previousValue: UInt64
-
-    init(start: UInt64) {
-        previousValue = start
-    }
-
-    func undiff(value: UInt64) throws -> UInt64 {
+    func undiff(value: T) throws -> T {
         let ret = previousValue.addingReportingOverflow(value)
         guard !ret.overflow else {
-            throw DiffValueError.int64SumOverflow(firstSummand: previousValue, secondSummand: value)
+            throw DiffValueError.sumOverflow(firstSummand: previousValue, secondSummand: value)
         }
         previousValue = ret.partialValue
-        return ret.partialValue
-    }
-}
-
-class Int32DiffValue {
-    var previousValue: Int32
-
-    init(start: Int32) {
-        previousValue = start
-    }
-
-    func diff(value: Int32) throws -> Int32 {
-        let ret = value.subtractingReportingOverflow(previousValue)
-        guard !ret.overflow else {
-            throw DiffValueError.int32DiffOverflow(minuend: value, subtrahend: previousValue)
-        }
-        previousValue = value
-        return ret.partialValue
-    }
-}
-
-class Int32UnDiffValue {
-    var previousValue: Int32
-
-    init(start: Int32) {
-        previousValue = start
-    }
-
-    func undiff(value: Int32) throws -> Int32 {
-        let ret = previousValue.addingReportingOverflow(value)
-        guard !ret.overflow else {
-            throw DiffValueError.int32SumOverflow(firstSummand: previousValue, secondSummand: value)
-        }
-        previousValue = value
         return ret.partialValue
     }
 }

@@ -285,16 +285,16 @@ class PersistenceTests: XCTestCase {
                 let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
                 let measurement = try FakeMeasurementImpl.fakeMeasurement(identifier: 2).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 3).addAccelerations(countOfAccelerations: 60).build(persistenceLayer)
 
-                let oocut = CoreDataBackedUpload(coreDataStack: coreDataStack, identifier: 1)
+                let oocut = CoreDataBackedUpload(coreDataStack: coreDataStack, identifier: UInt64(measurement.identifier))
                 let metaData = try oocut.metaData()
                 let data = try oocut.data()
 
                 XCTAssertEqual(data, try MeasurementSerializer().serializeCompressed(serializable: measurement))
                 XCTAssertEqual(metaData.measurementId, UInt64(measurement.identifier))
-                XCTAssertEqual(metaData.formatVersion, 2)
+                XCTAssertEqual(metaData.formatVersion, 3)
                 XCTAssertEqual(metaData.locationCount, 3)
             } catch {
-                XCTFail("\(error)")
+                XCTFail("\(error.localizedDescription)")
             }
         }
     }

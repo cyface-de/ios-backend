@@ -658,3 +658,63 @@ public enum PersistenceError: Error {
     /// On trying to load a not yet synchronized `Measurement`. This is usually a `Measurement` with en `objectId` of `nil`.
     case unsynchronizedMeasurement(identifier: Int64)
 }
+
+extension PersistenceError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .measurementNotLoadable(let measurementIdentifier):
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.measurementNotLoadable",
+                                                 value: "Unable to load measurement %d!",
+                                                 comment: """
+                Tell the user that a measurement was not loaded successfully. \
+                The first parameter is the identifier of the measurement.
+                """)
+            return String.localizedStringWithFormat(errorMessage, measurementIdentifier)
+        case .trackNotLoadable(_, let measurement):
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.trackNotLoadable",
+                                                 value: "Unable to load track from measurement %d!",
+                                                 comment: """
+                Tell the user that the system was unable to load a track from a measurement. \
+                The first parameter is the measurement the track belongs to.
+                """)
+            return String.localizedStringWithFormat(errorMessage, measurement.identifier)
+        case .nonPersistentTrackEncountered(_, let measurement):
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.nonPersistentTrackEncountered",
+                                                 value: "Unable to update values of non persistent track from measurement %d!",
+                                                 comment: """
+                Tell the user that the system was unable to update a track, since that track was not yet saved, \
+                to the database. The first parameter is the identifier of the measurement the track belongs to.
+                """)
+            return String.localizedStringWithFormat(errorMessage, measurement.identifier)
+        case .dataNotLoadable(measurement: let measurementIdentifier):
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.dataNotLoadable",
+                                                 value: "Unable to load some data belonging to measurement %d!",
+                                                 comment: """
+                Tell the user that the system was unable to load data belonging to some measurement. \
+                The first parameter is the identifier of the measurement!
+                """)
+            return String.localizedStringWithFormat(errorMessage, measurementIdentifier)
+        case .inconsistentState:
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.inconsistentState",
+                                                 value: "Data storage is in an inconsistent state!",
+                                                 comment: """
+                Tell the user that the data storage was in an inconsistent state and could not be accessed!
+                """)
+            return String.localizedStringWithFormat(errorMessage)
+        case .unsynchronizedMeasurement(identifier: let measurementIdentifier):
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.unsynchronizedMeasurement",
+                                                 value: "Failed to load measurement %d since it was not yet synchronized with the data storage!", comment: """
+                Tell the user that the measurement that was supposed to be loaded was not yet saved!
+                """)
+            return String.localizedStringWithFormat(errorMessage, measurementIdentifier)
+        case .measurementsNotLoadable:
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.measurementsNotLoadable",
+                                                 value: "Multiple measurements from the data storage have not been loadable!",
+                                                 comment: """
+                Tell the user that measurements from the database are not loadable. \
+                The reason is unknown at this point.
+                """)
+            return String.localizedStringWithFormat(errorMessage)
+        }
+    }
+}

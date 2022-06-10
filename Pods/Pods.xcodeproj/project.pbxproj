@@ -89,7 +89,6 @@
 		2D2929B0E8E673D9B93F7D4B4ECF0BFE /* EventType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8091DE1DD71E165F08BB6C46249D5A /* EventType.swift */; };
 		2E6FB03C553FF3BF3292FE61E181D4E6 /* LegendEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F0F20081A38C951154B38F5C444E56A /* LegendEntry.swift */; };
 		2F0F41DE52E8CEA66AA11593D28DCE46 /* MathUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E498EA5CEA2C64640D14E93BC91FA43 /* MathUtils.swift */; };
-		2FB26B17B9F7BD1721C09D5A5BB10ACA /* V3TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 66DE02A0CF498663BB3A81074853D2D8 /* V3TestData.sqlite */; };
 		313870F32D923C0BC5295E728C88D5AF /* DataCapturing.h in Headers */ = {isa = PBXBuildFile; fileRef = 3F3B1FAC2B754741909AB87AEBD328B8 /* DataCapturing.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		31C399458CB81BE85128CF975722C0E9 /* DataCapturingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82485206847615E5E0DA7E4500F553CC /* DataCapturingError.swift */; };
 		33A7D0F2D03004CE256A75E03DF33C70 /* RetryPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5AD2A27E60029FFB3209328BCF31962 /* RetryPolicy.swift */; };
@@ -270,6 +269,16 @@
 		A8DDA561A6A75AA642C91AB027716B9C /* TriangleShapeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B46CA2E283F5165B707F093C234644DF /* TriangleShapeRenderer.swift */; };
 		A9B919DD49F97C796E3BF64D0F5AFE03 /* LineChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4AD2CC9BA7DDE8FDC1F28EEFA32E1C /* LineChartView.swift */; };
 		AA5065DB8CE61B66F7AD623D8A86FB2B /* SquareShapeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2938B3C270CC3E1DC4C4CD7FA177AB2E /* SquareShapeRenderer.swift */; };
+		AAD092772853576000302684 /* DiffValueErrorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD092762853576000302684 /* DiffValueErrorTest.swift */; };
+		AAD0928A2853768000302684 /* SensorValueSerializationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD092892853768000302684 /* SensorValueSerializationTest.swift */; };
+		AAD09294285378B800302684 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = AAD0928C285378B800302684 /* README.md */; };
+		AAD09295285378B800302684 /* V2TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD0928D285378B800302684 /* V2TestData.sqlite */; };
+		AAD09296285378B800302684 /* V5TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD0928E285378B800302684 /* V5TestData.sqlite */; };
+		AAD09297285378B800302684 /* V4TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD0928F285378B800302684 /* V4TestData.sqlite */; };
+		AAD09298285378B800302684 /* V3TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD09290285378B800302684 /* V3TestData.sqlite */; };
+		AAD09299285378B800302684 /* V1TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD09291285378B800302684 /* V1TestData.sqlite */; };
+		AAD0929A285378B800302684 /* V6TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD09292285378B800302684 /* V6TestData.sqlite */; };
+		AAD0929B285378B800302684 /* serializedFixture.cyf in Resources */ = {isa = PBXBuildFile; fileRef = AAD09293285378B800302684 /* serializedFixture.cyf */; };
 		AAD4C166F51D0C63C3524DA9B0300804 /* IRadarChartDataSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527756082B666292310954DB6042F6A1 /* IRadarChartDataSet.swift */; };
 		AAF4D7E62850855C001C8197 /* measurement.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAF4D7E52850855C001C8197 /* measurement.pb.swift */; };
 		AB0CCAF6CDF9520E0378193CDC130806 /* XAxisRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F44915535C3852F08B86B95E147CECD /* XAxisRenderer.swift */; };
@@ -321,7 +330,6 @@
 		C95228EBD6F9D0E3E543D5F481D4C2AC /* CombinedChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7FC82777DABB568830805A0F40FCA3 /* CombinedChartData.swift */; };
 		C97829DEE87D5F0F51F7735B62F3076D /* DistanceCalculationStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114779512D02D562451886C7494A116E /* DistanceCalculationStrategy.swift */; };
 		C98FEEAFC3AE3E88BED5490286B8A204 /* Message+AnyAdditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4AD3EF54713512DDA333214D125E1E5 /* Message+AnyAdditions.swift */; };
-		CA237C79F85B92F5633440A0EA620A1B /* V1TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 92A0C25434AB2036B6117C9C97AD119B /* V1TestData.sqlite */; };
 		CB24F2325A1E8CD31B2DCAD4CC7A448A /* source_context.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFFE72C654CC3FF32FC72E7661C5498 /* source_context.pb.swift */; };
 		CC1EDFF9156131C5C3FC61CD4782F109 /* ScatterChartDataSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD6223AC26E047961FC4CC2335B53AD /* ScatterChartDataSet.swift */; };
 		CD8A5F0DFF9D42369C57B6D6FE269253 /* JSONDecodingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641C74D39BAC8EE312213A5EB72B3A20 /* JSONDecodingError.swift */; };
@@ -337,7 +345,6 @@
 		D0F2F136CD079750F8F656BC4A439134 /* ViewPortHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C707B53304D135970EC1BBEB95C4344 /* ViewPortHandler.swift */; };
 		D130F43448DC101FFF2C4E6A46D8AA2F /* WireFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB7B90193F4A407536B241E8BF06CDEB /* WireFormat.swift */; };
 		D163D9B5A3A22F6197B44A37918AC199 /* CustomJSONCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE083AE351E0D64E2CC889DC108374BB /* CustomJSONCodable.swift */; };
-		D1B4B2133B99C36B0C240500C7711226 /* V5TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 1D5D06E88D322FC7E8A0ED5426D71E0E /* V5TestData.sqlite */; };
 		D2A785D03BD954DF4A1F2A83BF3FFE0C /* EventMO+ManualExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB249D7FBCD3C56538C959CAF00E3DA8 /* EventMO+ManualExtensions.swift */; };
 		D5660F669E12D67E5C593FEFCFA11972 /* BarLineScatterCandleBubbleRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4EC8E45AFCE922086307F512BD4620 /* BarLineScatterCandleBubbleRenderer.swift */; };
 		D6A7671602F3C3D49D22C1EF755EAEDF /* BinaryEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45521EBC224BEC250B070A7A468E62B5 /* BinaryEncoder.swift */; };
@@ -354,7 +361,6 @@
 		DF25B35BE21E8CABD222E680B243C864 /* ILineRadarChartDataSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4F438B1D4F48F543D9CD8196755CC8 /* ILineRadarChartDataSet.swift */; };
 		E0B9C3E6941E1FD5C0326BFA67374C6C /* Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE7F0B674F7ECBB7D0F255B768ECF5 /* Status.swift */; };
 		E0FAE23ECB29EE7EB9B9D04CA6CCEDC2 /* PieChartRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF1ECF3C38D673C6047B5EEE5145F46 /* PieChartRenderer.swift */; };
-		E12860F1D011B76EB89301ED4A57E700 /* V4TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 61813CAAAE5AE028D5F5D2F2C350BC41 /* V4TestData.sqlite */; };
 		E21210F1E8F2073CE1711B2D8C61E408 /* AnyUnpackError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8301C93BFCB5CF90D4A6002617EAEDEE /* AnyUnpackError.swift */; };
 		E3630302BCECD32D68718ADD6F223AC0 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53AE0AA0F2F3A0F8C7EBC4F8673FAFC3 /* CoreData.framework */; };
 		E3C1F80059E2EE227D4CADB8422B1E4C /* V7toV8.xcmappingmodel in Resources */ = {isa = PBXBuildFile; fileRef = FB1B6AA7ADDE9E0CA5F20D71B7F1789B /* V7toV8.xcmappingmodel */; };
@@ -372,7 +378,6 @@
 		EAB3D3955DDA3125AFBED1EF436D475C /* struct.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9BC5B3CD6CA4BE86A2CA7D10003231 /* struct.pb.swift */; };
 		ED84A963BE647D0B59696B4A5252E29D /* MeasurementToMeasurementPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CBEFE568E0BA03DD4DE72E1A3F33D18 /* MeasurementToMeasurementPolicy.swift */; };
 		EEC150B66BCCD6C80FDA7E4D1975166B /* DispatchQueue+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3765B25E77721ECEB4BFE107A0E733A6 /* DispatchQueue+Alamofire.swift */; };
-		EEEBE5F7936C0E1AA02A06651DF7B500 /* V2TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4C160E333041C092CCF014F413D56783 /* V2TestData.sqlite */; };
 		F002B47A2A9D75AE535C2E4232B7955C /* TextFormatEncodingVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5ACEAB9BE174864FAC9E5DD8599E01B /* TextFormatEncodingVisitor.swift */; };
 		F11521E2E6289AEF523869C37294E313 /* DataCapturing-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = C9D05CE2F0EB005897E3EC1E6650054E /* DataCapturing-dummy.m */; };
 		F1342293C3DD2D2C5B18981F56D546E0 /* MetaData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC913FCCFB1A3F6D228C64144D949109 /* MetaData.swift */; };
@@ -383,7 +388,6 @@
 		F3E521EF4987A2CCF2D312E1A8F6F55D /* ChartUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B490390EDDD1AF6757C91B0C1C436F /* ChartUtils.swift */; };
 		F52FC8962A7C9987225EF533E00D873C /* IHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F531A6308AFAADC922CD9493A5138C /* IHighlighter.swift */; };
 		F65880287F172F56A4CD42CB80A778EB /* BarChartDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432C3D6FADD98CA4D49CAB49CA76AFC6 /* BarChartDataProvider.swift */; };
-		F65B930C1F8F9ED3706D5B7E79951A19 /* V6TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 87BE18EE2BE6EF81078DE99862FB9BFD /* V6TestData.sqlite */; };
 		F6ACA8CD54B2FC3730A2D065B9AA2F63 /* ZigZag.swift in Sources */ = {isa = PBXBuildFile; fileRef = A710DAAE3A508C87D4F059699BDEF324 /* ZigZag.swift */; };
 		F6D42416232B99DEF20E55DF604CFB89 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A11DB9A4361C233F50C1BE323181960 /* Foundation.framework */; };
 		F79D0CABECA28B2D65B0ECADFE7B99BE /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8475DCE2363E3E4300D2A00AAD0ADDA /* Renderer.swift */; };
@@ -572,7 +576,6 @@
 		1C03F4AFDAA5B81ED3C33BB5F4DAAD1B /* ChartDataRendererBase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ChartDataRendererBase.swift; path = Source/Charts/Renderers/ChartDataRendererBase.swift; sourceTree = "<group>"; };
 		1C52BA2315DA24085C4EEDDEAD01A50C /* Enum.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Enum.swift; path = Sources/SwiftProtobuf/Enum.swift; sourceTree = "<group>"; };
 		1D4AE396CC91228FE660B84E90FBD20A /* Mocker */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Mocker; path = Mocker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		1D5D06E88D322FC7E8A0ED5426D71E0E /* V5TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V5TestData.sqlite; path = DataCapturing/Tests/Resources/V5TestData.sqlite; sourceTree = "<group>"; };
 		1D6815548F1EB9BBBD29A18F8BD6AA69 /* DataCapturing-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DataCapturing-umbrella.h"; sourceTree = "<group>"; };
 		1E50EFE356BBED06B9E1BD09A6C0A131 /* DataCompression.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DataCompression.swift; path = Sources/DataCompression/DataCompression.swift; sourceTree = "<group>"; };
 		1E8ECF7153DCBFBDCE4D517AA1ECEEF5 /* 8.xcdatamodel */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcdatamodel; path = 8.xcdatamodel; sourceTree = "<group>"; };
@@ -652,7 +655,6 @@
 		495931BD84E34CFFF63D1FDA18F7051F /* JSONEncodingVisitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = JSONEncodingVisitor.swift; path = Sources/SwiftProtobuf/JSONEncodingVisitor.swift; sourceTree = "<group>"; };
 		4A887A564E3864628CE09D43E6B20217 /* all.css */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.css; name = all.css; path = docs/all.css; sourceTree = "<group>"; };
 		4ACA6D74618A37A2535B271DE13F2D8F /* BarChartDataEntry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BarChartDataEntry.swift; path = Source/Charts/Data/Implementations/Standard/BarChartDataEntry.swift; sourceTree = "<group>"; };
-		4C160E333041C092CCF014F413D56783 /* V2TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V2TestData.sqlite; path = DataCapturing/Tests/Resources/V2TestData.sqlite; sourceTree = "<group>"; };
 		4D15725EED315A0EC12DD62528727E9E /* MarkerImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MarkerImage.swift; path = Source/Charts/Components/MarkerImage.swift; sourceTree = "<group>"; };
 		4DD8E7C8A642FF0ACDD02E767D8BF1CB /* index.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; name = index.html; path = docs/SensorValue/index.html; sourceTree = "<group>"; };
 		4E005B98DD0DA0D6BE5C933058A96D77 /* Fill.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Fill.swift; path = Source/Charts/Utils/Fill.swift; sourceTree = "<group>"; };
@@ -702,7 +704,6 @@
 		605D0A237B3F668F082316AE34E4CFE4 /* GeoLocationMO+ManualExtensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "GeoLocationMO+ManualExtensions.swift"; sourceTree = "<group>"; };
 		60EA4710A3A6278ADC302CB064A0EB6C /* PieRadarHighlighter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PieRadarHighlighter.swift; path = Source/Charts/Highlight/PieRadarHighlighter.swift; sourceTree = "<group>"; };
 		614624434EB38D9AA196DF13D96CC6B0 /* Mocker-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Mocker-umbrella.h"; sourceTree = "<group>"; };
-		61813CAAAE5AE028D5F5D2F2C350BC41 /* V4TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V4TestData.sqlite; path = DataCapturing/Tests/Resources/V4TestData.sqlite; sourceTree = "<group>"; };
 		61D1A868372C3DE86239EE2A9EAE3B63 /* UploadProcess.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UploadProcess.swift; sourceTree = "<group>"; };
 		625B1839B6F05BA82FDEF5B340062E2D /* CandleChartData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CandleChartData.swift; path = Source/Charts/Data/Implementations/Standard/CandleChartData.swift; sourceTree = "<group>"; };
 		63F08802C626E61817A8531718A064F4 /* ChartColorTemplates.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ChartColorTemplates.swift; path = Source/Charts/Utils/ChartColorTemplates.swift; sourceTree = "<group>"; };
@@ -713,7 +714,6 @@
 		65A4F42E19E00445C70E5B3771F842BE /* 9.xcdatamodel */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcdatamodel; path = 9.xcdatamodel; sourceTree = "<group>"; };
 		661358792D229D9C838D077AA46CCE9B /* CombinedChartRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CombinedChartRenderer.swift; path = Source/Charts/Renderers/CombinedChartRenderer.swift; sourceTree = "<group>"; };
 		66725986B62F567DA1C96BE82B58387A /* IValueFormatter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = IValueFormatter.swift; path = Source/Charts/Formatters/IValueFormatter.swift; sourceTree = "<group>"; };
-		66DE02A0CF498663BB3A81074853D2D8 /* V3TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V3TestData.sqlite; path = DataCapturing/Tests/Resources/V3TestData.sqlite; sourceTree = "<group>"; };
 		67426FE450217A44CC8ED5D3C6AD6968 /* index.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; name = index.html; path = docs/MeasurementMO/index.html; sourceTree = "<group>"; };
 		6746D89FF701DDE8341FEBF8A30B0A4E /* Mocker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Mocker.debug.xcconfig; sourceTree = "<group>"; };
 		676B0940D3377A3ACC6578382AB80028 /* TextFormatDecodingOptions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TextFormatDecodingOptions.swift; path = Sources/SwiftProtobuf/TextFormatDecodingOptions.swift; sourceTree = "<group>"; };
@@ -768,7 +768,6 @@
 		85B02B464F2847D379CAB9F06F45260E /* AxisBase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AxisBase.swift; path = Source/Charts/Components/AxisBase.swift; sourceTree = "<group>"; };
 		85C8DBE693A933ED00B845B3C2120334 /* IShapeRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = IShapeRenderer.swift; path = Source/Charts/Renderers/Scatter/IShapeRenderer.swift; sourceTree = "<group>"; };
 		86603BCC5ED538CC6C2569AD8DE3DEC0 /* Pods-Example-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Example-resources.sh"; sourceTree = "<group>"; };
-		87BE18EE2BE6EF81078DE99862FB9BFD /* V6TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V6TestData.sqlite; path = DataCapturing/Tests/Resources/V6TestData.sqlite; sourceTree = "<group>"; };
 		87DA7A2D7B4510D19EDAC09975F3665A /* DataApproximator+N.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "DataApproximator+N.swift"; path = "Source/Charts/Filters/DataApproximator+N.swift"; sourceTree = "<group>"; };
 		885F1A5B8F97F672028B40584EB1A66A /* DataMigrationTest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DataMigrationTest.swift; path = DataCapturing/Tests/DataMigrationTest.swift; sourceTree = "<group>"; };
 		891C2BB8F068AC75A1C8770F735D3CE4 /* DataCapturing-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DataCapturing-prefix.pch"; sourceTree = "<group>"; };
@@ -789,7 +788,6 @@
 		90269B30B8C32A26EA7C70E418011000 /* IBubbleChartDataSet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = IBubbleChartDataSet.swift; path = Source/Charts/Data/Interfaces/IBubbleChartDataSet.swift; sourceTree = "<group>"; };
 		9104DF559E945CE06F3A8B23E3E565AA /* Alamofire-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Alamofire-prefix.pch"; sourceTree = "<group>"; };
 		91A89BE2FB8EB9F9BD8BACE2EDB135DB /* ChartViewBase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ChartViewBase.swift; path = Source/Charts/Charts/ChartViewBase.swift; sourceTree = "<group>"; };
-		92A0C25434AB2036B6117C9C97AD119B /* V1TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V1TestData.sqlite; path = DataCapturing/Tests/Resources/V1TestData.sqlite; sourceTree = "<group>"; };
 		9365DA5D87AB913F3C3AF11277424D18 /* SessionDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SessionDelegate.swift; path = Source/SessionDelegate.swift; sourceTree = "<group>"; };
 		93AF7502D5598BC310F9C83E9F6A4475 /* MessageExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MessageExtension.swift; path = Sources/SwiftProtobuf/MessageExtension.swift; sourceTree = "<group>"; };
 		93BE91173E0DA1584711ABA4F428631F /* RadarChartView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RadarChartView.swift; path = Source/Charts/Charts/RadarChartView.swift; sourceTree = "<group>"; };
@@ -854,6 +852,16 @@
 		AA59EC8AA6D568723D22AA49897E0B6B /* UnsafeRawPointer+Shims.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "UnsafeRawPointer+Shims.swift"; path = "Sources/SwiftProtobuf/UnsafeRawPointer+Shims.swift"; sourceTree = "<group>"; };
 		AAA28BB4D3606F33F88C688EF6312BDF /* MovebisDataCapturingService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MovebisDataCapturingService.swift; sourceTree = "<group>"; };
 		AAC953707B59F145EB787D2667BE2236 /* StringUtils.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = StringUtils.swift; path = Sources/SwiftProtobuf/StringUtils.swift; sourceTree = "<group>"; };
+		AAD092762853576000302684 /* DiffValueErrorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffValueErrorTest.swift; sourceTree = "<group>"; };
+		AAD092892853768000302684 /* SensorValueSerializationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorValueSerializationTest.swift; sourceTree = "<group>"; };
+		AAD0928C285378B800302684 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		AAD0928D285378B800302684 /* V2TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V2TestData.sqlite; sourceTree = "<group>"; };
+		AAD0928E285378B800302684 /* V5TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V5TestData.sqlite; sourceTree = "<group>"; };
+		AAD0928F285378B800302684 /* V4TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V4TestData.sqlite; sourceTree = "<group>"; };
+		AAD09290285378B800302684 /* V3TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V3TestData.sqlite; sourceTree = "<group>"; };
+		AAD09291285378B800302684 /* V1TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V1TestData.sqlite; sourceTree = "<group>"; };
+		AAD09292285378B800302684 /* V6TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V6TestData.sqlite; sourceTree = "<group>"; };
+		AAD09293285378B800302684 /* serializedFixture.cyf */ = {isa = PBXFileReference; lastKnownFileType = file; path = serializedFixture.cyf; sourceTree = "<group>"; };
 		AAF4D7E52850855C001C8197 /* measurement.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = measurement.pb.swift; sourceTree = "<group>"; };
 		AB249D7FBCD3C56538C959CAF00E3DA8 /* EventMO+ManualExtensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "EventMO+ManualExtensions.swift"; sourceTree = "<group>"; };
 		ABECC42F09565B1A4AB95775A7EDAFB1 /* SensorValue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SensorValue.swift; sourceTree = "<group>"; };
@@ -1733,6 +1741,22 @@
 			path = "../Target Support Files/Alamofire";
 			sourceTree = "<group>";
 		};
+		AAD0928B285378B800302684 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AAD0928C285378B800302684 /* README.md */,
+				AAD0928D285378B800302684 /* V2TestData.sqlite */,
+				AAD0928E285378B800302684 /* V5TestData.sqlite */,
+				AAD0928F285378B800302684 /* V4TestData.sqlite */,
+				AAD09290285378B800302684 /* V3TestData.sqlite */,
+				AAD09291285378B800302684 /* V1TestData.sqlite */,
+				AAD09292285378B800302684 /* V6TestData.sqlite */,
+				AAD09293285378B800302684 /* serializedFixture.cyf */,
+			);
+			name = Resources;
+			path = DataCapturing/Tests/Resources;
+			sourceTree = "<group>";
+		};
 		B6F57CD0298A8354C2696605D24077C4 /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
@@ -1856,15 +1880,12 @@
 				F5736E5630A89B5CA8094EFE496FD41F /* DistanceCalculationTests.swift */,
 				E0C02939077E79EC0071CC29F1126952 /* PersistenceTests.swift */,
 				FF364F3BB64FC380976502F53C419647 /* SerializationTest.swift */,
+				AAD092892853768000302684 /* SensorValueSerializationTest.swift */,
 				EDEE0DAAA76BF051F7CFBFD12F872F55 /* TrackCleanerTest.swift */,
-				92A0C25434AB2036B6117C9C97AD119B /* V1TestData.sqlite */,
-				4C160E333041C092CCF014F413D56783 /* V2TestData.sqlite */,
-				66DE02A0CF498663BB3A81074853D2D8 /* V3TestData.sqlite */,
-				61813CAAAE5AE028D5F5D2F2C350BC41 /* V4TestData.sqlite */,
-				1D5D06E88D322FC7E8A0ED5426D71E0E /* V5TestData.sqlite */,
-				87BE18EE2BE6EF81078DE99862FB9BFD /* V6TestData.sqlite */,
+				AAD092762853576000302684 /* DiffValueErrorTest.swift */,
 				B7EFC6304B392BF470CF06FE96F6E23B /* Support */,
 				237710DF38B3B9EE51E3C889A430F119 /* Synchronization */,
+				AAD0928B285378B800302684 /* Resources */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -2269,12 +2290,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CA237C79F85B92F5633440A0EA620A1B /* V1TestData.sqlite in Resources */,
-				EEEBE5F7936C0E1AA02A06651DF7B500 /* V2TestData.sqlite in Resources */,
-				2FB26B17B9F7BD1721C09D5A5BB10ACA /* V3TestData.sqlite in Resources */,
-				E12860F1D011B76EB89301ED4A57E700 /* V4TestData.sqlite in Resources */,
-				D1B4B2133B99C36B0C240500C7711226 /* V5TestData.sqlite in Resources */,
-				F65B930C1F8F9ED3706D5B7E79951A19 /* V6TestData.sqlite in Resources */,
+				AAD0929A285378B800302684 /* V6TestData.sqlite in Resources */,
+				AAD09296285378B800302684 /* V5TestData.sqlite in Resources */,
+				AAD0929B285378B800302684 /* serializedFixture.cyf in Resources */,
+				AAD09294285378B800302684 /* README.md in Resources */,
+				AAD09295285378B800302684 /* V2TestData.sqlite in Resources */,
+				AAD09297285378B800302684 /* V4TestData.sqlite in Resources */,
+				AAD09298285378B800302684 /* V3TestData.sqlite in Resources */,
+				AAD09299285378B800302684 /* V1TestData.sqlite in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2367,10 +2390,12 @@
 				1BA7AC1E8EE4D95821AA6746764BFD21 /* TestDataCapturingEventHandler.swift in Sources */,
 				E96C0A01F3A063EF73DA2891BC47993F /* TestDataCapturingService.swift in Sources */,
 				FC1A27EDCD0309F62F160F26240EA111 /* TestFixture.swift in Sources */,
+				AAD0928A2853768000302684 /* SensorValueSerializationTest.swift in Sources */,
 				8B6E7EC52A4BF0F0FA29DBAC09A6C9B3 /* TestLocationManager.swift in Sources */,
 				5CDBA97CF2FAB5C91598163DBA0742B9 /* TestMotionManager.swift in Sources */,
 				26897519B910EA1B3859EA72E5BF7B4F /* TrackCleanerTest.swift in Sources */,
 				269F42D76C22B3D65AC1776DFE49FB8A /* UploadProcessTest.swift in Sources */,
+				AAD092772853576000302684 /* DiffValueErrorTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
