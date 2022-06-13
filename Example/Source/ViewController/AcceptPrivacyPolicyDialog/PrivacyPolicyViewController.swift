@@ -68,7 +68,8 @@ class PrivacyPolicyViewController: CyViewController, PrivacyPolicyViewDelegate {
     var acceptButton: UIButton = {
         let button = CyButton()
         button.setTitle(NSLocalizedString("Accept", comment: "Title text for the accept button!"), for: .normal)
-        button.addTarget(PrivacyPolicyViewController.self, action: #selector(acceptPressed), for: .touchUpInside)
+        // self is correct here. Ignore the warning or the dialog will crash on button call.
+        button.addTarget(self, action: #selector(acceptPressed), for: .touchUpInside)
 
         return button
     }()
