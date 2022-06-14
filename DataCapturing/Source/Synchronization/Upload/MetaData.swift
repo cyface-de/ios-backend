@@ -48,22 +48,38 @@ var installationIdentifier: String {
  - version: 1.0.0
  */
 struct MetaData: Encodable {
+    /// The number of locations of the transmittable measurement.
     let locationCount: UInt64
+    /// The data format used to encode the payload data.
     let formatVersion: Int
+    /// The latitude of the first location in the transmitted measurement, or `nil` if no locations where captured.
     let startLocLat: Double?
+    /// The longitude of the first location in the transmitted measurement, or `nil` if no locations where captured.
     let startLocLon: Double?
+    /// The timestamp of the first location in the transmitted measurement, or `nil` if no locations where captured.
     let startLocTS: UInt64?
+    /// The latitude of the last location in the transmitted measurement, or `nil` if no locations where captured.
     let endLocLat: Double?
+    /// The longitude of the last location in the transmitted measurement, or `nil` if no locations where captured.
     let endLocLon: Double?
+    /// The timestamp of the last location in the transmitted measurement, or `nil` if no locations where captured.
     let endLocTS: UInt64?
+    /// The system wide unique identifier of the transmitted measurement.
     let measurementId: UInt64
+    /// The  version of the operation system, when transmitting the measurement.
     let osVersion: String
+    /// The current version of the Cyface application transmitting the measurement.
     let applicationVersion: String
+    /// The length of the transmitted measurement in meters.
     let length: Double
+    /// The starting modalitiy used for capturing the measurement.
     let modality: String
+    /// The world wide unique identifier of the current application installation.
     let deviceId = installationIdentifier
+    /// The type of the device transmitting the data.
     let deviceType = modelIdentifier
 
+    /// The meta data formatted as HTTP header data.
     var asHeader: HTTPHeaders {
         var headers: HTTPHeaders = [
             "Content-Type": "application/octet-stream",

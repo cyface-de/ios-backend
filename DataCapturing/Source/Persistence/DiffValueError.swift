@@ -26,11 +26,14 @@ import Foundation
  - version: 1.0.0
  */
 enum DiffValueError<T: FixedWidthInteger> : Error {
+    /// Thrown on a number overflow during a subraction.
     case diffOverflow(minuend: T, subtrahend: T)
+    /// Thrown on a number overflow during an addition.
     case sumOverflow(firstSummand: T, secondSummand: T)
 }
 
 extension DiffValueError: LocalizedError {
+    /// The localized error description for `DiffValueError` instances.
     public var errorDescription: String? {
         switch self {
         case .diffOverflow(minuend: let minuend, subtrahend: let subtrahend):

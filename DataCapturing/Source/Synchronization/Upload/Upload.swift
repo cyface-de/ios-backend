@@ -46,16 +46,27 @@ protocol Upload {
  - version 1.0.0
  */
 class CoreDataBackedUpload: Upload {
+    /// A wrapper for the `NSPersistentContainer` and the corresponding initialization code.
     var coreDataStack: CoreDataManager
+    /// The device wide unique identifier of the measurement to upload.
     var identifier: UInt64
+    /// The device wide unique measurement identifier as a signed 64 bit integer.
     var _identifier: Int64 {
         return Int64(identifier)
     }
+    /// A cache for the actual measurement to upload, so we don't have to reload it from the database all the time.
     var _measurement: Measurement?
+    /// A cache for the measurements metadata, so we don't have to reload it from the database all the time.
     var metaDataCache: MetaData?
+    /// A cache for the binary data to upload.
     var dataCache: Data?
+    /// A counter of the number of failed attempts to run this upload. This can be used to stop retrying after a certain amount of retries.
     var failedUploadsCounter = 0
 
+    /// Provide the measurement to upload from CoreData.
+    ///
+    /// After the first call this is retrieved from a local cache and not reloaded from the local storage.
+    /// To refresh the values, you need use a new instance of this class.
     private func measurement() throws -> Measurement {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         if _measurement == nil {
@@ -72,11 +83,16 @@ class CoreDataBackedUpload: Upload {
         }
     }
 
+    /// Make a new instance of this class, connected to a CoreData storage and associated with a measurement, via its `identifier`.
     init(coreDataStack: CoreDataManager, identifier: UInt64) {
         self.identifier = identifier
         self.coreDataStack = coreDataStack
     }
 
+    /// Load the meta data of the measurement from the CoreData storage.
+    ///
+    /// After the first call this is retrieved from a local cache and not reloaded from storage.
+    /// To refresh the values, you need use a new instance of this class.
     func metaData() throws -> MetaData {
         if let ret = metaDataCache {
             return ret
@@ -116,7 +132,13 @@ class CoreDataBackedUpload: Upload {
         }
     }
 
-    /// - throws: Either a `SerializationError` of serialization of the measurement failes for some reason or a CoreData error if loading the measurement fails.
+    /// Serialize the data from the measurement to upload into a binary format.
+    ///
+    /// The measurement is only loaded from the data storage on the first call.
+    /// Each subsequent call retrieves the measurement from a local cache.
+    /// To refresh the values, you need use a new instance of this class.
+    ///
+    /// - throws: Either a `SerializationError` if serialization of the measurement failes for some reason or a CoreData error if loading the measurement fails.
     func data() throws -> Data {
         if let ret = dataCache {
             return ret
@@ -130,6 +152,7 @@ class CoreDataBackedUpload: Upload {
         }
     }
 
+    /// Load a measurement from CoreData and return the measurement together with the initial modality.
     private func measurement(identifier: Int64) throws -> (Measurement, String) {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: identifier)
@@ -145,6 +168,7 @@ class CoreDataBackedUpload: Upload {
         return (measurement, initialModality)
     }
 
+    /// Provide the start location of the measurement ot upload as a triple of latitude, longitude and timestamp or all `nil` if the measurement has no locations.
     func startLocation() throws -> (Double?, Double?, UInt64?) {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
@@ -160,6 +184,7 @@ class CoreDataBackedUpload: Upload {
         return (startLocation.latitude, startLocation.longitude, startLocation.timestamp)
     }
 
+    /// Provide the end location of the measurement to upload as a triple of latitude, longitude and timestamp or all `nil` if the measurement has not locations.
     func endLocation() throws -> (Double?, Double?, UInt64?) {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
@@ -176,6 +201,14 @@ class CoreDataBackedUpload: Upload {
     }
 }
 
+/**
+ Errors thrown while accessing measurement data to upload.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 enum MeasurementError: Error {
+    /// Thrown if the managed object loaded from the database is currently a fault.
+    /// This usually means that managed object was accessed at the wrong time or from the wrong thread.
     case faultError
 }

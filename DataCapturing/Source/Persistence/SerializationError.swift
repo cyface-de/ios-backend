@@ -22,13 +22,6 @@ import Foundation
 /**
  An enumeration of all the possible errors thrown during serialization.
 
- ````
- case compressionFailed
- case decompressionFailed
- case missingData
- case invalidData
- ````
-
  - Author: Klemens Muthmann
  - Version: 1.0.0
  - Since: 1.0.0
@@ -38,17 +31,26 @@ enum SerializationError: Error {
     case compressionFailed(data: Data)
     /// Thrown if the system was unable to serialize a timestamp.
     case nonSerializableSensorValueTimestamp(cause: Error, timestamp: Date)
+    /// Thrown if serializing an X sensor value failed.
     case nonSerializableXValue(cause: Error, value: Double)
+    /// Thrown if serializing a Y sensor value failed.
     case nonSerializableYValue(cause: Error, value: Double)
+    /// Thrown if serializing a Z sensor value failed.
     case nonSerializableZValue(cause: Error, value: Double)
+    /// Thrown if serializing a location timestamp failed.
     case nonSerializableLocationTimestamp(cause: Error, timestamp: UInt64)
+    /// Thrown if serializing an accuracy value failed.
     case nonSerializableAccuracy(cause: Error, accuracy: Double)
+    /// Thrown if serializing a speed value failed.
     case nonSerializableSpeed(cause: Error, speed: Double)
+    /// Thrown if serializing a latitude value failed.
     case nonSerializableLatitude(cause: Error, latitude: Double)
+    /// Thrown if serializing a longitude value failed.
     case nonSerializableLongitude(cause: Error, longitude: Double)
 }
 
 extension SerializationError: LocalizedError {
+    /// The internationalized error description providing further details about a thrown error.
     public var errorDescription: String? {
         switch self {
         case .compressionFailed(data: let data):

@@ -279,6 +279,7 @@
 		AAD09299285378B800302684 /* V1TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD09291285378B800302684 /* V1TestData.sqlite */; };
 		AAD0929A285378B800302684 /* V6TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD09292285378B800302684 /* V6TestData.sqlite */; };
 		AAD0929B285378B800302684 /* serializedFixture.cyf in Resources */ = {isa = PBXBuildFile; fileRef = AAD09293285378B800302684 /* serializedFixture.cyf */; };
+		AAD0929D2858B86400302684 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = AAD0929C2858B86400302684 /* README.md */; };
 		AAD4C166F51D0C63C3524DA9B0300804 /* IRadarChartDataSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527756082B666292310954DB6042F6A1 /* IRadarChartDataSet.swift */; };
 		AAF4D7E62850855C001C8197 /* measurement.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAF4D7E52850855C001C8197 /* measurement.pb.swift */; };
 		AB0CCAF6CDF9520E0378193CDC130806 /* XAxisRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F44915535C3852F08B86B95E147CECD /* XAxisRenderer.swift */; };
@@ -862,6 +863,7 @@
 		AAD09291285378B800302684 /* V1TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V1TestData.sqlite; sourceTree = "<group>"; };
 		AAD09292285378B800302684 /* V6TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V6TestData.sqlite; sourceTree = "<group>"; };
 		AAD09293285378B800302684 /* serializedFixture.cyf */ = {isa = PBXFileReference; lastKnownFileType = file; path = serializedFixture.cyf; sourceTree = "<group>"; };
+		AAD0929C2858B86400302684 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		AAF4D7E52850855C001C8197 /* measurement.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = measurement.pb.swift; sourceTree = "<group>"; };
 		AB249D7FBCD3C56538C959CAF00E3DA8 /* EventMO+ManualExtensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "EventMO+ManualExtensions.swift"; sourceTree = "<group>"; };
 		ABECC42F09565B1A4AB95775A7EDAFB1 /* SensorValue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SensorValue.swift; sourceTree = "<group>"; };
@@ -1199,6 +1201,7 @@
 		120D8F6F10958601B58389FAD9C242E0 /* DataCapturing */ = {
 			isa = PBXGroup;
 			children = (
+				AAD0929C2858B86400302684 /* README.md */,
 				34DA41C10DB1EB541A762A3A78587418 /* CyfaceModel.xcdatamodeld */,
 				40A48971DC50A714E42EC1A8412A3ACE /* DiskConsumption.swift */,
 				114779512D02D562451886C7494A116E /* DistanceCalculationStrategy.swift */,
@@ -2296,6 +2299,7 @@
 				AAD09294285378B800302684 /* README.md in Resources */,
 				AAD09295285378B800302684 /* V2TestData.sqlite in Resources */,
 				AAD09297285378B800302684 /* V4TestData.sqlite in Resources */,
+				AAD0929D2858B86400302684 /* README.md in Resources */,
 				AAD09298285378B800302684 /* V3TestData.sqlite in Resources */,
 				AAD09299285378B800302684 /* V1TestData.sqlite in Resources */,
 			);

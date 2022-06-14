@@ -23,6 +23,7 @@ import os.log
 
 /// The current version of the Cyface binary format.
 let dataFormatVersion: UInt16 = 3
+/// The current version of the Cyface binary format in binary data form.
 let dataFormatVersionBytes = withUnsafeBytes(of: dataFormatVersion.bigEndian) {
     Data($0)
 }
@@ -101,11 +102,15 @@ extension BinarySerializer {
  - Version: 2.0.0
  */
 class MeasurementSerializer: BinarySerializer {
+    /// The number of centimeters in a meter.
     static let centimetersInAMeter = 100.0
+    /// The targeted amount of places after the comma to use for storing geo locations.
     static let geoLocationAccuracy = 6
-    /// Serializer to transform acceleration objects
+    /// File handle to store acceleration values to
     let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
+    /// File handle to store rotation values to
     let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
+    /// File handle to store direction values to
     let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
 
     /**
@@ -117,9 +122,7 @@ class MeasurementSerializer: BinarySerializer {
      - 4 Bytes: Count of directions (not used on iOS yet)
      
      - Parameter serializable: The measurement to serialize.
-     - Throws:
-        - `SerializationError.missingData` If no track data was found.
-        - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+     - Throws: if either converting the provided data or reading the sensor values fails.
      */
     func serialize(serializable measurement: Measurement) throws -> Data {
         var protosMeasurement = De_Cyface_Protos_Model_MeasurementBytes()
@@ -192,6 +195,7 @@ class MeasurementSerializer: BinarySerializer {
         return ret
     }
 
+    /// Serializes the provided `Event` instances to a Protobuf event type.
     private func serialize(events: [Event]) -> [De_Cyface_Protos_Model_Event] {
         var ret = [De_Cyface_Protos_Model_Event]()
         for event in events {
@@ -217,6 +221,11 @@ class MeasurementSerializer: BinarySerializer {
         return ret
     }
 
+    /**
+      Transforms a double to a 32 bit integer.
+
+      This is achieved by moving the comma `geoLocationAccuracy` places to the right and ommiting any further places after that.
+     */
     private func convert(coordinate: Double) -> Int32 {
         var shifter = 1.0
         for _ in 1...MeasurementSerializer.geoLocationAccuracy {
@@ -235,6 +244,7 @@ class MeasurementSerializer: BinarySerializer {
  - Note: This class was called `AccelerationSerializer` in SDK version prior to 6.0.0.
  */
 class SensorValueSerializer: BinarySerializer {
+    /// A constant used to convert between millimeters and meters.
     private static let millimetersInAMeter = 1_000.0
 
     /**
@@ -338,18 +348,36 @@ class SensorValueSerializer: BinarySerializer {
             return ret
         }
 
+    /**
+     An enumeration of errors happening during the serialization of Cyface data to the binary format.
+
+     - author: Klemens Muthmann
+     - version: 1.0.0
+     */
     public enum BinarySerializationError: Error {
+        /// Thrown if no data was provided, where some was expected.
         case emptyData
     }
 }
 
+/**
+ A calculator for differential encoding of an integer time series.
+
+ By starting from an initial values this class provides an algorithm, that always gives you the next differential in a time series of values. Since this allows to store smaller values, less bytes can be used per value.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 class DiffValue<T: FixedWidthInteger> {
+    /// The value to calculate the differential for.
     var previousValue: T
 
+    /// Initialize this `DiffValue` with a start value.
     init(start: T) {
         previousValue = start
     }
 
+    /// Calculate the diff between the last and the provided value.
     func diff(value: T) throws -> T {
         let ret = value.subtractingReportingOverflow(previousValue)
         guard !ret.overflow else {
@@ -359,6 +387,7 @@ class DiffValue<T: FixedWidthInteger> {
         return ret.partialValue
     }
 
+    /// Calculate the sum between the last and the provided value.
     func undiff(value: T) throws -> T {
         let ret = previousValue.addingReportingOverflow(value)
         guard !ret.overflow else {

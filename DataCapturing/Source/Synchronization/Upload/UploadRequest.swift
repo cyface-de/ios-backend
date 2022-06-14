@@ -25,6 +25,7 @@ import OSLog
  The actual upload requests sends captured data to a Cyface server.
 
  - author: Klemens Muthmann
+ - version: 1.0.0
  */
 class UploadRequest {
     /// The URL to the Cyface API receiving the data.
@@ -37,6 +38,7 @@ class UploadRequest {
         self.session = session
     }
 
+    /// Send the request for the provided `upload`.
     func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0, onSuccess: @escaping (UInt64) -> Void, onFailure: @escaping (String, String, Upload, Error) -> Void) {
         os_log("Uploading measurement %{public}d to session %{public}@.", log: log, type: .debug, upload.identifier, sessionIdentifier)
             do {

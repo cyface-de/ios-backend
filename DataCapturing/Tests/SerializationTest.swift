@@ -78,6 +78,7 @@ class SerializationTest: XCTestCase {
         try super.tearDownWithError()
     }
 
+    /// Store a test fixture to CoreData and provide the measurement identifier.
     func fixture() throws -> Int64 {
         var measurement = try self.persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
         try self.persistenceLayer.appendNewTrack(to: &measurement)
@@ -88,6 +89,7 @@ class SerializationTest: XCTestCase {
         return measurement.identifier
     }
 
+    /// Tests if serialization of a simple empty measurement into the Cyface binary format works as expected.
     func testSerializeEmptyMeasurement() throws {
         let measurement = Measurement(identifier: 1)
         measurement.tracks = []
@@ -137,6 +139,9 @@ class SerializationTest: XCTestCase {
         }
     }
 
+    /// Assert the deserialized test fixture.
+    ///
+    /// - see: `SerializationTest.fixture()`
     private func assert(fixture:De_Cyface_Protos_Model_Measurement) {
         XCTAssertFalse(fixture.hasRotationsBinary)
         XCTAssertFalse(fixture.hasCapturingLog)
@@ -168,7 +173,6 @@ class SerializationTest: XCTestCase {
     func ignore_testSerializeBigDataSet() throws {
         let nextIdentifier = try persistenceLayer.nextIdentifier()
         let measurement = try FakeMeasurementImpl.fakeMeasurement(identifier: nextIdentifier).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 36_000).addAccelerations(countOfAccelerations: 3_600_000).build(persistenceLayer)
-        let data = try oocut.serialize(serializable: measurement)
-        try data.write(to: URL(fileURLWithPath: "/Users/cyface/data.cyf"))
+        _ = try oocut.serialize(serializable: measurement)
     }
 }

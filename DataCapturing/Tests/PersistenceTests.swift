@@ -36,6 +36,7 @@ class PersistenceTests: XCTestCase {
     var fixture: DataCapturing.Measurement?
     /// The default mode of transportation used for tests.
     let defaultMode = "BICYCLE"
+    /// Load the data model for the test data stack.
     static let dataModel = try! CoreDataManager.load()
 
     /// Initializes the test enviroment by saving some test data to the test `PersistenceLayer`.
@@ -76,15 +77,11 @@ class PersistenceTests: XCTestCase {
     }
 
     /// Cleans the test enviroment by deleting all data.
-    override func tearDown() {
-        do {
-            try oocut.delete()
-        } catch {
-            fatalError("Unable to tear down persistence test. Reason: \(error)")
-        }
+    override func tearDownWithError() throws {
+        try oocut.delete()
         oocut = nil
         fixture = nil
-        super.tearDown()
+        try super.tearDownWithError()
     }
 
     /**
@@ -277,6 +274,7 @@ class PersistenceTests: XCTestCase {
         XCTAssertLessThanOrEqual(loadedEvents[1].time.timeIntervalSince1970, loadedEvents[2].time.timeIntervalSince1970)
     }
 
+    /// Tests that loading data for upload to a Cyface data collector works as expected.
     func testLoadUploadData() throws {
         let coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: PersistenceTests.dataModel)
         let bundle = Bundle(for: type(of: coreDataStack))

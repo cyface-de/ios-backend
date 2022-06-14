@@ -28,13 +28,25 @@ import Alamofire
  - version: 1.0.0
  */
 public class UploadProcess {
+    /// Session registry storing sessions open for resume.
     var openSessions: SessionRegistry
+    /// The URL to the Cyface data collector.
     let apiUrl: URL
+    /// Callback called on successful upload.
     let onSuccess: (UInt64) -> Void
+    /// Callback called on a failed upload.
     let onFailure: (UInt64, Error) -> Void
+    /// An Alamofire `Session` to use for sending requests and receiving responses.
     let session: Session
+    /// Authenticator to get authentication tokens from the upload URL, if the current user is a valid one.
     let authenticator: Authenticator
 
+    /// Makes a new `UploadProcess` using the supplied properties.
+    ///
+    /// - Parameter session: An optional Alamofire `Session`. Use this to inject a session, for example for mocking. If not used the standard Alamofire `Session` is used, which should be fine for most use cases.
+    /// - Parameter sessionRegistry: You may reuse some `SessionRegistry` here or provide one backed by persistent storage. If the sessions are not stored somewhere nothing bad will happen, except from a few unecessary uploads, which could have been resumed.
+    /// - Parameter onSuccess: Called on succeful completion of the process. Provides the uploaded measurements device wide unique identifier as a parameter.
+    /// - Parameter onFailure: Called on failed upload process. Provides the measurements device wide unique identifier of the measurement, that failed to upload, together with the error information.
     public init(apiUrl: URL, session: Session = AF, sessionRegistry: SessionRegistry, authenticator: Authenticator, onSuccess: @escaping (UInt64) -> Void, onFailure: @escaping (UInt64, Error) -> Void) {
         self.openSessions = sessionRegistry
         self.apiUrl = apiUrl
@@ -44,6 +56,7 @@ public class UploadProcess {
         self.authenticator = authenticator
     }
 
+    /// Start the upload process for the provided `Upload`.
     func upload(_ upload: Upload) {
         authenticator.authenticate(onSuccess: { token in
             self.onSuccessfulAuthentication(authToken: token, upload: upload)
@@ -52,6 +65,7 @@ public class UploadProcess {
         })
     }
 
+    /// Called after authentication with the Cyface data collector service was successful.
     private func onSuccessfulAuthentication(authToken: String, upload: Upload) {
         if let currentSession = openSessions.session(for: upload) {
             let statusRequest = StatusRequest(apiUrl: apiUrl, session: session)
@@ -71,6 +85,7 @@ public class UploadProcess {
         }
     }
 
+    /// Called after a status request on an open session returned successfully.
     private func onSuccessfulStatusRequest(authToken: String, sessionIdentifier: String, upload: Upload) {
         let uploadRequest = UploadRequest(session: session)
 
@@ -82,12 +97,14 @@ public class UploadProcess {
             onFailure: onFailedUploadRequest)
     }
 
+    /// Called if a status request was aborted by the server.
     private func onAbortedStatusRequest(authToken: String, upload: Upload) {
         let preRequest = PreRequest(apiUrl: apiUrl, session: session)
 
         preRequest.request(authToken: authToken, upload: upload, onSuccess: onSuccessfulPreRequest, onFailure: onFailure)
     }
 
+    /// Called if an upload pre request was successful.
     private func onSuccessfulPreRequest(authToken: String, sessionIdentifier: String, upload: Upload) {
         let uploadRequest = UploadRequest(session: session)
         openSessions.register(session: sessionIdentifier, measurement: upload)
@@ -100,6 +117,7 @@ public class UploadProcess {
             onFailure: onFailedUploadRequest)
     }
 
+    /// Called after a failed upload request.
     private func onFailedUploadRequest(authToken: String, sessionIdentifier: String, upload: Upload, error: Error) {
         var upload = upload
         upload.failedUploadsCounter += 1

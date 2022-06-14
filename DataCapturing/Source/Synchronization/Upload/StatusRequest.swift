@@ -19,16 +19,32 @@
 import Foundation
 import Alamofire
 
-class StatusRequest {
+/**
+ A request send to receive status information about an open upload session from the server.
 
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
+class StatusRequest {
+    /// The Cyface API URL to send the request to.
     let apiUrl: URL
+    /// The Alamofire `Session` to upload data with.
     let session: Session
 
+    /// Make a new request for a specific Cyface API.
     init(apiUrl: URL, session: Session) {
         self.apiUrl = apiUrl
         self.session = session
     }
 
+    /// Start the request
+    /// - Parameter authToken: JWT token to authenticate with. Get one by using an `Authenticator`.
+    /// - Parameter sessionIdentifier: The URL to the open session for which to request status information.
+    /// - Parameter upload: The data to upload.
+    /// - Parameter onFinished: Called when the status was that the request has been finished.
+    /// - Parameter onResume: Called when the status was that the request should be resumed.
+    /// - Parameter onAborted: Called when the status was that the request was aborted, for example if it timed out on server side.
+    /// - Parameter onFailure: Called if the status request failed.
     func request(authToken: String, sessionIdentifier: String, upload: Upload, onFinished: @escaping (UInt64) -> Void, onResume: @escaping (String, String, Upload) -> Void, onAborted: @escaping (String, Upload) -> Void, onFailure: @escaping (UInt64, Error) -> Void) {
         do {
             let metaData = try upload.metaData()

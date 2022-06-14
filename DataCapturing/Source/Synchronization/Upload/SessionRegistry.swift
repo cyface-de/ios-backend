@@ -20,11 +20,12 @@
 import Foundation
 
 /**
-Stores the open sessions, this app knows about.
+ Stores the open sessions, this app knows about.
 
-This implementation stores sessions in memory and allows continuation as long as the app was not terminated.
+ This implementation stores sessions in memory and allows continuation as long as the app was not terminated.
 
-- author: Klemens Muthmann
+ - author: Klemens Muthmann
+ - version: 1.0.0
  */
 public struct SessionRegistry {
     /// A mapping from the measurement identifier to the REST resource that session is available at.

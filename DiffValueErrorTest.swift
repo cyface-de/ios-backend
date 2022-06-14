@@ -20,12 +20,21 @@
 import XCTest
 @testable import DataCapturing
 
+/**
+ Tests the differential calculation used for efficient data storage.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 class DiffValueErrorTest: XCTestCase {
+
+    /// Tests that overflows of addition provides the correct information.
     func testDiffValueErrorSumOverflow() {
         let oocut = DiffValueError.sumOverflow(firstSummand: 1, secondSummand: 2)
         XCTAssertEqual(oocut.localizedDescription, "Calculation of 1 + 2 caused an overflow!")
     }
 
+    /// Tests that overflow of differential calculations provides the correct information.
     func testDiffValueErrorDiffOverflow() {
         let oocut = DiffValueError.diffOverflow(minuend: 1, subtrahend: 2)
         XCTAssertEqual(oocut.localizedDescription, "Calculation of 1 - 2 caused an overflow!")

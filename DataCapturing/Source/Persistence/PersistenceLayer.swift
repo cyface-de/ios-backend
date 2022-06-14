@@ -626,7 +626,7 @@ public class PersistenceLayer {
 
      - Parameters:
         - ofMeasurement: The measurement to traverse the tracks for
-        - call: A callback function receiving the track and geo location pairs. This might throw depending on implementation
+        - call: A callback function receiving the track and geo location pairs.
      */
     public static func traverseTracks(ofMeasurement measurement: Measurement, call closure: (Track, GeoLocation) -> Void) {
         for track in measurement.tracks {
@@ -660,6 +660,7 @@ public enum PersistenceError: Error {
 }
 
 extension PersistenceError: LocalizedError {
+    // Localized error description, with further information about the error.
     public var errorDescription: String? {
         switch self {
         case .measurementNotLoadable(let measurementIdentifier):

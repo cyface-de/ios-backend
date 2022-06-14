@@ -21,7 +21,14 @@ import XCTest
 import CoreData
 @testable import DataCapturing
 
+/**
+ Test the serialization of lists of sensor values.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 class SensorValueSerializationTest: XCTestCase {
+    /// Test the serialization of batches of sensor values.
     func testSerializeSensorValues() throws {
         let sensorValueSerializer = SensorValueSerializer()
 

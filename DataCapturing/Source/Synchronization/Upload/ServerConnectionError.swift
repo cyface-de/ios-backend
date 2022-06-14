@@ -28,22 +28,24 @@ import Alamofire
  - Since: 1.0.0
  */
 public enum ServerConnectionError: Error {
-    /// If authentication was carried out but was not successful
+    /// If authentication was carried out but was not successful.
     case authenticationNotSuccessful(String)
-    /// Error occuring if this client tried to communicate with the server without proper authentication
+    /// Error occuring if this client tried to communicate with the server without proper authentication.
     case notAuthenticated(String)
-    /// Thrown if modality type changes are inconsistent
+    /// Thrown if modality type changes are inconsistent.
     case modalityError(String)
-    /// Thrown if measurement events are inconsistent
+    /// Thrown if measurement events are inconsistent.
     case measurementError(Int64)
-    /// Thrown if some measurement metadata was not encodable as an UTF-8 String
+    /// Thrown if some measurement metadata was not encodable as an UTF-8 String.
     case dataError(String)
+    /// Rethrow an error from within Alamofire.
     case alamofireError(AFError)
+    /// Server did not send a response and client timed out.
     case noResponse
+    /// The request failed. The failure status code is provided.
     case requestFailed(httpStatusCode: Int)
+    /// Missing location header in pre request response.
     case noLocation
+    /// The upload location provided by a status request was no a valid URL.
     case invalidUploadLocation(String)
-    case uploadFailed(Error)
-    case preRequestFailed(Error)
-    case checkResumeFailed
 }

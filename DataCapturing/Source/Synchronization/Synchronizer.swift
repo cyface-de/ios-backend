@@ -49,7 +49,10 @@ public class Synchronizer {
     /// A strategy for cleaning the persistent storage after data synchronization.
     private let cleaner: Cleaner
 
+    /// A registry for open server sessions, used to repeat those sessions if possible.
     private let sessionRegistry: SessionRegistry
+
+    /// The authenticator to check if the current user has a valid user account.
     private let authenticator: Authenticator
 
     /// Handles background synchronization of available `Measurement`s.
@@ -73,8 +76,10 @@ public class Synchronizer {
     /// A queue synchronizing access to the Alamofire `NetworkReachabilityManager`.
     private let isReachableCheckingQueue = DispatchQueue.global(qos: .background)
 
+    /// Flag on whether the Cyface server is reachable on ethernet or WiFi.
     private var isReachableOnEthernetOrWifi = false
 
+    /// Flag on whether the Cyface server is reachable at all (including mobile).
     private var isReachable = false
 
     /**
@@ -92,9 +97,11 @@ public class Synchronizer {
      Initializer that sets the initial value of all the properties and prepares the background synchronization job.
 
      - Parameters:
+        - apiURL: The URL to a Cyface API
         - coreDataStack: Stack used to access *CoreData*.
         - cleaner: A strategy for cleaning the persistent storage after data synchronization.
-        - serverConnection: An authenticated connection to a Cyface API server.
+        - sessionRegistry: A registry to store open server sessions, to try to repeat instead of restart an upload.
+        - authenticator: The authenticator to use to check on the server on whether the current user is valid or not.
         - handler: The handler to call, when synchronization for a measurement has finished.
      */
     public init(apiURL: URL, coreDataStack: CoreDataManager, cleaner: Cleaner, sessionRegistry: SessionRegistry = SessionRegistry(), authenticator: Authenticator, handler: @escaping (DataCapturingEvent, Status) -> Void) {
@@ -302,9 +309,18 @@ public class Synchronizer {
         }
     }
 
+    /**
+     Errors thrown during data synchronization.
+
+     - author: Klemens Muthmann
+     - version: 1.0.0
+     */
     public enum SynchronizerError: Error {
+        /// If the host of the server to synchronize to is missing.
         case missingHost
+        /// If the Alamofire reachability manager could not be built.
         case unableToBuildReachabilityManager
+        /// If starting reachability checks fails.
         case reachabilityStartFailed
     }
 }

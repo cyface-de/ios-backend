@@ -21,11 +21,12 @@ import Foundation
 import Alamofire
 
 /**
-A request telling the server, that the app wants to upload a measurement.
+ A request telling the server, that the app wants to upload a measurement.
 
  The server can either accept this and return a resource on which to start the upload or turn it down if it has no interest in the data.
 
  - author: Klemens Muthmann
+ - version: 1.0.0
  */
 class PreRequest {
     /// A URL running an appropriate Cyface Server
@@ -33,11 +34,18 @@ class PreRequest {
     /// The Alamofire `Session` to use for uploading the data.
     let session: Session
 
+
+    /// Make a new pre request from a Cyface API URL and an Alamofire `Session`.
     init(apiUrl: URL, session: Session) {
         self.apiUrl = apiUrl
         self.session = session
     }
 
+    /// Send the request
+    /// - Parameter authToken: Get this JWT token from an `Authenticator`.
+    /// - Parameter upload: The upload information
+    /// - Parameter onSuccess: Callback after the request finished successfully.
+    /// - Parameter onFailure: Callback after the request failed for some reason.
     func request(authToken: String, upload: Upload, onSuccess: @escaping (String, String, Upload) -> Void, onFailure: @escaping (UInt64, Error) -> Void) {
         do {
             let metaData = try upload.metaData()
