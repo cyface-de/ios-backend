@@ -299,10 +299,6 @@ If any hicups occur, detailed information might be available from the [Swift Pro
 Contains swiftlint
 See: https://github.com/realm/SwiftLint
 
-### Creating the documentation
-* Install swift doc like described [here](https://github.com/SwiftDocOrg/swift-doc).
-* Call `swift doc generate DataCapturing/Source --module-name DataCapturing --output docs --format html --base-url /ios-backend/` from the terminal in the DataCapturing sub directory.
-
 ## Releasing a new Version
 * Always work on a new branch based on main conforming to the pattern "release-<major>.<minor>.<fix>_PROJ-TASKNUMBER
 * Increase Version for DataCapturing Target and DataCapturing.podspec
