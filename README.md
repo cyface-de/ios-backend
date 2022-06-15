@@ -280,7 +280,7 @@ authenticator: authenticator) { event, status in
 7. An authenticator using the same API URL as this synchronizer.
 
 ## API Documentation
-[See](https://cyface-de.github.io/ios-backend/)
+[See](https://cyface-de.github.io/ios-backend/documentation/datacapturing/)
 
 ## Building from Source
 
