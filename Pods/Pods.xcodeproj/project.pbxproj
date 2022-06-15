@@ -3017,6 +3017,7 @@
 				MODULEMAP_FILE = "Target Support Files/DataCapturing/DataCapturing.modulemap";
 				PRODUCT_MODULE_NAME = DataCapturing;
 				PRODUCT_NAME = DataCapturing;
+				RUN_DOCUMENTATION_COMPILER = YES;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
@@ -3574,6 +3575,7 @@
 				MODULEMAP_FILE = "Target Support Files/DataCapturing/DataCapturing.modulemap";
 				PRODUCT_MODULE_NAME = DataCapturing;
 				PRODUCT_NAME = DataCapturing;
+				RUN_DOCUMENTATION_COMPILER = YES;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
