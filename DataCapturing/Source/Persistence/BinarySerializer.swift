@@ -336,9 +336,9 @@ class SensorValueSerializer: BinarySerializer {
             for batch in deserializedValues.accelerations {
                 for accelerationsIndex in batch.timestamp.indices {
                     let timestamp = try timestampUnDiff.undiff(value: batch.timestamp[accelerationsIndex])
-                    let ax = Double(try axUnDiff.undiff(value: batch.x[accelerationsIndex]))/1000.0
-                    let ay = Double(try ayUnDiff.undiff(value: batch.y[accelerationsIndex]))/1000.0
-                    let az = Double(try azUnDiff.undiff(value: batch.z[accelerationsIndex]))/1000.0
+                    let ax = Double(try axUnDiff.undiff(value: batch.x[accelerationsIndex]))/SensorValueSerializer.millimetersInAMeter
+                    let ay = Double(try ayUnDiff.undiff(value: batch.y[accelerationsIndex]))/SensorValueSerializer.millimetersInAMeter
+                    let az = Double(try azUnDiff.undiff(value: batch.z[accelerationsIndex]))/SensorValueSerializer.millimetersInAMeter
 
                     let value = SensorValue(timestamp: Date(timeIntervalSince1970: Double(timestamp)/1_000), x: ax, y: ay, z: az)
                     ret.append(value)
