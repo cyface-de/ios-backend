@@ -357,11 +357,12 @@ public class PersistenceLayer {
                 }
             }
 
+            // TODO: Remove all those counts from the data model. It is a lef over from the old data format. After removal, the data model needs to change and we need new migration code.
             measurement.accelerationsCount = measurement.accelerationsCount.advanced(by: accelerations.count)
             measurementMO.accelerationsCount = measurement.accelerationsCount
             measurement.rotationsCount = measurement.rotationsCount.advanced(by: rotations.count)
             measurementMO.rotationsCount = measurement.rotationsCount
-            measurement.directionsCount = measurement.directionsCount.advanced(by: accelerations.count)
+            measurement.directionsCount = measurement.directionsCount.advanced(by: directions.count)
             measurementMO.directionsCount = measurement.directionsCount
 
             try context.save()
