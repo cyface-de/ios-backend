@@ -143,8 +143,8 @@ class CurrentMeasurementViewModel {
             return formatter.string(from: 0)
         }
         let timeDifferenceInMilliseconds = currentTimestamp - initialTimestamp
-        let timeDifferenceInSeconds = timeDifferenceInMilliseconds / Int64(1000)
-        let elapsedTimeInSeconds = TimeInterval(integerLiteral: timeDifferenceInSeconds)
+        let timeDifferenceInSeconds = timeDifferenceInMilliseconds / 1000
+        let elapsedTimeInSeconds = TimeInterval(timeDifferenceInSeconds)
         return formatter.string(from: elapsedTimeInSeconds)
     }
 }

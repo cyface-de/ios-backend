@@ -31,10 +31,16 @@
   ],
   "dependencies": {
     "Alamofire": [
-      "~> 4.9.1"
+      "~> 5.5.0"
     ],
     "DataCompression": [
       "~> 3.6.0"
+    ],
+    "SwiftProtobuf": [
+      "~> 1.19.0"
+    ],
+    "Protos": [
+      "~> 2.1.0"
     ]
   },
   "testspecs": [
@@ -42,7 +48,12 @@
       "name": "Tests",
       "test_type": "unit",
       "source_files": "DataCapturing/Tests/**/*.swift",
-      "resources": "DataCapturing/Tests/**/*.sqlite"
+      "resources": "DataCapturing/Tests/Resources/*.sqlite",
+      "dependencies": {
+        "Mocker": [
+          "~> 2.5.5"
+        ]
+      }
     }
   ],
   "appspecs": [

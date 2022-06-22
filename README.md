@@ -20,6 +20,9 @@ The `ServerConnection` class is responsible for transmitting captured data to a 
 
 ## Integration in your App
 
+### Integration
+
+
 ### Permissions
 
 To use the Cyface SDK permissions to capture the users location while using the app and additionally in the background are required.
@@ -77,7 +80,7 @@ try manager.setup(bundle: bundle) {
 
 As explained above before using any data capturing the integrating App must have the appropriate permissions to use location tracking in the background.
 See the Apple documentation about background location updates for more information.
-The must also be a `manager` instance of type `CoreDataManager` (see last section).
+There must also be a `manager` instance of type `CoreDataManager` (see last section).
 
 To integrate the Cyface SDK for iOS into your own app you need to either create a `DataCapturingService` or a `MovebisDataCapturingService`.
 This should look similar to:
@@ -151,43 +154,26 @@ Accessing this information to display it on the screen should follow the pattern
 ```swift
 do {
     let persistenceLayer = PersistenceLayer(onManager: manager)
-    persistenceLayer.context = persistenceLayer.makeContext()
     let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
 
-    guard let tracks = measurement.tracks?.array as? [Track] else {
-        fatalError()
-    }
+    for track in measurement.tracks {
 
-    for track in tracks {
-        guard let locations = track.locations?.array as? [GeoLocationMO] else {
-            fatalError()
-    }
-
-    guard !locations.isEmpty else {
-        os_log("No locations to display!")
-        continue
-    }
-
-    // Transform the location model objects from the database to a thread safe representation.
-    var localLocations = [GeoLocation]()
-    for location in locations {
-        localLocations.append(GeoLocation(latitude: location.lat, longitude: location.lon, accuracy: location.accuracy, speed: location.speed, timestamp: location.timestamp))
-    }
-
-    DispatchQueue.main.async { [weak self] in
-        guard let self = self else {
-            return
+        guard !track.locations.isEmpty else {
+            os_log("No locations to display!")
+            continue
         }
-        // Draw or refresh the UI.
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            // Draw or refresh the UI.
+        }
     }
 } catch {
     os_log("Unable to load locations!")
 }
 ```
-**ATTENTION:** Notice that all locations have been copied to new data objects. 
-This is necessary, as *CoreData* objects are not thread safe and will loose all data upon usage on a different thread. 
-You need to do this with all *CoreData* model objects before using them in your app. 
-*CoreData* model objects currently are `MeasurementMO`, `Event`, `Track` and `GeoLocationMO`.
 
 ### Getting the length of a measurement
 
@@ -196,7 +182,6 @@ To get access to this value you should either use the instance of `PersistenceLa
 Using that `PersistenceLayer` you can access the track length by loading a measurement, which looks similar to:
 
 ```swift
-persistenceLayer.context = persistenceLayer.makeContext()
 let measurement = try persistenceLayer.load(measurementIdentifiedBy: identifier) 
 let trackLength = measurement.trackLength
 ```
@@ -209,16 +194,13 @@ This is currently hard coded into the SDK but might change in a future release.
 
 ```swift
 let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-persistenceLayer.context = persistenceLayer.makeContext()
 let measurement = persistenceLayer.load(measurementIdentifiedBy: identifier)
-guard let track = measurement.tracks?.array.last as? Track else {
-    fatalError()
+for track in measurement.tracks {
+    let cleanTrack = try persistenceLayer.loadClean(track: track)
 }
-let cleanTrack = try oocut.loadClean(track: track)
 ```
 
-The `cleanTrack` is an array of `GeoLocationMO` instances.
-This array is not to be used on a different thread. Before using it you should copy all its values to main memory (or know how to use faults in CoreData).
+The `cleanTrack` is an array of `GeoLocation` instances.
 
 ### Using an Authenticator
 
@@ -239,7 +221,6 @@ To access the locations from a track, do something like the following.
 
 ```swift
 let persistenceLayer = PersistenceLayer(onManager: manager)
-persistenceLayer.context = persistenceLayer.makeContext()
 let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
 if let tracks = measurement.tracks {
     if let locations = tracks[0].locations {
@@ -256,11 +237,11 @@ If you need to know about past start, pause, resume and stop events you may retr
 The measurement provides the events as follows:
 
 ```swift
-let loadedEvents = loadedMeasurement.events?.array as? [Event]
+let loadedEvents = loadedMeasurement.events
 ```
 
 The list is ordered by the occurence time of the events.
-Each event provides a type, best retrieved from `Event.typeEnum` and the time of its occurrences as an `NSDate`.
+Each event provides a type, best retrieved from `Event.type` and the time of its occurrences as a `Date`.
 
 ### Continuous synchronization
 
@@ -275,36 +256,48 @@ Creating a synchronizer should look something like:
 // 1.
 let url = URL(string: "http://localhost/api")!
 // 2.
-let serverConnection = ServerConnection(apiURL: url, authenticator: authenticator, onManager: manager)
-// 3.
 let synchronizer = try Synchronizer(
+// 3.
+apiURL: url,
 // 4.
 coreDataStack: manager, 
 // 5.
 cleaner: AccelerationPointRemovalCleaner(), 
 // 6.
-serverConnection: serverConnection) { event, status in 
+sessionRegistry: registry,
+// 7.
+authenticator: authenticator) { event, status in 
 	// Handle .synchronizationFinished event for example by checking status for .success or .failure
 }
 ```
 
 1. Create the URL where your server is ready to receive data.
-2. Create a `ServerConnection` from the URL created in the previous step and add an authenticator and a manager as described above.
-3. Create the `Synchronizer` based on the following parameters.
+2. Create the `Synchronizer` based on the following parameters.
+3. The URL to the Cyface data collector API.
 4. Preferrably use the same `CoreDataManager` as described under setting up the `DataCapturingService`.
 5. Create a `Cleaner` which cleanes the database after successful synchronization.
-6. Provide the `ServerConnection` as created in step 2.
+6. A session registry to store interrupted but still open sessions.
+7. An authenticator using the same API URL as this synchronizer.
 
 ## API Documentation
-[See](https://cyface-de.github.io/ios-backend/)
+[See](https://cyface-de.github.io/ios-backend/documentation/datacapturing/)
 
 ## Building from Source
+
+### Generate Interface to Protocol Buffer
+We use protobuf to transmit data.
+Before this works you need to install the Swift Protobuf compiler for example using homebrew: 
+
+```
+brew install swift-protobuf
+```
+
+If this succeeds, code generation should work automatically.
+If any hicups occur, detailed information might be available from the [Swift Protobuf Github Page](https://github.com/apple/swift-protobuf/)
+
+### Linting
 Contains swiftlint
 See: https://github.com/realm/SwiftLint
-
-### Creating the documentation
-* Install swift doc like described [here](https://github.com/SwiftDocOrg/swift-doc).
-* Call `swift doc generate DataCapturing/Source --module-name DataCapturing --output docs --format html --base-url /ios-backend/` from the terminal in the DataCapturing sub directory.
 
 ## Releasing a new Version
 * Always work on a new branch based on main conforming to the pattern "release-<major>.<minor>.<fix>_PROJ-TASKNUMBER
@@ -319,7 +312,7 @@ See: https://github.com/realm/SwiftLint
 
 
 ## License
-Copyright 2017 - 2021 Cyface GmbH
+Copyright 2017 - 2022 Cyface GmbH
 
 This file is part of the Cyface SDK for iOS.
 

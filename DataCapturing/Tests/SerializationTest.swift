@@ -34,67 +34,74 @@ class SerializationTest: XCTestCase {
     var oocut: MeasurementSerializer!
     /// A `PersistenceLayer` instance used to load and store data for testing purposes.
     var persistenceLayer: PersistenceLayer!
-    /// A `MeasurementEntity` holding a test measurement to serialize and deserialize.
-    var fixture: Int64!
     /// A manager for handling the CoreData stack.
     var coreDataStack: CoreDataManager!
     /// The `NSManagedObjectModel` used by the test.
     static let dataModel = try! CoreDataManager.load()
 
     /// Initializes the test data set and `PersistenceLayer` with some test data.
-    override func setUp() {
+    override func setUpWithError() throws {
         super.setUp()
         oocut = MeasurementSerializer()
         let expectation = self.expectation(description: "CoreDataStack started successfully.")
+        var setUpError:Error?
 
-        do {
             coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: SerializationTest.dataModel)
             let bundle = Bundle(for: type(of: coreDataStack))
 
             try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
                 if let error = error {
-                    XCTFail("Unable to setup CoreData stack due to \(error)")
+                    setUpError = error
+                    return XCTFail("Unable to setup CoreData stack due to \(error)")
                 }
 
                 guard let self = self else {
                     return
                 }
 
-                do {
-                    self.persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
-                    var measurement = try self.persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
-                    try self.persistenceLayer.appendNewTrack(to: &measurement)
+                self.persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
 
-                    self.fixture = measurement.identifier
-                    try self.persistenceLayer.save(locations: [TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.0)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.1)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.2))], in: &measurement)
-                    try self.persistenceLayer.save(accelerations: [SensorValue(timestamp: Date(timeIntervalSince1970: 10.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10.1), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10.2), x: 1.0, y: 1.0, z: 1.0)], in: &measurement)
-
-                    expectation.fulfill()
-                } catch let error {
-                    XCTFail("Unable to set up test since persistence layer could not be initialized due to \(error.localizedDescription)!")
-                }
-            }
-        } catch {
-            XCTFail("Unable to setup CoreData stack due to \(error).")
+                expectation.fulfill()
         }
-        
-        waitForExpectations(timeout: 5) { error in
-            if let error = error {
-                XCTFail("Unable to setup SerializetionTest \(error)")
-            }
+
+        wait(for: [expectation],timeout: 5.0)
+        if let error = setUpError {
+            XCTFail("Unable to setup SerializationTest \(error.localizedDescription)")
         }
     }
 
     /// Finalizes the test environment by deleting all test data.
-    override func tearDown() {
+    override func tearDownWithError() throws {
         oocut = nil
-        do {
-            try persistenceLayer.delete()
-        } catch {
-            fatalError()
-        }
+        try persistenceLayer.delete()
         coreDataStack = nil
-        super.tearDown()
+        try super.tearDownWithError()
+    }
+
+    /// Store a test fixture to CoreData and provide the measurement identifier.
+    func fixture() throws -> Int64 {
+        var measurement = try self.persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
+        try self.persistenceLayer.appendNewTrack(to: &measurement)
+
+        try self.persistenceLayer.save(locations: [TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.0)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.1)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.2))], in: &measurement)
+        try self.persistenceLayer.save(accelerations: [SensorValue(timestamp: Date(timeIntervalSince1970: 10.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10.1), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10.2), x: 1.0, y: 1.0, z: 1.0)], in: &measurement)
+
+        return measurement.identifier
+    }
+
+    /// Tests if serialization of a simple empty measurement into the Cyface binary format works as expected.
+    func testSerializeEmptyMeasurement() throws {
+        let measurement = Measurement(identifier: 1)
+        measurement.tracks = []
+        let res = try oocut.serialize(serializable: measurement)
+
+        let deserializedMeasurement = try De_Cyface_Protos_Model_Measurement(serializedData: res[2...])
+
+        XCTAssertTrue(deserializedMeasurement.locationRecords.timestamp.isEmpty)
+        XCTAssertFalse(deserializedMeasurement.hasAccelerationsBinary)
+        XCTAssertFalse(deserializedMeasurement.hasCapturingLog)
+        XCTAssertFalse(deserializedMeasurement.hasDirectionsBinary)
+        XCTAssertFalse(deserializedMeasurement.hasRotationsBinary)
     }
 
     /**
@@ -102,21 +109,13 @@ class SerializationTest: XCTestCase {
      */
     func testUncompressedSerialization() {
         do {
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture())
             let res = try oocut.serialize(serializable: measurement)
 
-            XCTAssertEqual(res.count, 222)
-            // Data Format Version
-            XCTAssertEqual(res[0], 0)
-            XCTAssertEqual(res[1], 1)
-            // Count of Geo Locations
-            XCTAssertEqual(res[2], 0)
-            XCTAssertEqual(res[3], 0)
-            XCTAssertEqual(res[4], 0)
-            XCTAssertEqual(res[5], 3)
-            // Count of Accelerations
-            XCTAssertEqual(res[9], 3)
-        } catch let error {
+            let deserializedMeasurement = try De_Cyface_Protos_Model_Measurement(serializedData: res[2...])
+            assert(fixture: deserializedMeasurement)
+
+        } catch {
             XCTFail("Error \(error.localizedDescription)")
         }
     }
@@ -126,25 +125,46 @@ class SerializationTest: XCTestCase {
      */
     func testCompressedSerialization() {
         do {
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
+            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture())
             let res = try oocut.serializeCompressed(serializable: measurement)
 
             let uncompressedData = res.inflate()
+            guard let uncompressedData = uncompressedData else {
+                return XCTFail("Error unpacking zipped measurement!")
+            }
 
-            XCTAssertEqual(uncompressedData?.count, 222)
-            // Data Format Version
-            XCTAssertEqual(uncompressedData![0], 0)
-            XCTAssertEqual(uncompressedData![1], 1)
-            // Count of Geo Locations
-            XCTAssertEqual(uncompressedData![2], 0)
-            XCTAssertEqual(uncompressedData![3], 0)
-            XCTAssertEqual(uncompressedData![4], 0)
-            XCTAssertEqual(uncompressedData![5], 3)
-            // Count of Accelerations
-            XCTAssertEqual(uncompressedData![9], 3)
-        } catch let error {
-            XCTFail("Error \(error)")
+            assert(fixture: try De_Cyface_Protos_Model_Measurement(serializedData: uncompressedData[2...]))
+        } catch {
+            XCTFail("Error \(error.localizedDescription)")
         }
+    }
+
+    /// Assert the deserialized test fixture.
+    ///
+    /// - see: `SerializationTest.fixture()`
+    private func assert(fixture:De_Cyface_Protos_Model_Measurement) {
+        XCTAssertFalse(fixture.hasRotationsBinary)
+        XCTAssertFalse(fixture.hasCapturingLog)
+        XCTAssertFalse(fixture.hasDirectionsBinary)
+        XCTAssertTrue(fixture.hasLocationRecords)
+        XCTAssertTrue(fixture.hasAccelerationsBinary)
+
+        XCTAssertEqual(fixture.locationRecords.timestamp.count, 3)
+        XCTAssertEqual(fixture.locationRecords.timestamp[0], 10_000)
+        XCTAssertEqual(fixture.locationRecords.timestamp[1], 100)
+        XCTAssertEqual(fixture.locationRecords.timestamp[2], 100)
+        XCTAssertEqual(fixture.locationRecords.longitude[0], 2000000)
+        XCTAssertEqual(fixture.locationRecords.longitude[1], 0)
+        XCTAssertEqual(fixture.locationRecords.longitude[2], 0)
+
+        XCTAssertEqual(fixture.accelerationsBinary.accelerations.count, 1)
+        let firstAccelerationsBatch = fixture.accelerationsBinary.accelerations[0]
+        XCTAssertEqual(firstAccelerationsBatch.timestamp.count, 3)
+        XCTAssertEqual(firstAccelerationsBatch.timestamp[0], 10_000)
+        XCTAssertEqual(firstAccelerationsBatch.timestamp[1], 100)
+        XCTAssertEqual(firstAccelerationsBatch.timestamp[2], 100)
+
+        XCTAssertEqual(fixture.events.count, 1)
     }
 
     /**
@@ -153,99 +173,6 @@ class SerializationTest: XCTestCase {
     func ignore_testSerializeBigDataSet() throws {
         let nextIdentifier = try persistenceLayer.nextIdentifier()
         let measurement = try FakeMeasurementImpl.fakeMeasurement(identifier: nextIdentifier).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 36_000).addAccelerations(countOfAccelerations: 3_600_000).build(persistenceLayer)
-        let data = try oocut.serialize(serializable: measurement)
-        try data.write(to: URL(fileURLWithPath: "/Users/cyface/data.cyf"))
-    }
-
-    /**
-     Tests that geo location serialization works as expected for `GeoLocation` instances. This test runs isolated from all other serializations.
-     */
-    func testSerializeGeoLocations() {
-        var timestamp: [UInt32] = []
-        var accuracy: [UInt16] = []
-        do {
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
-
-            let locations = try PersistenceLayer.collectGeoLocations(from: measurement)
-
-            let serializedData = try self.oocut.serialize(serializable: measurement)
-            let sizeOfHeaderInBytes = 18
-            let sizeOfOneGeoLocationInBytes = 36
-
-            for index in 0..<locations.count {
-                let indexOffset = index * sizeOfOneGeoLocationInBytes + sizeOfHeaderInBytes
-                let timestampStartIndex = indexOffset
-                let timestampEndIndex = indexOffset + 8
-                let timestampData = serializedData[timestampStartIndex..<timestampEndIndex]
-                let accuracyStartIndex = indexOffset + 32
-                let accuracyEndIndex = indexOffset + 36
-                let accuracyData = serializedData[accuracyStartIndex..<accuracyEndIndex]
-                timestamp.append(self.dataToUInt32(data: Array(timestampData)))
-                accuracy.append(self.dataToUInt16(data: Array(accuracyData)))
-            }
-
-            //print(serializedData.map { String(format: "%02x", $0) }.joined())
-            XCTAssertEqual(timestamp.count, 3)
-            XCTAssertEqual(timestamp[0], 10_000)
-            XCTAssertEqual(timestamp[1], 10_100)
-            XCTAssertEqual(timestamp[2], 10_200)
-
-            XCTAssertEqual(accuracy.count, 3)
-            XCTAssertEqual(accuracy[0], 200)
-            XCTAssertEqual(accuracy[1], 200)
-            XCTAssertEqual(accuracy[2], 200)
-        } catch let error {
-            XCTFail("Unable to serialize measurement \(String(describing: fixture)). Error \(error)")
-        }
-    }
-
-    /// Tests that serialization to an events file works as expected
-    func testEventSerialization_HappyPath() throws {
-        // Arrange
-        let measurement = try persistenceLayer.load(measurementIdentifiedBy: fixture)
-
-        let events = measurement.events
-
-        let eventsSerializer = EventsSerializer()
-
-        // Act
-        let eventsData = try eventsSerializer.serialize(serializable: events)
-
-        // Assert
-        let sizeOfHeaderInBytes = 6
-        let sizeOfOneEventWithoutValue = 12
-        let sizeOfBicycleValue = 7
-
-        XCTAssertEqual(eventsData.count, sizeOfHeaderInBytes + events.count * sizeOfOneEventWithoutValue + sizeOfBicycleValue)
-    }
-
-    /**
-     Converts some byte data to an `UInt32` value. This is used to deserialize and thus test the success of serialization.
-
-     - Parameter data: The data to convert.
-     - Returns: The provided data interpreted as `UInt32`.
-     */
-    func dataToUInt32(data: [UInt8]) -> UInt32 {
-        var value: UInt32 = 0
-        for byte in data {
-            value = value << 8
-            value = value | UInt32(byte)
-        }
-        return value
-    }
-
-    /**
-     Converts some byte data to an `UInt16` value. This is used to deserialize and thus test the success of serialization.
-
-     - Parameter data: The data to convert.
-     - Returns: The provided data interpreted as `UInt16`.
-     */
-    func dataToUInt16(data: [UInt8]) -> UInt16 {
-        var value: UInt16 = 0
-        for byte in data {
-            value = value << 8
-            value = value | UInt16(byte)
-        }
-        return value
+        _ = try oocut.serialize(serializable: measurement)
     }
 }

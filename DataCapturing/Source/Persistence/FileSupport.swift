@@ -64,8 +64,7 @@ extension FileSupport {
 
      - Parameter for: The measurement to create the path to the data file for.
      - Returns: The path to the file as an URL.
-     - Throws:
-        - Some internal file system error on failure of creating the file at the required path.
+     - Throws: Some internal file system error on failure of creating the file at the required path.
      */
     fileprivate func path(for measurement: Int64) throws -> URL {
         let measurementIdentifier = measurement
@@ -93,8 +92,7 @@ extension FileSupport {
      Removes the data file for the provided measurement. If this was the last or only data file it also deletes the folder containing the files for the measurement.
 
      - Parameter from: The measurement to delete the data from.
-     - Throws:
-        - Some internal file system error on failure of creating the file at the required path.
+     - Throws: Some internal file system error on failure of creating the file at the required path.
      */
     func remove(from measurement: Measurement) throws {
         let filePath = try path(for: measurement.identifier)
@@ -155,15 +153,19 @@ public struct SensorValueFile: FileSupport {
         - serializable: The array of sensor values to write.
         - to: The measurement to write the sensor values to.
      - Returns: The file system URL of the file that was written to.
-     - Throws:
-        - Some internal file system error on failure of creating the file at the required path.
+     - Throws: Some internal file system error on failure of creating the file at the required path.
+     - Throws: `BinarySerializationError.emptyData` if the provided `serializable` array is empty.
+     - Throws: `BinaryEncodingError` if encoding fails.
      */
     func write(serializable: [SensorValue], to measurement: Int64) throws -> URL {
-        let sensorValueData = serializer.serialize(serializable: serializable)
+        let sensorValueData = try serializer.serialize(serializable: serializable)
         let sensorValueFilePath = try path(for: measurement)
 
         let fileHandle = try FileHandle(forWritingTo: sensorValueFilePath)
         defer { fileHandle.closeFile()}
+        guard FileManager.default.isWritableFile(atPath: sensorValueFilePath.path) else {
+            fatalError("Unable to write sensor data since file is not writable!")
+        }
         fileHandle.seekToEndOfFile()
         fileHandle.write(sensorValueData)
 
@@ -182,7 +184,7 @@ public struct SensorValueFile: FileSupport {
             let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
             defer {fileHandle.closeFile()}
             let data = fileHandle.readDataToEndOfFile()
-            return try serializer.deserialize(data: data, count: fileType.getCounter(measurement))
+            return try serializer.deserialize(data: data)
         } catch let error {
             throw FileSupportError.notReadable(cause: error)
         }
@@ -266,61 +268,17 @@ public struct MeasurementFile: FileSupport {
      - Returns: The data in the Cyface binary format.
      - Throws: `SerializationError.missingData` If no track data was found.
      - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-     - Throws: `FileSupportError.notReadable` If the data file was not readable.
+     - Throws: `FileSupportError.notReadable` If the data to write could not be read from the database.
      - Throws: Some unspecified undocumented file system error if file was not accessible.
      */
     func data(from serializable: Measurement) throws -> Data? {
         let serializer = MeasurementSerializer()
 
-        return try serializer.serializeCompressed(serializable: serializable)
-    }
-}
-
-/**
- Represents a file with events from a measurement.
-
- - Author: Klemens Muthmann
- - Version: 1.0.0
- - Since: 5.0.0
- */
-struct EventsFile: FileSupport {
-
-    /// The serializer for the events.
-    let serializer = EventsSerializer()
-
-    /// The file name used for events files
-    var fileName: String {
-        return "events"
-    }
-
-    /// The extension used for events files
-    var fileExtension: String {
-        return "cyfe"
-    }
-
-    /**
-     Writes the events for a measurement to a file on disk and returns a URL pointing to that file.
-
-     - Parameters:
-        - serializable: The `Event` objects to serialize
-        - to: The identifier of the measurement to serialize for
-     - Returns: A URL pointing to the created `Event`-file
-     - Throws: `SerializationError.decompressionFailed`` If decompressing the provided Serializable failed for some reason.
-     - Throws: `SerializationError.missingData` If no track data was found.
-     - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-     - Throws: Some unspecified undocumented file system error if file was not accessible.
-     */
-    func write(serializable: [Event], to measurement: Int64) throws -> URL {
-        // Serialization in the form (timestamp: long, eventType: short, valuesLength: short, values: [bytes])
-        let data = try serializer.serializeCompressed(serializable: serializable)
-
-        let filePath = try path(for: measurement)
-
-        let measurementFileHandle = try FileHandle(forWritingTo: filePath)
-        defer { measurementFileHandle.closeFile() }
-        measurementFileHandle.write(data)
-
-        return filePath
+        do {
+            return try serializer.serializeCompressed(serializable: serializable)
+        } catch {
+            throw FileSupportError.notReadable(cause: error)
+        }
     }
 }
 
@@ -356,21 +314,16 @@ public enum FileSupportError: Error {
 public class SensorValueFileType {
     /// A file type for acceleration files.
     public static let accelerationValueType = SensorValueFileType(
-        fileExtension: "cyfa",
-        getCounter: {measurement in return UInt32(measurement.accelerationsCount)})
+        fileExtension: "cyfa")
     /// A file type for rotation files.
     public static let rotationValueType = SensorValueFileType(
-        fileExtension: "cyfr",
-        getCounter: {measurement in return UInt32(measurement.rotationsCount)})
+        fileExtension: "cyfr")
     /// A file type for direction files.
     public static let directionValueType = SensorValueFileType(
-        fileExtension: "cyfd",
-        getCounter: {measurement in return UInt32(measurement.directionsCount)})
+        fileExtension: "cyfd")
 
     /// The file extension of the represented file type.
     public let fileExtension: String
-    /// A counter to get the amount of points within a file of this type from a measurement.
-    public let getCounter: (Measurement) -> UInt32
 
     /**
      Creates a new completely initiailized `SensorValueFileType`.
@@ -378,10 +331,8 @@ public class SensorValueFileType {
 
      - Parameters:
         - fileExtension: The file extension of the represented file type.
-        - getCounter: A counter to get the amount of points within a file of this type from a measurement.
      */
-    private init(fileExtension: String, getCounter: @escaping (Measurement) -> UInt32) {
+    private init(fileExtension: String) {
         self.fileExtension = fileExtension
-        self.getCounter = getCounter
     }
 }

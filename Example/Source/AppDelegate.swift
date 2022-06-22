@@ -44,8 +44,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
     var window: UIWindow?
     /// The database access layer using iOS CoreData framework
     var coreDataStack: CoreDataManager?
-    /// A connection to a Cyface collector service.
-    var serverConnection: ServerConnection?
     /// An authenticator authenticating users to login to the app and upload data to a Cyface collector service if valid.
     var authenticator: CredentialsAuthenticator?
     /// The persistent application settings. These includes hidden settings as well as those that can be customized using the systems settings app.
@@ -69,7 +67,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
             return
         }
 
-        self.serverConnection = self.createConnection(to: currentServerInSettings)
+        guard let serverURL = URL(string: currentServerInSettings) else {
+            showAskForServerDialog()
+            return
+        }
+
+        let authenticator = CredentialsAuthenticator(authenticationEndpoint: serverURL)
+        authenticator.username = settings.username
+        authenticator.password = settings.password
+        self.authenticator = authenticator
 
         // Authenticated server is the one from the settings so we start directly without login, otherwise login screen is shown.
         if settings.authenticatedServerUrl == currentServerInSettings {
@@ -158,24 +164,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
         }
     }
 
-    /**
-     Create the connection to a Cyface collector service
-
-     - Parameter to: The address of the collector service to connect to
-     */
-    private func createConnection(to server: String) -> ServerConnection? {
-        guard let coreDataStack = coreDataStack else {
-            fatalError()
-        }
-
-        let serverURL = URL(string: server)!
-
-        let authenticator = CredentialsAuthenticator(authenticationEndpoint: serverURL)
-        authenticator.username = settings.username
-        authenticator.password = settings.password
-        self.authenticator = authenticator
-        return ServerConnection(apiURL: serverURL, authenticator: authenticator, onManager: coreDataStack)
-    }
     // MARK: - UIApplicationDelegate
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -269,13 +257,5 @@ extension UIViewController {
             fatalError("Unable to load CoreDataStack!")
         }
         return coreDataStack
-    }
-
-    /// Provides the applications CoreData stack to all the views. This must only be called on the main thread.
-    var serverConnection: ServerConnection {
-        guard let serverConnection = appDelegate.serverConnection  else {
-            fatalError("Unable to load ServerConnection!")
-        }
-        return serverConnection
     }
 }

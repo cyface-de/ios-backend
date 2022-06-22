@@ -146,7 +146,6 @@ class LoginViewController: UIViewController {
         }
         // These two need to be called here since they use appDelegate in the background and thus need to run on the main queue.
         let authenticator = self.authenticator
-        let serverConnection = self.serverConnection
 
         // Run this on a background queue, since it is a possibly long running blocking operation.
         DispatchQueue.global(qos: .userInteractive).async { [weak self] in
@@ -155,7 +154,6 @@ class LoginViewController: UIViewController {
             }
 
             // Reset Cyface SDK to use the new URL
-            serverConnection.apiURL = serverUrl
             authenticator.authenticationEndpoint = serverUrl
             authenticator.username = self._model.username
             authenticator.password = self._model.password

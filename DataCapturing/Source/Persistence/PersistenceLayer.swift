@@ -45,11 +45,6 @@ public class PersistenceLayer {
     /// Used to update a measurements length, each time new locations are added.
     private let distanceCalculator: DistanceCalculationStrategy
 
-    /// The current `NSManagedObjectContext` used by this persistence layer. This has to be reset if the layer is used on a different thread. If it is `nil` each method is going to use its own context, which can cause problems if model objects are used between those methods.
-    public var context: NSManagedObjectContext {
-        return manager.backgroundContext
-    }
-
     // MARK: - Initializers
 
     /**
@@ -76,7 +71,7 @@ public class PersistenceLayer {
      - Returns: The newly created model object for the measurement.
      - Throws: `PersistenceError.inconsistentState`
      */
-    func createMeasurement(at timestamp: Int64, inMode mode: String) throws -> Measurement {
+    func createMeasurement(at timestamp: UInt64, inMode mode: String) throws -> Measurement {
         return try manager.wrapInContextReturn { context in
             // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
             var identifier = try nextIdentifier()
@@ -85,7 +80,7 @@ public class PersistenceLayer {
             }
 
             let measurementMO = MeasurementMO(context: context)
-            measurementMO.timestamp = timestamp
+            measurementMO.timestamp = Int64(timestamp)
             measurementMO.identifier = identifier
             measurementMO.synchronized = false
             measurementMO.synchronizable = false
@@ -287,7 +282,7 @@ public class PersistenceLayer {
                     longitude: location.longitude,
                     accuracy: location.accuracy,
                     speed: location.speed,
-                    timestamp: Int64(location.timestamp.timeIntervalSince1970 * 1000.0),
+                    timestamp: UInt64(location.timestamp.timeIntervalSince1970 * 1000.0),
                     isValid: location.isValid,
                     parent: track)
                 try track.append(location: geoLocation)
@@ -322,7 +317,7 @@ public class PersistenceLayer {
     func save(accelerations: [SensorValue] = [], rotations: [SensorValue] = [], directions: [SensorValue] = [], in measurement: inout Measurement) throws {
         try manager.wrapInContext { context in
 
-        debugPrint("Storing \(accelerations.count) accelerations \(rotations.count) rotations and \(directions.count) directions.")
+            debugPrint("Storing \(accelerations.count) accelerations \(rotations.count) rotations and \(directions.count) directions.")
 
             guard let measurementObjectId = measurement.objectId else {
                 throw PersistenceError.unsynchronizedMeasurement(identifier: measurement.identifier)
@@ -333,18 +328,42 @@ public class PersistenceLayer {
             }
 
             let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
-            _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
             let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
-            _ = try rotationsFile.write(serializable: rotations, to: measurement.identifier)
             let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
-            _ = try directionsFile.write(serializable: directions, to: measurement.identifier)
+            if !accelerations.isEmpty {
+                do {
+                    _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
+                } catch {
+                    debugPrint("Unable to write data to file \(accelerationsFile.fileName)!")
+                    throw error
+                }
+            }
 
-            measurementMO.accelerationsCount = measurementMO.accelerationsCount.advanced(by: accelerations.count)
-            measurement.accelerationsCount = measurementMO.accelerationsCount
-            measurementMO.rotationsCount = measurementMO.rotationsCount.advanced(by: rotations.count)
-            measurement.rotationsCount = measurementMO.rotationsCount
-            measurementMO.directionsCount = measurementMO.directionsCount.advanced(by: directions.count)
-            measurement.directionsCount = measurementMO.directionsCount
+            if !rotations.isEmpty {
+                do {
+                    _ = try rotationsFile.write(serializable: rotations, to: measurement.identifier)
+                } catch {
+                    debugPrint("Unable to write data to file \(rotationsFile.fileName)!")
+                    throw error
+                }
+            }
+
+            if !directions.isEmpty {
+                do {
+                    _ = try directionsFile.write(serializable: directions, to: measurement.identifier)
+                } catch {
+                    debugPrint("Unable to write data to file \(directionsFile.fileName)!")
+                    throw error
+                }
+            }
+
+            // TODO: Remove all those counts from the data model. It is a lef over from the old data format. After removal, the data model needs to change and we need new migration code.
+            measurement.accelerationsCount = measurement.accelerationsCount.advanced(by: accelerations.count)
+            measurementMO.accelerationsCount = measurement.accelerationsCount
+            measurement.rotationsCount = measurement.rotationsCount.advanced(by: rotations.count)
+            measurementMO.rotationsCount = measurement.rotationsCount
+            measurement.directionsCount = measurement.directionsCount.advanced(by: directions.count)
+            measurementMO.directionsCount = measurement.directionsCount
 
             try context.save()
         }
@@ -365,7 +384,7 @@ public class PersistenceLayer {
             } else {
                 let newManagedMeasurement = MeasurementMO(context: context)
                 newManagedMeasurement.identifier = measurement.identifier
-                newManagedMeasurement.timestamp = measurement.timestamp
+                newManagedMeasurement.timestamp = Int64(measurement.timestamp)
                 measurement.objectId = newManagedMeasurement.objectID
                 try newManagedMeasurement.update(from: measurement)
 
@@ -434,7 +453,7 @@ public class PersistenceLayer {
 
             var ret = [GeoLocation]()
             for fetchResult in try context.fetch(request) {
-                let location = try GeoLocation(managedObject: fetchResult, parent: track)
+                let location = GeoLocation(managedObject: fetchResult, parent: track)
                 ret.append(location)
             }
             return ret
@@ -608,7 +627,7 @@ public class PersistenceLayer {
 
      - Parameters:
         - ofMeasurement: The measurement to traverse the tracks for
-        - call: A callback function receiving the track and geo location pairs
+        - call: A callback function receiving the track and geo location pairs.
      */
     public static func traverseTracks(ofMeasurement measurement: Measurement, call closure: (Track, GeoLocation) -> Void) {
         for track in measurement.tracks {
@@ -639,4 +658,65 @@ public enum PersistenceError: Error {
     case inconsistentState
     /// On trying to load a not yet synchronized `Measurement`. This is usually a `Measurement` with en `objectId` of `nil`.
     case unsynchronizedMeasurement(identifier: Int64)
+}
+
+extension PersistenceError: LocalizedError {
+    // Localized error description, with further information about the error.
+    public var errorDescription: String? {
+        switch self {
+        case .measurementNotLoadable(let measurementIdentifier):
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.measurementNotLoadable",
+                                                 value: "Unable to load measurement %d!",
+                                                 comment: """
+                Tell the user that a measurement was not loaded successfully. \
+                The first parameter is the identifier of the measurement.
+                """)
+            return String.localizedStringWithFormat(errorMessage, measurementIdentifier)
+        case .trackNotLoadable(_, let measurement):
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.trackNotLoadable",
+                                                 value: "Unable to load track from measurement %d!",
+                                                 comment: """
+                Tell the user that the system was unable to load a track from a measurement. \
+                The first parameter is the measurement the track belongs to.
+                """)
+            return String.localizedStringWithFormat(errorMessage, measurement.identifier)
+        case .nonPersistentTrackEncountered(_, let measurement):
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.nonPersistentTrackEncountered",
+                                                 value: "Unable to update values of non persistent track from measurement %d!",
+                                                 comment: """
+                Tell the user that the system was unable to update a track, since that track was not yet saved, \
+                to the database. The first parameter is the identifier of the measurement the track belongs to.
+                """)
+            return String.localizedStringWithFormat(errorMessage, measurement.identifier)
+        case .dataNotLoadable(measurement: let measurementIdentifier):
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.dataNotLoadable",
+                                                 value: "Unable to load some data belonging to measurement %d!",
+                                                 comment: """
+                Tell the user that the system was unable to load data belonging to some measurement. \
+                The first parameter is the identifier of the measurement!
+                """)
+            return String.localizedStringWithFormat(errorMessage, measurementIdentifier)
+        case .inconsistentState:
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.inconsistentState",
+                                                 value: "Data storage is in an inconsistent state!",
+                                                 comment: """
+                Tell the user that the data storage was in an inconsistent state and could not be accessed!
+                """)
+            return String.localizedStringWithFormat(errorMessage)
+        case .unsynchronizedMeasurement(identifier: let measurementIdentifier):
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.unsynchronizedMeasurement",
+                                                 value: "Failed to load measurement %d since it was not yet synchronized with the data storage!", comment: """
+                Tell the user that the measurement that was supposed to be loaded was not yet saved!
+                """)
+            return String.localizedStringWithFormat(errorMessage, measurementIdentifier)
+        case .measurementsNotLoadable:
+            let errorMessage = NSLocalizedString("de.cyface.error.PersistenceError.measurementsNotLoadable",
+                                                 value: "Multiple measurements from the data storage have not been loadable!",
+                                                 comment: """
+                Tell the user that measurements from the database are not loadable. \
+                The reason is unknown at this point.
+                """)
+            return String.localizedStringWithFormat(errorMessage)
+        }
+    }
 }

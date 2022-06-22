@@ -82,7 +82,7 @@ class MapLocationSelectorViewController: UIViewController {
         destination.behaviour = { modality in
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
 
-            let timestamp = Date(timeIntervalSince1970: TimeInterval(integerLiteral: selectedPoint.timestamp / Int64(1_000)))
+            let timestamp = Date(timeIntervalSince1970: TimeInterval(selectedPoint.timestamp / 1_000))
             do {
                 _ = try persistenceLayer.createEvent(of: .modalityTypeChange, withValue: modality.dbValue, timestamp: timestamp, parent: &measurement)
             } catch {
@@ -158,7 +158,6 @@ class MapLocationSelectorViewController: UIViewController {
 
             var previousSmallestDistance: Double = Double.greatestFiniteMagnitude
             let distanceCalculator = DefaultDistanceCalculationStrategy()
-
             PersistenceLayer.traverseTracks(ofMeasurement: measurement) { _, location in
                 let distance = distanceCalculator.calculateDistance(
                     from: (location.latitude, location.longitude),

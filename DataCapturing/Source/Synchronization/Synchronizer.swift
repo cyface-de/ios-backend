@@ -40,14 +40,20 @@ public class Synchronizer {
     /// The logger used for objects of this class.
     private static let log = OSLog.init(subsystem: "Synchronizer", category: "de.cyface")
 
+    /// The URL to a Cyface server
+    private let apiURL: URL
+
     /// Stack used to access *CoreData*.
     private let coreDataStack: CoreDataManager
 
     /// A strategy for cleaning the persistent storage after data synchronization.
     private let cleaner: Cleaner
 
-    /// A connection to a Cyface server used to synchronize the data to.
-    private let serverConnection: ServerConnection
+    /// A registry for open server sessions, used to repeat those sessions if possible.
+    private let sessionRegistry: SessionRegistry
+
+    /// The authenticator to check if the current user has a valid user account.
+    private let authenticator: Authenticator
 
     /// Handles background synchronization of available `Measurement`s.
     var reachabilityManager: NetworkReachabilityManager?
@@ -70,8 +76,10 @@ public class Synchronizer {
     /// A queue synchronizing access to the Alamofire `NetworkReachabilityManager`.
     private let isReachableCheckingQueue = DispatchQueue.global(qos: .background)
 
+    /// Flag on whether the Cyface server is reachable on ethernet or WiFi.
     private var isReachableOnEthernetOrWifi = false
 
+    /// Flag on whether the Cyface server is reachable at all (including mobile).
     private var isReachable = false
 
     /**
@@ -89,15 +97,19 @@ public class Synchronizer {
      Initializer that sets the initial value of all the properties and prepares the background synchronization job.
 
      - Parameters:
+        - apiURL: The URL to a Cyface API
         - coreDataStack: Stack used to access *CoreData*.
         - cleaner: A strategy for cleaning the persistent storage after data synchronization.
-        - serverConnection: An authenticated connection to a Cyface API server.
+        - sessionRegistry: A registry to store open server sessions, to try to repeat instead of restart an upload.
+        - authenticator: The authenticator to use to check on the server on whether the current user is valid or not.
         - handler: The handler to call, when synchronization for a measurement has finished.
      */
-    public init(coreDataStack: CoreDataManager, cleaner: Cleaner, serverConnection: ServerConnection, handler: @escaping (DataCapturingEvent, Status) -> Void) {
+    public init(apiURL: URL, coreDataStack: CoreDataManager, cleaner: Cleaner, sessionRegistry: SessionRegistry = SessionRegistry(), authenticator: Authenticator, handler: @escaping (DataCapturingEvent, Status) -> Void) {
         self.coreDataStack = coreDataStack
+        self.apiURL = apiURL
         self.cleaner = cleaner
-        self.serverConnection = serverConnection
+        self.sessionRegistry = sessionRegistry
+        self.authenticator = authenticator
         self.handler = handler
         // Try to synchronize once per hour.
         dataSynchronizationTimer = RepeatingTimer(timeInterval: 60 * 60)
@@ -168,32 +180,42 @@ public class Synchronizer {
 
     /**
      Starts background synchronization as prepared in this objects initializer.
+
+     - throws: `SynchronizerError.missingHost` If tha `apiURL` provides no valid hostname.
+     - throws: `SynchronizerError.unableToBuildReachabilityManager` if the Alamofire `NetworkReachabilityManager` could not be created for the current host.
+     - throws: `SynchronizationError.reachabilityStartFailed` if the system was unable to start listening for reachability changes.
      */
-    public func activate() {
+    public func activate() throws {
         os_log("Activating Synchronization", log: Synchronizer.log, type: .debug)
 
-        let host = Synchronizer.stripSchemeFrom(url: serverConnection.apiURL)
-        reachabilityManager = NetworkReachabilityManager(host: host)
+        guard let host = apiURL.host else {
+            throw SynchronizerError.missingHost
+        }
+        guard let reachabilityManager = NetworkReachabilityManager(host: host) else {
+            throw SynchronizerError.unableToBuildReachabilityManager
+        }
         // Initial sync
         syncChecked()
-        reachabilityManager?.listener = { status in
+        let reachabilityManagerStarted = reachabilityManager.startListening { status in
             switch status {
             case .reachable(.ethernetOrWiFi):
                 self.isReachableOnEthernetOrWifi = true
                 self.isReachable = true
-            case .reachable(.wwan):
+            case .notReachable:
                 self.isReachableOnEthernetOrWifi = false
-                self.isReachable = true
+                self.isReachable = false
             default:
-                self.isReachableOnEthernetOrWifi = true
+                self.isReachableOnEthernetOrWifi = false
                 self.isReachable = true
             }
 
             self.syncChecked()
         }
-        if !reachabilityManager!.startListening() {
-            fatalError("Unable to start listening for network reachability!")
+        guard reachabilityManagerStarted else {
+            throw SynchronizerError.reachabilityStartFailed
         }
+        //
+        self.reachabilityManager = reachabilityManager
 
         dataSynchronizationTimer.resume()
     }
@@ -207,23 +229,6 @@ public class Synchronizer {
     }
 
     // MARK: - Internal Methods
-
-    /**
-     Removes the scheme "http://" or "https://" from the beginning of the URL.
-     This is required by the *Alamofire* `NetworkReachabilityManager`.
-
-     - Parameter url: The URL to remove the scheme from.
-     */
-    private static func stripSchemeFrom(url: URL) -> String {
-        let stringifiedURL = url.absoluteString
-        if stringifiedURL.hasPrefix("http://") {
-            return stringifiedURL.replacingOccurrences(of: "http://", with: "", options: .anchored)
-        } else if stringifiedURL.hasPrefix("https://") {
-            return stringifiedURL.replacingOccurrences(of: "https://", with: "", options: .anchored)
-        } else {
-            fatalError("Invalid URL used within Synchronizer!")
-        }
-    }
 
     /**
      Synchronizes the array of provided measurements if the status was successful and measurements are provided
@@ -243,10 +248,17 @@ public class Synchronizer {
             synchronizationInProgress = false
             return
         }
+        let uploadProcess = UploadProcess(
+            apiUrl: apiURL,
+            sessionRegistry: sessionRegistry,
+            authenticator: authenticator,
+            onSuccess: successHandler,
+            onFailure: failureHandler)
 
         for measurement in measurements {
             handler(.synchronizationStarted(measurement: measurement.identifier), .success)
-            serverConnection.sync(measurement: measurement.identifier, onSuccess: successHandler, onFailure: failureHandler)
+            let upload = CoreDataBackedUpload(coreDataStack: coreDataStack, identifier: UInt64(measurement.identifier))
+            uploadProcess.upload(upload)
         }
     }
 
@@ -255,13 +267,13 @@ public class Synchronizer {
 
      - Parameter measurement: The synchronized measurement.
      */
-    private func successHandler(measurement: Int64) {
+    private func successHandler(measurement: UInt64) {
         do {
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            try cleaner.clean(measurement: measurement, from: persistenceLayer)
-            handler(.synchronizationFinished(measurement: measurement), .success)
+            try cleaner.clean(measurement: Int64(measurement), from: persistenceLayer)
+            handler(.synchronizationFinished(measurement: Int64(measurement)), .success)
         } catch let error {
-            handler(.synchronizationFinished(measurement: measurement), .error(error))
+            handler(.synchronizationFinished(measurement: Int64(measurement)), .error(error))
         }
 
         synchronizationFinishedHandler()
@@ -274,10 +286,10 @@ public class Synchronizer {
         - measurement: The measurement for which the synchronization failed.
         - error: The error causing the failure.
      */
-    private func failureHandler(measurement: Int64, error: Error) {
+    private func failureHandler(measurement: UInt64, error: Error) {
         os_log("Unable to upload data for measurement: %d!", log: Synchronizer.log, type: .error, measurement)
         os_log("Error: %{public}@", log: Synchronizer.log, type: .error, error.localizedDescription)
-        handler(.synchronizationFinished(measurement: measurement), .error(error))
+        handler(.synchronizationFinished(measurement: Int64(measurement)), .error(error))
         synchronizationFinishedHandler()
     }
 
@@ -295,6 +307,21 @@ public class Synchronizer {
                 self.synchronizationInProgress = false
             }
         }
+    }
+
+    /**
+     Errors thrown during data synchronization.
+
+     - author: Klemens Muthmann
+     - version: 1.0.0
+     */
+    public enum SynchronizerError: Error {
+        /// If the host of the server to synchronize to is missing.
+        case missingHost
+        /// If the Alamofire reachability manager could not be built.
+        case unableToBuildReachabilityManager
+        /// If starting reachability checks fails.
+        case reachabilityStartFailed
     }
 }
 

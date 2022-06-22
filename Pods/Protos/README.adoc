@@ -1,0 +1,106 @@
+= Cyface Protobuf Messages
+
+This repository defines the Cyface Models as schemas such as Protocol Buffer Schemas.
+This allows to de-/serialize the Cyface Binary Data from in different programming languages.
+
+For more details on Protocol Buffers (short: Protobuf) check out its link:https://developers.google.com/protocol-buffers[documentation].
+
+
+== Message Format Definitions
+
+This is a collection of `.proto` files describe the data structure of the Cyface Models.
+
+- This allows Protobuf to automatically de-/encode the data from/to binary files.
+- Supports later extensions of the format with backward-compatibility
+- Following the link:https://developers.google.com/protocol-buffers/docs/style[Style Guide]
+
+At the time of writing the latest release is link:https://developers.google.com/protocol-buffers/docs/proto3[Protocol Buffer Version 3].
+
+
+=== Notes
+Reminders from the documentation which need to be considered for future updates:
+
+ - optional fields are default in proto3, `required` fields have been removed.
+
+ - link:https://developers.google.com/protocol-buffers/docs/proto3#updating[Updating A Message Type]
+
+ - link:https://developers.google.com/protocol-buffers/docs/javatutorial#extending-a-protocol-buffer[Extending a Protocol Buffer]
+
+ - Deprecated field link:https://developers.google.com/protocol-buffers/docs/proto3#options[annotations]
+
+ - link:https://developers.google.com/protocol-buffers/docs/proto3#default[Default values]
+
+ - Scalar message fields, once parsed, cannot tell if a field was not set or set the default value afterwards.
+ - Default values are not serialized on the wire.
+ - Keep this in mind when defining e.g. booleans, make sure you want that "default" `false` behavior on.
+ 
+Other message types:
+
+ - link:https://developers.google.com/protocol-buffers/docs/proto3#using_oneof[One-of] if only one of many fields can be set / should be interpreted. link:https://developers.google.com/protocol-buffers/docs/proto3#backwards-compatibility_issues[Be careful] with these fields.
+ - link:https://developers.google.com/protocol-buffers/docs/proto3#maps[Maps]
+ - link:https://developers.google.com/protocol-buffers/docs/proto3#json[JSON Mapping]
+ - There are also "well known" message types from Google, e.g. for `JSON`
+ - link:https://developers.google.com/protocol-buffers/docs/javatutorial#advanced-usage[Reflections]
+
+
+== Compiling the Message Definitions
+
+Generates serializer, deserializer, etc. in a chosen language, e.g. `.java` files for Java, or `.swift` files for Swift.
+
+### Java
+
+Java classes can be compiled with link:https://developers.google.com/protocol-buffers/docs/javatutorial#compiling-your-protocol-buffers[protoc] (Protocol Buffers, version: see `protobufVersion` in `build.gradle`):
+
+  protoc --java_out=./src/main/java/ src/main/protos/de/cyface/protos/model/measurement.proto
+
+However, the pre-compiled `JARs` are also published to the link:https://github.com/orgs/cyface-de/packages?repo_name=protos[Github Package Registry].
+
+- how to use with link:https://github.com/protocolbuffers/protobuf/tree/master/java#gradle[Gradle]
+- how to use with link:https://github.com/protocolbuffers/protobuf/tree/master/java#use-java-protocol-buffers-on-android[Android]
+
+    Instead of using the pre-compiled `java` classes (published `JAR`s) it's recommended to use `javalite` for Android. These classes can either be manually generated with:
+
+    protoc --java_out=lite:./src/main/java/ src/main/protos/de/cyface/protos/model/measurement.proto
+
+Or you can download the `proto` link:protoc --java_out=./src/main/java/ src/main/protos/de/cyface/protos/model/measurement.proto[files] from this repository and then generate the classes using the link:https://github.com/google/protobuf-gradle-plugin[Gradle Plugin]. This is done in the link:https://github.com/cyface-de/android-backend[Cyface Android SDK] - check it out if you need an example.
+
+The serializers encode the data in an efficient way, the decision process is documented link:https://cyface.atlassian.net/wiki/spaces/IM/pages/1535148033/Datenformat+bertragungsprotokoll+API+V3[internally].
+
+### Swift
+Swift classes may be generated using link:https://github.com/apple/swift-protobuf[Swift Protobuf] from Apple.
+
+You can include the `.proto` file with your Swift project from the Cyface custom Pod repository: `https://github.com/cyface-de/ios-podspecs.git` using CocoaPods:
+
+```
+pod 'Protos', '~> 2.1.0'
+```
+
+Using a custom Pods repository is explained on the link:https://guides.cocoapods.org/making/private-cocoapods.html[CocoaPods Website].
+
+== Using the generated Code
+
+____
+Protocol Buffers and Object-Oriented Design Protocol buffer classes are basically dumb data holders (like structs in C); they don't make good first class citizens in an object model. If you want to add richer behavior to a generated class, the best way to do this is to wrap the generated protocol buffer class in an application-specific class.
+____
+link:https://developers.google.com/protocol-buffers/docs/javatutorial#builders[Source]
+
+
+[#_licensing]
+== Licensing
+
+Copyright 2021-2022 Cyface GmbH
+
+This file is part of the Cyface Protobuf Messages.
+
+The Cyface Protobuf Messages is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+The Cyface Protobuf Messages is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with the Cyface Protobuf Messages.  If not, see http://www.gnu.org/licenses/.

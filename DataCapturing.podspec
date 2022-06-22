@@ -1,4 +1,4 @@
-# Copyright 2018 - 2021 Cyface GmbH
+# Copyright 2018 - 20222 Cyface GmbH
 #
 # This file is part of the Cyface SDK for iOS.
 #
@@ -47,15 +47,19 @@ This framework can be included by your App if you are going to capture sensor da
   
   # The following transitive dependencies are used by this project:
   # This one is used to handle network traffic like multipart requests
-  s.dependency 'Alamofire', '~> 4.9.1'
+  s.dependency 'Alamofire', '~> 5.5.0'
   # A wrapper for the complicated ObjectiveC compression API.
   s.dependency 'DataCompression', '~> 3.6.0'
+  # Handle Protobuf Data Format
+  s.dependency 'SwiftProtobuf', '~> 1.19.0'
+  s.dependency 'Protos', '~> 2.1.0'
 
   # Podspecs do not support references to files in the parent folder.
   # So make sure tests are always located on the same level or below the podspec.
   s.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'DataCapturing/Tests/**/*.swift'
-    test_spec.resources = 'DataCapturing/Tests/**/*.sqlite'
+    test_spec.resources = 'DataCapturing/Tests/Resources/*.sqlite'
+    test_spec.dependency 'Mocker', '~> 2.5.5'
   end
 
 

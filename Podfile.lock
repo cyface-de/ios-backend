@@ -1,15 +1,23 @@
 PODS:
-  - Alamofire (4.9.1)
+  - Alamofire (5.5.0)
   - Charts (3.6.0):
     - Charts/Core (= 3.6.0)
   - Charts/Core (3.6.0)
   - DataCapturing (10.0.0):
-    - Alamofire (~> 4.9.1)
+    - Alamofire (~> 5.5.0)
     - DataCompression (~> 3.6.0)
+    - Protos (~> 2.1.0)
+    - SwiftProtobuf (~> 1.19.0)
   - DataCapturing/Tests (10.0.0):
-    - Alamofire (~> 4.9.1)
+    - Alamofire (~> 5.5.0)
     - DataCompression (~> 3.6.0)
+    - Mocker (~> 2.5.5)
+    - Protos (~> 2.1.0)
+    - SwiftProtobuf (~> 1.19.0)
   - DataCompression (3.6.0)
+  - Mocker (2.5.5)
+  - Protos (2.1.0)
+  - SwiftProtobuf (1.19.0)
 
 DEPENDENCIES:
   - Charts (~> 3.6.0)
@@ -17,21 +25,28 @@ DEPENDENCIES:
   - DataCapturing/Tests (from `./`)
 
 SPEC REPOS:
-  trunk:
+  https://github.com/CocoaPods/Specs.git:
     - Alamofire
     - Charts
     - DataCompression
+    - Mocker
+    - SwiftProtobuf
+  https://github.com/cyface-de/ios-podspecs:
+    - Protos
 
 EXTERNAL SOURCES:
   DataCapturing:
     :path: "./"
 
 SPEC CHECKSUMS:
-  Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
+  Alamofire: 1c4fb5369c3fe93d2857c780d8bbe09f06f97e7c
   Charts: b1e3a1f5a1c9ba5394438ca3b91bd8c9076310af
-  DataCapturing: 80dd746bbc6dd7de0a939b95815edcb09e4f6b56
+  DataCapturing: 38c9c80573f3ef874560ee055e15fb00e6ef31db
   DataCompression: 06628f9c807b6f152e0da37635633f62fc51dc77
+  Mocker: 8c731a8104962f246cadf2b02556218e9edc1390
+  Protos: 0c003a8495268bb644d8e1d325ec4f117ba50183
+  SwiftProtobuf: 6ef3f0e422ef90d6605ca20b21a94f6c1324d6b3
 
-PODFILE CHECKSUM: acbd711de16953ad19288baefa9e4e460a7cdab7
+PODFILE CHECKSUM: 5e25a3313a9945f070e1dc55fc8f425b24612bce
 
 COCOAPODS: 1.11.3

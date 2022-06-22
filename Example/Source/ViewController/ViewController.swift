@@ -177,14 +177,19 @@ class ViewController: UIViewController {
         guard let coreDataStack = appDelegate.coreDataStack else {
             fatalError("Unable to load CoreData stack!")
         }
-        guard let serverConnection = appDelegate.serverConnection else {
+        guard let serverURL = URL(string: appDelegate.settings.serverUrl!) else {
             fatalError("Unable to load server connection!")
         }
+        let authenticator = CredentialsAuthenticator(authenticationEndpoint: serverURL)
+        authenticator.username = settings?.username
+        authenticator.password = settings?.password
 
         let ret = Synchronizer(
-        coreDataStack: coreDataStack,
-        cleaner: DeletionCleaner(),
-        serverConnection: serverConnection) { [weak self] event, status in
+            apiURL: serverURL,
+            coreDataStack: coreDataStack,
+            cleaner: DeletionCleaner(),
+            authenticator: authenticator
+        ) { [weak self] event, status in
             guard let self = self else {
                 return
             }
@@ -367,7 +372,12 @@ class ViewController: UIViewController {
         // Activate and deactivate the synchronizer based on the property value.
         let synchronizerIsNotActive = _settings.synchronizeData
         if synchronizerIsNotActive && !synchronizerWasPreviouslyActivated {
-            synchronizer.activate()
+            do {
+                try synchronizer.activate()
+            } catch {
+                // TODO: Just untoggle the synchronization toggle in that case.
+                fatalError("\(error)")
+            }
         } else if !synchronizerIsNotActive && synchronizerWasPreviouslyActivated {
             synchronizer.deactivate()
         } else {
@@ -509,7 +519,11 @@ class ViewController: UIViewController {
                             self.measurementsOverview.reloadData()
                             if self._settings.synchronizeData {
                                 os_log("Starting Data Synchronization", log: ViewController.LOG, type: .debug)
-                                self.synchronizer.activate()
+                                do {
+                                    try self.synchronizer.activate()
+                                } catch {
+                                    fatalError()
+                                }
                             }
                         }
 

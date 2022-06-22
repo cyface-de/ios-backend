@@ -64,7 +64,7 @@ class MeasurementModel {
         return mostRecentGeoLocation?.speed
     }
     /// The timestamp of the most recent captured geo location
-    var timestamp: Int64? {
+    var timestamp: UInt64? {
         return mostRecentGeoLocation?.timestamp
     }
     /// The longitude of the most recent captured geo location
@@ -88,7 +88,7 @@ class MeasurementModel {
         return measurement?.identifier
     }
     /// The timestamp of the start of the active measurement
-    var initialTimestamp: Int64? {
+    var initialTimestamp: UInt64? {
         return measurement?.timestamp
     }
     /// The most recent geo location captured by the active measurement

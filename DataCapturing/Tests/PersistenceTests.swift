@@ -33,167 +33,148 @@ class PersistenceTests: XCTestCase {
     /// A `PersistenceLayer` used for testing.
     var oocut: PersistenceLayer!
     /// Some test data.
-    var fixture: DataCapturing.Measurement!
+    var fixture: DataCapturing.Measurement?
     /// The default mode of transportation used for tests.
     let defaultMode = "BICYCLE"
+    /// Load the data model for the test data stack.
     static let dataModel = try! CoreDataManager.load()
 
     /// Initializes the test enviroment by saving some test data to the test `PersistenceLayer`.
-    override func setUp() {
+    override func setUpWithError() throws {
         super.setUp()
         let expectation = self.expectation(description: "CoreDataStack initialized successfully!")
 
-        do {
-            let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: PersistenceTests.dataModel)
-            let bundle = Bundle(for: type(of: manager))
-            try manager.setup(bundle: bundle) { error in
-
-                do {
-                    self.oocut = PersistenceLayer(onManager: manager)
-                    var measurement = try self.oocut.createMeasurement(at: 10_000, inMode: self.defaultMode)
-
-                    try self.oocut.appendNewTrack(to: &measurement)
-
-                    try self.oocut.save(locations: [TestFixture.location(latitude: 51.052181, longitude: 13.728956, timestamp: Date(timeIntervalSince1970: 10_000)), TestFixture.location(latitude: 51.051837, longitude: 13.729010, timestamp: Date(timeIntervalSince1970: 10_001))], in: &measurement)
-                    try self.oocut.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &measurement)
-                    self.fixture = try self.oocut.load(measurementIdentifiedBy: measurement.identifier)
-
-                    expectation.fulfill()
-                } catch let error {
-                    XCTFail("Unable to set up due to \(error.localizedDescription)")
-                }
+        let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: PersistenceTests.dataModel)
+        let bundle = Bundle(for: type(of: manager))
+        try manager.setup(bundle: bundle) { error in
+            defer {
+                expectation.fulfill()
             }
-        } catch {
-            XCTFail("Unable to initialize CoreData due to: \(error)")
+
+            do {
+                self.oocut = PersistenceLayer(onManager: manager)
+                var measurement = try self.oocut.createMeasurement(at: 10_000, inMode: self.defaultMode)
+
+                try self.oocut.appendNewTrack(to: &measurement)
+
+                try self.oocut.save(locations: [TestFixture.location(latitude: 51.052181, longitude: 13.728956, timestamp: Date(timeIntervalSince1970: 10_000)), TestFixture.location(latitude: 51.051837, longitude: 13.729010, timestamp: Date(timeIntervalSince1970: 10_001))], in: &measurement)
+                let accelerations = [TestFixture.randomAcceleration(), TestFixture.randomAcceleration(), TestFixture.randomAcceleration()]
+                try self.oocut.save(accelerations: accelerations, in: &measurement)
+                self.fixture = try self.oocut.load(measurementIdentifiedBy: measurement.identifier)
+                guard self.fixture != nil else {
+                    return XCTFail("Unable to set up. Fixture was not initialised!")
+                }
+            } catch let error {
+                XCTFail("Unable to set up due to:\n \(error.localizedDescription)")
+            }
         }
-            
-            waitForExpectations(timeout: 5) { error in
-                if let error = error {
-                    XCTFail("Unable to setup PersistenceTest \(error)")
-                }
+
+        waitForExpectations(timeout: 5) { error in
+            if let error = error {
+                XCTFail("Unable to setup PersistenceTest \(error)")
             }
+        }
     }
 
     /// Cleans the test enviroment by deleting all data.
-    override func tearDown() {
-        do {
-            try oocut.delete()
-        } catch {
-            fatalError("Unable to tear down persistence test. Reason: \(error)")
-        }
+    override func tearDownWithError() throws {
+        try oocut.delete()
         oocut = nil
         fixture = nil
-        super.tearDown()
+        try super.tearDownWithError()
     }
 
     /**
      Tests if new measurements are created with the correct identifier and if identifiers are increased for each new measurement. This should even work if one measurement is deleted in between.
      */
-    func testCreateMeasurement() {
-        do {
-            let secondMeasurement = try oocut.createMeasurement(at: 10_001, inMode: defaultMode)
+    func testCreateMeasurement() throws {
+        let fixture = try XCTUnwrap(fixture)
+        let secondMeasurement = try oocut.createMeasurement(at: 10_001, inMode: defaultMode)
 
-            let secondMeasurementIdentifier = secondMeasurement.identifier
-            XCTAssertEqual(secondMeasurementIdentifier, fixture.identifier+1)
-            let events = try oocut.loadEvents(typed: .modalityTypeChange, forMeasurement: secondMeasurement)
-            XCTAssertEqual(events.count, 1)
+        let secondMeasurementIdentifier = secondMeasurement.identifier
+        XCTAssertEqual(secondMeasurementIdentifier, fixture.identifier+1)
+        let events = try oocut.loadEvents(typed: .modalityTypeChange, forMeasurement: secondMeasurement)
+        XCTAssertEqual(events.count, 1)
 
-            try oocut.delete(measurement: secondMeasurement.identifier)
-            let thirdMeasurement = try oocut.createMeasurement(at: Int64(10_002), inMode: defaultMode)
+        try oocut.delete(measurement: secondMeasurement.identifier)
+        let thirdMeasurement = try oocut.createMeasurement(at: UInt64(10_002), inMode: defaultMode)
 
-            XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
-        } catch let error {
-            XCTFail("Error \(error.localizedDescription)")
-        }
+        XCTAssertEqual(thirdMeasurement.identifier, secondMeasurementIdentifier+1)
     }
 
     /// Tests if cleaning the test measurement from its additional sensor data is successful.
-    func testCleanMeasurement() {
-        do {
-            let accelerationCount = fixture.accelerationsCount
-            let geoLocationCount = try PersistenceLayer.collectGeoLocations(from: fixture).count
-            XCTAssertEqual(accelerationCount, 3)
-            XCTAssertEqual(geoLocationCount, 2)
+    func testCleanMeasurement() throws {
+        let fixture = try XCTUnwrap(fixture)
+        let accelerationCount = fixture.accelerationsCount
+        let geoLocationCount = PersistenceLayer.collectGeoLocations(from: fixture).count
+        XCTAssertEqual(accelerationCount, 3)
+        XCTAssertEqual(geoLocationCount, 2)
 
-            try oocut.clean(measurement: fixture.identifier)
+        try oocut.clean(measurement: fixture.identifier)
 
-            let measurementAfterClean = try oocut.load(measurementIdentifiedBy: fixture.identifier)
+        let measurementAfterClean = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
-            XCTAssertEqual(measurementAfterClean.accelerationsCount, 0, "Accelerations have not been empty after cleaning!")
-            let geoLocationCountAfterClean = try PersistenceLayer.collectGeoLocations(from: measurementAfterClean).count
-            XCTAssertFalse(geoLocationCountAfterClean==0, "Geo Locations was empty after cleaning!")
-        } catch let error {
-            XCTFail("Error \(error.localizedDescription)")
-        }
+        XCTAssertEqual(measurementAfterClean.accelerationsCount, 0, "Accelerations have not been empty after cleaning!")
+        let geoLocationCountAfterClean = PersistenceLayer.collectGeoLocations(from: measurementAfterClean).count
+        XCTAssertFalse(geoLocationCountAfterClean==0, "Geo Locations was empty after cleaning!")
     }
 
     /// Tests that deleting a measurement is successful.
-    func testDeleteMeasurement() {
-        do {
-            let count = try oocut.countMeasurements()
+    func testDeleteMeasurement() throws {
+        let fixture = try XCTUnwrap(fixture)
+        let count = try oocut.countMeasurements()
 
-            XCTAssertEqual(count, 1, "There should be one measurement before deleting it! There have been \(count).")
+        XCTAssertEqual(count, 1, "There should be one measurement before deleting it! There have been \(count).")
 
-            try oocut.delete(measurement: fixture.identifier)
+        try oocut.delete(measurement: fixture.identifier)
 
-            let countAfterDelete = try oocut.countMeasurements()
+        let countAfterDelete = try oocut.countMeasurements()
 
-            XCTAssertEqual(countAfterDelete, 0, "There should be no measurement after deleting it! There where \(count).")
-        } catch let error {
-            XCTFail("Error \(error.localizedDescription)")
-        }
+        XCTAssertEqual(countAfterDelete, 0, "There should be no measurement after deleting it! There where \(count).")
     }
 
     /// Tests that writing some data to an existing measurement is successful.
-    func testMergeDataToExistingMeasurement() {
-        do {
-            try oocut.save(locations: [TestFixture.randomLocation()], in: &fixture)
-            try oocut.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &fixture)
-            let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
+    func testMergeDataToExistingMeasurement() throws {
+        var fixture = try XCTUnwrap(fixture)
+        try oocut.save(locations: [TestFixture.randomLocation()], in: &fixture)
+        try oocut.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &fixture)
+        let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
-            XCTAssertEqual(try PersistenceLayer.collectGeoLocations(from: measurement).count, 3)
-            XCTAssertEqual(measurement.accelerationsCount, 6)
-        } catch let error {
-            XCTFail("Error \(error.localizedDescription)")
-        }
+        XCTAssertEqual(PersistenceLayer.collectGeoLocations(from: measurement).count, 3)
+        XCTAssertEqual(measurement.accelerationsCount, 6)
     }
 
     /// Tests that loading the test measurement is successful.
-    func testLoadMeasurement() {
-        do {
-            let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
+    func testLoadMeasurement() throws {
+        let fixture = try XCTUnwrap(fixture)
+        let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
-            XCTAssertEqual(measurement, fixture)
-            let events = try oocut.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
-            XCTAssertEqual(events.count, 1)
-            XCTAssertEqual(events[0].value, defaultMode)
-            XCTAssertEqual(try PersistenceLayer.collectGeoLocations(from: measurement).count, 2)
-            XCTAssertEqual(measurement.accelerationsCount, 3)
-        } catch let error {
-            XCTFail("Error \(error.localizedDescription)")
-        }
+        XCTAssertEqual(measurement, fixture)
+        let events = try oocut.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events[0].value, defaultMode)
+        XCTAssertEqual(PersistenceLayer.collectGeoLocations(from: measurement).count, 2)
+        XCTAssertEqual(measurement.accelerationsCount, 3)
     }
 
     /// Tests that accessing only synchronizable measurements does not return everything.
-    func testLoadSynchronizableMeasurements() {
-        do {
-            fixture.synchronizable = true
-            _ = try oocut.save(measurement: fixture)
-            let countOfLoadedMeasurementsPriorClean = try oocut.loadSynchronizableMeasurements().count
+    func testLoadSynchronizableMeasurements() throws {
+        let fixture = try XCTUnwrap(fixture)
+        fixture.synchronizable = true
+        _ = try oocut.save(measurement: fixture)
+        let countOfLoadedMeasurementsPriorClean = try oocut.loadSynchronizableMeasurements().count
 
-            try oocut.clean(measurement: fixture.identifier)
+        try oocut.clean(measurement: fixture.identifier)
 
-            let countOfLoadedMeasurementsPostClean = try oocut.loadSynchronizableMeasurements().count
+        let countOfLoadedMeasurementsPostClean = try oocut.loadSynchronizableMeasurements().count
 
-            XCTAssertEqual(countOfLoadedMeasurementsPriorClean, 1)
-            XCTAssertEqual(countOfLoadedMeasurementsPostClean, 0)
-        } catch let error {
-            XCTFail("Error \(error.localizedDescription)")
-        }
+        XCTAssertEqual(countOfLoadedMeasurementsPriorClean, 1)
+        XCTAssertEqual(countOfLoadedMeasurementsPostClean, 0)
     }
 
     /// Tests that some distance is calculated for the test measurement.
-    func testDistanceWasCalculated() {
+    func testDistanceWasCalculated() throws {
+        let fixture = try XCTUnwrap(fixture)
         let expectedTrackLength = 38.44
         let distanceCalculationAccuracy = 0.01
 
@@ -201,26 +182,24 @@ class PersistenceTests: XCTestCase {
     }
 
     /// Tests that distance is successfully created if new locations are added to a measurement.
-    func testDistanceWasAdded() {
+    func testDistanceWasAdded() throws {
         let expectedInitialTrackLength = 38.45660983580925
         let expectedAddedTrackLength = 45.0
         let expectedTrackLength = expectedInitialTrackLength + expectedAddedTrackLength
         let distanceCalculationAccuracy = 0.01
+        var fixture = try XCTUnwrap(fixture)
 
-        do {
-            XCTAssertEqual(fixture.trackLength, expectedInitialTrackLength)
+        XCTAssertEqual(fixture.trackLength, expectedInitialTrackLength)
 
-            let newLocationInput = [TestFixture.location(latitude: 51.051432, longitude: 13.729053, timestamp: Date(timeIntervalSince1970: 10_002))]
-            try oocut.save(locations: newLocationInput, in: &fixture)
+        let newLocationInput = [TestFixture.location(latitude: 51.051432, longitude: 13.729053, timestamp: Date(timeIntervalSince1970: 10_002))]
+        try oocut.save(locations: newLocationInput, in: &fixture)
 
-            XCTAssertEqual(fixture.trackLength, expectedTrackLength, accuracy: expectedTrackLength * distanceCalculationAccuracy, "Measurement length \(fixture.trackLength) should be within \(distanceCalculationAccuracy*100)% of \(expectedTrackLength).")
-        } catch let error {
-            XCTFail("Error \(error.localizedDescription)")
-        }
+        XCTAssertEqual(fixture.trackLength, expectedTrackLength, accuracy: expectedTrackLength * distanceCalculationAccuracy, "Measurement length \(fixture.trackLength) should be within \(distanceCalculationAccuracy*100)% of \(expectedTrackLength).")
     }
 
     /// Tests that geo locations are added successfully to tracks and can be loaded from them.
     func testLoadGeoLocationTracks() throws {
+        var fixture = try XCTUnwrap(fixture)
         let tracks = fixture.tracks
         XCTAssertEqual(tracks.count, 1, "There should only be one track in the fixture measurement!")
 
@@ -295,22 +274,33 @@ class PersistenceTests: XCTestCase {
         XCTAssertLessThanOrEqual(loadedEvents[1].time.timeIntervalSince1970, loadedEvents[2].time.timeIntervalSince1970)
     }
 
-    func testLoadEvent_HappyPath() throws {
-        // Act
-        let events = try oocut.loadEvents(typed: .modalityTypeChange, forMeasurement: fixture)
+    /// Tests that loading data for upload to a Cyface data collector works as expected.
+    func testLoadUploadData() throws {
+        let coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: PersistenceTests.dataModel)
+        let bundle = Bundle(for: type(of: coreDataStack))
+        try coreDataStack.setup(bundle: bundle) { error in
+            do {
+                let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+                let measurement = try FakeMeasurementImpl.fakeMeasurement(identifier: 2).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 3).addAccelerations(countOfAccelerations: 60).build(persistenceLayer)
 
-        // Assert
-        XCTAssertEqual(events.count, 1)
-        XCTAssertNotNil(events[0].objectId)
-        XCTAssertEqual(events[0].type, .modalityTypeChange)
-        XCTAssertEqual(events[0].measurement, fixture)
-        XCTAssertEqual(events[0].value, "BICYCLE")
-        XCTAssertTrue(events[0].time.timeIntervalSinceNow<0)
+                let oocut = CoreDataBackedUpload(coreDataStack: coreDataStack, identifier: UInt64(measurement.identifier))
+                let metaData = try oocut.metaData()
+                let data = try oocut.data()
+
+                XCTAssertEqual(data, try MeasurementSerializer().serializeCompressed(serializable: measurement))
+                XCTAssertEqual(metaData.measurementId, UInt64(measurement.identifier))
+                XCTAssertEqual(metaData.formatVersion, 3)
+                XCTAssertEqual(metaData.locationCount, 3)
+            } catch {
+                XCTFail("\(error.localizedDescription)")
+            }
+        }
     }
 
     /// Assure that saving geo locations to a measurement actually stores them in the database.
     func testSaveLocation_HappyPath() throws {
         // Arrange
+        var fixture = try XCTUnwrap(fixture)
         let currentDate = Date()
         let locations = [TestFixture.randomLocation(timestamp: currentDate), TestFixture.randomLocation(timestamp: currentDate.addingTimeInterval(10.0)), TestFixture.randomLocation(timestamp: currentDate.addingTimeInterval(20))]
 

@@ -474,7 +474,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
      */
     private func finish(measurement: Int64) throws -> Event {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        var currentMeasurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
+        let currentMeasurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
         currentMeasurement.synchronizable = true
         currentMeasurement.events.append(Event(time: Date(), type: .lifecycleStop, value: nil, measurement: currentMeasurement))
         let savedMeasurement = try persistenceLayer.save(measurement: currentMeasurement)
@@ -487,13 +487,13 @@ Starting data capturing on paused service. Finishing paused measurements and sta
     }
 
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
-    public static func currentTimeInMillisSince1970() -> Int64 {
+    public static func currentTimeInMillisSince1970() -> UInt64 {
         return convertToUtcTimestamp(date: Date())
     }
 
     /// Converts a `Data` object to a UTC milliseconds timestamp since january 1st 1970.
-    public static func convertToUtcTimestamp(date value: Date) -> Int64 {
-        return Int64(value.timeIntervalSince1970*1000.0)
+    public static func convertToUtcTimestamp(date value: Date) -> UInt64 {
+        return UInt64(value.timeIntervalSince1970*1000.0)
     }
 }
 
@@ -599,7 +599,7 @@ public struct LocationCacheEntry: Equatable, Hashable, CustomStringConvertible {
      - Parameter parent: The `Track` to add this as a `GeoLocation` to
      */
     func storeAsGeoLocation(to parent: inout Track) throws {
-        let location = try GeoLocation(
+        let location = GeoLocation(
             latitude: latitude,
             longitude: longitude,
             accuracy: accuracy,
