@@ -79,7 +79,7 @@
 		3D342F672554564400E8EFA6 /* Cyface.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cyface.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D342F732554564B00E8EFA6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3D342F782554564B00E8EFA6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Example/Info.plist; sourceTree = "<group>"; };
-		3D61274C2554A266007F6884 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		3D61274C2554A266007F6884 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = Settings.bundle; path = "../../Cyface-App/Resources/Settings.bundle"; sourceTree = "<group>"; };
 		3D61274E2554A266007F6884 /* privacy-policy-de.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "privacy-policy-de.html"; sourceTree = "<group>"; };
 		3D61274F2554A266007F6884 /* privacy-policy-it.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "privacy-policy-it.html"; sourceTree = "<group>"; };
 		3D6127502554A266007F6884 /* privacy-policy-en.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "privacy-policy-en.html"; sourceTree = "<group>"; };
@@ -128,9 +128,9 @@
 		3DACE6812554642D00FA9A40 /* Strings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
 		AA75B17F270DBD4100C05EBC /* ExampleUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExampleUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA75B181270DBD4100C05EBC /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
-		AAC5788926E0ED0A00BF1CFC /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		AAC5788926E0ED0A00BF1CFC /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Settings.swift; path = "../../../Cyface-App/Source/Model/Settings.swift"; sourceTree = "<group>"; };
 		AAC5788B26E0FE9700BF1CFC /* PrivacyPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicy.swift; sourceTree = "<group>"; };
-		AAC5788E26E1015A00BF1CFC /* PrivacyPolicyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyViewModel.swift; sourceTree = "<group>"; };
+		AAC5788E26E1015A00BF1CFC /* PrivacyPolicyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrivacyPolicyViewModel.swift; path = "../../../../Cyface-App/Source/Model/PrivacyPolicyViewModel.swift"; sourceTree = "<group>"; };
 		AAC5789126E1045400BF1CFC /* CyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyButton.swift; sourceTree = "<group>"; };
 		AAC5789326E109A300BF1CFC /* CyNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyNavigationBar.swift; sourceTree = "<group>"; };
 		AAD09FF126DFB22F007B2EEC /* AskForServerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskForServerViewController.swift; sourceTree = "<group>"; };

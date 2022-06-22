@@ -70,4 +70,11 @@ This framework can be included by your App if you are going to capture sensor da
     end
   end
 
+  s.app_spec 'Cyface-App' do |app_spec|
+    app_spec.source_files = 'Cyface-App/Source/**/*.swift'
+    app_spec.test_spec 'Cyface-AppTests' do |cyfaceapp_unit_test_spec|
+      cyfaceapp_unit_test_spec = 'Cyface-AppTests/**/*.swift'
+    end
+  end
+
 end
