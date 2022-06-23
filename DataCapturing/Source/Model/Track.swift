@@ -26,7 +26,7 @@ Represents a single continuously measured track of geo location and associated s
  Each track is part of a parent `Measurement`. New Tracks are appended to a measurement if the user pauses and resumes capturing of that  `Measurement`.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - since: 11.0.0
  */
 public class Track {
@@ -79,9 +79,10 @@ public class Track {
      - Throws InconsistentData.locationOrderViolated: If the newly added locations timestamp is smaller then the one from the previous location.
      */
     func append(location: GeoLocation) throws {
-        guard (locations.last?.timestamp ?? 0) < location.timestamp else {
+        // We can not check this, since there are old installations where this is not true.
+        /*guard (locations.last?.timestamp ?? 0) < location.timestamp else {
             throw InconsistentData.locationOrderViolated
-        }
+        }*/
 
         self.locations.append(location)
     }
