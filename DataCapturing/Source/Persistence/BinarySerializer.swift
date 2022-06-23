@@ -96,7 +96,7 @@ extension BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 2.0.0
+ - Version: 3.0.0
  */
 class MeasurementSerializer: BinarySerializer {
     /// The byte order used to serialize data to Cyface binary format.
@@ -153,7 +153,7 @@ class MeasurementSerializer: BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 2.0.0
+ - Version: 2.0.1
  - Note: This class was called `AccelerationSerializer` in SDK version prior to 6.0.0.
  */
 class SensorValueSerializer: BinarySerializer {
@@ -224,7 +224,7 @@ class SensorValueSerializer: BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 1.0.1
+ - Version: 2.0.0
  */
 class GeoLocationSerializer: BinarySerializer {
     /**
@@ -269,7 +269,7 @@ class GeoLocationSerializer: BinarySerializer {
  Serializes a list of events to an events file.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 5.0.0
  */
 public class EventsSerializer: BinarySerializer {

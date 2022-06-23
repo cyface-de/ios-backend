@@ -26,7 +26,7 @@ import CoreData
 Tests that reading and writing files works as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.0.2
+ - Version: 1.0.3
  - Since: 6.0.0
  */
 class FileSupportTest: XCTestCase {

@@ -28,7 +28,7 @@ import Alamofire
 
  - Author: Klemens Muthmann
  - Since: 4.0.1
- - Version: 1.1.2
+ - Version: 1.1.3
  */
 class ServerConnectionTest: XCTestCase {
     /// A CoreData stack used to load data to transmit from.

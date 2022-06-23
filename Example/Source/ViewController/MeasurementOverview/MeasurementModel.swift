@@ -24,7 +24,7 @@ import DataCapturing
  A representation of a measurement with access to the underlying database.
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 1.1.1
  - Since: 2.0.0
  */
 class MeasurementModel {

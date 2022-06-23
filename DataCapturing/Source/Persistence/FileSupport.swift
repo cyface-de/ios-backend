@@ -24,7 +24,7 @@ import os.log
  The protocol for writing accelerations to a file.
  
  - Author: Klemens Muthmann
- - Version: 2.0.1
+ - Version: 3.0.0
  - Since: 2.0.0
  */
 protocol FileSupport {
@@ -119,7 +119,7 @@ extension FileSupport {
  Struct implementing the `FileSupport` protocol to store sensor values to a file in Cyface binary format.
  
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version:4.0.0
  - Since: 2.0.0
  - Note: This class was called `AccelerationsFile` prior to SDK version 6.0.0.
  */
@@ -212,7 +212,7 @@ public struct SensorValueFile: FileSupport {
  Struct implementing the `FileSupport` protocol to serialize whole measurements to a file in Cyface binary format.
 
  - Author: Klemens Muthmann
- - Version: 2.0.3
+ - Version:3.0.0
  - Since: 2.0.0
  */
 public struct MeasurementFile: FileSupport {
@@ -280,7 +280,7 @@ public struct MeasurementFile: FileSupport {
  Represents a file with events from a measurement.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 5.0.0
  */
 struct EventsFile: FileSupport {
@@ -350,7 +350,7 @@ public enum FileSupportError: Error {
  The only valid instances are provided as static properties.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 6.0.0
  */
 public class SensorValueFileType {

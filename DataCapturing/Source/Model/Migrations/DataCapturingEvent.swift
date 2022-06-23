@@ -37,7 +37,7 @@ import Foundation
  ```
  
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 4.0.0
  - Since: 1.0.0
  */
 public enum DataCapturingEvent: CustomStringConvertible {

@@ -30,6 +30,7 @@ Instances of this class represent a single data capturing session, framed by cal
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - since: 11.0.0
  */
 public class Measurement: Hashable, Equatable {
     /// This measurements CoreData identifier or `nil` if the object has not been saved yet.

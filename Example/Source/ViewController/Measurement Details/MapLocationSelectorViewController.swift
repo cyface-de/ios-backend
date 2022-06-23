@@ -25,7 +25,7 @@ import DataCapturing
  A view controller that handles the selection of a geo location from a measurement track presented on a map.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 2.0.0
  */
 class MapLocationSelectorViewController: UIViewController {

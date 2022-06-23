@@ -29,7 +29,7 @@ import CoreData
  - SeeAlso: `DataCapturingService`, `PersistenceLayer.save(:[GeoLocation]:MeasurementEntity:(MeasurementMO?, Status) -> Void)`, `GeoLocationMO`
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 2.0.0
  - Since: 1.0.0
  */
 public class GeoLocation: CustomStringConvertible {

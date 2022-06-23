@@ -26,7 +26,7 @@ import os.log
  
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 2.0.0
  */
 class GeoLocationTrackDrawer: NSObject {

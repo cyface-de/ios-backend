@@ -25,7 +25,8 @@ import CoreMotion
  Helper to create test fixture data.
 
  - Author: Klemens Muthmann
- - Version 1.0.0
+ - Version: 1.0.0
+ - since: 11.0.0
  */
 struct TestFixture {
     /**

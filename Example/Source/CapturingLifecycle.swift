@@ -25,8 +25,8 @@ import os.log
  Handles the Cyface SDK lifecycle events, caused by start, pause, resume and stop calls.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
- - Since 6.0.0
+ - Version: 1.0.2
+ - Since: 6.0.0
  */
 class CapturingLifecycle {
 
