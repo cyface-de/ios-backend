@@ -79,9 +79,10 @@ public class Track {
      - Throws InconsistentData.locationOrderViolated: If the newly added locations timestamp is smaller then the one from the previous location.
      */
     func append(location: GeoLocation) throws {
-        guard (locations.last?.timestamp ?? 0) < location.timestamp else {
+        // We can not check this, since there are old installations where this is not true.
+        /*guard (locations.last?.timestamp ?? 0) < location.timestamp else {
             throw InconsistentData.locationOrderViolated
-        }
+        }*/
 
         self.locations.append(location)
     }
