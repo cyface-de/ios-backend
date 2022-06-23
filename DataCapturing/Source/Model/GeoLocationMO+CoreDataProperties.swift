@@ -32,6 +32,6 @@ extension GeoLocationMO {
     @NSManaged public var speed: Double
     @NSManaged public var timestamp: Int64
     @NSManaged public var isPartOfCleanedTrack: Bool
-    @NSManaged public var track: Track?
+    @NSManaged public var track: TrackMO?
 
 }

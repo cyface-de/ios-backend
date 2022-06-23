@@ -23,18 +23,18 @@ import OSLog
 
 /**
  A class for objects representing a *CoreData* stack.
+
  Please call `setup(bundle:completionClosure:)` before using an object of this class.
  That call will run data migration if necessary and might take some time depending on the amount of data that must be migrated.
  So it might be a good idea to run `setup(bundle:completionClosure:)` on a background thread.
 
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 3.1.0
  - Since: 4.0.0
- - Attention:
-    - You must call `setup(bundle:completionClosure:)` only once in your application. Usually this should happen in AddDelegate.application`
-    - Do not load or save any data before the call to `setup(bundle:completionClosure:)` has finished.
+ - Attention: You must call `setup(bundle:completionClosure:)` only once in your application. Usually this should happen in AddDelegate.application. Do not load or save any data before the call to `setup(bundle:completionClosure:)` has finished.
  */
 public class CoreDataManager {
+    /// os_log logger used for messages from instances of this class.
     private static let log = OSLog(subsystem: "CoreDataManager", category: "de.cyface")
     /// An object to migrate between different Cyface model versions.
     let migrator: CoreDataMigratorProtocol
@@ -47,7 +47,7 @@ public class CoreDataManager {
     /// Provides a background context usable on a background thread and accessing the data store managed by this stack.
     lazy var backgroundContext: NSManagedObjectContext = {
         let context = self.persistentContainer.newBackgroundContext()
-        // context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         // This improves performance as long as we do not need to undo on the background context.
         context.undoManager = nil
 
@@ -74,12 +74,12 @@ public class CoreDataManager {
      - Throws: `CoreDataError.invalidModelUrl`, `CoreDataError.modelNotAvailable`
      */
     public convenience init(storeType: String = NSSQLiteStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator()) throws {
-        let momdName = "CyfaceModel"
-        let mom = try CoreDataManager.loadModel()
-        self.init(storeType: storeType, migrator: migrator, modelName: momdName, model: mom)
+        let mom = try CoreDataManager.load()
+        self.init(storeType: storeType, migrator: migrator, model: mom)
     }
 
-    init(storeType: String = NSInMemoryStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator(), modelName: String, model: NSManagedObjectModel) {
+    /// An initializer, mostly used by tests, to load a specific CoreData model.
+    init(storeType: String = NSInMemoryStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator(), modelName: String = "CyfaceModel", model: NSManagedObjectModel) {
         self.storeType = storeType
         self.migrator = migrator
 
@@ -108,11 +108,11 @@ public class CoreDataManager {
         }
     }
 
-    public static func loadModel() throws -> NSManagedObjectModel {
-        let momdName = "CyfaceModel"
+    /// Load the specified `NSManagedObjectModel` from disk.
+    public static func load(model: String = "CyfaceModel") throws -> NSManagedObjectModel {
         let bundle = Bundle(for: CoreDataManager.self)
-        guard let modelURL = bundle.url(forResource: momdName, withExtension: "momd") else {
-            throw CoreDataError.invalidModelUrl(momdName)
+        guard let modelURL = bundle.url(forResource: model, withExtension: "momd") else {
+            throw CoreDataError.invalidModelUrl(model)
         }
 
         guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
@@ -137,6 +137,53 @@ public class CoreDataManager {
 
         if migrator.requiresMigration(at: storeURL, toVersion: CoreDataMigrationVersion.current, inBundle: bundle) {
             migrator.migrateStore(at: storeURL, toVersion: CoreDataMigrationVersion.current, inBundle: bundle)
+        }
+    }
+
+    /**
+     Wrap a block of data inside a valid `NSManagedObjectContext`. As long as control is not handed to any other thread, it is save to use managed objects within that block.
+
+     - Throws: Any error thrown by the block is rethrown here.
+     */
+    func wrapInContext(_ block: (NSManagedObjectContext) throws -> ()) throws {
+        var outerError: Error?
+
+        backgroundContext.performAndWait {
+            do {
+                try block(backgroundContext)
+            } catch {
+                outerError = error
+            }
+        }
+
+        if let unwrappedError = outerError {
+            throw unwrappedError
+        }
+    }
+
+    /**
+     Wrap a block of data inside a valid `NSMNagedObjectContext` and return some result. Similarly to `wrapInContext` it is save to use managed objects within this block as long as control is not transfered to another thread or queue.
+
+     - Throws: Any error thrown by the block is rethrown here.
+     */
+    func wrapInContextReturn<T>(_ block: (NSManagedObjectContext) throws -> T) throws -> T {
+        var outerError: Error?
+        var ret: T?
+
+        backgroundContext.performAndWait {
+            do {
+                ret = try block(backgroundContext)
+            } catch {
+                outerError = error
+            }
+        }
+
+        if let unwrappedError = outerError {
+            throw unwrappedError
+        } else if let ret = ret {
+            return ret
+        } else {
+            fatalError()
         }
     }
 

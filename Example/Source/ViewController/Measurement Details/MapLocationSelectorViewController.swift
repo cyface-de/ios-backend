@@ -1,10 +1,21 @@
-//
-//  MapLocationSelectorViewController.swift
-//  Cyface
-//
-//  Created by Team Cyface on 23.09.19.
-//  Copyright © 2019 Cyface GmbH. All rights reserved.
-//
+/*
+* Copyright 2019 - 2022 Cyface GmbH
+*
+* This file is part of the Cyface SDK for iOS.
+*
+* The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* The Cyface SDK for iOS is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 import UIKit
 import MapKit
@@ -14,7 +25,7 @@ import DataCapturing
  A view controller that handles the selection of a geo location from a measurement track presented on a map.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 2.0.0
  */
 class MapLocationSelectorViewController: UIViewController {
@@ -29,9 +40,9 @@ class MapLocationSelectorViewController: UIViewController {
 
     // MARK: - Properties
     var measurementIdentifier: Int64?
-    var measurement: MeasurementMO?
+    var measurement: DataCapturing.Measurement?
     var geoLocationTrackDrawer: GeoLocationTrackDrawer?
-    var selectedPoint: GeoLocationMO?
+    var selectedPoint: GeoLocation?
     var mapViewController: MapViewController?
 
     // MARK: - Methods
@@ -62,7 +73,7 @@ class MapLocationSelectorViewController: UIViewController {
             fatalError()
         }
 
-        guard let measurement = measurement else {
+        guard var measurement = measurement else {
             fatalError()
         }
 
@@ -70,22 +81,14 @@ class MapLocationSelectorViewController: UIViewController {
 
         destination.behaviour = { modality in
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
-            guard let migratedLocation = persistenceLayer.context?.object(with: selectedPoint.objectID) as? GeoLocationMO else {
-                fatalError()
-            }
-            guard let migratedMeasurement = persistenceLayer.context?.object(with: measurement.objectID) as? MeasurementMO else {
-                fatalError()
-            }
-            let context = persistenceLayer.context!
 
-            let event = Event(context: context)
-            event.type = EventType.modalityTypeChange.rawValue
-            event.value = modality.dbValue
-            event.time = Date(timeIntervalSince1970: TimeInterval(integerLiteral: migratedLocation.timestamp / Int64(1_000))) as NSDate
-            migratedMeasurement.addToEvents(event)
+            let timestamp = Date(timeIntervalSince1970: TimeInterval(integerLiteral: selectedPoint.timestamp / Int64(1_000)))
+            do {
+                _ = try persistenceLayer.createEvent(of: .modalityTypeChange, withValue: modality.dbValue, timestamp: timestamp, parent: &measurement)
+            } catch {
+                fatalError("\(error)")
+            }
 
-            context.saveRecursively()
             self.presentingViewController?.dismiss(animated: true)
             if let mapViewController = self.mapViewController {
                 mapViewController.eventsTableView.reloadData()
@@ -127,20 +130,18 @@ class MapLocationSelectorViewController: UIViewController {
 
         if sender.state == .ended {
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
 
             do {
-                let measurementMO = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
+                let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
 
-                selectedPoint = findPointClicked(sender: sender, measurement: measurementMO, persistenceLayer: persistenceLayer)
-                measurement = measurementMO
+                selectedPoint = findPointClicked(sender: sender, measurement: measurement, persistenceLayer: persistenceLayer)
             } catch {
                 fatalError("Unable to load measurement!")
             }
         }
     }
 
-    private func findPointClicked(sender: UIGestureRecognizer, measurement: MeasurementMO, persistenceLayer: PersistenceLayer) -> GeoLocationMO? {
+    private func findPointClicked(sender: UIGestureRecognizer, measurement: DataCapturing.Measurement, persistenceLayer: PersistenceLayer) -> GeoLocation? {
         guard let polyline = geoLocationTrackDrawer?.polyline else {
             return nil
         }
@@ -151,7 +152,7 @@ class MapLocationSelectorViewController: UIViewController {
 
         let point = MKMapPoint(locationOnMap)
         let mapRect = MKMapRect(x: point.x, y: point.y, width: 0, height: 0)
-        var closestPoint: GeoLocationMO?
+        var closestPoint: GeoLocation?
 
         if polyline.intersects(mapRect) {
 
@@ -160,7 +161,7 @@ class MapLocationSelectorViewController: UIViewController {
 
             PersistenceLayer.traverseTracks(ofMeasurement: measurement) { _, location in
                 let distance = distanceCalculator.calculateDistance(
-                    from: (location.lat, location.lon),
+                    from: (location.latitude, location.longitude),
                     to: (locationOnMap.latitude, locationOnMap.longitude))
                 if distance < previousSmallestDistance {
                     closestPoint = location

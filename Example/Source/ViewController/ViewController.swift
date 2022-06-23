@@ -29,7 +29,7 @@ The view controller showing the overview of unsynchronized measurements together
  This is still an MVC (Massive View Controller) until all the remining pieces of business logic are refactored out to their own view models. Of special importance is to remove all calls to the persistence layer from this view controller.
 
  - Author: Klemens Muthmann
- - Version: 2.1.1
+ - Version: 2.1.2
  - Since: 1.0.0
  */
 class ViewController: UIViewController {
@@ -491,7 +491,6 @@ class ViewController: UIViewController {
                         // TODO: Move this to a Table View Model
                         // Load the measurements to show
                         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-                        persistenceLayer.context = persistenceLayer.makeContext()
                         let measurements = try persistenceLayer.loadSynchronizableMeasurements()
 
                         os_log("Populating measurements", log: ViewController.LOG, type: .debug)

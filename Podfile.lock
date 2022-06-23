@@ -3,10 +3,10 @@ PODS:
   - Charts (3.6.0):
     - Charts/Core (= 3.6.0)
   - Charts/Core (3.6.0)
-  - DataCapturing (0.0.0):
+  - DataCapturing (10.0.0):
     - Alamofire (~> 4.9.1)
     - DataCompression (~> 3.6.0)
-  - DataCapturing/Tests (0.0.0):
+  - DataCapturing/Tests (10.0.0):
     - Alamofire (~> 4.9.1)
     - DataCompression (~> 3.6.0)
   - DataCompression (3.6.0)
@@ -29,9 +29,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   Charts: b1e3a1f5a1c9ba5394438ca3b91bd8c9076310af
-  DataCapturing: b3e88ba483e5152c406bac5558921ddbfd9a80cd
+  DataCapturing: 80dd746bbc6dd7de0a939b95815edcb09e4f6b56
   DataCompression: 06628f9c807b6f152e0da37635633f62fc51dc77
 
 PODFILE CHECKSUM: acbd711de16953ad19288baefa9e4e460a7cdab7
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3

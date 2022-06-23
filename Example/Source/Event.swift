@@ -1,10 +1,21 @@
-//
-//  Event.swift
-//  Cyface
-//
-//  Created by Team Cyface on 17.09.19.
-//  Copyright © 2019 Cyface GmbH. All rights reserved.
-//
+/*
+* Copyright 2019 - 2022 Cyface GmbH
+*
+* This file is part of the Cyface SDK for iOS.
+*
+* The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* The Cyface SDK for iOS is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 import Foundation
 import UIKit
@@ -39,10 +50,15 @@ class EventItemView: UITableViewCell {
     }
 }
 
+/**
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ - since: 11.0.0
+ */
 class EventItemViewModel {
     let model: EventItemModel
 
-    init(measurement: MeasurementMO, coreDataStack: CoreDataManager, position: Int) {
+    init(measurement: DataCapturing.Measurement, coreDataStack: CoreDataManager, position: Int) {
         self.model = EventItemModel(measurement: measurement, coreDataStack: coreDataStack, position: position)
     }
 
@@ -61,9 +77,8 @@ struct EventItemModel {
 
     let timestamp: Date
 
-    init(measurement: MeasurementMO, coreDataStack: CoreDataManager, position: Int) {
+    init(measurement: DataCapturing.Measurement, coreDataStack: CoreDataManager, position: Int) {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
         do {
             let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)

@@ -24,7 +24,7 @@ import os.log
 
 /**
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 1.0.0
  */
 class StatisticsViewController: UIViewController {
@@ -67,7 +67,6 @@ class StatisticsViewController: UIViewController {
                 fatalError()
             }
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
 
             let measurement = try persistenceLayer.load(measurementIdentifiedBy: entity)
 

@@ -1,8 +1,21 @@
-//
-// Copyright (C) 2018 - 2020 Cyface GmbH - All Rights Reserved
-// Unauthorized copying of this file, via any medium is strictly prohibited
-// Proprietary and confidential
-//
+/*
+* Copyright 2018 - 2022 Cyface GmbH
+*
+* This file is part of the Cyface SDK for iOS.
+*
+* The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* The Cyface SDK for iOS is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 import Foundation
 import DataCapturing
@@ -11,14 +24,14 @@ import DataCapturing
  A representation of a measurement with access to the underlying database.
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 1.1.1
  - Since: 2.0.0
  */
 class MeasurementModel {
     /// Internal storage for the current measurement database entity
-    private var internalMeasurement: MeasurementMO?
+    private var internalMeasurement: DataCapturing.Measurement?
     /// The database entity representing the current measurement
-    var measurement: MeasurementMO? {
+    var measurement: DataCapturing.Measurement? {
         get {
             if internalMeasurement==nil {
                 return nil
@@ -27,12 +40,13 @@ class MeasurementModel {
                     fatalError("Unable to access current measurement!")
                 }
 
-                if internalMeasurement.isFault {
-                    let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-                    persistenceLayer.makeContext().refresh(internalMeasurement, mergeChanges: true)
+                let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+                do {
+                    self.internalMeasurement = try persistenceLayer.load(measurementIdentifiedBy: internalMeasurement.identifier)
+                    return internalMeasurement
+                } catch {
+                    fatalError("Unable to load measurement")
                 }
-
-                return internalMeasurement
             }
         }
         set {
@@ -55,11 +69,11 @@ class MeasurementModel {
     }
     /// The longitude of the most recent captured geo location
     var lastLon: Double? {
-        return mostRecentGeoLocation?.lon
+        return mostRecentGeoLocation?.longitude
     }
     /// The latitude of the most recent captured geo location
     var lastLat: Double? {
-        return mostRecentGeoLocation?.lat
+        return mostRecentGeoLocation?.latitude
     }
     /// The current modality context of the active measurement
     var context: Modality? {
@@ -78,12 +92,12 @@ class MeasurementModel {
         return measurement?.timestamp
     }
     /// The most recent geo location captured by the active measurement
-    var mostRecentGeoLocation: GeoLocationMO? {
-        guard let mostRecentTrack = measurement?.tracks?.array.last as? Track else {
+    var mostRecentGeoLocation: GeoLocation? {
+        guard let mostRecentTrack = measurement?.tracks.last else {
             fatalError()
         }
 
-        guard let mostRecentGeoLocation = mostRecentTrack.locations?.array.last as? GeoLocationMO else {
+        guard let mostRecentGeoLocation = mostRecentTrack.locations.last else {
             return nil
         }
 
@@ -93,7 +107,6 @@ class MeasurementModel {
     var modalities: [Modality] {
         do {
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
             let events = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement!)
             let modalities: [Modality] = events.map { event in
                 guard let rawValue = event.value else {
@@ -126,7 +139,7 @@ class MeasurementModel {
         - coreDataStack: The stack used to access the `CoreData` stack to load the measurement data
         - measurement: The database object this model is based on
      */
-    public convenience init(_ coreDataStack: CoreDataManager, measurement: MeasurementMO) {
+    public convenience init(_ coreDataStack: CoreDataManager, measurement: DataCapturing.Measurement) {
         self.init(coreDataStack)
         self.measurement = measurement
     }
@@ -142,7 +155,6 @@ class MeasurementModel {
         }
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
         do {
             try persistenceLayer.delete(measurement: identifier)

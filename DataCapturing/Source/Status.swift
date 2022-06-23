@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019-2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -30,10 +30,10 @@ import Foundation
  ```
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 2.2.0
  */
-@available(swift, deprecated: 5.0.0, message: "There is a better solution provide by Swift natively beginning with Swift 5")
+@available(swift, deprecated: 5.0.0, message: "Use Swift 5 Result or Swift 5.5 async/await")
 public enum Status {
     /// The status returned if an asynchronous callback has finished successfully.
     case success

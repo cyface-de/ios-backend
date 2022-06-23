@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -18,25 +18,15 @@
  */
 
 import Foundation
-import CoreData
 
-extension Event {
+/**
+An error thrown if some inconsistent data was encountered.
 
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Event> {
-        return NSFetchRequest<Event>(entityName: "Event")
-    }
-
-    @NSManaged public var time: NSDate?
-    @NSManaged public var type: Int16
-    @NSManaged public var value: String?
-    @NSManaged public var measurement: MeasurementMO?
-
-    public var typeEnum: EventType {
-        get {
-            return EventType(rawValue: type)!
-        }
-        set {
-            self.type = newValue.rawValue
-        }
-    }
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - since: 11.0.0
+ */
+public enum InconsistentData: Error {
+    /// If locations are not ordered by timestamp ascending.
+    case locationOrderViolated
 }

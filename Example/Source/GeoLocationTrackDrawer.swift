@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 Cyface GmbH
+ * Copyright 2019 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -26,7 +26,7 @@ import os.log
  
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 2.0.0
  */
 class GeoLocationTrackDrawer: NSObject {
@@ -47,49 +47,30 @@ class GeoLocationTrackDrawer: NSObject {
                 fatalError()
             }
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-            persistenceLayer.context = persistenceLayer.makeContext()
 
             let measurement = try persistenceLayer.load(measurementIdentifiedBy: forMeasurementIdentifiedBy)
 
-            guard let tracks = measurement.tracks?.array as? [Track] else {
-                fatalError()
-            }
-
+            let tracks = measurement.tracks
             placeStartMarker(from: tracks, on: widget)
             placeEndMarker(from: tracks, on: widget)
 
             for track in tracks {
-                guard let locations = track.locations?.array as? [GeoLocationMO] else {
-                    fatalError()
-                }
-
+                let locations = track.locations
                 guard !locations.isEmpty else {
                     let identifier = measurement.identifier
                     os_log("No locations to display in measurement %d!", log: GeoLocationTrackDrawer.log, type: .default, identifier)
                     continue
                 }
 
-                // Transform the location model objects from the database to a thread safe representation.
-                var localLocations = [GeoLocation]()
-                for location in locations {
-                    localLocations.append(
-                        GeoLocation(
-                            latitude: location.lat,
-                            longitude: location.lon,
-                            accuracy: location.accuracy,
-                            speed: location.speed,
-                            timestamp: location.timestamp))
-                }
-
                 if let firstLocation = locations.first {
-                    center(map: widget, onLocation: CLLocationCoordinate2D(latitude: firstLocation.lat, longitude: firstLocation.lon))
+                    center(map: widget, onLocation: CLLocationCoordinate2D(latitude: firstLocation.latitude, longitude: firstLocation.longitude))
                 }
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self else {
                         return
                     }
 
-                    self.draw(path: localLocations, on: widget)
+                    self.draw(path: locations, on: widget)
                 }
             }
 
@@ -99,36 +80,22 @@ class GeoLocationTrackDrawer: NSObject {
     }
 
     private func placeStartMarker(from tracks: [Track], on map: MKMapView) {
-        guard let firstTrackLocation = tracks.first?.locations?.array.first as? GeoLocationMO else {
+        guard let firstTrackLocation = tracks.first?.locations.first else {
             return
         }
 
-        let firstLocation = GeoLocation(
-            latitude: firstTrackLocation.lat,
-            longitude: firstTrackLocation.lon,
-            accuracy: firstTrackLocation.accuracy,
-            speed: firstTrackLocation.speed,
-            timestamp: firstTrackLocation.timestamp)
-
         DispatchQueue.main.async {
-            self.place(firstLocation, "Start", on: map)
+            self.place(firstTrackLocation, "Start", on: map)
         }
     }
 
     private func placeEndMarker(from tracks: [Track], on map: MKMapView) {
-        guard let lastTrackLocation = tracks.last?.locations?.array.last as? GeoLocationMO else {
+        guard let lastTrackLocation = tracks.last?.locations.last else {
             return
         }
 
-        let lastLocation = GeoLocation(
-            latitude: lastTrackLocation.lat,
-            longitude: lastTrackLocation.lon,
-            accuracy: lastTrackLocation.accuracy,
-            speed: lastTrackLocation.speed,
-            timestamp: lastTrackLocation.timestamp)
-
         DispatchQueue.main.async {
-            self.place(lastLocation, "End", on: map)
+            self.place(lastTrackLocation, "End", on: map)
         }
     }
 

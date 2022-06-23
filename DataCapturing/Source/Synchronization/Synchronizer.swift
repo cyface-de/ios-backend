@@ -31,7 +31,7 @@ import Alamofire
  For foreground synchronization use `syncChecked()`.
 
  - Author: Klemens Muthmann
- - Version: 4.0.1
+ - Version: 4.0.2
  - Since: 2.3.0
  */
 public class Synchronizer {
@@ -158,7 +158,6 @@ public class Synchronizer {
 
             do {
                 let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
-                persistenceLayer.context = persistenceLayer.makeContext()
                 let measurements = try persistenceLayer.loadSynchronizableMeasurements()
                 self.handle(synchronizableMeasurements: measurements, status: .success)
             } catch let error {
@@ -233,7 +232,7 @@ public class Synchronizer {
         - synchronizableMeasurements: The synchronizable measurements to synchronize or `nil` if they have not been loaded.
         - status: Provides the status of whether loading the measurements was successful or not.
      */
-    private func handle(synchronizableMeasurements: [MeasurementMO]?, status: Status) {
+    private func handle(synchronizableMeasurements: [Measurement]?, status: Status) {
         guard let measurements = synchronizableMeasurements else {
             return
         }

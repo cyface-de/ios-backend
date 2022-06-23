@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cyface GmbH
+ * Copyright 2018-2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -96,11 +96,9 @@ extension BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 2.0.0
+ - Version: 3.0.0
  */
 class MeasurementSerializer: BinarySerializer {
-    /// Binds the Serializeable from the `BinarySerializer` protocol to a measurement.
-    typealias Serializable = MeasurementMO
     /// The byte order used to serialize data to Cyface binary format.
     static let byteOrder = ByteOrder.bigEndian
     /// Serializer to transform acceleration objects
@@ -123,7 +121,7 @@ class MeasurementSerializer: BinarySerializer {
         - `SerializationError.missingData` If no track data was found.
         - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
      */
-    func serialize(serializable measurement: MeasurementMO) throws -> Data {
+    func serialize(serializable measurement: Measurement) throws -> Data {
         let geoLocations = try PersistenceLayer.collectGeoLocations(from: measurement)
 
         var dataArray = [UInt8]()
@@ -155,13 +153,10 @@ class MeasurementSerializer: BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 2.0.0
+ - Version: 2.0.1
  - Note: This class was called `AccelerationSerializer` in SDK version prior to 6.0.0.
  */
 class SensorValueSerializer: BinarySerializer {
-    /// Binds the Serializeable from the `BinarySerializer` protocol to an array of sensor value points.
-    typealias Serializable = [SensorValue]
-
     /**
      Serializes an array of sensor values into binary format of the form:
      - 8 Bytes: timestamp as long
@@ -229,12 +224,9 @@ class SensorValueSerializer: BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 1.0.1
+ - Version: 2.0.0
  */
 class GeoLocationSerializer: BinarySerializer {
-    /// Binds the `Serializeble` from the `BinarySerializer` protocol to an array of geo locations.
-    typealias Serializable = [GeoLocationMO]
-
     /**
      Serializes an array of geo locations into binary format of the form:
      - 8 Bytes: timestamp as long
@@ -246,7 +238,7 @@ class GeoLocationSerializer: BinarySerializer {
      - Parameter serializable: The array of locations to serialize.
      - Returns: An array of serialized bytes.
      */
-    func serialize(serializable locations: [GeoLocationMO]) -> Data {
+    func serialize(serializable locations: [GeoLocation]) -> Data {
         var ret = [UInt8]()
         let byteOrder = ByteOrder.bigEndian
 
@@ -255,10 +247,10 @@ class GeoLocationSerializer: BinarySerializer {
             let timestamp = location.timestamp
             ret.append(contentsOf: byteOrder.convertToBytes(timestamp))
             // 8 Bytes
-            let latBitPattern = location.lat.bitPattern
+            let latBitPattern = location.latitude.bitPattern
             ret.append(contentsOf: byteOrder.convertToBytes(latBitPattern))
             // 8 Bytes
-            let lonBitPattern = location.lon.bitPattern
+            let lonBitPattern = location.longitude.bitPattern
             ret.append(contentsOf: byteOrder.convertToBytes(lonBitPattern))
             // 8 Bytes
             let speedBitPattern = location.speed.bitPattern
@@ -277,13 +269,10 @@ class GeoLocationSerializer: BinarySerializer {
  Serializes a list of events to an events file.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 5.0.0
  */
 public class EventsSerializer: BinarySerializer {
-
-    /// Binds the `Serializable` from the `BinarySerializer` to an array of `Event` instances.
-    typealias Serializable = [Event]
 
     /**
      Serializes an array of `Event` instaces to a binary representation of the form:
@@ -311,7 +300,7 @@ public class EventsSerializer: BinarySerializer {
         // Add all the events
         for event in events {
             // event timestamp; 8 bytes
-            let timestamp = Int64(event.time!.timeIntervalSince1970 * 1_000)
+            let timestamp = Int64(event.time.timeIntervalSince1970 * 1_000)
             ret.append(contentsOf: byteOrder.convertToBytes(timestamp))
             // event type: 2 bytes
             let type = translateType(of: event)
@@ -338,7 +327,7 @@ public class EventsSerializer: BinarySerializer {
      - Returns: The serializable representation of the provided `Event` type.
      */
     private func translateType(of event: Event) -> Int16 {
-        switch event.typeEnum {
+        switch event.type {
         case .lifecycleStart:
                 return 1
         case .lifecycleStop:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 Cyface GmbH
+ * Copyright 2019 - 2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -25,8 +25,8 @@ import os.log
  Handles the Cyface SDK lifecycle events, caused by start, pause, resume and stop calls.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
- - Since 6.0.0
+ - Version: 1.0.2
+ - Since: 6.0.0
  */
 class CapturingLifecycle {
 
@@ -163,7 +163,6 @@ class CapturingLifecycle {
             fatalError()
         }
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-        persistenceLayer.context = persistenceLayer.makeContext()
 
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifiedBy)
 
