@@ -24,7 +24,7 @@ import os.log
 
 /**
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 1.0.0
  */
 class StatisticsViewController: UIViewController {

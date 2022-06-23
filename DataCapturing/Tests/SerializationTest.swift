@@ -25,7 +25,7 @@ import CoreData
  Tests whether serialization and deserialization into and from the Cyface Binary Format works as expected
 
  - Author: Klemens Muthmann
- - Version: 1.1.3
+ - Version: 1.1.4
  - Since: 1.0.0
  */
 class SerializationTest: XCTestCase {

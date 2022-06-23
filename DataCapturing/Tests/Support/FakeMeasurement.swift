@@ -24,7 +24,8 @@ import Foundation
  A builder for fake measurements. It provides a fluent API and should be created via the static factory method `fakeMeasurement`.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
+ - since: 10.0.0
  */
 public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
     /// The fake measurement currently built.

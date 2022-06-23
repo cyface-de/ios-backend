@@ -99,7 +99,7 @@ extension BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 2.0.0
+ - Version: 3.0.0
  */
 class MeasurementSerializer: BinarySerializer {
     /// The number of centimeters in a meter.
@@ -240,7 +240,7 @@ class MeasurementSerializer: BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 2.0.0
+ - Version: 2.0.1
  - Note: This class was called `AccelerationSerializer` in SDK version prior to 6.0.0.
  */
 class SensorValueSerializer: BinarySerializer {

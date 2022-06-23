@@ -25,6 +25,7 @@ A single user initiated event during the capturing of a `Measurement`.
 
  - Author: Klemens Muthmann
  - Version 1.0.0
+ - since: 11.0.0
  */
 public class Event: CustomStringConvertible {
     /// The database identifier of the event or `nil` if the event has not been saved yet.

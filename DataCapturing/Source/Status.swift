@@ -30,7 +30,7 @@ import Foundation
  ```
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 2.2.0
  */
 @available(swift, deprecated: 5.0.0, message: "Use Swift 5 Result or Swift 5.5 async/await")
