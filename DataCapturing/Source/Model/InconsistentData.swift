@@ -24,6 +24,7 @@ An error thrown if some inconsistent data was encountered.
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - since: 11.0.0
  */
 public enum InconsistentData: Error {
     /// If locations are not ordered by timestamp ascending.

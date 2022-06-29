@@ -29,7 +29,7 @@ import OSLog
  So it might be a good idea to run `setup(bundle:completionClosure:)` on a background thread.
 
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 3.1.0
  - Since: 4.0.0
  - Attention: You must call `setup(bundle:completionClosure:)` only once in your application. Usually this should happen in AddDelegate.application. Do not load or save any data before the call to `setup(bundle:completionClosure:)` has finished.
  */

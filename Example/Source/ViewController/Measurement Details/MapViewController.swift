@@ -23,6 +23,11 @@ import MapKit
 import os.log
 
 // TODO: check that having open one of these VC while changing the server url actually opens the login screen again.
+/**
+ - author: Klemens Muthmann
+ - version: 1.0.1
+ - since: 1.0.0
+ */
 class MapViewController: UIViewController {
     // MARK: - Outlets
     @IBOutlet weak var mapWidget: MKMapView!

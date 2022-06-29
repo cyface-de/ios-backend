@@ -27,6 +27,7 @@ Represents a single continuously measured track of geo location and associated s
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - since: 11.0.0
  */
 public class Track {
     /// The database identifier used by CoreData to identify this object in the database.

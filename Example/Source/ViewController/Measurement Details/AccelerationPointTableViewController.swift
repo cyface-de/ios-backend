@@ -25,7 +25,7 @@ import os.log
  Controls the display of accelerations in a `UITableView`. Initially the view shows an activity indicator, while loading accelerations asynchronously from the database.
 
  - Author: Klemens Muthmann
- - Version: 1.0.2
+ - Version: 1.0.3
  - Since: 1.0.0
  */
 class AccelerationPointTableViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {

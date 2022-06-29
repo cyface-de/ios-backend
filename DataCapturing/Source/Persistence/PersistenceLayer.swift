@@ -25,7 +25,7 @@ import os.log
  An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and sensor values.
  
  - Author: Klemens Muthmann
- - Version: 6.2.0
+ - Version:7.0.0
  - Since: 1.0.0
  - throws: Most methods implemented by this class throw internal CoreData errors. This usually indicates something to be seriously wrong with the device executing the method and are almost never recoverable. Errors from the file system are rethrown on reading and writing sensor values. Those are mostly not recoverable as well. Another common error is an inconstent state of the measurement worked on, such as locations with non strongly monotonically increasing timestamps.
  */
@@ -640,7 +640,7 @@ public class PersistenceLayer {
  A structure for all the errors thrown by the `PersistenceLayer`.
 
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 3.1.0
  - Since: 2.3.0
  */
 public enum PersistenceError: Error {

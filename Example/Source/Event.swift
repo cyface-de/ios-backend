@@ -50,6 +50,11 @@ class EventItemView: UITableViewCell {
     }
 }
 
+/**
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ - since: 11.0.0
+ */
 class EventItemViewModel {
     let model: EventItemModel
 

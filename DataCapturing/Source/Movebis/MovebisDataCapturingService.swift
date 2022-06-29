@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cyface GmbH
+ * Copyright 2018-2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -30,7 +30,7 @@ import os.log
  The instance you provide will receive the updates.
  
  - Author: Klemens Muthmann
- - Version: 4.2.3
+ - Version: 5.0.0
  - Since: 1.0.0
  */
 public class MovebisDataCapturingService: DataCapturingService {
