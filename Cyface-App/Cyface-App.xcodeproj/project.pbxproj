@@ -285,6 +285,7 @@
 				AA7FB09027EE017E000FFC26 /* Frameworks */,
 				AA7FB09127EE017E000FFC26 /* Resources */,
 				F717710A3E5102FEC345A813 /* [CP] Embed Pods Frameworks */,
+				8EB1E15D8D223989F46B924E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -304,6 +305,7 @@
 				AA7FB0A027EE017F000FFC26 /* Frameworks */,
 				AA7FB0A127EE017F000FFC26 /* Resources */,
 				2E18940A306C2D958CFB40D6 /* [CP] Embed Pods Frameworks */,
+				7952E068F3ECD558718AFC1C /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -324,6 +326,7 @@
 				AA7FB0AA27EE017F000FFC26 /* Frameworks */,
 				AA7FB0AB27EE017F000FFC26 /* Resources */,
 				97262893723CD21A3FE3F1F6 /* [CP] Embed Pods Frameworks */,
+				4A279AD8F9EC840741D2811A /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -426,6 +429,23 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppTests/Pods-Cyface-AppTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		4A279AD8F9EC840741D2811A /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		6003DE031F02D3ACE4EC6C49 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -446,6 +466,40 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7952E068F3ECD558718AFC1C /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppTests/Pods-Cyface-AppTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppTests/Pods-Cyface-AppTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppTests/Pods-Cyface-AppTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8EB1E15D8D223989F46B924E /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		97262893723CD21A3FE3F1F6 /* [CP] Embed Pods Frameworks */ = {

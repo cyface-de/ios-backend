@@ -24,6 +24,7 @@ target 'Cyface-App' do
     inherit! :search_paths
     # Pods for testing
     pod 'DataCapturing', :path => './'
+    pod 'ViewInspector', '~> 0.9.1'
   end
 
   target 'Cyface-AppUITests' do

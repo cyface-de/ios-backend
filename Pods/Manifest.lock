@@ -33,9 +33,9 @@ SPEC REPOS:
     - DataCompression
     - Mocker
     - SwiftProtobuf
+    - ViewInspector
   https://github.com/cyface-de/ios-podspecs:
     - Protos
-    - ViewInspector
 
 EXTERNAL SOURCES:
   DataCapturing:
@@ -44,13 +44,13 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Alamofire: 1c4fb5369c3fe93d2857c780d8bbe09f06f97e7c
   Charts: b1e3a1f5a1c9ba5394438ca3b91bd8c9076310af
-  DataCapturing: dc579d48e901992edcb95fc070eb41670c3d0f90
+  DataCapturing: e7c94a6128373b865083cc6fa05f895027ab7cc0
   DataCompression: 06628f9c807b6f152e0da37635633f62fc51dc77
   Mocker: 8c731a8104962f246cadf2b02556218e9edc1390
   Protos: 0c003a8495268bb644d8e1d325ec4f117ba50183
   SwiftProtobuf: 6ef3f0e422ef90d6605ca20b21a94f6c1324d6b3
   ViewInspector: 68842776f07fbf186713689d4846e54f32ccbffb
 
-PODFILE CHECKSUM: 5e25a3313a9945f070e1dc55fc8f425b24612bce
+PODFILE CHECKSUM: 3303a2221bcda7b08e9af02d29e1e0b34ed921cc
 
 COCOAPODS: 1.11.3
