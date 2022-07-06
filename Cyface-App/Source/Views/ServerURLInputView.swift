@@ -28,11 +28,13 @@ struct ServerURLInputView: View {
                 }
             }
         }
+        .navigationTitle("Server Address")
+        .navigationBarBackButtonHidden(true)
     }
 }
 
 struct ServerURLInputView_Previews: PreviewProvider {
     static var previews: some View {
-        ServerURLInputView(initialURL: "hhtp://localhost:8080/api/v3/").environmentObject(ApplicationState(settings: PreviewSettings()))
+        ServerURLInputView(initialURL: "http://localhost:8080/api/v3/").environmentObject(ApplicationState(settings: PreviewSettings()))
     }
 }

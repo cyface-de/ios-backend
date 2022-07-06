@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ModalitySelectorView: View {
-    @State private var selectedModality: Modalities = Modalities.defaultSelection
+    @Binding var selectedModality: Modalities
 
     var body: some View {
         Picker("Modality", selection: $selectedModality) {
@@ -23,6 +23,6 @@ struct ModalitySelectorView: View {
 
 struct ModalitySelectorView_Previews: PreviewProvider {
     static var previews: some View {
-        ModalitySelectorView()
+        ModalitySelectorView(selectedModality: .constant(Modalities.defaultSelection))
     }
 }

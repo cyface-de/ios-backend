@@ -32,4 +32,19 @@ enum Modalities {
             return "Train"
         }
     }
+
+    var dbValue: String {
+        switch self {
+        case .car:
+            return "CAR"
+        case .bicycle:
+            return "BICYCLE"
+        case .walking:
+            return "WALKING"
+        case .bus:
+            return "BUS"
+        case .train:
+            return "TRAIN"
+        }
+    }
 }

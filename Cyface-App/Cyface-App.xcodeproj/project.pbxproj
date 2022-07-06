@@ -11,11 +11,13 @@
 		AA0F5861281B0FB400C8054A /* ModalitySelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F5860281B0FB400C8054A /* ModalitySelectorView.swift */; };
 		AA0F5863281B111C00C8054A /* Modalities.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F5862281B111C00C8054A /* Modalities.swift */; };
 		AA45C40228102B3500FBFC1F /* CurrentMeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA45C40128102B3500FBFC1F /* CurrentMeasurementView.swift */; };
-		AA45C40428102CCE00FBFC1F /* CurrentMeasurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA45C40328102CCE00FBFC1F /* CurrentMeasurement.swift */; };
-		AA45C40828103B8000FBFC1F /* MeasurementListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA45C40728103B8000FBFC1F /* MeasurementListView.swift */; };
-		AA45C40A28103B9F00FBFC1F /* OperationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA45C40928103B9F00FBFC1F /* OperationView.swift */; };
 		AA559E7527F430F10059ED27 /* CyfaceButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA559E7427F430F10059ED27 /* CyfaceButton.swift */; };
 		AA559E7727F436B20059ED27 /* CyfaceTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA559E7627F436B20059ED27 /* CyfaceTextField.swift */; };
+		AA7A9005286EDC0F00B22F16 /* MeasurementListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7A9004286EDC0F00B22F16 /* MeasurementListView.swift */; };
+		AA7A9007286EDC3B00B22F16 /* MeasurementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7A9006286EDC3B00B22F16 /* MeasurementViewModel.swift */; };
+		AA7A9009286EE54600B22F16 /* MeasurementsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7A9008286EE54600B22F16 /* MeasurementsViewModel.swift */; };
+		AA7A900C286F027300B22F16 /* DataCapturingEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7A900B286F027300B22F16 /* DataCapturingEventHandler.swift */; };
+		AA7A902B2874744200B22F16 /* SplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7A902A2874744200B22F16 /* SplashScreen.swift */; };
 		AA7FB09727EE017E000FFC26 /* CyfaceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7FB09627EE017E000FFC26 /* CyfaceApp.swift */; };
 		AA7FB09927EE017E000FFC26 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7FB09827EE017E000FFC26 /* LoginView.swift */; };
 		AA7FB09B27EE017F000FFC26 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA7FB09A27EE017F000FFC26 /* Assets.xcassets */; };
@@ -69,11 +71,13 @@
 		AA0F5860281B0FB400C8054A /* ModalitySelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalitySelectorView.swift; sourceTree = "<group>"; };
 		AA0F5862281B111C00C8054A /* Modalities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modalities.swift; sourceTree = "<group>"; };
 		AA45C40128102B3500FBFC1F /* CurrentMeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMeasurementView.swift; sourceTree = "<group>"; };
-		AA45C40328102CCE00FBFC1F /* CurrentMeasurement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMeasurement.swift; sourceTree = "<group>"; };
-		AA45C40728103B8000FBFC1F /* MeasurementListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementListView.swift; sourceTree = "<group>"; };
-		AA45C40928103B9F00FBFC1F /* OperationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationView.swift; sourceTree = "<group>"; };
 		AA559E7427F430F10059ED27 /* CyfaceButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyfaceButton.swift; sourceTree = "<group>"; };
 		AA559E7627F436B20059ED27 /* CyfaceTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyfaceTextField.swift; sourceTree = "<group>"; };
+		AA7A9004286EDC0F00B22F16 /* MeasurementListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementListView.swift; sourceTree = "<group>"; };
+		AA7A9006286EDC3B00B22F16 /* MeasurementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementViewModel.swift; sourceTree = "<group>"; };
+		AA7A9008286EE54600B22F16 /* MeasurementsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementsViewModel.swift; sourceTree = "<group>"; };
+		AA7A900B286F027300B22F16 /* DataCapturingEventHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingEventHandler.swift; sourceTree = "<group>"; };
+		AA7A902A2874744200B22F16 /* SplashScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreen.swift; sourceTree = "<group>"; };
 		AA7FB09327EE017E000FFC26 /* Cyface-App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Cyface-App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA7FB09627EE017E000FFC26 /* CyfaceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyfaceApp.swift; sourceTree = "<group>"; };
 		AA7FB09827EE017E000FFC26 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -96,6 +100,7 @@
 		AAD092DF286073D400302684 /* ApplicationUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationUI.swift; sourceTree = "<group>"; };
 		AAD092E12860783D00302684 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		AAD092E32860F60D00302684 /* ServerURLInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerURLInputView.swift; sourceTree = "<group>"; };
+		AAD2F1A92875B1B5008A3A9D /* Cyface-App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Cyface-App-Info.plist"; sourceTree = "<group>"; };
 		AAEC0B86280ED58E00CE2AF4 /* Inspectable+Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Inspectable+Model.swift"; sourceTree = "<group>"; };
 		F61EAF44E5EFB027EEF0844E /* Pods_Cyface_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Cyface_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -165,11 +170,12 @@
 			isa = PBXGroup;
 			children = (
 				AA7FB0C027F20AAB000FFC26 /* Credentials.swift */,
-				AA45C40328102CCE00FBFC1F /* CurrentMeasurement.swift */,
 				AA0F5862281B111C00C8054A /* Modalities.swift */,
 				AAD092CA285F474A00302684 /* ApplicationState.swift */,
 				AAD092DB285F4B4100302684 /* PrivacyPolicy.swift */,
 				AAD092DD285F4C6F00302684 /* Settings.swift */,
+				AA7A9006286EDC3B00B22F16 /* MeasurementViewModel.swift */,
+				AA7A9008286EE54600B22F16 /* MeasurementsViewModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -184,9 +190,18 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		AA7A900A286F025100B22F16 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				AA7A900B286F027300B22F16 /* DataCapturingEventHandler.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
 		AA7FB08A27EE017E000FFC26 = {
 			isa = PBXGroup;
 			children = (
+				AAD2F1A92875B1B5008A3A9D /* Cyface-App-Info.plist */,
 				AA559E7327F2CBD60059ED27 /* Resources */,
 				AA7FB09527EE017E000FFC26 /* Source */,
 				AA7FB0A627EE017F000FFC26 /* Cyface-AppTests */,
@@ -211,6 +226,7 @@
 			isa = PBXGroup;
 			children = (
 				AA7FB09627EE017E000FFC26 /* CyfaceApp.swift */,
+				AA7A900A286F025100B22F16 /* Controller */,
 				AA49A82E280ED87500EA7AD3 /* Model */,
 				AA49A82D280ED86400EA7AD3 /* Components */,
 				AA8BAB75280C45AE00EF894B /* Views */,
@@ -253,12 +269,12 @@
 				AA7FB09827EE017E000FFC26 /* LoginView.swift */,
 				AA8BAB73280C459F00EF894B /* MeasurementView.swift */,
 				AA45C40128102B3500FBFC1F /* CurrentMeasurementView.swift */,
-				AA45C40728103B8000FBFC1F /* MeasurementListView.swift */,
-				AA45C40928103B9F00FBFC1F /* OperationView.swift */,
 				AA0F5860281B0FB400C8054A /* ModalitySelectorView.swift */,
 				AAD092CC285F49B100302684 /* PrivacyPolicyView.swift */,
 				AAD092DF286073D400302684 /* ApplicationUI.swift */,
 				AAD092E32860F60D00302684 /* ServerURLInputView.swift */,
+				AA7A9004286EDC0F00B22F16 /* MeasurementListView.swift */,
+				AA7A902A2874744200B22F16 /* SplashScreen.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -588,19 +604,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA559E7527F430F10059ED27 /* CyfaceButton.swift in Sources */,
+				AA7A9007286EDC3B00B22F16 /* MeasurementViewModel.swift in Sources */,
 				AAD092E42860F60E00302684 /* ServerURLInputView.swift in Sources */,
+				AA7A9009286EE54600B22F16 /* MeasurementsViewModel.swift in Sources */,
 				AAD092DC285F4B4100302684 /* PrivacyPolicy.swift in Sources */,
+				AA7A900C286F027300B22F16 /* DataCapturingEventHandler.swift in Sources */,
 				AA45C40228102B3500FBFC1F /* CurrentMeasurementView.swift in Sources */,
 				AAD092DE285F4C6F00302684 /* Settings.swift in Sources */,
 				AA0F5861281B0FB400C8054A /* ModalitySelectorView.swift in Sources */,
+				AA7A902B2874744200B22F16 /* SplashScreen.swift in Sources */,
 				AAD092CD285F49B100302684 /* PrivacyPolicyView.swift in Sources */,
-				AA45C40A28103B9F00FBFC1F /* OperationView.swift in Sources */,
 				AA7FB0C127F20AAB000FFC26 /* Credentials.swift in Sources */,
+				AA7A9005286EDC0F00B22F16 /* MeasurementListView.swift in Sources */,
 				AAD092E0286073D400302684 /* ApplicationUI.swift in Sources */,
-				AA45C40828103B8000FBFC1F /* MeasurementListView.swift in Sources */,
 				AA7FB09927EE017E000FFC26 /* LoginView.swift in Sources */,
 				AAD092CB285F474A00302684 /* ApplicationState.swift in Sources */,
-				AA45C40428102CCE00FBFC1F /* CurrentMeasurement.swift in Sources */,
 				AA559E7727F436B20059ED27 /* CyfaceTextField.swift in Sources */,
 				AA7FB09727EE017E000FFC26 /* CyfaceApp.swift in Sources */,
 				AA8BAB74280C459F00EF894B /* MeasurementView.swift in Sources */,
@@ -692,7 +710,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -746,7 +764,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -768,6 +786,7 @@
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Cyface-App-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -798,6 +817,7 @@
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Cyface-App-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

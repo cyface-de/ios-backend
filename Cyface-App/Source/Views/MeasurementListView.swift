@@ -2,19 +2,50 @@
 //  MeasurementListView.swift
 //  Cyface-App
 //
-//  Created by Klemens Muthmann on 20.04.22.
+//  Created by Klemens Muthmann on 01.07.22.
 //
 
 import SwiftUI
 
 struct MeasurementListView: View {
+    @Binding var measurementViewModel: MeasurementViewModel
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        HStack {
+        VStack {
+            HStack {
+                Text("Measurement \(measurementViewModel.id)")
+                Spacer()
+            }
+
+            HStack {
+                Text("Distance")
+                Spacer()
+                Text("\(measurementViewModel.distance)")
+            }
+
+
+        }
+            if measurementViewModel.synchronizing {
+                ProgressView().padding()
+            } else if measurementViewModel.synchronizationFailed {
+                Image("error").padding()
+            } else {
+                EmptyView().padding()
+            }
+        }
     }
 }
 
 struct MeasurementListView_Previews: PreviewProvider {
     static var previews: some View {
-        MeasurementListView()
+        let measurementViewModel = MeasurementViewModel(distance: 10.0, id: 2)
+        MeasurementListView(measurementViewModel: .constant(measurementViewModel))
+
+        let synchronizingViewModel = MeasurementViewModel(synchronizing: true, distance: 10.0, id: 2)
+        MeasurementListView(measurementViewModel: .constant(synchronizingViewModel))
+
+        let synchronizationFailedViewModel = MeasurementViewModel(synchronizationFailed: true, distance: 10.0, id: 2)
+        MeasurementListView(measurementViewModel: .constant(synchronizationFailedViewModel))
     }
 }

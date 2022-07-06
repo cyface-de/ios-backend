@@ -12,22 +12,31 @@ struct ApplicationUI: View {
     @EnvironmentObject var appState: ApplicationState
 
     var body: some View {
-        if(!appState.hasAcceptedCurrentPrivacyPolicy) {
-            VStack {
-                PrivacyPolicyView(settings: appState.settings)
-                Button("Accept") {
-                    appState.acceptPrivacyPolicy()
+        NavigationView {
+            if(appState.isInitialized) {
+                if(!appState.hasAcceptedCurrentPrivacyPolicy) {
+                    VStack {
+                        PrivacyPolicyView(settings: appState.settings)
+                        Button("Accept") {
+                            appState.acceptPrivacyPolicy()
+                        }
+                    }
+                    .navigationTitle("Privacy Policy")
+                    .navigationBarBackButtonHidden(true)
+                } else if(!appState.hasValidServerURL) {
+                    ServerURLInputView(initialURL: appState.settings.serverUrl ?? "")
+                } else if(!appState.isLoggedIn) {
+                    let username = appState.settings.username ?? ""
+                    let password = appState.settings.password ?? ""
+                    let credentials = Credentials(username: username, password: password)
+                    LoginView(credentials: credentials)
+                        .navigationTitle("Login")
+                } else {
+                    MeasurementView()
                 }
+            } else {
+                SplashScreen()
             }
-        } else if(!appState.hasValidServerURL) {
-            ServerURLInputView(initialURL: appState.settings.serverUrl ?? "")
-        } else if(!appState.isLoggedIn) {
-            let username = appState.settings.username ?? ""
-            let password = appState.settings.password ?? ""
-            let credentials = Credentials(username: username, password: password)
-            LoginView(credentials: credentials)
-        } else {
-            MeasurementListView()
         }
     }
 }

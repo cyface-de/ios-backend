@@ -73,7 +73,7 @@ public class DataCapturingService: NSObject {
     /**
      The *CoreData* stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
      */
-    let coreDataStack: CoreDataManager
+    public let coreDataStack: CoreDataManager
 
     /// An in memory storage for geo locations, before they are written to disk.
     var locationsCache = [LocationCacheEntry]()
@@ -84,8 +84,8 @@ public class DataCapturingService: NSObject {
     /// An object that handles capturing of values from the smartphones sensors excluding geo locations (GPS, GLONASS, GALILEO, etc.).
     let sensorCapturer: SensorCapturer
 
-    /// A listener that is notified of important events during data capturing.
-    private var handler: ((DataCapturingEvent, Status) -> Void)
+    /// A list of listeners that are notified of important events during data capturing.
+    public var handler = [((DataCapturingEvent, Status) -> Void)]()
 
     /**
      A queue used to synchronize calls to the lifecycle methods `start`, `pause`, `resume` and `stop`.
@@ -125,9 +125,9 @@ public class DataCapturingService: NSObject {
             }
 
             if newValue {
-                handler(DataCapturingEvent.geoLocationFixAcquired, Status.success)
+                handle(event: DataCapturingEvent.geoLocationFixAcquired, status: Status.success)
             } else {
-                handler(DataCapturingEvent.geoLocationFixLost, Status.success)
+                handle(event: DataCapturingEvent.geoLocationFixLost, status: Status.success)
             }
             _hasFix = newValue
         }
@@ -155,15 +155,13 @@ public class DataCapturingService: NSObject {
         gyroInterval: Double = 100,
         directionsInterval: Double = 100,
         savingInterval time: TimeInterval = 30,
-        dataManager: CoreDataManager,
-        eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) {
+        dataManager: CoreDataManager) {
 
         coreDataStack = dataManager
         manager.accelerometerUpdateInterval = 1.0 / accelerometerInterval
         manager.gyroUpdateInterval = 1.0 / gyroInterval
         manager.magnetometerUpdateInterval = 1.0 / directionsInterval
         self.sensorCapturer = SensorCapturer(lifecycleQueue: lifecycleQueue, capturingQueue: capturingQueue, motionManager: manager)
-        self.handler = eventHandler
         self.savingInterval = time
 
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
@@ -220,7 +218,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             self.currentMeasurement = measurement.identifier
 
             if let event = try startCapturing(savingEvery: savingInterval, for: .lifecycleStart) {
-                handler(.serviceStarted(measurement: measurement.identifier, event: event), .success)
+                handle(event: .serviceStarted(measurement: measurement.identifier, event: event), status: .success)
             }
         }
     }
@@ -249,7 +247,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             let event = try finish(measurement: currentMeasurement)
             self.currentMeasurement = nil
             isPaused = false
-            self.handler(.serviceStopped(measurement: currentMeasurement, event: event), .success)
+            self.handle(event: .serviceStopped(measurement: currentMeasurement, event: event), status: .success)
         }
     }
 
@@ -280,7 +278,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             var measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
             let event = try persistenceLayer.createEvent(of: .lifecyclePause, parent: &measurement)
 
-            handler(.servicePaused(measurement: currentMeasurement, event: event), .success)
+            handle(event: .servicePaused(measurement: currentMeasurement, event: event), status: .success)
         }
     }
 
@@ -309,7 +307,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             if let startEvent = try startCapturing(savingEvery: savingInterval, for: .lifecycleResume) {
                 isPaused = false
 
-                handler(.serviceResumed(measurement: currentMeasurement, event: startEvent), .success)
+                handle(event: .serviceResumed(measurement: currentMeasurement, event: startEvent), status: .success)
             }
         }
     }
@@ -486,6 +484,12 @@ Starting data capturing on paused service. Finishing paused measurements and sta
         return event
     }
 
+    private func handle(event: DataCapturingEvent, status: Status) {
+        handler.forEach { listener in
+            listener(event, status)
+        }
+    }
+
     /// Provides the current time in milliseconds since january 1st 1970 (UTC).
     public static func currentTimeInMillisSince1970() -> UInt64 {
         return convertToUtcTimestamp(date: Date())
@@ -545,7 +549,7 @@ extension DataCapturingService: CLLocationManagerDelegate {
                         return
                     }
 
-                    self.handler(.geoLocationAcquired(position: geoLocation), .success)
+                    self.handle(event: .geoLocationAcquired(position: geoLocation), status: .success)
                 }
             }
             if geoLocationEventNumber == locationUpdateSkipRate {

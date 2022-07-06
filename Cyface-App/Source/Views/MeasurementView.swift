@@ -6,70 +6,110 @@
 //
 
 import SwiftUI
+import DataCapturing
 
 struct MeasurementView: View {
 
-    @State private var isCurrentlyCapturing: Bool = false
-    @State private var isPaused: Bool = false
-    private let items = ["1", "2", "3", "4", "5", "6", "7", "8"]
+    // @StateObject var measurementsViewModel: MeasurementsViewModel
+    @EnvironmentObject var appState: ApplicationState
+    @State var selectedModality = Modalities.defaultSelection
+    @State var showError = false
+    @State var errorMessage = ""
+    // TODO: add modality state
     var body: some View {
         VStack {
             ScrollView {
-                    ForEach(items, id: \.self) { row in
-                        Text(row)
+                ForEach($appState.measurements) { $row in
+                        MeasurementListView(measurementViewModel: $row)
                     }
             }
 
-            if isCurrentlyCapturing || isPaused {
+            if appState.isCurrentlyCapturing || appState.isPaused {
                 CurrentMeasurementView()
             }
 
-            ModalitySelectorView()
+            ModalitySelectorView(selectedModality: $selectedModality)
 
             HStack {
                 Button(action: {
-                    isCurrentlyCapturing = true
-                    isPaused = false
+                    do {
+                        try appState.dcs.start(inMode: selectedModality.dbValue)
+                    } catch {
+                        errorMessage = error.localizedDescription
+                        showError = true
+                    }
                 }) {
                     Image("play")
                         .renderingMode(.original)
                         .padding()
                 }
                 .frame(maxWidth: .infinity)
-                .disabled(isCurrentlyCapturing)
+                .disabled(appState.isCurrentlyCapturing)
 
                 Button(action: {
-                    isCurrentlyCapturing = false
-                    isPaused = true
+                    do {
+                        try appState.dcs.pause()
+                    } catch {
+                        errorMessage = error.localizedDescription
+                        showError = true
+                    }
                 }) {
                     Image("pause")
                         .renderingMode(.original)
                         .padding()
                 }
                 .frame(maxWidth: .infinity)
-                .disabled(isPaused || (!isPaused && !isCurrentlyCapturing))
+                .disabled(appState.isPaused || (!appState.isPaused && !appState.isCurrentlyCapturing))
 
                 Button(action: {
-                    isCurrentlyCapturing = false
-                    isPaused = false
+                    do {
+                        try appState.dcs.stop()
+                    } catch {
+                        errorMessage = error.localizedDescription
+                        showError = true
+                    }
                 }) {
                     Image("stop")
                         .renderingMode(.original)
                         .padding()
                 }
                 .frame(maxWidth: .infinity)
-                .disabled(!isCurrentlyCapturing && !isPaused)
+                .disabled(!appState.isCurrentlyCapturing && !appState.isPaused)
             }
             .frame(maxWidth: .infinity)
+
+            HStack {
+                Button(action: {
+                    // TODO: Invoke Synchronization here
+                }) {
+                    Image("upload")
+                }
+                .padding(10)
+
+                Spacer()
+            }
         }
             .navigationBarBackButtonHidden(true)
             .navigationTitle("Measurements")
             .frame(maxWidth: .infinity)
+            .alert("Error", isPresented: $showError, actions: {
+                // actions
+            }, message: {
+                Text(errorMessage)
+            })
     }
 }
 
 struct MeasurementView_Previews: PreviewProvider {
+    static var applicationState: ApplicationState {
+        let ret = ApplicationState(settings: PreviewSettings())
+        ret.isCurrentlyCapturing = true
+        ret.measurements = [MeasurementViewModel(distance: 5.0, id: 1), MeasurementViewModel(distance: 6.0, id: 2)]
+
+        return ret
+    }
+
     static var previews: some View {
-        MeasurementView()
+        MeasurementView().environmentObject(applicationState)
     }
 }

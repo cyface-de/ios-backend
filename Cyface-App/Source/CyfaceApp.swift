@@ -6,11 +6,16 @@
 //
 
 import SwiftUI
+import DataCapturing
+import CoreMotion
 
 @main
 struct CyfaceApp: App {
-
     @StateObject var appState = ApplicationState(settings: PropertySettings())
+
+    init() {
+        print("App")
+    }
 
     var body: some Scene {
         WindowGroup {
