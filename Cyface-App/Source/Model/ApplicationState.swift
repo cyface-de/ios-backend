@@ -97,82 +97,82 @@ class ApplicationState: ObservableObject, ServerUrlChangedListener {
 
 extension ApplicationState: CyfaceEventHandler {
     func handle(event: DataCapturingEvent, status: Status) {
-        switch event {
-
-        case .geoLocationFixAcquired:
-            self.hasFix = true
-        case .geoLocationFixLost:
-            self.hasFix = false
-        case .geoLocationAcquired(position: let position):
-            let persistenceLayer = PersistenceLayer(onManager: dcs.coreDataStack)
-            if let currentMeasurementIdentifier = dcs.currentMeasurement {
-                // Update the trip distance or if that fails just use the old one.
-                let currentMeasurement = try? persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
-                tripDistance = currentMeasurement?.trackLength ?? tripDistance
-                latitude = position.latitude
-                longitude = position.longitude
-                speed = position.speed
-                duration = Date(timeIntervalSince1970: Double(currentMeasurement?.timestamp ?? 0) / 1_000.0).timeIntervalSinceNow
-            }
-        case .lowDiskSpace(allocation: let allocation): break
-        case .serviceStarted(_, _):
-            isCurrentlyCapturing = true
-            isPaused = false
-        case .servicePaused(_, _):
-            isCurrentlyCapturing = false
-            isPaused = true
-        case .serviceResumed(_, _):
-            isCurrentlyCapturing = true
-            isPaused = false
-        case .serviceStopped(measurement: let measurementIdentifier, event: let event):
-            isCurrentlyCapturing = false
-            isPaused = false
-
-            guard let measurementIdentifier = measurementIdentifier else {
-                hasError = true
-                errorMessage = "Stopped service for unknown measurement."
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
                 return
             }
 
+            switch event {
 
-            do {
-                let measurement = try loadMeasurement(measurementIdentifier)
-                measurements.append(MeasurementViewModel(distance: measurement.trackLength, id: measurementIdentifier))
-            } catch {
-                hasError = true
-                errorMessage = error.localizedDescription
-            }
-        case .synchronizationFinished(measurement: let measurementIdentifier):
-            do {
-                let measurement = try loadMeasurement(measurementIdentifier)
-                if measurement.synchronized {
-                    measurements.removeAll(where: { model in
-                        return model.id == measurementIdentifier
-                    })
-                } else {
-                    // Synchronization failed. Show error indicator.
-                    if let index = measurements.firstIndex(where: {model in
-                        return model.id == measurementIdentifier
-                    }) {
-                        measurements[index].synchronizing = false
-                        measurements[index].synchronizationFailed = true
-                    }
+            case .geoLocationFixAcquired:
+                self.hasFix = true
+            case .geoLocationFixLost:
+                self.hasFix = false
+            case .geoLocationAcquired(position: let position):
+                let persistenceLayer = PersistenceLayer(onManager: self.dcs.coreDataStack)
+                if let currentMeasurementIdentifier = self.dcs.currentMeasurement {
+                    // Update the trip distance or if that fails just use the old one.
+                    let currentMeasurement = try? persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
+                    self.tripDistance = currentMeasurement?.trackLength ?? self.tripDistance
+                    self.latitude = position.latitude
+                    self.longitude = position.longitude
+                    self.speed = position.speed
+                    self.duration = Date(timeIntervalSince1970: Double(currentMeasurement?.timestamp ?? 0) / 1_000.0).timeIntervalSinceNow
                 }
-            } catch {
-                hasError = true
-                errorMessage = error.localizedDescription
-            }
-        case .synchronizationStarted(measurement: let measurementIdentifier):
-            do {
-                let measurement = try loadMeasurement(measurementIdentifier)
-                if let index = measurements.firstIndex(where: {model in
+            case .lowDiskSpace(_): break
+            case .serviceStarted(_, _):
+                self.isCurrentlyCapturing = true
+                self.isPaused = false
+            case .servicePaused(_, _):
+                self.isCurrentlyCapturing = false
+                self.isPaused = true
+            case .serviceResumed(_, _):
+                self.isCurrentlyCapturing = true
+                self.isPaused = false
+            case .serviceStopped(measurement: let measurementIdentifier, _):
+                self.isCurrentlyCapturing = false
+                self.isPaused = false
+
+                guard let measurementIdentifier = measurementIdentifier else {
+                    self.hasError = true
+                    self.errorMessage = "Stopped service for unknown measurement."
+                    return
+                }
+
+
+                do {
+                    let measurement = try self.loadMeasurement(measurementIdentifier)
+                    self.measurements.append(MeasurementViewModel(distance: measurement.trackLength, id: measurementIdentifier))
+                } catch {
+                    self.hasError = true
+                    self.errorMessage = error.localizedDescription
+                }
+            case .synchronizationFinished(measurement: let measurementIdentifier):
+                do {
+                    let measurement = try self.loadMeasurement(measurementIdentifier)
+                    if measurement.synchronized {
+                        self.measurements.removeAll(where: { model in
+                            return model.id == measurementIdentifier
+                        })
+                    } else {
+                        // Synchronization failed. Show error indicator.
+                        if let index = self.measurements.firstIndex(where: {model in
+                            return model.id == measurementIdentifier
+                        }) {
+                            self.measurements[index].synchronizing = false
+                            self.measurements[index].synchronizationFailed = true
+                        }
+                    }
+                } catch {
+                    self.hasError = true
+                    self.errorMessage = error.localizedDescription
+                }
+            case .synchronizationStarted(measurement: let measurementIdentifier):
+                if let index = self.measurements.firstIndex(where: {model in
                     model.id == measurementIdentifier
                 }) {
-                    measurements[index].synchronizing = true
+                    self.measurements[index].synchronizing = true
                 }
-            } catch {
-                hasError = true
-                errorMessage = error.localizedDescription
             }
         }
     }
