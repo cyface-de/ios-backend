@@ -26,6 +26,7 @@ struct MeasurementView: View {
 
             if appState.isCurrentlyCapturing || appState.isPaused {
                 CurrentMeasurementView()
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             ModalitySelectorView(selectedModality: $selectedModality)
@@ -91,6 +92,7 @@ struct MeasurementView: View {
         }
             .navigationBarBackButtonHidden(true)
             .navigationTitle("Measurements")
+            .navigationBarTitleDisplayMode(.inline)
             .frame(maxWidth: .infinity)
             .alert("Error", isPresented: $showError, actions: {
                 // actions
@@ -110,6 +112,14 @@ struct MeasurementView_Previews: PreviewProvider {
     }
 
     static var previews: some View {
-        MeasurementView().environmentObject(applicationState)
+        Group {
+            NavigationView {
+                MeasurementView().previewDevice("iPhone 12").environmentObject(applicationState)
+            }
+
+            NavigationView {
+                MeasurementView().previewDevice("iPod touch (7th generation)").environmentObject(applicationState)
+            }
+        }
     }
 }
