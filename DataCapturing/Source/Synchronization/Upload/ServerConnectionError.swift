@@ -34,8 +34,6 @@ public enum ServerConnectionError: Error {
     case notAuthenticated(String)
     /// Thrown if modality type changes are inconsistent.
     case modalityError(String)
-    /// Thrown if measurement events are inconsistent.
-    case measurementError(Int64)
     /// Thrown if some measurement metadata was not encodable as an UTF-8 String.
     case dataError(String)
     /// Rethrow an error from within Alamofire.
@@ -48,4 +46,91 @@ public enum ServerConnectionError: Error {
     case noLocation
     /// The upload location provided by a status request was no a valid URL.
     case invalidUploadLocation(String)
+}
+
+extension ServerConnectionError: LocalizedError {
+    /// The internationalized error description providing further details about a thrown error.
+    public var errorDescription: String? {
+        switch self {
+        case .authenticationNotSuccessful(let username):
+            let errorMessage =  NSLocalizedString(
+                "de.cyface.error.ServerConnectionError.authenticationNotSuccessful",
+                value: "Authentication was not successful for user: %@",
+                comment: """
+Tell the user that authentication with the Cyface server for its credentials has failed! \
+The username that was used is provided as the first parameter.
+""")
+            return String.localizedStringWithFormat(errorMessage, username)
+
+        case .notAuthenticated(let reason):
+            let errorMessage =  NSLocalizedString(
+                "de.cyface.error.ServerConnectionError.notAuthenticated",
+                value: "Your request was not authenticated with the server! Reason: %@",
+                comment: """
+Tell the user that its request did not have a valid authentication token and thus could not be carried out. \
+The reason for this is provided as the first parameter.
+""")
+            return String.localizedStringWithFormat(errorMessage, reason)
+        case .modalityError(let reason):
+            let errorMessage =  NSLocalizedString(
+                "de.cyface.error.ServerConnectionError.modalityError",
+                value: "The modality of a measurement was invalid! Reason: %@",
+                comment: """
+Tell the user that applying the requested modality for failed for some reason. \
+The reason is provided as the first parameter.
+""")
+            return String.localizedStringWithFormat(errorMessage, reason)
+        case .dataError(let reason):
+            let errorMessage =  NSLocalizedString(
+                "de.cyface.error.ServerConnectionError.dataError",
+                value: "Failed to process binary data! Reason: %@",
+                comment: """
+Tell the user that processing some binary data failed. \
+The reason is provided as the first parameter.
+""")
+            return String.localizedStringWithFormat(errorMessage, reason)
+        case .alamofireError(let error):
+            let errorMessage =  NSLocalizedString(
+                "de.cyface.error.ServerConnectionError.alamofireError",
+                value: "Internal error! Reason: %@",
+                comment: """
+Tell the user that the Alamofire library produced an error \
+The reason is provided as the first parameter.
+""")
+            return String.localizedStringWithFormat(errorMessage, error.localizedDescription)
+        case .noResponse:
+            let errorMessage =  NSLocalizedString(
+                "de.cyface.error.ServerConnectionError.noResponse",
+                value: "The server did not answer!",
+                comment: """
+Tell the user that the server did not answer to a request!
+""")
+            return String.localizedStringWithFormat(errorMessage)
+        case .requestFailed(httpStatusCode: let httpStatusCode):
+            let errorMessage =  NSLocalizedString(
+                "de.cyface.error.ServerConnectionError.requestFailed",
+                value: "Invalid HTTP status code %d!",
+                comment: """
+Tell the user that the server answered with a non successful error code. \
+The code is provided as the first parameter
+""")
+            return String.localizedStringWithFormat(errorMessage, httpStatusCode)
+        case .noLocation:
+            let errorMessage =  NSLocalizedString(
+                "de.cyface.error.ServerConnectionError.noLocation",
+                value: "PreRequest did not provide upload location",
+                comment: """
+Tell the user that a pre request failed because no data upload location was provided.
+""")
+            return String.localizedStringWithFormat(errorMessage)
+        case .invalidUploadLocation(let session):
+            let errorMessage =  NSLocalizedString(
+                "de.cyface.error.ServerConnectionError.invalidUploadLocation",
+                value: "Upload session %@ was invalid!",
+                comment: """
+Tell the user that an upload failed because the session used for that upload was invalid.
+""")
+            return String.localizedStringWithFormat(errorMessage, session)
+        }
+    }
 }

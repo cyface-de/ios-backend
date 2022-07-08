@@ -67,8 +67,8 @@ public class Synchronizer {
     /// The measurements to synchonize in the current synchronization run.
     private var countOfMeasurementsToSynchronize = 0
 
-    /// The handler to call, when synchronization for a measurement has finished.
-    private let handler: (DataCapturingEvent, Status) -> Void
+    /// The list of handler to call, when synchronization for a measurement has finished.
+    public var handler = [(DataCapturingEvent, Status) -> Void]()
 
     /// A timer called regularly to check for available measurements and synchronize them if not done yet.
     private let dataSynchronizationTimer: RepeatingTimer
@@ -104,13 +104,12 @@ public class Synchronizer {
         - authenticator: The authenticator to use to check on the server on whether the current user is valid or not.
         - handler: The handler to call, when synchronization for a measurement has finished.
      */
-    public init(apiURL: URL, coreDataStack: CoreDataManager, cleaner: Cleaner, sessionRegistry: SessionRegistry = SessionRegistry(), authenticator: Authenticator, handler: @escaping (DataCapturingEvent, Status) -> Void) {
+    public init(apiURL: URL, coreDataStack: CoreDataManager, cleaner: Cleaner, sessionRegistry: SessionRegistry = SessionRegistry(), authenticator: Authenticator) {
         self.coreDataStack = coreDataStack
         self.apiURL = apiURL
         self.cleaner = cleaner
         self.sessionRegistry = sessionRegistry
         self.authenticator = authenticator
-        self.handler = handler
         // Try to synchronize once per hour.
         dataSynchronizationTimer = RepeatingTimer(timeInterval: 60 * 60)
 
@@ -256,7 +255,7 @@ public class Synchronizer {
             onFailure: failureHandler)
 
         for measurement in measurements {
-            handler(.synchronizationStarted(measurement: measurement.identifier), .success)
+            handle(.synchronizationStarted(measurement: measurement.identifier), .success)
             let upload = CoreDataBackedUpload(coreDataStack: coreDataStack, identifier: UInt64(measurement.identifier))
             uploadProcess.upload(upload)
         }
@@ -271,9 +270,9 @@ public class Synchronizer {
         do {
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             try cleaner.clean(measurement: Int64(measurement), from: persistenceLayer)
-            handler(.synchronizationFinished(measurement: Int64(measurement)), .success)
+            handle(.synchronizationFinished(measurement: Int64(measurement)), .success)
         } catch let error {
-            handler(.synchronizationFinished(measurement: Int64(measurement)), .error(error))
+            handle(.synchronizationFinished(measurement: Int64(measurement)), .error(error))
         }
 
         synchronizationFinishedHandler()
@@ -289,8 +288,14 @@ public class Synchronizer {
     private func failureHandler(measurement: UInt64, error: Error) {
         os_log("Unable to upload data for measurement: %d!", log: Synchronizer.log, type: .error, measurement)
         os_log("Error: %{public}@", log: Synchronizer.log, type: .error, error.localizedDescription)
-        handler(.synchronizationFinished(measurement: Int64(measurement)), .error(error))
+        handle(.synchronizationFinished(measurement: Int64(measurement)), .error(error))
         synchronizationFinishedHandler()
+    }
+
+    private func handle(_ event: DataCapturingEvent, _ status: Status) {
+        for h in handler {
+            h(event, status)
+        }
     }
 
     /**

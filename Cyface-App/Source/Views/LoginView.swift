@@ -24,7 +24,11 @@ struct LoginView: View {
 
                 VStack {
                     CyfaceTextField(label: "Username", binding: $credentials.username)
-                    CyfaceTextField(label: "Password", binding: $credentials.password)
+                        .disableAutocorrection(true)
+                    SecureField("Password", text: $credentials.password)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
                 }.padding()
 
 

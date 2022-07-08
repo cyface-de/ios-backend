@@ -89,13 +89,13 @@ public class CredentialsAuthenticator: Authenticator {
             request.response { response in
                 guard let httpResponse = response.response else {
                     os_log("Unable to unwrap authentication response!", log: CredentialsAuthenticator.log, type: OSLogType.error)
-                    return onFailure(ServerConnectionError.authenticationNotSuccessful("Unable to unwrap authentication response!"))
+                    return onFailure(ServerConnectionError.authenticationNotSuccessful(username))
                 }
 
                 if httpResponse.statusCode==200, let authorizationValue = httpResponse.allHeaderFields["Authorization"] as? String {
                     onSuccess(authorizationValue)
                 } else {
-                    onFailure(ServerConnectionError.authenticationNotSuccessful("Authentication was not successful!"))
+                    onFailure(ServerConnectionError.authenticationNotSuccessful(username))
                 }
             }
             request.resume()

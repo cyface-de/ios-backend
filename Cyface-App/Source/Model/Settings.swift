@@ -83,8 +83,10 @@ class PropertySettings: NSObject, Settings {
     // MARK: - Properties
     /// Needs to be stored here, so we can avoid asking for credentials after an URL change to the same URL as before (if the user changed his/her mind for example or if the settings change was caused by a different setting).
     private var oldServerUrl: String?
+    private var oldSynchronizeData: Bool?
     /// Objects interested in changes to the current Cyface server URL.
     private var serverUrlChangedListener: [ServerUrlChangedListener] = []
+    private var synchronizationToggleChangedListener: [UploadToggleChangedListener] = []
 
     /// The URL to the currently used synchronization server.
     var serverUrl: String? {
@@ -178,7 +180,7 @@ class PropertySettings: NSObject, Settings {
         UserDefaults.standard.register(defaults: defaultsToRegister)
         oldServerUrl = serverUrl
         NotificationCenter.default.addObserver(self,
-                                               selector: #selector(self.onUploadServerUrlChanged(notification:)),
+                                               selector: #selector(self.onSettingsChanged(notification:)),
                                                name: UserDefaults.didChangeNotification,
                                                object: nil)
     }
@@ -190,38 +192,61 @@ class PropertySettings: NSObject, Settings {
      - Parameter notification: A notification that contains the current settings for easy and fast access
      */
     @objc
-    private func onUploadServerUrlChanged(notification: NSNotification) {
+    private func onSettingsChanged(notification: NSNotification) {
         guard (notification.object as? UserDefaults) != nil else {
             return
         }
 
-        guard oldServerUrl != serverUrl else {
-            return
+        if oldServerUrl != serverUrl {
+            onUploadServerUrlChanged()
         }
+        if oldSynchronizeData != synchronizeData {
+            onSynchronizeDataToggleChanged()
+        }
+    }
 
-        guard let newServerUrl = serverUrl else {
+    private func onUploadServerUrlChanged() {
+        guard let newServerURL = serverUrl else {
             for serverUrlChangedListener in self.serverUrlChangedListener {
-                serverUrlChangedListener.toInvalidUrl()
+                serverUrlChangedListener.to(invalidURL: serverUrl)
             }
             return
         }
 
-        oldServerUrl = newServerUrl
+        oldServerUrl = newServerURL
         // If the server URL actually changed we need to re login or ask for a valid URL
-        if newServerUrl.isEmpty {
+        guard !newServerURL.isEmpty else {
             for serverUrlChangedListener in self.serverUrlChangedListener {
-                serverUrlChangedListener.toInvalidUrl()
+                serverUrlChangedListener.to(invalidURL: newServerURL)
             }
-        } else {
-            // Display login view again
+            return
+        }
+
+        guard let parsedURL = URL(string: newServerURL) else {
             for serverUrlChangedListener in self.serverUrlChangedListener {
-                serverUrlChangedListener.toValidUrl()
+                serverUrlChangedListener.to(invalidURL: newServerURL)
             }
+            return
+        }
+
+        // Display login view again
+        for serverUrlChangedListener in self.serverUrlChangedListener {
+            serverUrlChangedListener.to(validURL: parsedURL)
+        }
+    }
+
+    private func onSynchronizeDataToggleChanged() {
+        for listener in synchronizationToggleChangedListener {
+            listener.to(upload: synchronizeData)
         }
     }
 
     func add(serverUrlChangedListener listener: ServerUrlChangedListener) {
         serverUrlChangedListener.append(listener)
+    }
+
+    func add(uploadToggleChangedListener listener: UploadToggleChangedListener) {
+        synchronizationToggleChangedListener.append(listener)
     }
 
     deinit {
@@ -246,16 +271,21 @@ protocol ServerUrlChangedListener {
      Checks currently only for the URL value to not be empty.
      Further checks might be added in the future.
      */
-    func toValidUrl()
+    func to(validURL: URL)
 
     /**
      Called if the server URL is changed to an invalid value.
      Invalid are empty `String` instances at the moment.
      */
-    func toInvalidUrl()
+    func to(invalidURL: String?)
+}
+
+protocol UploadToggleChangedListener {
+    func to(upload: Bool)
 }
 
 #if DEBUG
+// MARK: - PreviewSettings
 class PreviewSettings: NSObject, Settings {
     var serverUrl: String? = "http://localhost:8080/api/v3/"
 

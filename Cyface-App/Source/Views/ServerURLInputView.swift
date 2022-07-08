@@ -18,14 +18,16 @@ struct ServerURLInputView: View {
 
     var body: some View {
         VStack {
-            TextField("Please enter a valid Cyface server URL!", text: $textInput)
+            CyfaceTextField(label: "Please enter a valid Cyface server URL!", binding: $textInput)
             HStack {
                 Button("Clear") {
                     textInput = ""
                 }
+                .buttonStyle(CyfaceButton())
                 Button("OK") {
                     appState.settings.serverUrl = textInput
                 }
+                .buttonStyle(CyfaceButton())
             }
         }
         .navigationTitle("Server Address")

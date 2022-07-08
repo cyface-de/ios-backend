@@ -81,7 +81,7 @@ struct MeasurementView: View {
 
             HStack {
                 Button(action: {
-                    // TODO: Invoke Synchronization here
+                    appState.synchronizer.syncChecked()
                 }) {
                     Image("upload")
                 }
@@ -98,6 +98,11 @@ struct MeasurementView: View {
                 // actions
             }, message: {
                 Text(errorMessage)
+            })
+            .alert("Error", isPresented: $appState.hasError, actions: {
+                // actions
+            }, message: {
+                Text(appState.errorMessage)
             })
     }
 }

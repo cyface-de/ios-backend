@@ -15,6 +15,7 @@ struct CyfaceTextField: View {
     var body: some View {
         TextField(label, text: binding)
             .textFieldStyle(RoundedBorderTextFieldStyle())
+            .autocapitalization(.none)
     }
 }
 
