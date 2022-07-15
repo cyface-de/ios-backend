@@ -11,6 +11,7 @@
 		AA0F5861281B0FB400C8054A /* ModalitySelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F5860281B0FB400C8054A /* ModalitySelectorView.swift */; };
 		AA0F5863281B111C00C8054A /* Modalities.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F5862281B111C00C8054A /* Modalities.swift */; };
 		AA45C40228102B3500FBFC1F /* CurrentMeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA45C40128102B3500FBFC1F /* CurrentMeasurementView.swift */; };
+		AA5040CF287EF43200C4F93D /* ViewError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5040CE287EF43200C4F93D /* ViewError.swift */; };
 		AA559E7527F430F10059ED27 /* CyfaceButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA559E7427F430F10059ED27 /* CyfaceButton.swift */; };
 		AA559E7727F436B20059ED27 /* CyfaceTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA559E7627F436B20059ED27 /* CyfaceTextField.swift */; };
 		AA7A9005286EDC0F00B22F16 /* MeasurementListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7A9004286EDC0F00B22F16 /* MeasurementListView.swift */; };
@@ -71,6 +72,7 @@
 		AA0F5860281B0FB400C8054A /* ModalitySelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalitySelectorView.swift; sourceTree = "<group>"; };
 		AA0F5862281B111C00C8054A /* Modalities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modalities.swift; sourceTree = "<group>"; };
 		AA45C40128102B3500FBFC1F /* CurrentMeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMeasurementView.swift; sourceTree = "<group>"; };
+		AA5040CE287EF43200C4F93D /* ViewError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewError.swift; sourceTree = "<group>"; };
 		AA559E7427F430F10059ED27 /* CyfaceButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyfaceButton.swift; sourceTree = "<group>"; };
 		AA559E7627F436B20059ED27 /* CyfaceTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyfaceTextField.swift; sourceTree = "<group>"; };
 		AA7A9004286EDC0F00B22F16 /* MeasurementListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementListView.swift; sourceTree = "<group>"; };
@@ -176,6 +178,7 @@
 				AAD092DD285F4C6F00302684 /* Settings.swift */,
 				AA7A9006286EDC3B00B22F16 /* MeasurementViewModel.swift */,
 				AA7A9008286EE54600B22F16 /* MeasurementsViewModel.swift */,
+				AA5040CE287EF43200C4F93D /* ViewError.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -186,6 +189,7 @@
 				AA7FB09A27EE017F000FFC26 /* Assets.xcassets */,
 				AAD092E12860783D00302684 /* Settings.bundle */,
 				AAD092CE285F4A2C00302684 /* PrivacyPolicy */,
+				AA7FB09C27EE017F000FFC26 /* Preview Content */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -230,7 +234,6 @@
 				AA49A82E280ED87500EA7AD3 /* Model */,
 				AA49A82D280ED86400EA7AD3 /* Components */,
 				AA8BAB75280C45AE00EF894B /* Views */,
-				AA7FB09C27EE017F000FFC26 /* Preview Content */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -604,6 +607,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA559E7527F430F10059ED27 /* CyfaceButton.swift in Sources */,
+				AA5040CF287EF43200C4F93D /* ViewError.swift in Sources */,
 				AA7A9007286EDC3B00B22F16 /* MeasurementViewModel.swift in Sources */,
 				AAD092E42860F60E00302684 /* ServerURLInputView.swift in Sources */,
 				AA7A9009286EE54600B22F16 /* MeasurementsViewModel.swift in Sources */,
@@ -782,11 +786,16 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Source/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Cyface-App-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Cyface;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Program requires GPS to match your position with the acquired road surface data.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Program requires GPS to match your position with the acquired road surface data.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Program requires GPS to match your position with the acquired road surface data.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Program requires GPS to match your position with the acquired road surface data.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -813,11 +822,16 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Source/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Cyface-App-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Cyface;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Program requires GPS to match your position with the acquired road surface data.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Program requires GPS to match your position with the acquired road surface data.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Program requires GPS to match your position with the acquired road surface data.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Program requires GPS to match your position with the acquired road surface data.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

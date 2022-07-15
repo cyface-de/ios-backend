@@ -46,6 +46,8 @@ public enum ServerConnectionError: Error {
     case noLocation
     /// The upload location provided by a status request was no a valid URL.
     case invalidUploadLocation(String)
+    /// Thrown if the server did not accept the upload of a measurement for some reason
+    case uploadNotAccepted(measurementIdentifier: Int64)
 }
 
 extension ServerConnectionError: LocalizedError {
@@ -105,7 +107,7 @@ The reason is provided as the first parameter.
                 comment: """
 Tell the user that the server did not answer to a request!
 """)
-            return String.localizedStringWithFormat(errorMessage)
+            return errorMessage
         case .requestFailed(httpStatusCode: let httpStatusCode):
             let errorMessage =  NSLocalizedString(
                 "de.cyface.error.ServerConnectionError.requestFailed",
@@ -122,7 +124,7 @@ The code is provided as the first parameter
                 comment: """
 Tell the user that a pre request failed because no data upload location was provided.
 """)
-            return String.localizedStringWithFormat(errorMessage)
+            return errorMessage
         case .invalidUploadLocation(let session):
             let errorMessage =  NSLocalizedString(
                 "de.cyface.error.ServerConnectionError.invalidUploadLocation",
@@ -131,6 +133,14 @@ Tell the user that a pre request failed because no data upload location was prov
 Tell the user that an upload failed because the session used for that upload was invalid.
 """)
             return String.localizedStringWithFormat(errorMessage, session)
+        case .uploadNotAccepted(measurementIdentifier: let measurementIdentifier):
+            let errorMessage =  NSLocalizedString(
+                "de.cyface.error.ServerConnectionError.uploadNotAccepted",
+                value: "The server did not accept the upload of the measurement",
+                comment: """
+////Tell the user that for some reason the server did not accept the upload of measurement %@. There are several possible reasons for that, which are server specific. One example would be a measurement without any location data.
+""")
+            return String.localizedStringWithFormat(errorMessage, measurementIdentifier)
         }
     }
 }

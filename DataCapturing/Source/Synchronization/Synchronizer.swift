@@ -21,6 +21,8 @@ import Foundation
 import os.log
 import Alamofire
 
+// MARK: - Synchronizer Protocol
+
 /**
  An instance of this class synchronizes captured measurements from persistent storage to a Cyface server.
 
@@ -34,9 +36,68 @@ import Alamofire
  - Version: 4.0.2
  - Since: 2.3.0
  */
-public class Synchronizer {
+public protocol Synchronizer {
 
     // MARK: - Properties
+
+    /// The list of handler to call, when synchronization for a measurement has finished.
+    var handler: [(DataCapturingEvent, Status) -> Void] { get set }
+
+    /**
+     A flag indicating whether synchronization of data should only happen if the device is connected to a wireless local area network (Wifi).
+
+     If `true` data is only synchronized via Wifi; if `false` data is also synchronized via mobile network.
+     The default setting is `true`.
+     Setting this to `false` might put heavy load on the users device and deplete her or his data plan.
+     */
+    var syncOnWiFiOnly: Bool { get set }
+
+    /// The authenticator to check if the current user has a valid user account.
+    var authenticator: Authenticator { get }
+
+    // MARK: - API Methods
+
+    /**
+     Tries to synchronize all measurements after checking for a proper connection. If `syncOnWiFiOnly` is true, this will only work if the device is connected to a WiFi network.
+    */
+    func syncChecked()
+
+    /**
+     Synchronize all measurements now.
+
+     The call is asynchronous, meaning it returns almost immediately, while the synchronization continues running inside its own thread.
+
+     You may call this method multiple times in short succession.
+     However only one synchronization can be active at a given time.
+     If you call this during an active synchronization it is going to return without doing anything.
+     */
+    func sync()
+
+    /**
+     Starts background synchronization as prepared in this objects initializer.
+
+     - throws: `SynchronizerError.missingHost` If tha `apiURL` provides no valid hostname.
+     - throws: `SynchronizerError.unableToBuildReachabilityManager` if the Alamofire `NetworkReachabilityManager` could not be created for the current host.
+     - throws: `SynchronizationError.reachabilityStartFailed` if the system was unable to start listening for reachability changes.
+     */
+    func activate() throws
+
+    /**
+     Stops background synchronization.
+     */
+    func deactivate()
+}
+
+public class CyfaceSynchronizer: Synchronizer {
+
+    // MARK: - Properties
+
+    public var handler = [(DataCapturingEvent, Status) -> Void]()
+
+    public var syncOnWiFiOnly = true
+
+    public let authenticator: Authenticator
+
     /// The logger used for objects of this class.
     private static let log = OSLog.init(subsystem: "Synchronizer", category: "de.cyface")
 
@@ -52,9 +113,6 @@ public class Synchronizer {
     /// A registry for open server sessions, used to repeat those sessions if possible.
     private let sessionRegistry: SessionRegistry
 
-    /// The authenticator to check if the current user has a valid user account.
-    private let authenticator: Authenticator
-
     /// Handles background synchronization of available `Measurement`s.
     var reachabilityManager: NetworkReachabilityManager?
 
@@ -67,9 +125,6 @@ public class Synchronizer {
     /// The measurements to synchonize in the current synchronization run.
     private var countOfMeasurementsToSynchronize = 0
 
-    /// The list of handler to call, when synchronization for a measurement has finished.
-    public var handler = [(DataCapturingEvent, Status) -> Void]()
-
     /// A timer called regularly to check for available measurements and synchronize them if not done yet.
     private let dataSynchronizationTimer: RepeatingTimer
 
@@ -81,15 +136,6 @@ public class Synchronizer {
 
     /// Flag on whether the Cyface server is reachable at all (including mobile).
     private var isReachable = false
-
-    /**
-     A flag indicating whether synchronization of data should only happen if the device is connected to a wireless local area network (Wifi).
-
-     If `true` data is only synchronized via Wifi; if `false` data is also synchronized via mobile network.
-     The default setting is `true`.
-     Setting this to `false` might put heavy load on the users device and deplete her or his data plan.
-     */
-    public var syncOnWiFiOnly = true
 
     // MARK: - Initializers
 
@@ -132,9 +178,6 @@ public class Synchronizer {
 
     // MARK: - API Methods
 
-    /**
-     Tries to synchronize all measurements after checking for a proper connection. If `syncOnWiFiOnly` is true, this will only work if the device is connected to a WiFi network.
-    */
     public func syncChecked() {
         self.isReachableCheckingQueue.sync {
             if syncOnWiFiOnly && isReachableOnEthernetOrWifi {
@@ -145,15 +188,6 @@ public class Synchronizer {
         }
     }
 
-    /**
-     Synchronize all measurements now.
-
-     The call is asynchronous, meaning it returns almost immediately, while the synchronization continues running inside its own thread.
-
-     You may call this method multiple times in short succession.
-     However only one synchronization can be active at a given time.
-     If you call this during an active synchronization it is going to return without doing anything.
-     */
     public func sync() {
         serverSynchronizationQueue.async { [weak self] in
             guard let self = self else {
@@ -177,15 +211,8 @@ public class Synchronizer {
         }
     }
 
-    /**
-     Starts background synchronization as prepared in this objects initializer.
-
-     - throws: `SynchronizerError.missingHost` If tha `apiURL` provides no valid hostname.
-     - throws: `SynchronizerError.unableToBuildReachabilityManager` if the Alamofire `NetworkReachabilityManager` could not be created for the current host.
-     - throws: `SynchronizationError.reachabilityStartFailed` if the system was unable to start listening for reachability changes.
-     */
     public func activate() throws {
-        os_log("Activating Synchronization", log: Synchronizer.log, type: .debug)
+        os_log("Activating Synchronization", log: CyfaceSynchronizer.log, type: .debug)
 
         guard let host = apiURL.host else {
             throw SynchronizerError.missingHost
@@ -219,9 +246,6 @@ public class Synchronizer {
         dataSynchronizationTimer.resume()
     }
 
-    /**
-     Stops background synchronization.
-     */
     public func deactivate() {
         reachabilityManager?.stopListening()
         dataSynchronizationTimer.suspend()
@@ -286,8 +310,8 @@ public class Synchronizer {
         - error: The error causing the failure.
      */
     private func failureHandler(measurement: UInt64, error: Error) {
-        os_log("Unable to upload data for measurement: %d!", log: Synchronizer.log, type: .error, measurement)
-        os_log("Error: %{public}@", log: Synchronizer.log, type: .error, error.localizedDescription)
+        os_log("Unable to upload data for measurement: %d!", log: CyfaceSynchronizer.log, type: .error, measurement)
+        os_log("Error: %{public}@", log: CyfaceSynchronizer.log, type: .error, error.localizedDescription)
         handle(.synchronizationFinished(measurement: Int64(measurement)), .error(error))
         synchronizationFinishedHandler()
     }

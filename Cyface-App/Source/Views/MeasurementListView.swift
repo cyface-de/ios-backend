@@ -27,11 +27,19 @@ struct MeasurementListView: View {
 
         }
             if measurementViewModel.synchronizing {
-                ProgressView().padding()
+                ProgressView()
+                    .padding()
+                    .frame(width: 50, height: 50, alignment: .center)
             } else if measurementViewModel.synchronizationFailed {
-                Image("error").padding()
+                Image("error")
+                    .resizable()
+                    .padding()
+                    .frame(width: 50, height: 50, alignment: .center)
             } else {
-                EmptyView().padding()
+                ProgressView()
+                    .padding()
+                    .hidden()
+                    .frame(width: 50, height: 50, alignment: .center)
             }
         }
     }

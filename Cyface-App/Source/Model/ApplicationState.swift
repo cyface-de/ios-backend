@@ -14,9 +14,9 @@ class ApplicationState: ObservableObject {
 
     let settings: Settings
     let dcs: DataCapturingService
-    var synchronizer: Synchronizer
+    var synchronizer: Synchronizer?
     @Published var hasAcceptedCurrentPrivacyPolicy: Bool
-    @Published var isLoggedIn: Bool
+    var isLoggedIn: Bool
     @Published var hasValidServerURL: Bool
     @Published var hasFix: Bool
     @Published var tripDistance: Double
@@ -36,7 +36,6 @@ class ApplicationState: ObservableObject {
 
         let hasValidServerURL = ApplicationState.hasValidServerURL(settings: settings)
         self.hasValidServerURL = hasValidServerURL
-        self.isLoggedIn = hasValidServerURL || (settings.authenticatedServerUrl == settings.serverUrl)
         self.settings = settings
         self.hasFix = false
         self.isInitialized = false
@@ -49,17 +48,7 @@ class ApplicationState: ObservableObject {
         do {
             let coreDataStack = try CoreDataManager()
 
-            guard let serverURL = settings.serverUrl else {
-                fatalError("Unable to get server URL from settings!")
-            }
-
-            guard let url = URL(string: serverURL) else {
-                fatalError("Invalid URL \(serverURL)!")
-            }
-
-            let sessionRegistry = SessionRegistry()
-            let authenticator = CredentialsAuthenticator(authenticationEndpoint: url)
-            self.synchronizer = Synchronizer(apiURL: url, coreDataStack: coreDataStack, cleaner: DeletionCleaner(), sessionRegistry: sessionRegistry, authenticator: authenticator)
+            self.isLoggedIn = hasValidServerURL || (settings.authenticatedServerUrl == settings.serverUrl)
             self.dcs = DataCapturingService(sensorManager: CMMotionManager(), dataManager: coreDataStack)
 
             self.settings.add(serverUrlChangedListener: self)
@@ -69,9 +58,10 @@ class ApplicationState: ObservableObject {
                 self?.isInitialized = true
             }
             self.dcs.handler.append(self.handle)
-            self.synchronizer.handler.append(self.handle)
-            if settings.synchronizeData {
-                try self.synchronizer.activate()
+
+            let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+            for measurement in try persistenceLayer.loadMeasurements() {
+                measurements.append(MeasurementViewModel(distance: measurement.trackLength, id: measurement.identifier))
             }
         } catch {
             fatalError(error.localizedDescription)
@@ -97,6 +87,68 @@ class ApplicationState: ObservableObject {
         }
         return false
     }
+
+    /*private static func setupSynchronizer(for endpoint: URL, _ coreDataStack: CoreDataManager) -> (Synchronizer, CredentialsAuthenticator) {
+        let sessionRegistry = SessionRegistry()
+        let authenticator = CredentialsAuthenticator(authenticationEndpoint: endpoint)
+
+        return (Synchronizer(apiURL: endpoint, coreDataStack: coreDataStack, cleaner: DeletionCleaner(), sessionRegistry: sessionRegistry, authenticator: authenticator), authenticator)
+    }*/
+    func startSynchronization(authenticator: CredentialsAuthenticator?) {
+        guard let authenticator = authenticator else {
+            hasError = true
+            errorMessage = ViewError.missingAuthenticator.localizedDescription
+            return
+        }
+
+        // This makes the function idempotent (ensures that multiple calls do not start synchroniation multiple times.
+        if let existingAuthenticator = synchronizer?.authenticator as? CredentialsAuthenticator {
+            let authenticationEndpointChanged = existingAuthenticator.authenticationEndpoint != authenticator.authenticationEndpoint
+            let usernameChanged = existingAuthenticator.username != authenticator.username
+            let passwordChanged = existingAuthenticator.password != authenticator.password
+
+            let shouldStartSynchronization  = authenticationEndpointChanged || usernameChanged || passwordChanged
+
+            guard shouldStartSynchronization else {
+                return
+            }
+
+            synchronizer?.deactivate()
+        }
+
+        guard let url = settings.authenticatedServerUrl else {
+            hasError = true
+            errorMessage = ViewError.noAuthenticatedServerURL.localizedDescription
+            return
+        }
+
+        guard let parsedURL = URL(string: url) else {
+            hasError = true
+            errorMessage = ViewError.authenticatedServerURLUnparseable(value: url).localizedDescription
+            return
+        }
+
+        self.synchronizer = CyfaceSynchronizer(apiURL: parsedURL, coreDataStack: dcs.coreDataStack, cleaner: DeletionCleaner(), sessionRegistry: SessionRegistry(), authenticator: authenticator)
+        self.synchronizer?.handler.append(self.handle)
+        do {
+            try self.synchronizer?.activate()
+        } catch {
+            hasError = true
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func sync() {
+        synchronizer?.sync()
+    }
+
+    func deleteMeasurements(at offsets: IndexSet) throws {
+        let persistenceLayer = PersistenceLayer(onManager: dcs.coreDataStack)
+        for offset in offsets {
+            try persistenceLayer.delete(measurement: measurements[offset].id)
+            measurements.remove(at: offset)
+        }
+    }
 }
 
 extension ApplicationState: ServerUrlChangedListener {
@@ -104,9 +156,7 @@ extension ApplicationState: ServerUrlChangedListener {
         self.isLoggedIn = false
         self.hasValidServerURL = true
 
-        let sessionRegistry = SessionRegistry()
-        let authenticator = CredentialsAuthenticator(authenticationEndpoint: validURL)
-        self.synchronizer = Synchronizer(apiURL: validURL, coreDataStack: dcs.coreDataStack, cleaner: DeletionCleaner(), sessionRegistry: sessionRegistry, authenticator: authenticator)
+        //(self.synchronizer, self.authenticator) = ApplicationState.setupSynchronizer(for: validURL, dcs.coreDataStack)
     }
 
     func to(invalidURL: String?) {
@@ -119,13 +169,13 @@ extension ApplicationState: UploadToggleChangedListener {
     func to(upload: Bool) {
         if upload {
             do {
-                try synchronizer.activate()
+                try synchronizer?.activate()
             } catch {
                 hasError = true
                 errorMessage = error.localizedDescription
             }
         } else {
-            synchronizer.deactivate()
+            synchronizer?.deactivate()
         }
     }
 }
@@ -192,7 +242,6 @@ extension ApplicationState: CyfaceEventHandler {
                                 return model.id == measurementIdentifier
                             })
                         } else {
-                            // Synchronization failed. Show error indicator.
                             if let index = self.measurements.firstIndex(where: {model in
                                 return model.id == measurementIdentifier
                             }) {
@@ -205,15 +254,35 @@ extension ApplicationState: CyfaceEventHandler {
                         self.errorMessage = error.localizedDescription
                     }
                 case .synchronizationStarted(measurement: let measurementIdentifier):
+                    for measurement in self.measurements {
+                        print("measurement \(measurement.id)")
+                    }
+
                     if let index = self.measurements.firstIndex(where: {model in
-                        model.id == measurementIdentifier
+                        print("Found model with identifier \(model.id) == \(measurementIdentifier)")
+                        return model.id == measurementIdentifier
                     }) {
+                        print("Progress on index \(index)")
                         self.measurements[index].synchronizing = true
                     }
                 }
             case .error(let error):
-                self.hasError = true
-                self.errorMessage = error.localizedDescription
+                switch event {
+
+                case .synchronizationFinished(let measurementIdentifier):
+                    if let index = self.measurements.firstIndex(where: {model in model.id == measurementIdentifier}) {
+                        self.measurements[index].synchronizing = false
+                        self.measurements[index].synchronizationFailed = true
+                    }
+                case .synchronizationStarted(let measurementIdentifier):
+                    if let index = self.measurements.firstIndex(where: {model in model.id == measurementIdentifier}) {
+                        self.measurements[index].synchronizing = false
+                        self.measurements[index].synchronizationFailed = true
+                    }
+                default:
+                    self.hasError = true
+                    self.errorMessage = error.localizedDescription
+                }
             }
         }
     }

@@ -18,8 +18,6 @@
  */
 
 import Foundation
-import Alamofire
-import os.log
 
 /**
  An authenticator using a combination of `username` and `password` to authenticate against a Cyface data collector server.
@@ -31,76 +29,14 @@ import os.log
  - Version: 2.0.3
  - Since: 2.0.0
  */
-public class CredentialsAuthenticator: Authenticator {
+public protocol CredentialsAuthenticator: Authenticator {
 
     // MARK: - Properties
 
-    /// The logger used for objects of this class.
-    private static let log = OSLog(subsystem: "CredentialsAuthenticator", category: "de.cyface")
     /// The username used for authentication.
-    public var username: String?
+    var username: String? { get set }
     /// The password used for authentication.
-    public var password: String?
+    var password: String? { get set }
     /// The location of the Cyface Collector API, used for authentication.
-    public var authenticationEndpoint: URL
-    /// An Alamofire session to use for sending requests and receiving responses.
-    private let session: Session
-
-    // MARK: - Initializers
-
-    /**
-     Creates a new not yet authenticated `Authenticator`.
-     To authenticate you need to provide a valid `username` and `password` and call `authenticate(:(String) -> Void, :(Error) -> Void)` afterwards.
-
-     - Parameters:
-        - authenticationEndpoint: The location of the Cyface Collector API, used for authentication.
-        - session: An Alamofire session to use for sending requests and receiving responses.
-     */
-    public required init(authenticationEndpoint: URL, session: Session = AF) {
-        self.authenticationEndpoint = authenticationEndpoint
-        self.session = session
-    }
-
-    // MARK: - Methods
-
-    public func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
-        guard let username = username else {
-            return onFailure(ServerConnectionError.notAuthenticated("Missing username!"))
-        }
-
-        guard let password = password else {
-            return onFailure(ServerConnectionError.notAuthenticated("Missing password!"))
-        }
-
-        // Does this have the potential for some kind of injection attack?
-        do {
-            let jsonCredentials = try JSONSerialization.data(withJSONObject: ["username": username, "password": password])
-            let url = authenticationEndpoint.appendingPathComponent("login")
-
-            let headers: HTTPHeaders = [
-                "Content-Type": "application/json",
-                "Accept": "*/*"
-            ]
-            let request = session.upload(
-                jsonCredentials,
-                to: url,
-                method: .post,
-                headers: headers)
-            request.response { response in
-                guard let httpResponse = response.response else {
-                    os_log("Unable to unwrap authentication response!", log: CredentialsAuthenticator.log, type: OSLogType.error)
-                    return onFailure(ServerConnectionError.authenticationNotSuccessful(username))
-                }
-
-                if httpResponse.statusCode==200, let authorizationValue = httpResponse.allHeaderFields["Authorization"] as? String {
-                    onSuccess(authorizationValue)
-                } else {
-                    onFailure(ServerConnectionError.authenticationNotSuccessful(username))
-                }
-            }
-            request.resume()
-        } catch let error {
-            onFailure(error)
-        }
-    }
+    var authenticationEndpoint: URL { get }
 }

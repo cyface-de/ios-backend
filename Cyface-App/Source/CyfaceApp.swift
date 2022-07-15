@@ -13,13 +13,9 @@ import CoreMotion
 struct CyfaceApp: App {
     @StateObject var appState = ApplicationState(settings: PropertySettings())
 
-    init() {
-        print("App")
-    }
-
     var body: some Scene {
         WindowGroup {
-            ApplicationUI().environmentObject(appState)
+            ApplicationUI(appState: appState).environmentObject(appState)
         }
     }
 }

@@ -6,14 +6,17 @@
 //
 
 import SwiftUI
+import DataCapturing
 
 struct ApplicationUI: View {
 
-    @EnvironmentObject var appState: ApplicationState
+    @ObservedObject var appState: ApplicationState
 
     var body: some View {
         NavigationView {
+            // Show splash screen as long as CoreData etc. loads
             if(appState.isInitialized) {
+                // Show privacy policy until accepted
                 if(!appState.hasAcceptedCurrentPrivacyPolicy) {
                     VStack {
                         PrivacyPolicyView(settings: appState.settings)
@@ -23,26 +26,29 @@ struct ApplicationUI: View {
                     }
                     .navigationTitle("Privacy Policy")
                     .navigationBarBackButtonHidden(true)
+                // Ask for a valid Server URL if non has been provided
                 } else if(!appState.hasValidServerURL) {
                     ServerURLInputView(initialURL: appState.settings.serverUrl ?? "")
-                } else if(!appState.isLoggedIn) {
-                    let username = appState.settings.username ?? ""
-                    let password = appState.settings.password ?? ""
-                    let credentials = Credentials(username: username, password: password)
-                    LoginView(credentials: credentials)
-                        .navigationTitle("Login")
+                // Enable login
                 } else {
-                    MeasurementView()
+                    LoginView(settings: appState.settings)
                 }
             } else {
                 SplashScreen()
             }
         }
     }
+
+    @ViewBuilder
+    func buildMeasurementView() -> some View {
+
+    }
 }
 
 struct ApplicationUI_Previews: PreviewProvider {
+    private static var settings = PreviewSettings()
+
     static var previews: some View {
-        ApplicationUI().environmentObject(ApplicationState(settings: PreviewSettings()))
+        ApplicationUI(appState: ApplicationState(settings: settings))
     }
 }

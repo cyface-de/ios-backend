@@ -12,16 +12,27 @@ struct MeasurementView: View {
 
     // @StateObject var measurementsViewModel: MeasurementsViewModel
     @EnvironmentObject var appState: ApplicationState
+    var authenticator: CredentialsAuthenticator?
+//    var synchronizer: Synchronizer?
     @State var selectedModality = Modalities.defaultSelection
+
     @State var showError = false
     @State var errorMessage = ""
-    // TODO: add modality state
+    var dismiss = false
+    /// This is required to dimiss the view on a non recoverable error.
+    /// More explanation here: https://www.hackingwithswift.com/quick-start/swiftui/how-to-make-a-view-dismiss-itself
+    @Environment(\.presentationMode) var presentationMode
+
     var body: some View {
         VStack {
-            ScrollView {
+            List {
                 ForEach($appState.measurements) { $row in
                         MeasurementListView(measurementViewModel: $row)
                     }
+                .onDelete(perform: deleteMeasurements)
+            }
+            .toolbar {
+                EditButton()
             }
 
             if appState.isCurrentlyCapturing || appState.isPaused {
@@ -40,8 +51,10 @@ struct MeasurementView: View {
                         showError = true
                     }
                 }) {
-                    Image("play")
+                    Image(systemName: "play.fill")
                         .renderingMode(.original)
+                        .foregroundColor(.primary)
+                        .font(.system(size: 30))
                         .padding()
                 }
                 .frame(maxWidth: .infinity)
@@ -55,8 +68,10 @@ struct MeasurementView: View {
                         showError = true
                     }
                 }) {
-                    Image("pause")
+                    Image(systemName: "pause.fill")
                         .renderingMode(.original)
+                        .foregroundColor(.primary)
+                        .font(.system(size: 30))
                         .padding()
                 }
                 .frame(maxWidth: .infinity)
@@ -70,8 +85,10 @@ struct MeasurementView: View {
                         showError = true
                     }
                 }) {
-                    Image("stop")
+                    Image(systemName: "stop.fill")
                         .renderingMode(.original)
+                        .foregroundColor(.primary)
+                        .font(.system(size: 30))
                         .padding()
                 }
                 .frame(maxWidth: .infinity)
@@ -81,11 +98,14 @@ struct MeasurementView: View {
 
             HStack {
                 Button(action: {
-                    appState.synchronizer.syncChecked()
+                    appState.sync()
                 }) {
-                    Image("upload")
+                    Image(systemName: "square.and.arrow.up")
                 }
-                .padding(10)
+                .frame(alignment: .center)
+                .foregroundColor(.primary)
+                .padding(5)
+                .font(.system(size: 25))
 
                 Spacer()
             }
@@ -101,9 +121,26 @@ struct MeasurementView: View {
             })
             .alert("Error", isPresented: $appState.hasError, actions: {
                 // actions
+                Button("OK") {
+                    if dismiss {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                }
             }, message: {
                 Text(appState.errorMessage)
             })
+            .onAppear() {
+                appState.startSynchronization(authenticator: self.authenticator)
+            }
+    }
+
+    private func deleteMeasurements(at offsets: IndexSet) {
+        do {
+            try appState.deleteMeasurements(at: offsets)
+        } catch {
+            showError = true
+            errorMessage = error.localizedDescription
+        }
     }
 }
 
@@ -111,7 +148,7 @@ struct MeasurementView_Previews: PreviewProvider {
     static var applicationState: ApplicationState {
         let ret = ApplicationState(settings: PreviewSettings())
         ret.isCurrentlyCapturing = true
-        ret.measurements = [MeasurementViewModel(distance: 5.0, id: 1), MeasurementViewModel(distance: 6.0, id: 2)]
+        ret.measurements = [MeasurementViewModel(distance: 5.0, id: 1), MeasurementViewModel(distance: 6.0, id: 2), MeasurementViewModel(synchronizationFailed: true, distance: 10.0, id: 4)]
 
         return ret
     }
@@ -119,12 +156,42 @@ struct MeasurementView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             NavigationView {
-                MeasurementView().previewDevice("iPhone 12").environmentObject(applicationState)
+                MeasurementView(authenticator: MockAuthenticator(username: "test", password: "test", authenticationEndpoint: URL(string: "http://localhost:8080/api/v3/")!))
+                    .previewDevice("iPhone 12")
+                    .environmentObject(applicationState)
             }
 
             NavigationView {
-                MeasurementView().previewDevice("iPod touch (7th generation)").environmentObject(applicationState)
+                MeasurementView(authenticator: MockAuthenticator(username: "test", password: "test", authenticationEndpoint: URL(string: "http://localhost:8080/api/v3/")!))
+                    .previewDevice("iPod touch (7th generation)")
+                    .environmentObject(applicationState)
+            }
+
+            NavigationView {
+                MeasurementView(authenticator: MockAuthenticator(username: "test", password: "test", authenticationEndpoint: URL(string: "http://localhost:8080/api/v3/")!))
+                    .preferredColorScheme(.dark)
+                    .environmentObject(applicationState)
             }
         }
     }
 }
+
+#if DEBUG
+class MockAuthenticator: CredentialsAuthenticator {
+    var username: String?
+
+    var password: String?
+
+    var authenticationEndpoint: URL
+
+    init(username: String, password: String, authenticationEndpoint: URL) {
+        self.username = username
+        self.password = password
+        self.authenticationEndpoint = authenticationEndpoint
+    }
+
+    func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
+        onSuccess("test")
+    }
+}
+#endif
