@@ -224,15 +224,9 @@ extension ApplicationState: CyfaceEventHandler {
                         return model.id == measurementIdentifier
                     })
                 case .synchronizationStarted(measurement: let measurementIdentifier):
-                    for measurement in self.measurements {
-                        print("measurement \(measurement.id)")
-                    }
-
                     if let index = self.measurements.firstIndex(where: {model in
-                        print("Found model with identifier \(model.id) == \(measurementIdentifier)")
                         return model.id == measurementIdentifier
                     }) {
-                        print("Progress on index \(index)")
                         self.measurements[index].synchronizing = true
                     }
                 }
