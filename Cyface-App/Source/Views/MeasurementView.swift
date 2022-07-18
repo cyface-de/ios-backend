@@ -36,7 +36,7 @@ struct MeasurementView: View {
             }
 
             if appState.isCurrentlyCapturing || appState.isPaused {
-                CurrentMeasurementView()
+                CurrentMeasurementView(viewModel: CurrentMeasurementViewModel(appState: appState))
                     .fixedSize(horizontal: false, vertical: true)
             }
 

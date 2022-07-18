@@ -10,6 +10,7 @@
 		1329C243620868C329249050 /* Pods_Cyface_AppTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1454E0DBEAF35ADE337A15D8 /* Pods_Cyface_AppTests.framework */; };
 		AA0F5861281B0FB400C8054A /* ModalitySelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F5860281B0FB400C8054A /* ModalitySelectorView.swift */; };
 		AA0F5863281B111C00C8054A /* Modalities.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F5862281B111C00C8054A /* Modalities.swift */; };
+		AA3C6DE72885454D00A38153 /* CurrentMeasurementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C6DE62885454D00A38153 /* CurrentMeasurementViewModel.swift */; };
 		AA45C40228102B3500FBFC1F /* CurrentMeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA45C40128102B3500FBFC1F /* CurrentMeasurementView.swift */; };
 		AA5040CF287EF43200C4F93D /* ViewError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5040CE287EF43200C4F93D /* ViewError.swift */; };
 		AA559E7527F430F10059ED27 /* CyfaceButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA559E7427F430F10059ED27 /* CyfaceButton.swift */; };
@@ -71,6 +72,7 @@
 		9C22E7C8B3B1B8516D46D19B /* Pods-Cyface-AppUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cyface-AppUITests.release.xcconfig"; path = "Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests.release.xcconfig"; sourceTree = "<group>"; };
 		AA0F5860281B0FB400C8054A /* ModalitySelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalitySelectorView.swift; sourceTree = "<group>"; };
 		AA0F5862281B111C00C8054A /* Modalities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modalities.swift; sourceTree = "<group>"; };
+		AA3C6DE62885454D00A38153 /* CurrentMeasurementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMeasurementViewModel.swift; sourceTree = "<group>"; };
 		AA45C40128102B3500FBFC1F /* CurrentMeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMeasurementView.swift; sourceTree = "<group>"; };
 		AA5040CE287EF43200C4F93D /* ViewError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewError.swift; sourceTree = "<group>"; };
 		AA559E7427F430F10059ED27 /* CyfaceButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyfaceButton.swift; sourceTree = "<group>"; };
@@ -179,6 +181,7 @@
 				AA7A9006286EDC3B00B22F16 /* MeasurementViewModel.swift */,
 				AA7A9008286EE54600B22F16 /* MeasurementsViewModel.swift */,
 				AA5040CE287EF43200C4F93D /* ViewError.swift */,
+				AA3C6DE62885454D00A38153 /* CurrentMeasurementViewModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -615,6 +618,7 @@
 				AA7A900C286F027300B22F16 /* DataCapturingEventHandler.swift in Sources */,
 				AA45C40228102B3500FBFC1F /* CurrentMeasurementView.swift in Sources */,
 				AAD092DE285F4C6F00302684 /* Settings.swift in Sources */,
+				AA3C6DE72885454D00A38153 /* CurrentMeasurementViewModel.swift in Sources */,
 				AA0F5861281B0FB400C8054A /* ModalitySelectorView.swift in Sources */,
 				AA7A902B2874744200B22F16 /* SplashScreen.swift in Sources */,
 				AAD092CD285F49B100302684 /* PrivacyPolicyView.swift in Sources */,

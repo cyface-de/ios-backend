@@ -64,7 +64,7 @@
 			<key>Key</key>
 			<string>de.cyface.serverurl</string>
 			<key>DefaultValue</key>
-			<string>https://s2.cyface.de/api/v3</string>
+			<string>https://s2-b.cyface.de/api/v3/</string>
 			<key>KeyboardType</key>
 			<string>URL</string>
 		</dict>

@@ -8,13 +8,10 @@
 import SwiftUI
 
 struct CurrentMeasurementView: View {
-    @EnvironmentObject var appState: ApplicationState
-    var timeFormatter: DateComponentsFormatter {
-        let formatter = DateComponentsFormatter()
+    @StateObject var viewModel: CurrentMeasurementViewModel
 
-        formatter.unitsStyle = .abbreviated
-        formatter.allowedUnits = [.hour, .minute, .second]
-        return formatter
+    init(viewModel: CurrentMeasurementViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View {
@@ -24,7 +21,7 @@ struct CurrentMeasurementView: View {
                     Text("GPS Fix")
                         .lineLimit(1)
                     Spacer()
-                    Image(appState.hasFix ? "gps-available" : "gps-not-available")
+                    Image(uiImage: viewModel.hasFix)
                         .resizable()
                         .scaledToFit()
                         .frame(height: 15.0)
@@ -35,7 +32,7 @@ struct CurrentMeasurementView: View {
                     Text("Distance")
                         .lineLimit(1)
                     Spacer()
-                    Text(appState.tripDistance, format: .number)
+                    Text(viewModel.distance)
                         .lineLimit(1)
                 }
                 Spacer()
@@ -43,7 +40,7 @@ struct CurrentMeasurementView: View {
                     Text("Speed")
                         .lineLimit(1)
                     Spacer()
-                    Text(appState.speed, format: .number)
+                    Text(viewModel.speed)
                         .lineLimit(1)
                 }
             }.frame(maxHeight: .infinity)
@@ -52,7 +49,7 @@ struct CurrentMeasurementView: View {
                     Text("Duration")
                         .lineLimit(1)
                     Spacer()
-                    Text(timeFormatter.string(from: abs(appState.duration)) ?? "0s")
+                    Text(viewModel.duration)
                         .lineLimit(1)
                 }
                 Spacer()
@@ -60,7 +57,7 @@ struct CurrentMeasurementView: View {
                     Text("Latitude")
                         .lineLimit(1)
                     Spacer()
-                    Text(appState.latitude, format: .number)
+                    Text(viewModel.latitude)
                         .lineLimit(1)
                 }
                 Spacer()
@@ -68,7 +65,7 @@ struct CurrentMeasurementView: View {
                     Text("Longitude")
                         .lineLimit(1)
                     Spacer()
-                    Text(appState.longitude, format: .number)
+                    Text(viewModel.longitude)
                         .lineLimit(1)
                 }
             }
@@ -80,20 +77,18 @@ struct CurrentMeasurementView_Previews: PreviewProvider {
 
     static var appState: ApplicationState {
         let ret = ApplicationState(settings: PreviewSettings())
-        ret.duration = 200
+        //ret.duration = 200
 
         return ret
     }
 
     static var previews: some View {
-        CurrentMeasurementView()
+        CurrentMeasurementView(viewModel: CurrentMeasurementViewModel(appState: appState))
             .previewDevice("iPod touch (7th generation)")
             .previewInterfaceOrientation(.portraitUpsideDown)
-            .environmentObject(appState)
 
-        CurrentMeasurementView()
+        CurrentMeasurementView(viewModel: CurrentMeasurementViewModel(appState: appState))
             .previewDevice("iPhone 12")
             .previewInterfaceOrientation(.portraitUpsideDown)
-            .environmentObject(appState)
     }
 }

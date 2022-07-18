@@ -9,6 +9,12 @@ import Foundation
 import DataCapturing
 import CoreMotion
 
+/**
+ A class encompassing all the state required everywhere in the application.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 class ApplicationState: ObservableObject {
     static let urlRegEx = "(https?:\\/\\/[^\\/]+)(\\.[^\\/]+)?(:\\d+)?(\\/.+)*\\/?"
 
@@ -18,12 +24,6 @@ class ApplicationState: ObservableObject {
     @Published var hasAcceptedCurrentPrivacyPolicy: Bool
     var isLoggedIn: Bool
     @Published var hasValidServerURL: Bool
-    @Published var hasFix: Bool
-    @Published var tripDistance: Double
-    @Published var duration: TimeInterval
-    @Published var latitude: Double
-    @Published var longitude: Double
-    @Published var speed: Double
     @Published var isInitialized: Bool
     @Published var isCurrentlyCapturing: Bool = false
     @Published var isPaused: Bool = false
@@ -37,13 +37,7 @@ class ApplicationState: ObservableObject {
         let hasValidServerURL = ApplicationState.hasValidServerURL(settings: settings)
         self.hasValidServerURL = hasValidServerURL
         self.settings = settings
-        self.hasFix = false
         self.isInitialized = false
-        self.tripDistance = 0.0
-        self.duration = 0.0
-        self.latitude = 0.0
-        self.longitude = 0.0
-        self.speed = 0.0
 
         do {
             let coreDataStack = try CoreDataManager()
@@ -88,12 +82,13 @@ class ApplicationState: ObservableObject {
         return false
     }
 
-    /*private static func setupSynchronizer(for endpoint: URL, _ coreDataStack: CoreDataManager) -> (Synchronizer, CredentialsAuthenticator) {
-        let sessionRegistry = SessionRegistry()
-        let authenticator = CredentialsAuthenticator(authenticationEndpoint: endpoint)
+    /**
+     This function makes it possible to create the ``Synchronizer`` based on the ``Authenticator`` created during login.
 
-        return (Synchronizer(apiURL: endpoint, coreDataStack: coreDataStack, cleaner: DeletionCleaner(), sessionRegistry: sessionRegistry, authenticator: authenticator), authenticator)
-    }*/
+     The function should be called after a successful login to setup the `Synchronizer` correctly and activate data synchronization. Calling this multiple times is ok. The function is idempotent.
+
+     - param authenticator: If `nil` the error status of the application is set to `true` and the error message from ``ViewError.missingAuthenticator`` will be set into the ``errorMessage`` attribute.
+     */
     func startSynchronization(authenticator: CredentialsAuthenticator?) {
         guard let authenticator = authenticator else {
             hasError = true
@@ -156,18 +151,20 @@ extension ApplicationState: ServerUrlChangedListener {
         self.isLoggedIn = false
         self.hasValidServerURL = true
 
-        //(self.synchronizer, self.authenticator) = ApplicationState.setupSynchronizer(for: validURL, dcs.coreDataStack)
+        synchronizer?.deactivate()
     }
 
     func to(invalidURL: String?) {
         self.isLoggedIn = false
         self.hasValidServerURL = false
+
+        synchronizer?.deactivate()
     }
 }
 
 extension ApplicationState: UploadToggleChangedListener {
     func to(upload: Bool) {
-        if upload {
+        if upload && isLoggedIn {
             do {
                 try synchronizer?.activate()
             } catch {
@@ -191,21 +188,9 @@ extension ApplicationState: CyfaceEventHandler {
             case .success:
                 switch event {
 
-                case .geoLocationFixAcquired:
-                    self.hasFix = true
-                case .geoLocationFixLost:
-                    self.hasFix = false
-                case .geoLocationAcquired(position: let position):
-                    let persistenceLayer = PersistenceLayer(onManager: self.dcs.coreDataStack)
-                    if let currentMeasurementIdentifier = self.dcs.currentMeasurement {
-                        // Update the trip distance or if that fails just use the old one.
-                        let currentMeasurement = try? persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
-                        self.tripDistance = currentMeasurement?.trackLength ?? self.tripDistance
-                        self.latitude = position.latitude
-                        self.longitude = position.longitude
-                        self.speed = position.speed
-                        self.duration = Date(timeIntervalSince1970: Double(currentMeasurement?.timestamp ?? 0) / 1_000.0).timeIntervalSinceNow
-                    }
+                case .geoLocationFixAcquired: break
+                case .geoLocationFixLost: break
+                case .geoLocationAcquired(position: let _): break
                 case .lowDiskSpace(_): break
                 case .serviceStarted(_, _):
                     self.isCurrentlyCapturing = true
