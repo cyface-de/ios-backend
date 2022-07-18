@@ -21,7 +21,7 @@ struct MeasurementListView: View {
             HStack {
                 Text("Distance")
                 Spacer()
-                Text("\(measurementViewModel.distance)")
+                Text("\(measurementViewModel.formattedDistance)")
             }
 
 
@@ -55,5 +55,7 @@ struct MeasurementListView_Previews: PreviewProvider {
 
         let synchronizationFailedViewModel = MeasurementViewModel(synchronizationFailed: true, distance: 10.0, id: 2)
         MeasurementListView(measurementViewModel: .constant(synchronizationFailedViewModel))
+
+        MeasurementListView(measurementViewModel: .constant(MeasurementViewModel(distance: 2364.82374, id: 4)))
     }
 }

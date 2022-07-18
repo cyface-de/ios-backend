@@ -12,5 +12,10 @@ struct MeasurementViewModel: Identifiable {
     var synchronizationFailed = false
     var synchronizing = false
     var distance = 0.0
+    var formattedDistance: String {
+        get {
+            distance < 1_000 ? String(format: "%.0f m", distance) : String(format: "%.2f km", distance / 1_000)
+        }
+    }
     let id: Int64
 }
