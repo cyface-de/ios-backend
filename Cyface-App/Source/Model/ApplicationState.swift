@@ -235,24 +235,9 @@ extension ApplicationState: CyfaceEventHandler {
                         self.errorMessage = error.localizedDescription
                     }
                 case .synchronizationFinished(measurement: let measurementIdentifier):
-                    do {
-                        let measurement = try self.loadMeasurement(measurementIdentifier)
-                        if measurement.synchronized {
-                            self.measurements.removeAll(where: { model in
-                                return model.id == measurementIdentifier
-                            })
-                        } else {
-                            if let index = self.measurements.firstIndex(where: {model in
-                                return model.id == measurementIdentifier
-                            }) {
-                                self.measurements[index].synchronizing = false
-                                self.measurements[index].synchronizationFailed = true
-                            }
-                        }
-                    } catch {
-                        self.hasError = true
-                        self.errorMessage = error.localizedDescription
-                    }
+                    self.measurements.removeAll(where: { model in
+                        return model.id == measurementIdentifier
+                    })
                 case .synchronizationStarted(measurement: let measurementIdentifier):
                     for measurement in self.measurements {
                         print("measurement \(measurement.id)")
@@ -270,20 +255,23 @@ extension ApplicationState: CyfaceEventHandler {
                 switch event {
 
                 case .synchronizationFinished(let measurementIdentifier):
-                    if let index = self.measurements.firstIndex(where: {model in model.id == measurementIdentifier}) {
-                        self.measurements[index].synchronizing = false
-                        self.measurements[index].synchronizationFailed = true
-                    }
+                    self.markAsFailed(measurementIdentifier: measurementIdentifier)
                 case .synchronizationStarted(let measurementIdentifier):
-                    if let index = self.measurements.firstIndex(where: {model in model.id == measurementIdentifier}) {
-                        self.measurements[index].synchronizing = false
-                        self.measurements[index].synchronizationFailed = true
-                    }
+                    self.markAsFailed(measurementIdentifier: measurementIdentifier)
                 default:
                     self.hasError = true
                     self.errorMessage = error.localizedDescription
                 }
             }
+        }
+    }
+
+    private func markAsFailed(measurementIdentifier: Int64) {
+        if let index = self.measurements.firstIndex(where: {model in
+            return model.id == measurementIdentifier
+        }) {
+            self.measurements[index].synchronizing = false
+            self.measurements[index].synchronizationFailed = true
         }
     }
 
