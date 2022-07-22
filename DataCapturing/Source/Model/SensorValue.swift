@@ -68,3 +68,16 @@ public class SensorValue: CustomStringConvertible {
         self.z = z
     }
 }
+
+extension SensorValue: Hashable {
+    public static func == (lhs: SensorValue, rhs: SensorValue) -> Bool {
+        return lhs.timestamp == rhs.timestamp && lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(timestamp)
+        hasher.combine(x)
+        hasher.combine(y)
+        hasher.combine(z)
+    }
+}
