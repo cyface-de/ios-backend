@@ -39,6 +39,7 @@ class Credentials: ObservableObject {
                 }
             }
         }
+        self.settings.add(serverUrlChangedListener: self)
     }
 
     func login(onSuccess: @escaping ()->(), onFailure: @escaping (Error) -> Void) throws {
@@ -64,5 +65,15 @@ class Credentials: ObservableObject {
         authenticator.password = password
 
         return authenticator
+    }
+}
+
+extension Credentials: ServerUrlChangedListener {
+    func to(validURL: URL) {
+        authenticator = nil
+    }
+
+    func to(invalidURL: String?) {
+        authenticator = nil
     }
 }

@@ -68,9 +68,7 @@ class ApplicationState: ObservableObject {
     }
 
     private static func hasValidServerURL(settings: Settings) -> Bool {
-        if let authenticatedURL = settings.authenticatedServerUrl {
-            return authenticatedURL == settings.serverUrl
-        } else if let unwrappedURL = settings.serverUrl {
+        if let unwrappedURL = settings.serverUrl {
             if NSPredicate(format: "SELF MATCHES %@", urlRegEx).evaluate(with: unwrappedURL) {
                 if URL(string: unwrappedURL) != nil {
                     return true

@@ -18,25 +18,49 @@ struct ServerURLInputView: View {
 
     var body: some View {
         VStack {
-            CyfaceTextField(label: "Please enter a valid Cyface server URL!", binding: $textInput)
             HStack {
-                Button("Clear") {
+                Image(systemName: "cloud")
+            TextField("Please enter a valid Cyface server URL!", text: $textInput)
+            }
+            .padding()
+            .overlay(
+                    RoundedRectangle(cornerRadius: 15)
+            .stroke(lineWidth: 2))
+            .foregroundColor(.gray)
+            .padding()
+
+
+            Spacer()
+
+            HStack {
+                Button( action: {
                     textInput = ""
+                }) {
+                    Text("Clear")
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(CyfaceButton())
-                Button("OK") {
+                .buttonStyle(.bordered)
+
+                Button(action: {
                     appState.settings.serverUrl = textInput
+                }) {
+                    Text("OK")
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(CyfaceButton())
+                .buttonStyle(.borderedProminent)
             }
         }
         .navigationTitle("Server Address")
+        .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .tint(Color("Cyface-Green"))
     }
 }
 
 struct ServerURLInputView_Previews: PreviewProvider {
     static var previews: some View {
-        ServerURLInputView(initialURL: "http://localhost:8080/api/v3/").environmentObject(ApplicationState(settings: PreviewSettings()))
+        NavigationView {
+            ServerURLInputView(initialURL: "http://localhost:8080/api/v3/").environmentObject(ApplicationState(settings: PreviewSettings()))
+        }
     }
 }

@@ -15,7 +15,7 @@ struct CyfaceApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ApplicationUI(appState: appState).environmentObject(appState)
+            ApplicationUI(appState: appState).environmentObject(appState).tint(Color("Cyface-Green"))
         }
     }
 }

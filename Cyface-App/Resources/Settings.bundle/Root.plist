@@ -10,6 +10,30 @@
 	<array>
 		<dict>
 			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>Title</key>
+			<string>Cyface Server URL</string>
+			<key>Key</key>
+			<string>de.cyface.serverurl</string>
+			<key>DefaultValue</key>
+			<string>https://s2-b.cyface.de/api/v3/</string>
+			<key>KeyboardType</key>
+			<string>URL</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSTextFieldSpecifier</string>
+			<key>Title</key>
+			<string>Cyface Registration URL</string>
+			<key>Key</key>
+			<string>de.cyface.registrationurl</string>
+			<key>DefaultValue</key>
+			<string>https://app.cyface.de</string>
+			<key>KeyboardType</key>
+			<string>URL</string>
+		</dict>
+		<dict>
+			<key>Type</key>
 			<string>PSTitleValueSpecifier</string>
 			<key>Title</key>
 			<string>Version of Privacy Policy Accepted</string>
@@ -55,18 +79,6 @@
 			<string>Installation Identifier</string>
 			<key>Key</key>
 			<string>de.cyface.identifier</string>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSTextFieldSpecifier</string>
-			<key>Title</key>
-			<string>Cyface Server URL</string>
-			<key>Key</key>
-			<string>de.cyface.serverurl</string>
-			<key>DefaultValue</key>
-			<string>https://s2-b.cyface.de/api/v3/</string>
-			<key>KeyboardType</key>
-			<string>URL</string>
 		</dict>
 		<dict>
 			<key>Type</key>

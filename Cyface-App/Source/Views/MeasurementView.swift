@@ -132,6 +132,7 @@ struct MeasurementView: View {
             .onAppear() {
                 appState.startSynchronization(authenticator: self.authenticator)
             }
+            .tint(Color("Cyface-Green"))
     }
 
     private func deleteMeasurements(at offsets: IndexSet) {

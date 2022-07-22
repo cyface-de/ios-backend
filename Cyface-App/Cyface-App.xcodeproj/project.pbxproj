@@ -13,7 +13,6 @@
 		AA3C6DE72885454D00A38153 /* CurrentMeasurementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C6DE62885454D00A38153 /* CurrentMeasurementViewModel.swift */; };
 		AA45C40228102B3500FBFC1F /* CurrentMeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA45C40128102B3500FBFC1F /* CurrentMeasurementView.swift */; };
 		AA5040CF287EF43200C4F93D /* ViewError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5040CE287EF43200C4F93D /* ViewError.swift */; };
-		AA559E7527F430F10059ED27 /* CyfaceButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA559E7427F430F10059ED27 /* CyfaceButton.swift */; };
 		AA559E7727F436B20059ED27 /* CyfaceTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA559E7627F436B20059ED27 /* CyfaceTextField.swift */; };
 		AA7A9005286EDC0F00B22F16 /* MeasurementListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7A9004286EDC0F00B22F16 /* MeasurementListView.swift */; };
 		AA7A9007286EDC3B00B22F16 /* MeasurementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7A9006286EDC3B00B22F16 /* MeasurementViewModel.swift */; };
@@ -29,6 +28,13 @@
 		AA7FB0B427EE017F000FFC26 /* Cyface_AppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7FB0B327EE017F000FFC26 /* Cyface_AppUITestsLaunchTests.swift */; };
 		AA7FB0C127F20AAB000FFC26 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7FB0C027F20AAB000FFC26 /* Credentials.swift */; };
 		AA8BAB74280C459F00EF894B /* MeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8BAB73280C459F00EF894B /* MeasurementView.swift */; };
+		AAAE46ED2886E92A00E30575 /* RegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAE46EC2886E92A00E30575 /* RegistrationView.swift */; };
+		AAAE46F628881AC000E30575 /* RegistrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAE46F528881AC000E30575 /* RegistrationViewModel.swift */; };
+		AAAE46F82888299400E30575 /* LabelledDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAE46F72888299400E30575 /* LabelledDivider.swift */; };
+		AAAE46FA28882FDF00E30575 /* HCaptchaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAE46F928882FDF00E30575 /* HCaptchaView.swift */; };
+		AABF4D2A28892CEA00206933 /* RegistrationRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABF4D2928892CEA00206933 /* RegistrationRequest.swift */; };
+		AABF4D2C28896CFB00206933 /* AsyncButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABF4D2B28896CFB00206933 /* AsyncButton.swift */; };
+		AABF4D2E2889824600206933 /* HCaptchaViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABF4D2D2889824600206933 /* HCaptchaViewModel.swift */; };
 		AAD092CB285F474A00302684 /* ApplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD092CA285F474A00302684 /* ApplicationState.swift */; };
 		AAD092CD285F49B100302684 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD092CC285F49B100302684 /* PrivacyPolicyView.swift */; };
 		AAD092D5285F4A2C00302684 /* privacy-policy-de.html in Resources */ = {isa = PBXBuildFile; fileRef = AAD092CF285F4A2C00302684 /* privacy-policy-de.html */; };
@@ -75,7 +81,6 @@
 		AA3C6DE62885454D00A38153 /* CurrentMeasurementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMeasurementViewModel.swift; sourceTree = "<group>"; };
 		AA45C40128102B3500FBFC1F /* CurrentMeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMeasurementView.swift; sourceTree = "<group>"; };
 		AA5040CE287EF43200C4F93D /* ViewError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewError.swift; sourceTree = "<group>"; };
-		AA559E7427F430F10059ED27 /* CyfaceButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyfaceButton.swift; sourceTree = "<group>"; };
 		AA559E7627F436B20059ED27 /* CyfaceTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyfaceTextField.swift; sourceTree = "<group>"; };
 		AA7A9004286EDC0F00B22F16 /* MeasurementListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementListView.swift; sourceTree = "<group>"; };
 		AA7A9006286EDC3B00B22F16 /* MeasurementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementViewModel.swift; sourceTree = "<group>"; };
@@ -94,6 +99,13 @@
 		AA7FB0B327EE017F000FFC26 /* Cyface_AppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cyface_AppUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		AA7FB0C027F20AAB000FFC26 /* Credentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
 		AA8BAB73280C459F00EF894B /* MeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementView.swift; sourceTree = "<group>"; };
+		AAAE46EC2886E92A00E30575 /* RegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationView.swift; sourceTree = "<group>"; };
+		AAAE46F528881AC000E30575 /* RegistrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationViewModel.swift; sourceTree = "<group>"; };
+		AAAE46F72888299400E30575 /* LabelledDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelledDivider.swift; sourceTree = "<group>"; };
+		AAAE46F928882FDF00E30575 /* HCaptchaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HCaptchaView.swift; sourceTree = "<group>"; };
+		AABF4D2928892CEA00206933 /* RegistrationRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationRequest.swift; sourceTree = "<group>"; };
+		AABF4D2B28896CFB00206933 /* AsyncButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncButton.swift; sourceTree = "<group>"; };
+		AABF4D2D2889824600206933 /* HCaptchaViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HCaptchaViewModel.swift; sourceTree = "<group>"; };
 		AAD092CA285F474A00302684 /* ApplicationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationState.swift; sourceTree = "<group>"; };
 		AAD092CC285F49B100302684 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
 		AAD092CF285F4A2C00302684 /* privacy-policy-de.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "privacy-policy-de.html"; sourceTree = "<group>"; };
@@ -164,8 +176,9 @@
 		AA49A82D280ED86400EA7AD3 /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				AA559E7427F430F10059ED27 /* CyfaceButton.swift */,
 				AA559E7627F436B20059ED27 /* CyfaceTextField.swift */,
+				AAAE46F72888299400E30575 /* LabelledDivider.swift */,
+				AABF4D2B28896CFB00206933 /* AsyncButton.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -182,6 +195,7 @@
 				AA7A9008286EE54600B22F16 /* MeasurementsViewModel.swift */,
 				AA5040CE287EF43200C4F93D /* ViewError.swift */,
 				AA3C6DE62885454D00A38153 /* CurrentMeasurementViewModel.swift */,
+				AAAE46F02887FED100E30575 /* Registration */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -201,6 +215,7 @@
 			isa = PBXGroup;
 			children = (
 				AA7A900B286F027300B22F16 /* DataCapturingEventHandler.swift */,
+				AABF4D2928892CEA00206933 /* RegistrationRequest.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -281,8 +296,27 @@
 				AAD092E32860F60D00302684 /* ServerURLInputView.swift */,
 				AA7A9004286EDC0F00B22F16 /* MeasurementListView.swift */,
 				AA7A902A2874744200B22F16 /* SplashScreen.swift */,
+				AABF4D282888343E00206933 /* Registration */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		AAAE46F02887FED100E30575 /* Registration */ = {
+			isa = PBXGroup;
+			children = (
+				AAAE46F528881AC000E30575 /* RegistrationViewModel.swift */,
+				AABF4D2D2889824600206933 /* HCaptchaViewModel.swift */,
+			);
+			path = Registration;
+			sourceTree = "<group>";
+		};
+		AABF4D282888343E00206933 /* Registration */ = {
+			isa = PBXGroup;
+			children = (
+				AAAE46EC2886E92A00E30575 /* RegistrationView.swift */,
+				AAAE46F928882FDF00E30575 /* HCaptchaView.swift */,
+			);
+			path = Registration;
 			sourceTree = "<group>";
 		};
 		AAD092CE285F4A2C00302684 /* PrivacyPolicy */ = {
@@ -609,12 +643,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA559E7527F430F10059ED27 /* CyfaceButton.swift in Sources */,
 				AA5040CF287EF43200C4F93D /* ViewError.swift in Sources */,
 				AA7A9007286EDC3B00B22F16 /* MeasurementViewModel.swift in Sources */,
 				AAD092E42860F60E00302684 /* ServerURLInputView.swift in Sources */,
+				AAAE46ED2886E92A00E30575 /* RegistrationView.swift in Sources */,
 				AA7A9009286EE54600B22F16 /* MeasurementsViewModel.swift in Sources */,
 				AAD092DC285F4B4100302684 /* PrivacyPolicy.swift in Sources */,
+				AAAE46F628881AC000E30575 /* RegistrationViewModel.swift in Sources */,
 				AA7A900C286F027300B22F16 /* DataCapturingEventHandler.swift in Sources */,
 				AA45C40228102B3500FBFC1F /* CurrentMeasurementView.swift in Sources */,
 				AAD092DE285F4C6F00302684 /* Settings.swift in Sources */,
@@ -622,12 +657,17 @@
 				AA0F5861281B0FB400C8054A /* ModalitySelectorView.swift in Sources */,
 				AA7A902B2874744200B22F16 /* SplashScreen.swift in Sources */,
 				AAD092CD285F49B100302684 /* PrivacyPolicyView.swift in Sources */,
+				AAAE46F82888299400E30575 /* LabelledDivider.swift in Sources */,
 				AA7FB0C127F20AAB000FFC26 /* Credentials.swift in Sources */,
 				AA7A9005286EDC0F00B22F16 /* MeasurementListView.swift in Sources */,
 				AAD092E0286073D400302684 /* ApplicationUI.swift in Sources */,
+				AABF4D2E2889824600206933 /* HCaptchaViewModel.swift in Sources */,
 				AA7FB09927EE017E000FFC26 /* LoginView.swift in Sources */,
 				AAD092CB285F474A00302684 /* ApplicationState.swift in Sources */,
+				AABF4D2A28892CEA00206933 /* RegistrationRequest.swift in Sources */,
 				AA559E7727F436B20059ED27 /* CyfaceTextField.swift in Sources */,
+				AAAE46FA28882FDF00E30575 /* HCaptchaView.swift in Sources */,
+				AABF4D2C28896CFB00206933 /* AsyncButton.swift in Sources */,
 				AA7FB09727EE017E000FFC26 /* CyfaceApp.swift in Sources */,
 				AA8BAB74280C459F00EF894B /* MeasurementView.swift in Sources */,
 				AA0F5863281B111C00C8054A /* Modalities.swift in Sources */,

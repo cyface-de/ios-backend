@@ -29,6 +29,9 @@ protocol Settings: NSObject {
     /// The URL to the currently used synchronization server.
     var serverUrl: String? { get set }
 
+    /// The URL to use for the registration of user accounts.
+    var registrationURL: String? { get set }
+
     /// The server the user is currently authenticated on. This is required to notice instances where the server URL and the authenticated server URL differ to ask for reauthentication.
     var authenticatedServerUrl: String? { get set }
 
@@ -70,6 +73,7 @@ class PropertySettings: NSObject, Settings {
     private static let syncToggleKey = "de.cyface.sync_toggle"
     /// The settings key for the setting storing the URL to the currently used synchronization server.
     private static let serverURLKey = "de.cyface.serverurl"
+    private static let registrationURLKey = "de.cyface.registrationurl"
     /// The settings key for the setting storing the currently used username to authenticate with the server and to upload data.
     private static let usernameKey = "de.cyface.login"
     /// The settings key for the setting storing the currently used password to authenticate with the server and to upload data.
@@ -96,6 +100,16 @@ class PropertySettings: NSObject, Settings {
 
         set(value) {
             UserDefaults.standard.set(value, forKey: PropertySettings.serverURLKey)
+        }
+    }
+
+    var registrationURL: String? {
+        get {
+            UserDefaults.standard.string(forKey: PropertySettings.registrationURLKey)
+        }
+
+        set(value) {
+            UserDefaults.standard.set(value, forKey: PropertySettings.registrationURLKey)
         }
     }
 
@@ -288,6 +302,8 @@ protocol UploadToggleChangedListener {
 // MARK: - PreviewSettings
 class PreviewSettings: NSObject, Settings {
     var serverUrl: String? = "http://localhost:8080/api/v3/"
+
+    var registrationURL: String? = "http://localhost:8080/registration"
 
     var authenticatedServerUrl: String? = "http://localhost:8080/api/v3/"
 

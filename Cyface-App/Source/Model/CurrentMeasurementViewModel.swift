@@ -18,6 +18,7 @@ import DataCapturing
  - version: 1.0.0
  */
 class CurrentMeasurementViewModel: ObservableObject {
+
     @Published var hasFix: UIImage
     @Published var distance: String
     @Published var speed: String
@@ -27,14 +28,6 @@ class CurrentMeasurementViewModel: ObservableObject {
     @Published var errorMessage: String?
     private let coreDateStack: CoreDataManager
     private let measurementIdentifier: Int64?
-
-    private var timeFormatter: DateComponentsFormatter {
-        let formatter = DateComponentsFormatter()
-
-        formatter.unitsStyle = .abbreviated
-        formatter.allowedUnits = [.hour, .minute, .second]
-        return formatter
-    }
 
     init(appState: ApplicationState, distance: String = "0 m", speed: String = "0 km/s", duration: String = "0 s", latitude: String = "0", longitude: String = "0") {
         self.hasFix = UIImage(named: "gps-not-available")!
@@ -46,6 +39,18 @@ class CurrentMeasurementViewModel: ObservableObject {
         self.coreDateStack = appState.dcs.coreDataStack
         self.measurementIdentifier = appState.dcs.currentMeasurement
         appState.dcs.handler.append(self.handle)
+    }
+
+}
+
+extension CurrentMeasurementViewModel: CyfaceEventHandler {
+
+    private var timeFormatter: DateComponentsFormatter {
+        let formatter = DateComponentsFormatter()
+
+        formatter.unitsStyle = .abbreviated
+        formatter.allowedUnits = [.hour, .minute, .second]
+        return formatter
     }
 
     func handle(event: DataCapturingEvent, status: Status) {
@@ -87,4 +92,5 @@ class CurrentMeasurementViewModel: ObservableObject {
             break
         }
     }
+
 }

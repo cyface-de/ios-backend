@@ -20,10 +20,15 @@ struct ApplicationUI: View {
                 if(!appState.hasAcceptedCurrentPrivacyPolicy) {
                     VStack {
                         PrivacyPolicyView(settings: appState.settings)
-                        Button("Accept") {
+                        Button(action:  {
                             appState.acceptPrivacyPolicy()
+                        }) {
+                            Text("Accept")
+                                .frame(maxWidth: .infinity)
                         }
+                        .buttonStyle(.borderedProminent)
                     }
+                    .tint(Color("Cyface-Green"))
                     .navigationTitle("Privacy Policy")
                     .navigationBarBackButtonHidden(true)
                 // Ask for a valid Server URL if non has been provided
@@ -37,11 +42,7 @@ struct ApplicationUI: View {
                 SplashScreen()
             }
         }
-    }
-
-    @ViewBuilder
-    func buildMeasurementView() -> some View {
-
+        .tint(Color("Cyface-Green"))
     }
 }
 

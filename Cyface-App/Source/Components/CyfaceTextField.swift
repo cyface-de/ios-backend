@@ -7,24 +7,11 @@
 
 import SwiftUI
 
-struct CyfaceTextField: View {
+struct CyfaceTextField: TextFieldStyle {
 
-    var label: String
-    var binding: Binding<String>
-
-    var body: some View {
-        TextField(label, text: binding)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
+    public func _body(configuration field: TextField<_Label>) -> some View {
+        field/*.textFieldStyle(.roundedBorder)*/
             .autocapitalization(.none)
-    }
-}
-
-struct CyfaceTextField_Previews: PreviewProvider {
-    @State static var bind = ""
-
-    static var previews: some View {
-
-        CyfaceTextField(label: "Light", binding: $bind).preferredColorScheme(.light)
-        CyfaceTextField(label: "Dark", binding: $bind).preferredColorScheme(.dark)
+            .disableAutocorrection(true)
     }
 }

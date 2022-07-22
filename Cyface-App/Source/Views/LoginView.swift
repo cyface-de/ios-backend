@@ -12,7 +12,6 @@ struct LoginView: View {
 
     @EnvironmentObject var appState: ApplicationState
     @StateObject private var credentials: Credentials
-    @State private var loginSuccessful = false
     @State private var showError: Bool
     @State private var errorMessage: String?
 
@@ -34,21 +33,39 @@ struct LoginView: View {
                 Image("Cyface-Logo")
 
                 VStack {
-                    CyfaceTextField(label: "Username", binding: $credentials.username)
-                        .disableAutocorrection(true)
-                    SecureField("Password", text: $credentials.password)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
+                    HStack {
+                        Image(systemName: "person")
+                        TextField("Username", text: $credentials.username)
+                            .autocapitalization(.none)
+                            .disableAutocorrection(true)
+                    }
+                    .padding()
+                    .overlay(
+                            RoundedRectangle(cornerRadius: 15)
+                    .stroke(lineWidth: 2))
+                    .foregroundColor(.gray)
+
+                    HStack {
+                        Image(systemName: "lock")
+                        SecureField("Password", text: $credentials.password)
+                            .autocapitalization(.none)
+                            .disableAutocorrection(true)
+                    }
+                    .padding()
+                    .overlay(
+                            RoundedRectangle(cornerRadius: 15)
+                            .stroke(lineWidth: 2)
+                        )
+                    .foregroundColor(.gray)
+
                 }.padding()
 
 
-                Button("Login") {
+                AsyncButton(action: {
                     do {
                         try credentials.login(onSuccess: {
-                            loginSuccessful = true
-                        },
-                                              onFailure: { error in
+                            appState.isLoggedIn = true
+                        }, onFailure: { error in
                             showError = true
                             errorMessage = error.localizedDescription
                         })
@@ -56,17 +73,18 @@ struct LoginView: View {
                         showError = true
                         errorMessage = error.localizedDescription
                     }
+                }) {
+                    Text("Login")
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(CyfaceButton())
-                .frame(maxWidth: .infinity)
+                .buttonStyle(.borderedProminent)
+                .padding([.trailing, .leading])
 
+                LabelledDivider(label: "or")
 
-                Text("or").padding()
-
-                Button("Register New Account") {
-
+                NavigationLink(destination: HCaptchaView(settings: credentials.settings)) {
+                    Text("Register New Account")
                 }
-                .buttonStyle(CyfaceButton())
                 .frame(maxWidth: .infinity)
             }
             .navigationBarHidden(true)
@@ -76,6 +94,7 @@ struct LoginView: View {
             }, message: {
                 Text(errorMessage ?? "")
             })
+            .tint(Color("Cyface-Green"))
         }
     }
 }
