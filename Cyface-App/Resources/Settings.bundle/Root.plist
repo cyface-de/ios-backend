@@ -28,7 +28,7 @@
 			<key>Key</key>
 			<string>de.cyface.registrationurl</string>
 			<key>DefaultValue</key>
-			<string>https://app.cyface.de</string>
+			<string>https://s2-b.cyface.de</string>
 			<key>KeyboardType</key>
 			<string>URL</string>
 		</dict>
