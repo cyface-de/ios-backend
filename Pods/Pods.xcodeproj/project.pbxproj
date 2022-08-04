@@ -279,7 +279,6 @@
 		AAD09299285378B800302684 /* V1TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD09291285378B800302684 /* V1TestData.sqlite */; };
 		AAD0929A285378B800302684 /* V6TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD09292285378B800302684 /* V6TestData.sqlite */; };
 		AAD0929B285378B800302684 /* serializedFixture.cyf in Resources */ = {isa = PBXBuildFile; fileRef = AAD09293285378B800302684 /* serializedFixture.cyf */; };
-		AAD0929D2858B86400302684 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = AAD0929C2858B86400302684 /* README.md */; };
 		AAD4C166F51D0C63C3524DA9B0300804 /* IRadarChartDataSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527756082B666292310954DB6042F6A1 /* IRadarChartDataSet.swift */; };
 		AAF4D7E62850855C001C8197 /* measurement.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAF4D7E52850855C001C8197 /* measurement.pb.swift */; };
 		AB0CCAF6CDF9520E0378193CDC130806 /* XAxisRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F44915535C3852F08B86B95E147CECD /* XAxisRenderer.swift */; };
@@ -2299,7 +2298,6 @@
 				AAD09294285378B800302684 /* README.md in Resources */,
 				AAD09295285378B800302684 /* V2TestData.sqlite in Resources */,
 				AAD09297285378B800302684 /* V4TestData.sqlite in Resources */,
-				AAD0929D2858B86400302684 /* README.md in Resources */,
 				AAD09298285378B800302684 /* V3TestData.sqlite in Resources */,
 				AAD09299285378B800302684 /* V1TestData.sqlite in Resources */,
 			);
