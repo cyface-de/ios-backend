@@ -259,7 +259,8 @@ class ViewController: UIViewController {
                     return
                 }
 
-                self.lifecycle.onServiceStopped(synchronizer: self.synchronizer, synchronize: self._settings.synchronizeData)
+                let shouldSynchronizeData = self._settings.synchronizeData
+                self.lifecycle.onServiceStopped(synchronizer: self.synchronizer, synchronize: shouldSynchronizeData)
             }
 
         case .servicePaused:
@@ -495,8 +496,9 @@ class ViewController: UIViewController {
                         let motionManager = CMMotionManager()
                         self.dataCapturingService = DataCapturingService(
                             sensorManager: motionManager,
-                            dataManager: coreDataStack,
-                            eventHandler: self.handleDataCapturingEvent)
+                            dataManager: coreDataStack)
+                        self.dataCapturingService?.setup()
+                        self.dataCapturingService?.handler.append(self.handleDataCapturingEvent)
 
                         // TODO: Move this to a Table View Model
                         // Load the measurements to show

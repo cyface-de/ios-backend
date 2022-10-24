@@ -15,9 +15,9 @@ PODS:
     - Protos (~> 2.1.0)
     - SwiftProtobuf (~> 1.19.0)
   - DataCompression (3.6.0)
-  - HCaptcha (2.3.1):
-    - HCaptcha/Core (= 2.3.1)
-  - HCaptcha/Core (2.3.1)
+  - HCaptcha (2.3.2):
+    - HCaptcha/Core (= 2.3.2)
+  - HCaptcha/Core (2.3.2)
   - Mocker (2.5.5)
   - Protos (2.1.0)
   - SwiftProtobuf (1.19.0)
@@ -27,7 +27,7 @@ DEPENDENCIES:
   - Charts (~> 3.6.0)
   - DataCapturing (from `./`)
   - DataCapturing/Tests (from `./`)
-  - HCaptcha
+  - HCaptcha (~> 2.3.2)
   - ViewInspector (~> 0.9.1)
 
 SPEC REPOS:
@@ -51,12 +51,12 @@ SPEC CHECKSUMS:
   Charts: b1e3a1f5a1c9ba5394438ca3b91bd8c9076310af
   DataCapturing: e7c94a6128373b865083cc6fa05f895027ab7cc0
   DataCompression: 06628f9c807b6f152e0da37635633f62fc51dc77
-  HCaptcha: c2c06dc1fb3805c702f3a6469f2ecf9b77abe93d
+  HCaptcha: 924da35fcd3b85780e95af49eb2a7e2ee9f3eca3
   Mocker: 8c731a8104962f246cadf2b02556218e9edc1390
   Protos: 0c003a8495268bb644d8e1d325ec4f117ba50183
   SwiftProtobuf: 6ef3f0e422ef90d6605ca20b21a94f6c1324d6b3
   ViewInspector: 68842776f07fbf186713689d4846e54f32ccbffb
 
-PODFILE CHECKSUM: 151cc01d3e07d7ec9530cdf93493d7b7f05b2972
+PODFILE CHECKSUM: 6e630c1a2fbc39f75a921109eaa0e1e67a4b007c
 
 COCOAPODS: 1.11.3

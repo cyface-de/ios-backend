@@ -1,16 +1,40 @@
-//
-//  RegistrationRequest.swift
-//  Cyface-App
-//
-//  Created by Klemens Muthmann on 21.07.22.
-//
+/*
+ * Copyright 2022 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 
+/// An HTTP request to a Cyface server to register a new user account.
+///
+/// @author: Klemens Muthmann
+/// @version: 1.0.0
+/// @since: 4.0.0
 struct RegistrationRequest {
 
+    /// The address of the server running the registration service.
     let url: URL
 
+    /// Sends the request.
+    ///
+    /// - Parameters:
+    ///   - username: The username of the user to create.
+    ///   - password: The password of the user to create.
+    ///   - validationToken: The HCaptcha validation token, which validates, that the request is from an actual human.
     func request(username: String, password: String, validationToken: String) async throws {
 
         let body = ["email" : username, "password": password, "captcha": validationToken]
@@ -46,6 +70,11 @@ struct RegistrationRequest {
 
 }
 
+/// An enumeration with all the possible errors thrown during a ``RegistrationRequest``.
+///
+/// - author: Klemens Muthmann
+/// - version: 1.0.0
+/// - since: 4.0.0
 enum RegistrationError {
     case internalError(cause: Error)
     case invalidResponseType
@@ -58,6 +87,7 @@ enum RegistrationError {
 }
 
 extension RegistrationError: LocalizedError {
+    /// An internationalized error description for all the different error cases.
     var errorDescription: String? {
         switch self {
         case .internalError(cause: let cause):

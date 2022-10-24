@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Cyface GmbH
+ * Copyright 2021-2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -25,6 +25,7 @@ import Foundation
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 1.0.0
  */
 class PrivacyPolicy {
     // MARK: - Properties

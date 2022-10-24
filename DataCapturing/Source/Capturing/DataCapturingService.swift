@@ -164,23 +164,31 @@ public class DataCapturingService: NSObject {
         self.sensorCapturer = SensorCapturer(lifecycleQueue: lifecycleQueue, capturingQueue: capturingQueue, motionManager: manager)
         self.savingInterval = time
 
+        super.init()
+    }
+
+    // MARK: - Public API Methods
+    /**
+     Puts the `DataCapturingService` in the correct state according to the current database values.
+
+     - Attention: This method must be called before calling any other method from the `DataCapturingService`
+     */
+    public func setup() {
         let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
 
         do {
-            for measurement in try persistenceLayer.loadMeasurements() {
+            for var measurement in try persistenceLayer.loadMeasurements() {
                 if !measurement.synchronizable && !measurement.synchronized {
                     currentMeasurement = measurement.identifier
+                    let pauseEvent = try persistenceLayer.createEvent(of: .lifecyclePause, parent: &measurement)
                     isPaused = true
+                    self.handle(event: .servicePaused(measurement: currentMeasurement, event: pauseEvent), status: .success)
                 }
             }
         } catch {
             fatalError("Unable to load measurements from database! Reason: \(error)")
         }
-
-        super.init()
     }
-
-    // MARK: - Public API Methods
 
     /**
      Starts the capturing process.

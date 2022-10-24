@@ -1,12 +1,31 @@
-//
-//  CurrentMeasurementView.swift
-//  Cyface-App
-//
-//  Created by Klemens Muthmann on 20.04.22.
-//
+/*
+ * Copyright 2022 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import SwiftUI
 
+/// A view showing information about the currently captured measurement.
+///
+/// It shows details about the GPS fix, duration of the measurement, current location, speed and distance traveled.
+///
+/// - author: Klemens Muthmann
+/// - version: 1.0.0
+/// - since: 4.0.0
 struct CurrentMeasurementView: View {
     @StateObject var viewModel: CurrentMeasurementViewModel
 
@@ -24,7 +43,7 @@ struct CurrentMeasurementView: View {
                     Image(uiImage: viewModel.hasFix)
                         .resizable()
                         .scaledToFit()
-                        .frame(height: 15.0)
+                        .frame(height: 20.0)
 
                 }
                 Spacer()
@@ -70,6 +89,11 @@ struct CurrentMeasurementView: View {
                 }
             }
         }
+        .alert("Error", isPresented: $viewModel.hasError, actions: {
+            // actions
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
     }
 }
 
@@ -82,6 +106,14 @@ struct CurrentMeasurementView_Previews: PreviewProvider {
         return ret
     }
 
+    static var errorModel: CurrentMeasurementViewModel {
+        let ret = CurrentMeasurementViewModel(appState: appState)
+        ret.hasError = true
+        ret.errorMessage = "Some error message!"
+
+        return ret
+    }
+
     static var previews: some View {
         CurrentMeasurementView(viewModel: CurrentMeasurementViewModel(appState: appState))
             .previewDevice("iPod touch (7th generation)")
@@ -90,5 +122,10 @@ struct CurrentMeasurementView_Previews: PreviewProvider {
         CurrentMeasurementView(viewModel: CurrentMeasurementViewModel(appState: appState))
             .previewDevice("iPhone 12")
             .previewInterfaceOrientation(.portraitUpsideDown)
+
+        CurrentMeasurementView(viewModel: CurrentMeasurementViewModel(appState: appState))
+            .preferredColorScheme(.dark)
+
+        CurrentMeasurementView(viewModel: errorModel)
     }
 }

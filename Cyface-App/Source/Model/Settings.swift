@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Cyface GmbH
+ * Copyright 2021-2022 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -23,7 +23,7 @@ import Foundation
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
- - Since: 9.0.0
+ - Since: 1.0.0
  */
 protocol Settings: NSObject {
     /// The URL to the currently used synchronization server.
@@ -66,6 +66,7 @@ protocol Settings: NSObject {
 
  - author: Klemens Muthmann
  - version: 1.0.0
+ - since: 1.0.0
  */
 class PropertySettings: NSObject, Settings {
     // MARK: - Constants
@@ -73,6 +74,7 @@ class PropertySettings: NSObject, Settings {
     private static let syncToggleKey = "de.cyface.sync_toggle"
     /// The settings key for the setting storing the URL to the currently used synchronization server.
     private static let serverURLKey = "de.cyface.serverurl"
+    /// The settings key for the setting storing the URL to the currently used registration server.
     private static let registrationURLKey = "de.cyface.registrationurl"
     /// The settings key for the setting storing the currently used username to authenticate with the server and to upload data.
     private static let usernameKey = "de.cyface.login"
@@ -84,12 +86,15 @@ class PropertySettings: NSObject, Settings {
     private static let highestAcceptedPrivacyPolicyKey = "de.cyface.settings.privacy_policy_version"
     /// The default server address, which can be accessed using a guest login.
     static let defaultServerURL = "https://s2.cyface.de/api/v2"
+
     // MARK: - Properties
     /// Needs to be stored here, so we can avoid asking for credentials after an URL change to the same URL as before (if the user changed his/her mind for example or if the settings change was caused by a different setting).
     private var oldServerUrl: String?
+    /// Wether to synchronize data before the last settings change. This needs to be stored here, so we can identify if a settings change happened due to the synchronization toggle changing.
     private var oldSynchronizeData: Bool?
     /// Objects interested in changes to the current Cyface server URL.
     private var serverUrlChangedListener: [ServerUrlChangedListener] = []
+    /// A list of listeners who are informed every time the synchronization toggle was switched.
     private var synchronizationToggleChangedListener: [UploadToggleChangedListener] = []
 
     /// The URL to the currently used synchronization server.
@@ -103,6 +108,7 @@ class PropertySettings: NSObject, Settings {
         }
     }
 
+    /// The URL used to address the registration server.
     var registrationURL: String? {
         get {
             UserDefaults.standard.string(forKey: PropertySettings.registrationURLKey)
@@ -278,6 +284,7 @@ Protocol required by objects that want to be notified about changes to the serve
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since:
  */
 protocol ServerUrlChangedListener {
     /**
@@ -294,11 +301,17 @@ protocol ServerUrlChangedListener {
     func to(invalidURL: String?)
 }
 
+// MARK: - UploadToggleChangedListener
+/**
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 4.0.0
+ */
 protocol UploadToggleChangedListener {
+    /// Called with the value the upload toggle was changed to.
     func to(upload: Bool)
 }
 
-#if DEBUG
 // MARK: - PreviewSettings
 class PreviewSettings: NSObject, Settings {
     var serverUrl: String? = "http://localhost:8080/api/v3/"
@@ -319,4 +332,3 @@ class PreviewSettings: NSObject, Settings {
         // Nothing to do here.
     }
 }
-#endif

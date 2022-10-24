@@ -1,9 +1,21 @@
-//
-//  ContentView.swift
-//  Cyface-App
-//
-//  Created by Klemens Muthmann on 25.03.22.
-//
+/*
+ * Copyright 2022 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import SwiftUI
 import DataCapturing
@@ -11,14 +23,14 @@ import DataCapturing
 struct LoginView: View {
 
     @EnvironmentObject var appState: ApplicationState
-    @StateObject private var credentials: Credentials
+    @StateObject private var credentials: LoginViewModel
     @State private var showError: Bool
     @State private var errorMessage: String?
 
     init(settings: Settings, showError: Bool = false, errorMessage: String? = nil) {
         // According to a talk from WWDC 21 this is considered valid, even though the documentation says otherwise.
         // See: https://swiftui-lab.com/random-lessons/#data-10
-        self._credentials = StateObject(wrappedValue: Credentials(settings: settings))
+        self._credentials = StateObject(wrappedValue: LoginViewModel(settings: settings))
         self.showError = showError
         self.errorMessage = errorMessage
     }
@@ -36,8 +48,7 @@ struct LoginView: View {
                     HStack {
                         Image(systemName: "person")
                         TextField("Username", text: $credentials.username)
-                            .autocapitalization(.none)
-                            .disableAutocorrection(true)
+                            .textFieldStyle(CyfaceTextField())
                     }
                     .padding()
                     .overlay(
@@ -48,8 +59,7 @@ struct LoginView: View {
                     HStack {
                         Image(systemName: "lock")
                         SecureField("Password", text: $credentials.password)
-                            .autocapitalization(.none)
-                            .disableAutocorrection(true)
+                            .textFieldStyle(CyfaceTextField())
                     }
                     .padding()
                     .overlay(

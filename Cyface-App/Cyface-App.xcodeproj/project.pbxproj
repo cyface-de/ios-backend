@@ -26,7 +26,7 @@
 		AA7FB0A827EE017F000FFC26 /* CyfaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7FB0A727EE017F000FFC26 /* CyfaceTests.swift */; };
 		AA7FB0B227EE017F000FFC26 /* Cyface_AppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7FB0B127EE017F000FFC26 /* Cyface_AppUITests.swift */; };
 		AA7FB0B427EE017F000FFC26 /* Cyface_AppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7FB0B327EE017F000FFC26 /* Cyface_AppUITestsLaunchTests.swift */; };
-		AA7FB0C127F20AAB000FFC26 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7FB0C027F20AAB000FFC26 /* Credentials.swift */; };
+		AA7FB0C127F20AAB000FFC26 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7FB0C027F20AAB000FFC26 /* LoginViewModel.swift */; };
 		AA8BAB74280C459F00EF894B /* MeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8BAB73280C459F00EF894B /* MeasurementView.swift */; };
 		AAAE46ED2886E92A00E30575 /* RegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAE46EC2886E92A00E30575 /* RegistrationView.swift */; };
 		AAAE46F628881AC000E30575 /* RegistrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAE46F528881AC000E30575 /* RegistrationViewModel.swift */; };
@@ -97,7 +97,7 @@
 		AA7FB0AD27EE017F000FFC26 /* Cyface-AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Cyface-AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA7FB0B127EE017F000FFC26 /* Cyface_AppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cyface_AppUITests.swift; sourceTree = "<group>"; };
 		AA7FB0B327EE017F000FFC26 /* Cyface_AppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cyface_AppUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		AA7FB0C027F20AAB000FFC26 /* Credentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
+		AA7FB0C027F20AAB000FFC26 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		AA8BAB73280C459F00EF894B /* MeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementView.swift; sourceTree = "<group>"; };
 		AAAE46EC2886E92A00E30575 /* RegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationView.swift; sourceTree = "<group>"; };
 		AAAE46F528881AC000E30575 /* RegistrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationViewModel.swift; sourceTree = "<group>"; };
@@ -186,7 +186,7 @@
 		AA49A82E280ED87500EA7AD3 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				AA7FB0C027F20AAB000FFC26 /* Credentials.swift */,
+				AA7FB0C027F20AAB000FFC26 /* LoginViewModel.swift */,
 				AA0F5862281B111C00C8054A /* Modalities.swift */,
 				AAD092CA285F474A00302684 /* ApplicationState.swift */,
 				AAD092DB285F4B4100302684 /* PrivacyPolicy.swift */,
@@ -424,6 +424,7 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
 			);
 			mainGroup = AA7FB08A27EE017E000FFC26;
 			productRefGroup = AA7FB09427EE017E000FFC26 /* Products */;
@@ -658,7 +659,7 @@
 				AA7A902B2874744200B22F16 /* SplashScreen.swift in Sources */,
 				AAD092CD285F49B100302684 /* PrivacyPolicyView.swift in Sources */,
 				AAAE46F82888299400E30575 /* LabelledDivider.swift in Sources */,
-				AA7FB0C127F20AAB000FFC26 /* Credentials.swift in Sources */,
+				AA7FB0C127F20AAB000FFC26 /* LoginViewModel.swift in Sources */,
 				AA7A9005286EDC0F00B22F16 /* MeasurementListView.swift in Sources */,
 				AAD092E0286073D400302684 /* ApplicationUI.swift in Sources */,
 				AABF4D2E2889824600206933 /* HCaptchaViewModel.swift in Sources */,
@@ -904,13 +905,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.cyface.Cyface-AppTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cyface-App.app/Cyface-App";
 			};
 			name = Debug;
@@ -925,13 +926,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.cyface.Cyface-AppTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cyface-App.app/Cyface-App";
 			};
 			name = Release;
@@ -950,7 +951,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = "Cyface-App";
 			};
 			name = Debug;
@@ -969,7 +970,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = "Cyface-App";
 			};
 			name = Release;

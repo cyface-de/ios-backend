@@ -1,9 +1,21 @@
-//
-//  Cyface_AppTests.swift
-//  Cyface-AppTests
-//
-//  Created by Klemens Muthmann on 25.03.22.
-//
+/*
+ * Copyright 2022 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import XCTest
 import ViewInspector
@@ -29,7 +41,7 @@ class Cyface_AppTests: XCTestCase {
     }
 
     func testLoginScreen() throws {
-        let vut = LoginView(credentials: Credentials(username: "ali", password: "test"))
+        let vut = LoginView(settings: PreviewSettings())
         /*let expectation = vut.inspection.inspect { view in
             let loginButton = try vut.inspect().find(button: "Login")
             XCTAssertTrue(try loginButton.buttonStyle() is CyfaceButton)

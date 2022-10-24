@@ -1,30 +1,55 @@
-//
-//  Credentials.swift
-//  Cyface-App
-//
-//  Created by Klemens Muthmann on 28.03.22.
-//
+/*
+ * Copyright 2022 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import DataCapturing
 import os.log
 
-class Credentials: ObservableObject {
+/// A view model used by the ``LoginView`` to represent that views current state.
+///
+/// - author: Klemens Muthmann
+/// - version: 1.0.0
+/// - since: 4.0.0
+class LoginViewModel: ObservableObject {
+    /// The username entered into the login text field.
     @Published var username: String {
         didSet {
             settings.username = username
         }
     }
+    /// The password entered into the password secure text field.
     @Published var password: String {
         didSet {
             settings.password = password
         }
     }
+    /// The authenticator to use to authenticate with a Cyface Server.
+    ///
+    /// This authenticator should also be used by future requests to the Cyface Server, such as upload requests.
     @Published var authenticator: CredentialsAuthenticator?
 
+    /// The application settings, some of which are changeable via the devices settings app.
     let settings: Settings
+    /// The os log to log infomration to the device console.
     let log = OSLog(subsystem: "Credentials", category: "de.cyface")
 
+    /// Create a new instance of this class, and provide a connection to the system settings.
     init(settings: Settings) {
         self.settings = settings
         self.username = settings.username ?? ""
@@ -42,6 +67,11 @@ class Credentials: ObservableObject {
         self.settings.add(serverUrlChangedListener: self)
     }
 
+    /// Carry out the login of a user to the Cyface Server
+    ///
+    /// - Parameters:
+    ///   - onSuccess: Callback called if the login was successful.
+    ///   - onFailure: Callback called if the login failed.
     func login(onSuccess: @escaping ()->(), onFailure: @escaping (Error) -> Void) throws {
         let authenticator = try createAuthenticator()
         authenticator.authenticate(onSuccess: { [weak self] _ in
@@ -51,6 +81,10 @@ class Credentials: ObservableObject {
         }, onFailure: onFailure)
     }
 
+    /// Create the authenticator for the login to the Cyface Server.
+    ///
+    /// This authenticator should also be used by future requests to the Cyface Server, such as upload requests.
+    /// - Returns: An initialized authenticator with the current values from the login form.
     private func createAuthenticator() throws -> CredentialsAuthenticator {
         guard let url = settings.serverUrl else {
             throw ViewError.noServerURL
@@ -68,7 +102,7 @@ class Credentials: ObservableObject {
     }
 }
 
-extension Credentials: ServerUrlChangedListener {
+extension LoginViewModel: ServerUrlChangedListener {
     func to(validURL: URL) {
         authenticator = nil
     }

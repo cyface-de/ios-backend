@@ -19,7 +19,7 @@ end
 target 'Cyface-App' do
   project 'Cyface-App/Cyface-App.xcodeproj'
   pod 'DataCapturing', :path => './', :testspecs => ['Tests']
-  pod "HCaptcha"
+  pod 'HCaptcha', '~> 2.3.2'
 
   target 'Cyface-AppTests' do
     inherit! :search_paths
