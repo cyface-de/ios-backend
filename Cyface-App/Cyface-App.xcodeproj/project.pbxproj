@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1329C243620868C329249050 /* Pods_Cyface_AppTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1454E0DBEAF35ADE337A15D8 /* Pods_Cyface_AppTests.framework */; };
+		03028453D59C9737DD70A2E6 /* Pods_Cyface_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1C76021E0036AC8E821F7A4 /* Pods_Cyface_App.framework */; };
+		469FDB8CCD4582F7BD5774A6 /* Pods_Cyface_AppUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8F07E39DE7A290E54F9FF0B /* Pods_Cyface_AppUITests.framework */; };
 		AA0F5861281B0FB400C8054A /* ModalitySelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F5860281B0FB400C8054A /* ModalitySelectorView.swift */; };
 		AA0F5863281B111C00C8054A /* Modalities.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F5862281B111C00C8054A /* Modalities.swift */; };
 		AA3C6DE72885454D00A38153 /* CurrentMeasurementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C6DE62885454D00A38153 /* CurrentMeasurementViewModel.swift */; };
@@ -46,8 +47,7 @@
 		AAD092E22860798D00302684 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = AAD092E12860783D00302684 /* Settings.bundle */; };
 		AAD092E42860F60E00302684 /* ServerURLInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD092E32860F60D00302684 /* ServerURLInputView.swift */; };
 		AAEC0B87280ED58E00CE2AF4 /* Inspectable+Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEC0B86280ED58E00CE2AF4 /* Inspectable+Model.swift */; };
-		BFC10D5474F8D51A1D47AD68 /* Pods_Cyface_AppUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6B33EA53CBB28F0B483DB8BF /* Pods_Cyface_AppUITests.framework */; };
-		C7BAA09B18F70DA721A92B15 /* Pods_Cyface_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F61EAF44E5EFB027EEF0844E /* Pods_Cyface_App.framework */; };
+		F79E90305635A801F8D663FA /* Pods_Cyface_AppTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD2ACABF21918C129F038C18 /* Pods_Cyface_AppTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,14 +68,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1454E0DBEAF35ADE337A15D8 /* Pods_Cyface_AppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Cyface_AppTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		45FC32AC5ABB7F56D7FBD5F9 /* Pods-Cyface-AppTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cyface-AppTests.debug.xcconfig"; path = "Target Support Files/Pods-Cyface-AppTests/Pods-Cyface-AppTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5935C4B14D1841A6FD6E676E /* Pods-Cyface-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cyface-App.release.xcconfig"; path = "Target Support Files/Pods-Cyface-App/Pods-Cyface-App.release.xcconfig"; sourceTree = "<group>"; };
 		6876CE017A7615C0A899A935 /* Pods-Cyface-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cyface-App.debug.xcconfig"; path = "Target Support Files/Pods-Cyface-App/Pods-Cyface-App.debug.xcconfig"; sourceTree = "<group>"; };
-		6B33EA53CBB28F0B483DB8BF /* Pods_Cyface_AppUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Cyface_AppUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		73F25B7E155D104ABF74D23E /* Pods-Cyface-AppUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cyface-AppUITests.debug.xcconfig"; path = "Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		8DDAA42A273D1DEEFFE214BB /* Pods-Cyface-AppTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cyface-AppTests.release.xcconfig"; path = "Target Support Files/Pods-Cyface-AppTests/Pods-Cyface-AppTests.release.xcconfig"; sourceTree = "<group>"; };
 		9C22E7C8B3B1B8516D46D19B /* Pods-Cyface-AppUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cyface-AppUITests.release.xcconfig"; path = "Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests.release.xcconfig"; sourceTree = "<group>"; };
+		AA0054F42907F2960057522E /* HCaptcha.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = HCaptcha.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0F5860281B0FB400C8054A /* ModalitySelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalitySelectorView.swift; sourceTree = "<group>"; };
 		AA0F5862281B111C00C8054A /* Modalities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modalities.swift; sourceTree = "<group>"; };
 		AA3C6DE62885454D00A38153 /* CurrentMeasurementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentMeasurementViewModel.swift; sourceTree = "<group>"; };
@@ -118,7 +117,9 @@
 		AAD092E32860F60D00302684 /* ServerURLInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerURLInputView.swift; sourceTree = "<group>"; };
 		AAD2F1A92875B1B5008A3A9D /* Cyface-App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Cyface-App-Info.plist"; sourceTree = "<group>"; };
 		AAEC0B86280ED58E00CE2AF4 /* Inspectable+Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Inspectable+Model.swift"; sourceTree = "<group>"; };
-		F61EAF44E5EFB027EEF0844E /* Pods_Cyface_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Cyface_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B8F07E39DE7A290E54F9FF0B /* Pods_Cyface_AppUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Cyface_AppUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CD2ACABF21918C129F038C18 /* Pods_Cyface_AppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Cyface_AppTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1C76021E0036AC8E821F7A4 /* Pods_Cyface_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Cyface_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,7 +127,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C7BAA09B18F70DA721A92B15 /* Pods_Cyface_App.framework in Frameworks */,
+				03028453D59C9737DD70A2E6 /* Pods_Cyface_App.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,7 +135,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1329C243620868C329249050 /* Pods_Cyface_AppTests.framework in Frameworks */,
+				F79E90305635A801F8D663FA /* Pods_Cyface_AppTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -142,7 +143,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BFC10D5474F8D51A1D47AD68 /* Pods_Cyface_AppUITests.framework in Frameworks */,
+				469FDB8CCD4582F7BD5774A6 /* Pods_Cyface_AppUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,9 +153,10 @@
 		49798FC929070292C2112942 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F61EAF44E5EFB027EEF0844E /* Pods_Cyface_App.framework */,
-				1454E0DBEAF35ADE337A15D8 /* Pods_Cyface_AppTests.framework */,
-				6B33EA53CBB28F0B483DB8BF /* Pods_Cyface_AppUITests.framework */,
+				AA0054F42907F2960057522E /* HCaptcha.framework */,
+				F1C76021E0036AC8E821F7A4 /* Pods_Cyface_App.framework */,
+				CD2ACABF21918C129F038C18 /* Pods_Cyface_AppTests.framework */,
+				B8F07E39DE7A290E54F9FF0B /* Pods_Cyface_AppUITests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -340,8 +342,8 @@
 				AA7FB08F27EE017E000FFC26 /* Sources */,
 				AA7FB09027EE017E000FFC26 /* Frameworks */,
 				AA7FB09127EE017E000FFC26 /* Resources */,
-				F717710A3E5102FEC345A813 /* [CP] Embed Pods Frameworks */,
 				8EB1E15D8D223989F46B924E /* [CP] Copy Pods Resources */,
+				A2DE216F2FA335E263E4A333 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -360,8 +362,8 @@
 				AA7FB09F27EE017F000FFC26 /* Sources */,
 				AA7FB0A027EE017F000FFC26 /* Frameworks */,
 				AA7FB0A127EE017F000FFC26 /* Resources */,
-				2E18940A306C2D958CFB40D6 /* [CP] Embed Pods Frameworks */,
 				7952E068F3ECD558718AFC1C /* [CP] Copy Pods Resources */,
+				282A7826773F909EBCCE8D35 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -381,8 +383,8 @@
 				AA7FB0A927EE017F000FFC26 /* Sources */,
 				AA7FB0AA27EE017F000FFC26 /* Frameworks */,
 				AA7FB0AB27EE017F000FFC26 /* Resources */,
-				97262893723CD21A3FE3F1F6 /* [CP] Embed Pods Frameworks */,
 				4A279AD8F9EC840741D2811A /* [CP] Copy Pods Resources */,
+				FADAC42FCDAE3AE67AE7A6DD /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -469,7 +471,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		2E18940A306C2D958CFB40D6 /* [CP] Embed Pods Frameworks */ = {
+		282A7826773F909EBCCE8D35 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -559,21 +561,21 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		97262893723CD21A3FE3F1F6 /* [CP] Embed Pods Frameworks */ = {
+		A2DE216F2FA335E263E4A333 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		B0EDD5C54006DFAC5987138B /* [CP] Check Pods Manifest.lock */ = {
@@ -598,21 +600,21 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		F717710A3E5102FEC345A813 /* [CP] Embed Pods Frameworks */ = {
+		FADAC42FCDAE3AE67AE7A6DD /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		FEED0564ECF8BE55E6DFC9B6 /* [CP] Check Pods Manifest.lock */ = {

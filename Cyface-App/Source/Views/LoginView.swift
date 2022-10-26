@@ -20,13 +20,25 @@
 import SwiftUI
 import DataCapturing
 
-struct LoginView: View {
+/**
+ The view displayed to the user to login to a Cyface Server
 
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
+struct LoginView: View {
+    /// The current application state.
     @EnvironmentObject var appState: ApplicationState
+    /// The view model used by this view.
     @StateObject private var credentials: LoginViewModel
+    /// If `true` the view shows an error message.
     @State private var showError: Bool
+    /// The error message to show if `showError` is `true`.
     @State private var errorMessage: String?
 
+    /**
+     Initialize the view from the system settings.
+     */
     init(settings: Settings, showError: Bool = false, errorMessage: String? = nil) {
         // According to a talk from WWDC 21 this is considered valid, even though the documentation says otherwise.
         // See: https://swiftui-lab.com/random-lessons/#data-10

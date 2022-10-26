@@ -19,11 +19,21 @@
 
 import SwiftUI
 
-struct ServerURLInputView: View {
+/**
+ View providing an input field to enter a valid server URL.
 
+ This view is shown if the URL provided via the system settings is not valid. It prevents the user from starting the application with an invalid URL.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
+struct ServerURLInputView: View {
+    /// The URL entered by the user.
     @State private var textInput: String = ""
+    /// The current state of the application.
     @EnvironmentObject var appState: ApplicationState
 
+    /// Create a new version of this view provided with an initial URL to edit.
     init(initialURL: String) {
         self._textInput = State(wrappedValue: initialURL)
     }

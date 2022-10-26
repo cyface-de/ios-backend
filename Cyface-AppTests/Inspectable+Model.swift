@@ -8,5 +8,5 @@ import Foundation
 import ViewInspector
 @testable import Cyface_App
 
-extension Inspection: InspectionEmissary {}
+//extension Inspection: InspectionEmissary {}
 extension LoginView: Inspectable {}

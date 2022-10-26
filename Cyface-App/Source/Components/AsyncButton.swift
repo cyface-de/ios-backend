@@ -19,12 +19,23 @@
 import Foundation
 import SwiftUI
 
+/**
+ A button, that shows a spinner icon, while the action it triggered is processed.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 struct AsyncButton<Label: View>: View {
+    /// The action to trigger, when this button is pressed.
     var action: () async -> Void
+    /// The modifications to the button while it is waiting for the result of the triggered action.
     var actionOptions = Set(ActionOption.allCases)
+    /// The label to show on the button.
     @ViewBuilder var label: () -> Label
 
+    /// The starting state of being disabled.
     @State private var isDisabled = false
+    /// The starting state of showing a progress view.
     @State private var showProgressView = false
 
     var body: some View {
@@ -66,6 +77,7 @@ struct AsyncButton<Label: View>: View {
 }
 
 extension AsyncButton {
+    /// The default options changing the button while waiting for the triggered action.
     enum ActionOption: CaseIterable {
         case disableButton
         case showProgressView
@@ -73,6 +85,7 @@ extension AsyncButton {
 }
 
 extension AsyncButton where Label == Text {
+    /// Create a new button with a text label.
     init(_ label: String,
          actionOptions: Set<ActionOption> = Set(ActionOption.allCases),
          action: @escaping () async -> Void) {
@@ -83,6 +96,7 @@ extension AsyncButton where Label == Text {
 }
 
 extension AsyncButton where Label == Image {
+    /// Create a new button with an image for the label.
     init(systemImageName: String,
          actionOptions: Set<ActionOption> = Set(ActionOption.allCases),
          action: @escaping () async -> Void) {

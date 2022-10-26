@@ -19,7 +19,14 @@
 
 import SwiftUI
 
+/**
+ A single list entry in the list of measurements, showing a general overview of the measurement.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 struct MeasurementListView: View {
+    /// The view model containing the current data of the measurement and handling connection to data storage.
     @Binding var measurementViewModel: MeasurementViewModel
 
     var body: some View {

@@ -20,10 +20,20 @@
 import SwiftUI
 import WebKit
 
+/**
+ The view used to show the privacy policy on first app start and each time the text changes.
+
+ The privacy policy is shown as an HTML page view a `WKWebView`.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 struct PrivacyPolicyView: UIViewRepresentable {
 
+    /// The view model used.
     let model: PrivacyPolicy
 
+    /// Create a new view from the provided system settings.
     init(settings: Settings) {
         model = PrivacyPolicy(settings)
     }

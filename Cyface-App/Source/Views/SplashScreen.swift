@@ -19,6 +19,13 @@
 
 import SwiftUI
 
+/**
+ The Cyface splash screen shown while the application is loading.
+ This will only show on slow devices under certain conditions like data migration after an app update.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 struct SplashScreen: View {
     var body: some View {
        Image("Cyface-Logo")

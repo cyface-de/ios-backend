@@ -20,7 +20,12 @@
 import SwiftUI
 import HCaptcha
 
-// Wrapper-view to provide UIView instance
+/**
+An empty placeholder view, that is filled with the HCaptcha UI on a button press
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 struct UIViewWrapperView : UIViewRepresentable {
     var uiview = UIView()
 
@@ -32,12 +37,20 @@ struct UIViewWrapperView : UIViewRepresentable {
     }
 }
 
-// Example of hCaptcha usage
-struct HCaptchaView: View {
-    @StateObject var model = HCaptchaViewModel()
-    private(set) var hcaptcha: HCaptcha!
+/**
+The HCaptcha UI, used to verify that the registration is carried out by an actual human.
 
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
+struct HCaptchaView: View {
+    /// The view model used by this view from the HCaptcha framework.
+    @StateObject var model = HCaptchaViewModel()
+    /// The HCaptcha instance from the HCaptcha framework.
+    private(set) var hcaptcha: HCaptcha!
+    /// The placeholder view to fill with the HCaptcha UI.
     let placeholder = UIViewWrapperView()
+    /// The application system settings
     let settings: Settings
 
     var body: some View {
@@ -83,7 +96,7 @@ struct HCaptchaView: View {
         .tint(Color("Cyface-Green"))
     }
 
-
+    /// Create a new instance of this view based on the provided application system settings.
     init(settings: Settings) {
         self.settings = settings
         guard let baseURL = URL(string: "http://localhost") else {

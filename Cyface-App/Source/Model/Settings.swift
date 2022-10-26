@@ -17,6 +17,7 @@
  * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
 import Foundation
+import OSLog
 
 /**
  Access, write and react to changes within the apps settings.
@@ -53,6 +54,11 @@ protocol Settings: NSObject {
      - Parameter serverUrlChangedListener: The listener to add to the list of listeners
      */
     func add(serverUrlChangedListener listener: ServerUrlChangedListener)
+
+    /**
+     Add the provided `UploadToggleChangedListener` to the objects that are notified each time the user changes whether the app should upload data or not.
+     */
+    func add(uploadToggleChangedListener listener: UploadToggleChangedListener)
 }
 
 /**
@@ -213,6 +219,7 @@ class PropertySettings: NSObject, Settings {
      */
     @objc
     private func onSettingsChanged(notification: NSNotification) {
+        os_log("System settings changed!")
         guard (notification.object as? UserDefaults) != nil else {
             return
         }
@@ -225,6 +232,9 @@ class PropertySettings: NSObject, Settings {
         }
     }
 
+    /**
+     Called if the user changed the upload server URL via the application system settings.
+     */
     private func onUploadServerUrlChanged() {
         guard let newServerURL = serverUrl else {
             for serverUrlChangedListener in self.serverUrlChangedListener {
@@ -255,16 +265,19 @@ class PropertySettings: NSObject, Settings {
         }
     }
 
+    /// Called if the user changed the synchronization toggle via the application system settings.
     private func onSynchronizeDataToggleChanged() {
         for listener in synchronizationToggleChangedListener {
             listener.to(upload: synchronizeData)
         }
     }
 
+    /// Adds the provided `listener` to be informed about server URL changes via the system settings application.
     func add(serverUrlChangedListener listener: ServerUrlChangedListener) {
         serverUrlChangedListener.append(listener)
     }
 
+    /// Adds the provided `listener` to be informed about changes to the upload toggle status.
     func add(uploadToggleChangedListener listener: UploadToggleChangedListener) {
         synchronizationToggleChangedListener.append(listener)
     }
@@ -329,6 +342,10 @@ class PreviewSettings: NSObject, Settings {
     var synchronizeData: Bool = false
 
     func add(serverUrlChangedListener listener: ServerUrlChangedListener) {
+        // Nothing to do here.
+    }
+
+    func add(uploadToggleChangedListener listener: UploadToggleChangedListener) {
         // Nothing to do here.
     }
 }

@@ -20,7 +20,7 @@ PODS:
   - HCaptcha/Core (2.3.2)
   - Mocker (2.5.5)
   - Protos (2.1.0)
-  - SwiftProtobuf (1.19.0)
+  - SwiftProtobuf (1.19.1)
   - ViewInspector (0.9.1)
 
 DEPENDENCIES:
@@ -54,9 +54,9 @@ SPEC CHECKSUMS:
   HCaptcha: 924da35fcd3b85780e95af49eb2a7e2ee9f3eca3
   Mocker: 8c731a8104962f246cadf2b02556218e9edc1390
   Protos: 0c003a8495268bb644d8e1d325ec4f117ba50183
-  SwiftProtobuf: 6ef3f0e422ef90d6605ca20b21a94f6c1324d6b3
+  SwiftProtobuf: 59d9ea2eb5f84b509f32d170a65f3348ae758f1e
   ViewInspector: 68842776f07fbf186713689d4846e54f32ccbffb
 
-PODFILE CHECKSUM: 6e630c1a2fbc39f75a921109eaa0e1e67a4b007c
+PODFILE CHECKSUM: 92b85ba2f650ae43c35d9d0445579242d132ff50
 
 COCOAPODS: 1.11.3

@@ -20,16 +20,24 @@
 import SwiftUI
 import DataCapturing
 
+/**
+ The main view of the application, combining an overview of all the captured measurements and control elements to run data capturing.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 struct MeasurementView: View {
-
-    // @StateObject var measurementsViewModel: MeasurementsViewModel
+    /// The current application state.
     @EnvironmentObject var appState: ApplicationState
+    /// The authenticator used to login the user. This should contain the currently valid user to login and upload data.
     var authenticator: CredentialsAuthenticator?
-//    var synchronizer: Synchronizer?
+    /// The modality selected to capture data.
     @State var selectedModality = Modalities.defaultSelection
-
+    /// If `true` an error message is shown to the user.
     @State var showError = false
+    /// The error message to show if `showError` is true.
     @State var errorMessage = ""
+    /// If `true` the currently displayed error is dismissed.
     var dismiss = false
     /// This is required to dimiss the view on a non recoverable error.
     /// More explanation here: https://www.hackingwithswift.com/quick-start/swiftui/how-to-make-a-view-dismiss-itself
@@ -147,6 +155,7 @@ struct MeasurementView: View {
             .tint(Color("Cyface-Green"))
     }
 
+    /// Handles calling delete on one or more measurements.
     private func deleteMeasurements(at offsets: IndexSet) {
         do {
             try appState.deleteMeasurements(at: offsets)

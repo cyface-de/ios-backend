@@ -20,8 +20,16 @@
 import SwiftUI
 import DataCapturing
 
+/**
+ The central entry point for the user interface.
+
+ An object of this class is used to decide which view is shown at the start of the application and how to initialize the application.
+
+ - author: Klemens Muthmann
+ */
 struct ApplicationUI: View {
 
+    /// The initial application state.
     @ObservedObject var appState: ApplicationState
 
     var body: some View {

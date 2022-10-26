@@ -19,10 +19,18 @@
 
 import SwiftUI
 
-struct LabelledDivider: View {
+/**
+A horizontal line with a lable in the center.
 
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
+struct LabelledDivider: View {
+    /// The label to show in the center of the line.
     let label: String
+    /// Padding to the left and the right.
     let horizontalPadding: CGFloat = 20
+    /// Color of the line and the text.
     let color: Color = .gray
 
     var body: some View {
@@ -33,6 +41,7 @@ struct LabelledDivider: View {
         }
     }
 
+    /// The line part to the left and the right of the label.
     var line: some View {
         VStack { Divider().background(color) }.padding(horizontalPadding)
     }

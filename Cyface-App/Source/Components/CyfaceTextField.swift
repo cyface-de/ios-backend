@@ -19,6 +19,12 @@
 
 import SwiftUI
 
+/**
+The typical style used by all text fields in this application.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 struct CyfaceTextField: TextFieldStyle {
 
     public func _body(configuration field: TextField<_Label>) -> some View {

@@ -20,6 +20,7 @@
 import Foundation
 import DataCapturing
 import CoreMotion
+import OSLog
 
 /**
  A class encompassing all the state required everywhere in the application.
@@ -52,12 +53,17 @@ class ApplicationState: ObservableObject {
     @Published var isInitialized: Bool
     /// This is `true` if data capturing is active and `false` otherwise. Depending on this value, buttons are without function and the UI for the current measurement is shown.
     @Published var isCurrentlyCapturing: Bool = false
+    /// Used to decide on whether to show the pause UI elements or not. This usually means that the capturing bar is displayed, but the pause button is disabled while the play and the stop button are enabled.
     @Published var isPaused: Bool = false
+    /// The list of measurements currently shown via the user interface.
     @Published var measurements = [MeasurementViewModel]()
+    /// `true` if the UI is supposed to display an error message; `false` otherwise.
     @Published var hasError = false
+    /// The error message to show if `hasError` is `true`.
     @Published var errorMessage = ""
 
     // MARK: - Initializers
+    /// Create a new `ApplicationState` from the system settings of this application.
     init(settings: Settings) {
         self.hasAcceptedCurrentPrivacyPolicy = settings.highestAcceptedPrivacyPolicy >= PrivacyPolicy.currentPrivacyPolicyVersion
 
@@ -80,6 +86,7 @@ class ApplicationState: ObservableObject {
             self.dcs.setup()
 
             self.settings.add(serverUrlChangedListener: self)
+            self.settings.add(uploadToggleChangedListener: self)
 
             let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
             for measurement in try persistenceLayer.loadSynchronizableMeasurements() {
@@ -91,6 +98,7 @@ class ApplicationState: ObservableObject {
     }
 
     // MARK: - Methods
+    /// Called if the user accepts the privacy policy.
     func acceptPrivacyPolicy() {
         settings.highestAcceptedPrivacyPolicy = PrivacyPolicy.currentPrivacyPolicyVersion
         hasAcceptedCurrentPrivacyPolicy = true
@@ -104,13 +112,15 @@ class ApplicationState: ObservableObject {
      - param authenticator: If `nil` the error status of the application is set to `true` and the error message from ``ViewError.missingAuthenticator`` will be set into the ``errorMessage`` attribute.
      */
     func startSynchronization(authenticator: CredentialsAuthenticator?) {
+        os_log("Starting Synchronization")
+
         guard let authenticator = authenticator else {
             hasError = true
             errorMessage = ViewError.missingAuthenticator.localizedDescription
             return
         }
 
-        // This makes the function idempotent (ensures that multiple calls do not start synchroniation multiple times.
+        // This makes the function idempotent (ensures that multiple calls do not start synchronization multiple times.
         if let existingAuthenticator = synchronizer?.authenticator as? CredentialsAuthenticator {
             let authenticationEndpointChanged = existingAuthenticator.authenticationEndpoint != authenticator.authenticationEndpoint
             let usernameChanged = existingAuthenticator.username != authenticator.username
@@ -140,17 +150,24 @@ class ApplicationState: ObservableObject {
         self.synchronizer = CyfaceSynchronizer(apiURL: parsedURL, coreDataStack: dcs.coreDataStack, cleaner: DeletionCleaner(), sessionRegistry: SessionRegistry(), authenticator: authenticator)
         self.synchronizer?.handler.append(self.handle)
         do {
-            try self.synchronizer?.activate()
+            if settings.synchronizeData {
+                try self.synchronizer?.activate()
+            } else {
+                os_log("Not Starting Synchronization, since it is switched off in the settings.")
+                return
+            }
         } catch {
             hasError = true
             errorMessage = error.localizedDescription
         }
     }
 
+    /// Force the application to synchronize measurements with the server.
     func sync() {
         synchronizer?.sync()
     }
 
+    // Called if the user deletes one or more measurements.
     func deleteMeasurements(at offsets: IndexSet) throws {
         let persistenceLayer = PersistenceLayer(onManager: dcs.coreDataStack)
         for offset in offsets {
@@ -162,8 +179,8 @@ class ApplicationState: ObservableObject {
     // MARK: - Private Methods
     /// Checks if the settings contain a valid Cyface server URL at the moment.
     /// 
-    /// - Parameter settings: 
-    /// - Returns: <#description#>
+    /// - Parameter settings: The App settings containing the server URL
+    /// - Returns: `true` if a valid server URL has been provided by the user via the applications system settings.
     private static func hasValidServerURL(settings: Settings) -> Bool {
         if let unwrappedURL = settings.serverUrl {
             if NSPredicate(format: "SELF MATCHES %@", urlRegEx).evaluate(with: unwrappedURL) {
@@ -197,6 +214,7 @@ extension ApplicationState: ServerUrlChangedListener {
 extension ApplicationState: UploadToggleChangedListener {
     func to(upload: Bool) {
         if upload && isLoggedIn {
+            os_log("User activated synchronization!")
             do {
                 try synchronizer?.activate()
             } catch {
@@ -204,6 +222,7 @@ extension ApplicationState: UploadToggleChangedListener {
                 errorMessage = error.localizedDescription
             }
         } else {
+            os_log("User deactivated synchronization!")
             synchronizer?.deactivate()
         }
     }
@@ -277,6 +296,7 @@ extension ApplicationState: CyfaceEventHandler {
         }
     }
 
+    /// Mark the measurement as a failed upload.
     private func markAsFailed(measurementIdentifier: Int64) {
         if let index = self.measurements.firstIndex(where: {model in
             return model.id == measurementIdentifier
@@ -286,6 +306,7 @@ extension ApplicationState: CyfaceEventHandler {
         }
     }
 
+    /// Load the measurement from persistent storage.
     private func loadMeasurement(_ identifier: Int64) throws -> DataCapturing.Measurement {
         let persistenceLayer = PersistenceLayer(onManager: dcs.coreDataStack)
 

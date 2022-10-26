@@ -19,11 +19,19 @@
 
 import SwiftUI
 
-struct RegistrationView: View {
+/**
+ View shown to allow the user to register with the Cyface server.
 
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
+struct RegistrationView: View {
+    /// The application system settings containing the user and login information.
     var settings: Settings
+    /// The view model containing the registration information.
     @StateObject var model: RegistrationViewModel
 
+    /// Create a new instance of this view based on the current system settings and an HCaptcha `validationToken`.
     init(settings: Settings, validationToken: String) {
         self.settings = settings
         self._model = StateObject(wrappedValue: RegistrationViewModel(validationToken: validationToken)) 

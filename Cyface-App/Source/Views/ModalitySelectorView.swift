@@ -19,6 +19,12 @@
 
 import SwiftUI
 
+/**
+ A picker used to select the current modality for the data measurement.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 struct ModalitySelectorView: View {
     @Binding var selectedModality: Modalities
 

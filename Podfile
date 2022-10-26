@@ -32,5 +32,6 @@ target 'Cyface-App' do
     inherit! :search_paths
     # Pods for testing
     pod 'DataCapturing', :path => './'
+    pod 'HCaptcha', '~> 2.3.2'
   end
 end

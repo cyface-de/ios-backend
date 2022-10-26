@@ -25,10 +25,15 @@ import Foundation
 /// - version: 1.0.0
 /// - since: 4.0.0
 enum Modalities {
+    /// Used if the application captures a bicycle ride.
     case bicycle
+    /// Used if the application captures a car drive.
     case car
+    /// Used if the application captures a walk.
     case walking
+    /// Used if the application captures a bus ride.
     case bus
+    /// Used if the application captures a train ride.
     case train
 
     /// The modality selected by default after the start of the Application.

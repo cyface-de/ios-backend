@@ -554,7 +554,8 @@ class DataCapturingTests: XCTestCase {
         - eventHandler: An `eventHandler` used to capture events from the created service. The default implementation is a no-op implementation throwing all events away.
      */
     func dataCapturingService(sensorManager: CMMotionManager = TestMotionManager(), dataManager: CoreDataManager, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void) = {_, _ in }) -> TestDataCapturingService {
-        let ret = TestDataCapturingService(sensorManager: sensorManager, dataManager: dataManager, eventHandler: eventHandler)
+        let ret = TestDataCapturingService(sensorManager: sensorManager, dataManager: dataManager)
+        ret.handler.append(eventHandler)
         ret.coreLocationManager = TestLocationManager()
         return ret
     }
