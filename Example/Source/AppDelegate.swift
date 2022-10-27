@@ -72,7 +72,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
             return
         }
 
-        let authenticator = CredentialsAuthenticator(authenticationEndpoint: serverURL)
+        let authenticator = CyfaceAuthenticator(authenticationEndpoint: serverURL)
         authenticator.username = settings.username
         authenticator.password = settings.password
         self.authenticator = authenticator

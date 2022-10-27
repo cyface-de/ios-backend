@@ -92,10 +92,13 @@ public class CyfaceSynchronizer: Synchronizer {
 
     // MARK: - Properties
 
+    /// The handler to inform about `DataCapturingEvent` instances related to data synchronization.
     public var handler = [(DataCapturingEvent, Status) -> Void]()
 
+    /// Whether to sync only on a WiFi connection. If `false` data is synchronized over mobile connections as well.
     public var syncOnWiFiOnly = true
 
+    /// The authenticator to use to synchronize the with a Cyface data collector
     public let authenticator: Authenticator
 
     /// The logger used for objects of this class.

@@ -129,9 +129,9 @@
 		9C495DEDB48B9380E7198DF4 /* Pods-Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.release.xcconfig"; path = "Target Support Files/Pods-Example/Pods-Example.release.xcconfig"; sourceTree = "<group>"; };
 		AA75B17F270DBD4100C05EBC /* ExampleUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExampleUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA75B181270DBD4100C05EBC /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
-		AAC5788926E0ED0A00BF1CFC /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Settings.swift; path = "../../../Cyface-App/Source/Model/Settings.swift"; sourceTree = "<group>"; };
+		AAC5788926E0ED0A00BF1CFC /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		AAC5788B26E0FE9700BF1CFC /* PrivacyPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicy.swift; sourceTree = "<group>"; };
-		AAC5788E26E1015A00BF1CFC /* PrivacyPolicyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrivacyPolicyViewModel.swift; path = "../../../../Cyface-App/Source/Model/PrivacyPolicyViewModel.swift"; sourceTree = "<group>"; };
+		AAC5788E26E1015A00BF1CFC /* PrivacyPolicyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyViewModel.swift; sourceTree = "<group>"; };
 		AAC5789126E1045400BF1CFC /* CyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyButton.swift; sourceTree = "<group>"; };
 		AAC5789326E109A300BF1CFC /* CyNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyNavigationBar.swift; sourceTree = "<group>"; };
 		AAD09FF126DFB22F007B2EEC /* AskForServerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskForServerViewController.swift; sourceTree = "<group>"; };

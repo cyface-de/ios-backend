@@ -1,8 +1,9 @@
 PODS:
   - Alamofire (5.5.0)
-  - Charts (3.6.0):
-    - Charts/Core (= 3.6.0)
-  - Charts/Core (3.6.0)
+  - Charts (4.1.0):
+    - Charts/Core (= 4.1.0)
+  - Charts/Core (4.1.0):
+    - SwiftAlgorithms (~> 1.0)
   - DataCapturing (10.0.0):
     - Alamofire (~> 5.5.0)
     - DataCompression (~> 3.6.0)
@@ -20,11 +21,12 @@ PODS:
   - HCaptcha/Core (2.3.2)
   - Mocker (2.5.5)
   - Protos (2.1.0)
+  - SwiftAlgorithms (1.0.0)
   - SwiftProtobuf (1.19.1)
   - ViewInspector (0.9.1)
 
 DEPENDENCIES:
-  - Charts (~> 3.6.0)
+  - Charts (~> 4.1.0)
   - DataCapturing (from `./`)
   - DataCapturing/Tests (from `./`)
   - HCaptcha (~> 2.3.2)
@@ -37,6 +39,7 @@ SPEC REPOS:
     - DataCompression
     - HCaptcha
     - Mocker
+    - SwiftAlgorithms
     - SwiftProtobuf
     - ViewInspector
   https://github.com/cyface-de/ios-podspecs:
@@ -48,15 +51,16 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 1c4fb5369c3fe93d2857c780d8bbe09f06f97e7c
-  Charts: b1e3a1f5a1c9ba5394438ca3b91bd8c9076310af
+  Charts: 354f86803d11d9c35de280587fef50d1af063978
   DataCapturing: e7c94a6128373b865083cc6fa05f895027ab7cc0
   DataCompression: 06628f9c807b6f152e0da37635633f62fc51dc77
   HCaptcha: 924da35fcd3b85780e95af49eb2a7e2ee9f3eca3
   Mocker: 8c731a8104962f246cadf2b02556218e9edc1390
   Protos: 0c003a8495268bb644d8e1d325ec4f117ba50183
+  SwiftAlgorithms: 38dda4731d19027fdeee1125f973111bf3386b53
   SwiftProtobuf: 59d9ea2eb5f84b509f32d170a65f3348ae758f1e
   ViewInspector: 68842776f07fbf186713689d4846e54f32ccbffb
 
-PODFILE CHECKSUM: 92b85ba2f650ae43c35d9d0445579242d132ff50
+PODFILE CHECKSUM: bbd7ee5188d13a609bd31377b609c1d17ab3d4b2
 
 COCOAPODS: 1.11.3

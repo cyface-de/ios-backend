@@ -6,7 +6,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 target 'Example' do
   project 'Example.xcodeproj'
-  pod 'Charts', '~> 3.6.0'
+  pod 'Charts', '~> 4.1.0'
   pod 'DataCapturing', :path => './', :testspecs => ['Tests']
 
   target 'ExampleUnitTests' do

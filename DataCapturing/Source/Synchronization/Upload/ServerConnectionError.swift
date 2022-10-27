@@ -138,7 +138,9 @@ Tell the user that an upload failed because the session used for that upload was
                 "de.cyface.error.ServerConnectionError.uploadNotAccepted",
                 value: "The server did not accept the upload of the measurement",
                 comment: """
-////Tell the user that for some reason the server did not accept the upload of measurement %@. There are several possible reasons for that, which are server specific. One example would be a measurement without any location data.
+Tell the user that for some reason the server did not accept the upload of measurement %@.
+There are several possible reasons for that, which are server specific.
+One example would be a measurement without any location data.
 """)
             return String.localizedStringWithFormat(errorMessage, measurementIdentifier)
         }
