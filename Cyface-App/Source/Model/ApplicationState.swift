@@ -270,6 +270,10 @@ extension ApplicationState: CyfaceEventHandler {
                         self.hasError = true
                         self.errorMessage = error.localizedDescription
                     }
+
+                    if self.settings.synchronizeData {
+                        self.synchronizer?.syncChecked()
+                    }
                 case .synchronizationFinished(measurement: let measurementIdentifier):
                     self.measurements.removeAll(where: { model in
                         return model.id == measurementIdentifier
