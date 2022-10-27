@@ -137,6 +137,7 @@ class CapturingLifecycle {
 
         self.viewController.measurementsOverview.reloadData()
         if synchronize {
+            os_log("Starting Synchronization since synchronize is true", log: CapturingLifecycle.log, type: .info)
             synchronizer.syncChecked()
         }
 

@@ -51,9 +51,7 @@ import CoreData
 // 3
 let manager = CoreDataManager()
 // 4
-guard let bundle = Bundle(for: type(of: manager)) else {
-    fatalError()
-}
+let bundle = Bundle(for: type(of: manager))
 // 5
 try manager.setup(bundle: bundle) {
     // 6

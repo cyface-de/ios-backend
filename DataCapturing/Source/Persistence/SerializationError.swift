@@ -26,7 +26,7 @@ import Foundation
  - Version: 1.0.0
  - Since: 1.0.0
  */
-enum SerializationError: Error {
+public enum SerializationError: Error {
     /// Thrown if compression of serialized data was not successful. The failed data is provided as parameter.
     case compressionFailed(data: Data)
     /// Thrown if the system was unable to serialize a timestamp.

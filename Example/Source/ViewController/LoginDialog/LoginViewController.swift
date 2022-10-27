@@ -59,9 +59,9 @@ class LoginViewController: UIViewController {
     @IBAction func guestLoginButtonTapped(_ sender: UIButton) {
         if _model.serverUrl==Settings.defaultServerURL {
             _model.username = Settings.guestUsername
-            authenticator.username = Settings.guestUsername
+            appDelegate.authenticator?.username = Settings.guestUsername
             _model.password = Settings.guestPassword
-            authenticator.password = Settings.guestPassword
+            appDelegate.authenticator?.password = Settings.guestPassword
 
             login()
         } else {
@@ -154,9 +154,9 @@ class LoginViewController: UIViewController {
             }
 
             // Reset Cyface SDK to use the new URL
-            authenticator.authenticationEndpoint = serverUrl
-            authenticator.username = self._model.username
-            authenticator.password = self._model.password
+            //appDelegate.authenticator?.authenticationEndpoint = serverUrl
+            self.appDelegate.authenticator?.username = self._model.username
+            self.appDelegate.authenticator?.password = self._model.password
 
             authenticator.authenticate(onSuccess: {_ in
                                         DispatchQueue.main.async { [weak self] in

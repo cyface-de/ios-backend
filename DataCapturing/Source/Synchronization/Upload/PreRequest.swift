@@ -80,13 +80,16 @@ class PreRequest {
                 }
 
                 let status = response.statusCode
-                guard let location = response.headers["Location"] else {
-                    onFailure(measurementIdentifier, ServerConnectionError.noLocation)
-                    return
-                }
 
                 if status == 200 {
+                    guard let location = response.headers["Location"] else {
+                        onFailure(measurementIdentifier, ServerConnectionError.noLocation)
+                        return
+                    }
+
                     onSuccess(authToken, location, upload)
+                } else if status == 412 {
+                    onFailure(measurementIdentifier, ServerConnectionError.uploadNotAccepted(measurementIdentifier: Int64(measurementIdentifier)))
                 } else {
                     onFailure(measurementIdentifier, ServerConnectionError.requestFailed(httpStatusCode: status))
                 }

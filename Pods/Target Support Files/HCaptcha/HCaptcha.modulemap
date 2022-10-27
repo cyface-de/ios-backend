@@ -1,0 +1,6 @@
+framework module HCaptcha {
+  umbrella header "HCaptcha-umbrella.h"
+
+  export *
+  module * { export * }
+}

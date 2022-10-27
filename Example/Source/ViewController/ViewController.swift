@@ -173,23 +173,24 @@ class ViewController: UIViewController {
     // MARK: - Properties
     var dataCapturingService: DataCapturingService?
 
-    private lazy var synchronizer: Synchronizer = {
+    private lazy var synchronizer: CyfaceSynchronizer = {
         guard let coreDataStack = appDelegate.coreDataStack else {
             fatalError("Unable to load CoreData stack!")
         }
         guard let serverURL = URL(string: appDelegate.settings.serverUrl!) else {
             fatalError("Unable to load server connection!")
         }
-        let authenticator = CredentialsAuthenticator(authenticationEndpoint: serverURL)
+        let authenticator = CyfaceAuthenticator(authenticationEndpoint: serverURL)
         authenticator.username = settings?.username
         authenticator.password = settings?.password
 
-        let ret = Synchronizer(
+        let ret = CyfaceSynchronizer(
             apiURL: serverURL,
             coreDataStack: coreDataStack,
             cleaner: DeletionCleaner(),
             authenticator: authenticator
-        ) { [weak self] event, status in
+        )
+        ret.handler.append { [weak self] event, status in
             guard let self = self else {
                 return
             }
@@ -259,7 +260,8 @@ class ViewController: UIViewController {
                     return
                 }
 
-                self.lifecycle.onServiceStopped(synchronizer: self.synchronizer, synchronize: self._settings.synchronizeData)
+                let shouldSynchronizeData = self._settings.synchronizeData
+                self.lifecycle.onServiceStopped(synchronizer: self.synchronizer, synchronize: shouldSynchronizeData)
             }
 
         case .servicePaused:
@@ -495,8 +497,9 @@ class ViewController: UIViewController {
                         let motionManager = CMMotionManager()
                         self.dataCapturingService = DataCapturingService(
                             sensorManager: motionManager,
-                            dataManager: coreDataStack,
-                            eventHandler: self.handleDataCapturingEvent)
+                            dataManager: coreDataStack)
+                        self.dataCapturingService?.setup()
+                        self.dataCapturingService?.handler.append(self.handleDataCapturingEvent)
 
                         // TODO: Move this to a Table View Model
                         // Load the measurements to show

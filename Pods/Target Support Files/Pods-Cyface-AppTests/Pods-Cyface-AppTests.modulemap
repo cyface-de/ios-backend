@@ -1,0 +1,6 @@
+framework module Pods_Cyface_AppTests {
+  umbrella header "Pods-Cyface-AppTests-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -67,6 +67,16 @@
           "source_files": "ExampleUnitTests/**/*.swift"
         }
       ]
+    },
+    {
+      "name": "Cyface-App",
+      "source_files": "Cyface-App/Source/**/*.swift",
+      "testspecs": [
+        {
+          "name": "Cyface-AppTests",
+          "test_type": "unit"
+        }
+      ]
     }
   ],
   "swift_version": "5.3"
