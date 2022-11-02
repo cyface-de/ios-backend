@@ -1,0 +1,35 @@
+{
+  "images" : [
+    {
+<<<<<<< HEAD
+      "filename" : "logo_v1.2_text-only-2.svg",
+=======
+      "filename" : "logo_200pt_1x.png",
+>>>>>>> 504f8b7 (Add new UI project based on SwiftUI)
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+<<<<<<< HEAD
+      "filename" : "logo_v1.2_text-only-1.svg",
+=======
+      "filename" : "logo_200pt_2x.png",
+>>>>>>> 504f8b7 (Add new UI project based on SwiftUI)
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+<<<<<<< HEAD
+      "filename" : "logo_v1.2_text-only.svg",
+=======
+      "filename" : "logo_200pt_3x.png",
+>>>>>>> 504f8b7 (Add new UI project based on SwiftUI)
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

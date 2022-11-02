@@ -50,7 +50,7 @@ struct MeasurementListView: View {
                     .padding()
                     .frame(width: 50, height: 50, alignment: .center)
             } else if measurementViewModel.synchronizationFailed {
-                Image("error")
+                Image(systemName: "exclamationmark.triangle.fill")
                     .resizable()
                     .padding()
                     .frame(width: 50, height: 50, alignment: .center)

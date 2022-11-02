@@ -48,7 +48,7 @@ struct LoginView: View {
     }
 
     var body: some View {
-        if credentials.authenticator != nil {
+        if appState.isLoggedIn {
             MeasurementView(authenticator: credentials.authenticator)
         } else {
 
@@ -128,19 +128,25 @@ struct ContentView_Previews: PreviewProvider {
         return ret
     }
 
+    private static var appState: ApplicationState {
+        let ret = ApplicationState(settings: settings)
+        ret.isLoggedIn = false
+        return ret
+    }
+
     static var previews: some View {
 
         Group {
             NavigationView {
-                LoginView(settings: settings).preferredColorScheme(.light).environmentObject(ApplicationState(settings: settings))
+                LoginView(settings: settings).preferredColorScheme(.light).environmentObject(appState)
             }
 
             NavigationView {
-                LoginView(settings: settings).preferredColorScheme(.dark).environmentObject(ApplicationState(settings: settings))
+                LoginView(settings: settings).preferredColorScheme(.dark).environmentObject(appState)
             }
 
             NavigationView {
-                LoginView(settings: settings, showError: true, errorMessage: "This is some generic error message!").environmentObject(ApplicationState(settings: settings))
+                LoginView(settings: settings, showError: true, errorMessage: "This is some generic error message!").environmentObject(appState)
             }
         }
     }
