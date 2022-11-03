@@ -51,9 +51,6 @@ struct MeasurementView: View {
                     }
                 .onDelete(perform: deleteMeasurements)
             }
-            .toolbar {
-                EditButton()
-            }
 
             if appState.isCurrentlyCapturing || appState.isPaused {
                 CurrentMeasurementView(viewModel: CurrentMeasurementViewModel(appState: appState))
@@ -115,24 +112,30 @@ struct MeasurementView: View {
                 .disabled(!appState.isCurrentlyCapturing && !appState.isPaused)
             }
             .frame(maxWidth: .infinity)
-
-            HStack {
-                Button(action: {
-                    appState.sync()
-                }) {
-                    Image(systemName: "square.and.arrow.up")
-                }
-                .frame(alignment: .center)
-                .foregroundColor(.primary)
-                .padding(5)
-                .font(.system(size: 25))
-
-                Spacer()
-            }
         }
             .navigationBarBackButtonHidden(true)
             .navigationTitle("Measurements")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .destructiveAction) {
+                    Button(action: {
+                        appState.sync()
+                    }) {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                }
+
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(action: {
+                        DispatchQueue.main.async {
+                            appState.isLoggedIn = false
+                            appState.settings.authenticatedServerUrl = nil
+                        }
+                    }) {
+                        Image(systemName: "power.circle")
+                    }
+                }
+            }
             .frame(maxWidth: .infinity)
             .alert("Error", isPresented: $showError, actions: {
                 // actions

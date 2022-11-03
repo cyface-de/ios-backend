@@ -46,7 +46,7 @@ class ApplicationState: ObservableObject {
     /// This is `true` if the most recent privacy policy has been accepted by the user or `false` otherwise. Depending on the value of this flag, the application either shows the privacy policy screen or not.
     @Published var hasAcceptedCurrentPrivacyPolicy: Bool
     /// This is `true` if the user has been logged in or `false` otherwise. Depending on the state of this flag the app either shows a login screen or the main screen.
-    var isLoggedIn: Bool
+    @Published var isLoggedIn: Bool
     /// Is there currently a valid Cyface server set in the application settings. If not this can be used to force the user to enter one such URL.
     @Published var hasValidServerURL: Bool
     /// Is the application properly initialized? This information is used to show a splash screen on startup, which disappears after initialization has finished. Initialization at the moment is the setup of the CoreDataStack, which can include data migration from previous database versions.
@@ -73,8 +73,11 @@ class ApplicationState: ObservableObject {
         self.isInitialized = false
 
         do {
-            self.isLoggedIn = hasValidServerURL || (settings.authenticatedServerUrl == settings.serverUrl)
-            
+            let authenticatedServerURL = settings.authenticatedServerUrl
+            let serverURL = settings.serverUrl
+            let serverURLMatchesAuthenticatedURL = authenticatedServerURL == serverURL
+            self.isLoggedIn = hasValidServerURL && serverURLMatchesAuthenticatedURL
+
             let coreDataStack = try CoreDataManager()
             let bundle = Bundle(for: type(of: coreDataStack))
 

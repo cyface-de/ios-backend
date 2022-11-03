@@ -91,3 +91,6 @@ playground.xcworkspace
 
 # MAC OS System files
 **/.DS_Store
+
+# Git Temporary Files
+**/*.orig
