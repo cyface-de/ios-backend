@@ -38,9 +38,6 @@
     ],
     "SwiftProtobuf": [
       "~> 1.19.0"
-    ],
-    "Protos": [
-      "~> 2.1.0"
     ]
   },
   "testspecs": [

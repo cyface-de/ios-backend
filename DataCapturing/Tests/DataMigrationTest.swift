@@ -19,6 +19,7 @@
 
 import XCTest
 import CoreData
+import OSLog
 @testable import DataCapturing
 
 /**
@@ -432,8 +433,17 @@ extension FileManager {
     static func moveFileFromBundleToTempDirectory(filename: String) -> URL {
         let destinationURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true).appendingPathComponent(filename)
         try? FileManager.default.removeItem(at: destinationURL)
-        let bundleURL = Bundle(for: DataMigrationTest.self).resourceURL!.appendingPathComponent(filename)
-        try? FileManager.default.copyItem(at: bundleURL, to: destinationURL)
+        let bundleURL = Bundle(for: CoreDataMigrator.self).resourceURL!
+            .appendingPathComponent(filename)
+        do {
+            try FileManager.default.copyItem(at: bundleURL, to: destinationURL)
+        } catch {
+            fatalError("""
+Unable to copy test data from \(bundleURL) to \(destinationURL).
+Reason: \(error)
+File Exists: \(FileManager.default.fileExists(atPath: bundleURL.absoluteString))
+""")
+        }
 
         return destinationURL
     }

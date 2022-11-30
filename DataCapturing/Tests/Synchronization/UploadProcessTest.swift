@@ -48,7 +48,7 @@ class UploadProcessTest: XCTestCase {
         let mockedSession = Alamofire.Session(configuration: configuration)
 
         let apiURL = try XCTUnwrap(URL(string: apiURL))
-        let authenticator = CredentialsAuthenticator(authenticationEndpoint: apiURL, session: mockedSession)
+        let authenticator = CyfaceAuthenticator(authenticationEndpoint: apiURL, session: mockedSession)
         authenticator.username = "admin"
         authenticator.password = "secret"
         let loginURL = try XCTUnwrap(URL(string: loginURL))
@@ -99,7 +99,7 @@ class UploadProcessTest: XCTestCase {
         configuration.protocolClasses = [URLProtocolStub.self]  + (configuration.protocolClasses ?? [])
         let mockedSession = Session(configuration: configuration)
         let sessionRegistry = SessionRegistry()
-        let authenticator = CredentialsAuthenticator(authenticationEndpoint: apiURL, session: mockedSession)
+        let authenticator = CyfaceAuthenticator(authenticationEndpoint: apiURL, session: mockedSession)
         authenticator.username = "admin"
         authenticator.password = "secret"
         let expectation = XCTestExpectation(description: "UploadProcess finishes.")
@@ -162,7 +162,7 @@ class MockUpload: Upload {
 
     /// Some random test data to upload.
     func data() -> Data {
-        let bundle = Bundle(for: UploadProcessTest.self)
+        let bundle = Bundle(for: UploadProcess.self)
         guard let path = bundle.path(forResource: "serializedFixture", ofType: "cyf") else {
             fatalError()
         }

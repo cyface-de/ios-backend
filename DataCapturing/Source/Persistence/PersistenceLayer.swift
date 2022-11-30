@@ -249,6 +249,7 @@ public class PersistenceLayer {
      - Throws: `PersistenceError.dataNotLoadable`, Some unspecified errors from within CoreData.
      */
     func save(locations: [LocationCacheEntry], in measurement: inout Measurement) throws {
+        os_log("Storing %{PUBLIC}d locations to measurement %{PUBLIC}d!", log: PersistenceLayer.log, type: .debug, locations.count, measurement.identifier)
         try manager.wrapInContext { context in
 
             guard let measurementMO = try load(measurementIdentifiedBy: measurement.identifier, from: context) else {
@@ -302,6 +303,13 @@ public class PersistenceLayer {
             measurement.trackLength = measurementMO.trackLength
 
             try context.save()
+
+            os_log("Stored %{PUBLIC}d locations to measurement %{PUBLIC}d with calculated length of %{PUBLIC}f!",
+                           log: PersistenceLayer.log,
+                           type: .debug,
+                           locations.count,
+                           measurement.identifier,
+                           measurement.trackLength)
         }
     }
 
