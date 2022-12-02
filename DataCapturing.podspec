@@ -32,8 +32,8 @@ This framework can be included by your App if you are going to capture sensor da
   s.source                = { :git => 'https://github.com/cyface-de/ios-backend.git', :tag => s.version.to_s }
   s.social_media_url      = 'https://twitter.com/CyfaceDE'
 
-  s.platform	          = :ios, '12.4'
-  s.ios.deployment_target = '12.4'
+  s.platform	          = :ios, '14.0'
+  s.ios.deployment_target = '14.0'
   s.swift_version         = '5.3'
 
   # It seems these files need to reside inside a folder DataCapturing (same name as framework).
@@ -52,7 +52,6 @@ This framework can be included by your App if you are going to capture sensor da
   s.dependency 'DataCompression', '~> 3.6.0'
   # Handle Protobuf Data Format
   s.dependency 'SwiftProtobuf', '~> 1.19.0'
-  s.dependency 'Protos', '~> 2.1.0'
 
   # Podspecs do not support references to files in the parent folder.
   # So make sure tests are always located on the same level or below the podspec.

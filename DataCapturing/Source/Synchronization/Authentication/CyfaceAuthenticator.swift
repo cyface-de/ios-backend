@@ -81,18 +81,30 @@ public class CyfaceAuthenticator: CredentialsAuthenticator {
                 headers: headers)
             request.response { response in
                 guard let httpResponse = response.response else {
-                    os_log("Unable to unwrap authentication response!", log: CyfaceAuthenticator.log, type: OSLogType.error)
+                    os_log("Unable to unwrap authentication response at endpoint \"%{PUBLIC}@\" using credentials %@ / %@!",
+                           log: CyfaceAuthenticator.log,
+                           type: .error,
+                           url.absoluteString,
+                           username,
+                           password)
                     return onFailure(ServerConnectionError.authenticationNotSuccessful(username))
                 }
 
                 if httpResponse.statusCode==200, let authorizationValue = httpResponse.allHeaderFields["Authorization"] as? String {
                     onSuccess(authorizationValue)
                 } else {
+                    os_log("Authentication not successful at endpoint \"%{PUBLIC}@\" using credentials %@ / %@",
+                            log: CyfaceAuthenticator.log,
+                            type: .info,
+                            url.absoluteString,
+                            username,
+                            password)
                     onFailure(ServerConnectionError.authenticationNotSuccessful(username))
                 }
             }
             request.resume()
         } catch let error {
+            os_log("Unable to serialize authentication body with credentials %@ /%@", log: CyfaceAuthenticator.log, type: .error, username, password)
             onFailure(error)
         }
     }

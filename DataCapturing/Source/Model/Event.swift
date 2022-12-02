@@ -77,6 +77,6 @@ If this instance is persisted via CoreData, its `objectId` must be set to the ap
 
    /// A stringified variant of this object. Mostly used to pretty print instances during debugging.
     public var description: String {
-        "Event(type: \(type), time: \(time), value: \(value), measurement: \(measurement.identifier))"
+        "Event(type: \(type), time: \(time), value: \(String(describing: value)), measurement: \(measurement.identifier))"
     }
 }

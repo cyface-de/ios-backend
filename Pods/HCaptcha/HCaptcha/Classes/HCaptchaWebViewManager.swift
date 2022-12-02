@@ -9,10 +9,9 @@
 import Foundation
 import WebKit
 
-
 /** Handles comunications with the webview containing the HCaptcha challenge.
  */
-internal class HCaptchaWebViewManager {
+internal class HCaptchaWebViewManager: NSObject {
     enum JSCommand: String {
         case execute = "execute();"
         case reset = "reset();"
@@ -23,6 +22,8 @@ internal class HCaptchaWebViewManager {
         static let ResetCommand = "reset();"
         static let BotUserAgent = "bot/2.1"
     }
+
+    fileprivate let webViewInitSize = CGSize(width: 1, height: 1)
 
 #if DEBUG
     /// Forces the challenge to be explicitly displayed.
@@ -92,7 +93,7 @@ internal class HCaptchaWebViewManager {
     /// The webview that executes JS code
     lazy var webView: WKWebView = {
         let webview = WKWebView(
-            frame: CGRect(x: 0, y: 0, width: 1, height: 1),
+            frame: CGRect(origin: CGPoint.zero, size: webViewInitSize),
             configuration: self.buildConfiguration()
         )
         webview.accessibilityIdentifier = "webview"
@@ -101,6 +102,9 @@ internal class HCaptchaWebViewManager {
 
         return webview
     }()
+
+    /// Responsible for external link handling
+    fileprivate let urlOpener: HCaptchaURLOpener
 
     /**
      - parameters:
@@ -113,7 +117,9 @@ internal class HCaptchaWebViewManager {
          - theme: Widget theme, value must be valid JS Object or String with brackets
      */
     init(html: String, apiKey: String, baseURL: URL, endpoint: URL,
-         size: HCaptchaSize, rqdata: String?, theme: String) {
+         size: HCaptchaSize, rqdata: String?, theme: String, urlOpener: HCaptchaURLOpener = HCapchaAppURLOpener()) {
+        self.urlOpener = urlOpener
+        super.init()
         self.baseURL = baseURL
         self.decoder = HCaptchaDecoder { [weak self] result in
             self?.handle(result: result)
@@ -141,6 +147,9 @@ internal class HCaptchaWebViewManager {
         }
 #endif
         view.addSubview(webView)
+        if self.didFinishLoading && (webView.bounds.size == CGSize.zero || webView.bounds.size == webViewInitSize) {
+            self.doConfigureWebView()
+        }
 
         executeJS(command: .execute)
     }
@@ -251,6 +260,10 @@ fileprivate extension HCaptchaWebViewManager {
         if completion != nil {
             executeJS(command: .execute)
         }
+        self.doConfigureWebView()
+    }
+
+    private func doConfigureWebView() {
         if configureWebView != nil {
             DispatchQueue.once(token: configureWebViewDispatchToken) { [weak self] in
                 guard let `self` = self else { return }
@@ -293,6 +306,7 @@ fileprivate extension HCaptchaWebViewManager {
     func setupWebview(on window: UIWindow, html: String, url: URL) {
         window.addSubview(webView)
         webView.loadHTMLString(html, baseURL: url)
+        webView.navigationDelegate = self
 
         if let observer = observer {
             NotificationCenter.default.removeObserver(observer)
@@ -325,5 +339,15 @@ fileprivate extension HCaptchaWebViewManager {
                 self?.decoder.send(error: .unexpected(error))
             }
         }
+    }
+}
+
+extension HCaptchaWebViewManager: WKNavigationDelegate {
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
+                 decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if navigationAction.targetFrame == nil, let url = navigationAction.request.url, urlOpener.canOpenURL(url) {
+            urlOpener.openURL(url)
+        }
+        decisionHandler(WKNavigationActionPolicy.allow)
     }
 }

@@ -342,7 +342,6 @@
 				AA7FB08F27EE017E000FFC26 /* Sources */,
 				AA7FB09027EE017E000FFC26 /* Frameworks */,
 				AA7FB09127EE017E000FFC26 /* Resources */,
-				8EB1E15D8D223989F46B924E /* [CP] Copy Pods Resources */,
 				A2DE216F2FA335E263E4A333 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
@@ -362,7 +361,6 @@
 				AA7FB09F27EE017F000FFC26 /* Sources */,
 				AA7FB0A027EE017F000FFC26 /* Frameworks */,
 				AA7FB0A127EE017F000FFC26 /* Resources */,
-				7952E068F3ECD558718AFC1C /* [CP] Copy Pods Resources */,
 				282A7826773F909EBCCE8D35 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
@@ -383,7 +381,6 @@
 				AA7FB0A927EE017F000FFC26 /* Sources */,
 				AA7FB0AA27EE017F000FFC26 /* Frameworks */,
 				AA7FB0AB27EE017F000FFC26 /* Resources */,
-				4A279AD8F9EC840741D2811A /* [CP] Copy Pods Resources */,
 				FADAC42FCDAE3AE67AE7A6DD /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
@@ -488,23 +485,6 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppTests/Pods-Cyface-AppTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		4A279AD8F9EC840741D2811A /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppUITests/Pods-Cyface-AppUITests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		6003DE031F02D3ACE4EC6C49 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -525,40 +505,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		7952E068F3ECD558718AFC1C /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppTests/Pods-Cyface-AppTests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppTests/Pods-Cyface-AppTests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-AppTests/Pods-Cyface-AppTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		8EB1E15D8D223989F46B924E /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Cyface-App/Pods-Cyface-App-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		A2DE216F2FA335E263E4A333 /* [CP] Embed Pods Frameworks */ = {
@@ -848,12 +794,13 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "de.cyface.Cyface-App";
+				MARKETING_VERSION = 4.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -884,12 +831,13 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "de.cyface.Cyface-App";
+				MARKETING_VERSION = 4.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -901,13 +849,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 45FC32AC5ABB7F56D7FBD5F9 /* Pods-Cyface-AppTests.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.cyface.Cyface-AppTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -922,13 +869,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 8DDAA42A273D1DEEFFE214BB /* Pods-Cyface-AppTests.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.cyface.Cyface-AppTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -943,7 +889,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 73F25B7E155D104ABF74D23E /* Pods-Cyface-AppUITests.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
@@ -962,7 +907,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9C22E7C8B3B1B8516D46D19B /* Pods-Cyface-AppUITests.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 45GZ5C9N64;

@@ -86,7 +86,7 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
 
         let startTime = Date()
         for i in 0..<countOfGeoLocations {
-            let location = try GeoLocation(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: DataCapturingService.convertToUtcTimestamp(date: startTime.addingTimeInterval(Double(i))), isValid: true, parent: track)
+            let location = GeoLocation(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: DataCapturingService.convertToUtcTimestamp(date: startTime.addingTimeInterval(Double(i))), isValid: true, parent: track)
 
             try track.append(location: location)
         }

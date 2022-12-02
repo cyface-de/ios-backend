@@ -557,6 +557,7 @@ class DataCapturingTests: XCTestCase {
         let ret = TestDataCapturingService(sensorManager: sensorManager, dataManager: dataManager)
         ret.handler.append(eventHandler)
         ret.coreLocationManager = TestLocationManager()
+        ret.setup()
         return ret
     }
 }

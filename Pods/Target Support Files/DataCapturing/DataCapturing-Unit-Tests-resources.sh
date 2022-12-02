@@ -109,7 +109,6 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_resource "${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/CyfaceModel.xcdatamodel"
   install_resource "${PODS_ROOT}/../DataCapturing/Source/Model/Migrations/V3toV4/V3toV4.xcmappingmodel"
   install_resource "${PODS_ROOT}/../DataCapturing/Source/Model/Migrations/V7toV8/V7toV8.xcmappingmodel"
-  install_resource "${PODS_ROOT}/Protos/src/main/proto/de/cyface/protos/model/measurement.proto"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_resource "${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld"
@@ -124,7 +123,6 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_resource "${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/CyfaceModel.xcdatamodel"
   install_resource "${PODS_ROOT}/../DataCapturing/Source/Model/Migrations/V3toV4/V3toV4.xcmappingmodel"
   install_resource "${PODS_ROOT}/../DataCapturing/Source/Model/Migrations/V7toV8/V7toV8.xcmappingmodel"
-  install_resource "${PODS_ROOT}/Protos/src/main/proto/de/cyface/protos/model/measurement.proto"
 fi
 
 mkdir -p "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}"
