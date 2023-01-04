@@ -1,9 +1,0 @@
-
-/* Class = "UILabel"; text = "Please select vehicle"; ObjectID = "0Md-7z-L0e"; */
-"0Md-7z-L0e.text" = "Selezionare il mezzo di trasporto";
-
-/* Class = "UIButton"; normalTitle = "Cancel"; ObjectID = "Mb5-Re-W2n"; */
-"Mb5-Re-W2n.normalTitle" = "Annulla";
-
-/* Class = "UIButton"; normalTitle = "OK"; ObjectID = "kMz-w2-5aI"; */
-"kMz-w2-5aI.normalTitle" = "OK";

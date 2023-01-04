@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21513" systemVersion="21G115" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Acceleration" representedClassName="AccelerationPointMO" syncable="YES">
+        <attribute name="ax" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="ay" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="az" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="GeoLocation" representedClassName="GeoLocationMO" syncable="YES">
+        <attribute name="accuracy" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="lat" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="lon" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="speed" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="Measurement" representedClassName="MeasurementMO" syncable="YES">
+        <attribute name="identifier" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="synchronized" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="timestamp" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="accelerations" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Acceleration"/>
+        <relationship name="geoLocations" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="GeoLocation"/>
+    </entity>
+</model>

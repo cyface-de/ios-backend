@@ -23,6 +23,7 @@
 ## Build generated
 build/
 DerivedData/
+**/docc
 
 ## Various settings
 *.pbxuser
@@ -33,9 +34,9 @@ DerivedData/
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
-xcuserdata/
-Example/Source/CyfaceCredentials.swift
-Example/env-vars.sh
+**/xcuserdata/
+**/project.xcworkspace
+**/*.xcuserstate
 
 ## Other
 *.moved-aside
