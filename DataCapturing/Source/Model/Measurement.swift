@@ -22,7 +22,7 @@ import CoreData
 
 // TODO: There probably need to be two kinds of Measurement instances (and other objects in that hierarchy). One is used to create new instances and one is used for already synchronized ones. The reason is, that refreshing the objectId via the context does not work, as the context changes the objectId as soon as a call to context.save() happens. -.-
 /**
-Instances of this class represent a single data capturing session, framed by calls to `DataCapturingService.start` and `DataCapturingService.stop`.
+ Instances of this class represent a single data capturing session, framed by calls to `DataCapturingService.start` and `DataCapturingService.stop`.
 
  Initially this is not going to be saved via CoreData. As soon as you call an appropriate save method on the `PersistenceLayer` the object is stored to CoreData and this objects `objectId` will receive a value.
 
@@ -33,29 +33,11 @@ Instances of this class represent a single data capturing session, framed by cal
  - since: 11.0.0
  */
 public class Measurement: Hashable, Equatable {
+    // MARK: - Internal Properties
     /// This measurements CoreData identifier or `nil` if the object has not been saved yet.
     var objectId: NSManagedObjectID?
-    /// The number of accelerations stored by this measurement. This information is required to deserialize the binary format for those values.
-    public var accelerationsCount: Int32
-    /// The number of rotations stored by this measurement. This information is required to deserialize the binary format for those values.
-    public var rotationsCount: Int32
-    /// The number of directions stored by this measurement. This information is required to deserialize the binary format for those values.
-    public var directionsCount: Int32
-    /// A device wide unique identifier for this measurement. Usually set by incrementing a counter.
-    public let identifier: Int64
-    /// A flag, marking this `Measurement` as either ready for data syncrhonization or not.
-    public var synchronizable: Bool
-    /// A flag, marking this `Measurement` as either synchronized or not.
-    public var synchronized: Bool
-    /// The UNIX timestamp in milliseconds since the 1st of January 1970, when this measurement was started.
-    public let timestamp: Int64
-    /// The calculated length of the `Measurement`. See `DistanceCalculationStrategy` for further details.
-    public var trackLength: Double
-    /// The user events that occurred during this `Measurement`.
-    public var events: [Event]
-    /// The tracks containing all the data this `Measurement` has captured.
-    public var tracks: [Track]
 
+    // MARK: - Public Initializers
     /**
      Initialize a new `Measurement` from an existing CoreData managed object.
 
@@ -122,6 +104,58 @@ public class Measurement: Hashable, Equatable {
         self.tracks = tracks
     }
 
+    // MARK: - Public Interface
+    /// The number of accelerations stored by this measurement. This information is required to deserialize the binary format for those values.
+    public var accelerationsCount: Int32
+    /// The number of rotations stored by this measurement. This information is required to deserialize the binary format for those values.
+    public var rotationsCount: Int32
+    /// The number of directions stored by this measurement. This information is required to deserialize the binary format for those values.
+    public var directionsCount: Int32
+    /// A device wide unique identifier for this measurement. Usually set by incrementing a counter.
+    public let identifier: Int64
+    /// A flag, marking this `Measurement` as either ready for data syncrhonization or not.
+    public var synchronizable: Bool
+    /// A flag, marking this `Measurement` as either synchronized or not.
+    public var synchronized: Bool
+    /// The UNIX timestamp in milliseconds since the 1st of January 1970, when this measurement was started.
+    public let timestamp: Int64
+    /// The calculated length of the `Measurement`. See `DistanceCalculationStrategy` for further details.
+    public var trackLength: Double
+    /// The user events that occurred during this `Measurement`.
+    public var events: [Event]
+    /// The tracks containing all the data this `Measurement` has captured.
+    public var tracks: [Track]
+
+    /// Required by the `Hashable` protocol to produce a hash for this object.
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(identifier)
+    }
+
+    /// Required by the `Equatable` protocol to compare two `Measurement` instances.
+    public static func == (lhs: Measurement, rhs: Measurement) -> Bool {
+        return lhs.identifier == rhs.identifier
+    }
+
+    /// Provide the average speed from the provided measurement
+    public func averageSpeed() -> Double {
+        var sum = 0.0
+        var counter = 0
+        tracks.forEach { track in
+            track.locations.forEach { location in
+                sum += location.speed
+                counter += 1
+            }
+        }
+
+        if counter==0 {
+            return 0.0
+        } else {
+            return sum/Double(counter)
+        }
+    }
+
+    // MARK: - Internal helper functions
+
     /**
      Add a `Track` to the end of this `Measurement`.
 
@@ -138,15 +172,5 @@ public class Measurement: Hashable, Equatable {
      */
     func append(event: Event) {
         events.append(event)
-    }
-
-    /// Required by the `Hashable` protocol to produce a hash for this object.
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(identifier)
-    }
-
-    /// Required by the `Equatable` protocol to compare two `Measurement` instances.
-    public static func ==(lhs: Measurement, rhs: Measurement) -> Bool {
-        return lhs.identifier == rhs.identifier
     }
 }

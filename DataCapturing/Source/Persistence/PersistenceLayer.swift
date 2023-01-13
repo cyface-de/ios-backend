@@ -434,7 +434,7 @@ public class PersistenceLayer {
 
             var ret = [GeoLocation]()
             for fetchResult in try context.fetch(request) {
-                let location = try GeoLocation(managedObject: fetchResult, parent: track)
+                let location = GeoLocation(managedObject: fetchResult, parent: track)
                 ret.append(location)
             }
             return ret

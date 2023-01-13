@@ -50,4 +50,8 @@ extension TrackMO {
 
         // TODO: Delete invalid locations from managed location. This should not happen in our current use cases but would still be necessary conceptually.
     }
+
+    func typedLocations() -> [GeoLocationMO]? {
+        return locations?.array as? [GeoLocationMO]
+    }
 }

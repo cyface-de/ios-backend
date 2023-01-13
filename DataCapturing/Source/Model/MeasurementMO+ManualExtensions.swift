@@ -52,4 +52,9 @@ extension MeasurementMO {
         // TODO: Delete obsolete events and tracks here. This is not necessary for our current uses cases, but should be added to complete this code conceptually.
     }
 
+
+    func typedTracks() -> [TrackMO]? {
+        return tracks?.array as? [TrackMO]
+    }
+
 }
