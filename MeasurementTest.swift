@@ -8,7 +8,14 @@
 import XCTest
 @testable import DataCapturing
 
+/**
+ Tests a ``Measurements`` behaviour.
+ */
 class MeasurementTest: XCTestCase {
+
+    /**
+     A happy path test for calculating the average speed for a ``Measurement``:
+     */
     func testCalculateAverageSpeed() {
         // Arrange
         let measurement = fixture(speeds: [[10.0, 5.0], [15.0]])
@@ -20,6 +27,9 @@ class MeasurementTest: XCTestCase {
         XCTAssertEqual(averageSpeed, 10.0)
     }
 
+    /**
+     Tests that average speed calculation works also for ``Measurement`` instances without any location information.
+     */
     func testCalculateAverageSpeedOnEmpty() {
         // Arrange
         let measurement = fixture(speeds: [])
@@ -31,6 +41,9 @@ class MeasurementTest: XCTestCase {
         XCTAssertEqual(averageSpeed, 0.0)
     }
 
+    /**
+     Tests that average speed calculation works for ``Measurement`` instances with only one location.
+     */
     func testCalculateAverageSpeedOnOneLocation() {
         // Arrange
         let measurement = fixture(speeds: [[1.0]])
