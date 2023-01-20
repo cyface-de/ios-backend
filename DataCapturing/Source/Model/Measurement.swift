@@ -142,8 +142,10 @@ public class Measurement: Hashable, Equatable {
         var counter = 0
         tracks.forEach { track in
             track.locations.forEach { location in
-                sum += location.speed
-                counter += 1
+                if location.isValid {
+                    sum += location.speed
+                    counter += 1
+                }
             }
         }
 
@@ -152,6 +154,20 @@ public class Measurement: Hashable, Equatable {
         } else {
             return sum/Double(counter)
         }
+    }
+
+    public func totalDuration() -> TimeInterval {
+        var timeInMillis = Int64(0)
+        tracks.forEach { track in
+            guard let firstTimestamp = track.locations.first?.timestamp, let lastTimestamp = track.locations.last?.timestamp else {
+                return
+            }
+
+            let time = lastTimestamp - firstTimestamp
+            timeInMillis += time
+        }
+
+        return TimeInterval(floatLiteral: Double(timeInMillis)/1_000.0)
     }
 
     // MARK: - Internal helper functions
