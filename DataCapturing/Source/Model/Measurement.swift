@@ -136,7 +136,7 @@ public class Measurement: Hashable, Equatable {
         return lhs.identifier == rhs.identifier
     }
 
-    /// Provide the average speed from the provided measurement
+    /// Provide the average speed of this measurement.
     public func averageSpeed() -> Double {
         var sum = 0.0
         var counter = 0
