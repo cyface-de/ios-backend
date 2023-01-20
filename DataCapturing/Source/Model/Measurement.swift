@@ -156,6 +156,7 @@ public class Measurement: Hashable, Equatable {
         }
     }
 
+    /// Provide the total duration of this measurement.
     public func totalDuration() -> TimeInterval {
         var timeInMillis = Int64(0)
         tracks.forEach { track in
