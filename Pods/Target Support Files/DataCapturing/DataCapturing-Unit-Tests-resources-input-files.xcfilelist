@@ -11,3 +11,5 @@ ${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/9.xcdatamode
 ${PODS_ROOT}/../DataCapturing/Source/Model/CyfaceModel.xcdatamodeld/CyfaceModel.xcdatamodel
 ${PODS_ROOT}/../DataCapturing/Source/Model/Migrations/V3toV4/V3toV4.xcmappingmodel
 ${PODS_ROOT}/../DataCapturing/Source/Model/Migrations/V7toV8/V7toV8.xcmappingmodel
+${PODS_ROOT}/../DataCapturing/Source/Model/v11model.xcdatamodeld
+${PODS_ROOT}/../DataCapturing/Source/Model/v11model.xcdatamodeld/v11model.xcdatamodel

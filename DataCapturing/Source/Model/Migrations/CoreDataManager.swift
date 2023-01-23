@@ -79,7 +79,7 @@ public class CoreDataManager {
     }
 
     /// An initializer, mostly used by tests, to load a specific CoreData model.
-    init(storeType: String = NSInMemoryStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator(), modelName: String = "CyfaceModel", model: NSManagedObjectModel) {
+    public init(storeType: String = NSInMemoryStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator(), modelName: String = "CyfaceModel", model: NSManagedObjectModel) {
         self.storeType = storeType
         self.migrator = migrator
 

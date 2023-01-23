@@ -54,6 +54,10 @@ class SensorCapturer {
     var directions = [SensorValue]()
     /// The timestamp of the previously captured direction. This is stored to make sure all directions are captured in increasing order.
     var previousCapturedDirectionTimestamp: TimeInterval
+    /// An altimeter to get altitude information.
+    let altimeter = CMAltimeter()
+    /// A cache for storing the captured altitudes, before they are written to the database.
+    var altitudes = [Altitude]()
     /// The queue running and synchronizing the data capturing lifecycle.
     private let lifecycleQueue: DispatchQueue
     /// The queue running and synchronizing read and write operations to the sensor storage objects.
@@ -101,6 +105,10 @@ class SensorCapturer {
         if motionManager.isDeviceMotionAvailable {
             motionManager.showsDeviceMovementDisplay = true
             motionManager.startDeviceMotionUpdates(using: .xArbitraryCorrectedZVertical, to: queue, withHandler: handle)
+        }
+
+        if CMAltimeter.isRelativeAltitudeAvailable() {
+            altimeter.startRelativeAltitudeUpdates(to: queue, withHandler: onAltitudeUpdate)
         }
     }
 
@@ -188,7 +196,12 @@ class SensorCapturer {
      */
     private func handle(_ data: CMDeviceMotion?, _ error: Error?) {
         if let error = error {
-            return os_log("Device Motion error: %{public}@", log: SensorCapturer.log, type: .error, error.localizedDescription)
+            return os_log(
+                "Device Motion error: %{public}@",
+                log: SensorCapturer.log,
+                type: .error,
+                error.localizedDescription
+            )
         }
 
         guard let data = data else {
@@ -196,14 +209,61 @@ class SensorCapturer {
         }
 
         guard previousCapturedDirectionTimestamp < data.timestamp else {
-            return os_log("Device Motion error: Received late value!", log: SensorCapturer.log, type: .error)
+            return os_log(
+                "Device Motion error: Received late value!",
+                log: SensorCapturer.log,
+                type: .error
+            )
         }
 
         let dirValues = data.magneticField
         let timestamp = Date()
-        let dir = SensorValue(timestamp: timestamp, x: dirValues.field.x, y: dirValues.field.y, z: dirValues.field.z)
+        let dir = SensorValue(
+            timestamp: timestamp,
+            x: dirValues.field.x,
+            y: dirValues.field.y,
+            z: dirValues.field.z
+        )
         lifecycleQueue.async {
             self.directions.append(dir)
         }
+    }
+
+    /// Called everytime the system has a new altitude value.
+    private func onAltitudeUpdate(data: CMAltitudeData?, error: Error?) {
+        if let error = error {
+            os_log(
+                "Device Motion error while capturing Altitude: %{public}@",
+                log: SensorCapturer.log,
+                type: .error,
+                error.localizedDescription
+            )
+            return
+        }
+
+        guard let data = data else {
+            os_log(
+                "No altitude data available!",
+                log: SensorCapturer.log,
+                type: .error
+            )
+            return
+        }
+
+        let altitude = Altitude(relativeAltitude: data.relativeAltitude.doubleValue, pressure: data.pressure.doubleValue, timestamp: data.startTime())
+
+        lifecycleQueue.async {
+            self.altitudes.append(altitude)
+        }
+    }
+}
+
+extension CMLogItem {
+    /// The boot time of the device this runs on.
+    static let bootTime = Date(timeIntervalSinceNow: -ProcessInfo.processInfo.systemUptime)
+
+    /// The actual timestamp of this item.
+    func startTime() -> Date {
+        return CMLogItem.bootTime.addingTimeInterval(self.timestamp)
     }
 }

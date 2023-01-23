@@ -35,10 +35,13 @@ class DataCapturingTests: XCTestCase {
     var oocut: TestDataCapturingService!
     /// The *CoreData* stack to access and check data create by lifecycle methods.
     var coreDataStack: CoreDataManager!
+    /// The V11 database *CoreData* stack. This separation is required to merge the extra data required in this branch, back into the main branch later on.
+    var v11Stack: CoreDataManager!
     /// The default mode of transportation used for testing.
     let defaultMode = "BICYCLE"
     /// An object for logging lifecycle events during tests and providing functionality to assert on them.
     var testEventHandler: TestDataCapturingEventHandler!
+    /// The data model used by the main database as a static variable, since loading the model is expensive.
     static let dataModel = try! CoreDataManager.load()
 
     /// Initializes every test by creating a `TestDataCapturingService`.
@@ -48,6 +51,8 @@ class DataCapturingTests: XCTestCase {
 
         do {
             coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: DataCapturingTests.dataModel)
+            let v11Model = try CoreDataManager.load(model: "v11model")
+            v11Stack = CoreDataManager(storeType: NSInMemoryStoreType, modelName: "v11model", model: v11Model)
             let bundle = Bundle(for: type(of: coreDataStack))
             try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
                 if let error = error {
@@ -59,9 +64,23 @@ class DataCapturingTests: XCTestCase {
                 }
 
                 self.testEventHandler = TestDataCapturingEventHandler()
-                self.oocut = self.dataCapturingService(dataManager: self.coreDataStack, eventHandler: self.testEventHandler.handle(event: status:))
+                do {
+                    try self.v11Stack.setup(bundle: bundle) { [weak self] error in
+                        if let error = error {
+                            XCTFail("Unable to setup CoreData V11 stack due to \(error)")
+                        }
 
-                expectation.fulfill()
+                        guard let self = self else {
+                            return
+                        }
+
+                        self.oocut = self.dataCapturingService(dataManager: self.coreDataStack, v11Stack: self.v11Stack, eventHandler: self.testEventHandler.handle(event: status:))
+
+                        expectation.fulfill()
+                    }
+                } catch {
+                    XCTFail("Unable to setup CoreData V11 stack due to \(error)")
+                }
             }
         } catch {
             XCTFail("Unable to setup CoreData stack due to \(error)")
@@ -85,6 +104,7 @@ class DataCapturingTests: XCTestCase {
             fatalError("\(error)")
         }
         coreDataStack = nil
+        v11Stack = nil
         testEventHandler = nil
         super.tearDown()
     }
@@ -386,7 +406,7 @@ class DataCapturingTests: XCTestCase {
         oocut.currentMeasurement = measurement.identifier
 
         measure {
-            oocut.locationsCache = [LocationCacheEntry(latitude: 1.0, longitude: 1.0, accuracy: 1.0, speed: 1.0, timestamp: Date(timeIntervalSince1970: 10_000), isValid: true)]
+            oocut.locationsCache = [LocationCacheEntry(latitude: 1.0, longitude: 1.0, altitude: 51.0, accuracy: 1.0, verticalAccuracy: 5.0, speed: 1.0, timestamp: Date(timeIntervalSince1970: 10_000), isValid: true)]
             oocut.sensorCapturer.accelerations = []
             for i in 0...99 {
                 oocut.sensorCapturer.accelerations.append(SensorValue(timestamp: Date(timeInterval: TimeInterval(Int64(i)), since: Date(timeIntervalSince1970: TimeInterval(10_000))), x: 1.0, y: 1.0, z: 1.0))
@@ -406,7 +426,7 @@ class DataCapturingTests: XCTestCase {
         // Arrange
         var updateCounter = 0
         let async = expectation(description: "Geo Location events")
-        let testCapturingService = dataCapturingService(dataManager: coreDataStack) { (event, _) in
+        let testCapturingService = dataCapturingService(dataManager: coreDataStack, v11Stack: v11Stack) { (event, _) in
                 if case DataCapturingEvent.geoLocationAcquired(_) = event {
                     updateCounter += 1
                     if updateCounter == 2 {
@@ -461,7 +481,7 @@ class DataCapturingTests: XCTestCase {
         try oocut.start(inMode: defaultMode)
         try oocut.pause()
 
-        let newOocut = dataCapturingService(dataManager: coreDataStack)
+        let newOocut = dataCapturingService(dataManager: coreDataStack, v11Stack: v11Stack)
         do {
             try newOocut.resume()
         } catch {
@@ -475,7 +495,7 @@ class DataCapturingTests: XCTestCase {
         try oocut.start(inMode: defaultMode)
         try oocut.pause()
 
-        let newOocut = dataCapturingService(dataManager: coreDataStack)
+        let newOocut = dataCapturingService(dataManager: coreDataStack, v11Stack: v11Stack)
         XCTAssertTrue(newOocut.isPaused)
         do {
             try newOocut.start(inMode: defaultMode)
@@ -551,10 +571,11 @@ class DataCapturingTests: XCTestCase {
      - Parameters:
         - sensorManager: The iOS `CMMotionManager` to use. The default is a `TestMotionManager`, which prevents accessing the actual sensors and only returns random values.
         - dataManager: A `CoreDataManager` used to access the database to write or read data.
+        - v11Stack: A CoreData stack used to access additional data stored externally until this branch is merged into the main development.
         - eventHandler: An `eventHandler` used to capture events from the created service. The default implementation is a no-op implementation throwing all events away.
      */
-    func dataCapturingService(sensorManager: CMMotionManager = TestMotionManager(), dataManager: CoreDataManager, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void) = {_, _ in }) -> TestDataCapturingService {
-        let ret = TestDataCapturingService(sensorManager: sensorManager, dataManager: dataManager, eventHandler: eventHandler)
+    func dataCapturingService(sensorManager: CMMotionManager = TestMotionManager(), dataManager: CoreDataManager, v11Stack: CoreDataManager, eventHandler: @escaping ((DataCapturingEvent, Status) -> Void) = {_, _ in }) -> TestDataCapturingService {
+        let ret = TestDataCapturingService(sensorManager: sensorManager, dataManager: dataManager, v11Stack: v11Stack, eventHandler: eventHandler)
         ret.coreLocationManager = TestLocationManager()
         return ret
     }
