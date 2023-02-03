@@ -22,6 +22,9 @@ import XCTest
 
 /**
  Tests a ``Measurements`` behaviour.
+ 
+ - Author: Klemens Muthmann
+ - version: 1.0.0
  */
 class MeasurementTest: XCTestCase {
 
