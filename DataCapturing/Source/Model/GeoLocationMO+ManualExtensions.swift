@@ -35,5 +35,4 @@ extension GeoLocationMO {
         self.speed = location.speed
         self.timestamp = location.timestamp
     }
-
 }

@@ -1,18 +1,20 @@
 PODS:
   - Alamofire (4.9.1)
-  - Charts (3.6.0):
-    - Charts/Core (= 3.6.0)
-  - Charts/Core (3.6.0)
-  - DataCapturing (10.0.0):
+  - Charts (4.1.0):
+    - Charts/Core (= 4.1.0)
+  - Charts/Core (4.1.0):
+    - SwiftAlgorithms (~> 1.0)
+  - DataCapturing (11.1.0):
     - Alamofire (~> 4.9.1)
     - DataCompression (~> 3.6.0)
-  - DataCapturing/Tests (10.0.0):
+  - DataCapturing/Tests (11.1.0):
     - Alamofire (~> 4.9.1)
     - DataCompression (~> 3.6.0)
   - DataCompression (3.6.0)
+  - SwiftAlgorithms (1.0.0)
 
 DEPENDENCIES:
-  - Charts (~> 3.6.0)
+  - Charts (~> 4.1.0)
   - DataCapturing (from `./`)
   - DataCapturing/Tests (from `./`)
 
@@ -21,6 +23,7 @@ SPEC REPOS:
     - Alamofire
     - Charts
     - DataCompression
+    - SwiftAlgorithms
 
 EXTERNAL SOURCES:
   DataCapturing:
@@ -28,10 +31,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  Charts: b1e3a1f5a1c9ba5394438ca3b91bd8c9076310af
-  DataCapturing: 80dd746bbc6dd7de0a939b95815edcb09e4f6b56
+  Charts: 354f86803d11d9c35de280587fef50d1af063978
+  DataCapturing: 8898a51f8a3237eba13ed16198a2717596d04639
   DataCompression: 06628f9c807b6f152e0da37635633f62fc51dc77
+  SwiftAlgorithms: 38dda4731d19027fdeee1125f973111bf3386b53
 
-PODFILE CHECKSUM: acbd711de16953ad19288baefa9e4e460a7cdab7
+PODFILE CHECKSUM: 085e209c288a37e69933c71ab52c58eb4f48a123
 
 COCOAPODS: 1.11.3
