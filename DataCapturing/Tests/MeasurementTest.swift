@@ -70,6 +70,60 @@ class MeasurementTest: XCTestCase {
         XCTAssertEqual(averageSpeed, 1.0)
     }
 
+    /**
+     A happy path test for getting a ``Measurement`` duration.
+     */
+    func testCalculateDuration() {
+        // Arrange
+        let measurement = fixture(times: [[1.0, 2.0, 3.0]])
+
+        // Act
+        let time = measurement.totalDuration()
+
+        // Assert
+        XCTAssertEqual(time, 2)
+    }
+
+    /**
+     Tests that duration calculation works on ``Measurement`` instances with no location information.
+     */
+    func testCalculateDurationOnEmpty() {
+        // Arrange
+        let measurement = fixture(times: [])
+
+        // Act
+        let time = measurement.totalDuration()
+
+        // Assert
+        XCTAssertEqual(time, 0.0)
+    }
+
+    /**
+     Tests that duration calculation works on ``Measurement`` instances with only one location.
+     */
+    func testCalculateDurationOnOneLocation() {
+        // Arrange
+        let measurement = fixture(times: [[1.0]])
+
+        // Act
+        let time = measurement.totalDuration()
+
+        // Assert
+        XCTAssertEqual(time, 0.0)
+    }
+
+    /// Tests that duration calculation works even if the duration is distributed over multiple tracks and ensures that pauses are not included.
+    func testCalculateDurationOnMultipleTracks() {
+        // Arrange
+        let measurement = fixture(times: [[1.0, 2.0], [3.0, 4.0]])
+
+        // Act
+        let time = measurement.totalDuration()
+
+        // Assert
+        XCTAssertEqual(time, 2.0)
+    }
+
     /// Provide a `Measurement` as a fixture containing locations with the provided speed values.
     private func fixture(speeds: [[Double]]) -> DataCapturing.Measurement {
         let measurement = Measurement(
@@ -93,6 +147,42 @@ class MeasurementTest: XCTestCase {
                     accuracy: Double.random(in: 1.0...10.0),
                     speed: speed,
                     timestamp: Int64(Date().timeIntervalSince1970*1_000),
+                    isValid: true,
+                    parent: track
+                )
+            }
+            return track
+        }
+        measurement.tracks = tracks
+
+        return measurement
+    }
+
+    /// Provide a `Measurement` with random locations at the provided times
+    ///
+    /// - Parameter times: The timestamps to create the new `Measurement` from, as an array of arrays, where each sub-array matches one track in the new `Measurement`. Each entry is in seconds since 1st of January 1970.
+    private func fixture(times: [[Double]]) -> DataCapturing.Measurement {
+        let measurement = Measurement(
+            identifier: Int64(0),
+            synchronizable: true,
+            synchronized: false,
+            accelerationsCount: 0,
+            rotationsCount: 0,
+            directionsCount: 0,
+            timestamp: Int64(0),
+            trackLength: 700,
+            events: [],
+            tracks: []
+        )
+        let tracks = times.map { trackTimes in
+            let track = Track(parent: measurement)
+            track.locations = trackTimes.map { time in
+                return GeoLocation(
+                    latitude: Double.random(in: -180.0...180.0),
+                    longitude: Double.random(in: -90.0...90.0),
+                    accuracy: Double.random(in: 1.0...10.0),
+                    speed: 10.0,
+                    timestamp: Int64(time*1_000),
                     isValid: true,
                     parent: track
                 )
