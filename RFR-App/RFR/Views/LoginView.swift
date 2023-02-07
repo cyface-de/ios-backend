@@ -1,12 +1,27 @@
-//
-//  LoginView.swift
-//  RFR
-//
-//  Created by Klemens Muthmann on 27.01.23.
-//
+/*
+ * Copyright 2023 Cyface GmbH
+ *
+ * This file is part of the Read-for-Robots iOS App.
+ *
+ * The Read-for-Robots iOS App is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Read-for-Robots iOS App is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Read-for-Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import SwiftUI
 
+/**
+ View asking for user credentials and handling the login to the Ready-For-Robots Server.
+ */
 struct LoginView: View {
     // TODO: Move to Viewmodel
     @State private var username: String = ""
@@ -50,23 +65,6 @@ struct LoginView: View {
 
                 }.padding()
 
-
-                /*AsyncButton(action: {
-                 do {
-                 try credentials.login(onSuccess: {
-                 appState.isLoggedIn = true
-                 }, onFailure: { error in
-                 showError = true
-                 errorMessage = error.localizedDescription
-                 })
-                 } catch {
-                 showError = true
-                 errorMessage = error.localizedDescription
-                 }
-                 }) {
-                 Text("Login")
-                 .frame(maxWidth: .infinity)
-                 }*/
                 NavigationLink(destination: LiveView(viewModel: viewModelExample)) {
                     Text("Login")
                         .frame(maxWidth: .infinity)
@@ -83,12 +81,6 @@ struct LoginView: View {
             }
             .navigationTitle("Anmeldung")
         }
-
-        /*.alert("Error", isPresented: $showError, actions: {
-            // actions
-        }, message: {
-            Text(errorMessage ?? "")
-        })*/
     }
 }
 

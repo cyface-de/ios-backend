@@ -1,13 +1,32 @@
-//
-//  ContentView.swift
-//  RFR
-//
-//  Created by Klemens Muthmann on 26.01.23.
-//
+/*
+ * Copyright 2023 Cyface GmbH
+ *
+ * This file is part of the Read-for-Robots iOS App.
+ *
+ * The Read-for-Robots iOS App is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Read-for-Robots iOS App is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Read-for-Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
+ */
 import MapKit
 import SwiftUI
 
+/**
+ A view for showing information about the current measurement and providing controls for that
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 struct LiveView: View {
+    /// The view model used by this `View`.
     @State var viewModel: LiveViewModel
 
     var body: some View {
@@ -32,6 +51,12 @@ struct LiveView_Previews: PreviewProvider {
     }
 }
 
+/**
+A view showing live statistics about the current measurement.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 struct LiveStatisticsView: View {
     var body: some View {
         VStack(alignment: .leading) {
@@ -65,6 +90,12 @@ struct LiveStatisticsView: View {
     }
 }
 
+/**
+ A view showing controls for the active measurement.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 struct ControlBarView: View {
     var body: some View {
         HStack {
@@ -89,6 +120,12 @@ struct ControlBarView: View {
     }
 }
 
+/**
+A view showing focused details such as the current position or speed of the active measurement.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 struct LiveDetailsView: View {
     @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.507222, longitude: -0.1275), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5))
     

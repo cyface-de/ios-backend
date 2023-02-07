@@ -49,6 +49,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA11963C29924961008161C4 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		AA11963D29924A6F008161C4 /* COPYING */ = {isa = PBXFileReference; lastKnownFileType = text; path = COPYING; sourceTree = "<group>"; };
 		AA87D0682982ADE8002F6B3B /* RFR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RFR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA87D06B2982ADE8002F6B3B /* RFRApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRApp.swift; sourceTree = "<group>"; };
 		AA87D06D2982ADE8002F6B3B /* LiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveView.swift; sourceTree = "<group>"; };
@@ -106,6 +108,8 @@
 		AA87D05F2982ADE8002F6B3B = {
 			isa = PBXGroup;
 			children = (
+				AA11963D29924A6F008161C4 /* COPYING */,
+				AA11963C29924961008161C4 /* README.md */,
 				AA87D09C2982B511002F6B3B /* Packages */,
 				AA87D06A2982ADE8002F6B3B /* RFR */,
 				AA87D07B2982ADE9002F6B3B /* RFRTests */,
