@@ -36,15 +36,24 @@ class V11DatabaseTest: XCTestCase {
     override func setUp() {
         do {
             let model = try CoreDataManager.load(model: "v11model")
-            let v11Stack = CoreDataManager(storeType: NSInMemoryStoreType, modelName: "v11model", model: model)
+            let migrator = CoreDataMigrator(model: "v11model", to: CoreDataMigrationVersion.v11version9)
+            let v11Stack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: migrator, modelName: "v11model", model: model)
+            let expectation = expectation(description: "Wait for CoreData Stack to finish!")
             try v11Stack.setup(bundle: Bundle(for: CoreDataManager.self)) { error in
                 if let error = error {
                     XCTFail(error.localizedDescription)
                 }
+                expectation.fulfill()
             }
             self.v11Stack = v11Stack
         } catch {
             XCTFail("\(error)")
+        }
+
+        waitForExpectations(timeout: 5) { error in
+            if let error = error {
+                XCTFail(error.localizedDescription)
+            }
         }
     }
 
@@ -316,6 +325,27 @@ class V11DatabaseTest: XCTestCase {
         let result = group.wait(timeout: DispatchTime.now() + 10)
 
         XCTAssert(result == .success)
+    }
+
+
+    /// Test that migration does not crash on V11 model but also is not executed, since no migration is necessary.
+    func testDataMigration() throws {
+        let model = try CoreDataManager.load(model: "v11model")
+        let migrator = CoreDataMigrator(model: "v11model", to: CoreDataMigrationVersion.v11version9)
+        let bundle = Bundle(for: CoreDataManager.self)
+        let newV11Stack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: migrator, modelName: "v11model", model: model)
+
+        try newV11Stack.setup(bundle: bundle) { error in
+            if let error = error {
+                XCTFail(error.localizedDescription)
+            }
+        }
+
+        guard let persistentStoreUrl = newV11Stack.persistentContainer.persistentStoreDescriptions.first?.url else {
+            XCTFail()
+            return
+        }
+        XCTAssertFalse(try migrator.requiresMigration(at: persistentStoreUrl, inBundle: bundle))
     }
 
     /// Add a fixture of locations to the test database.

@@ -44,10 +44,11 @@ struct CoreDataMigrationStep {
         - sourceVersion: The source version to migrate from
         - destinationVersion: the destination version to migrate to
         - bundle: The bundle containing the model and mapping files.
+     - Throws: ``CoreDataMigrationError/modelFileNotFound(modelName:resourceName:)`` If the model file is missing in the application bundle.
      */
-    init(sourceVersion: CoreDataMigrationVersion, destinationVersion: CoreDataMigrationVersion, bundle: Bundle) {
-        let sourceModel = NSManagedObjectModel.managedObjectModel(forResource: sourceVersion.rawValue, inBundle: bundle)
-        let destinationModel = NSManagedObjectModel.managedObjectModel(forResource: destinationVersion.rawValue, inBundle: bundle)
+    init(modelName: String, sourceVersion: CoreDataMigrationVersion, destinationVersion: CoreDataMigrationVersion, bundle: Bundle) throws {
+        let sourceModel = try NSManagedObjectModel.managedObjectModel(forResource: sourceVersion.rawValue, inBundle: bundle, withModelName: modelName)
+        let destinationModel = try NSManagedObjectModel.managedObjectModel(forResource: destinationVersion.rawValue, inBundle: bundle, withModelName: modelName)
 
         guard let mappingModel = CoreDataMigrationStep.mappingModel(
             fromSourceModel: sourceModel,

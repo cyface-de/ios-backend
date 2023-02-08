@@ -47,10 +47,13 @@ public enum CoreDataMigrationVersion: String, CaseIterable {
     /// The ninth version of the model
     case version9 = "9"
 
+    /// The temporary version used by the V11 database
+    case v11version9 = "v11model"
+
     // MARK: - Current
 
     /// The currently used model version
-    static var current: CoreDataMigrationVersion {
+    public static var current: CoreDataMigrationVersion {
         guard let current = allCases.last else {
             fatalError("No model versions found")
         }
@@ -80,6 +83,8 @@ public enum CoreDataMigrationVersion: String, CaseIterable {
         case .version8:
             return .version9
         case .version9:
+            return nil
+        case .v11version9:
             return nil
         }
     }

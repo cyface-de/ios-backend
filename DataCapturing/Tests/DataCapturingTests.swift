@@ -52,9 +52,9 @@ class DataCapturingTests: XCTestCase {
         do {
             coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: DataCapturingTests.dataModel)
             let v11Model = try CoreDataManager.load(model: "v11model")
-            v11Stack = CoreDataManager(storeType: NSInMemoryStoreType, modelName: "v11model", model: v11Model)
+            v11Stack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(model: "v11model", to: CoreDataMigrationVersion.v11version9), modelName: "v11model", model: v11Model)
             let bundle = Bundle(for: type(of: coreDataStack))
-            try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
+            coreDataStack.setup(bundle: bundle) { [weak self] (error) in
                 if let error = error {
                     XCTFail("Unable to setup CoreData stack due to \(error)")
                 }
@@ -64,22 +64,22 @@ class DataCapturingTests: XCTestCase {
                 }
 
                 self.testEventHandler = TestDataCapturingEventHandler()
-                do {
-                    try self.v11Stack.setup(bundle: bundle) { [weak self] error in
-                        if let error = error {
-                            XCTFail("Unable to setup CoreData V11 stack due to \(error)")
-                        }
+                self.v11Stack.setup(bundle: bundle) { [weak self] error in
+                     if let error = error {
+                        XCTFail("Unable to setup CoreData V11 stack due to \(error)")
+                     }
 
-                        guard let self = self else {
-                            return
-                        }
-
-                        self.oocut = self.dataCapturingService(dataManager: self.coreDataStack, v11Stack: self.v11Stack, eventHandler: self.testEventHandler.handle(event: status:))
-
-                        expectation.fulfill()
+                    guard let self = self else {
+                        return
                     }
-                } catch {
-                    XCTFail("Unable to setup CoreData V11 stack due to \(error)")
+
+                    self.oocut = self.dataCapturingService(
+                        dataManager: self.coreDataStack,
+                        v11Stack: self.v11Stack,
+                        eventHandler: self.testEventHandler.handle(event: status:)
+                    )
+
+                    expectation.fulfill()
                 }
             }
         } catch {

@@ -74,7 +74,7 @@ class DataMigrationTest: XCTestCase {
      */
     func testMigrationV1ToV2() throws {
         // Arrange, Act
-        let context = migrate(fromVersion: .version1, toVersion: .version2, usingTestData: "V1TestData.sqlite")
+        let context = try migrate(fromVersion: .version1, toVersion: .version2, usingTestData: "V1TestData.sqlite")
 
         // Assert
         try assertV2(onContext: context)
@@ -88,7 +88,7 @@ class DataMigrationTest: XCTestCase {
      */
     func testMigrationV2ToV3() throws {
         // Arrange, Act
-        let context = migrate(fromVersion: .version2, toVersion: .version3, usingTestData: "V2TestData.sqlite")
+        let context = try migrate(fromVersion: .version2, toVersion: .version3, usingTestData: "V2TestData.sqlite")
 
         // Assert
         try assertV3(onContext: context)
@@ -102,7 +102,7 @@ class DataMigrationTest: XCTestCase {
      */
     func testMigrationV3ToV4() throws {
         // Arrange, Act
-        let context = migrate(fromVersion: .version3, toVersion: .version4, usingTestData: "V3TestData.sqlite")
+        let context = try migrate(fromVersion: .version3, toVersion: .version4, usingTestData: "V3TestData.sqlite")
 
         // Assert
         try assertV4(onContext: context, withFirstLocationCount: 300, withSecondLocationCount: 200)
@@ -116,7 +116,7 @@ class DataMigrationTest: XCTestCase {
      */
     func testMigrationV4ToV5() throws {
         // Arrange, Act
-        let context = migrate(fromVersion: .version4, toVersion: .version5, usingTestData: "V4TestData.sqlite")
+        let context = try migrate(fromVersion: .version4, toVersion: .version5, usingTestData: "V4TestData.sqlite")
 
         // Assert
         try assertV5(onContext: context)
@@ -130,7 +130,7 @@ class DataMigrationTest: XCTestCase {
      */
     func testMigrationV5ToV6() throws {
         // Arrange, Act
-        let context = migrate(fromVersion: .version5, toVersion: .version6, usingTestData: "V5TestData.sqlite")
+        let context = try migrate(fromVersion: .version5, toVersion: .version6, usingTestData: "V5TestData.sqlite")
 
         // Assert
         try assertV6(onContext: context)
@@ -144,7 +144,7 @@ class DataMigrationTest: XCTestCase {
      */
     func testMigrationV6ToV7() throws {
         // Arrange, Act
-        let context = migrate(fromVersion: .version6, toVersion: .version7, usingTestData: "V6TestData.sqlite")
+        let context = try migrate(fromVersion: .version6, toVersion: .version7, usingTestData: "V6TestData.sqlite")
 
         // Assert
         try assertV7(onContext: context)
@@ -158,7 +158,7 @@ class DataMigrationTest: XCTestCase {
      */
     func testMigrationV1ToV4() throws {
         // Arrange, Act
-        let context = migrate(fromVersion: .version1, toVersion: .version4, usingTestData: "V1TestData.sqlite")
+        let context = try migrate(fromVersion: .version1, toVersion: .version4, usingTestData: "V1TestData.sqlite")
 
         // Assert
         try assertV4(onContext: context, withFirstLocationCount: 100, withSecondLocationCount: 200)
@@ -172,7 +172,7 @@ class DataMigrationTest: XCTestCase {
      */
     func testMigrationV1ToV5() throws {
         // Arrange, Act
-        let context = migrate(fromVersion: .version1, toVersion: .version5, usingTestData: "V1TestData.sqlite")
+        let context = try migrate(fromVersion: .version1, toVersion: .version5, usingTestData: "V1TestData.sqlite")
 
         // Assert
         try assertV5(onContext: context)
@@ -185,25 +185,26 @@ class DataMigrationTest: XCTestCase {
         - fromVersion: The version of the provided pregenerated data store used as input
         - toVersion: The version to migrate the pregenerated data store to
         - usingTestData: The test data store to migrate to
-     - Returns: The `NSManagedObjectContext` on the migrated data store.
+     - Returns: The ``NSManagedObjectContext` on the migrated data store.
+     - Throws: ``CoreDataMigrationError/modelFileNotFound(modelName:resourceName:)`` if the model file was not found in the migrators bundle
      */
-    func migrate(fromVersion: CoreDataMigrationVersion, toVersion: CoreDataMigrationVersion, usingTestData testDatastore: String) -> NSManagedObjectContext {
+    func migrate(fromVersion: CoreDataMigrationVersion, toVersion: CoreDataMigrationVersion, usingTestData testDatastore: String) throws -> NSManagedObjectContext {
         // Arrange
-        let migrator = CoreDataMigrator()
+        let migrator = CoreDataMigrator(to: toVersion)
         let bundle = Bundle(for: type(of: migrator))
         let datastore = FileManager.moveFileFromBundleToTempDirectory(filename: testDatastore)
         addTeardownBlock {
             FileManager.clearTempDirectoryContents()
         }
-        XCTAssertTrue(migrator.requiresMigration(at: datastore, toVersion: toVersion, inBundle: bundle))
+        XCTAssertTrue(try migrator.requiresMigration(at: datastore, inBundle: bundle))
 
         // Act
-        migrator.migrateStore(at: datastore, toVersion: toVersion, inBundle: bundle)
+        try migrator.migrateStore(at: datastore, inBundle: bundle)
 
         // Assert
         XCTAssertTrue(try datastore.checkPromisedItemIsReachable())
 
-        let model = NSManagedObjectModel.managedObjectModel(forResource: toVersion.rawValue, inBundle: bundle)
+        let model = try NSManagedObjectModel.managedObjectModel(forResource: toVersion.rawValue, inBundle: bundle, withModelName: "CyfaceModel")
         let context = NSManagedObjectContext(model: model, storeURL: datastore)
         addTeardownBlock {
             context.destroyStore()

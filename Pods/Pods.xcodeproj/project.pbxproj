@@ -204,6 +204,7 @@
 		A3ED25F247BFB75D1457ED21662ADB6F /* ServerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3A6024F8C3E974C33A593AE3BE5C3F /* ServerConnection.swift */; };
 		A5A2B62222D6B52255157E45BBFC2D78 /* DefaultFillFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9396A62DB7D5FCE8DA708C5C4CB4EA1B /* DefaultFillFormatter.swift */; };
 		A90A272F4B1735E0644FD2464064E428 /* LineScatterCandleRadarChartDataSetProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D4827DC8504EC6E9BD5A839E37C0E6 /* LineScatterCandleRadarChartDataSetProtocol.swift */; };
+		AA11963F2993A688008161C4 /* CoreDataMigrationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11963E2993A688008161C4 /* CoreDataMigrationError.swift */; };
 		AA4BFF1F297986ED005233E8 /* V11DatabaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4BFF1E297986ED005233E8 /* V11DatabaseTest.swift */; };
 		AA4BFF21297988BF005233E8 /* MeasurementTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4BFF20297988BF005233E8 /* MeasurementTest.swift */; };
 		AB797ECDF30C3B23237AD4CEA3DE6262 /* Chain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27859A716D492819F0726382D95899A /* Chain.swift */; };
@@ -668,6 +669,8 @@
 		A7FA53355D6AB98354CA8BEB60C7C822 /* LineChartDataSet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LineChartDataSet.swift; path = Source/Charts/Data/Implementations/Standard/LineChartDataSet.swift; sourceTree = "<group>"; };
 		A915742DA31F166917DFE6ED43187AC5 /* CredentialsAuthenticator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CredentialsAuthenticator.swift; sourceTree = "<group>"; };
 		A958A66DD98796B4AA3838E20742C2EE /* Pods-Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Example-acknowledgements.plist"; sourceTree = "<group>"; };
+		AA11963E2993A688008161C4 /* CoreDataMigrationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMigrationError.swift; sourceTree = "<group>"; };
+		AA1196402993EAC5008161C4 /* 1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = 1.xcdatamodel; sourceTree = "<group>"; };
 		AA3119387680A84BF2842BF723502FF7 /* Charts-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Charts-umbrella.h"; sourceTree = "<group>"; };
 		AA4BFF1E297986ED005233E8 /* V11DatabaseTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = V11DatabaseTest.swift; path = DataCapturing/Tests/V11DatabaseTest.swift; sourceTree = "<group>"; };
 		AA4BFF20297988BF005233E8 /* MeasurementTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MeasurementTest.swift; path = DataCapturing/Tests/MeasurementTest.swift; sourceTree = "<group>"; };
@@ -1131,6 +1134,7 @@
 				675CFE0B746A2752C4C40866D1D77950 /* CoreDataMigrationStep.swift */,
 				8043364AD68F1CB13E78A3D61FF2216F /* CoreDataMigrationVersion.swift */,
 				AB0D7A22CEFA5433B30F1001CD7B16FD /* CoreDataMigrator.swift */,
+				AA11963E2993A688008161C4 /* CoreDataMigrationError.swift */,
 				D9611C7264535795845D2144A6122CA9 /* DataCapturingEvent.swift */,
 				3C605156899CAFE120C1306BA095C0F8 /* V3toV4 */,
 				1990451FAA74674DEACCCA84EA6E18FB /* V7toV8 */,
@@ -2216,6 +2220,7 @@
 				6B7A621DA79D66EAE19DCCBB9DCD5A72 /* MeasurementMO+CoreDataClass.swift in Sources */,
 				1FBA4F503F074F1AEF24B46D8549C618 /* MeasurementMO+CoreDataProperties.swift in Sources */,
 				B9030DC93C20DBB555B089CB61F5F291 /* MeasurementMO+ManualExtensions.swift in Sources */,
+				AA11963F2993A688008161C4 /* CoreDataMigrationError.swift in Sources */,
 				BF0400A1DA62520318587A2CAE13921E /* MeasurementToMeasurementPolicy.swift in Sources */,
 				F0B70634059603BEC807811FBB482E56 /* MeasurementV11+ManualExtensions.swift in Sources */,
 				B95B43C4BBF67F528A445955D21AEC68 /* MovebisDataCapturingService.swift in Sources */,
@@ -3282,6 +3287,7 @@
 		7DF70D3C0022327E703ACF364E4EB9A9 /* v11model.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				AA1196402993EAC5008161C4 /* 1.xcdatamodel */,
 				CF53AA23AE242C96F5DCC418BD2F0A73 /* v11model.xcdatamodel */,
 			);
 			currentVersion = CF53AA23AE242C96F5DCC418BD2F0A73 /* v11model.xcdatamodel */;
