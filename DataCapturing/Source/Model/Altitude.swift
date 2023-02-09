@@ -25,9 +25,9 @@ import Foundation
  - Author: Klemens Muthmann
  */
 struct Altitude {
-    /// The relative altitude change since the last measured value.
+    /// The relative altitude change since the last measured value, in meters.
     let relativeAltitude: Double
-    /// The currently measured pressure.
+    /// The currently measured pressure in kilopascals .
     let pressure: Double
     /// The time this was measured.
     let timestamp: Date
