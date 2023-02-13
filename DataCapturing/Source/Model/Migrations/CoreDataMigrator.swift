@@ -71,7 +71,7 @@ public class CoreDataMigrator: CoreDataMigratorProtocol {
     /**
      Public constructor, with the possibility to provide a version of a datastore to migrate to.
      */
-    public init(model: String = "CyfaceData", to version: CoreDataMigrationVersion = CoreDataMigrationVersion.current) {
+    public init(model: String = "CyfaceModel", to version: CoreDataMigrationVersion = CoreDataMigrationVersion.current) {
         self.model = model
         self.version = version
     }

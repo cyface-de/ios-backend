@@ -178,6 +178,19 @@ class DataMigrationTest: XCTestCase {
         try assertV5(onContext: context)
     }
 
+    /// Test that migration works with no model updated at all.
+    func testMigrationV9ToV9() throws {
+        let migrator = CoreDataMigrator(to: .version9)
+        let bundle = Bundle(for: type(of: migrator))
+        let datastore = FileManager.moveFileFromBundleToTempDirectory(filename: "CyfaceModel.sqlite")
+        addTeardownBlock {
+            FileManager.clearTempDirectoryContents()
+        }
+        XCTAssertFalse(try migrator.requiresMigration(at: datastore, inBundle: bundle))
+
+        //try assertV9(assertV2(onContext: context))
+    }
+
     /**
      Migrates a test data store `fromVersion` to a not necessarily consecutive `toVersion` using a pregenerated data store as test data.
 

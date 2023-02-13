@@ -31,7 +31,6 @@
 		1606B1D13D8FB0700219A8932B770E84 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B5585EA1FBD78B298654C6444060CAD /* CoreData.framework */; };
 		1611A02A50E8ECD5F31ECF1CDDCCFF7F /* LegendEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE663A10193F9B4DDA9EDAE5C9BC49EB /* LegendEntry.swift */; };
 		16362413D2756A8A8BD2E5D20726520D /* LineScatterCandleRadarChartDataSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B17361FE56F62A78C98410A56F19F5 /* LineScatterCandleRadarChartDataSet.swift */; };
-		16AC4957804354D7C3CB5A47A6C92A75 /* V5TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = A27A30FAA06C318D47FDCD69172DF23F /* V5TestData.sqlite */; };
 		16C5A86B21B4BF6C530A96DC25C9ECDB /* PieChartDataEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6E21E3A7C73593041BCACB9A1CD5F5C /* PieChartDataEntry.swift */; };
 		18441508FF1E4B2B863CFEFDC52499B3 /* Synchronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0544219D71429F21B50091172961D9A4 /* Synchronizer.swift */; };
 		19B6EEC24FCFED361007DB2B636F25A9 /* Reductions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CB3B363672FA4DE4861A2EF8AD20371 /* Reductions.swift */; };
@@ -40,7 +39,6 @@
 		1A9B9E734802A997025A919BE71AD6FD /* DiskConsumption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB21E3F956A6B1ABF4FF789A15B19E2 /* DiskConsumption.swift */; };
 		1C7423F964AEF53EA37E1B4F2F4C8A3D /* MoveViewJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CE5BAABB5B8D36181E73740D180B4BD /* MoveViewJob.swift */; };
 		1CBCA6DCCC2E903C9EBE2F04A7AB2CCA /* Pods-ExampleUnitTests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 52EBE2AF7BB0D833E05390561B8E3CC5 /* Pods-ExampleUnitTests-dummy.m */; };
-		1CF5062CAFAA42BF270940AD7E81070E /* V6TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = CCF90F9D782695590459C67BA9133412 /* V6TestData.sqlite */; };
 		1D34F4B3A1D1C60A52F76424D499F1C1 /* TestMotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD96E044FB2E87CDABC29B267D3216A4 /* TestMotionManager.swift */; };
 		1DE2C1FA507E3683612641FD7110DA54 /* TrackCleanerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6089A19485A5E314B7336B9877083C5 /* TrackCleanerTest.swift */; };
 		1F10FE85C095FD556EA057A795FEC030 /* DataCapturing.h in Headers */ = {isa = PBXBuildFile; fileRef = EEDC19592A2DD4B26E536B1ACF48EE49 /* DataCapturing.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -108,7 +106,6 @@
 		585FD9DA0B21341F777A5B39ED1CA562 /* RadarChartDataEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373C8D26CA7A1BB120AA639B384D4EE9 /* RadarChartDataEntry.swift */; };
 		58889ECB9711CC8D285F5689C9DF4584 /* ChartColorTemplates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EBB0F6BD45399C0FEBE888C13599EAE /* ChartColorTemplates.swift */; };
 		594F156E8DDBAD992D6C0CF7AD29036B /* BinarySerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4112106E2F354CE227717FA8D2CDAA9 /* BinarySerializer.swift */; };
-		595773677B7CE756EAADB3ECE4C188BE /* V3TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AD1A5F4EC917F0513D195768205A6134 /* V3TestData.sqlite */; };
 		5BE63573A7F48FED1DDA9B1ADF049CAB /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A564042D6FC0A2EDAB98C88D3DC75F /* Networking.swift */; };
 		5CECD168465CF59B489253695D3FB51F /* NetworkReachabilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF85CBD0776A80753D8EE7ED36BE8778 /* NetworkReachabilityManager.swift */; };
 		5D998F2454D188B00E592ECF3DFB6371 /* PieChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDC0EABAA8338471EB80D05AC9905971 /* PieChartData.swift */; };
@@ -207,6 +204,18 @@
 		AA11963F2993A688008161C4 /* CoreDataMigrationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11963E2993A688008161C4 /* CoreDataMigrationError.swift */; };
 		AA4BFF1F297986ED005233E8 /* V11DatabaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4BFF1E297986ED005233E8 /* V11DatabaseTest.swift */; };
 		AA4BFF21297988BF005233E8 /* MeasurementTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4BFF20297988BF005233E8 /* MeasurementTest.swift */; };
+		AAD6295E299A227A0084B13D /* V2TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD6294F299A227A0084B13D /* V2TestData.sqlite */; };
+		AAD6295F299A227A0084B13D /* V5TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD62950299A227A0084B13D /* V5TestData.sqlite */; };
+		AAD62960299A227A0084B13D /* V4TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD62951299A227A0084B13D /* V4TestData.sqlite */; };
+		AAD62961299A227A0084B13D /* V3TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD62952299A227A0084B13D /* V3TestData.sqlite */; };
+		AAD62962299A227A0084B13D /* V1TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD62953299A227A0084B13D /* V1TestData.sqlite */; };
+		AAD62963299A227A0084B13D /* cache.db in Resources */ = {isa = PBXBuildFile; fileRef = AAD62957299A227A0084B13D /* cache.db */; };
+		AAD62964299A227A0084B13D /* v11model.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD62958299A227A0084B13D /* v11model.sqlite */; };
+		AAD62965299A227A0084B13D /* CyfaceModel.sqlite-shm in Resources */ = {isa = PBXBuildFile; fileRef = AAD62959299A227A0084B13D /* CyfaceModel.sqlite-shm */; };
+		AAD62966299A227A0084B13D /* CyfaceModel.sqlite-wal in Resources */ = {isa = PBXBuildFile; fileRef = AAD6295A299A227A0084B13D /* CyfaceModel.sqlite-wal */; };
+		AAD62967299A227A0084B13D /* CyfaceModel.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD6295B299A227A0084B13D /* CyfaceModel.sqlite */; };
+		AAD62968299A227A0084B13D /* v11model.sqlite-shm in Resources */ = {isa = PBXBuildFile; fileRef = AAD6295C299A227A0084B13D /* v11model.sqlite-shm */; };
+		AAD62969299A227A0084B13D /* V6TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD6295D299A227A0084B13D /* V6TestData.sqlite */; };
 		AB797ECDF30C3B23237AD4CEA3DE6262 /* Chain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27859A716D492819F0726382D95899A /* Chain.swift */; };
 		AD6A9FC5127879A7389236329CB2B58A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E8EC2C7E3C1BA94B3323CC7FD99FFD /* Foundation.framework */; };
 		ADA9E28A7FE4AFE7047AD93EFD890A6A /* ChartDataSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB83F43A91576684113EB5AF190E2F59 /* ChartDataSet.swift */; };
@@ -228,7 +237,6 @@
 		B95B43C4BBF67F528A445955D21AEC68 /* MovebisDataCapturingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E841F0639F29843BA7A568C2B059842E /* MovebisDataCapturingService.swift */; };
 		B9D166D151ACFDB386C494C06BC8A8F0 /* SensorValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51817D2DA8D893583ABF8C5C123DACFB /* SensorValue.swift */; };
 		BA0450AFE1E62F153F2A2D522E7330A5 /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEFAFE201942CD78A86BDC23DBECAD5 /* Authenticator.swift */; };
-		BA92026685ADE6359B41626D0EE5E2C8 /* V2TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = EDF11E4770FB6C5446E1388940A6D4C1 /* V2TestData.sqlite */; };
 		BDD2DC914B2D6A656C4E3C1714D953B5 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 815806EF77DED69235961101D8703311 /* CoreLocation.framework */; };
 		BDFE5C038BFAEDE5843A3BE7B78DAB9B /* AnimatedViewPortJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436C87623DE9911533A8C1FC28ECA68B /* AnimatedViewPortJob.swift */; };
 		BE85BF81DBD61E106AE6168F19DBBF0A /* CandleChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B280E6DC7D55BB6224F664D831E9A33 /* CandleChartData.swift */; };
@@ -246,7 +254,6 @@
 		C7E4A381095F15F90606D7C157BD9ABA /* ChartUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8317DFF3F698492193BF2AFA3BAD5F1 /* ChartUtils.swift */; };
 		C87A51827CB46DA28F06016CB7AE3785 /* Altitude.swift in Sources */ = {isa = PBXBuildFile; fileRef = 490430E78E9B9310C2D4BF5C8374357C /* Altitude.swift */; };
 		CA589FE7EC72C5BD7743D8EADBDB914E /* BarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1F68E65C187F870639BC7F6D5BE780 /* BarChartView.swift */; };
-		CCA9B01014C51B6575C36A8B7F232A0B /* V1TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4CD3C4F0080FCB1F7907B4D8D505ADDC /* V1TestData.sqlite */; };
 		CCDA0713496420D577B4796C7A4974AA /* TestLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9479B7F3366B134F41AA1F2FACBE5E /* TestLocationManager.swift */; };
 		CF491A4A998823F62438EFF79A37028E /* ViewPortHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4691DF6EC0D3AACA40B3C34CF6B64DC9 /* ViewPortHandler.swift */; };
 		CF53CF4998B07E3B054A32F34598D911 /* CombinedChartRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCAF7478644AF0FB514D9123BEFEB1F6 /* CombinedChartRenderer.swift */; };
@@ -256,7 +263,6 @@
 		D593E5BEB4221FF272DBF69E51945319 /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290C17C1A29D282F92996FC1EA16D114 /* Request.swift */; };
 		D5C1C08AE40489E2AD4424932D3C6964 /* EventMO+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C066539DC46945EE5CD1DDFB3DD8C275 /* EventMO+CoreDataProperties.swift */; };
 		D62DC5AC4359E848C5D70B9DF7596E21 /* GeoLocationMO+ManualExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA107F6FDBDDA50C566B36A556996B1B /* GeoLocationMO+ManualExtensions.swift */; };
-		D69646E0FEC3F65A3B8D4F2D77518204 /* V4TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = CFE61B94323FB34D764619F4E688FCC9 /* V4TestData.sqlite */; };
 		D806EE791E0C1722A40410F0084F63E6 /* BarChartDataEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9263C6F119EFFC9BF0C4AC03CF4425E7 /* BarChartDataEntry.swift */; };
 		DB13171585A147FFDE19FED165897AD2 /* PieChartDataSetProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4F63D652EF75812673F7681BF693795 /* PieChartDataSetProtocol.swift */; };
 		DB9D63E83B807491CBF175ADF9530AE3 /* FlattenCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FEA996F880F3F7A8D28BD4F21EE8F2B /* FlattenCollection.swift */; };
@@ -531,7 +537,6 @@
 		4AA9200B3C30BF34FF900104181F99A6 /* XAxisRendererRadarChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = XAxisRendererRadarChart.swift; path = Source/Charts/Renderers/XAxisRendererRadarChart.swift; sourceTree = "<group>"; };
 		4AF5A7109D6784AFE6CCCE90A39D68B9 /* AxisValueFormatter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AxisValueFormatter.swift; path = Source/Charts/Formatters/AxisValueFormatter.swift; sourceTree = "<group>"; };
 		4B9F67A9C013A18A16724242167633C1 /* Pods-ExampleUnitTests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ExampleUnitTests-acknowledgements.markdown"; sourceTree = "<group>"; };
-		4CD3C4F0080FCB1F7907B4D8D505ADDC /* V1TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V1TestData.sqlite; path = DataCapturing/Tests/Resources/V1TestData.sqlite; sourceTree = "<group>"; };
 		4E042C49699F6E7F457D76903EAFFCD9 /* MeasurementMO+CoreDataClass.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "MeasurementMO+CoreDataClass.swift"; sourceTree = "<group>"; };
 		4E98C8C37F4D65B9E5AF258279F15570 /* Track.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
 		506208F730FCADAF50663CD7860DFEA7 /* Pods-Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Example-frameworks.sh"; sourceTree = "<group>"; };
@@ -653,7 +658,6 @@
 		A044FAE00C805EA12958156462797434 /* Highlight.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Highlight.swift; path = Source/Charts/Highlight/Highlight.swift; sourceTree = "<group>"; };
 		A1C1B977ED8804E8AEEC884E7359EE58 /* Charts */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Charts; path = Charts.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2589D10C5DE07696717D4CF79FBF1F0 /* Pods-ExampleUnitTests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ExampleUnitTests-acknowledgements.plist"; sourceTree = "<group>"; };
-		A27A30FAA06C318D47FDCD69172DF23F /* V5TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V5TestData.sqlite; path = DataCapturing/Tests/Resources/V5TestData.sqlite; sourceTree = "<group>"; };
 		A2DC669B5FC47B9AA1DAB3730788C9A9 /* index.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; name = index.html; path = docs/GeoLocation/index.html; sourceTree = "<group>"; };
 		A427288E87EEBDD66AFEA38E032CB649 /* DataCompression.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = DataCompression.modulemap; sourceTree = "<group>"; };
 		A478F76EBB1139CE837041910D302E4E /* Pods-Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-Example-umbrella.h"; sourceTree = "<group>"; };
@@ -674,11 +678,22 @@
 		AA3119387680A84BF2842BF723502FF7 /* Charts-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Charts-umbrella.h"; sourceTree = "<group>"; };
 		AA4BFF1E297986ED005233E8 /* V11DatabaseTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = V11DatabaseTest.swift; path = DataCapturing/Tests/V11DatabaseTest.swift; sourceTree = "<group>"; };
 		AA4BFF20297988BF005233E8 /* MeasurementTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MeasurementTest.swift; path = DataCapturing/Tests/MeasurementTest.swift; sourceTree = "<group>"; };
+		AAD6294F299A227A0084B13D /* V2TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V2TestData.sqlite; sourceTree = "<group>"; };
+		AAD62950299A227A0084B13D /* V5TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V5TestData.sqlite; sourceTree = "<group>"; };
+		AAD62951299A227A0084B13D /* V4TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V4TestData.sqlite; sourceTree = "<group>"; };
+		AAD62952299A227A0084B13D /* V3TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V3TestData.sqlite; sourceTree = "<group>"; };
+		AAD62953299A227A0084B13D /* V1TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V1TestData.sqlite; sourceTree = "<group>"; };
+		AAD62957299A227A0084B13D /* cache.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = cache.db; sourceTree = "<group>"; };
+		AAD62958299A227A0084B13D /* v11model.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = v11model.sqlite; sourceTree = "<group>"; };
+		AAD62959299A227A0084B13D /* CyfaceModel.sqlite-shm */ = {isa = PBXFileReference; lastKnownFileType = file; path = "CyfaceModel.sqlite-shm"; sourceTree = "<group>"; };
+		AAD6295A299A227A0084B13D /* CyfaceModel.sqlite-wal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "CyfaceModel.sqlite-wal"; sourceTree = "<group>"; };
+		AAD6295B299A227A0084B13D /* CyfaceModel.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = CyfaceModel.sqlite; sourceTree = "<group>"; };
+		AAD6295C299A227A0084B13D /* v11model.sqlite-shm */ = {isa = PBXFileReference; lastKnownFileType = file; path = "v11model.sqlite-shm"; sourceTree = "<group>"; };
+		AAD6295D299A227A0084B13D /* V6TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V6TestData.sqlite; sourceTree = "<group>"; };
 		AB0D7A22CEFA5433B30F1001CD7B16FD /* CoreDataMigrator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoreDataMigrator.swift; sourceTree = "<group>"; };
 		AB66026E4BA228847875134084EE531B /* Charts-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Charts-Info.plist"; sourceTree = "<group>"; };
 		AC9425A518C47934D211D6630C5BE789 /* DataCompression.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DataCompression.swift; path = Sources/DataCompression/DataCompression.swift; sourceTree = "<group>"; };
 		ACC28536E391222F7FCEA7967D815B4E /* DataCapturing */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = DataCapturing; path = DataCapturing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		AD1A5F4EC917F0513D195768205A6134 /* V3TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V3TestData.sqlite; path = DataCapturing/Tests/Resources/V3TestData.sqlite; sourceTree = "<group>"; };
 		AE43F653568F2AB60A160B26C92156C8 /* GeoLocationMO+CoreDataProperties.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "GeoLocationMO+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		AE9C4E9ACA7F81856FF75B106FE7F2DD /* BarLineScatterCandleBubbleRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BarLineScatterCandleBubbleRenderer.swift; path = Source/Charts/Renderers/BarLineScatterCandleBubbleRenderer.swift; sourceTree = "<group>"; };
 		AFA1959F8F6BD2762E53C3BC58A410E9 /* Pods-ExampleUnitTests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-ExampleUnitTests-umbrella.h"; sourceTree = "<group>"; };
@@ -727,13 +742,11 @@
 		CC655F8963D749E62260D907F8CF0734 /* Stride.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Stride.swift; path = Sources/Algorithms/Stride.swift; sourceTree = "<group>"; };
 		CCAF7478644AF0FB514D9123BEFEB1F6 /* CombinedChartRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CombinedChartRenderer.swift; path = Source/Charts/Renderers/CombinedChartRenderer.swift; sourceTree = "<group>"; };
 		CCD44EC0DDF9695AFB6A6E13B11E6351 /* GeoLocationMO+CoreDataClass.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "GeoLocationMO+CoreDataClass.swift"; sourceTree = "<group>"; };
-		CCF90F9D782695590459C67BA9133412 /* V6TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V6TestData.sqlite; path = DataCapturing/Tests/Resources/V6TestData.sqlite; sourceTree = "<group>"; };
 		CD720CDA9FB75F209958C5376D45A016 /* 2.xcdatamodel */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcdatamodel; path = 2.xcdatamodel; sourceTree = "<group>"; };
 		CE045B07AC9BAC430ABC7ABCF875A9B7 /* ChartDataEntryBase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ChartDataEntryBase.swift; path = Source/Charts/Data/Implementations/Standard/ChartDataEntryBase.swift; sourceTree = "<group>"; };
 		CEDAABFC993FC4439DEBCF7F35FC66F5 /* RadarChartRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RadarChartRenderer.swift; path = Source/Charts/Renderers/RadarChartRenderer.swift; sourceTree = "<group>"; };
 		CF53AA23AE242C96F5DCC418BD2F0A73 /* v11model.xcdatamodel */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcdatamodel; path = v11model.xcdatamodel; sourceTree = "<group>"; };
 		CF9624C0D93E04A37BE13C68E3651569 /* Animator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Animator.swift; path = Source/Charts/Animation/Animator.swift; sourceTree = "<group>"; };
-		CFE61B94323FB34D764619F4E688FCC9 /* V4TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V4TestData.sqlite; path = DataCapturing/Tests/Resources/V4TestData.sqlite; sourceTree = "<group>"; };
 		D00CA3B3114FA836849D1E1318F1A350 /* Platform+Graphics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Platform+Graphics.swift"; path = "Source/Charts/Utils/Platform+Graphics.swift"; sourceTree = "<group>"; };
 		D09310C407892F502AD8E54F523FBB37 /* SwiftAlgorithms-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SwiftAlgorithms-Info.plist"; sourceTree = "<group>"; };
 		D1532C1806C37C96F615A223DE5A999C /* SwiftAlgorithms.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SwiftAlgorithms.debug.xcconfig; sourceTree = "<group>"; };
@@ -781,7 +794,6 @@
 		EB83F43A91576684113EB5AF190E2F59 /* ChartDataSet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ChartDataSet.swift; path = Source/Charts/Data/Implementations/Standard/ChartDataSet.swift; sourceTree = "<group>"; };
 		ED161BEDB184C91F5F65E9972892B0E0 /* DataCapturingError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DataCapturingError.swift; sourceTree = "<group>"; };
 		ED234A50A4B7A5E0313F5D38135EFE73 /* Pods-ExampleUnitTests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-ExampleUnitTests.modulemap"; sourceTree = "<group>"; };
-		EDF11E4770FB6C5446E1388940A6D4C1 /* V2TestData.sqlite */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = V2TestData.sqlite; path = DataCapturing/Tests/Resources/V2TestData.sqlite; sourceTree = "<group>"; };
 		EEDC19592A2DD4B26E536B1ACF48EE49 /* DataCapturing.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = DataCapturing.h; sourceTree = "<group>"; };
 		EEFE625B7B3CF4B6CD9178C0835D02B6 /* HorizontalBarHighlighter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HorizontalBarHighlighter.swift; path = Source/Charts/Highlight/HorizontalBarHighlighter.swift; sourceTree = "<group>"; };
 		F05CF9F1A4E115E2075B4FCCCD088FDB /* CandleChartDataSetProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CandleChartDataSetProtocol.swift; path = Source/Charts/Data/Interfaces/CandleChartDataSetProtocol.swift; sourceTree = "<group>"; };
@@ -1358,6 +1370,7 @@
 		9E9D6221FC63DA9508F9BEFD286D710A /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				AAD6294E299A227A0084B13D /* Resources */,
 				BF93F2E4D2C059739E35CE9135EFC427 /* DataCapturingTests.swift */,
 				C7CF303805F29222DCCB6C3A1E4A3C54 /* DataMigrationTest.swift */,
 				23264193506A68B0565B21AD9D62DCAA /* DistanceCalculationTests.swift */,
@@ -1368,12 +1381,6 @@
 				A6089A19485A5E314B7336B9877083C5 /* TrackCleanerTest.swift */,
 				AA4BFF1E297986ED005233E8 /* V11DatabaseTest.swift */,
 				AA4BFF20297988BF005233E8 /* MeasurementTest.swift */,
-				4CD3C4F0080FCB1F7907B4D8D505ADDC /* V1TestData.sqlite */,
-				EDF11E4770FB6C5446E1388940A6D4C1 /* V2TestData.sqlite */,
-				AD1A5F4EC917F0513D195768205A6134 /* V3TestData.sqlite */,
-				CFE61B94323FB34D764619F4E688FCC9 /* V4TestData.sqlite */,
-				A27A30FAA06C318D47FDCD69172DF23F /* V5TestData.sqlite */,
-				CCF90F9D782695590459C67BA9133412 /* V6TestData.sqlite */,
 				11ECD5C1A2FA94BD3B12EE8BF1059510 /* Support */,
 			);
 			name = Tests;
@@ -1392,6 +1399,50 @@
 			);
 			name = "Support Files";
 			path = "../Target Support Files/Charts";
+			sourceTree = "<group>";
+		};
+		AAD6294E299A227A0084B13D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AAD6294F299A227A0084B13D /* V2TestData.sqlite */,
+				AAD62950299A227A0084B13D /* V5TestData.sqlite */,
+				AAD62951299A227A0084B13D /* V4TestData.sqlite */,
+				AAD62952299A227A0084B13D /* V3TestData.sqlite */,
+				AAD62953299A227A0084B13D /* V1TestData.sqlite */,
+				AAD6295D299A227A0084B13D /* V6TestData.sqlite */,
+				AAD62954299A227A0084B13D /* v9TestData */,
+			);
+			name = Resources;
+			path = DataCapturing/Tests/Resources;
+			sourceTree = "<group>";
+		};
+		AAD62954299A227A0084B13D /* v9TestData */ = {
+			isa = PBXGroup;
+			children = (
+				AAD62955299A227A0084B13D /* org.klimabuendnis.Stadtradeln */,
+				AAD62958299A227A0084B13D /* v11model.sqlite */,
+				AAD62959299A227A0084B13D /* CyfaceModel.sqlite-shm */,
+				AAD6295A299A227A0084B13D /* CyfaceModel.sqlite-wal */,
+				AAD6295B299A227A0084B13D /* CyfaceModel.sqlite */,
+				AAD6295C299A227A0084B13D /* v11model.sqlite-shm */,
+			);
+			path = v9TestData;
+			sourceTree = "<group>";
+		};
+		AAD62955299A227A0084B13D /* org.klimabuendnis.Stadtradeln */ = {
+			isa = PBXGroup;
+			children = (
+				AAD62956299A227A0084B13D /* .mapbox */,
+			);
+			path = org.klimabuendnis.Stadtradeln;
+			sourceTree = "<group>";
+		};
+		AAD62956299A227A0084B13D /* .mapbox */ = {
+			isa = PBXGroup;
+			children = (
+				AAD62957299A227A0084B13D /* cache.db */,
+			);
+			path = .mapbox;
 			sourceTree = "<group>";
 		};
 		B033499112613930B2E0B8AA80970FBB /* Charts */ = {
@@ -1907,12 +1958,18 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CCA9B01014C51B6575C36A8B7F232A0B /* V1TestData.sqlite in Resources */,
-				BA92026685ADE6359B41626D0EE5E2C8 /* V2TestData.sqlite in Resources */,
-				595773677B7CE756EAADB3ECE4C188BE /* V3TestData.sqlite in Resources */,
-				D69646E0FEC3F65A3B8D4F2D77518204 /* V4TestData.sqlite in Resources */,
-				16AC4957804354D7C3CB5A47A6C92A75 /* V5TestData.sqlite in Resources */,
-				1CF5062CAFAA42BF270940AD7E81070E /* V6TestData.sqlite in Resources */,
+				AAD62962299A227A0084B13D /* V1TestData.sqlite in Resources */,
+				AAD62965299A227A0084B13D /* CyfaceModel.sqlite-shm in Resources */,
+				AAD62960299A227A0084B13D /* V4TestData.sqlite in Resources */,
+				AAD6295E299A227A0084B13D /* V2TestData.sqlite in Resources */,
+				AAD62963299A227A0084B13D /* cache.db in Resources */,
+				AAD62968299A227A0084B13D /* v11model.sqlite-shm in Resources */,
+				AAD62961299A227A0084B13D /* V3TestData.sqlite in Resources */,
+				AAD62964299A227A0084B13D /* v11model.sqlite in Resources */,
+				AAD62966299A227A0084B13D /* CyfaceModel.sqlite-wal in Resources */,
+				AAD62969299A227A0084B13D /* V6TestData.sqlite in Resources */,
+				AAD6295F299A227A0084B13D /* V5TestData.sqlite in Resources */,
+				AAD62967299A227A0084B13D /* CyfaceModel.sqlite in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
