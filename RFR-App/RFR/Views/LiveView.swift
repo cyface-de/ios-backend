@@ -145,8 +145,8 @@ struct LiveDetailsView: View {
                     .fontWeight(.bold)
             }
             .tabItem {
-                Image(systemName: "play")
-                Text("Live")
+                Image(systemName: "speedometer")
+                Text("Speed")
             }
         }
     }

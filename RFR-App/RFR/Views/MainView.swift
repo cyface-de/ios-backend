@@ -31,13 +31,13 @@ struct MainView: View {
             TabView {
                 MeasurementsView(measurements: exampleMeasurements)
                     .tabItem {
-                        Image(systemName: "square.3.layers.3d")
+                        Image(systemName: "list.bullet")
                         Text("Fahrten")
                             .font(.footnote)
                     }
                 LiveView(viewModel: viewModelExample)
                     .tabItem {
-                        Image(systemName: "play")
+                        Image(systemName: "location.fill")
                         Text("Live")
                     }
                 StatisticsView()
