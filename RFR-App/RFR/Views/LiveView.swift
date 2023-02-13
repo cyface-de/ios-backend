@@ -146,7 +146,7 @@ struct LiveDetailsView: View {
             }
             .tabItem {
                 Image(systemName: "speedometer")
-                Text("Speed")
+                Text("Geschwindigkeit")
             }
         }
     }

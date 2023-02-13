@@ -65,7 +65,7 @@ struct LoginView: View {
 
                 }.padding()
 
-                NavigationLink(destination: LiveView(viewModel: viewModelExample)) {
+                NavigationLink(destination: MainView()) {
                     Text("Login")
                         .frame(maxWidth: .infinity)
                 }
