@@ -28,6 +28,9 @@ import Foundation
  - Since: 4.0.0
  */
 public enum CoreDataMigrationVersion: String, CaseIterable {
+    /// The temporary version used by the V11 database
+    case v11version9 = "v11model"
+
     /// The first and oldest version of the model
     case version1 = "CyfaceModel"
     /// The second version of the model
@@ -46,9 +49,6 @@ public enum CoreDataMigrationVersion: String, CaseIterable {
     case version8 = "8"
     /// The ninth version of the model
     case version9 = "9"
-
-    /// The temporary version used by the V11 database
-    case v11version9 = "v11model"
 
     // MARK: - Current
 
