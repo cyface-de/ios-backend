@@ -44,6 +44,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
     var window: UIWindow?
     /// The database access layer using iOS CoreData framework
     var coreDataStack: CoreDataManager?
+    /// A database containing information that must be merged into the main database in the future, when this branch is reintegrated into main.
+    var v11Stack: CoreDataManager?
     /// A connection to a Cyface collector service.
     var serverConnection: ServerConnection?
     /// An authenticator authenticating users to login to the app and upload data to a Cyface collector service if valid.
@@ -109,7 +111,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
         guard let loginViewController = storyboard.instantiateInitialViewController() as? LoginViewController else {
             fatalError("Unable to cast main storyboard initial view controller to a LoginViewController!")
         }
-        // TODO: This late dependency injection is not necessary if using a proper programmatical MVVM.
         // Refactor the LoginViewController to follow that model!
         loginViewController.model = settings
         window?.rootViewController = loginViewController
@@ -187,6 +188,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
             self.settings.add(serverUrlChangedListener: self)
             do {
                 let coreDataStack = try CoreDataManager()
+                let v11ObjectModel = try CoreDataManager.load(model: "v11model")
+                let v11Stack = CoreDataManager(modelName: "v11model", model: v11ObjectModel)
                 let bundle = Bundle(for: type(of: coreDataStack))
                 try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
                     if let error = error {
@@ -197,13 +200,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
                     }
                     self.coreDataStack = coreDataStack
 
-                    DispatchQueue.main.async { [weak self] in
-                        guard let self = self else {
-                            return
-                        }
+                    do {
+                        try v11Stack.setup(bundle: bundle) { [weak self] (error) in
+                            if let error = error {
+                                fatalError("Unable to setup v11 CoreData stack due to: \(error)")
+                            }
+                            guard let self = self else {
+                                return
+                            }
+                            self.v11Stack = v11Stack
 
-                        self.window = UIWindow(frame: UIScreen.main.bounds)
-                        self.presentMainUI()
+                            DispatchQueue.main.async { [weak self] in
+                                guard let self = self else {
+                                    return
+                                }
+
+                                self.window = UIWindow(frame: UIScreen.main.bounds)
+                                self.presentMainUI()
+                            }
+                        }
+                    } catch {
+                        fatalError("Unable to setup v11 CoreData stack due to: \(error)")
                     }
                 }
             } catch {
@@ -269,6 +286,13 @@ extension UIViewController {
             fatalError("Unable to load CoreDataStack!")
         }
         return coreDataStack
+    }
+
+    var v11Stack: CoreDataManager {
+        guard let stack = appDelegate.v11Stack else {
+            fatalError("Unable to load V11 CoreDataStack!")
+        }
+        return stack
     }
 
     /// Provides the applications CoreData stack to all the views. This must only be called on the main thread.

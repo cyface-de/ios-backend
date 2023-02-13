@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict/>
+	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Program requires GPS to match your position with the acquired road surface data.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Program requires GPS to match your position with the acquired road surface data.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Program requires GPS to match your position with the acquired road surface data.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Program requires GPS to match your position with the acquired road surface data.</string>
+</dict>
+</plist>

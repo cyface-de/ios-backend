@@ -30,6 +30,7 @@ import Foundation
  - Version: 3.1.0
  - Since: 1.0.0
  - Note: This was called  `Acceleration` in previous versions of the SDK.
+ - Note: This class is mostly necessary to avoid using the *CoreMotion* data classes, which are a nightmare to test.
  */
 public class SensorValue: CustomStringConvertible {
 

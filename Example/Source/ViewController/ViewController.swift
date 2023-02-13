@@ -464,6 +464,7 @@ class ViewController: UIViewController {
         if measurements.isEmpty {
             showOverlay {
                 let coreDataStack = self.coreDataStack
+                let v11Stack = self.v11Stack
                 DispatchQueue.global(qos: .userInteractive).async { [weak self] in
                     guard let self = self else {
                         return
@@ -486,6 +487,7 @@ class ViewController: UIViewController {
                         self.dataCapturingService = DataCapturingService(
                             sensorManager: motionManager,
                             dataManager: coreDataStack,
+                            v11Stack: v11Stack,
                             eventHandler: self.handleDataCapturingEvent)
 
                         // TODO: Move this to a Table View Model

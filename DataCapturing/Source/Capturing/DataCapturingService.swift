@@ -75,6 +75,9 @@ public class DataCapturingService: NSObject {
      */
     let coreDataStack: CoreDataManager
 
+    /// Stack for storing additional data, which will be merged into the full database later on.
+    let v11Stack: CoreDataManager
+
     /// An in memory storage for geo locations, before they are written to disk.
     var locationsCache = [LocationCacheEntry]()
 
@@ -156,9 +159,11 @@ public class DataCapturingService: NSObject {
         directionsInterval: Double = 100,
         savingInterval time: TimeInterval = 30,
         dataManager: CoreDataManager,
+        v11Stack: CoreDataManager,
         eventHandler: @escaping ((DataCapturingEvent, Status) -> Void)) {
 
-        coreDataStack = dataManager
+        self.coreDataStack = dataManager
+        self.v11Stack = v11Stack
         manager.accelerometerUpdateInterval = 1.0 / accelerometerInterval
         manager.gyroUpdateInterval = 1.0 / gyroInterval
         manager.magnetometerUpdateInterval = 1.0 / directionsInterval
@@ -442,6 +447,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             let localAccelerationsCache = sensorCapturer.accelerations
             let localRotationsCache = sensorCapturer.rotations
             let localDirectionsCache = sensorCapturer.directions
+            let localAltitudesCache = sensorCapturer.altitudes
             let localLocationsCache = self.locationsCache
 
             let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
@@ -453,11 +459,17 @@ Starting data capturing on paused service. Finishing paused measurements and sta
                 accelerations: localAccelerationsCache,
                 rotations: localRotationsCache,
                 directions: localDirectionsCache,
-                in: &measurement)
+                in: &measurement
+            )
+
+            let v11Database = V11Database(coreDataStack: self.v11Stack)
+            try v11Database.store(altitudes: localAltitudesCache, to: measurement)
+            try v11Database.store(locations: localLocationsCache, to: measurement)
 
             sensorCapturer.accelerations.removeAll()
             sensorCapturer.rotations.removeAll()
             sensorCapturer.directions.removeAll()
+            sensorCapturer.altitudes.removeAll()
 
             self.locationsCache = [LocationCacheEntry]()
         } catch let error {
@@ -528,10 +540,13 @@ extension DataCapturingService: CLLocationManagerDelegate {
             let geoLocation = LocationCacheEntry(
                 latitude: location.coordinate.latitude,
                 longitude: location.coordinate.longitude,
+                altitude: location.altitude, // TODO: Use ellipsoidalAltitude if switching to iOS 15
                 accuracy: location.horizontalAccuracy,
+                verticalAccuracy: location.verticalAccuracy,
                 speed: location.speed,
                 timestamp: location.timestamp,
-                isValid: isValid)
+                isValid: isValid
+            )
 
             lifecycleQueue.async(flags: .barrier) {
                 self.locationsCache.append(geoLocation)
@@ -579,8 +594,12 @@ public struct LocationCacheEntry: Equatable, Hashable, CustomStringConvertible {
     public let latitude: Double
     /// The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.
     public let longitude: Double
+    /// Ellipsoidal Altitude in meters
+    public let altitude: Double
     /// The estimated accuracy of the measurement in meters.
     public let accuracy: Double
+    /// The accuracy of altitude calculations in meters.
+    public let verticalAccuracy: Double
     /// The speed the device was moving during the measurement in meters per second.
     public let speed: Double
     /// The time the measurement happened at.
@@ -599,7 +618,7 @@ public struct LocationCacheEntry: Equatable, Hashable, CustomStringConvertible {
      - Parameter parent: The `Track` to add this as a `GeoLocation` to
      */
     func storeAsGeoLocation(to parent: inout Track) throws {
-        let location = try GeoLocation(
+        let location = GeoLocation(
             latitude: latitude,
             longitude: longitude,
             accuracy: accuracy,

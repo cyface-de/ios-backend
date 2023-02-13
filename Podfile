@@ -13,3 +13,8 @@ target 'Example' do
     pod 'DataCapturing', :path => './'
   end
 end
+
+target 'StatisticsExample' do
+  project 'StatisticsExample/StatisticsExample.xcodeproj'
+  pod 'DataCapturing', :path => './', :testspecs => ['Tests']
+end
