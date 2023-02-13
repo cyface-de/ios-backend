@@ -111,7 +111,7 @@ class PersistenceTests: XCTestCase {
     func testCleanMeasurement() {
         do {
             let accelerationCount = fixture.accelerationsCount
-            let geoLocationCount = try PersistenceLayer.collectGeoLocations(from: fixture).count
+            let geoLocationCount = PersistenceLayer.collectGeoLocations(from: fixture).count
             XCTAssertEqual(accelerationCount, 3)
             XCTAssertEqual(geoLocationCount, 2)
 
@@ -120,7 +120,7 @@ class PersistenceTests: XCTestCase {
             let measurementAfterClean = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
             XCTAssertEqual(measurementAfterClean.accelerationsCount, 0, "Accelerations have not been empty after cleaning!")
-            let geoLocationCountAfterClean = try PersistenceLayer.collectGeoLocations(from: measurementAfterClean).count
+            let geoLocationCountAfterClean = PersistenceLayer.collectGeoLocations(from: measurementAfterClean).count
             XCTAssertFalse(geoLocationCountAfterClean==0, "Geo Locations was empty after cleaning!")
         } catch let error {
             XCTFail("Error \(error.localizedDescription)")
@@ -151,7 +151,7 @@ class PersistenceTests: XCTestCase {
             try oocut.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &fixture)
             let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
-            XCTAssertEqual(try PersistenceLayer.collectGeoLocations(from: measurement).count, 3)
+            XCTAssertEqual(PersistenceLayer.collectGeoLocations(from: measurement).count, 3)
             XCTAssertEqual(measurement.accelerationsCount, 6)
         } catch let error {
             XCTFail("Error \(error.localizedDescription)")
@@ -167,7 +167,7 @@ class PersistenceTests: XCTestCase {
             let events = try oocut.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
             XCTAssertEqual(events.count, 1)
             XCTAssertEqual(events[0].value, defaultMode)
-            XCTAssertEqual(try PersistenceLayer.collectGeoLocations(from: measurement).count, 2)
+            XCTAssertEqual(PersistenceLayer.collectGeoLocations(from: measurement).count, 2)
             XCTAssertEqual(measurement.accelerationsCount, 3)
         } catch let error {
             XCTFail("Error \(error.localizedDescription)")

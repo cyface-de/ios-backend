@@ -29,25 +29,26 @@ import CoreData
  */
 public protocol CoreDataMigratorProtocol {
     /**
-     Checks if the provided store requires a migration to reach `toVersion`.
+     Checks if the provided store requires a migration to the version of this migrator.
 
      - Parameters:
         - at: The URL pointing to the store to check
-        - toVersion: The version to migrate to
         - inBundle: The bundle containing the model and mapping files
      - Returns: `true` if migration is required, `false` otherwise
+     - Throws: ``CoreDataMigrationError/modelFileNotFound(modelName:resourceName:)`` if the model was not present in the provided `Bundle`.
      */
-    func requiresMigration(at storeURL: URL, toVersion version: CoreDataMigrationVersion, inBundle bundle: Bundle) -> Bool
+    func requiresMigration(at storeURL: URL, inBundle bundle: Bundle) throws -> Bool
 
     /**
-     Migrates the provided store to the provided version.
+     Migrates the provided store to the version of this migrator.
 
+     - Attention: Only call this after checking that migration is really necessary using ``requiresMigration(at:inBundle:)``. The call is going to crash otherwise.
      - Parameters:
         - at: The URL pointing to the store to migrate
-        - toVersion: The version to migrate to
         - inBundle: The bundle containing the model and mapping files
+     - Throws: ``CoreDataMigrationError/modelFileNotFound(modelName:resourceName:)`` If the modle file was not present in the provided `Bundle`.
      */
-    func migrateStore(at storeURL: URL, toVersion version: CoreDataMigrationVersion, inBundle bundle: Bundle)
+    func migrateStore(at storeURL: URL, inBundle bundle: Bundle) throws
 }
 
 /**
@@ -59,30 +60,37 @@ public protocol CoreDataMigratorProtocol {
  */
 public class CoreDataMigrator: CoreDataMigratorProtocol {
 
+    // MARK: - Properties
+    /// The name of the model to migrate.
+    private let model: String
+    /// The version to migrate to.
+    private let version: CoreDataMigrationVersion
+
     // MARK: - Initializers
 
     /**
-     Public no argument constructor, so it becomes possible to create instances of this class.
+     Public constructor, with the possibility to provide a version of a datastore to migrate to.
      */
-    public init() {
-        // Nothing to do here
+    public init(model: String = "CyfaceModel", to version: CoreDataMigrationVersion = CoreDataMigrationVersion.current) {
+        self.model = model
+        self.version = version
     }
 
     // MARK: - Methods
 
-    public func requiresMigration(at storeURL: URL, toVersion version: CoreDataMigrationVersion, inBundle bundle: Bundle = Bundle.main) -> Bool {
+    public func requiresMigration(at storeURL: URL, inBundle bundle: Bundle = Bundle.main) throws -> Bool {
         guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL) else {
             return false
         }
 
-        return (CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle) != version)
+        return (try CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle, model) != version)
     }
 
-    public func migrateStore(at storeURL: URL, toVersion version: CoreDataMigrationVersion, inBundle bundle: Bundle = Bundle.main) {
+    public func migrateStore(at storeURL: URL, inBundle bundle: Bundle = Bundle.main) throws {
         forceWALCheckpointingForStore(at: storeURL, inBundle: bundle)
 
         var currentURL = storeURL
-        let migrationSteps = self.migrationStepsForStore(at: storeURL, toVersion: version, inBundle: bundle)
+        let migrationSteps = try self.migrationStepsForStore(at: storeURL, toVersion: version, inBundle: bundle)
 
         for migrationStep in migrationSteps {
             let manager = NSMigrationManager(sourceModel: migrationStep.sourceModel, destinationModel: migrationStep.destinationModel)
@@ -123,17 +131,18 @@ public class CoreDataMigrator: CoreDataMigratorProtocol {
         - toVersion: The version to migrate to.
         - inBundle: The bundle containing the model and mapping files.
      - Returns: An array of `CoreDataMigrationStep` instances ordered from the oldest to the newest.
+     - Throws: ``CoreDataMigrationError/modelFileNotFound(modelName:resourceName:)`` If the model file was not present in the provided `Bundle`.
      */
-    private func migrationStepsForStore(at storeURL: URL, toVersion destinationVersion: CoreDataMigrationVersion, inBundle bundle: Bundle) -> [CoreDataMigrationStep] {
+    private func migrationStepsForStore(at storeURL: URL, toVersion destinationVersion: CoreDataMigrationVersion, inBundle bundle: Bundle) throws -> [CoreDataMigrationStep] {
         guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL) else {
             fatalError("Unable to load metadata for persistent store: \(storeURL).")
         }
 
-        guard let sourceVersion = CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle) else {
+        guard let sourceVersion = try CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata, bundle, model) else {
             fatalError("Unknown store version at URL \(storeURL).")
         }
 
-        return migrationSteps(fromSourceVersion: sourceVersion, toDestinationVersion: destinationVersion, inBundle: bundle)
+        return try migrationSteps(fromSourceVersion: sourceVersion, toDestinationVersion: destinationVersion, inBundle: bundle)
     }
 
     /**
@@ -145,12 +154,17 @@ public class CoreDataMigrator: CoreDataMigratorProtocol {
         - inBundle: The bundle containing the model and mapping files.
      - Returns: An array of `CoreDataMigrationStep` instances necessary to reach `toDestinationVersion` from `fromSourceVersion`, ordered from the oldest to the newest version.
      */
-    private func migrationSteps(fromSourceVersion sourceVersion: CoreDataMigrationVersion, toDestinationVersion destinationVersion: CoreDataMigrationVersion, inBundle bundle: Bundle) -> [CoreDataMigrationStep] {
+    private func migrationSteps(fromSourceVersion sourceVersion: CoreDataMigrationVersion, toDestinationVersion destinationVersion: CoreDataMigrationVersion, inBundle bundle: Bundle) throws -> [CoreDataMigrationStep] {
         var sourceVersion = sourceVersion
         var migrationSteps = [CoreDataMigrationStep]()
 
         while sourceVersion != destinationVersion, let nextVersion = sourceVersion.nextVersion() {
-            let migrationStep = CoreDataMigrationStep(sourceVersion: sourceVersion, destinationVersion: nextVersion, bundle: bundle)
+            let migrationStep = try CoreDataMigrationStep(
+                modelName: model,
+                sourceVersion: sourceVersion,
+                destinationVersion: nextVersion,
+                bundle: bundle
+            )
             migrationSteps.append(migrationStep)
 
             sourceVersion = nextVersion
@@ -267,13 +281,17 @@ extension NSManagedObjectModel {
         - inBundle: The bundle containing the provided resource
      - Returns: The created `NSManagedObjectModel`
      */
-    static func managedObjectModel(forResource resource: String, inBundle bundle: Bundle) -> NSManagedObjectModel {
-        let subdirectory = "CyfaceModel.momd"
+    static func managedObjectModel(
+        forResource resource: String,
+        inBundle bundle: Bundle,
+        withModelName name: String
+    ) throws -> NSManagedObjectModel {
+        let subdirectory = "\(name).momd"
         let omoURL = bundle.url(forResource: resource, withExtension: "omo", subdirectory: subdirectory) // optimized model file
         let momURL = bundle.url(forResource: resource, withExtension: "mom", subdirectory: subdirectory)
 
         guard let url = omoURL ?? momURL else {
-            fatalError("Unable to find model in bundle!")
+            throw CoreDataMigrationError.modelFileNotFound(modelName: name, resourceName: resource)
         }
 
         guard let model = NSManagedObjectModel(contentsOf: url) else {
@@ -308,15 +326,33 @@ private extension CoreDataMigrationVersion {
      - Parameters:
         - metadata: The meta data to use to search for a version.
         - bundle: The bundle to search for compatible model version files.
+        - name: The name of the model to load the compatible version from.
      - Returns: Either the retrieved version or `nil` if no model file with a compatible version has been found inside the provided bundle.
+     - Throws: ``CoreDataMigrationError/noCompatibleVersion(modelName:)`` If the model file was not present in the provided `Bundle`.
      */
-    static func compatibleVersionForStoreMetadata(_ metadata: [String: Any], _ bundle: Bundle) -> CoreDataMigrationVersion? {
-        let compatibleVersion = CoreDataMigrationVersion.allCases.first {
-            let model = NSManagedObjectModel.managedObjectModel(forResource: $0.rawValue, inBundle: bundle)
+    static func compatibleVersionForStoreMetadata(_ metadata: [String: Any], _ bundle: Bundle, _ name: String) throws -> CoreDataMigrationVersion? {
+        let compatibleVersion = CoreDataMigrationVersion.allCases.compactMap { versionName in
+            let rawVersionName = versionName.rawValue
+            do {
+                let model = try NSManagedObjectModel.managedObjectModel(
+                    forResource: rawVersionName,
+                    inBundle: bundle,
+                    withModelName: name
+                )
 
+                return (model, versionName)
+            } catch {
+                return nil
+            }
+        }.filter { (modelWithVersion: (NSManagedObjectModel, CoreDataMigrationVersion)) in
+            let model = modelWithVersion.0
             return model.isConfiguration(withName: nil, compatibleWithStoreMetadata: metadata)
+        }.first
+
+        guard let version = compatibleVersion?.1 else {
+            throw CoreDataMigrationError.noCompatibleVersion(modelName: name)
         }
 
-        return compatibleVersion
+        return version
     }
 }

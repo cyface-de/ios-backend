@@ -98,12 +98,18 @@ public class CoreDataManager {
     /**
      Connects this `CoreDataManager` to the underlying storage, possibly migrating the data model to the current version.
 
+     The error reported by the `completionClosure` may be an ``CoreDataError/missingModelUrl`` or a ``CoreDataMigrationError/modelFileNotFound(modelName:resourceName:)``.
+
      - Parameter bundle: The bundle containing the data model.
      - Throws: `CoreDataError.missingModelUrl`
      */
-    public func setup(bundle: Bundle, completionClosure: @escaping (Error?) -> Void) throws {
-        try migrateStoreIfNeeded(bundle: bundle)
-        self.persistentContainer.loadPersistentStores { _, error in
+    public func setup(bundle: Bundle, completionClosure: @escaping (Error?) -> Void) {
+        do {
+            try migrateStoreIfNeeded(bundle: bundle)
+            self.persistentContainer.loadPersistentStores { _, error in
+                completionClosure(error)
+            }
+        } catch {
             completionClosure(error)
         }
     }
@@ -128,20 +134,21 @@ public class CoreDataManager {
      Migrates the storage to the current version if required.
 
      - Parameter bundle: The bundle containing data and mapping models.
-     - Throws: `CoreDataError.missingModelUrl`
+     - Throws: ``CoreDataError/missingModelUrl``
+     - Throws: ``CoreDataMigrationError/modelFileNotFound(modelName:resourceName:)`` if the model was not part of the provided ``Bundle``.
      */
     private func migrateStoreIfNeeded(bundle: Bundle) throws {
         guard let storeURL = persistentContainer.persistentStoreDescriptions.first?.url else {
             throw CoreDataError.missingModelUrl
         }
 
-        if migrator.requiresMigration(at: storeURL, toVersion: CoreDataMigrationVersion.current, inBundle: bundle) {
-            migrator.migrateStore(at: storeURL, toVersion: CoreDataMigrationVersion.current, inBundle: bundle)
+        if try migrator.requiresMigration(at: storeURL, inBundle: bundle) {
+            try migrator.migrateStore(at: storeURL, inBundle: bundle)
         }
     }
 
     /**
-     Wrap a block of data inside a valid `NSManagedObjectContext`. As long as control is not handed to any other thread, it is save to use managed objects within that block.
+     Wrap a block of data inside a valid ``NSManagedObjectContext``. As long as control is not handed to any other thread, it is save to use managed objects within that block.
 
      - Throws: Any error thrown by the block is rethrown here.
      */
@@ -194,7 +201,7 @@ public class CoreDataManager {
      - Since: 10.0.0
      - Version: 1.0.0
      */
-    enum CoreDataError: Error {
+    public enum CoreDataError: Error {
         /// If the URL to the CoreData model file can not be processed by the system. This should usually not happen, since it does not depend on user input. If you encounter this error you probably have an invalid build of the Cyface SDK.
         case invalidModelUrl(String)
         /// A CoreData persistent store was missing its model URL. This is not supposed to happen, unless you are starting data migration before initialization of the persistent store. Doing this is only possible if you are messing with the persistent store manually and circumventing Cyface interfaces.‚

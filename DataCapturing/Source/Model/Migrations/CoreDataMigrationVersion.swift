@@ -28,6 +28,9 @@ import Foundation
  - Since: 4.0.0
  */
 public enum CoreDataMigrationVersion: String, CaseIterable {
+    /// The temporary version used by the V11 database
+    case v11version9 = "v11model"
+
     /// The first and oldest version of the model
     case version1 = "CyfaceModel"
     /// The second version of the model
@@ -50,7 +53,7 @@ public enum CoreDataMigrationVersion: String, CaseIterable {
     // MARK: - Current
 
     /// The currently used model version
-    static var current: CoreDataMigrationVersion {
+    public static var current: CoreDataMigrationVersion {
         guard let current = allCases.last else {
             fatalError("No model versions found")
         }
@@ -80,6 +83,8 @@ public enum CoreDataMigrationVersion: String, CaseIterable {
         case .version8:
             return .version9
         case .version9:
+            return nil
+        case .v11version9:
             return nil
         }
     }
