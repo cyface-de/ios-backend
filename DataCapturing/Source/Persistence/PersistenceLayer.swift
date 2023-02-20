@@ -261,7 +261,7 @@ public class PersistenceLayer {
             }
 
             guard let track = measurement.tracks.last else {
-                throw PersistenceError.inconsistentState
+                throw PersistenceError.missingTrack(measurement)
             }
             guard let trackObjectId = track.objectId else {
                 throw PersistenceError.nonPersistentTrackEncountered(track, measurement)
@@ -639,4 +639,6 @@ public enum PersistenceError: Error {
     case inconsistentState
     /// On trying to load a not yet synchronized `Measurement`. This is usually a `Measurement` with en `objectId` of `nil`.
     case unsynchronizedMeasurement(identifier: Int64)
+    /// If a measurement, which was expected to
+    case missingTrack(Measurement)
 }

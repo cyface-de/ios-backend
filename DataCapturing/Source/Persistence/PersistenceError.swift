@@ -72,6 +72,12 @@ extension PersistenceError: LocalizedError {
                 comment: ""
             )
             return errorMessage
+        case .missingTrack(let measurement):
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.PersistenceError.missingTrack",
+                value: "Encountered measurement %d without track to store data to!",
+                comment: "")
+            return String.localizedStringWithFormat(errorMessage, measurement.identifier)
         }
     }
 }
