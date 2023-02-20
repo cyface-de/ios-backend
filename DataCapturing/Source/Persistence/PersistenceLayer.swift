@@ -641,4 +641,9 @@ public enum PersistenceError: Error {
     case unsynchronizedMeasurement(identifier: Int64)
     /// If a measurement, which was expected to
     case missingTrack(Measurement)
+    case measurementV11NotLoadable(Measurement, Error)
+    case unableToLoadV11Altitudes(Measurement, Error)
+    case unableToStoreV11Altitudes(Measurement, Error)
+    case unableToLoadV11Locations(Measurement, Error)
+    case unableToStoreV11Locations(Measurement, Error)
 }
