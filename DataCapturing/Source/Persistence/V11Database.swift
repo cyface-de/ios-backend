@@ -116,33 +116,32 @@ public class V11Database {
 
     /// Load a `measurement` from the data storage.
     private func loadV11Measurement(for measurement: Measurement, from context: NSManagedObjectContext) throws -> MeasurementV11 {
-            let fetchRequest = MeasurementV11.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "identifier = %i", measurement.identifier)
-            do {
-                let dbMeasurements = try context.fetch(fetchRequest)
-                guard dbMeasurements.count <= 1 else {
-                    throw PersistenceError.measurementNotLoadable(measurement.identifier)
-                }
-
-                if dbMeasurements.isEmpty {
-
-                    let newV11Measurement = MeasurementV11(context: context)
-                    newV11Measurement.identifier = measurement.identifier
-                    newV11Measurement.addToTracks(TrackV11(context: context))
-                    return newV11Measurement
-
-                } else {
-
-                    while dbMeasurements[0].typedTracks().count < measurement.tracks.count {
-                        dbMeasurements[0].addToTracks(TrackV11(context: context))
-                    }
-                    return dbMeasurements[0]
-
-                }
-            } catch {
-                print("fetch \(error.localizedDescription)")
-                throw error
+        let fetchRequest = MeasurementV11.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "identifier = %i", measurement.identifier)
+        do {
+            let dbMeasurements = try context.fetch(fetchRequest)
+            guard dbMeasurements.count <= 1 else {
+                throw PersistenceError.measurementNotLoadable(measurement.identifier)
             }
+
+            if dbMeasurements.isEmpty {
+
+                let newV11Measurement = MeasurementV11(context: context)
+                newV11Measurement.identifier = measurement.identifier
+                newV11Measurement.addToTracks(TrackV11(context: context))
+                return newV11Measurement
+
+            } else {
+
+                while dbMeasurements[0].typedTracks().count < measurement.tracks.count {
+                    dbMeasurements[0].addToTracks(TrackV11(context: context))
+                }
+                return dbMeasurements[0]
+
+            }
+        } catch {
+            throw PersistenceError.measurementV11NotLoadable(measurement, error)
+        }
     }
 
     // MARK: - Reading Calculated Results
