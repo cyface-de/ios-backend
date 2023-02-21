@@ -25,7 +25,7 @@ import Foundation
  - Version: 1.1.0
  - Since: 4.6.1
  */
-public enum EventType: Int16 {
+public enum EventType: Int16, CaseIterable {
     /// An event logged after the service has successfully started
     case lifecycleStart
     /// An event logged after the service has successfully paused
