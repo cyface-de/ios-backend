@@ -106,7 +106,6 @@
 		585FD9DA0B21341F777A5B39ED1CA562 /* RadarChartDataEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373C8D26CA7A1BB120AA639B384D4EE9 /* RadarChartDataEntry.swift */; };
 		58889ECB9711CC8D285F5689C9DF4584 /* ChartColorTemplates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EBB0F6BD45399C0FEBE888C13599EAE /* ChartColorTemplates.swift */; };
 		594F156E8DDBAD992D6C0CF7AD29036B /* BinarySerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4112106E2F354CE227717FA8D2CDAA9 /* BinarySerializer.swift */; };
-		5BE63573A7F48FED1DDA9B1ADF049CAB /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A564042D6FC0A2EDAB98C88D3DC75F /* Networking.swift */; };
 		5CECD168465CF59B489253695D3FB51F /* NetworkReachabilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF85CBD0776A80753D8EE7ED36BE8778 /* NetworkReachabilityManager.swift */; };
 		5D998F2454D188B00E592ECF3DFB6371 /* PieChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDC0EABAA8338471EB80D05AC9905971 /* PieChartData.swift */; };
 		5F2E42F99E348D1808A2172406D31BA8 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E98C8C37F4D65B9E5AF258279F15570 /* Track.swift */; };
@@ -708,7 +707,6 @@
 		B4919B2AE4136B4A6AC4B4734D081752 /* index.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; name = index.html; path = docs/Track/index.html; sourceTree = "<group>"; };
 		B5C6DE1F04F67205B98F6EA911D20736 /* Trim.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Trim.swift; path = Sources/Algorithms/Trim.swift; sourceTree = "<group>"; };
 		B663F6854D2C18A3333876E3B3624A85 /* 8.xcdatamodel */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcdatamodel; path = 8.xcdatamodel; sourceTree = "<group>"; };
-		B6A564042D6FC0A2EDAB98C88D3DC75F /* Networking.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		B6A575D1060703D24167F27D0F6AE524 /* DefaultAxisValueFormatter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DefaultAxisValueFormatter.swift; path = Source/Charts/Formatters/DefaultAxisValueFormatter.swift; sourceTree = "<group>"; };
 		B8CBF2D18B18F5920A43832EB671263D /* DataCompression-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DataCompression-dummy.m"; sourceTree = "<group>"; };
 		B9150F03F21E468C8C631AEDAF9DD1CC /* TrackMO+ManualExtensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "TrackMO+ManualExtensions.swift"; sourceTree = "<group>"; };
@@ -1566,7 +1564,6 @@
 			children = (
 				DAEFAFE201942CD78A86BDC23DBECAD5 /* Authenticator.swift */,
 				A915742DA31F166917DFE6ED43187AC5 /* CredentialsAuthenticator.swift */,
-				B6A564042D6FC0A2EDAB98C88D3DC75F /* Networking.swift */,
 				DD3A6024F8C3E974C33A593AE3BE5C3F /* ServerConnection.swift */,
 				8C0271C42546DBCA17E6F33A6690E0C0 /* StaticAuthenticator.swift */,
 				0544219D71429F21B50091172961D9A4 /* Synchronizer.swift */,
@@ -2285,7 +2282,6 @@
 				BF0400A1DA62520318587A2CAE13921E /* MeasurementToMeasurementPolicy.swift in Sources */,
 				F0B70634059603BEC807811FBB482E56 /* MeasurementV11+ManualExtensions.swift in Sources */,
 				B95B43C4BBF67F528A445955D21AEC68 /* MovebisDataCapturingService.swift in Sources */,
-				5BE63573A7F48FED1DDA9B1ADF049CAB /* Networking.swift in Sources */,
 				FF8EB509EB448ADACD94E62434574012 /* PersistenceError.swift in Sources */,
 				3B334D4DD07173F3C4A42272EE6C5157 /* PersistenceLayer.swift in Sources */,
 				F5BC5F05517AB438D31819B5698C5A39 /* RepeatingTimer.swift in Sources */,
