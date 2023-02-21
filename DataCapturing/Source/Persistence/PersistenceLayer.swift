@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Cyface GmbH
+ * Copyright 2017 - 2023 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -641,9 +641,14 @@ public enum PersistenceError: Error {
     case unsynchronizedMeasurement(identifier: Int64)
     /// If a measurement, which was expected to
     case missingTrack(Measurement)
+    /// Thrown if the measurement data from the V11 database could not be retrieved. The cause for this is provided as a parameter to this error.
     case measurementV11NotLoadable(Measurement, Error)
+    /// Thrown if the system was unable to load some altitudes from the V11 database. The cause for this is provided as a parameter to this error.
     case unableToLoadV11Altitudes(Measurement, Error)
+    /// Thrown if the system was unable to store altitudes to a measurement in the V11 database. The cause for this is provided as a parameter to this error.
     case unableToStoreV11Altitudes(Measurement, Error)
+    /// Thrown if the system was unable to load location information for a measurement from the V11 database. The cause for this is provided as a parameter to this error.
     case unableToLoadV11Locations(Measurement, Error)
+    /// Thrown if the system was unable to store location information for a measurement into the V11 database. The cause for this is provided as a parameter to this error.
     case unableToStoreV11Locations(Measurement, Error)
 }
