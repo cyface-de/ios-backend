@@ -56,65 +56,91 @@ public class V11Database {
     /// Store Altimeter altitude values to the provided measurement.
     func store(altitudes: [Altitude], to measurement: Measurement) throws {
         try coreDataStack.wrapInContext { context in
-            let v11Measurement = try loadV11Measurement(for: measurement, from: context)
+            try V11Database.writeQueue.sync {
+                do {
+                    let v11Measurement = try loadV11Measurement(for: measurement, from: context)
 
-            let v11Track = v11Measurement.lastTrack()
+                    let v11Track = v11Measurement.lastTrack()
 
-            altitudes.forEach { altitude in
-                let altitudeMO = AltitudeMO(context: context)
-                altitudeMO.altitude = altitude.relativeAltitude
-                altitudeMO.timestamp = altitude.timestamp
-                v11Track.addToAltitudes(altitudeMO)
+                    altitudes.forEach { altitude in
+                        let altitudeMO = AltitudeMO(context: context)
+                        altitudeMO.altitude = altitude.relativeAltitude
+                        altitudeMO.timestamp = altitude.timestamp
+                        v11Track.addToAltitudes(altitudeMO)
+                    }
+                } catch {
+                    throw PersistenceError.unableToLoadV11Altitudes(measurement, error)
+                }
+
+                do {
+                    try context.save()
+                } catch {
+                    throw PersistenceError.unableToStoreV11Altitudes(measurement, error)
+                }
             }
-            try context.save()
         }
     }
 
     /// Store the provided locations, containing altitude information, with the `Measurement`.
     func store(locations: [LocationCacheEntry], to measurement: Measurement) throws {
         try coreDataStack.wrapInContext { context in
-            let v11Measurement = try loadV11Measurement(for: measurement, from: context)
+            try V11Database.writeQueue.sync {
+                do {
+                    let v11Measurement = try loadV11Measurement(for: measurement, from: context)
 
-            let v11Track = v11Measurement.lastTrack()
+                    let v11Track = v11Measurement.lastTrack()
 
-            locations.forEach { location in
-                let locationMO = GeoLocationWithAltitudeMO(context: context)
-                locationMO.altitude = location.altitude
-                locationMO.verticalAccuracy = location.verticalAccuracy
-                locationMO.speed = location.speed
-                locationMO.timestamp = Int64(location.timestamp.timeIntervalSince1970 * 1000.0)
-                locationMO.accuracy = location.accuracy
-                locationMO.isPartOfCleanedTrack = location.isValid
-                locationMO.lat = location.latitude
-                locationMO.lon = location.longitude
-                v11Track.addToLocations(locationMO)
+                    locations.forEach { location in
+                        let locationMO = GeoLocationWithAltitudeMO(context: context)
+                        locationMO.altitude = location.altitude
+                        locationMO.verticalAccuracy = location.verticalAccuracy
+                        locationMO.speed = location.speed
+                        locationMO.timestamp = Int64(location.timestamp.timeIntervalSince1970 * 1000.0)
+                        locationMO.accuracy = location.accuracy
+                        locationMO.isPartOfCleanedTrack = location.isValid
+                        locationMO.lat = location.latitude
+                        locationMO.lon = location.longitude
+                        v11Track.addToLocations(locationMO)
+                    }
+                } catch {
+                    throw PersistenceError.unableToLoadV11Locations(measurement, error)
+                }
+                do {
+                    try context.save()
+                } catch {
+                    throw PersistenceError.unableToStoreV11Locations(measurement, error)
+                }
             }
-
-            try context.save()
         }
     }
 
     /// Load a `measurement` from the data storage.
     private func loadV11Measurement(for measurement: Measurement, from context: NSManagedObjectContext) throws -> MeasurementV11 {
-        try V11Database.writeQueue.sync {
-            let fetchRequest = MeasurementV11.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "identifier = %i", measurement.identifier)
+        let fetchRequest = MeasurementV11.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "identifier = %i", measurement.identifier)
+        do {
             let dbMeasurements = try context.fetch(fetchRequest)
             guard dbMeasurements.count <= 1 else {
-                throw PersistenceError.inconsistentState
+                throw PersistenceError.measurementNotLoadable(measurement.identifier)
             }
 
             if dbMeasurements.isEmpty {
+
                 let newV11Measurement = MeasurementV11(context: context)
                 newV11Measurement.identifier = measurement.identifier
                 newV11Measurement.addToTracks(TrackV11(context: context))
                 return newV11Measurement
+
             } else {
+
                 while dbMeasurements[0].typedTracks().count < measurement.tracks.count {
                     dbMeasurements[0].addToTracks(TrackV11(context: context))
                 }
                 return dbMeasurements[0]
+
             }
+        } catch {
+            throw PersistenceError.measurementV11NotLoadable(measurement, error)
         }
     }
 

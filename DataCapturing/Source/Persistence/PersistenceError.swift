@@ -68,16 +68,51 @@ extension PersistenceError: LocalizedError {
         case .unsynchronizedMeasurement(identifier: let identifier):
             let errorMessage = NSLocalizedString(
                 "de.cyface.error.PersistenceError.unsynchronizedMeasurement",
-                value: "Encountered an unsynchronized measurement where a synchronized one was expected!",
+                value: "Encountered an unsynchronized measurement with identifier %d where a synchronized one was expected!",
                 comment: ""
             )
-            return errorMessage
+            return String.localizedStringWithFormat(errorMessage, identifier)
         case .missingTrack(let measurement):
             let errorMessage = NSLocalizedString(
                 "de.cyface.error.PersistenceError.missingTrack",
                 value: "Encountered measurement %d without track to store data to!",
-                comment: "")
+                comment: ""
+            )
             return String.localizedStringWithFormat(errorMessage, measurement.identifier)
+        case .unableToStoreV11Locations(let measurement, let error):
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.PersistenceError.unableToStoreV11Locations",
+                value: "Unable to store locations to V11 database for measurement %d. Cause: %@",
+                comment: ""
+            )
+            return String.localizedStringWithFormat(errorMessage, measurement.identifier, error.localizedDescription)
+        case .unableToLoadV11Locations(let measurement, let error):
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.PersistenceError.unableToLoadV11Locations",
+                value: "Unable to load locations from V11 database for measurement %d. Cause: %@",
+                comment: ""
+            )
+            return String.localizedStringWithFormat(errorMessage, measurement.identifier, error.localizedDescription)
+        case .unableToStoreV11Altitudes(let measurement, let error):
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.PersistenceError.unableToStoreV11Altitudes",
+                value: "Unable to store altitudes to V11 database for measurement %d. Cause: %@",
+                comment: ""
+            )
+            return String.localizedStringWithFormat(errorMessage, measurement.identifier, error.localizedDescription)
+        case .unableToLoadV11Altitudes(let measurement, let error):
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.PersistenceError.unableToLoadV11Altitudes",
+                value: "Unable to load altitudes from V11 database for measurement %d. Cause %@",
+                comment: ""
+            )
+            return String.localizedStringWithFormat(errorMessage, measurement.identifier, error.localizedDescription)
+        case .measurementV11NotLoadable(let measurement, let error):
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.measurementV11NotLoadable",
+                value: "Unable to load V11 measurement %d from database. Cause %@",
+                comment: "")
+            return String.localizedStringWithFormat(errorMessage, measurement.identifier, error.localizedDescription)
         }
     }
 }
