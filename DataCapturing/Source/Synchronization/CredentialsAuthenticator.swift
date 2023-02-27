@@ -77,7 +77,7 @@ public class CredentialsAuthenticator: Authenticator {
                 "Content-Type": "application/json",
                 "Accept": "*/*"
             ]
-            let request = Networking.sharedInstance.sessionManager.upload(
+            let request = Alamofire.upload(
                 jsonCredentials,
                 to: url,
                 method: .post,

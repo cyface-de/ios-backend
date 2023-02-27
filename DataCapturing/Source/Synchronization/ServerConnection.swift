@@ -134,7 +134,7 @@ public class ServerConnection {
             }
         }
         os_log("Transmitting measurement to URL %{public}@!", log: ServerConnection.osLog, type: .debug, url.absoluteString)
-        Networking.sharedInstance.backgroundSessionManager.upload(
+        Alamofire.upload(
             multipartFormData: encode,
             usingThreshold: SessionManager.multipartFormDataEncodingMemoryThreshold,
             to: url,
