@@ -97,26 +97,19 @@ struct LiveStatisticsView: View {
  - Version: 1.0.0
  */
 struct ControlBarView: View {
+    let viewModel: ControlBarViewModel = ControlBarViewModel()
+
     var body: some View {
         HStack {
-            Button(action: onPlayPausePressed) {
+            Button(action: viewModel.onPlayPausePressed) {
                 Image(systemName: "playpause.fill")
             }
             .frame(maxWidth: .infinity, minHeight: 44)
-            Button(action: onStopPressed){
+            Button(action: viewModel.onStopPressed){
                 Image(systemName: "stop.fill")
             }
             .frame(maxWidth: .infinity, minHeight: 44)
         }
-    }
-
-    // TODO: Move to ViewModel
-    func onPlayPausePressed() {
-        print("play/pause")
-    }
-
-    func onStopPressed() {
-        print("stop")
     }
 }
 

@@ -59,6 +59,7 @@ struct MeasurementView: View {
                         Text("1,3 kg")
                     }
                 }.tabItem {
+                    Image(systemName: "chart.xyaxis.line")
                     Text("Statistiken")
                 }
 

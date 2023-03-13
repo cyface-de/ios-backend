@@ -29,6 +29,10 @@
 		AAC9D2FD29895526003C4CC7 /* Altitude.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2FC29895526003C4CC7 /* Altitude.swift */; };
 		AAC9D2FF29895D16003C4CC7 /* KeyValueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2FE29895D16003C4CC7 /* KeyValueView.swift */; };
 		AAC9D30129897042003C4CC7 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D30029897042003C4CC7 /* MainView.swift */; };
+		AACB767F29BF5E8A00A9DB6F /* ControlBarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB767E29BF5E8A00A9DB6F /* ControlBarViewModel.swift */; };
+		AACB768329BF639F00A9DB6F /* DataCapturing in Frameworks */ = {isa = PBXBuildFile; productRef = AACB768229BF639F00A9DB6F /* DataCapturing */; };
+		AACB768529BF671600A9DB6F /* LoadinScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768429BF671600A9DB6F /* LoadinScreen.swift */; };
+		AACB768729BF67E800A9DB6F /* DataCapturingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,7 +68,6 @@
 		AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementsView.swift; sourceTree = "<group>"; };
 		AA87D0982982B43F002F6B3B /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 		AA87D09A2982B4CB002F6B3B /* MeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementView.swift; sourceTree = "<group>"; };
-		AA87D09D2982B511002F6B3B /* DataCapturing */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = DataCapturing; path = ../DataCapturing; sourceTree = "<group>"; };
 		AAC9D2E72983DEC3003C4CC7 /* LiveViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveViewModel.swift; sourceTree = "<group>"; };
 		AAC9D2E929840131003C4CC7 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AAC9D2EB29840601003C4CC7 /* RegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationView.swift; sourceTree = "<group>"; };
@@ -78,6 +81,10 @@
 		AAC9D2FC29895526003C4CC7 /* Altitude.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Altitude.swift; sourceTree = "<group>"; };
 		AAC9D2FE29895D16003C4CC7 /* KeyValueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyValueView.swift; sourceTree = "<group>"; };
 		AAC9D30029897042003C4CC7 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		AACB767E29BF5E8A00A9DB6F /* ControlBarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBarViewModel.swift; sourceTree = "<group>"; };
+		AACB768029BF626500A9DB6F /* DataCapturing */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = DataCapturing; path = ../DataCapturing; sourceTree = "<group>"; };
+		AACB768429BF671600A9DB6F /* LoadinScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadinScreen.swift; sourceTree = "<group>"; };
+		AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +92,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AACB768329BF639F00A9DB6F /* DataCapturing in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,6 +123,7 @@
 				AA87D07B2982ADE9002F6B3B /* RFRTests */,
 				AA87D0852982ADE9002F6B3B /* RFRUITests */,
 				AA87D0692982ADE8002F6B3B /* Products */,
+				AACB768129BF639F00A9DB6F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -180,6 +189,7 @@
 				AAC9D2F329840D83003C4CC7 /* MeasurementCell.swift */,
 				AAC9D2FE29895D16003C4CC7 /* KeyValueView.swift */,
 				AAC9D30029897042003C4CC7 /* MainView.swift */,
+				AACB768429BF671600A9DB6F /* LoadinScreen.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -187,7 +197,7 @@
 		AA87D09C2982B511002F6B3B /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				AA87D09D2982B511002F6B3B /* DataCapturing */,
+				AACB768029BF626500A9DB6F /* DataCapturing */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -198,6 +208,8 @@
 				AAC9D2E72983DEC3003C4CC7 /* LiveViewModel.swift */,
 				AAC9D2F829891B22003C4CC7 /* MeasurementCellViewModel.swift */,
 				AAC9D2FA298954CE003C4CC7 /* MeasurementViewViewModel.swift */,
+				AACB767E29BF5E8A00A9DB6F /* ControlBarViewModel.swift */,
+				AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -220,6 +232,13 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
+		AACB768129BF639F00A9DB6F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -236,6 +255,9 @@
 			dependencies = (
 			);
 			name = RFR;
+			packageProductDependencies = (
+				AACB768229BF639F00A9DB6F /* DataCapturing */,
+			);
 			productName = RFR;
 			productReference = AA87D0682982ADE8002F6B3B /* RFR.app */;
 			productType = "com.apple.product-type.application";
@@ -350,11 +372,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AACB767F29BF5E8A00A9DB6F /* ControlBarViewModel.swift in Sources */,
 				AAC9D2E82983DEC3003C4CC7 /* LiveViewModel.swift in Sources */,
 				AAC9D2EF29840651003C4CC7 /* LabelledDivider.swift in Sources */,
 				AAC9D2F729891A8D003C4CC7 /* Measurement.swift in Sources */,
 				AAC9D2EA29840131003C4CC7 /* LoginView.swift in Sources */,
 				AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */,
+				AACB768729BF67E800A9DB6F /* DataCapturingViewModel.swift in Sources */,
 				AA87D0992982B43F002F6B3B /* StatisticsView.swift in Sources */,
 				AA87D06E2982ADE8002F6B3B /* LiveView.swift in Sources */,
 				AA87D09B2982B4CB002F6B3B /* MeasurementView.swift in Sources */,
@@ -366,6 +390,7 @@
 				AAC9D2F929891B22003C4CC7 /* MeasurementCellViewModel.swift in Sources */,
 				AAC9D2F429840D83003C4CC7 /* MeasurementCell.swift in Sources */,
 				AAC9D2FF29895D16003C4CC7 /* KeyValueView.swift in Sources */,
+				AACB768529BF671600A9DB6F /* LoadinScreen.swift in Sources */,
 				AAC9D2EC29840601003C4CC7 /* RegistrationView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -699,6 +724,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AACB768229BF639F00A9DB6F /* DataCapturing */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DataCapturing;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AA87D0602982ADE8002F6B3B /* Project object */;
 }
