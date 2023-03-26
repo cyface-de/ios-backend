@@ -7,36 +7,57 @@
 
 import DataCapturing
 import CoreMotion
+import CoreLocation
+import CoreData
 
-class ViewModel: ObservableObject {
+class ViewModel: NSObject, ObservableObject {
     @Published var errorMessage: String? = nil
     @Published var averageSpeed: String
     @Published var duration: String
     @Published var accumulatedHeight: String
     @Published var isStopped: Bool
+    @Published var currentAltitude: String
+    @Published var currentBarometricAltitude: String
+    @Published var currentAbsoluteBarometricAltitude: String
+    @Published var currentSpeed: String
     var dataCapturingService: DataCapturingService?
     var v11Stack: CoreDataManager?
     var coreDataStack: CoreDataManager?
+    var localLocationManager: CLLocationManager?
+    var altimeter: CMAltimeter?
+    let altimeterQueue: OperationQueue
 
-    init() {
+    override init() {
         let motionManager = CMMotionManager()
         let bundle = Bundle(for: CoreDataManager.self)
-        averageSpeed = "0.0 km/h"
+        averageSpeed = "0.00 km/h"
         duration = "0:00:00"
-        accumulatedHeight = "0 m"
+        accumulatedHeight = "0.0 m"
         isStopped = true
+        currentAltitude = "0.0000 m"
+        currentSpeed = "0.0000 km/h"
+        altimeterQueue = OperationQueue()
+        currentBarometricAltitude = "0.0000 m"
+        currentAbsoluteBarometricAltitude = "0.0 m"
+        super.init()
+
+        localLocationManager = CLLocationManager()
+        localLocationManager?.delegate = self
+        altimeter = CMAltimeter()
+
         do {
             // Initial state
             let coreDataModel = try CoreDataManager.load(model: "CyfaceModel")
             let v11Model = try CoreDataManager.load(model: "v11model")
-            let coreDataStack = CoreDataManager(modelName: "CyfaceModel", model: coreDataModel)
+            let coreDataStack = CoreDataManager(storeType: NSSQLiteStoreType, modelName: "CyfaceModel", model: coreDataModel)
             self.coreDataStack = coreDataStack
-            let v11Stack = CoreDataManager(modelName: "v11model", model: v11Model)
+            let v11Migrator = CoreDataMigrator(model: "v11model", to: .v11version9)
+            let v11Stack = CoreDataManager(storeType: NSSQLiteStoreType, migrator: v11Migrator, modelName: "v11model", model: v11Model)
             self.v11Stack = v11Stack
             let initializationLock = DispatchSemaphore(value: 2)
 
             // Setup databases
-            try coreDataStack.setup(bundle: bundle) { [weak self] error in
+            coreDataStack.setup(bundle: bundle) { [weak self] error in
                 guard let self = self else {
                     return
                 }
@@ -49,7 +70,7 @@ class ViewModel: ObservableObject {
                 initializationLock.signal()
             }
 
-            try v11Stack.setup(bundle: bundle) { [weak self] error in
+            v11Stack.setup(bundle: bundle) { [weak self] error in
                 guard let self = self else {
                     return
                 }
@@ -118,13 +139,13 @@ class ViewModel: ObservableObject {
                             return
                         }
 
-                        self.averageSpeed = "\(String(format: "%.2f",measurement.averageSpeed()/3.6)) km/h"
+                        self.averageSpeed = String(format: "%.2f km/h",measurement.averageSpeed() * 3.6)
                         let totalDuration = measurement.totalDuration()
                         self.duration = "\(totalDuration.hours()):\(String(format: "%02d", totalDuration.minutes())):\(String(format: "%02d", totalDuration.seconds()))"
 
                         let database = V11Database(coreDataStack: v11Stack)
                         do {
-                            self.accumulatedHeight = "\(String(format: "%.1f", try database.summedHeight(measurement: measurement))) m"
+                            self.accumulatedHeight = String(format: "%.1f m", try database.summedHeight(measurement: measurement))
                         } catch {
                             self.errorMessage = error.localizedDescription
                         }
@@ -141,6 +162,10 @@ class ViewModel: ObservableObject {
     }
 
     func onPlayPausePressed() {
+        localLocationManager?.startUpdatingLocation()
+        altimeter?.startAbsoluteAltitudeUpdates(to: altimeterQueue, withHandler: handleAbsoluteAltimeterUpdate)
+        altimeter?.startRelativeAltitudeUpdates(to: altimeterQueue, withHandler: handleAltimeterUpdate)
+
         guard let dataCapturingService = dataCapturingService else {
             return
         }
@@ -159,6 +184,10 @@ class ViewModel: ObservableObject {
     }
 
     func onStopPressed() {
+        localLocationManager?.stopUpdatingLocation()
+        altimeter?.stopAbsoluteAltitudeUpdates()
+        altimeter?.stopRelativeAltitudeUpdates()
+
         guard let dataCapturingService = dataCapturingService else {
             return
         }
@@ -167,6 +196,53 @@ class ViewModel: ObservableObject {
             try dataCapturingService.stop()
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+}
+
+extension ViewModel: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let lastLocation = locations.last {
+            currentAltitude = String(format: "%.4f m", lastLocation.altitude) //String(format: "%02d m", lastLocation.altitude)
+            currentSpeed = String(format: "%.4f km/h", lastLocation.speed * 3.6)
+        }
+    }
+}
+
+extension ViewModel {
+    func handleAltimeterUpdate(data: CMAltitudeData?, error: Error?) {
+        if let error = error {
+            print(error.localizedDescription)
+            return
+        }
+
+        guard let data = data else {
+            return
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            self.currentBarometricAltitude = String(format: "%.4f m", data.relativeAltitude) //String(format: "%02d m", data.relativeAltitude)
+        }
+    }
+
+    func handleAbsoluteAltimeterUpdate(data: CMAbsoluteAltitudeData?, error: Error?) {
+        if let error = error {
+            print(error.localizedDescription)
+            return
+        }
+
+        guard let data = data else {
+            return
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            self.currentAbsoluteBarometricAltitude = data.altitude.description //String(format: "%02d m", data.altitude)
         }
     }
 }

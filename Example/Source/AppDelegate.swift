@@ -191,7 +191,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
                 let v11ObjectModel = try CoreDataManager.load(model: "v11model")
                 let v11Stack = CoreDataManager(modelName: "v11model", model: v11ObjectModel)
                 let bundle = Bundle(for: type(of: coreDataStack))
-                try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
+                coreDataStack.setup(bundle: bundle) { [weak self] (error) in
                     if let error = error {
                         fatalError("Unable to setup CoreData stack due to: \(error)")
                     }
@@ -200,27 +200,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ServerUrlChangedListener 
                     }
                     self.coreDataStack = coreDataStack
 
-                    do {
-                        try v11Stack.setup(bundle: bundle) { [weak self] (error) in
-                            if let error = error {
-                                fatalError("Unable to setup v11 CoreData stack due to: \(error)")
-                            }
+                    v11Stack.setup(bundle: bundle) { [weak self] (error) in
+                        if let error = error {
+                            fatalError("Unable to setup v11 CoreData stack due to: \(error)")
+                        }
+                        guard let self = self else {
+                            return
+                        }
+                        self.v11Stack = v11Stack
+
+                        DispatchQueue.main.async { [weak self] in
                             guard let self = self else {
                                 return
                             }
-                            self.v11Stack = v11Stack
 
-                            DispatchQueue.main.async { [weak self] in
-                                guard let self = self else {
-                                    return
-                                }
-
-                                self.window = UIWindow(frame: UIScreen.main.bounds)
-                                self.presentMainUI()
-                            }
+                            self.window = UIWindow(frame: UIScreen.main.bounds)
+                            self.presentMainUI()
                         }
-                    } catch {
-                        fatalError("Unable to setup v11 CoreData stack due to: \(error)")
                     }
                 }
             } catch {

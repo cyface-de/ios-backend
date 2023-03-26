@@ -179,21 +179,117 @@ public class V11Database {
                     }
 
                 } else {
-                    // Calculation using a low pass filter to remove noise
                     os_log("Using altimeter values to calculate accumulated height.", log: log, type: .debug)
-                    var value = 0.0
-                    let filterFactor = 0.1
-                    altimeterAltitudes.forEach { altitude in
-                        let relativeAltitudeChange = altitude.altitude
-                        if relativeAltitudeChange > 0.0 {
-                            value = filterFactor * value + (1.0 - filterFactor) * relativeAltitudeChange
-                            sum += value
+                    // Calculation using a low pass filter to remove noise
+                    //let filter = TriangularFilter()
+                    //let smoothedSignal = filter.filter(signal: relativeAltitudeChanges(altitudes: altimeterAltitudes), windowSize: 11)
+                    //sum = addPositiveChanges(signal: smoothedSignal)
+                    var previousAltitude: Double? = nil
+                    for altitude in altimeterAltitudes {
+                        if let previousAltitude = previousAltitude {
+                            let relativeAltitudeChange = altitude.altitude - previousAltitude
+                            if relativeAltitudeChange > 0.1 {
+                                sum += relativeAltitudeChange
+                            }
                         }
+                        previousAltitude = altitude.altitude
                     }
-
                 }
             }
             return sum
         }
+    }
+
+    private func relativeAltitudeChanges(altitudes: [AltitudeMO]) -> [Double] {
+        var ret = [Double]()
+
+        var previousAltitude: Double?
+        for altitude in altitudes {
+            if let previousAltitude = previousAltitude {
+                ret.append(altitude.altitude - previousAltitude)
+            }
+            previousAltitude = altitude.altitude
+        }
+
+        return ret
+    }
+
+    private func addPositiveChanges(signal: [Double]) -> Double {
+        var sum = 0.0
+        for value in signal {
+            if value > 0.2, value < 3.0 {
+                sum += value
+            }
+        }
+
+        return sum
+    }
+}
+
+// https://maker.pro/arduino/tutorial/how-to-clean-up-noisy-sensor-data-with-a-moving-average-filter
+struct SmoothingAlgorithm {
+    var index = 0
+    var value = 0.0
+    var sum = 0.0
+    var readings: [Double]
+    var averaged = 0.0
+
+    func smooth(value: Double) -> SmoothingAlgorithm {
+        let windowSize = readings.count
+        var readings = readings.map { $0 }
+        var sum = sum - readings[index]         // Remove the oldest entry from the sum
+        readings[index] = value                 // Add the newest reading to the window
+        sum = sum + value                       // Add the newest reading to the sum
+        let index = (index+1) % windowSize      // Increment the index, and wrap to 0 if it exceeds the window size
+
+        let averaged = sum / Double(windowSize) // Divide the sum of the window by the window size for the result
+
+        return SmoothingAlgorithm(index: index, value: value, sum: sum, readings: readings, averaged: averaged)
+    }
+}
+
+struct NoiseFilter {
+    var filteredValue = 0.0
+    let kFilteringFactor: Double
+
+    func smooth(value: Double) -> NoiseFilter {
+        let filteredValue = (value * kFilteringFactor) + (filteredValue * (1.0 - kFilteringFactor))
+        return NoiseFilter(filteredValue: filteredValue, kFilteringFactor: kFilteringFactor)
+    }
+}
+
+protocol SignalFilter {
+    func filter(signal: [Double], windowSize: Int) -> [Double]
+}
+
+class TriangularFilter: SignalFilter {
+    func filter(signal: [Double], windowSize: Int) -> [Double] {
+        guard windowSize%2 != 0 else {
+            fatalError("Triangular Filtering is only possible with odd sized windows! Window size \(windowSize) is not valid!")
+        }
+        var ret = [Double]()
+        if signal.count-windowSize > 0 {
+            for index in 0..<signal.count-windowSize {
+                let fromIndex = index
+                let toIndex = index+windowSize-1
+                if toIndex < signal.count {
+                    let currentWindow = signal[fromIndex...toIndex]
+                    let smoothedValue = triangularFilter(window: Array(currentWindow))
+                    ret.append(smoothedValue)
+                }
+            }
+        }
+        return ret
+    }
+
+    private func triangularFilter(window: [Double]) -> Double {
+        var smoothedValue = 0.0
+        var denominator = 0.0
+        for index in 0..<window.count {
+            let weight = index-(window.count/2)>0 ? Double(window.count-index) : Double(index+1)
+            denominator += weight
+            smoothedValue += weight * window[index]
+        }
+        return smoothedValue/denominator
     }
 }

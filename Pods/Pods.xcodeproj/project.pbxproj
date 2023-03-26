@@ -203,6 +203,7 @@
 		AA11963F2993A688008161C4 /* CoreDataMigrationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11963E2993A688008161C4 /* CoreDataMigrationError.swift */; };
 		AA4BFF1F297986ED005233E8 /* V11DatabaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4BFF1E297986ED005233E8 /* V11DatabaseTest.swift */; };
 		AA4BFF21297988BF005233E8 /* MeasurementTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4BFF20297988BF005233E8 /* MeasurementTest.swift */; };
+		AA56BF1429B766E2009CBFA3 /* AltitudeMO+ManualExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA56BF1329B766E2009CBFA3 /* AltitudeMO+ManualExtensions.swift */; };
 		AACEFE6D29A381CB004D0AFA /* ChaosPersistenceTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACEFE6C29A381CB004D0AFA /* ChaosPersistenceTest.swift */; };
 		AAD6295E299A227A0084B13D /* V2TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD6294F299A227A0084B13D /* V2TestData.sqlite */; };
 		AAD6295F299A227A0084B13D /* V5TestData.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = AAD62950299A227A0084B13D /* V5TestData.sqlite */; };
@@ -678,6 +679,7 @@
 		AA3119387680A84BF2842BF723502FF7 /* Charts-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Charts-umbrella.h"; sourceTree = "<group>"; };
 		AA4BFF1E297986ED005233E8 /* V11DatabaseTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = V11DatabaseTest.swift; path = DataCapturing/Tests/V11DatabaseTest.swift; sourceTree = "<group>"; };
 		AA4BFF20297988BF005233E8 /* MeasurementTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MeasurementTest.swift; path = DataCapturing/Tests/MeasurementTest.swift; sourceTree = "<group>"; };
+		AA56BF1329B766E2009CBFA3 /* AltitudeMO+ManualExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AltitudeMO+ManualExtensions.swift"; sourceTree = "<group>"; };
 		AACEFE6C29A381CB004D0AFA /* ChaosPersistenceTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChaosPersistenceTest.swift; path = DataCapturing/Tests/ChaosPersistenceTest.swift; sourceTree = "<group>"; };
 		AAD6294F299A227A0084B13D /* V2TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V2TestData.sqlite; sourceTree = "<group>"; };
 		AAD62950299A227A0084B13D /* V5TestData.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = V5TestData.sqlite; sourceTree = "<group>"; };
@@ -1051,6 +1053,7 @@
 			isa = PBXGroup;
 			children = (
 				490430E78E9B9310C2D4BF5C8374357C /* Altitude.swift */,
+				AA56BF1329B766E2009CBFA3 /* AltitudeMO+ManualExtensions.swift */,
 				5CF27FA928A012D48A7B3EA876C049A9 /* Event.swift */,
 				302B6DB6BBC0DB409D30EF4A05DF4F43 /* EventMO+CoreDataClass.swift */,
 				C066539DC46945EE5CD1DDFB3DD8C275 /* EventMO+CoreDataProperties.swift */,
@@ -2287,6 +2290,7 @@
 				F5BC5F05517AB438D31819B5698C5A39 /* RepeatingTimer.swift in Sources */,
 				F67E48260D682EF1B67F78F1314B2417 /* SensorCapturer.swift in Sources */,
 				B9D166D151ACFDB386C494C06BC8A8F0 /* SensorValue.swift in Sources */,
+				AA56BF1429B766E2009CBFA3 /* AltitudeMO+ManualExtensions.swift in Sources */,
 				A3ED25F247BFB75D1457ED21662ADB6F /* ServerConnection.swift in Sources */,
 				A0BB6582ADC11EF3DBB465FA68E56683 /* StaticAuthenticator.swift in Sources */,
 				EF042D0E948E186F10A4757EA92A0F65 /* Status.swift in Sources */,

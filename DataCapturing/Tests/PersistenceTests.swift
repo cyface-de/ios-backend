@@ -43,35 +43,31 @@ class PersistenceTests: XCTestCase {
         super.setUp()
         let expectation = self.expectation(description: "CoreDataStack initialized successfully!")
 
-        do {
-            let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: PersistenceTests.dataModel)
-            let bundle = Bundle(for: type(of: manager))
-            try manager.setup(bundle: bundle) { error in
+        let manager = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: PersistenceTests.dataModel)
+        let bundle = Bundle(for: type(of: manager))
+        manager.setup(bundle: bundle) { error in
 
-                do {
-                    self.oocut = PersistenceLayer(onManager: manager)
-                    var measurement = try self.oocut.createMeasurement(at: 10_000, inMode: self.defaultMode)
+            do {
+                self.oocut = PersistenceLayer(onManager: manager)
+                var measurement = try self.oocut.createMeasurement(at: 10_000, inMode: self.defaultMode)
 
-                    try self.oocut.appendNewTrack(to: &measurement)
+                try self.oocut.appendNewTrack(to: &measurement)
 
-                    try self.oocut.save(locations: [TestFixture.location(latitude: 51.052181, longitude: 13.728956, timestamp: Date(timeIntervalSince1970: 10_000)), TestFixture.location(latitude: 51.051837, longitude: 13.729010, timestamp: Date(timeIntervalSince1970: 10_001))], in: &measurement)
-                    try self.oocut.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &measurement)
-                    self.fixture = try self.oocut.load(measurementIdentifiedBy: measurement.identifier)
+                try self.oocut.save(locations: [TestFixture.location(latitude: 51.052181, longitude: 13.728956, timestamp: Date(timeIntervalSince1970: 10_000)), TestFixture.location(latitude: 51.051837, longitude: 13.729010, timestamp: Date(timeIntervalSince1970: 10_001))], in: &measurement)
+                try self.oocut.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &measurement)
+                self.fixture = try self.oocut.load(measurementIdentifiedBy: measurement.identifier)
 
-                    expectation.fulfill()
-                } catch let error {
-                    XCTFail("Unable to set up due to \(error.localizedDescription)")
-                }
+                expectation.fulfill()
+            } catch let error {
+                XCTFail("Unable to set up due to \(error.localizedDescription)")
             }
-        } catch {
-            XCTFail("Unable to initialize CoreData due to: \(error)")
         }
-            
-            waitForExpectations(timeout: 5) { error in
-                if let error = error {
-                    XCTFail("Unable to setup PersistenceTest \(error)")
-                }
+
+        waitForExpectations(timeout: 5) { error in
+            if let error = error {
+                XCTFail("Unable to setup PersistenceTest \(error)")
             }
+        }
     }
 
     /// Cleans the test enviroment by deleting all data.

@@ -39,7 +39,7 @@ class V11DatabaseTest: XCTestCase {
             let migrator = CoreDataMigrator(model: "v11model", to: CoreDataMigrationVersion.v11version9)
             let v11Stack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: migrator, modelName: "v11model", model: model)
             let expectation = expectation(description: "Wait for CoreData Stack to finish!")
-            try v11Stack.setup(bundle: Bundle(for: CoreDataManager.self)) { error in
+            v11Stack.setup(bundle: Bundle(for: CoreDataManager.self)) { error in
                 if let error = error {
                     XCTFail(error.localizedDescription)
                 }
@@ -335,7 +335,7 @@ class V11DatabaseTest: XCTestCase {
         let bundle = Bundle(for: CoreDataManager.self)
         let newV11Stack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: migrator, modelName: "v11model", model: model)
 
-        try newV11Stack.setup(bundle: bundle) { error in
+        newV11Stack.setup(bundle: bundle) { error in
             if let error = error {
                 XCTFail(error.localizedDescription)
             }
@@ -346,6 +346,20 @@ class V11DatabaseTest: XCTestCase {
             return
         }
         XCTAssertFalse(try migrator.requiresMigration(at: persistentStoreUrl, inBundle: bundle))
+    }
+
+    func testSmoothingAlgorithm() {
+        let signal = [0.0, 0.24740395925452294, 0.479425538604203, 0.6816387600233341, 0.8414709848078965, 0.9489846193555862, 0.9974949866040544, 0.9839859468739369, 0.9092974268256817, 0.7780731968879212, 0.5984721441039564, 0.3816609920523317, 0.1411200080598672, -0.10819513453010837, -0.35078322768961984, -0.5715613187423437, -0.7568024953079283, -0.8949893582285835, -0.977530117665097, -0.999292788975378, -0.9589242746631385, -0.858934493426592, -0.7055403255703919, -0.5082790774992584, -0.27941549819892586, -0.03317921654755682, 0.21511998808781552, 0.4500440737806176]
+        var smoothingStep = SmoothingAlgorithm(readings: Array(signal.prefix(3)))
+
+        var smoothedSignal = [Double]()
+        for value in signal[3..<signal.count] {
+            smoothingStep = smoothingStep.smooth(value: value)
+            let smoothedValue = smoothingStep.averaged
+            smoothedSignal.append(smoothedValue)
+        }
+
+        print(smoothedSignal)
     }
 
     /// Add a fixture of locations to the test database.

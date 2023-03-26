@@ -18,15 +18,23 @@ struct ContentView: View {
                 Spacer()
                 HStack {
                     VStack(alignment: .leading) {
+                        Text("Current Speed")
                         Text("Average Speed")
                         Text("Duration")
                         Text("Accumulated Height")
+                        Text("Current Altitude")
+                        Text("Relative Barometric Altitude")
+                        Text("Absolute Barometric Altitude")
                     }
                     Spacer()
                     VStack(alignment: .trailing) {
+                        Text(viewModel.currentSpeed)
                         Text(viewModel.averageSpeed)
                         Text(viewModel.duration)
                         Text(viewModel.accumulatedHeight)
+                        Text(viewModel.currentAltitude)
+                        Text(viewModel.currentBarometricAltitude)
+                        Text(viewModel.currentAbsoluteBarometricAltitude)
                     }
                 }
                 Spacer()
