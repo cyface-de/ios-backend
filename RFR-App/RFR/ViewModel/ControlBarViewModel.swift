@@ -34,7 +34,7 @@ class ControlBarViewModel: ObservableObject {
         do {
             if dataCapturingService.isRunning {
                 try dataCapturingService.pause()
-            } else if dataCapturingService.currentMeasurement != nil {
+            } else if dataCapturingService.currentMeasurement == nil {
                 try dataCapturingService.start(inMode: "BICYCLE")
             } else {
                 try dataCapturingService.resume()

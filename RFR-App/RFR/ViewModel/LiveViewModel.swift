@@ -76,6 +76,8 @@ class LiveViewModel: ObservableObject {
         self.rise = rise
         self.avoidedEmissions = avoidedEmissions
         self.dataCapturingService = dataCapturingService
+        self.dataCapturingService.handler.append(self.handle)
+        os_log("Initializing LiveViewModel. Handler in dataCapturingService %d", self.dataCapturingService.handler.count)
     }
 
     func start() throws {
@@ -94,6 +96,7 @@ class LiveViewModel: ObservableObject {
         try dataCapturingService.resume()
     }
 
+    // TODO: This should be communicated using a Combine publisher from DataCapturingService
     func handle(event: DataCapturingEvent, status: Status) {
         switch status {
         case .success:
