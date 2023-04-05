@@ -137,11 +137,12 @@ struct ControlBarView: View {
  - Version: 1.0.0
  */
 struct LiveDetailsView: View {
-    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.75155, longitude: 11.97411), span: MKCoordinateSpan( latitudeDelta: 0.02, longitudeDelta: 0.02))
+    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.5515, longitude: 12.2388), span: MKCoordinateSpan( latitudeDelta: 0.9, longitudeDelta: 0.9))
 
     var body: some View {
         TabView {
-            Map(coordinateRegion: $region)
+            Map(coordinateRegion: $region, showsUserLocation: true, userTrackingMode: .constant(.follow))
+                .padding([.top])
                 .tabItem {
                     Image(systemName: "map")
                     Text("Position")
