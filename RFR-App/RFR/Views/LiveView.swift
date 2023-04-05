@@ -31,13 +31,6 @@ struct LiveView: View {
 
     var body: some View {
         VStack {
-            HStack {
-                Text("Ready for Robots")
-                    .font(.largeTitle)
-                Spacer()
-
-            }
-            .padding(/*@START_MENU_TOKEN@*/[.top, .leading, .trailing]/*@END_MENU_TOKEN@*/)
             LiveDetailsView()
             if showLiveDetails(viewModel: viewModel) {
                 Divider()

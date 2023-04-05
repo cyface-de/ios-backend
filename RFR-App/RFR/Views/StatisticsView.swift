@@ -28,12 +28,6 @@ import SwiftUI
 struct StatisticsView: View {
     var body: some View {
         VStack {
-            HStack {
-                Text("Statistiken")
-                    .font(.largeTitle)
-                Spacer()
-            }
-
             List {
                 
                 Section(header: Text("Maximale Strecke")) {

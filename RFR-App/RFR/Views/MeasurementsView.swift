@@ -31,12 +31,6 @@ struct MeasurementsView: View {
     
     var body: some View {
         VStack {
-            HStack {
-                Text("Fahrten")
-                    .font(.largeTitle)
-                Spacer()
-            }
-
             List {
                 ForEach(measurements) {measurement in
                     NavigationLink(destination: MeasurementView(viewModel: MeasurementViewViewModel())) {
