@@ -200,7 +200,7 @@ class MeasurementSerializer: BinarySerializer {
         var ret = [De_Cyface_Protos_Model_Event]()
         for event in events {
             ret.append(De_Cyface_Protos_Model_Event.with {
-                $0.timestamp = DataCapturingService.convertToUtcTimestamp(date: event.time)
+                $0.timestamp = convertToUtcTimestamp(date: event.time)
                 if let value = event.value {
                     $0.value = value
                 }
@@ -277,7 +277,7 @@ class SensorValueSerializer: BinarySerializer {
             let xValue = values[valueIndex].x
             let yValue = values[valueIndex].y
             let zValue = values[valueIndex].z
-            let utcTimestamp = DataCapturingService.convertToUtcTimestamp(date: timestamp)
+            let utcTimestamp = convertToUtcTimestamp(date: timestamp)
             do {
                 timestamps.append(try timestampDiffValue.diff(value: Int64(utcTimestamp)))
             } catch {

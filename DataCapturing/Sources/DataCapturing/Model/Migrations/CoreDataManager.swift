@@ -21,6 +21,7 @@ import Foundation
 import CoreData
 import OSLog
 
+// TODO: Rename this to CoreDataStack and move it to the Persistence group.
 /**
  A class for objects representing a *CoreData* stack.
 
@@ -40,6 +41,7 @@ public class CoreDataManager {
     let migrator: CoreDataMigratorProtocol
     /// The type of the store to use. In production this should usually be `NSSQLiteStoreType`. In a test environment you might use `NSInMemoryStoreType`. Both values are defined by *CoreData*.
     private let storeType: String
+    private let bundle: Bundle
 
     /// The `NSPersistentContainer` used by this *CoreData* stack.
     var persistentContainer: NSPersistentContainer
@@ -74,14 +76,22 @@ public class CoreDataManager {
      - Throws: `CoreDataError.invalidModelUrl`, `CoreDataError.modelNotAvailable`
      */
     public convenience init(storeType: String = NSSQLiteStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator()) throws {
-        let mom = try CoreDataManager.load()
-        self.init(storeType: storeType, migrator: migrator, model: mom)
+        let bundle = Bundle.module
+        let mom = try CoreDataManager.load(bundle: bundle)
+        self.init(storeType: storeType, migrator: migrator, model: mom, bundle: bundle)
     }
 
     /// An initializer, mostly used by tests, to load a specific CoreData model.
-    init(storeType: String = NSInMemoryStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator(), modelName: String = "CyfaceModel", model: NSManagedObjectModel) {
+    init(
+        storeType: String = NSInMemoryStoreType,
+        migrator: CoreDataMigratorProtocol = CoreDataMigrator(),
+        modelName: String = "CyfaceModel",
+        model: NSManagedObjectModel,
+        bundle: Bundle
+    ) {
         self.storeType = storeType
         self.migrator = migrator
+        self.bundle = bundle
 
         // Initialize persistent container
         os_log("Creating persistent container", log: CoreDataManager.log, type: .info)
@@ -101,6 +111,7 @@ public class CoreDataManager {
      - Parameter bundle: The bundle containing the data model.
      - Throws: `CoreDataError.missingModelUrl`
      */
+    @available(iOS, obsoleted: 13.0, deprecated, message: "Only use this before iOS 13. Use the async/await version of this method on newer systems.")
     public func setup(bundle: Bundle, completionClosure: @escaping (Error?) -> Void) throws {
         try migrateStoreIfNeeded(bundle: bundle)
         self.persistentContainer.loadPersistentStores { _, error in
@@ -108,10 +119,24 @@ public class CoreDataManager {
         }
     }
 
+    @available(iOS 13.0, *)
+    public func setup() async throws {
+        // TODO: Remove this parameter as soon as deprecated setup method has been deleted.
+        try migrateStoreIfNeeded(bundle: self.bundle)
+        typealias LoadPersistentStoreContinuation = CheckedContinuation<NSPersistentStoreDescription, Error>
+        _ = try await withCheckedThrowingContinuation { (loadPersistentStoreContinuation: LoadPersistentStoreContinuation) in
+            persistentContainer.loadPersistentStores { result, error in
+                if let error = error {
+                    loadPersistentStoreContinuation.resume(throwing: error)
+                } else {
+                    loadPersistentStoreContinuation.resume(returning: result)
+                }
+            }
+        }
+    }
+
     /// Load the specified `NSManagedObjectModel` from disk.
-    public static func load(model: String = "CyfaceModel") throws -> NSManagedObjectModel {
-//        let bundle = Bundle(for: CoreDataManager.self)
-        let bundle = Bundle.module
+    public static func load(model: String = "CyfaceModel", bundle: Bundle) throws -> NSManagedObjectModel {
         guard let modelURL = bundle.url(forResource: model, withExtension: "momd") else {
             throw CoreDataError.invalidModelUrl(model)
         }
@@ -132,12 +157,13 @@ public class CoreDataManager {
      - Throws: `CoreDataError.missingModelUrl`
      */
     private func migrateStoreIfNeeded(bundle: Bundle) throws {
+        // TODO: this loads the storeURL for the wrong location
         guard let storeURL = persistentContainer.persistentStoreDescriptions.first?.url else {
             throw CoreDataError.missingModelUrl
         }
 
-        if migrator.requiresMigration(at: storeURL, toVersion: CoreDataMigrationVersion.current, inBundle: bundle) {
-            migrator.migrateStore(at: storeURL, toVersion: CoreDataMigrationVersion.current, inBundle: bundle)
+        if try migrator.requiresMigration(at: storeURL, inBundle: bundle) {
+            try migrator.migrateStore(at: storeURL, inBundle: bundle)
         }
     }
 

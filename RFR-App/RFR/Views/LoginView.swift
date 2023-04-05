@@ -23,24 +23,21 @@ import SwiftUI
  View asking for user credentials and handling the login to the Ready-For-Robots Server.
  */
 struct LoginView: View {
-    // TODO: Move to Viewmodel
-    @State private var username: String = ""
-    // TODO: Move to Viewmodel
-    @State private var password: String = ""
+    @ObservedObject var viewModel: LoginViewModel
+    @State private var showPassword = false
+    @Binding var isAuthenticated: Bool
 
     var body: some View {
-        NavigationStack {
             VStack {
-
                 Image("RFR-Logo")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .padding()
-
+                
                 VStack {
                     HStack {
                         Image(systemName: "person")
-                        TextField("Username", text: $username)
+                        TextField("Username", text: $viewModel.username)
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
                     }
@@ -49,12 +46,27 @@ struct LoginView: View {
                         RoundedRectangle(cornerRadius: 15)
                             .stroke(lineWidth: 2))
                     .foregroundColor(.gray)
-
+                    
                     HStack {
                         Image(systemName: "lock")
-                        SecureField("Password", text: $password)
+                        if showPassword {
+                            TextField(
+                                "Password",
+                                text: $viewModel.password
+                            )
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
+                            .frame(height: 10)
+                        } else {
+                            SecureField("Password", text: $viewModel.password)
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                                .frame(height: 10)
+                        }
+
+                        Button(action: {showPassword.toggle()}) {
+                            Image(systemName: showPassword ? "eye.slash" : "eye")
+                        }
                     }
                     .padding()
                     .overlay(
@@ -62,30 +74,58 @@ struct LoginView: View {
                             .stroke(lineWidth: 2)
                     )
                     .foregroundColor(.gray)
-
+                    
                 }.padding()
-
-                NavigationLink(destination: MainView()) {
+                
+                /*AsyncButton(action: {
+                        path.append("test")
+                    /*if let bearerToken = await viewModel.authenticate() {
+                        path.append(bearerToken)
+                    }*/
+                }*/
+                Button(action: {
+                    // TODO: Add true authentication.
+                    Task {
+                        //_ = try await viewModel.authenticate()
+                        isAuthenticated = true
+                    }
+                }) {
                     Text("Login")
                         .frame(maxWidth: .infinity)
+                        .foregroundColor(Color("ButtonText"))
+                    
                 }
                 .buttonStyle(.borderedProminent)
                 .padding([.trailing, .leading])
 
                 LabelledDivider(label: "or")
-
+                
                 NavigationLink(destination: RegistrationView()) {
                     Text("Register New Account")
                 }
                 .frame(maxWidth: .infinity)
+                .padding([.trailing, .leading, .bottom])
             }
-            .navigationTitle("Anmeldung")
+        .alert(viewModel.error?.localizedDescription.description ?? "No Error Information available", isPresented: $viewModel.showError) {
+            Button("OK", role: .cancel) {}
         }
     }
 }
 
+#if DEBUG
 struct LoginView_Previews: PreviewProvider {
+    @State static var isAuthenticated = false
     static var previews: some View {
-        LoginView()
+        LoginView(
+            viewModel: LoginViewModel(
+                username: "testusers",
+                password: "12345",
+                showError: false,
+                error: nil,
+                authenticator: MockAuthenticator()
+            ),
+            isAuthenticated: $isAuthenticated
+        )
     }
 }
+#endif

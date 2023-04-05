@@ -17,6 +17,10 @@
 		AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */; };
 		AA87D0992982B43F002F6B3B /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D0982982B43F002F6B3B /* StatisticsView.swift */; };
 		AA87D09B2982B4CB002F6B3B /* MeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D09A2982B4CB002F6B3B /* MeasurementView.swift */; };
+		AAA1AAAC29D57BB2002CBC91 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAAB29D57BB2002CBC91 /* Router.swift */; };
+		AAA1AAAE29D6FB8D002CBC91 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAAD29D6FB8D002CBC91 /* OSLog.swift */; };
+		AAA1AAB029DB1F0C002CBC91 /* Preview_Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */; };
+		AAA1AAB229DC36A5002CBC91 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAB129DC36A5002CBC91 /* LoginViewModel.swift */; };
 		AAC9D2E82983DEC3003C4CC7 /* LiveViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2E72983DEC3003C4CC7 /* LiveViewModel.swift */; };
 		AAC9D2EA29840131003C4CC7 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2E929840131003C4CC7 /* LoginView.swift */; };
 		AAC9D2EC29840601003C4CC7 /* RegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2EB29840601003C4CC7 /* RegistrationView.swift */; };
@@ -33,6 +37,8 @@
 		AACB768329BF639F00A9DB6F /* DataCapturing in Frameworks */ = {isa = PBXBuildFile; productRef = AACB768229BF639F00A9DB6F /* DataCapturing */; };
 		AACB768529BF671600A9DB6F /* LoadinScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768429BF671600A9DB6F /* LoadinScreen.swift */; };
 		AACB768729BF67E800A9DB6F /* DataCapturingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */; };
+		AACB768929C0989300A9DB6F /* RFRError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768829C0989300A9DB6F /* RFRError.swift */; };
+		AACB768C29C1C24B00A9DB6F /* InitializationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768B29C1C24B00A9DB6F /* InitializationView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +74,10 @@
 		AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementsView.swift; sourceTree = "<group>"; };
 		AA87D0982982B43F002F6B3B /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 		AA87D09A2982B4CB002F6B3B /* MeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementView.swift; sourceTree = "<group>"; };
+		AAA1AAAB29D57BB2002CBC91 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
+		AAA1AAAD29D6FB8D002CBC91 /* OSLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLog.swift; sourceTree = "<group>"; };
+		AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preview_Mocks.swift; sourceTree = "<group>"; };
+		AAA1AAB129DC36A5002CBC91 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		AAC9D2E72983DEC3003C4CC7 /* LiveViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveViewModel.swift; sourceTree = "<group>"; };
 		AAC9D2E929840131003C4CC7 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AAC9D2EB29840601003C4CC7 /* RegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationView.swift; sourceTree = "<group>"; };
@@ -85,6 +95,8 @@
 		AACB768029BF626500A9DB6F /* DataCapturing */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = DataCapturing; path = ../DataCapturing; sourceTree = "<group>"; };
 		AACB768429BF671600A9DB6F /* LoadinScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadinScreen.swift; sourceTree = "<group>"; };
 		AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingViewModel.swift; sourceTree = "<group>"; };
+		AACB768829C0989300A9DB6F /* RFRError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRError.swift; sourceTree = "<group>"; };
+		AACB768B29C1C24B00A9DB6F /* InitializationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitializationView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,9 +157,12 @@
 				AA87D09E2983DC49002F6B3B /* ViewModel */,
 				AAC9D2F529891A75003C4CC7 /* Model */,
 				AA87D0952982B366002F6B3B /* Views */,
+				AACB768A29C0989D00A9DB6F /* Error */,
 				AA87D06B2982ADE8002F6B3B /* RFRApp.swift */,
 				AA87D06F2982ADE9002F6B3B /* Assets.xcassets */,
 				AA87D0712982ADE9002F6B3B /* Preview Content */,
+				AAA1AAAB29D57BB2002CBC91 /* Router.swift */,
+				AAA1AAAD29D6FB8D002CBC91 /* OSLog.swift */,
 			);
 			path = RFR;
 			sourceTree = "<group>";
@@ -190,6 +205,7 @@
 				AAC9D2FE29895D16003C4CC7 /* KeyValueView.swift */,
 				AAC9D30029897042003C4CC7 /* MainView.swift */,
 				AACB768429BF671600A9DB6F /* LoadinScreen.swift */,
+				AACB768B29C1C24B00A9DB6F /* InitializationView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -210,6 +226,8 @@
 				AAC9D2FA298954CE003C4CC7 /* MeasurementViewViewModel.swift */,
 				AACB767E29BF5E8A00A9DB6F /* ControlBarViewModel.swift */,
 				AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */,
+				AAA1AAB129DC36A5002CBC91 /* LoginViewModel.swift */,
+				AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -237,6 +255,14 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		AACB768A29C0989D00A9DB6F /* Error */ = {
+			isa = PBXGroup;
+			children = (
+				AACB768829C0989300A9DB6F /* RFRError.swift */,
+			);
+			path = Error;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -374,19 +400,25 @@
 			files = (
 				AACB767F29BF5E8A00A9DB6F /* ControlBarViewModel.swift in Sources */,
 				AAC9D2E82983DEC3003C4CC7 /* LiveViewModel.swift in Sources */,
+				AAA1AAAE29D6FB8D002CBC91 /* OSLog.swift in Sources */,
 				AAC9D2EF29840651003C4CC7 /* LabelledDivider.swift in Sources */,
 				AAC9D2F729891A8D003C4CC7 /* Measurement.swift in Sources */,
 				AAC9D2EA29840131003C4CC7 /* LoginView.swift in Sources */,
 				AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */,
 				AACB768729BF67E800A9DB6F /* DataCapturingViewModel.swift in Sources */,
+				AAA1AAB229DC36A5002CBC91 /* LoginViewModel.swift in Sources */,
 				AA87D0992982B43F002F6B3B /* StatisticsView.swift in Sources */,
 				AA87D06E2982ADE8002F6B3B /* LiveView.swift in Sources */,
 				AA87D09B2982B4CB002F6B3B /* MeasurementView.swift in Sources */,
 				AAC9D2FB298954CE003C4CC7 /* MeasurementViewViewModel.swift in Sources */,
+				AACB768929C0989300A9DB6F /* RFRError.swift in Sources */,
 				AAC9D2F129840682003C4CC7 /* AsyncButton.swift in Sources */,
 				AAC9D2FD29895526003C4CC7 /* Altitude.swift in Sources */,
 				AAC9D30129897042003C4CC7 /* MainView.swift in Sources */,
+				AAA1AAB029DB1F0C002CBC91 /* Preview_Mocks.swift in Sources */,
+				AAA1AAAC29D57BB2002CBC91 /* Router.swift in Sources */,
 				AA87D06C2982ADE8002F6B3B /* RFRApp.swift in Sources */,
+				AACB768C29C1C24B00A9DB6F /* InitializationView.swift in Sources */,
 				AAC9D2F929891B22003C4CC7 /* MeasurementCellViewModel.swift in Sources */,
 				AAC9D2F429840D83003C4CC7 /* MeasurementCell.swift in Sources */,
 				AAC9D2FF29895D16003C4CC7 /* KeyValueView.swift in Sources */,
@@ -559,6 +591,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -592,6 +625,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

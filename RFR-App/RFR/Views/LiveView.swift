@@ -27,32 +27,56 @@ import SwiftUI
  */
 struct LiveView: View {
     /// The view model used by this `View`.
-    @State var viewModel: LiveViewModel
+    @ObservedObject var viewModel: LiveViewModel
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                LiveDetailsView()
+        VStack {
+            HStack {
+                Text("Ready for Robots")
+                    .font(.largeTitle)
+                Spacer()
+
+            }
+            .padding(/*@START_MENU_TOKEN@*/[.top, .leading, .trailing]/*@END_MENU_TOKEN@*/)
+            LiveDetailsView()
+            if showLiveDetails(viewModel: viewModel) {
                 Divider()
                 LiveStatisticsView()
                 Spacer()
-                Divider()
-                ControlBarView()
             }
-            .padding()
-            .navigationBarTitle("Ready for Robots")
+            Divider()
+            ControlBarView(viewModel: ControlBarViewModel(dataCapturingService: viewModel.dataCapturingService))
+                .padding()
+        }
+    }
+
+    func showLiveDetails(viewModel: LiveViewModel) -> Bool {
+        switch viewModel.measurementState {
+        case .stopped:
+            return false
+        case .running:
+            return true
+        case .paused:
+            return true
         }
     }
 }
 
+#if DEBUG
 struct LiveView_Previews: PreviewProvider {
     static var previews: some View {
-        LiveView(viewModel: LiveViewModel(speed: "21 km/h", averageSpeed: "15 km/h", measurementState: .stopped, position: (51.507222, -0.1275), measurementName: "Fahrt 23", distance: "7,4 km", duration: "00:21:04", rise: "732 m", avoidedEmissions: "0,7 kg"))
+        LiveView(viewModel: LiveViewModel(
+            speed: "21.0 km/h",
+            averageSpeed: "15 km/h",
+            measurementState: .stopped,
+            dataCapturingService:
+                MockDataCapturingService(state: .stopped)))
     }
 }
+#endif
 
 /**
-A view showing live statistics about the current measurement.
+ A view showing live statistics about the current measurement.
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
@@ -97,7 +121,7 @@ struct LiveStatisticsView: View {
  - Version: 1.0.0
  */
 struct ControlBarView: View {
-    let viewModel: ControlBarViewModel = ControlBarViewModel()
+    @ObservedObject var viewModel: ControlBarViewModel
 
     var body: some View {
         HStack {
@@ -114,18 +138,17 @@ struct ControlBarView: View {
 }
 
 /**
-A view showing focused details such as the current position or speed of the active measurement.
+ A view showing focused details such as the current position or speed of the active measurement.
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
  */
 struct LiveDetailsView: View {
-    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.507222, longitude: -0.1275), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5))
-    
+    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.75155, longitude: 11.97411), span: MKCoordinateSpan( latitudeDelta: 0.02, longitudeDelta: 0.02))
+
     var body: some View {
         TabView {
             Map(coordinateRegion: $region)
-                .frame(width: 400, height: 300)
                 .tabItem {
                     Image(systemName: "map")
                     Text("Position")

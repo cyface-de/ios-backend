@@ -29,7 +29,7 @@ import SwiftUI
 struct RFRApp: App {
     var body: some Scene {
         WindowGroup {
-            LoginView()
+            InitializationView(viewModel: DataCapturingViewModel())
         }
     }
 }

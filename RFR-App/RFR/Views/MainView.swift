@@ -26,42 +26,95 @@ import SwiftUI
  - Version: 1.0.0
  */
 struct MainView: View {
+    @State private var selectedTab = 2
+    @Binding var isAuthenticated: Bool
+    @ObservedObject var viewModel: DataCapturingViewModel
+
     var body: some View {
-        NavigationStack {
-            TabView {
-                MeasurementsView(measurements: exampleMeasurements)
-                    .tabItem {
-                        Image(systemName: "list.bullet")
-                        Text("Fahrten")
-                            .font(.footnote)
+        if let dataCapturingService = viewModel.dataCapturingService {
+            NavigationStack {
+                TabView(selection: $selectedTab) {
+                    MeasurementsView(measurements: exampleMeasurements)
+                        .tabItem {
+                            Image(systemName: "list.bullet")
+                            Text("Fahrten")
+                                .font(.footnote)
+                        }
+                        .tag(1)
+                    LiveView(viewModel: LiveViewModel(dataCapturingService))
+                        .tabItem {
+                            Image(systemName: "location.fill")
+                            Text("Live")
+                        }
+                        .tag(2)
+                    StatisticsView()
+                        .tabItem {
+                            Image(systemName: "chart.xyaxis.line")
+                            Text("Statistiken")
+                                .font(.footnote)
+                        }
+                        .tag(3)
+                }
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        HStack {
+                            Image("RFR-Logo")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                            Spacer()
+                        }
                     }
-                LiveView(viewModel: viewModelExample)
-                    .tabItem {
-                        Image(systemName: "location.fill")
-                        Text("Live")
+                    ToolbarItem(placement: .automatic) {
+                        Button(action: {
+                            isAuthenticated = false
+                        }) {
+                            VStack {
+                                Image(systemName: "power.circle")
+                                Text("Abmelden")
+                                    .font(.footnote)
+                            }
+                        }
                     }
-                StatisticsView()
-                    .tabItem {
-                        Image(systemName: "chart.xyaxis.line")
-                        Text("Statistiken")
-                            .font(.footnote)
-                    }
-            }
-            .toolbar {
-                Button(action: {print("Daten übertragen")}) {
-                    VStack {
-                        Image(systemName: "icloud.and.arrow.up")
-                        Text("Daten übertragen")
-                            .font(.footnote)
+
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            viewModel.synchronize()
+                        }) {
+                            VStack {
+                                Image(systemName: "icloud.and.arrow.up")
+                                Text("Daten übertragen")
+                                    .font(.footnote)
+                            }
+                        }
                     }
                 }
+            }
+        } else {
+            HStack {
+                Image(systemName: "exclamationmark.triangle")
+                Text("Error: Data Capturing Service was not yet initialized!")
             }
         }
     }
 }
 
+#if DEBUG
 struct MainView_Previews: PreviewProvider {
+    @State static var isAuthenticated = true
     static var previews: some View {
-        MainView()
+        MainView(
+            isAuthenticated: $isAuthenticated,
+            viewModel: DataCapturingViewModel(
+                isInitialized: false,
+                showError: false,
+                username: "testuser",
+                password: "testpassword",
+                error: nil,
+                dataCapturingService: MockDataCapturingService(state: .stopped
+                                                              )
+            )
+        )
     }
 }
+#endif

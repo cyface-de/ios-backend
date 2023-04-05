@@ -20,12 +20,46 @@
 import Foundation
 import DataCapturing
 
-class ControlBarViewModel {
+class ControlBarViewModel: ObservableObject {
+
+    let dataCapturingService: DataCapturingService
+    @Published var showError = false
+    var error: Error?
+
+    init(dataCapturingService: DataCapturingService) {
+        self.dataCapturingService = dataCapturingService
+    }
+
     func onPlayPausePressed() {
-        print("play/pause")
+        do {
+            if dataCapturingService.isRunning {
+                try dataCapturingService.pause()
+            } else if dataCapturingService.currentMeasurement != nil {
+                try dataCapturingService.start(inMode: "BICYCLE")
+            } else {
+                try dataCapturingService.resume()
+            }
+        } catch {
+            handleError(error)
+        }
     }
 
     func onStopPressed() {
-        print("stop")
+        do {
+            try dataCapturingService.stop()
+        } catch {
+            handleError(error)
+        }
+    }
+
+    private func handleError(_ error: Error) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+
+            self.error = error
+            self.showError = true
+        }
     }
 }

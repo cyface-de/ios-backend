@@ -91,9 +91,10 @@ struct RegistrationView: View {
                 .disabled(!password.isEmpty && password==repeatedPassword)
             }
 
-            NavigationLink(destination: LoginView(), isActive: $registrationSuccessful) {
+            /*NavigationLink(destination: LoginView(), isActive: $registrationSuccessful) {
                 EmptyView()
-            }
+            }*/
+            
         }
         .navigationTitle("Konto Registrieren")
     }

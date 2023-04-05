@@ -101,7 +101,7 @@ public class Measurement: Hashable, Equatable {
         identifier: Int64,
         synchronizable: Bool = false,
         synchronized: Bool = false,
-        timestamp: UInt64 = DataCapturingService.currentTimeInMillisSince1970(),
+        timestamp: UInt64 = currentTimeInMillisSince1970(),
         trackLength: Double = 0.0,
         events: [Event] = [Event](),
         tracks: [Track] = [Track]()

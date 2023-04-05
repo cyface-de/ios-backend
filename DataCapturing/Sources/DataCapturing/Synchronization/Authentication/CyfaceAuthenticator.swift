@@ -56,6 +56,7 @@ public class CyfaceAuthenticator: CredentialsAuthenticator {
 
     // MARK: - Methods
 
+    @available(*, deprecated)
     public func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
         guard let username = username else {
             return onFailure(ServerConnectionError.notAuthenticated("Missing username!"))
@@ -104,8 +105,59 @@ public class CyfaceAuthenticator: CredentialsAuthenticator {
             }
             request.resume()
         } catch let error {
-            os_log("Unable to serialize authentication body with credentials %@ /%@", log: CyfaceAuthenticator.log, type: .error, username, password)
+            os_log("Unable to serialize authentication body with credentials %@ / %@", log: CyfaceAuthenticator.log, type: .error, username, password)
             onFailure(error)
+        }
+    }
+
+    public func authenticate() async throws -> String {
+        guard let username = username else {
+            throw ServerConnectionError.notAuthenticated("Missing username!")
+        }
+
+        guard let password = password else {
+            throw ServerConnectionError.notAuthenticated("Missing password!")
+        }
+
+        // Does this have the potential for some kind of injection attack?
+        do {
+            let jsonCredentials = try JSONSerialization.data(withJSONObject: ["username": username, "password": password])
+            let url = authenticationEndpoint.appendingPathComponent("login")
+
+            let headers: HTTPHeaders = [
+                "Content-Type": "application/json",
+                "Accept": "*/*"
+            ]
+            let request = session.upload(
+                jsonCredentials,
+                to: url,
+                method: .post,
+                headers: headers).validate().serializingString()
+            guard let response = await request.response.response else {
+                os_log("Unable to unwrap authentication response at endpoint \"%{PUBLIC}@\" using credentials %@ / %@!",
+                       log: CyfaceAuthenticator.log,
+                       type: .error,
+                       url.absoluteString,
+                       username,
+                       password)
+                throw ServerConnectionError.authenticationNotSuccessful(username)
+            }
+
+            if response.statusCode==200, let authorizationValue = response.allHeaderFields["Authorization"] as? String {
+                return authorizationValue
+            } else {
+                os_log("Authentication not successful at endpoint \"%{PUBLIC}@\" using credentials %@ / %@",
+                        log: CyfaceAuthenticator.log,
+                        type: .info,
+                        url.absoluteString,
+                        username,
+                        password
+                )
+                throw ServerConnectionError.authenticationNotSuccessful(username)
+            }
+        } catch let error {
+            os_log("Unable to serialize authentication body with credentials %@ /%@", log: CyfaceAuthenticator.log, type: .error, username, password)
+            throw error
         }
     }
 }

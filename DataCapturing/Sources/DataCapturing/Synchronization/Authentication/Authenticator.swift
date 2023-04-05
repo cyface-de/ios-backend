@@ -35,5 +35,8 @@ public protocol Authenticator {
      - onSuccess: A closure called and supplied with the resulting authentication token, when authentication was successful.
      - onFailure: A closure called and supplied with the causing error, when authentication was not successful.
     */
+    @available(*, deprecated)
     func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void)
+
+    func authenticate() async throws -> String
 }

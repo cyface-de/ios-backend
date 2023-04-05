@@ -35,7 +35,7 @@ import os.log
  - Version: 2.0.1
  - Since: 6.0.0
  */
-class SensorCapturer {
+public class SensorCapturer {
 
     // MARK: - Constants
     /// The log used to identify messages from this class.
@@ -74,10 +74,19 @@ class SensorCapturer {
      - capturingQueue: The queue running and synchronizing read and write operations to the sensor storage objects.
      - motionManager: An instance of `CMMotionManager`. There should be only one instance of this type in your application.
      */
-    init(lifecycleQueue: DispatchQueue, capturingQueue: DispatchQueue, motionManager: CMMotionManager) {
+    init(
+        lifecycleQueue: DispatchQueue,
+        capturingQueue: DispatchQueue,
+        accelerometerInterval: Double = 100.0,
+        gyroInterval: Double = 100.0,
+        directionsInterval: Double = 100.0
+    ) {
         self.lifecycleQueue = lifecycleQueue
         self.capturingQueue = capturingQueue
-        self.motionManager = motionManager
+        self.motionManager = CMMotionManager()
+        self.motionManager.accelerometerUpdateInterval = 1.0 / accelerometerInterval
+        self.motionManager.gyroUpdateInterval = 1.0 / gyroInterval
+        self.motionManager.magnetometerUpdateInterval = 1.0 / directionsInterval
 
         self.previousCapturedAccelerationTimestamp = 0.0
         self.previousCapturedRotationTimestamp = 0.0

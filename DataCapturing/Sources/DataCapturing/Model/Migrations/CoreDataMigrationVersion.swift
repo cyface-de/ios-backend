@@ -50,7 +50,7 @@ public enum CoreDataMigrationVersion: String, CaseIterable {
     // MARK: - Current
 
     /// The currently used model version
-    static var current: CoreDataMigrationVersion {
+    public static var current: CoreDataMigrationVersion {
         guard let current = allCases.last else {
             fatalError("No model versions found")
         }

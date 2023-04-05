@@ -20,24 +20,29 @@
 import SwiftUI
 
 /**
-A view showing the lists of measurements capture by this device.
-
+ A view showing the lists of measurements capture by this device.
+ 
  - Author: Klemens Muthmann
  - Version: 1.0.0
  */
 struct MeasurementsView: View {
     /// The measurements displayed by this view.
     var measurements: [Measurement]
-
+    
     var body: some View {
-        NavigationStack {
+        VStack {
+            HStack {
+                Text("Fahrten")
+                    .font(.largeTitle)
+                Spacer()
+            }
+
             List {
-                    ForEach(measurements) {measurement in
-                        NavigationLink(destination: MeasurementView(viewModel: MeasurementViewViewModel())) {
-                            MeasurementCell(viewModel: MeasurementCellViewModel(measurement: measurement))
-                        }
+                ForEach(measurements) {measurement in
+                    NavigationLink(destination: MeasurementView(viewModel: MeasurementViewViewModel())) {
+                        MeasurementCell(viewModel: MeasurementCellViewModel(measurement: measurement))
                     }
-                    .navigationTitle("Fahrten")
+                }
             }
         }
     }
