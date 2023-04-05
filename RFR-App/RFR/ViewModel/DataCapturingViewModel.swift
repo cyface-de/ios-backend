@@ -42,11 +42,7 @@ class DataCapturingViewModel: ObservableObject {
                         coreDataStack: coreDataStack
                     )
                     DispatchQueue.main.async { [weak self] in
-                        guard let self = self else {
-                            return
-                        }
-
-                        self.isInitialized = true
+                        self?.isInitialized = true
                     }
                 } catch {
                     handleError(error)
@@ -73,19 +69,6 @@ class DataCapturingViewModel: ObservableObject {
         self.dataCapturingService = dataCapturingService
     }
 
-    // TODO: Add events to handle (especially geo location information and status of data capturing)
-    func handle(event: DataCapturingEvent, status: Status) {
-        switch status {
-        case .success:
-            switch event {
-            default:
-                os_log("Unhandled data capturing event %@!",log: OSLog.capturingEvent, type: .info, event.description)
-            }
-        case .error(let error):
-            handleError(error)
-        }
-    }
-
     func synchronize() {
         // TODO: Implement data synchronization.
     }
@@ -93,11 +76,7 @@ class DataCapturingViewModel: ObservableObject {
     private func handleError(_ error: Error) {
         self.error = error
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-
-            self.showError = true
+            self?.showError = true
         }
     }
 }
