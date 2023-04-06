@@ -31,10 +31,10 @@ struct LiveView: View {
 
     var body: some View {
         VStack {
-            LiveDetailsView()
+            LiveDetailsView(viewModel: viewModel)
             if showLiveDetails(viewModel: viewModel) {
                 Divider()
-                LiveStatisticsView()
+                LiveStatisticsView(viewModel: viewModel)
                 Spacer()
             }
             Divider()
@@ -59,8 +59,8 @@ struct LiveView: View {
 struct LiveView_Previews: PreviewProvider {
     static var previews: some View {
         LiveView(viewModel: LiveViewModel(
-            speed: "21.0 km/h",
-            averageSpeed: "15 km/h",
+            speed: 21.0,
+            averageSpeed: 15.0,
             measurementState: .stopped,
             dataCapturingService:
                 MockDataCapturingService(state: .stopped)))
@@ -75,33 +75,35 @@ struct LiveView_Previews: PreviewProvider {
  - Version: 1.0.0
  */
 struct LiveStatisticsView: View {
+    @ObservedObject var viewModel: LiveViewModel
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("Fahrt 23").font(.largeTitle)
             HStack {
                 Text("Geschwindigkeit")
                 Spacer()
-                Text("21 km/h (\u{2205} 15 km/h)")
+                Text("\(viewModel.speed) (\u{2205} \(viewModel.averageSpeed))")
             }
             HStack {
                 Text("Strecke")
                 Spacer()
-                Text("7,4 km")
+                Text(viewModel.distance)
             }
             HStack {
                 Text("Fahrtzeit")
                 Spacer()
-                Text("00:21:04")
+                Text(viewModel.duration)
             }
             HStack {
                 Text("Anstieg")
                 Spacer()
-                Text("732 m")
+                Text(viewModel.rise)
             }
             HStack {
                 Text("Vermiedener CO\u{2082} Ausstoß")
                 Spacer()
-                Text("0,7 kg")
+                Text(viewModel.avoidedEmissions)
             }
         }
     }
@@ -138,6 +140,7 @@ struct ControlBarView: View {
  */
 struct LiveDetailsView: View {
     @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.5515, longitude: 12.2388), span: MKCoordinateSpan( latitudeDelta: 0.9, longitudeDelta: 0.9))
+    @ObservedObject var viewModel: LiveViewModel
 
     var body: some View {
         TabView {
@@ -150,7 +153,7 @@ struct LiveDetailsView: View {
             VStack {
                 Text("Geschwindigkeit")
                     .font(.largeTitle)
-                Text("21 km/h")
+                Text(viewModel.speed)
                     .font(.system(size: 36))
                     .fontWeight(.bold)
             }

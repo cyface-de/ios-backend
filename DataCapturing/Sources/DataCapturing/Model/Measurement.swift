@@ -22,7 +22,7 @@ import CoreData
 
 // TODO: There probably need to be two kinds of Measurement instances (and other objects in that hierarchy). One is used to create new instances and one is used for already synchronized ones. The reason is, that refreshing the objectId via the context does not work, as the context changes the objectId as soon as a call to context.save() happens. -.-
 /**
-Instances of this class represent a single data capturing session, framed by calls to `DataCapturingService.start` and `DataCapturingService.stop`.
+ Instances of this class represent a single data capturing session, framed by calls to `DataCapturingService.start` and `DataCapturingService.stop`.
 
  Initially this is not going to be saved via CoreData. As soon as you call an appropriate save method on the `PersistenceLayer` the object is stored to CoreData and this objects `objectId` will receive a value.
 
@@ -141,5 +141,40 @@ public class Measurement: Hashable, Equatable {
     /// Required by the `Equatable` protocol to compare two `Measurement` instances.
     public static func == (lhs: Measurement, rhs: Measurement) -> Bool {
         return lhs.identifier == rhs.identifier
+    }
+
+    /// Provide the average speed of this measurement in m/s.
+    public func averageSpeed() -> Double {
+        var sum = 0.0
+        var counter = 0
+        tracks.forEach { track in
+            track.locations.forEach { location in
+                if location.isValid {
+                    sum += location.speed
+                    counter += 1
+                }
+            }
+        }
+
+        if counter==0 {
+            return 0.0
+        } else {
+            return sum/Double(counter)
+        }
+    }
+
+    /// Provide the total duration of this measurement.
+    public func totalDuration() -> TimeInterval {
+        var timeInMillis = UInt64(0)
+        tracks.forEach { track in
+            guard let firstTimestamp = track.locations.first?.timestamp, let lastTimestamp = track.locations.last?.timestamp else {
+                return
+            }
+
+            let time = lastTimestamp - firstTimestamp
+            timeInMillis += time
+        }
+
+        return TimeInterval(floatLiteral: Double(timeInMillis)/1_000.0)
     }
 }

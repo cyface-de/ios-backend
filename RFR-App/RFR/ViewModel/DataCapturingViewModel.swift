@@ -6,10 +6,8 @@
 //
 
 import Foundation
-import DataCapturing
 import CoreMotion
 import DataCapturing
-import OSLog
 
 class DataCapturingViewModel: ObservableObject {
     @Published var isInitialized = false

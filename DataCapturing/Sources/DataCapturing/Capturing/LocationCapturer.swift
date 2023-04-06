@@ -57,11 +57,7 @@ public class LocationCapturer: NSObject {
     func start() {
         coreLocationManager.locationDelegate = self
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-
-            self.coreLocationManager.startUpdatingLocation()
+            self?.coreLocationManager.startUpdatingLocation()
         }
     }
     func stop() {
@@ -125,14 +121,7 @@ extension LocationCapturer: CLLocationManagerDelegate {
 
             geoLocationEventNumber += 1
             if geoLocationEventNumber == 1 {
-                // TODO: Actually the calling app should care for whether this happens on the main thread or not. Nevertheless it must be synchronized. It could be added to the lifecycleQueue to achieve this. Maybe with version 5.
-                DispatchQueue.main.async { [weak self] in
-                    guard let self = self else {
-                        return
-                    }
-
-                    self.locationSubject.send(geoLocation)
-                }
+                locationSubject.send(geoLocation)
             }
             if geoLocationEventNumber == locationUpdateSkipRate {
                 geoLocationEventNumber = 0

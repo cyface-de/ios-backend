@@ -20,6 +20,7 @@
 import Foundation
 import DataCapturing
 import OSLog
+import SwiftUI
 
 /**
  The view model for the live view showing the current capturing session and providing buttons to control it.
@@ -30,51 +31,120 @@ import OSLog
  */
 class LiveViewModel: ObservableObject {
     /// How to display the current speed of the user.
-    var speed: String = "0,0 km/h"
+    @Published var speed: String
     /// How to display the average speed of the user.
-    var averageSpeed: String = "0,0 km/h"
+    @Published var averageSpeed: String
     /// The state the active ``Measurement`` is in.
-    var measurementState: MeasurementState = .stopped
+    @Published var measurementState: MeasurementState
     /// The current position in geographic coordinates of longitude and latitude.
-    var position: (Double, Double) = (0.0, 0.0)
+    @Published var lastCapturedLongitude: String
+    @Published var lastCapturedLatitude: String
     /// The name to display for this ``Measurement``.
-    var measurementName: String = ""
+    var measurementName: String
     /// How to display the distance already travelled during this ``Measurement``.
-    var distance: String = "0,0 m"
+    @Published var distance: String
     /// How to display the duration this ``Measurement`` has already taken.
-    var duration: String = "0:00:00"
+    @Published var duration: String
     /// How to display the current rise during the active ``Measurement``.
-    var rise: String = "0 m"
+    @Published var rise: String
     /// How to display the avoided emissions during the active ``Measurement``.
-    var avoidedEmissions: String = "0 g CO"
+    @Published var avoidedEmissions: String
+    @Published var hasLocationFix = Image(systemName: "location")
     var dataCapturingService: DataCapturingService
+    static let speedFormatter = {
+        let nf = NumberFormatter()
+        nf.minimumFractionDigits = 1
+        nf.maximumFractionDigits = 2
+        nf.multiplier = 3.6
 
-    init(_ dataCapturingService: DataCapturingService) {
-        self.dataCapturingService = dataCapturingService
-        self.dataCapturingService.handler.append(self.handle)
+        return nf
+    }()
+    static let locationFormatter = {
+        let nf = NumberFormatter()
+        nf.minimumFractionDigits = 1
+        nf.maximumFractionDigits = 5
+
+        return nf
+    }()
+    static let emissionsFormatter = {
+        let nf = NumberFormatter()
+        nf.minimumFractionDigits = 1
+        nf.maximumFractionDigits = 3
+
+        return nf
+    }()
+    static let distanceFormatter = {
+        let nf = NumberFormatter()
+        nf.minimumFractionDigits = 1
+        nf.maximumFractionDigits = 3
+        nf.multiplier = 0.001
+
+        return nf
+    }()
+    static let timeFormatter = {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.zeroFormattingBehavior = .pad
+
+        return formatter
+    }()
+    /// The average carbon emissions per kilometer in gramms, based on data from Statista (https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/)
+    static let averageCarbonEmissionsPerMeter = 0.117
+
+    convenience init(_ dataCapturingService: DataCapturingService) {
+        self.init(dataCapturingService: dataCapturingService)
     }
 
     init(
-        speed: String = "0,0 km/h",
-        averageSpeed: String = "0,0 km/h",
+        speed: Double = 0.0,
+        averageSpeed: Double = 0.0,
         measurementState: MeasurementState = .stopped,
         position: (Double, Double) = (0.0, 0.0),
         measurementName: String = "",
-        distance: String = "0,0 m",
-        duration: String = "0:00:00",
+        distance: Double = 0.0,
+        duration: TimeInterval = 0.0,
         rise: String = "0 m",
-        avoidedEmissions: String = "0 g CO₂",
+        avoidedEmissions: Double = 0.0,
         dataCapturingService: DataCapturingService
     ) {
-        self.speed = speed
-        self.averageSpeed = averageSpeed
+        guard let formattedSpeed = LiveViewModel.speedFormatter.string(from: speed as NSNumber) else {
+            fatalError()
+        }
+
+        guard let formattedLongitude = LiveViewModel.locationFormatter.string(from: position.1 as NSNumber) else {
+            fatalError()
+        }
+
+        guard let formattedLatitude = LiveViewModel.locationFormatter.string(from: position.0 as NSNumber) else {
+            fatalError()
+        }
+
+        guard let averageFormattedSpeed = LiveViewModel.speedFormatter.string(from: averageSpeed as NSNumber) else {
+            fatalError()
+        }
+
+        guard let formattedAvoidedEmissions = LiveViewModel.emissionsFormatter.string(from: avoidedEmissions as NSNumber) else {
+            fatalError()
+        }
+
+        guard let formattedDistance = LiveViewModel.distanceFormatter.string(from: distance as NSNumber) else {
+            fatalError()
+        }
+
+        guard let formattedDuration = LiveViewModel.timeFormatter.string(from: duration) else {
+            fatalError()
+        }
+
+        self.speed = "\(formattedSpeed) km/h"
+        self.averageSpeed = "\(averageFormattedSpeed) km/h"
         self.measurementState = measurementState
-        self.position = position
+        self.lastCapturedLongitude = formattedLongitude
+        self.lastCapturedLatitude = formattedLatitude
         self.measurementName = measurementName
-        self.distance = distance
-        self.duration = duration
+        self.distance = "\(formattedDistance) km"
+        self.duration = formattedDuration
         self.rise = rise
-        self.avoidedEmissions = avoidedEmissions
+        self.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
         self.dataCapturingService = dataCapturingService
         self.dataCapturingService.handler.append(self.handle)
         os_log("Initializing LiveViewModel. Handler in dataCapturingService %d", self.dataCapturingService.handler.count)
@@ -124,15 +194,43 @@ class LiveViewModel: ObservableObject {
                     self?.measurementState = .stopped
                 }
             case .geoLocationAcquired(position: let location):
-                DispatchQueue.main.async { [weak self] in
-                    self?.speed = String(format: "%.2d", location.speed)
-                    self?.position = (location.longitude, location.latitude)
-                }
+                updateBasedOn(location: location)
             default:
                 os_log("Unknown event %@.", log: OSLog.capturingEvent, type: .info, event.description)
             }
         case .error(let error):
             os_log("Event $@ failed. %@", event.description, error.localizedDescription)
+        }
+    }
+
+    private func updateBasedOn(location: LocationCacheEntry) {
+        guard let capturedMeasurement = dataCapturingService.capturedMeasurement else {
+            return
+        }
+        let avoidedEmissions = capturedMeasurement.trackLength * LiveViewModel.averageCarbonEmissionsPerMeter
+        DispatchQueue.main.async { [weak self] in
+            if let formattedSpeed = LiveViewModel.speedFormatter.string(from: location.speed as NSNumber) {
+                self?.speed = "\(formattedSpeed) km/h"
+            }
+            if let formattedLatitude = LiveViewModel.locationFormatter.string(from: location.latitude as NSNumber) {
+                self?.lastCapturedLatitude = formattedLatitude
+            }
+            if let formattedLongitude = LiveViewModel.locationFormatter.string(from: location.longitude as NSNumber) {
+                self?.lastCapturedLongitude = formattedLongitude
+            }
+            if let formattedAverageSpeed = LiveViewModel.speedFormatter.string(from: capturedMeasurement.averageSpeed() as NSNumber) {
+                self?.averageSpeed = "\(formattedAverageSpeed) km/h"
+            }
+            if let formattedAvoidedEmissions = LiveViewModel.emissionsFormatter.string(from: avoidedEmissions as NSNumber) {
+                self?.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
+            }
+            if let formattedDistance = LiveViewModel.distanceFormatter.string(from: capturedMeasurement.trackLength as NSNumber) {
+                self?.distance = "\(formattedDistance) km"
+            }
+            if let formattedDuration = LiveViewModel.timeFormatter.string(from: capturedMeasurement.totalDuration()) {
+                self?.duration = formattedDuration
+            }
+            // TODO: Add rise here
         }
     }
 }

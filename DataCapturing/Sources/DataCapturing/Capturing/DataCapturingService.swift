@@ -20,6 +20,7 @@
 import Foundation
 import CoreMotion
 import CoreLocation
+import Combine
 import os.log
 
 public protocol DataCapturingService {
@@ -148,6 +149,8 @@ public class DataCapturingServiceImpl {
      _hasFix = newValue
      }
      }*/
+    var fixSubjectCancellable: AnyCancellable?
+    var locationSubjectCancellable: AnyCancellable?
 
     // MARK: - Initializers
 
@@ -181,21 +184,6 @@ public class DataCapturingServiceImpl {
             self.sensorCapturer = SensorCapturer(lifecycleQueue: lifecycleQueue, capturingQueue: capturingQueue)
             self.locationCapturer = LocationCapturer(lifecycleQueue: lifecycleQueue)
             self.savingInterval = time
-
-            _ = locationCapturer.fixSubject.sink { [weak self] hasFix in
-                guard let self = self else {
-                    return
-                }
-
-                self.handle(event: hasFix ? DataCapturingEvent.geoLocationFixAcquired: DataCapturingEvent.geoLocationFixLost, status: .success)
-            }
-            _ = locationCapturer.locationSubject.sink { [weak self] location in
-                guard let self = self else {
-                    return
-                }
-
-                self.handle(event: .geoLocationAcquired(position: location), status: .success)
-            }
         }
 
     public init(
@@ -208,20 +196,6 @@ public class DataCapturingServiceImpl {
         self.sensorCapturer = SensorCapturer(lifecycleQueue: lifecycleQueue, capturingQueue: capturingQueue)
         self.locationCapturer = LocationCapturer(lifecycleQueue: lifecycleQueue)
         self.savingInterval = savingInterval
-        _ = locationCapturer.fixSubject.sink { [weak self] hasFix in
-            guard let self = self else {
-                return
-            }
-
-            self.handle(event: hasFix ? DataCapturingEvent.geoLocationFixAcquired: DataCapturingEvent.geoLocationFixLost, status: .success)
-        }
-        _ = locationCapturer.locationSubject.sink { [weak self] location in
-            guard let self = self else {
-                return
-            }
-
-            self.handle(event: .geoLocationAcquired(position: location), status: .success)
-        }
     }
 
 
@@ -267,6 +241,12 @@ public class DataCapturingServiceImpl {
         backgroundSynchronizationTimer.activate()
         self.backgroundSynchronizationTimer = backgroundSynchronizationTimer
 
+        self.fixSubjectCancellable = locationCapturer.fixSubject.sink { [weak self] hasFix in
+            self?.handle(event: hasFix ? DataCapturingEvent.geoLocationFixAcquired: DataCapturingEvent.geoLocationFixLost, status: .success)
+        }
+        self.locationSubjectCancellable = locationCapturer.locationSubject.sink { [weak self] location in
+            self?.handle(event: .geoLocationAcquired(position: location), status: .success)
+        }
         locationCapturer.start()
 
         self.isRunning = true
@@ -284,7 +264,8 @@ public class DataCapturingServiceImpl {
         saveCapturedData()
         //}
         isRunning = false
-
+        fixSubjectCancellable?.cancel()
+        locationSubjectCancellable?.cancel()
     }
 
     /**
