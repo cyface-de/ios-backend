@@ -12,8 +12,9 @@ import DataCapturing
 class DataCapturingViewModel: ObservableObject {
     @Published var isInitialized = false
     @Published var showError = false
-    @Published var username = ""
-    @Published var password = ""
+    // TODO: Why do I need username and password here?
+    //@Published var username = ""
+    //@Published var password = ""
     var error: Error? {
         didSet {
             DispatchQueue.main.async { [weak self] in
@@ -54,21 +55,13 @@ class DataCapturingViewModel: ObservableObject {
     init(
         isInitialized: Bool,
         showError: Bool,
-        username: String,
-        password: String,
         error: Error?,
         dataCapturingService: DataCapturingService
     ) {
         self.isInitialized = isInitialized
         self.showError = showError
-        self.username = username
-        self.password = password
         self.error = error
         self.dataCapturingService = dataCapturingService
-    }
-
-    func synchronize() {
-        // TODO: Implement data synchronization.
     }
 
     private func handleError(_ error: Error) {

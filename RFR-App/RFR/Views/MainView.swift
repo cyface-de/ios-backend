@@ -108,8 +108,6 @@ struct MainView_Previews: PreviewProvider {
             viewModel: DataCapturingViewModel(
                 isInitialized: false,
                 showError: false,
-                username: "testuser",
-                password: "testpassword",
                 error: nil,
                 dataCapturingService: MockDataCapturingService(state: .stopped
                                                               )

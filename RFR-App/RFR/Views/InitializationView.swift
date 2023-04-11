@@ -44,8 +44,6 @@ struct InitializationView_Previews: PreviewProvider {
             viewModel: DataCapturingViewModel(
                 isInitialized: true,
                 showError: false,
-                username: "",
-                password: "",
                 error: nil,
                 dataCapturingService: MockDataCapturingService(state: .stopped)
             )
