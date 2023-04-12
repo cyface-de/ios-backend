@@ -143,7 +143,7 @@ class MeasurementSerializer: BinarySerializer {
 
         var records = protosMeasurement.locationRecords
         for location in measurement.tracks.flatMap({track in track.locations}) {
-            let timestamp = location.timestamp
+            let timestamp = convertToUtcTimestamp(date: location.time)
             let accuracy = location.accuracy
             let latitude = location.latitude
             let longitude = location.longitude

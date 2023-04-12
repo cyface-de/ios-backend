@@ -108,7 +108,7 @@ public class CyfaceSynchronizer: Synchronizer {
     private let apiURL: URL
 
     /// Stack used to access *CoreData*.
-    private let coreDataStack: CoreDataManager
+    private let dataStoreStack: DataStoreStack
 
     /// A strategy for cleaning the persistent storage after data synchronization.
     private let cleaner: Cleaner
@@ -153,8 +153,8 @@ public class CyfaceSynchronizer: Synchronizer {
         - authenticator: The authenticator to use to check on the server on whether the current user is valid or not.
         - handler: The handler to call, when synchronization for a measurement has finished.
      */
-    public init(apiURL: URL, coreDataStack: CoreDataManager, cleaner: Cleaner, sessionRegistry: SessionRegistry = SessionRegistry(), authenticator: Authenticator) {
-        self.coreDataStack = coreDataStack
+    public init(apiURL: URL, dataStoreStack: DataStoreStack, cleaner: Cleaner, sessionRegistry: SessionRegistry = SessionRegistry(), authenticator: Authenticator) {
+        self.dataStoreStack = dataStoreStack
         self.apiURL = apiURL
         self.cleaner = cleaner
         self.sessionRegistry = sessionRegistry
@@ -205,7 +205,7 @@ public class CyfaceSynchronizer: Synchronizer {
             }
 
             do {
-                let persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
+                let persistenceLayer = self.dataStoreStack.persistenceLayer()
                 let measurements = try persistenceLayer.loadSynchronizableMeasurements()
                 self.handle(synchronizableMeasurements: measurements, status: .success)
             } catch let error {
@@ -283,7 +283,7 @@ public class CyfaceSynchronizer: Synchronizer {
 
         for measurement in measurements {
             handle(.synchronizationStarted(measurement: measurement.identifier), .success)
-            let upload = CoreDataBackedUpload(coreDataStack: coreDataStack, identifier: UInt64(measurement.identifier))
+            let upload = CoreDataBackedUpload(dataStoreStack: dataStoreStack, identifier: UInt64(measurement.identifier))
             uploadProcess.upload(upload)
         }
     }
@@ -295,7 +295,7 @@ public class CyfaceSynchronizer: Synchronizer {
      */
     private func successHandler(measurement: UInt64) {
         do {
-            let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
+            let persistenceLayer = dataStoreStack.persistenceLayer()
             try cleaner.clean(measurement: Int64(measurement), from: persistenceLayer)
             handle(.synchronizationFinished(measurement: Int64(measurement)), .success)
         } catch let error {

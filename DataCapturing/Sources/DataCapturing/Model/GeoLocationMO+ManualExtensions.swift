@@ -50,7 +50,9 @@ extension GeoLocationMO {
         self.track = managedParent
         self.isPartOfCleanedTrack = location.isValid
         self.speed = location.speed
-        self.timestamp = Int64(location.timestamp)
+        self.time = location.time
+        self.verticalAccuracy = location.verticalAccuracy
+        self.altitude = location.altitude
     }
 
 }

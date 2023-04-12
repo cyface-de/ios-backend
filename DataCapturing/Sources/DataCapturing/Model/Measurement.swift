@@ -19,6 +19,7 @@
 
 import Foundation
 import CoreData
+import OSLog
 
 // TODO: There probably need to be two kinds of Measurement instances (and other objects in that hierarchy). One is used to create new instances and one is used for already synchronized ones. The reason is, that refreshing the objectId via the context does not work, as the context changes the objectId as soon as a call to context.save() happens. -.-
 /**
@@ -33,6 +34,10 @@ import CoreData
  - since: 11.0.0
  */
 public class Measurement: Hashable, Equatable {
+    /// The minimum number of meters before the ascend is increased, to filter sensor noise.
+    private static let ascendThresholdMeters = 2.0
+    /// The minimum accuracy in meters for GNSS altitudes to be used in ascend calculation.
+    private static let verticalAccuracyThresholdMeters = 12.0
     /// This measurements CoreData identifier or `nil` if the object has not been saved yet.
     var objectId: NSManagedObjectID?
     /// A device wide unique identifier for this measurement. Usually set by incrementing a counter.
@@ -41,8 +46,8 @@ public class Measurement: Hashable, Equatable {
     public var synchronizable: Bool
     /// A flag, marking this `Measurement` as either synchronized or not.
     public var synchronized: Bool
-    /// The UNIX timestamp in milliseconds since the 1st of January 1970, when this measurement was started.
-    public let timestamp: UInt64
+    /// The time when this measurement was started.
+    public let time: Date
     /// The calculated length of the `Measurement`. See `DistanceCalculationStrategy` for further details.
     public var trackLength: Double
     /// The user events that occurred during this `Measurement`.
@@ -63,7 +68,7 @@ public class Measurement: Hashable, Equatable {
             identifier: managedObject.identifier,
             synchronizable: managedObject.synchronizable,
             synchronized: managedObject.synchronized,
-            timestamp: UInt64(managedObject.timestamp),
+            time: managedObject.time!,
             trackLength: managedObject.trackLength)
         self.objectId = managedObject.objectID
 
@@ -97,11 +102,11 @@ public class Measurement: Hashable, Equatable {
         - events: The user events that occurred during this `Measurement`.
         - tracks: The tracks containing all the data this `Measurement` has captured.
      */
-    init(
+    public init(
         identifier: Int64,
         synchronizable: Bool = false,
         synchronized: Bool = false,
-        timestamp: UInt64 = currentTimeInMillisSince1970(),
+        time: Date = Date(),
         trackLength: Double = 0.0,
         events: [Event] = [Event](),
         tracks: [Track] = [Track]()
@@ -109,7 +114,7 @@ public class Measurement: Hashable, Equatable {
         self.identifier = identifier
         self.synchronizable = synchronizable
         self.synchronized = synchronized
-        self.timestamp = timestamp
+        self.time = time
         self.trackLength = trackLength
         self.events = events
         self.tracks = tracks
@@ -165,16 +170,59 @@ public class Measurement: Hashable, Equatable {
 
     /// Provide the total duration of this measurement.
     public func totalDuration() -> TimeInterval {
-        var timeInMillis = UInt64(0)
+        var totalTime = TimeInterval()
         tracks.forEach { track in
-            guard let firstTimestamp = track.locations.first?.timestamp, let lastTimestamp = track.locations.last?.timestamp else {
+            guard let firstTime = track.locations.first?.time, let lastTime = track.locations.last?.time else {
                 return
             }
 
-            let time = lastTimestamp - firstTimestamp
-            timeInMillis += time
+            totalTime += lastTime.timeIntervalSince(firstTime)
+
         }
 
-        return TimeInterval(floatLiteral: Double(timeInMillis)/1_000.0)
+        return totalTime
+    }
+
+    /// Calculate the accumulated height value for this measurement.
+    public func summedHeight() -> Double {
+        var sum = 0.0
+        tracks.forEach { track in
+
+            if track.altitudes.isEmpty {
+                os_log("Using location values to calculate accumulated height.", log: OSLog.measurement, type: .debug)
+                var previousAltitude = 0.0
+                var isFirst = true
+                track.locations.forEach { location in
+                    if isFirst {
+                        previousAltitude = location.altitude
+                        isFirst = false
+                    } else if !(location.verticalAccuracy > Measurement.verticalAccuracyThresholdMeters) {
+
+                        let currentAltitude = location.altitude
+                        let altitudeChange = currentAltitude - previousAltitude
+
+                        if abs(altitudeChange) > Measurement.ascendThresholdMeters {
+                            if altitudeChange > 0.0 {
+                                sum += altitudeChange
+                            }
+                            previousAltitude = location.altitude
+                        }
+                    }
+                }
+            } else {
+                os_log("Using altimeter values to calculate accumulated height.", log: OSLog.measurement, type: .debug)
+                var previousAltitude: Double? = nil
+                for altitude in track.altitudes {
+                    if let previousAltitude = previousAltitude {
+                        let relativeAltitudeChange = altitude.relativeAltitude - previousAltitude
+                        if relativeAltitudeChange > 0.1 {
+                            sum += relativeAltitudeChange
+                        }
+                    }
+                    previousAltitude = altitude.relativeAltitude
+                }
+            }
+        }
+        return sum
     }
 }

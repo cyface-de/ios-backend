@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21513" systemVersion="21G115" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Altitude" representedClassName="AltitudeMO" syncable="YES" codeGenerationType="class">
+        <attribute name="altitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="time" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="track" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Track" inverseName="altitudes" inverseEntity="Track"/>
+    </entity>
+    <entity name="Event" representedClassName="EventMO" syncable="YES" codeGenerationType="class">
+        <attribute name="time" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="type" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="value" optional="YES" attributeType="String"/>
+        <relationship name="measurement" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Measurement" inverseName="events" inverseEntity="Measurement"/>
+    </entity>
+    <entity name="GeoLocation" representedClassName="GeoLocationMO" syncable="YES" codeGenerationType="class">
+        <attribute name="accuracy" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="altitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="isPartOfCleanedTrack" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="lat" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="lon" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="speed" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="time" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="verticalAccuracy" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="track" maxCount="1" deletionRule="Nullify" destinationEntity="Track" inverseName="locations" inverseEntity="Track"/>
+    </entity>
+    <entity name="Measurement" representedClassName="MeasurementMO" syncable="YES" codeGenerationType="class">
+        <attribute name="identifier" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="synchronizable" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="synchronized" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="time" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="trackLength" attributeType="Double" minValueString="0" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="events" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Event" inverseName="measurement" inverseEntity="Event"/>
+        <relationship name="tracks" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Track" inverseName="measurement" inverseEntity="Track"/>
+    </entity>
+    <entity name="Track" representedClassName="TrackMO" syncable="YES" codeGenerationType="class">
+        <relationship name="altitudes" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Altitude" inverseName="track" inverseEntity="Altitude"/>
+        <relationship name="locations" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="GeoLocation" inverseName="track" inverseEntity="GeoLocation"/>
+        <relationship name="measurement" maxCount="1" deletionRule="Nullify" destinationEntity="Measurement" inverseName="tracks" inverseEntity="Measurement"/>
+    </entity>
+</model>

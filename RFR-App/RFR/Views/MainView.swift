@@ -34,7 +34,7 @@ struct MainView: View {
         if let dataCapturingService = viewModel.dataCapturingService {
             NavigationStack {
                 TabView(selection: $selectedTab) {
-                    MeasurementsView(measurements: exampleMeasurements)
+                    MeasurementsView(viewModel: MeasurementsViewModel(dataStoreStack: dataCapturingService.dataStoreStack))
                         .tabItem {
                             Image(systemName: "list.bullet")
                             Text("Fahrten")
@@ -56,7 +56,7 @@ struct MainView: View {
                         .tag(3)
                 }
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
+                /*.toolbar {
                     ToolbarItem(placement: .principal) {
                         HStack {
                             Image("RFR-Logo")
@@ -88,7 +88,7 @@ struct MainView: View {
                             }
                         }
                     }
-                }
+                }*/
             }
         } else {
             HStack {

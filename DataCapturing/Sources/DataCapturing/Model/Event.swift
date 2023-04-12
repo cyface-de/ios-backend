@@ -50,7 +50,7 @@ public class Event: CustomStringConvertible {
      - Attention: CoreData changes the objectId as soon as a new instance is written from the `NSManagedObjectContext` to the underlying database. So if you call `context.save()` after this contrxutor, the objectId might become invalid. Loading the object from the database prior to its usage provides a save instance.
      */
     convenience init(managedObject: EventMO, parent: Measurement) {
-        guard let managedObjectTimeAsDate = managedObject.time as? Date else {
+        guard let managedObjectTimeAsDate = managedObject.time else {
             fatalError()
         }
         self.init(time: managedObjectTimeAsDate, type: managedObject.typeEnum, value: managedObject.value, measurement: parent)
@@ -68,7 +68,7 @@ If this instance is persisted via CoreData, its `objectId` must be set to the ap
      - value: An optional value if that is necessary.
      - measurement: The `Measurement` during which the event occured.
      */
-    init(time: Date=Date(), type: EventType, value: String?=nil, measurement: Measurement) {
+    public init(time: Date=Date(), type: EventType, value: String?=nil, measurement: Measurement) {
         self.time = time
         self.type = type
         self.value = value

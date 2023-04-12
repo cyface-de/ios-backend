@@ -88,6 +88,13 @@ class LiveViewModel: ObservableObject {
 
         return formatter
     }()
+    static let riseFormatter = {
+        let formatter = NumberFormatter()
+        formatter.minimumFractionDigits = 1
+        formatter.maximumFractionDigits = 1
+
+        return formatter
+    }()
     /// The average carbon emissions per kilometer in gramms, based on data from Statista (https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/)
     static let averageCarbonEmissionsPerMeter = 0.117
 
@@ -103,7 +110,7 @@ class LiveViewModel: ObservableObject {
         measurementName: String = "",
         distance: Double = 0.0,
         duration: TimeInterval = 0.0,
-        rise: String = "0 m",
+        rise: Double = 0.0,
         avoidedEmissions: Double = 0.0,
         dataCapturingService: DataCapturingService
     ) {
@@ -135,6 +142,10 @@ class LiveViewModel: ObservableObject {
             fatalError()
         }
 
+        guard let formattedRise = LiveViewModel.riseFormatter.string(from: rise as NSNumber) else {
+            fatalError()
+        }
+
         self.speed = "\(formattedSpeed) km/h"
         self.averageSpeed = "\(averageFormattedSpeed) km/h"
         self.measurementState = measurementState
@@ -143,7 +154,7 @@ class LiveViewModel: ObservableObject {
         self.measurementName = measurementName
         self.distance = "\(formattedDistance) km"
         self.duration = formattedDuration
-        self.rise = rise
+        self.rise = "\(formattedRise) m"
         self.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
         self.dataCapturingService = dataCapturingService
         self.dataCapturingService.handler.append(self.handle)
@@ -230,7 +241,9 @@ class LiveViewModel: ObservableObject {
             if let formattedDuration = LiveViewModel.timeFormatter.string(from: capturedMeasurement.totalDuration()) {
                 self?.duration = formattedDuration
             }
-            // TODO: Add rise here
+            if let formattedRise = LiveViewModel.riseFormatter.string(from: capturedMeasurement.summedHeight() as NSNumber) {
+                self?.rise = formattedRise
+            }
         }
     }
 }

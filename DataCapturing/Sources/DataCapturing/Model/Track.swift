@@ -34,6 +34,8 @@ public class Track {
     var objectId: NSManagedObjectID?
     /// The locations constituting this track.
     public var locations: [GeoLocation]
+    /// The barometric altitudes captured for this track. If the device does not support an altimeter, this array is empty.
+    public var altitudes: [Altitude]
     /// The measurement this track belongs to.
     let measurement: Measurement
 
@@ -56,6 +58,8 @@ public class Track {
                 try append(location: GeoLocation(managedObject: geoLocationMO, parent: self))
             }
         }
+
+        //if let altitudeMOs = managedObject.al
     }
 
     /**
@@ -67,6 +71,7 @@ public class Track {
      */
     init(parent: Measurement) {
         self.locations = [GeoLocation]()
+        self.altitudes = [Altitude]()
         self.measurement = parent
     }
 
@@ -79,7 +84,7 @@ public class Track {
      - Throws InconsistentData.locationOrderViolated: If the newly added locations timestamp is smaller then the one from the previous location.
      */
     func append(location: GeoLocation) throws {
-        guard (locations.last?.timestamp ?? 0) < location.timestamp else {
+        guard (locations.last?.time ?? Date.distantPast) < location.time else {
             throw InconsistentData.locationOrderViolated
         }
 

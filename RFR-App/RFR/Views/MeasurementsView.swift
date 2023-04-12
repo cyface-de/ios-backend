@@ -18,6 +18,7 @@
  */
 
 import SwiftUI
+import DataCapturing
 
 /**
  A view showing the lists of measurements capture by this device.
@@ -26,15 +27,22 @@ import SwiftUI
  - Version: 1.0.0
  */
 struct MeasurementsView: View {
-    /// The measurements displayed by this view.
-    var measurements: [Measurement]
+    @ObservedObject var viewModel: MeasurementsViewModel
     
     var body: some View {
         VStack {
-            List {
-                ForEach(measurements) {measurement in
-                    NavigationLink(destination: MeasurementView(viewModel: MeasurementViewViewModel())) {
-                        MeasurementCell(viewModel: MeasurementCellViewModel(measurement: measurement))
+            if let error = viewModel.error {
+                ErrorView(error: error)
+            } else if viewModel.isLoading {
+                ProgressView {
+                    Text("Bitte warten!")
+                }
+            } else {
+                List {
+                    ForEach(viewModel.measurements) {measurement in
+                        NavigationLink(destination: MeasurementView(viewModel: MeasurementViewViewModel())) {
+                            MeasurementCell(viewModel: MeasurementCellViewModel(measurement: measurement))
+                        }
                     }
                 }
             }
@@ -42,8 +50,15 @@ struct MeasurementsView: View {
     }
 }
 
+/// Some example data to use for testing views depending on a `Measurement`.
+let exampleMeasurements = [
+    Measurement(id: 1, name: "Fahrt zu Oma", distance: 3.0, startTime: Date(), synchronized: true),
+    Measurement(id: 2, name: "Arbeit", distance: 10.0, startTime: Date(), synchronized: false),
+    Measurement(id: 3, name: "Supermarkt", distance: 2.3, startTime: Date(), synchronized: true)
+]
+
 struct MeasurementsView_Previews: PreviewProvider {
     static var previews: some View {
-        MeasurementsView(measurements: exampleMeasurements)
+        MeasurementsView(viewModel: MeasurementsViewModel(dataStoreStack: MockDataStoreStack()))
     }
 }

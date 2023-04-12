@@ -21,6 +21,10 @@ import Foundation
 import CoreData
 import OSLog
 
+public protocol DataStoreStack {
+    func setup() async throws
+    func persistenceLayer() -> PersistenceLayer
+}
 // TODO: Rename this to CoreDataStack and move it to the Persistence group.
 /**
  A class for objects representing a *CoreData* stack.
@@ -34,9 +38,7 @@ import OSLog
  - Since: 4.0.0
  - Attention: You must call `setup(bundle:completionClosure:)` only once in your application. Usually this should happen in AddDelegate.application. Do not load or save any data before the call to `setup(bundle:completionClosure:)` has finished.
  */
-public class CoreDataManager {
-    /// os_log logger used for messages from instances of this class.
-    private static let log = OSLog(subsystem: "CoreDataManager", category: "de.cyface")
+public class CoreDataStack: DataStoreStack {
     /// An object to migrate between different Cyface model versions.
     let migrator: CoreDataMigratorProtocol
     /// The type of the store to use. In production this should usually be `NSSQLiteStoreType`. In a test environment you might use `NSInMemoryStoreType`. Both values are defined by *CoreData*.
@@ -77,7 +79,7 @@ public class CoreDataManager {
      */
     public convenience init(storeType: String = NSSQLiteStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator()) throws {
         let bundle = Bundle.module
-        let mom = try CoreDataManager.load(bundle: bundle)
+        let mom = try CoreDataStack.load(bundle: bundle)
         self.init(storeType: storeType, migrator: migrator, model: mom, bundle: bundle)
     }
 
@@ -94,7 +96,7 @@ public class CoreDataManager {
         self.bundle = bundle
 
         // Initialize persistent container
-        os_log("Creating persistent container", log: CoreDataManager.log, type: .info)
+        os_log("Creating persistent container", log: OSLog.persistence, type: .info)
 
         persistentContainer = NSPersistentContainer(name: modelName, managedObjectModel: model)
         let description = persistentContainer.persistentStoreDescriptions.first
@@ -133,6 +135,10 @@ public class CoreDataManager {
                 }
             }
         }
+    }
+
+    public func persistenceLayer() -> PersistenceLayer {
+        return CoreDataPersistenceLayer(onManager: self)
     }
 
     /// Load the specified `NSManagedObjectModel` from disk.

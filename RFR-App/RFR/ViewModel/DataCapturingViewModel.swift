@@ -12,9 +12,6 @@ import DataCapturing
 class DataCapturingViewModel: ObservableObject {
     @Published var isInitialized = false
     @Published var showError = false
-    // TODO: Why do I need username and password here?
-    //@Published var username = ""
-    //@Published var password = ""
     var error: Error? {
         didSet {
             DispatchQueue.main.async { [weak self] in
@@ -30,7 +27,7 @@ class DataCapturingViewModel: ObservableObject {
 
     init() {
         do {
-            let coreDataStack = try CoreDataManager()
+            let coreDataStack = try CoreDataStack()
             Task {
                 do {
                     try await coreDataStack.setup()
@@ -38,7 +35,7 @@ class DataCapturingViewModel: ObservableObject {
                         lifecycleQueue: DispatchQueue(label: "lifecylce"),
                         capturingQueue: DispatchQueue.global(qos: .userInitiated),
                         savingInterval: TimeInterval(1.0),
-                        coreDataStack: coreDataStack
+                        dataStoreStack: coreDataStack
                     )
                     DispatchQueue.main.async { [weak self] in
                         self?.isInitialized = true

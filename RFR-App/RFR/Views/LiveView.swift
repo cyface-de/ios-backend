@@ -106,6 +106,7 @@ struct LiveStatisticsView: View {
                 Text(viewModel.avoidedEmissions)
             }
         }
+        .padding([.leading, .trailing])
     }
 }
 

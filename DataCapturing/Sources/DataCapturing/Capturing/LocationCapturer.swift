@@ -110,10 +110,13 @@ extension LocationCapturer: CLLocationManagerDelegate {
             let geoLocation = LocationCacheEntry(
                 latitude: location.coordinate.latitude,
                 longitude: location.coordinate.longitude,
+                altitude: location.altitude,
                 accuracy: location.horizontalAccuracy,
+                verticalAccuracy: location.verticalAccuracy,
                 speed: location.speed,
-                timestamp: location.timestamp,
-                isValid: isValid)
+                time: location.timestamp,
+                isValid: isValid
+            )
 
             lifecycleQueue.async(flags: .barrier) {
                 self.locationsCache.append(geoLocation)

@@ -18,6 +18,8 @@
  */
 
 import Foundation
+import DataCapturing
+import Combine
 
 /**
  A struct representing a measurement as required by the user interface of the application.`
@@ -37,10 +39,3 @@ struct Measurement: Identifiable {
     /// Whether this measurement has been synchronized with the cloud. This is `true` if the measurement was synchronized and `false otherwise.`
     let synchronized: Bool
 }
-
-/// Some example data to use for testing views depending on a `Measurement`.
-let exampleMeasurements = [
-    Measurement(id: 1, name: "Fahrt zu Oma", distance: 3.0, startTime: Date(), synchronized: true),
-    Measurement(id: 2, name: "Arbeit", distance: 10.0, startTime: Date(), synchronized: false),
-    Measurement(id: 3, name: "Supermarkt", distance: 2.3, startTime: Date(), synchronized: true)
-]

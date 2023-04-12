@@ -26,13 +26,11 @@ struct InitializationView: View {
             }
 
         } else {
-            LoadinScreen()
-                .alert(isPresented: $viewModel.showError) {
-                    Alert(
-                        title: Text("Error"),
-                        message: Text(viewModel.error?.localizedDescription ?? "")
-                    )
-                }
+            if let error = viewModel.error {
+                ErrorView(error: error)
+            } else {
+                LoadinScreen()
+            }
         }
     }
 }

@@ -27,11 +27,23 @@ import Foundation
  - SeeAlso: ``MeasurementCell`
  */
 class MeasurementCellViewModel {
+    static let distanceFormatter = {
+        let nf = NumberFormatter()
+        nf.minimumFractionDigits = 1
+        nf.maximumFractionDigits = 3
+        nf.multiplier = 0.001
+
+        return nf
+    }()
     /// The ``Measurement`` displayed by the cell.
     let measurement: Measurement
     /// Detail information about the displayed ``Measurement``.
     var details: String {
-        "\(measurement.startTime.formatted()) (\(measurement.distance / 1_000.0) km)"
+        guard let formattedDistance = MeasurementCellViewModel.distanceFormatter.string(from: measurement.distance as NSNumber) else {
+            fatalError()
+        }
+
+        return "\(measurement.startTime.formatted()) (\(formattedDistance) km)"
     }
     /// The symbol showing the current synchronization status of the ``Measurement``.
     var synchedSymbol: String {

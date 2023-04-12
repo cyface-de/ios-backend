@@ -57,13 +57,13 @@ struct MetaData: Encodable {
     /// The longitude of the first location in the transmitted measurement, or `nil` if no locations where captured.
     let startLocLon: Double?
     /// The timestamp of the first location in the transmitted measurement, or `nil` if no locations where captured.
-    let startLocTS: UInt64?
+    let startLocTS: Date?
     /// The latitude of the last location in the transmitted measurement, or `nil` if no locations where captured.
     let endLocLat: Double?
     /// The longitude of the last location in the transmitted measurement, or `nil` if no locations where captured.
     let endLocLon: Double?
     /// The timestamp of the last location in the transmitted measurement, or `nil` if no locations where captured.
-    let endLocTS: UInt64?
+    let endLocTS: Date?
     /// The system wide unique identifier of the transmitted measurement.
     let measurementId: UInt64
     /// The  version of the operation system, when transmitting the measurement.
@@ -100,7 +100,7 @@ struct MetaData: Encodable {
             headers.add(name: "startLocLon", value: String(startLocLon))
         }
         if let startLocTS = startLocTS {
-            headers.add(name: "startLocTS", value: String(startLocTS))
+            headers.add(name: "startLocTS", value: String(convertToUtcTimestamp(date: startLocTS)))
         }
         if let endLocLat = endLocLat {
             headers.add(name: "endLocLat", value: String(endLocLat))
@@ -109,7 +109,7 @@ struct MetaData: Encodable {
             headers.add(name: "endLocLon", value: String(endLocLon))
         }
         if let endLocTS = endLocTS {
-            headers.add(name: "endLocTS", value: String(endLocTS))
+                headers.add(name: "endLocTS", value: String(convertToUtcTimestamp(date: endLocTS)))
         }
 
         return headers

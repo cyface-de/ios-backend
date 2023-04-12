@@ -45,15 +45,17 @@ public class GeoLocation: CustomStringConvertible {
     public let accuracy: Double
     /// The speed the device was moving during the measurement in meters per second.
     public let speed: Double
-    /// The time the measurement happened at in milliseconds since the 1st of january 1970.
-    public let timestamp: UInt64
+    /// The time the measurement happened.
+    public let time: Date
     /// Whether or not this is a valid location in a cleaned track.
     public let isValid: Bool
+    public let altitude: Double
+    public let verticalAccuracy: Double
     /// The track this location belongs to
     public let track: Track
     /// A human readable description of this object.
     public var description: String {
-        return "GeoLocation (latitude: \(latitude), longitude: \(longitude), accuracy: \(accuracy), speed: \(speed), timestamp: \(timestamp))"
+        return "GeoLocation (latitude: \(latitude), longitude: \(longitude), accuracy: \(accuracy), speed: \(speed), timestamp: \(time.debugDescription))"
     }
 
     /**
@@ -71,9 +73,12 @@ public class GeoLocation: CustomStringConvertible {
             longitude: managedObject.lon,
             accuracy: managedObject.accuracy,
             speed: managedObject.speed,
-            timestamp: UInt64(managedObject.timestamp),
+            time: managedObject.time!,
             isValid: managedObject.isPartOfCleanedTrack,
-            parent: parent)
+            altitude: managedObject.altitude,
+            verticalAccuracy: managedObject.verticalAccuracy,
+            parent: parent
+        )
         // TODO: This does not really work, as the objectId for new managed objects changes after they are written to the database (i.e. after the context is synchronized via context.save())
         self.objectId = managedObject.objectID
     }
@@ -88,17 +93,29 @@ public class GeoLocation: CustomStringConvertible {
         - longitude: The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.
         - accuracy: The estimated accuracy of the measurement in meters.
         - speed: The speed the device was moving during the measurement in meters per second.
-        - timestamp: The time the measurement happened at in milliseconds since the 1st of january 1970.
+        - time: The time the measurement happened.
         - isValid: Whether or not this is a valid location in a cleaned track.
         - parent: The track this location belongs to
      */
-    public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: UInt64, isValid: Bool = true, parent: Track) {
+    public init(
+        latitude: Double,
+        longitude: Double,
+        accuracy: Double,
+        speed: Double,
+        time: Date,
+        isValid: Bool = true,
+        altitude: Double,
+        verticalAccuracy: Double,
+        parent: Track
+    ) {
         self.latitude = latitude
         self.longitude = longitude
         self.accuracy = accuracy
         self.speed = speed
-        self.timestamp = timestamp
+        self.time = time
         self.isValid = isValid
+        self.altitude = altitude
+        self.verticalAccuracy = verticalAccuracy
         self.track = parent
     }
 }

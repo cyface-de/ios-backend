@@ -42,6 +42,8 @@ public class SensorCapturer {
     private static let log = OSLog(subsystem: "SensorCapturer", category: "de.cyface")
 
     // MARK: - Properties
+    /// The measurement this data is captured for or `nil` if measurement is not active at the moment.
+    var measurement: Measurement?
     /// An in memory storage for accelerations, before they are written to disk.
     var accelerations = [SensorValue]()
     /// The timestamp of the previously captured acceleration. This is stored to make sure all accelerations are captured in increasing order.
@@ -54,6 +56,8 @@ public class SensorCapturer {
     var directions = [SensorValue]()
     /// The timestamp of the previously captured direction. This is stored to make sure all directions are captured in increasing order.
     var previousCapturedDirectionTimestamp: TimeInterval
+    /// A cache for storing the captured altitudes, before they are written to the database.
+    var altitudes = [Altitude]()
     /// The queue running and synchronizing the data capturing lifecycle.
     private let lifecycleQueue: DispatchQueue
     /// The queue running and synchronizing read and write operations to the sensor storage objects.
@@ -61,6 +65,8 @@ public class SensorCapturer {
     /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
     private let motionManager: CMMotionManager
     /// `true` if the complete storage is empty. `false` otherwise.
+    /// /// An altimeter to get altitude information.
+    let altimeter = CMAltimeter()
     var isEmpty: Bool {
         return accelerations.isEmpty && rotations.isEmpty && directions.isEmpty
     }
@@ -95,7 +101,9 @@ public class SensorCapturer {
 
     // MARK: - Methods
     /// The the sensor capturing to the storage instances `accelertions`, `rotations` and `directions`.
-    func start() {
+    func start(measurement: Measurement) {
+        self.measurement = measurement
+
         let queue = OperationQueue()
         queue.qualityOfService = QualityOfService.userInitiated
         queue.underlyingQueue = capturingQueue
@@ -111,13 +119,19 @@ public class SensorCapturer {
             motionManager.showsDeviceMovementDisplay = true
             motionManager.startDeviceMotionUpdates(using: .xArbitraryCorrectedZVertical, to: queue, withHandler: handle)
         }
+
+        if CMAltimeter.isRelativeAltitudeAvailable() {
+            altimeter.startRelativeAltitudeUpdates(to: queue, withHandler: onAltitudeUpdate)
+        }
     }
 
     /// Stop sensor capturing.
     func stop() {
+        self.measurement = nil
         motionManager.stopAccelerometerUpdates()
         motionManager.stopGyroUpdates()
         motionManager.stopDeviceMotionUpdates()
+        altimeter.stopRelativeAltitudeUpdates()
     }
 
     /**
@@ -214,5 +228,50 @@ public class SensorCapturer {
         lifecycleQueue.async {
             self.directions.append(dir)
         }
+    }
+
+    /// Called everytime the system has a new altitude value.
+    private func onAltitudeUpdate(data: CMAltitudeData?, error: Error?) {
+        if let error = error {
+            os_log(
+                "Device Motion error while capturing Altitude: %{public}@",
+                log: SensorCapturer.log,
+                type: .error,
+                error.localizedDescription
+            )
+            return
+        }
+
+        guard let data = data else {
+            os_log(
+                "No altitude data available!",
+                log: SensorCapturer.log,
+                type: .error
+            )
+            return
+        }
+
+        let altitude = Altitude(
+            relativeAltitude: data.relativeAltitude.doubleValue,
+            pressure: data.pressure.doubleValue,
+            time: data.startTime()
+        )
+        if let lastTrackIndex = measurement?.tracks.count {
+            measurement?.tracks[lastTrackIndex-1].altitudes.append(altitude)
+        }
+
+        lifecycleQueue.async {
+            self.altitudes.append(altitude)
+        }
+    }
+}
+
+extension CMLogItem {
+    /// The boot time of the device this runs on.
+    static let bootTime = Date(timeIntervalSinceNow: -ProcessInfo.processInfo.systemUptime)
+
+    /// The actual timestamp of this item.
+    func startTime() -> Date {
+        return CMLogItem.bootTime.addingTimeInterval(self.timestamp)
     }
 }
