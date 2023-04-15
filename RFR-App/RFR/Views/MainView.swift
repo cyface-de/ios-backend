@@ -29,34 +29,44 @@ struct MainView: View {
     @State private var selectedTab = 2
     @Binding var isAuthenticated: Bool
     @ObservedObject var viewModel: DataCapturingViewModel
+    @ObservedObject var syncViewModel: SynchronizationViewModel
 
     var body: some View {
         if let dataCapturingService = viewModel.dataCapturingService {
             NavigationStack {
-                TabView(selection: $selectedTab) {
-                    MeasurementsView(viewModel: MeasurementsViewModel(dataStoreStack: dataCapturingService.dataStoreStack))
-                        .tabItem {
-                            Image(systemName: "list.bullet")
-                            Text("Fahrten")
-                                .font(.footnote)
-                        }
-                        .tag(1)
-                    LiveView(viewModel: LiveViewModel(dataCapturingService))
-                        .tabItem {
-                            Image(systemName: "location.fill")
-                            Text("Live")
-                        }
-                        .tag(2)
-                    StatisticsView()
-                        .tabItem {
-                            Image(systemName: "chart.xyaxis.line")
-                            Text("Statistiken")
-                                .font(.footnote)
-                        }
-                        .tag(3)
+                VStack {
+                    TabView(selection: $selectedTab) {
+                        MeasurementsView(
+                            viewModel: MeasurementsViewModel(
+                                dataStoreStack: dataCapturingService.dataStoreStack,
+                                uploadPublisher: syncViewModel.uploadStatusPublisher
+                            )
+                        )
+                            .tabItem {
+                                Image(systemName: "list.bullet")
+                                Text("Fahrten")
+                                    .font(.footnote)
+                            }
+                            .tag(1)
+                        LiveView(viewModel: LiveViewModel(dataCapturingService))
+                            .tabItem {
+                                Image(systemName: "location.fill")
+                                Text("Live")
+                            }
+                            .tag(2)
+                        StatisticsView(
+                            viewModel: Measurements(coreDataStack: dataCapturingService.dataStoreStack)
+                        )
+                            .tabItem {
+                                Image(systemName: "chart.xyaxis.line")
+                                Text("Statistiken")
+                                    .font(.footnote)
+                            }
+                            .tag(3)
+                    }
                 }
                 .navigationBarTitleDisplayMode(.inline)
-                /*.toolbar {
+                .toolbar {
                     ToolbarItem(placement: .principal) {
                         HStack {
                             Image("RFR-Logo")
@@ -68,6 +78,7 @@ struct MainView: View {
                     ToolbarItem(placement: .automatic) {
                         Button(action: {
                             isAuthenticated = false
+                            syncViewModel.deactivate()
                         }) {
                             VStack {
                                 Image(systemName: "power.circle")
@@ -79,7 +90,7 @@ struct MainView: View {
 
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {
-                            viewModel.synchronize()
+                            syncViewModel.synchronize()
                         }) {
                             VStack {
                                 Image(systemName: "icloud.and.arrow.up")
@@ -88,7 +99,7 @@ struct MainView: View {
                             }
                         }
                     }
-                }*/
+                }
             }
         } else {
             HStack {
@@ -109,8 +120,10 @@ struct MainView_Previews: PreviewProvider {
                 isInitialized: false,
                 showError: false,
                 error: nil,
-                dataCapturingService: MockDataCapturingService(state: .stopped
-                                                              )
+                dataCapturingService: MockDataCapturingService(state: .stopped)
+            ),
+            syncViewModel: SynchronizationViewModel(
+                synchronizer: MockSynchronizer()
             )
         )
     }

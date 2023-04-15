@@ -51,50 +51,7 @@ class LiveViewModel: ObservableObject {
     @Published var avoidedEmissions: String
     @Published var hasLocationFix = Image(systemName: "location")
     var dataCapturingService: DataCapturingService
-    static let speedFormatter = {
-        let nf = NumberFormatter()
-        nf.minimumFractionDigits = 1
-        nf.maximumFractionDigits = 2
-        nf.multiplier = 3.6
-
-        return nf
-    }()
-    static let locationFormatter = {
-        let nf = NumberFormatter()
-        nf.minimumFractionDigits = 1
-        nf.maximumFractionDigits = 5
-
-        return nf
-    }()
-    static let emissionsFormatter = {
-        let nf = NumberFormatter()
-        nf.minimumFractionDigits = 1
-        nf.maximumFractionDigits = 3
-
-        return nf
-    }()
-    static let distanceFormatter = {
-        let nf = NumberFormatter()
-        nf.minimumFractionDigits = 1
-        nf.maximumFractionDigits = 3
-        nf.multiplier = 0.001
-
-        return nf
-    }()
-    static let timeFormatter = {
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute, .second]
-        formatter.zeroFormattingBehavior = .pad
-
-        return formatter
-    }()
-    static let riseFormatter = {
-        let formatter = NumberFormatter()
-        formatter.minimumFractionDigits = 1
-        formatter.maximumFractionDigits = 1
-
-        return formatter
-    }()
+    
     /// The average carbon emissions per kilometer in gramms, based on data from Statista (https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/)
     static let averageCarbonEmissionsPerMeter = 0.117
 
@@ -114,35 +71,35 @@ class LiveViewModel: ObservableObject {
         avoidedEmissions: Double = 0.0,
         dataCapturingService: DataCapturingService
     ) {
-        guard let formattedSpeed = LiveViewModel.speedFormatter.string(from: speed as NSNumber) else {
+        guard let formattedSpeed = speedFormatter.string(from: speed as NSNumber) else {
             fatalError()
         }
 
-        guard let formattedLongitude = LiveViewModel.locationFormatter.string(from: position.1 as NSNumber) else {
+        guard let formattedLongitude = locationFormatter.string(from: position.1 as NSNumber) else {
             fatalError()
         }
 
-        guard let formattedLatitude = LiveViewModel.locationFormatter.string(from: position.0 as NSNumber) else {
+        guard let formattedLatitude = locationFormatter.string(from: position.0 as NSNumber) else {
             fatalError()
         }
 
-        guard let averageFormattedSpeed = LiveViewModel.speedFormatter.string(from: averageSpeed as NSNumber) else {
+        guard let averageFormattedSpeed = speedFormatter.string(from: averageSpeed as NSNumber) else {
             fatalError()
         }
 
-        guard let formattedAvoidedEmissions = LiveViewModel.emissionsFormatter.string(from: avoidedEmissions as NSNumber) else {
+        guard let formattedAvoidedEmissions = emissionsFormatter.string(from: avoidedEmissions as NSNumber) else {
             fatalError()
         }
 
-        guard let formattedDistance = LiveViewModel.distanceFormatter.string(from: distance as NSNumber) else {
+        guard let formattedDistance = distanceFormatter.string(from: distance as NSNumber) else {
             fatalError()
         }
 
-        guard let formattedDuration = LiveViewModel.timeFormatter.string(from: duration) else {
+        guard let formattedDuration = timeFormatter.string(from: duration) else {
             fatalError()
         }
 
-        guard let formattedRise = LiveViewModel.riseFormatter.string(from: rise as NSNumber) else {
+        guard let formattedRise = riseFormatter.string(from: rise as NSNumber) else {
             fatalError()
         }
 
@@ -220,28 +177,28 @@ class LiveViewModel: ObservableObject {
         }
         let avoidedEmissions = capturedMeasurement.trackLength * LiveViewModel.averageCarbonEmissionsPerMeter
         DispatchQueue.main.async { [weak self] in
-            if let formattedSpeed = LiveViewModel.speedFormatter.string(from: location.speed as NSNumber) {
+            if let formattedSpeed = speedFormatter.string(from: location.speed as NSNumber) {
                 self?.speed = "\(formattedSpeed) km/h"
             }
-            if let formattedLatitude = LiveViewModel.locationFormatter.string(from: location.latitude as NSNumber) {
+            if let formattedLatitude = locationFormatter.string(from: location.latitude as NSNumber) {
                 self?.lastCapturedLatitude = formattedLatitude
             }
-            if let formattedLongitude = LiveViewModel.locationFormatter.string(from: location.longitude as NSNumber) {
+            if let formattedLongitude = locationFormatter.string(from: location.longitude as NSNumber) {
                 self?.lastCapturedLongitude = formattedLongitude
             }
-            if let formattedAverageSpeed = LiveViewModel.speedFormatter.string(from: capturedMeasurement.averageSpeed() as NSNumber) {
+            if let formattedAverageSpeed = speedFormatter.string(from: capturedMeasurement.averageSpeed() as NSNumber) {
                 self?.averageSpeed = "\(formattedAverageSpeed) km/h"
             }
-            if let formattedAvoidedEmissions = LiveViewModel.emissionsFormatter.string(from: avoidedEmissions as NSNumber) {
+            if let formattedAvoidedEmissions = emissionsFormatter.string(from: avoidedEmissions as NSNumber) {
                 self?.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
             }
-            if let formattedDistance = LiveViewModel.distanceFormatter.string(from: capturedMeasurement.trackLength as NSNumber) {
+            if let formattedDistance = distanceFormatter.string(from: capturedMeasurement.trackLength as NSNumber) {
                 self?.distance = "\(formattedDistance) km"
             }
-            if let formattedDuration = LiveViewModel.timeFormatter.string(from: capturedMeasurement.totalDuration()) {
+            if let formattedDuration = timeFormatter.string(from: capturedMeasurement.totalDuration()) {
                 self?.duration = formattedDuration
             }
-            if let formattedRise = LiveViewModel.riseFormatter.string(from: capturedMeasurement.summedHeight() as NSNumber) {
+            if let formattedRise = riseFormatter.string(from: capturedMeasurement.summedHeight() as NSNumber) {
                 self?.rise = formattedRise
             }
         }

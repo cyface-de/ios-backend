@@ -6,22 +6,32 @@
 //
 
 import SwiftUI
+import DataCapturing
 
 struct InitializationView: View {
     @StateObject var viewModel: DataCapturingViewModel
+    @StateObject var loginViewModel: LoginViewModel
     @State private var isAuthenticated = false
 
     var body: some View {
-        if(viewModel.isInitialized) {
+        if viewModel.isInitialized, let apiUrl = URL(string: RFRApp.uploadEndpoint), let authenticator = loginViewModel.authenticator, let dataStoreStack = viewModel.dataCapturingService?.dataStoreStack {
 
             if isAuthenticated {
                 MainView(
                     isAuthenticated: $isAuthenticated,
-                    viewModel: viewModel
+                    viewModel: viewModel,
+                    syncViewModel: SynchronizationViewModel(
+                        synchronizer: CyfaceSynchronizer(
+                            apiURL: apiUrl,
+                            dataStoreStack: dataStoreStack,
+                            cleaner: AccelerationPointRemovalCleaner(),
+                            authenticator: authenticator
+                        )
+                    )
                 )
             } else {
                 LoginView(
-                    viewModel: LoginViewModel(), isAuthenticated: $isAuthenticated
+                    viewModel: loginViewModel, isAuthenticated: $isAuthenticated
                 )
             }
 
@@ -44,7 +54,7 @@ struct InitializationView_Previews: PreviewProvider {
                 showError: false,
                 error: nil,
                 dataCapturingService: MockDataCapturingService(state: .stopped)
-            )
+            ), loginViewModel: LoginViewModel()
         )
     }
 }

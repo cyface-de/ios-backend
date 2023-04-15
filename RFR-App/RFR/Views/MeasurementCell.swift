@@ -37,8 +37,7 @@ struct MeasurementCell: View {
             HStack {
                 Text("\(viewModel.details)")
                 Spacer()
-                Image(systemName: viewModel.synchedSymbol)
-                    .font(.subheadline)
+                viewModel.synchedSymbol.padding([.trailing])
             }
         }
     }

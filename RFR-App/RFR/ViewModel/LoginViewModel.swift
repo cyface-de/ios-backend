@@ -9,8 +9,6 @@ import Foundation
 import DataCapturing
 
 class LoginViewModel: ObservableObject {
-    // TODO: Put this into some configuration file
-    private static let authenticationEndpoint = "https://s2-b.cyface.de/api/v3/"
     @Published var username = ""
     @Published var password = ""
     @Published var showError = false
@@ -18,8 +16,8 @@ class LoginViewModel: ObservableObject {
     var authenticator: CredentialsAuthenticator?
 
     init() {
-        guard let url = URL(string: LoginViewModel.authenticationEndpoint) else {
-            handleError(RFRError.invalidUrl(url: LoginViewModel.authenticationEndpoint))
+        guard let url = URL(string: RFRApp.authenticationEndpoint) else {
+            handleError(RFRError.invalidUrl(url: RFRApp.authenticationEndpoint))
             return
         }
         self.authenticator = CyfaceAuthenticator(authenticationEndpoint: url)

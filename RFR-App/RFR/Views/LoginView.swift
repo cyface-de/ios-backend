@@ -77,17 +77,11 @@ struct LoginView: View {
                     
                 }.padding()
                 
-                /*AsyncButton(action: {
-                        path.append("test")
-                    /*if let bearerToken = await viewModel.authenticate() {
-                        path.append(bearerToken)
-                    }*/
-                }*/
-                Button(action: {
-                    // TODO: Add true authentication.
+                AsyncButton(action: {
                     Task {
-                        //_ = try await viewModel.authenticate()
-                        isAuthenticated = true
+                        if await viewModel.authenticate() != nil {
+                            isAuthenticated = true
+                        }
                     }
                 }) {
                     Text("Login")

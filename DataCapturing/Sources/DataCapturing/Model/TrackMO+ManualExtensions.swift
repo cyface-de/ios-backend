@@ -38,6 +38,28 @@ extension TrackMO {
         // TODO: Delete invalid locations from managed location. This should not happen in our current use cases but would still be necessary conceptually.
     }
 
+    /**
+     The altitudes in this measurement already cast to the correct type.
+     */
+    public func typedAltitudes() -> [AltitudeMO] {
+        guard let typedAltitudes = altitudes?.array as? [AltitudeMO] else {
+            fatalError("Unable to cast altitudes to the correct type!")
+        }
+
+        return typedAltitudes
+    }
+
+    /**
+     The locations from this measurement already cast to the correct type.
+     */
+    public func typedLocations() -> [GeoLocationMO] {
+        guard let typedLocations = locations?.array as? [GeoLocationMO] else {
+            fatalError("Unable to cast altitudes to the correct type!")
+        }
+
+        return typedLocations
+    }
+
     private func updateLocations(from track: Track) throws {
         for i in 0..<track.locations.count {
             var location = track.locations[i]

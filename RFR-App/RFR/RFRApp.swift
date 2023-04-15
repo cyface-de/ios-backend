@@ -27,9 +27,16 @@ import SwiftUI
  */
 @main
 struct RFRApp: App {
+    // TODO: Put this into some configuration file
+    static let authenticationEndpoint = "https://s1-b.cyface.de/api/v3"
+    static let uploadEndpoint = "https://s1-b.cyface.de/api/v3"
+
     var body: some Scene {
         WindowGroup {
-            InitializationView(viewModel: DataCapturingViewModel())
+            InitializationView(
+                viewModel: DataCapturingViewModel(),
+                loginViewModel: LoginViewModel()
+            )
         }
     }
 }

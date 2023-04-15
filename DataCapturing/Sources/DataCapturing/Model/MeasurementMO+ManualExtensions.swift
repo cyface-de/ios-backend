@@ -52,4 +52,14 @@ extension MeasurementMO {
         // TODO: Delete obsolete events and tracks here. This is not necessary for our current uses cases, but should be added to complete this code conceptually.
     }
 
+    /**
+     The altitudes in this measurement already cast to the correct type.
+     */
+    public func typedTracks() -> [TrackMO] {
+        guard let typedTracks = tracks?.array as? [TrackMO] else {
+            fatalError("Unable to cast altitudes to the correct type!")
+        }
+
+        return typedTracks
+    }
 }

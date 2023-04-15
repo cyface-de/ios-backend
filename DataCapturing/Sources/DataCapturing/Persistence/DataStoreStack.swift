@@ -22,6 +22,7 @@ import CoreData
 import OSLog
 
 public protocol DataStoreStack {
+    func wrapInContext(_ block: (NSManagedObjectContext) throws -> Void) throws
     func setup() async throws
     func persistenceLayer() -> PersistenceLayer
 }
@@ -178,7 +179,7 @@ public class CoreDataStack: DataStoreStack {
 
      - Throws: Any error thrown by the block is rethrown here.
      */
-    func wrapInContext(_ block: (NSManagedObjectContext) throws -> Void) throws {
+    public func wrapInContext(_ block: (NSManagedObjectContext) throws -> Void) throws {
         var outerError: Error?
 
         backgroundContext.performAndWait {
@@ -199,7 +200,7 @@ public class CoreDataStack: DataStoreStack {
 
      - Throws: Any error thrown by the block is rethrown here.
      */
-    func wrapInContextReturn<T>(_ block: (NSManagedObjectContext) throws -> T) throws -> T {
+    public func wrapInContextReturn<T>(_ block: (NSManagedObjectContext) throws -> T) throws -> T {
         var outerError: Error?
         var ret: T?
 

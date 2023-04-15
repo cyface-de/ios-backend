@@ -7,6 +7,7 @@
 #if DEBUG
 import Foundation
 import DataCapturing
+import CoreData
 
 class MockDataCapturingService: DataCapturingService {
 
@@ -88,6 +89,10 @@ class MockAuthenticator: CredentialsAuthenticator {
 }
 
 class MockDataStoreStack: DataStoreStack {
+    func wrapInContext(_ block: (NSManagedObjectContext) throws -> Void) throws {
+
+    }
+
     func setup() async throws {
         // Nothing to do here!
     }
@@ -164,6 +169,32 @@ class MockPersistenceLayer: PersistenceLayer {
     func countGeoLocations(forMeasurement measurement: DataCapturing.Measurement) throws -> Int {
         return 0
     }
+}
+
+class MockSynchronizer: Synchronizer {
+    var handler: [(DataCapturing.DataCapturingEvent, DataCapturing.Status) -> Void] = []
+
+    var syncOnWiFiOnly: Bool = true
+
+    var authenticator: DataCapturing.Authenticator = MockAuthenticator()
+
+    func syncChecked() {
+
+    }
+
+    func sync() {
+
+    }
+
+    func activate() throws {
+
+    }
+
+    func deactivate() {
+        
+    }
+
+
 }
 
 #endif

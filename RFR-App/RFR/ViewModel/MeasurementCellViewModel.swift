@@ -18,6 +18,7 @@
  */
 
 import Foundation
+import SwiftUI
 
 /**
  The view model used by a single measurement cell in the list overview of all the measurements.
@@ -46,8 +47,17 @@ class MeasurementCellViewModel {
         return "\(measurement.startTime.formatted()) (\(formattedDistance) km)"
     }
     /// The symbol showing the current synchronization status of the ``Measurement``.
-    var synchedSymbol: String {
-        measurement.synchronized ? "checkmark.icloud" : "icloud.and.arrow.up"
+    @ViewBuilder var synchedSymbol: some View {
+        switch measurement.synchronizationState {
+        case .synchronized:
+            Image(systemName: "checkmark.icloud")
+                .font(.subheadline)
+        case .synchronizing:
+            ProgressView()
+        case .synchronizable:
+            Image(systemName: "icloud.and.arrow.up")
+                .font(.subheadline)
+        }
     }
 
     /// Create a new view model for the provided ``Measurement``.

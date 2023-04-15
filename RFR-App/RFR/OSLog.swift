@@ -12,4 +12,6 @@ extension OSLog {
     private static var subsystem = Bundle.main.bundleIdentifier!
 
     static let capturingEvent = OSLog(subsystem: subsystem, category: "capturing")
+    static let synchronization = OSLog(subsystem: subsystem, category: "synchronization")
+    static let measurement = OSLog(subsystem: subsystem, category: "measurement")
 }

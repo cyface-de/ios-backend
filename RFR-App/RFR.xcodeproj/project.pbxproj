@@ -23,6 +23,9 @@
 		AAA1AAB229DC36A5002CBC91 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAB129DC36A5002CBC91 /* LoginViewModel.swift */; };
 		AAA1AAB429E540D0002CBC91 /* MeasurementsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAB329E540CF002CBC91 /* MeasurementsViewModel.swift */; };
 		AAA1AAB829E6E729002CBC91 /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAB729E6E729002CBC91 /* ErrorView.swift */; };
+		AAA1AABA29E6FAE0002CBC91 /* SynchronizationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAB929E6FAE0002CBC91 /* SynchronizationViewModel.swift */; };
+		AAA1AABC29E84519002CBC91 /* Measurements.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AABB29E84519002CBC91 /* Measurements.swift */; };
+		AAA1AABE29E8895A002CBC91 /* Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AABD29E8895A002CBC91 /* Formatter.swift */; };
 		AAC9D2E82983DEC3003C4CC7 /* LiveViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2E72983DEC3003C4CC7 /* LiveViewModel.swift */; };
 		AAC9D2EA29840131003C4CC7 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2E929840131003C4CC7 /* LoginView.swift */; };
 		AAC9D2EC29840601003C4CC7 /* RegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2EB29840601003C4CC7 /* RegistrationView.swift */; };
@@ -82,6 +85,9 @@
 		AAA1AAB129DC36A5002CBC91 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		AAA1AAB329E540CF002CBC91 /* MeasurementsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementsViewModel.swift; sourceTree = "<group>"; };
 		AAA1AAB729E6E729002CBC91 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
+		AAA1AAB929E6FAE0002CBC91 /* SynchronizationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynchronizationViewModel.swift; sourceTree = "<group>"; };
+		AAA1AABB29E84519002CBC91 /* Measurements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Measurements.swift; sourceTree = "<group>"; };
+		AAA1AABD29E8895A002CBC91 /* Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatter.swift; sourceTree = "<group>"; };
 		AAC9D2E72983DEC3003C4CC7 /* LiveViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveViewModel.swift; sourceTree = "<group>"; };
 		AAC9D2E929840131003C4CC7 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AAC9D2EB29840601003C4CC7 /* RegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationView.swift; sourceTree = "<group>"; };
@@ -234,6 +240,8 @@
 				AAA1AAB129DC36A5002CBC91 /* LoginViewModel.swift */,
 				AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */,
 				AAA1AAB329E540CF002CBC91 /* MeasurementsViewModel.swift */,
+				AAA1AAB929E6FAE0002CBC91 /* SynchronizationViewModel.swift */,
+				AAA1AABD29E8895A002CBC91 /* Formatter.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -252,6 +260,7 @@
 			children = (
 				AAC9D2F629891A8D003C4CC7 /* Measurement.swift */,
 				AAC9D2FC29895526003C4CC7 /* Altitude.swift */,
+				AAA1AABB29E84519002CBC91 /* Measurements.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -414,6 +423,7 @@
 				AACB768729BF67E800A9DB6F /* DataCapturingViewModel.swift in Sources */,
 				AAA1AAB429E540D0002CBC91 /* MeasurementsViewModel.swift in Sources */,
 				AAA1AAB229DC36A5002CBC91 /* LoginViewModel.swift in Sources */,
+				AAA1AABE29E8895A002CBC91 /* Formatter.swift in Sources */,
 				AA87D0992982B43F002F6B3B /* StatisticsView.swift in Sources */,
 				AAA1AAB829E6E729002CBC91 /* ErrorView.swift in Sources */,
 				AA87D06E2982ADE8002F6B3B /* LiveView.swift in Sources */,
@@ -429,8 +439,10 @@
 				AACB768C29C1C24B00A9DB6F /* InitializationView.swift in Sources */,
 				AAC9D2F929891B22003C4CC7 /* MeasurementCellViewModel.swift in Sources */,
 				AAC9D2F429840D83003C4CC7 /* MeasurementCell.swift in Sources */,
+				AAA1AABA29E6FAE0002CBC91 /* SynchronizationViewModel.swift in Sources */,
 				AAC9D2FF29895D16003C4CC7 /* KeyValueView.swift in Sources */,
 				AACB768529BF671600A9DB6F /* LoadinScreen.swift in Sources */,
+				AAA1AABC29E84519002CBC91 /* Measurements.swift in Sources */,
 				AAC9D2EC29840601003C4CC7 /* RegistrationView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

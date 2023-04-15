@@ -19,6 +19,7 @@
 
 import SwiftUI
 import DataCapturing
+import Combine
 
 /**
  A view showing the lists of measurements capture by this device.
@@ -28,7 +29,7 @@ import DataCapturing
  */
 struct MeasurementsView: View {
     @ObservedObject var viewModel: MeasurementsViewModel
-    
+
     var body: some View {
         VStack {
             if let error = viewModel.error {
@@ -52,13 +53,18 @@ struct MeasurementsView: View {
 
 /// Some example data to use for testing views depending on a `Measurement`.
 let exampleMeasurements = [
-    Measurement(id: 1, name: "Fahrt zu Oma", distance: 3.0, startTime: Date(), synchronized: true),
-    Measurement(id: 2, name: "Arbeit", distance: 10.0, startTime: Date(), synchronized: false),
-    Measurement(id: 3, name: "Supermarkt", distance: 2.3, startTime: Date(), synchronized: true)
+    Measurement(id: 1, name: "Fahrt zu Oma", distance: 3.0, startTime: Date(), synchronizationState: .synchronizable),
+    Measurement(id: 2, name: "Arbeit", distance: 10.0, startTime: Date(), synchronizationState: .synchronizing),
+    Measurement(id: 3, name: "Supermarkt", distance: 2.3, startTime: Date(), synchronizationState: .synchronized)
 ]
 
 struct MeasurementsView_Previews: PreviewProvider {
     static var previews: some View {
-        MeasurementsView(viewModel: MeasurementsViewModel(dataStoreStack: MockDataStoreStack()))
+        MeasurementsView(
+            viewModel: MeasurementsViewModel(
+                dataStoreStack: MockDataStoreStack(),
+                uploadPublisher: PassthroughSubject<UploadStatus, Never>()
+            )
+        )
     }
 }

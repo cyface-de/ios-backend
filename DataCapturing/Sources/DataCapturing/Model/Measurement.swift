@@ -35,9 +35,9 @@ import OSLog
  */
 public class Measurement: Hashable, Equatable {
     /// The minimum number of meters before the ascend is increased, to filter sensor noise.
-    private static let ascendThresholdMeters = 2.0
+    public static let ascendThresholdMeters = 2.0
     /// The minimum accuracy in meters for GNSS altitudes to be used in ascend calculation.
-    private static let verticalAccuracyThresholdMeters = 12.0
+    public static let verticalAccuracyThresholdMeters = 12.0
     /// This measurements CoreData identifier or `nil` if the object has not been saved yet.
     var objectId: NSManagedObjectID?
     /// A device wide unique identifier for this measurement. Usually set by incrementing a counter.

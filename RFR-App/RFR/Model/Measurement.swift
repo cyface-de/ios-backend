@@ -36,6 +36,20 @@ struct Measurement: Identifiable {
     let distance: Double
     /// The time and date at which this measurement started.
     let startTime: Date
-    /// Whether this measurement has been synchronized with the cloud. This is `true` if the measurement was synchronized and `false otherwise.`
-    let synchronized: Bool
+    /// The state of  synchronizting this measurement.
+    let synchronizationState: SynchronizationState
+}
+
+/**
+ Provides an enum with the state of synchronization a measurement can be in.
+
+ Each measurement start as synchronizable, switches to synchronizing as soon as the upload is running and ends as synchronized.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
+enum SynchronizationState {
+    case synchronizable
+    case synchronizing
+    case synchronized
 }
