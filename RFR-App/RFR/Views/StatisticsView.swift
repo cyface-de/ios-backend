@@ -52,10 +52,11 @@ struct StatisticsView: View {
     }
 }
 
+#if DEBUG
 struct StatisticsView_Previews: PreviewProvider {
     static var previews: some View {
         StatisticsView(viewModel: Measurements(coreDataStack: MockDataStoreStack()))
     }
 }
-
+#endif
 

@@ -1,107 +1,83 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2022 Cyface GmbH
  *
- * This file is part of the Read-for-Robots iOS App.
+ * This file is part of the Cyface SDK for iOS.
  *
- * The Read-for-Robots iOS App is free software: you can redistribute it and/or modify
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Read-for-Robots iOS App is distributed in the hope that it will be useful,
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Read-for-Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import SwiftUI
 
 /**
- View allowing the user to register with the Ready-For-Robots auth server.
+ View shown to allow the user to register with the Cyface server.
 
- - Author: Klemens Muthmann
- - Version: 1.0.0
+ - author: Klemens Muthmann
+ - version: 1.0.0
  */
 struct RegistrationView: View {
-    // TODO: Move the following to a view model
-    @State private var username: String = ""
-    @State private var password: String = ""
-    @State private var repeatedPassword: String = ""
-    @State private var registrationSuccessful: Bool = false
+    /// The view model containing the registration information.
+    @StateObject var model: RegistrationViewModel
+    @Binding var showRegistrationView: Bool
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                Spacer()
-                VStack {
-                    HStack {
-                        Image(systemName: "person")
-                        TextField("Username", text: $username)
-                            .autocapitalization(.none)
-                            .disableAutocorrection(true)
-                    }
-                        .padding()
-                        .overlay(
-                                RoundedRectangle(cornerRadius: 15)
-                        .stroke(lineWidth: 2))
-                        .foregroundColor(.gray)
-
-                    HStack {
-                        Image(systemName: "lock")
-                        SecureField("Password", text: $password)
-                            .autocapitalization(.none)
-                            .disableAutocorrection(true)
-                    }
-                    .padding()
-                    .overlay(
-                            RoundedRectangle(cornerRadius: 15)
-                    .stroke(lineWidth: 2))
-                    .foregroundColor(.gray)
-
-                    HStack {
-                        Image(systemName: "lock")
-                        SecureField("Repeat Password", text: $repeatedPassword)
-                            .autocapitalization(.none)
-                            .disableAutocorrection(true)
-                    }
-                    .padding()
-                    .overlay(
-                            RoundedRectangle(cornerRadius: 15)
-                    .stroke(lineWidth: 2))
-                    .foregroundColor(.gray)
-
-                }
-                .padding()
-
-                Spacer()
-
+        VStack {
+            HStack {
                 Button(action: {
-                    print("register")
-                    registrationSuccessful=true
+                    showRegistrationView = false
                 }) {
-                    Text("Register")
-                        .frame(maxWidth: .infinity)
-
+                    HStack {
+                        Image(systemName: "chevron.backward")
+                            .font(.title)
+                        Text("Zurück")
+                            .font(.title2)
+                    }
                 }
-                .padding([.leading, .trailing])
-                .buttonStyle(.borderedProminent)
-                .disabled(!password.isEmpty && password==repeatedPassword)
+                Spacer()
             }
-
-            /*NavigationLink(destination: LoginView(), isActive: $registrationSuccessful) {
-                EmptyView()
-            }*/
-            
+            if let error = model.error {
+                ErrorView(error: error)
+            } else if model.isValidated {
+                RegistrationDetailsView(
+                    model: model,
+                    showRegistrationView: $showRegistrationView
+                )
+            } else {
+                HCaptchaView(
+                    model: model
+                )
+            }
         }
-        .navigationTitle("Konto Registrieren")
     }
 }
 
-struct RegistrationView_Previews: PreviewProvider {
+#if DEBUG
+struct RegistrationViewContainer_Previews: PreviewProvider {
+    @State static var showRegistrationView = true
     static var previews: some View {
-        RegistrationView()
+        NavigationView {
+            RegistrationView(
+                model: RegistrationViewModel(),
+                showRegistrationView: $showRegistrationView
+            )
+        }
+
+        NavigationView {
+            RegistrationView(
+                model: RegistrationViewModel(),
+                showRegistrationView: $showRegistrationView
+            )
+        }.preferredColorScheme(.dark)
     }
 }
+#endif

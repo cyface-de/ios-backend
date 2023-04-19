@@ -76,103 +76,21 @@ class Measurements: ObservableObject {
                 var meanIncline = sumIncline / Double(measurements.count)
 
                 self.maxDistance = "\(distanceFormatter.string(from: maxDistance as NSNumber)!) km"
-                self.meansDistance = "\(distanceFormatter.string(from: meanDistance as NSNumber)!) km"
-                self.summedDuration = timeFormatter.string(from: totalDuration)!
-                self.meanDuration = timeFormatter.string(from: meanDuration)!
+                self.meansDistance = "\(distanceFormatter.string(from: (meanDistance.isNaN ? 0 : meanDistance) as NSNumber)!) km"
+                self.summedDuration = timeFormatter.string(from: totalDuration) ?? ""
+                self.meanDuration = timeFormatter.string(from: meanDuration.isNaN ? 0 : meanDuration) ?? ""
                 self.lowestPoint = "\(riseFormatter.string(from: lowestPoint as NSNumber)!) m"
                 self.highestPoint = "\(riseFormatter.string(from: hightestPoint as NSNumber)!) m"
                 self.maxIncline = "\(riseFormatter.string(from: maxIncline as NSNumber)!) m"
-                self.meanIncline = "\(riseFormatter.string(from: meanIncline as NSNumber)!) m"
+                self.meanIncline = "\(riseFormatter.string(from: meanIncline.isNaN ? 0 : meanIncline as NSNumber)!) m"
                 self.avoidedEmissions = "\(emissionsFormatter.string(from: sumOfAvoidedEmissions as NSNumber)!) kg"
                 self.maxAvoidedEmissions = "\(emissionsFormatter.string(from: maxAvoidedEmissions as NSNumber)!) kg"
-                self.meanAvoidedEmissions = "\(emissionsFormatter.string(from: meanAvoidedEmissions as NSNumber)!) kg"
+                self.meanAvoidedEmissions = "\(emissionsFormatter.string(from: meanAvoidedEmissions.isNaN ? 0 : meanAvoidedEmissions as NSNumber)!) kg"
                 isInitialized = true
             }
         } catch {
             self.error = error
         }
     }
-
-    /// Calculate the accumulated height value for this measurement.
-    private func summedHeight(timelines: [AltitudeTimeline]) -> Double {
-        var sum = 0.0
-        timelines.forEach { timeline in
-
-            if timeline.barometric.isEmpty {
-                os_log("Using location values to calculate accumulated height.", log: OSLog.measurement, type: .debug)
-                var previousAltitude = 0.0
-                var isFirst = true
-                timeline.sattelite.forEach { satteliteAltitude in
-                    if isFirst {
-                        previousAltitude = satteliteAltitude.value
-                        isFirst = false
-                    } else if !(satteliteAltitude.accuracy > DataCapturing.Measurement.verticalAccuracyThresholdMeters) {
-
-                        let currentAltitude = satteliteAltitude.value
-                        let altitudeChange = currentAltitude - previousAltitude
-
-                        if abs(altitudeChange) > DataCapturing.Measurement.ascendThresholdMeters {
-                            if altitudeChange > 0.0 {
-                                sum += altitudeChange
-                            }
-                            previousAltitude = satteliteAltitude.value
-                        }
-                    }
-                }
-            } else {
-                os_log("Using altimeter values to calculate accumulated height.", log: OSLog.measurement, type: .debug)
-                var previousAltitude: Double? = nil
-                for altitude in timeline.barometric {
-                    if let previousAltitude = previousAltitude {
-                        let relativeAltitudeChange = altitude.value - previousAltitude
-                        if relativeAltitudeChange > 0.1 {
-                            sum += relativeAltitudeChange
-                        }
-                    }
-                    previousAltitude = altitude.value
-                }
-            }
-        }
-        return sum
-    }
 }
 
-protocol AltitudeTimeline {
-    var sattelite: [SatteliteAltitude] { get }
-    var barometric: [BarometricAltitude] { get }
-}
-
-protocol SatteliteAltitude {
-    var value: Double { get }
-    var accuracy: Double { get }
-}
-
-protocol BarometricAltitude {
-    var value: Double { get }
-}
-
-extension TrackMO: AltitudeTimeline {
-    var barometric: [BarometricAltitude] {
-        self.typedAltitudes()
-    }
-
-    var sattelite: [SatteliteAltitude] {
-        self.typedLocations()
-    }
-}
-
-extension GeoLocationMO: SatteliteAltitude {
-    var value: Double {
-        self.altitude
-    }
-
-    var accuracy: Double {
-        self.verticalAccuracy
-    }
-}
-
-extension AltitudeMO: BarometricAltitude {
-    var value: Double {
-        self.altitude
-    }
-}

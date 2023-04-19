@@ -41,7 +41,11 @@ struct MeasurementsView: View {
             } else {
                 List {
                     ForEach(viewModel.measurements) {measurement in
-                        NavigationLink(destination: MeasurementView(viewModel: MeasurementViewViewModel())) {
+                        NavigationLink(destination: MeasurementView(
+                            viewModel: MeasurementViewViewModel(
+                                dataStoreStack: viewModel.dataStoreStack,
+                                measurement: measurement
+                            ))) {
                             MeasurementCell(viewModel: MeasurementCellViewModel(measurement: measurement))
                         }
                     }
@@ -58,6 +62,7 @@ let exampleMeasurements = [
     Measurement(id: 3, name: "Supermarkt", distance: 2.3, startTime: Date(), synchronizationState: .synchronized)
 ]
 
+#if DEBUG
 struct MeasurementsView_Previews: PreviewProvider {
     static var previews: some View {
         MeasurementsView(
@@ -68,3 +73,4 @@ struct MeasurementsView_Previews: PreviewProvider {
         )
     }
 }
+#endif

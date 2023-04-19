@@ -16,10 +16,12 @@ class MeasurementsViewModel: ObservableObject {
     @Published var error: Error? = nil
     let syncQueue = DispatchQueue(label: "measurements-view-operations")
     var uploadSubscription: AnyCancellable?
+    let dataStoreStack: DataStoreStack
 
     // TODO: Why is it not possible to call this async? It is going to take some time for larger amounts of measurements.
     init(dataStoreStack: DataStoreStack, uploadPublisher: some Publisher<UploadStatus, Never>) {
         self.measurements = [Measurement]()
+        self.dataStoreStack = dataStoreStack
         let dao = dataStoreStack.persistenceLayer()
         do {
             let loadedMeasurements = try dao.loadMeasurements()

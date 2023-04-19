@@ -26,8 +26,17 @@ struct LoginView: View {
     @ObservedObject var viewModel: LoginViewModel
     @State private var showPassword = false
     @Binding var isAuthenticated: Bool
+    //@State var navigationPath = NavigationPath()
+    @State var showRegistrationView = false
 
     var body: some View {
+        // This cannot be inside a navigation view since HCaptcha does not work inside NavigationStack elements.
+        if showRegistrationView {
+            RegistrationView(
+                model: RegistrationViewModel(),
+                showRegistrationView: $showRegistrationView
+            )
+        } else {
             VStack {
                 Image("RFR-Logo")
                     .resizable()
@@ -63,7 +72,7 @@ struct LoginView: View {
                                 .disableAutocorrection(true)
                                 .frame(height: 10)
                         }
-
+                        
                         Button(action: {showPassword.toggle()}) {
                             Image(systemName: showPassword ? "eye.slash" : "eye")
                         }
@@ -91,17 +100,25 @@ struct LoginView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .padding([.trailing, .leading])
-
-                LabelledDivider(label: "or")
                 
-                NavigationLink(destination: RegistrationView()) {
+                LabelledDivider(label: "or")
+
+                Button(action: {
+                    /*NavigationLink(
+                     destination: RegistrationView(
+                     model: RegistrationViewModel(),
+                     navigationPath: $navigationPath)*/
+                    showRegistrationView = true
+                }
+                ) {
                     Text("Register New Account")
                 }
                 .frame(maxWidth: .infinity)
                 .padding([.trailing, .leading, .bottom])
             }
-        .alert(viewModel.error?.localizedDescription.description ?? "No Error Information available", isPresented: $viewModel.showError) {
-            Button("OK", role: .cancel) {}
+            .alert(viewModel.error?.localizedDescription.description ?? "No Error Information available", isPresented: $viewModel.showError) {
+                Button("OK", role: .cancel) {}
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ enum RFRError: Error {
     case initializationFailed(cause: Error)
     case invalidUrl(url: String)
     case missingAuthenticator
+    case unableToLoadMeasurement(measurement: Measurement)
 }
 
 extension RFRError: LocalizedError {
@@ -38,6 +39,13 @@ extension RFRError: LocalizedError {
                 )
 
             return errorMessage
+        case .unableToLoadMeasurement(measurement: let measurement):
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.rfrerror.unableToLoadMeasurement",
+                value: "Unable to load measurement %@!",
+                comment: "Tell the user that a measurement could not be loaded. The device wide unique identifier of the measurement is provided as the first parameter.")
+
+            return String.localizedStringWithFormat(errorMessage, measurement.id)
         }
     }
 }

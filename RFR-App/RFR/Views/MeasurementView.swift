@@ -29,19 +29,21 @@ import MapKit
  */
 struct MeasurementView: View {
     /// The view model used by this view to get the information necessary to display a measurement.
-    let viewModel: MeasurementViewViewModel
-    //TODO: Move into the view model.
+    @ObservedObject var viewModel: MeasurementViewViewModel
     @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.75155, longitude: 11.97411), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5))
 
     var body: some View {
+        if let error = viewModel.error {
+            ErrorView(error: error)
+        } else if viewModel.isInitialized {
             TabView {
                 List {
                     Section(header: Text("Geschwindigkeit")) {
-                        KeyValueView(key: "Max", value: "21 km/h (\u{2205} 15 km/h)")
+                        KeyValueView(key: "Max", value: "\(viewModel.maxSpeed) (\u{2205} \(viewModel.meanSpeed))")
                     }
                     Section(header: Text("Strecke")) {
-                        KeyValueView(key: "Distanz", value: "214,2 km")
-                        KeyValueView(key: "Dauer", value: "2 T 14 h 12 min")
+                        KeyValueView(key: "Distanz", value: viewModel.distance)
+                        KeyValueView(key: "Dauer", value: viewModel.duration)
                     }
                     Section(header: Text("Höhenprofil")) {
                         Chart(viewModel.heightProfile) {
@@ -50,12 +52,12 @@ struct MeasurementView: View {
                                 y: .value("Höhe", $0.height)
                             )
                         }.padding()
-                        KeyValueView(key: "Anstieg", value: "2,1 km")
-                        KeyValueView(key: "Tiefster Punkt", value: "104 m")
-                        KeyValueView(key: "Höchster Punkt", value: "2.203 m")
+                        KeyValueView(key: "Anstieg", value: viewModel.inclination)
+                        KeyValueView(key: "Tiefster Punkt", value: viewModel.lowestPoint)
+                        KeyValueView(key: "Höchster Punkt", value: viewModel.highestPoint)
                     }
                     Section(header: Text("Vermiedender CO\u{2082} Ausstoß")) {
-                        Text("1,3 kg")
+                        Text(viewModel.avoidedEmissions)
                     }
                 }.tabItem {
                     Image(systemName: "chart.xyaxis.line")
@@ -70,11 +72,29 @@ struct MeasurementView: View {
                     }
             }
             .navigationTitle(viewModel.title)
+        } else {
+            ProgressView {
+                Text("Bitte warten")
+            }
+        }
     }
 }
 
+#if DEBUG
 struct MeasurementView_Previews: PreviewProvider {
     static var previews: some View {
-        MeasurementView(viewModel: MeasurementViewViewModel())
+        MeasurementView(
+            viewModel: MeasurementViewViewModel(
+                dataStoreStack: MockDataStoreStack(),
+                measurement: Measurement(
+                    id: 0,
+                    name: "Titel",
+                    distance: 10.2,
+                    startTime: Date(),
+                    synchronizationState: .synchronizable
+                )
+            )
+        )
     }
 }
+#endif

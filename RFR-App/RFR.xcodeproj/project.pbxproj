@@ -26,6 +26,12 @@
 		AAA1AABA29E6FAE0002CBC91 /* SynchronizationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAB929E6FAE0002CBC91 /* SynchronizationViewModel.swift */; };
 		AAA1AABC29E84519002CBC91 /* Measurements.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AABB29E84519002CBC91 /* Measurements.swift */; };
 		AAA1AABE29E8895A002CBC91 /* Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AABD29E8895A002CBC91 /* Formatter.swift */; };
+		AAA1AAC129ED4544002CBC91 /* Statistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAC029ED4544002CBC91 /* Statistics.swift */; };
+		AAA1AAC429EED663002CBC91 /* HCaptcha in Frameworks */ = {isa = PBXBuildFile; productRef = AAA1AAC329EED663002CBC91 /* HCaptcha */; };
+		AAA1AAC629EEDB76002CBC91 /* HCaptchaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAC529EEDB76002CBC91 /* HCaptchaView.swift */; };
+		AAA1AACA29EEDC0A002CBC91 /* RegistrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAC929EEDC0A002CBC91 /* RegistrationViewModel.swift */; };
+		AAA1AACC29EEDC63002CBC91 /* RegistrationRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AACB29EEDC63002CBC91 /* RegistrationRequest.swift */; };
+		AAA1AACE29EFD0F8002CBC91 /* RegistrationDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AACD29EFD0F8002CBC91 /* RegistrationDetailsView.swift */; };
 		AAC9D2E82983DEC3003C4CC7 /* LiveViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2E72983DEC3003C4CC7 /* LiveViewModel.swift */; };
 		AAC9D2EA29840131003C4CC7 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2E929840131003C4CC7 /* LoginView.swift */; };
 		AAC9D2EC29840601003C4CC7 /* RegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2EB29840601003C4CC7 /* RegistrationView.swift */; };
@@ -88,6 +94,11 @@
 		AAA1AAB929E6FAE0002CBC91 /* SynchronizationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynchronizationViewModel.swift; sourceTree = "<group>"; };
 		AAA1AABB29E84519002CBC91 /* Measurements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Measurements.swift; sourceTree = "<group>"; };
 		AAA1AABD29E8895A002CBC91 /* Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatter.swift; sourceTree = "<group>"; };
+		AAA1AAC029ED4544002CBC91 /* Statistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics.swift; sourceTree = "<group>"; };
+		AAA1AAC529EEDB76002CBC91 /* HCaptchaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HCaptchaView.swift; sourceTree = "<group>"; };
+		AAA1AAC929EEDC0A002CBC91 /* RegistrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationViewModel.swift; sourceTree = "<group>"; };
+		AAA1AACB29EEDC63002CBC91 /* RegistrationRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationRequest.swift; sourceTree = "<group>"; };
+		AAA1AACD29EFD0F8002CBC91 /* RegistrationDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationDetailsView.swift; sourceTree = "<group>"; };
 		AAC9D2E72983DEC3003C4CC7 /* LiveViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveViewModel.swift; sourceTree = "<group>"; };
 		AAC9D2E929840131003C4CC7 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		AAC9D2EB29840601003C4CC7 /* RegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationView.swift; sourceTree = "<group>"; };
@@ -114,6 +125,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAA1AAC429EED663002CBC91 /* HCaptcha in Frameworks */,
 				AACB768329BF639F00A9DB6F /* DataCapturing in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -165,6 +177,7 @@
 				AAC9D2F229840B9E003C4CC7 /* Info.plist */,
 				AAC9D2ED2984061D003C4CC7 /* Components */,
 				AA87D09E2983DC49002F6B3B /* ViewModel */,
+				AAA1AABF29ED44F8002CBC91 /* BusinessLogic */,
 				AAC9D2F529891A75003C4CC7 /* Model */,
 				AA87D0952982B366002F6B3B /* Views */,
 				AACB768A29C0989D00A9DB6F /* Error */,
@@ -217,6 +230,8 @@
 				AACB768429BF671600A9DB6F /* LoadinScreen.swift */,
 				AACB768B29C1C24B00A9DB6F /* InitializationView.swift */,
 				AAA1AAB729E6E729002CBC91 /* ErrorView.swift */,
+				AAA1AAC529EEDB76002CBC91 /* HCaptchaView.swift */,
+				AAA1AACD29EFD0F8002CBC91 /* RegistrationDetailsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -238,12 +253,22 @@
 				AACB767E29BF5E8A00A9DB6F /* ControlBarViewModel.swift */,
 				AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */,
 				AAA1AAB129DC36A5002CBC91 /* LoginViewModel.swift */,
-				AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */,
 				AAA1AAB329E540CF002CBC91 /* MeasurementsViewModel.swift */,
 				AAA1AAB929E6FAE0002CBC91 /* SynchronizationViewModel.swift */,
-				AAA1AABD29E8895A002CBC91 /* Formatter.swift */,
+				AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */,
+				AAA1AAC929EEDC0A002CBC91 /* RegistrationViewModel.swift */,
 			);
 			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		AAA1AABF29ED44F8002CBC91 /* BusinessLogic */ = {
+			isa = PBXGroup;
+			children = (
+				AAA1AABD29E8895A002CBC91 /* Formatter.swift */,
+				AAA1AAC029ED4544002CBC91 /* Statistics.swift */,
+				AAA1AACB29EEDC63002CBC91 /* RegistrationRequest.swift */,
+			);
+			path = BusinessLogic;
 			sourceTree = "<group>";
 		};
 		AAC9D2ED2984061D003C4CC7 /* Components */ = {
@@ -298,6 +323,7 @@
 			name = RFR;
 			packageProductDependencies = (
 				AACB768229BF639F00A9DB6F /* DataCapturing */,
+				AAA1AAC329EED663002CBC91 /* HCaptcha */,
 			);
 			productName = RFR;
 			productReference = AA87D0682982ADE8002F6B3B /* RFR.app */;
@@ -371,6 +397,9 @@
 				Base,
 			);
 			mainGroup = AA87D05F2982ADE8002F6B3B;
+			packageReferences = (
+				AAA1AAC229EED663002CBC91 /* XCRemoteSwiftPackageReference "HCaptcha-ios-sdk" */,
+			);
 			productRefGroup = AA87D0692982ADE8002F6B3B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -414,14 +443,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				AACB767F29BF5E8A00A9DB6F /* ControlBarViewModel.swift in Sources */,
+				AAA1AAC629EEDB76002CBC91 /* HCaptchaView.swift in Sources */,
 				AAC9D2E82983DEC3003C4CC7 /* LiveViewModel.swift in Sources */,
 				AAA1AAAE29D6FB8D002CBC91 /* OSLog.swift in Sources */,
+				AAA1AACE29EFD0F8002CBC91 /* RegistrationDetailsView.swift in Sources */,
 				AAC9D2EF29840651003C4CC7 /* LabelledDivider.swift in Sources */,
 				AAC9D2F729891A8D003C4CC7 /* Measurement.swift in Sources */,
 				AAC9D2EA29840131003C4CC7 /* LoginView.swift in Sources */,
 				AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */,
 				AACB768729BF67E800A9DB6F /* DataCapturingViewModel.swift in Sources */,
+				AAA1AACA29EEDC0A002CBC91 /* RegistrationViewModel.swift in Sources */,
 				AAA1AAB429E540D0002CBC91 /* MeasurementsViewModel.swift in Sources */,
+				AAA1AACC29EEDC63002CBC91 /* RegistrationRequest.swift in Sources */,
 				AAA1AAB229DC36A5002CBC91 /* LoginViewModel.swift in Sources */,
 				AAA1AABE29E8895A002CBC91 /* Formatter.swift in Sources */,
 				AA87D0992982B43F002F6B3B /* StatisticsView.swift in Sources */,
@@ -435,6 +468,7 @@
 				AAC9D30129897042003C4CC7 /* MainView.swift in Sources */,
 				AAA1AAB029DB1F0C002CBC91 /* Preview_Mocks.swift in Sources */,
 				AAA1AAAC29D57BB2002CBC91 /* Router.swift in Sources */,
+				AAA1AAC129ED4544002CBC91 /* Statistics.swift in Sources */,
 				AA87D06C2982ADE8002F6B3B /* RFRApp.swift in Sources */,
 				AACB768C29C1C24B00A9DB6F /* InitializationView.swift in Sources */,
 				AAC9D2F929891B22003C4CC7 /* MeasurementCellViewModel.swift in Sources */,
@@ -600,7 +634,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
@@ -616,7 +650,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.2;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -634,7 +668,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
@@ -650,7 +684,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.2;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -779,7 +813,23 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		AAA1AAC229EED663002CBC91 /* XCRemoteSwiftPackageReference "HCaptcha-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hCaptcha/HCaptcha-ios-sdk";
+			requirement = {
+				kind = exactVersion;
+				version = 2.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		AAA1AAC329EED663002CBC91 /* HCaptcha */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAA1AAC229EED663002CBC91 /* XCRemoteSwiftPackageReference "HCaptcha-ios-sdk" */;
+			productName = HCaptcha;
+		};
 		AACB768229BF639F00A9DB6F /* DataCapturing */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DataCapturing;
