@@ -37,7 +37,12 @@ struct RegistrationRequest {
     ///   - validationToken: The HCaptcha validation token, which validates, that the request is from an actual human.
     func request(username: String, password: String, validationToken: String) async throws {
 
-        let body = ["email" : username, "password": password, "captcha": validationToken]
+        let body = [
+            "email" : username,
+            "password": password,
+            "captcha": validationToken,
+            "template": "R4R_IOS"
+        ]
 
         do {
             var request = try URLRequest(url: url, method: .post)
