@@ -64,7 +64,9 @@ class RegistrationViewModel: ObservableObject {
 
         do {
             try await registrationRequest.request(username: username, password: password, validationToken: token)
-            self.registrationSuccessful = true
+            DispatchQueue.main.async {
+                self.registrationSuccessful = true
+            }
         } catch {
             DispatchQueue.main.async { [weak self] in
                 self?.error = error
