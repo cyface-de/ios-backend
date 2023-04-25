@@ -30,7 +30,7 @@ struct RFRApp: App {
     // TODO: Put this into some configuration file
     static let authenticationEndpoint = "https://s2-b.cyface.de/api/v3"
     static let uploadEndpoint = "https://s2-b.cyface.de/api/v3"
-    static let registrationUrl = "https://s2-b.cyface.de"
+    static let registrationUrl = "https://s2-b.cyface.de/provider/api/v1/"
 
     var body: some Scene {
         WindowGroup {

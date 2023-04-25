@@ -42,6 +42,7 @@ struct RegistrationRequest {
         do {
             var request = try URLRequest(url: url, method: .post)
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
             let (_, response) = try await URLSession.shared.data(for: request)
 
             guard let httpResponse = response as? HTTPURLResponse else {

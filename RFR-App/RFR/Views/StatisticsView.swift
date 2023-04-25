@@ -33,7 +33,7 @@ struct StatisticsView: View {
             List {
                 
                 Section(header: Text("Maximale Strecke")) {
-                    KeyValueView(key: "Distanz", value: "\(viewModel.maxDistance) (\u{2205} \(viewModel.meansDistance)")
+                    KeyValueView(key: "Distanz", value: "\(viewModel.maxDistance) (\u{2205} \(viewModel.meansDistance))")
                     KeyValueView(key: "Dauer", value: "\(viewModel.summedDuration) (\u{2205} \(viewModel.meanDuration))")
                 }
                 

@@ -48,7 +48,8 @@ struct HCaptchaView: View {
 
     var body: some View {
         VStack{
-            placeholder.frame(width: 640, height: 640, alignment: .center)
+            placeholder.frame(width: 400, height: 500, alignment: .center)
+            Spacer()
             Button(action: {
                     //model.isLoading=true
                     hcaptcha.validate(on: placeholder.uiview) { result in

@@ -45,17 +45,22 @@ struct RegistrationView: View {
                 }
                 Spacer()
             }
+            .padding()
+            Spacer()
             if let error = model.error {
                 ErrorView(error: error)
+                    .padding([.bottom])
             } else if model.isValidated {
                 RegistrationDetailsView(
                     model: model,
                     showRegistrationView: $showRegistrationView
                 )
+                .padding([.bottom])
             } else {
                 HCaptchaView(
                     model: model
                 )
+                .padding([.bottom])
             }
         }
     }
