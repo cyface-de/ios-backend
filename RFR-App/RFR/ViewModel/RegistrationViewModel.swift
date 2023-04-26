@@ -18,6 +18,7 @@
  */
 
 import Foundation
+import Combine
 
 /// The MVVM view model used by the ``RegistrationView``
 ///
@@ -25,12 +26,21 @@ import Foundation
 /// - version: 1.0.0
 /// - since: 4.0.0
 class RegistrationViewModel: ObservableObject {
+    private static let passwordValidationExpression = try! Regex("^[a-zA-Z0-9!$%&?+*~#_.,/-]{6,32}$")
+    private static let emailValidationExpression = try! Regex("(?:[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}~-]+(?:\\.[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}" + "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\" + "x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[\\p{L}0-9](?:[a-" + "z0-9-]*[\\p{L}0-9])?\\.)+[\\p{L}0-9](?:[\\p{L}0-9-]*[\\p{L}0-9])?|\\[(?:(?:25[0-5" + "]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-" + "9][0-9]?|[\\p{L}0-9-]*[\\p{L}0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21" + "-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])")
     /// The username entered into the username text field. This value is used to get the username to register the new user at.
-    @Published var username: String = ""
+    @Published var username: String = "" {
+        didSet {
+            usernameIsValid = (try? RegistrationViewModel.emailValidationExpression.wholeMatch(in: username)) != nil
+            showUsernameError = !usernameIsValid
+        }
+    }
     /// The password entered into the password secure text field. This value is used as the password for the newly created user.
     @Published var password: String = "" {
         didSet {
-            passwordsAreEqualAndNotEmpty = !password.isEmpty && !repeatedPassword.isEmpty && repeatedPassword==password
+            let validation = (try? RegistrationViewModel.passwordValidationExpression.wholeMatch(in: password)) != nil
+            passwordIsValid = !password.isEmpty && !repeatedPassword.isEmpty && repeatedPassword==password && validation
+            showPasswordError = !validation
         }
     }
     /// The repeated password entered into the repeat password secure text field.
@@ -38,11 +48,9 @@ class RegistrationViewModel: ObservableObject {
     /// This value needs to match the value in the password field, before the registration button is enabled.
     @Published var repeatedPassword: String = "" {
         didSet {
-            passwordsAreEqualAndNotEmpty = !password.isEmpty && !repeatedPassword.isEmpty && repeatedPassword==password
+            passwordIsValid = !password.isEmpty && !repeatedPassword.isEmpty && repeatedPassword==password
         }
     }
-    /// A flag that is `true` if both ``password`` and ``repeatedPassword`` contain the same non empty value.
-    @Published var passwordsAreEqualAndNotEmpty = false
     /// A flag that becomes `true` if registration has finished successfully. If `true` it causes a switch back to the login view.
     @Published var registrationSuccessful = false
     /// The HCaptcha token, which can be used for user registration.
@@ -55,6 +63,10 @@ class RegistrationViewModel: ObservableObject {
     /// A flag that is set to `true` while the HCaptcha is loading.
     /// Since this can take some time a spinner or progress view is shown during that time.
     @Published var isLoading = false
+    @Published var passwordIsValid = false
+    @Published var usernameIsValid = false
+    @Published var showPasswordError = false
+    @Published var showUsernameError = false
 
     /// Carry out the registration. This is triggered by a press on the register button.
     func register(url: URL) async {
