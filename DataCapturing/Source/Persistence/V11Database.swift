@@ -239,7 +239,7 @@ struct SmoothingAlgorithm {
         var readings = readings.map { $0 }
         var sum = sum - readings[index]         // Remove the oldest entry from the sum
         readings[index] = value                 // Add the newest reading to the window
-        sum = sum + value                       // Add the newest reading to the sum
+        sum += value                       // Add the newest reading to the sum
         let index = (index+1) % windowSize      // Increment the index, and wrap to 0 if it exceeds the window size
 
         let averaged = sum / Double(windowSize) // Divide the sum of the window by the window size for the result
