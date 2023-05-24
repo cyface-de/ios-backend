@@ -263,7 +263,7 @@ public class CyfaceSynchronizer: Synchronizer {
         - synchronizableMeasurements: The synchronizable measurements to synchronize or `nil` if they have not been loaded.
         - status: Provides the status of whether loading the measurements was successful or not.
      */
-    private func handle(synchronizableMeasurements: [Measurement]?, status: Status) {
+    private func handle(synchronizableMeasurements: [FinishedMeasurement]?, status: Status) {
         guard let measurements = synchronizableMeasurements else {
             return
         }

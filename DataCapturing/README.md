@@ -18,6 +18,13 @@ There is an API to control the capturing lifecycle via the `DataCapturingService
 There is also an API to access captured data via the `PersistenceLayer` class.
 The `ServerConnection` class is responsible for transmitting captured data to a Cyface server, while the Synchronizer makes sure this happens at convenient times and in regular intervals.
 
+## General Architecture
+- Two areas of interest: ``Measurement`` during data capturing and ``FinishedMeasurement`` for information about all previous measurements from the device.
+- Measurement captures all information required during a measurement and writes it through to the database. It informes clients via Combine about newly arrived information (Locations, Altitudes, UserInteractions).
+- FinishedMeasurement is a read only object hierarchy, which provides information about captured data.
+- The persistence layer provides convenience methods to avoid loading whole object hierarchies into storage
+- Updates to finished measurements are also only possible via methods within the `PersistenceLayer.
+
 ## Integration in your App
 
 ### Integration

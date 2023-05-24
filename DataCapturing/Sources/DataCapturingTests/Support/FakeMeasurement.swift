@@ -27,42 +27,47 @@ import Foundation
  - Version: 2.0.0
  - since: 10.0.0
  */
-public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
-    /// The fake measurement currently built.
-    private var fakeMeasurement: DataCapturing.Measurement
+public class FakeMeasurementImpl: FakeMeasurement {
     /// The array of accelerations used for the currently built `Measurement`.
     private var accelerations = [SensorValue]()
+    private var tracks = [[GeoLocation]]()
+    private var identifier: Int64
+    private var currentTime = Date()
+    private let startingTime = Date()
 
-    /**
-     Creates a new completely initialized object of this class. The constructor is private to make sure objects are only initialized via the static factory method.
-
-     - Parameters measurement: The initial value for the faked measurement
-     */
-    private init(measurement: DataCapturing.Measurement) {
-        self.fakeMeasurement = measurement
+    init(identifier: Int64) {
+        self.identifier = identifier
     }
 
-    public func build(_ persistenceLayer: PersistenceLayer) throws -> DataCapturing.Measurement {
-        var synchronizedMeasurement = try persistenceLayer.save(measurement: fakeMeasurement)
+    public func build(_ persistenceLayer: PersistenceLayer) throws -> FinishedMeasurement {
+        let measurement = FinishedMeasurement(
+            identifier: identifier,
+            synchronizable: false,
+            synchronized: false,
+            time: Date(),
+            trackLength: Double.random(in: 0..<10_000.0),
+            events: [], tracks: [])
+        measurement.append(
+            event: Event(
+                time: startingTime,
+                type: .modalityTypeChange,
+                value: "BICYCLE"
+            )
+        )
+
+        tracks.forEach { locations in
+            let track = Track()
+            track.locations = locations
+            measurement.append(track: track)
+        }
+        var synchronizedMeasurement = try persistenceLayer.save(measurement: measurement)
         try persistenceLayer.save(accelerations: accelerations, in: &synchronizedMeasurement)
         return synchronizedMeasurement
 
     }
 
-    public func addGeoLocationsAnd(countOfGeoLocations: Int) throws -> FakeTrack {
-        try geoLocations(countOfGeoLocations: countOfGeoLocations)
-
-        return self
-    }
-
-    public func addAccelerationsAnd(countOfAccelerations: Int) throws -> FakeTrack {
-        try accelerations(countOfAccelerations: countOfAccelerations)
-
-        return self
-    }
-
     public func addGeoLocations(countOfGeoLocations: Int) throws -> FakeMeasurement {
-        try geoLocations(countOfGeoLocations: countOfGeoLocations)
+        tracks.append(geoLocations(countOfGeoLocations: countOfGeoLocations))
 
         return self
     }
@@ -79,17 +84,20 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
      - Parameter countOfGeoLocations: The amount of geo locations to create within the test measurement
      - Throws: `FakeMeasurementError.noTrackCreated` if trying to add a geo location without a proper track available. In such cases call `appendTrack` or `appendTrackAnd` before calling this method.
      */
-    private func geoLocations(countOfGeoLocations: Int) throws {
-        guard let track = fakeMeasurement.tracks.last else {
-            throw FakeMeasurementError.noTrackCreated
+    private func geoLocations(countOfGeoLocations: Int) -> [GeoLocation] {
+        let ret = (0..<countOfGeoLocations).map { index in
+            GeoLocation(
+                latitude: Double.random(in: -90.0...90.0),
+                longitude: Double.random(in: -180.0...180.0),
+                accuracy: Double.random(in: 0.0...20.0),
+                speed: Double.random(in: 0.0...80.0),
+                time: currentTime.addingTimeInterval(Double(index)),
+                altitude: 0.0,
+                verticalAccuracy: 0.0
+            )
         }
-
-        let startTime = Date()
-        for i in 0..<countOfGeoLocations {
-            let location = GeoLocation(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0), accuracy: Double.random(in: 0.0...20.0), speed: Double.random(in: 0.0...80.0), timestamp: DataCapturingService.convertToUtcTimestamp(date: startTime.addingTimeInterval(Double(i))), isValid: true, parent: track)
-
-            try track.append(location: location)
-        }
+        currentTime = currentTime.addingTimeInterval(Double(countOfGeoLocations))
+        return ret
     }
 
     /**
@@ -102,7 +110,14 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
      */
     private func accelerations(countOfAccelerations: Int) throws {
         for _ in 0..<countOfAccelerations {
-            accelerations.append(SensorValue(timestamp: Date(), x: Double.random(in: -10.0...10.0), y: Double.random(in: -10.0...10.0), z: Double.random(in: -10.0...10.0)))
+            accelerations.append(
+                SensorValue(
+                timestamp: Date(),
+                x: Double.random(in: -10.0...10.0),
+                y: Double.random(in: -10.0...10.0),
+                z: Double.random(in: -10.0...10.0)
+                )
+            )
         }
     }
 
@@ -115,29 +130,8 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
         - Some unspecified errors from within CoreData.
      */
     public static func fakeMeasurement(identifier: Int64) throws -> FakeMeasurement {
-
-        let currentTimestamp = DataCapturingService.currentTimeInMillisSince1970()
-        let measurement = DataCapturing.Measurement(
-            identifier: identifier,
-            synchronizable: false,
-            synchronized: false,
-            timestamp: currentTimestamp,
-            trackLength: Double.random(in: 0..<10_000.0),
-            events: [], tracks: [])
-        measurement.append(event: Event(time: Date(timeIntervalSince1970: Double(currentTimestamp)/1_000.0), type: .modalityTypeChange, value: "BICYCLE", measurement: measurement))
-
-        let ret = FakeMeasurementImpl(measurement: measurement)
+        let ret = FakeMeasurementImpl(identifier: identifier)
         return ret
-    }
-
-    public func appendTrack() throws -> FakeMeasurement {
-        fakeMeasurement.append(track: Track(parent: fakeMeasurement))
-        return self
-    }
-
-    public func appendTrackAnd() throws -> FakeTrack {
-        fakeMeasurement.append(track: Track(parent: fakeMeasurement))
-        return self
     }
 }
 
@@ -148,49 +142,6 @@ public class FakeMeasurementImpl: FakeMeasurement, FakeTrack {
  - Version: 1.0.0
  */
 public protocol FakeMeasurement {
-    /**
-     Appends a new track to the measurement and allows to manipulate that track, like adding data.
-
-     - Returns: The builder for the appended track
-     */
-    func appendTrackAnd() throws -> FakeTrack
-    /**
-     Appends a new empty track to the measurement.
-
-     - Returns: The current measurement builder
-     */
-    func appendTrack() throws -> FakeMeasurement
-    /**
-     Create the product of this builder.
-     Finishes the creation of the fake measurement by storing it to the database.
-
-     - Parameter persistenceLayer: A `PersistenceLayer` used to store the created measurement
-     - Returns: A completely intialized fake measurement
-     */
-    func build(_ persistenceLayer: PersistenceLayer) throws -> DataCapturing.Measurement
-}
-
-/**
- Builder state when adding data to a track. This provides all methods allowed while building a track.
-
- - Author: Klemens Muthmann
- - Version: 1.0.0
- */
-public protocol FakeTrack {
-    /**
-     Adds the specified amount of geo locations to a track and allows to manipulate that track even further.
-
-     - Parameter countOfGeoLocations: The amount of geo locations to create within the test measurement
-     - Returns: The current fake track builder
-     */
-    func addGeoLocationsAnd(countOfGeoLocations: Int) throws -> FakeTrack
-    /**
-    Adds the specified amount of accelerations to a track and allows to manipulate that track even further.
-
-     - Parameter countOfAccelerations: The amount of accelerations to create within the test measurement
-     - Returns: The current fake track builder
-     */
-    func addAccelerationsAnd(countOfAccelerations: Int) throws -> FakeTrack
     /**
      Add the specified amount of geo locations to a track and finishes manipulation of that track.
 
@@ -205,6 +156,14 @@ public protocol FakeTrack {
      - Returns: The current fake measurement builder
      */
     func addAccelerations(countOfAccelerations: Int) throws -> FakeMeasurement
+    /**
+     Create the product of this builder.
+     Finishes the creation of the fake measurement by storing it to the database.
+
+     - Parameter persistenceLayer: A `PersistenceLayer` used to store the created measurement
+     - Returns: A completely intialized fake measurement
+     */
+    func build(_ persistenceLayer: PersistenceLayer) throws -> FinishedMeasurement
 }
 
 /**

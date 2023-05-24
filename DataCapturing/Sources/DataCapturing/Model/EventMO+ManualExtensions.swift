@@ -46,8 +46,6 @@ extension EventMO {
      */
     convenience init(event: inout Event, context: NSManagedObjectContext) throws {
         self.init(context: context)
-        event.objectId = self.objectID
-
         try update(from: event)
     }
 
@@ -65,19 +63,5 @@ extension EventMO {
         self.type = event.type.rawValue
         self.time = event.time
         self.value = event.value
-
-        guard let managedParentObjectId = event.measurement.objectId else {
-            throw PersistenceError.unsynchronizedMeasurement(identifier: event.measurement.identifier)
-        }
-
-        guard let context = managedObjectContext else {
-            throw PersistenceError.inconsistentState
-        }
-
-        guard let managedParent = try context.existingObject(with: managedParentObjectId) as? MeasurementMO else {
-            throw PersistenceError.measurementNotLoadable(event.measurement.identifier)
-        }
-
-        self.measurement = managedParent
     }
 }

@@ -33,13 +33,11 @@ import OSLog
  - Version: 1.0.0
  - since: 11.0.0
  */
-public class Measurement: Hashable, Equatable {
+public class FinishedMeasurement: Hashable, Equatable {
     /// The minimum number of meters before the ascend is increased, to filter sensor noise.
     public static let ascendThresholdMeters = 2.0
     /// The minimum accuracy in meters for GNSS altitudes to be used in ascend calculation.
     public static let verticalAccuracyThresholdMeters = 12.0
-    /// This measurements CoreData identifier or `nil` if the object has not been saved yet.
-    var objectId: NSManagedObjectID?
     /// A device wide unique identifier for this measurement. Usually set by incrementing a counter.
     public let identifier: Int64
     /// A flag, marking this `Measurement` as either ready for data syncrhonization or not.
@@ -70,19 +68,18 @@ public class Measurement: Hashable, Equatable {
             synchronized: managedObject.synchronized,
             time: managedObject.time!,
             trackLength: managedObject.trackLength)
-        self.objectId = managedObject.objectID
 
         if let eventMOs = managedObject.events?.array as? [EventMO] {
 
             for eventMO in eventMOs {
-                let event = Event(managedObject: eventMO, parent: self)
+                let event = Event(managedObject: eventMO)
                 events.append(event)
             }
         }
 
         if let trackMOs = managedObject.tracks?.array as? [TrackMO] {
             for trackMO in trackMOs {
-                let track = try Track(managedObject: trackMO, parent: self)
+                let track = try Track(managedObject: trackMO)
                 tracks.append(track)
             }
         }
@@ -144,13 +141,14 @@ public class Measurement: Hashable, Equatable {
     }
 
     /// Required by the `Equatable` protocol to compare two `Measurement` instances.
-    public static func == (lhs: Measurement, rhs: Measurement) -> Bool {
+    public static func == (lhs: FinishedMeasurement, rhs: FinishedMeasurement) -> Bool {
         return lhs.identifier == rhs.identifier
     }
 
+    // TODO: Remove everything below?
     /// Provide the average speed of this measurement in m/s.
     public func averageSpeed() -> Double {
-        var sum = 0.0
+        /*var sum = 0.0
         var counter = 0
         tracks.forEach { track in
             track.locations.forEach { location in
@@ -161,11 +159,11 @@ public class Measurement: Hashable, Equatable {
             }
         }
 
-        if counter==0 {
+        if counter==0 {*/
             return 0.0
-        } else {
+        /*} else {
             return sum/Double(counter)
-        }
+        }*/
     }
 
     /// Provide the total duration of this measurement.
@@ -196,12 +194,12 @@ public class Measurement: Hashable, Equatable {
                     if isFirst {
                         previousAltitude = location.altitude
                         isFirst = false
-                    } else if !(location.verticalAccuracy > Measurement.verticalAccuracyThresholdMeters) {
+                    } else if !(location.verticalAccuracy > FinishedMeasurement.verticalAccuracyThresholdMeters) {
 
                         let currentAltitude = location.altitude
                         let altitudeChange = currentAltitude - previousAltitude
 
-                        if abs(altitudeChange) > Measurement.ascendThresholdMeters {
+                        if abs(altitudeChange) > FinishedMeasurement.ascendThresholdMeters {
                             if altitudeChange > 0.0 {
                                 sum += altitudeChange
                             }

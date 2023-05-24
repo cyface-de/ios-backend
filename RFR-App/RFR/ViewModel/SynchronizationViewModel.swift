@@ -43,7 +43,7 @@ class SynchronizationViewModel: ObservableObject {
             case .synchronizationStarted(measurement: let measurementIdentifier):
                 uploadStatusPublisher.send(UploadStatus(id: measurementIdentifier, status: .started))
             case .synchronizationFinished(measurement: let measurementIdentifier):
-                // TODO: This needs to provide error information if the upload was not successful.
+                // TODO: This needs to provide error information if the upload was not successful. --> Error information should be part of status field
                 uploadStatusPublisher.send(UploadStatus(id: measurementIdentifier, status: .finished))
             default:
                 os_log("Unhandled synchronization event %@", log: OSLog.synchronization, type: .debug, syncEvent.description)

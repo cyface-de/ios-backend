@@ -9,7 +9,7 @@ import Foundation
 import DataCapturing
 import CoreData
 
-class MockDataCapturingService: DataCapturingService {
+/*class MockDataCapturingService: DataCapturingService {
 
     let dataStoreStack: DataStoreStack = MockDataStoreStack()
 
@@ -64,7 +64,7 @@ class MockDataCapturingService: DataCapturingService {
     func changeModality(to modality: String) {
 
     }
-}
+}*/
 
 class MockAuthenticator: CredentialsAuthenticator {
     var username: String?
@@ -104,10 +104,12 @@ class MockDataStoreStack: DataStoreStack {
 
 class MockPersistenceLayer: PersistenceLayer {
 
+
+
     let measurements = [
-        DataCapturing.Measurement(identifier: 0),
-        DataCapturing.Measurement(identifier: 1),
-        DataCapturing.Measurement(identifier: 2)
+        DataCapturing.FinishedMeasurement(identifier: 0),
+        DataCapturing.FinishedMeasurement(identifier: 1),
+        DataCapturing.FinishedMeasurement(identifier: 2)
     ]
 
     func delete(measurement: Int64) throws {
@@ -118,27 +120,31 @@ class MockPersistenceLayer: PersistenceLayer {
 
     }
 
+    func delete() throws {
+        
+    }
+
     func clean(measurement: Int64) throws {
 
     }
 
-    func createMeasurement(at time: Date, inMode mode: String) throws -> DataCapturing.Measurement {
-        return DataCapturing.Measurement(identifier: 0)
+    func createMeasurement(at time: Date, inMode mode: String) throws -> DataCapturing.FinishedMeasurement {
+        return DataCapturing.FinishedMeasurement(identifier: 0)
     }
 
-    func createEvent(of type: DataCapturing.EventType, withValue: String?, time: Date, parent: inout DataCapturing.Measurement) throws -> DataCapturing.Event {
-        return DataCapturing.Event(type: .lifecycleStart, measurement: DataCapturing.Measurement(identifier: 0))
+    func createEvent(of type: DataCapturing.EventType, withValue: String?, time: Date, parent: inout DataCapturing.FinishedMeasurement) throws -> DataCapturing.Event {
+        return DataCapturing.Event(type: .lifecycleStart)
     }
 
-    func appendNewTrack(to measurement: inout DataCapturing.Measurement) throws {
+    func appendNewTrack(to measurement: inout DataCapturing.FinishedMeasurement) throws {
 
     }
 
-    func save(measurement: DataCapturing.Measurement) throws -> DataCapturing.Measurement {
-        return DataCapturing.Measurement(identifier: 0)
+    func save(measurement: DataCapturing.FinishedMeasurement) throws -> DataCapturing.FinishedMeasurement {
+        return DataCapturing.FinishedMeasurement(identifier: 0)
     }
 
-    func save(locations: [DataCapturing.LocationCacheEntry], in measurement: inout DataCapturing.Measurement) throws {
+    func save(locations: [DataCapturing.GeoLocation], in measurement: inout DataCapturing.FinishedMeasurement) throws {
 
     }
 
@@ -146,27 +152,27 @@ class MockPersistenceLayer: PersistenceLayer {
 
     }
 
-    func load(measurementIdentifiedBy identifier: Int64) throws -> DataCapturing.Measurement {
-        return DataCapturing.Measurement(identifier: 0)
+    func load(measurementIdentifiedBy identifier: Int64) throws -> DataCapturing.FinishedMeasurement {
+        return DataCapturing.FinishedMeasurement(identifier: 0)
     }
 
-    func loadMeasurements() throws -> [DataCapturing.Measurement] {
-        return [DataCapturing.Measurement]()
+    func loadMeasurements() throws -> [DataCapturing.FinishedMeasurement] {
+        return [DataCapturing.FinishedMeasurement]()
     }
 
-    func loadEvents(typed type: DataCapturing.EventType, forMeasurement measurement: DataCapturing.Measurement) throws -> [DataCapturing.Event] {
+    func loadEvents(typed type: DataCapturing.EventType, forMeasurement measurement: DataCapturing.FinishedMeasurement) throws -> [DataCapturing.Event] {
         return [DataCapturing.Event]()
     }
 
-    func loadSynchronizableMeasurements() throws -> [DataCapturing.Measurement] {
-        return [DataCapturing.Measurement]()
+    func loadSynchronizableMeasurements() throws -> [DataCapturing.FinishedMeasurement] {
+        return [DataCapturing.FinishedMeasurement]()
     }
 
     func loadClean(track: inout DataCapturing.Track) throws -> [DataCapturing.GeoLocation] {
         return [DataCapturing.GeoLocation]()
     }
 
-    func countGeoLocations(forMeasurement measurement: DataCapturing.Measurement) throws -> Int {
+    func countGeoLocations(forMeasurement measurement: DataCapturing.FinishedMeasurement) throws -> Int {
         return 0
     }
 }

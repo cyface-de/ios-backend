@@ -33,41 +33,23 @@ class SerializationTest: XCTestCase {
     /// The object of the class under test
     var oocut: MeasurementSerializer!
     /// A `PersistenceLayer` instance used to load and store data for testing purposes.
-    var persistenceLayer: PersistenceLayer!
+    var persistenceLayer: CoreDataPersistenceLayer!
     /// A manager for handling the CoreData stack.
-    var coreDataStack: CoreDataManager!
+    var coreDataStack: CoreDataStack!
     /// The `NSManagedObjectModel` used by the test.
-    static let dataModel = try! CoreDataManager.load()
+    static let dataModel = try! CoreDataStack.load(bundle: XCTestCase.appBundle()!)
 
     /// Initializes the test data set and `PersistenceLayer` with some test data.
-    override func setUpWithError() throws {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         oocut = MeasurementSerializer()
         let expectation = self.expectation(description: "CoreDataStack started successfully.")
-        var setUpError:Error?
 
-            coreDataStack = CoreDataManager(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: SerializationTest.dataModel)
-            let bundle = Bundle(for: type(of: coreDataStack))
+        coreDataStack = CoreDataStack(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: SerializationTest.dataModel, bundle: XCTestCase.appBundle()!)
+        let bundle = Bundle(for: type(of: coreDataStack))
 
-            try coreDataStack.setup(bundle: bundle) { [weak self] (error) in
-                if let error = error {
-                    setUpError = error
-                    return XCTFail("Unable to setup CoreData stack due to \(error)")
-                }
-
-                guard let self = self else {
-                    return
-                }
-
-                self.persistenceLayer = PersistenceLayer(onManager: self.coreDataStack)
-
-                expectation.fulfill()
-        }
-
-        wait(for: [expectation],timeout: 5.0)
-        if let error = setUpError {
-            XCTFail("Unable to setup SerializationTest \(error.localizedDescription)")
-        }
+        try await coreDataStack.setup()
+        persistenceLayer = (self.coreDataStack.persistenceLayer() as! CoreDataPersistenceLayer)
     }
 
     /// Finalizes the test environment by deleting all test data.
@@ -80,18 +62,25 @@ class SerializationTest: XCTestCase {
 
     /// Store a test fixture to CoreData and provide the measurement identifier.
     func fixture() throws -> Int64 {
-        var measurement = try self.persistenceLayer.createMeasurement(at: 1, inMode: "BICYCLE")
+        var measurement = try self.persistenceLayer.createMeasurement(at: Date(), inMode: "BICYCLE")
         try self.persistenceLayer.appendNewTrack(to: &measurement)
 
         try self.persistenceLayer.save(locations: [TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.0)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.1)), TestFixture.location(accuracy: 2.0, timestamp: Date(timeIntervalSince1970: 10.2))], in: &measurement)
-        try self.persistenceLayer.save(accelerations: [SensorValue(timestamp: Date(timeIntervalSince1970: 10.0), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10.1), x: 1.0, y: 1.0, z: 1.0), SensorValue(timestamp: Date(timeIntervalSince1970: 10.2), x: 1.0, y: 1.0, z: 1.0)], in: &measurement)
+        try self.persistenceLayer.save(
+            accelerations: [
+                SensorValue(timestamp: Date(timeIntervalSince1970: 10.0), x: 1.0, y: 1.0, z: 1.0),
+                SensorValue(timestamp: Date(timeIntervalSince1970: 10.1), x: 1.0, y: 1.0, z: 1.0),
+                SensorValue(timestamp: Date(timeIntervalSince1970: 10.2), x: 1.0, y: 1.0, z: 1.0)
+            ],
+            in: &measurement
+        )
 
         return measurement.identifier
     }
 
     /// Tests if serialization of a simple empty measurement into the Cyface binary format works as expected.
     func testSerializeEmptyMeasurement() throws {
-        let measurement = Measurement(identifier: 1)
+        let measurement = FinishedMeasurement(identifier: 1)
         measurement.tracks = []
         let res = try oocut.serialize(serializable: measurement)
 
@@ -172,7 +161,12 @@ class SerializationTest: XCTestCase {
      */
     func ignore_testSerializeBigDataSet() throws {
         let nextIdentifier = try persistenceLayer.nextIdentifier()
-        let measurement = try FakeMeasurementImpl.fakeMeasurement(identifier: nextIdentifier).appendTrackAnd().addGeoLocationsAnd(countOfGeoLocations: 36_000).addAccelerations(countOfAccelerations: 3_600_000).build(persistenceLayer)
+        let measurement = try FakeMeasurementImpl.fakeMeasurement(
+            identifier: nextIdentifier)
+            .addGeoLocations(countOfGeoLocations: 36_000)
+            .addAccelerations(countOfAccelerations: 3_600_000)
+            .build(persistenceLayer
+            )
         _ = try oocut.serialize(serializable: measurement)
     }
 }

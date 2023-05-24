@@ -124,7 +124,7 @@ class MeasurementSerializer: BinarySerializer {
      - Parameter serializable: The measurement to serialize.
      - Throws: if either converting the provided data or reading the sensor values fails.
      */
-    func serialize(serializable measurement: Measurement) throws -> Data {
+    func serialize(serializable measurement: FinishedMeasurement) throws -> Data {
         var protosMeasurement = De_Cyface_Protos_Model_MeasurementBytes()
         protosMeasurement.formatVersion = UInt32(dataFormatVersion)
         protosMeasurement.events = serialize(events: measurement.events)

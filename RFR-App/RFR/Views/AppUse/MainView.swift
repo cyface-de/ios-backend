@@ -32,13 +32,13 @@ struct MainView: View {
     @ObservedObject var syncViewModel: SynchronizationViewModel
 
     var body: some View {
-        if let dataCapturingService = viewModel.dataCapturingService {
+        if let dataStoreStack = viewModel.dataStoreStack {
             NavigationStack {
                 VStack {
                     TabView(selection: $selectedTab) {
                         MeasurementsView(
                             viewModel: MeasurementsViewModel(
-                                dataStoreStack: dataCapturingService.dataStoreStack,
+                                dataStoreStack: dataStoreStack,
                                 uploadPublisher: syncViewModel.uploadStatusPublisher
                             )
                         )
@@ -48,14 +48,14 @@ struct MainView: View {
                                     .font(.footnote)
                             }
                             .tag(1)
-                        LiveView(viewModel: LiveViewModel(dataCapturingService))
+                        LiveView(viewModel: LiveViewModel())
                             .tabItem {
                                 Image(systemName: "location.fill")
                                 Text("Live")
                             }
                             .tag(2)
                         StatisticsView(
-                            viewModel: Measurements(coreDataStack: dataCapturingService.dataStoreStack)
+                            viewModel: Measurements(coreDataStack: dataStoreStack)
                         )
                             .tabItem {
                                 Image(systemName: "chart.xyaxis.line")
@@ -120,7 +120,7 @@ struct MainView_Previews: PreviewProvider {
                 isInitialized: false,
                 showError: false,
                 error: nil,
-                dataCapturingService: MockDataCapturingService(state: .stopped)
+                dataStoreStack: MockDataStoreStack()
             ),
             syncViewModel: SynchronizationViewModel(
                 synchronizer: MockSynchronizer()

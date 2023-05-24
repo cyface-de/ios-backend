@@ -27,7 +27,7 @@ import SwiftUI
  */
 struct LiveView: View {
     /// The view model used by this `View`.
-    @ObservedObject var viewModel: LiveViewModel
+    @StateObject var viewModel = LiveViewModel()
 
     var body: some View {
         VStack {
@@ -38,7 +38,7 @@ struct LiveView: View {
                 Spacer()
             }
             Divider()
-            ControlBarView(viewModel: ControlBarViewModel(dataCapturingService: viewModel.dataCapturingService))
+            ControlBarView(viewModel: viewModel)
                 .padding()
         }
     }
@@ -61,9 +61,13 @@ struct LiveView_Previews: PreviewProvider {
         LiveView(viewModel: LiveViewModel(
             speed: 21.0,
             averageSpeed: 15.0,
-            measurementState: .stopped,
-            dataCapturingService:
-                MockDataCapturingService(state: .stopped)))
+            measurementState: .stopped
+            )
+        )
+
+        LiveView(viewModel: LiveViewModel(
+            measurementState: .running
+        ))
     }
 }
 #endif
@@ -117,7 +121,7 @@ struct LiveStatisticsView: View {
  - Version: 1.0.0
  */
 struct ControlBarView: View {
-    @ObservedObject var viewModel: ControlBarViewModel
+    @ObservedObject var viewModel: LiveViewModel
 
     var body: some View {
         HStack {

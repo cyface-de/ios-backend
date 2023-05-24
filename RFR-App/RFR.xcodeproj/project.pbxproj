@@ -50,6 +50,7 @@
 		AACB768729BF67E800A9DB6F /* DataCapturingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */; };
 		AACB768929C0989300A9DB6F /* RFRError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768829C0989300A9DB6F /* RFRError.swift */; };
 		AACB768C29C1C24B00A9DB6F /* InitializationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768B29C1C24B00A9DB6F /* InitializationView.swift */; };
+		AAEA84392A1BAF3E00DFA28D /* CredentialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEA84382A1BAF3E00DFA28D /* CredentialsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -118,6 +119,7 @@
 		AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingViewModel.swift; sourceTree = "<group>"; };
 		AACB768829C0989300A9DB6F /* RFRError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRError.swift; sourceTree = "<group>"; };
 		AACB768B29C1C24B00A9DB6F /* InitializationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitializationView.swift; sourceTree = "<group>"; };
+		AAEA84382A1BAF3E00DFA28D /* CredentialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,20 +220,9 @@
 		AA87D0952982B366002F6B3B /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				AA87D06D2982ADE8002F6B3B /* LiveView.swift */,
-				AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */,
-				AA87D0982982B43F002F6B3B /* StatisticsView.swift */,
-				AA87D09A2982B4CB002F6B3B /* MeasurementView.swift */,
-				AAC9D2E929840131003C4CC7 /* LoginView.swift */,
-				AAC9D2EB29840601003C4CC7 /* RegistrationView.swift */,
-				AAC9D2F329840D83003C4CC7 /* MeasurementCell.swift */,
-				AAC9D2FE29895D16003C4CC7 /* KeyValueView.swift */,
-				AAC9D30029897042003C4CC7 /* MainView.swift */,
-				AACB768429BF671600A9DB6F /* LoadinScreen.swift */,
-				AACB768B29C1C24B00A9DB6F /* InitializationView.swift */,
 				AAA1AAB729E6E729002CBC91 /* ErrorView.swift */,
-				AAA1AAC529EEDB76002CBC91 /* HCaptchaView.swift */,
-				AAA1AACD29EFD0F8002CBC91 /* RegistrationDetailsView.swift */,
+				AAEA843B2A1CB9D500DFA28D /* AppUse */,
+				AAEA843A2A1CB9CC00DFA28D /* AppStart */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -303,6 +294,34 @@
 				AACB768829C0989300A9DB6F /* RFRError.swift */,
 			);
 			path = Error;
+			sourceTree = "<group>";
+		};
+		AAEA843A2A1CB9CC00DFA28D /* AppStart */ = {
+			isa = PBXGroup;
+			children = (
+				AAC9D2E929840131003C4CC7 /* LoginView.swift */,
+				AAEA84382A1BAF3E00DFA28D /* CredentialsView.swift */,
+				AAC9D2EB29840601003C4CC7 /* RegistrationView.swift */,
+				AAA1AAC529EEDB76002CBC91 /* HCaptchaView.swift */,
+				AAA1AACD29EFD0F8002CBC91 /* RegistrationDetailsView.swift */,
+				AACB768429BF671600A9DB6F /* LoadinScreen.swift */,
+				AACB768B29C1C24B00A9DB6F /* InitializationView.swift */,
+			);
+			path = AppStart;
+			sourceTree = "<group>";
+		};
+		AAEA843B2A1CB9D500DFA28D /* AppUse */ = {
+			isa = PBXGroup;
+			children = (
+				AA87D06D2982ADE8002F6B3B /* LiveView.swift */,
+				AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */,
+				AA87D0982982B43F002F6B3B /* StatisticsView.swift */,
+				AA87D09A2982B4CB002F6B3B /* MeasurementView.swift */,
+				AAC9D2F329840D83003C4CC7 /* MeasurementCell.swift */,
+				AAC9D2FE29895D16003C4CC7 /* KeyValueView.swift */,
+				AAC9D30029897042003C4CC7 /* MainView.swift */,
+			);
+			path = AppUse;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -470,6 +489,7 @@
 				AAA1AAAC29D57BB2002CBC91 /* Router.swift in Sources */,
 				AAA1AAC129ED4544002CBC91 /* Statistics.swift in Sources */,
 				AA87D06C2982ADE8002F6B3B /* RFRApp.swift in Sources */,
+				AAEA84392A1BAF3E00DFA28D /* CredentialsView.swift in Sources */,
 				AACB768C29C1C24B00A9DB6F /* InitializationView.swift in Sources */,
 				AAC9D2F929891B22003C4CC7 /* MeasurementCellViewModel.swift in Sources */,
 				AAC9D2F429840D83003C4CC7 /* MeasurementCell.swift in Sources */,

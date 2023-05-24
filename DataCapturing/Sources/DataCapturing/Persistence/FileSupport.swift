@@ -50,9 +50,9 @@ protocol FileSupport {
      */
     func write(serializable: Serializable, to measurement: Int64) throws -> URL
     /**
-     Removes the file for the provided `MeasurementMO` instance.
+     Removes the file for the provided `FinishedMeasurement` instance.
      */
-    func remove(from measurement: Measurement) throws
+    func remove(from measurement: FinishedMeasurement) throws
 }
 
 // MARK: - Implementation
@@ -94,7 +94,7 @@ extension FileSupport {
      - Parameter from: The measurement to delete the data from.
      - Throws: Some internal file system error on failure of creating the file at the required path.
      */
-    func remove(from measurement: Measurement) throws {
+    func remove(from measurement: FinishedMeasurement) throws {
         let filePath = try path(for: measurement.identifier)
         let parent = filePath.deletingLastPathComponent()
         let fileManager = FileManager.default
@@ -179,7 +179,7 @@ public struct SensorValueFile: FileSupport {
      - Throws: If the file containing the sensor values was not readable.
      - Returns: An array of all the sensor values from the provided measurement.
     */
-    public func load(from measurement: Measurement) throws -> [SensorValue] {
+    public func load(from measurement: FinishedMeasurement) throws -> [SensorValue] {
         do {
             let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
             defer {fileHandle.closeFile()}
@@ -199,7 +199,7 @@ public struct SensorValueFile: FileSupport {
         - `FileSupportError.notReadable` If the data file was not readable.
         - Some unspecified undocumented file system error if file was not accessible.
     */
-    func data(for measurement: Measurement) throws -> Data {
+    func data(for measurement: FinishedMeasurement) throws -> Data {
         do {
             let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
             defer {fileHandle.closeFile()}
@@ -248,7 +248,7 @@ public struct MeasurementFile: FileSupport {
      - Throws: `FileSupportError.notReadable` If the data file was not readable.
      - Throws: Some unspecified undocumented file system error if file was not accessible.
     */
-    func write(serializable: Measurement, to measurement: Int64) throws -> URL {
+    func write(serializable: FinishedMeasurement, to measurement: Int64) throws -> URL {
         let measurementData = try data(from: serializable)
         let measurementFilePath = try path(for: measurement)
 
@@ -271,7 +271,7 @@ public struct MeasurementFile: FileSupport {
      - Throws: `FileSupportError.notReadable` If the data to write could not be read from the database.
      - Throws: Some unspecified undocumented file system error if file was not accessible.
      */
-    func data(from serializable: Measurement) throws -> Data? {
+    func data(from serializable: FinishedMeasurement) throws -> Data? {
         let serializer = MeasurementSerializer()
 
         do {

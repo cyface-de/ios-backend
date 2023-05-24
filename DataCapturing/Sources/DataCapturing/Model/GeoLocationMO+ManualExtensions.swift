@@ -27,28 +27,14 @@ extension GeoLocationMO {
     /// Initializes a managed object from an existing `GeoLocation`.
     convenience init(location: inout GeoLocation, context: NSManagedObjectContext) throws {
         self.init(context: context)
-        location.objectId = self.objectID
         try update(from: location)
     }
 
     /// Update this managed object with the values from the provided `GeoLocation`.
     func update(from location: GeoLocation) throws {
-        guard location.objectId == self.objectID else {
-            throw PersistenceError.inconsistentState
-        }
-
-        guard let parentObjectId = location.track.objectId else {
-            throw PersistenceError.inconsistentState
-        }
-
         self.lat = location.latitude
         self.lon = location.longitude
         self.accuracy = location.accuracy
-        guard let managedParent = try managedObjectContext?.existingObject(with: parentObjectId) as? TrackMO else {
-            throw PersistenceError.inconsistentState
-        }
-        self.track = managedParent
-        self.isPartOfCleanedTrack = location.isValid
         self.speed = location.speed
         self.time = location.time
         self.verticalAccuracy = location.verticalAccuracy

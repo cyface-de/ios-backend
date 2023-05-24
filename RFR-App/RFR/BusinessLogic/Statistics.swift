@@ -22,12 +22,12 @@ func summedHeight(timelines: [AltitudeTimeline]) -> Double {
                 if isFirst {
                     previousAltitude = satteliteAltitude.value
                     isFirst = false
-                } else if !(satteliteAltitude.accuracy > DataCapturing.Measurement.verticalAccuracyThresholdMeters) {
+                } else if !(satteliteAltitude.accuracy > DataCapturing.FinishedMeasurement.verticalAccuracyThresholdMeters) {
 
                     let currentAltitude = satteliteAltitude.value
                     let altitudeChange = currentAltitude - previousAltitude
 
-                    if abs(altitudeChange) > DataCapturing.Measurement.ascendThresholdMeters {
+                    if abs(altitudeChange) > DataCapturing.FinishedMeasurement.ascendThresholdMeters {
                         if altitudeChange > 0.0 {
                             sum += altitudeChange
                         }

@@ -19,6 +19,7 @@
 
 import Foundation
 import CoreMotion
+import Combine
 import os.log
 
 /**
@@ -43,33 +44,26 @@ public class SensorCapturer {
 
     // MARK: - Properties
     /// The measurement this data is captured for or `nil` if measurement is not active at the moment.
-    var measurement: Measurement?
-    /// An in memory storage for accelerations, before they are written to disk.
-    var accelerations = [SensorValue]()
+    //var measurement: Measurement?
     /// The timestamp of the previously captured acceleration. This is stored to make sure all accelerations are captured in increasing order.
-    var previousCapturedAccelerationTimestamp: TimeInterval
-    /// An in memory storage for rotations, before they are written to disk.
-    var rotations = [SensorValue]()
+    private var previousCapturedAccelerationTimestamp: TimeInterval
     /// The timestamp of the previously captured rotation. This is stored to make sure all rotations are captured in increasing order.
-    var previousCapturedRotationTimestamp: TimeInterval
-    /// An in memory storage for directions, before they are written to disk.
-    var directions = [SensorValue]()
+    private var previousCapturedRotationTimestamp: TimeInterval
     /// The timestamp of the previously captured direction. This is stored to make sure all directions are captured in increasing order.
-    var previousCapturedDirectionTimestamp: TimeInterval
-    /// A cache for storing the captured altitudes, before they are written to the database.
-    var altitudes = [Altitude]()
+    private var previousCapturedDirectionTimestamp: TimeInterval
+    private let capturedValues: PassthroughSubject<Message, Never>
     /// The queue running and synchronizing the data capturing lifecycle.
-    private let lifecycleQueue: DispatchQueue
+    //private let lifecycleQueue: DispatchQueue
     /// The queue running and synchronizing read and write operations to the sensor storage objects.
     private let capturingQueue: DispatchQueue
     /// An instance of `CMMotionManager`. There should be only one instance of this type in your application.
     private let motionManager: CMMotionManager
     /// `true` if the complete storage is empty. `false` otherwise.
     /// /// An altimeter to get altitude information.
-    let altimeter = CMAltimeter()
-    var isEmpty: Bool {
-        return accelerations.isEmpty && rotations.isEmpty && directions.isEmpty
-    }
+    private let altimeter = CMAltimeter()
+    /*var isEmpty: Bool {
+     return accelerations.isEmpty && rotations.isEmpty && directions.isEmpty
+     }*/
 
     // MARK: - Initializers
     /**
@@ -81,13 +75,13 @@ public class SensorCapturer {
      - motionManager: An instance of `CMMotionManager`. There should be only one instance of this type in your application.
      */
     init(
-        lifecycleQueue: DispatchQueue,
+        //lifecycleQueue: DispatchQueue,
         capturingQueue: DispatchQueue,
         accelerometerInterval: Double = 100.0,
         gyroInterval: Double = 100.0,
         directionsInterval: Double = 100.0
     ) {
-        self.lifecycleQueue = lifecycleQueue
+        //self.lifecycleQueue = lifecycleQueue
         self.capturingQueue = capturingQueue
         self.motionManager = CMMotionManager()
         self.motionManager.accelerometerUpdateInterval = 1.0 / accelerometerInterval
@@ -97,12 +91,14 @@ public class SensorCapturer {
         self.previousCapturedAccelerationTimestamp = 0.0
         self.previousCapturedRotationTimestamp = 0.0
         self.previousCapturedDirectionTimestamp = 0.0
+
+        capturedValues = PassthroughSubject<Message, Never>()
     }
 
     // MARK: - Methods
-    /// The the sensor capturing to the storage instances `accelertions`, `rotations` and `directions`.
-    func start(measurement: Measurement) {
-        self.measurement = measurement
+    /// The the sensor capturing to the storage instances `accelertions`, `rotations`, `directions` and `altitudes`.
+    func start(/*measurement: Measurement*/) -> AnyPublisher<Message, Never> {
+        //self.measurement = measurement
 
         let queue = OperationQueue()
         queue.qualityOfService = QualityOfService.userInitiated
@@ -123,11 +119,13 @@ public class SensorCapturer {
         if CMAltimeter.isRelativeAltitudeAvailable() {
             altimeter.startRelativeAltitudeUpdates(to: queue, withHandler: onAltitudeUpdate)
         }
+
+        return capturedValues.eraseToAnyPublisher()
     }
 
     /// Stop sensor capturing.
     func stop() {
-        self.measurement = nil
+        //self.measurement = nil
         motionManager.stopAccelerometerUpdates()
         motionManager.stopGyroUpdates()
         motionManager.stopDeviceMotionUpdates()
@@ -160,14 +158,16 @@ public class SensorCapturer {
 
         let accValues = data.acceleration
         let timestamp = Date()
-        let acc = SensorValue(timestamp: timestamp,
-                              x: accValues.x,
-                              y: accValues.y,
-                              z: accValues.z)
-        // Synchronize this write operation.
-        self.lifecycleQueue.async(flags: .barrier) {
-            self.accelerations.append(acc)
-        }
+        capturedValues.send(
+            .capturedAcceleration(
+                SensorValue(
+                    timestamp: timestamp,
+                    x: accValues.x,
+                    y: accValues.y,
+                    z: accValues.z
+                )
+            )
+        )
     }
 
     /**
@@ -194,10 +194,19 @@ public class SensorCapturer {
 
         let rotValues = data.rotationRate
         let timestamp = Date()
-        let rot = SensorValue(timestamp: timestamp, x: rotValues.x, y: rotValues.y, z: rotValues.z)
-        lifecycleQueue.async(flags: .barrier) {
-            self.rotations.append(rot)
-        }
+        capturedValues.send(
+            .capturedRotation(
+                SensorValue(
+                    timestamp: timestamp,
+                    x: rotValues.x,
+                    y: rotValues.y,
+                    z: rotValues.z
+                )
+            )
+        )
+        /*lifecycleQueue.async(flags: .barrier) {
+         self.rotations.append(rot)
+         }*/
     }
 
     /**
@@ -224,14 +233,20 @@ public class SensorCapturer {
 
         let dirValues = data.magneticField
         let timestamp = Date()
-        let dir = SensorValue(timestamp: timestamp, x: dirValues.field.x, y: dirValues.field.y, z: dirValues.field.z)
-        lifecycleQueue.async {
-            self.directions.append(dir)
-        }
+        capturedValues.send(
+            .capturedDirection(
+                SensorValue(
+                    timestamp: timestamp,
+                    x: dirValues.field.x,
+                    y: dirValues.field.y,
+                    z: dirValues.field.z
+                )
+            )
+        )
     }
 
     /// Called everytime the system has a new altitude value.
-    private func onAltitudeUpdate(data: CMAltitudeData?, error: Error?) {
+    private func onAltitudeUpdate(_ data: CMAltitudeData?, _ error: Error?) {
         if let error = error {
             os_log(
                 "Device Motion error while capturing Altitude: %{public}@",
@@ -251,18 +266,15 @@ public class SensorCapturer {
             return
         }
 
-        let altitude = Altitude(
-            relativeAltitude: data.relativeAltitude.doubleValue,
-            pressure: data.pressure.doubleValue,
-            time: data.startTime()
+        capturedValues.send(
+            .capturedAltitude(
+                Altitude(
+                    relativeAltitude: data.relativeAltitude.doubleValue,
+                    pressure: data.pressure.doubleValue,
+                    time: data.startTime()
+                )
+            )
         )
-        if let lastTrackIndex = measurement?.tracks.count {
-            measurement?.tracks[lastTrackIndex-1].altitudes.append(altitude)
-        }
-
-        lifecycleQueue.async {
-            self.altitudes.append(altitude)
-        }
     }
 }
 

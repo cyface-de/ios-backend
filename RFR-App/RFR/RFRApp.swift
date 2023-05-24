@@ -31,13 +31,43 @@ struct RFRApp: App {
     static let authenticationEndpoint = "https://s2-b.cyface.de/api/v3"
     static let uploadEndpoint = "https://s2-b.cyface.de/api/v3"
     static let registrationUrl = "https://s2-b.cyface.de/provider/api/v1/"
+    @StateObject var appViewModel = AppViewModel()
 
     var body: some Scene {
         WindowGroup {
-            InitializationView(
-                viewModel: DataCapturingViewModel(),
-                loginViewModel: LoginViewModel()
-            )
+            if appViewModel.isInitialized {
+                if let loginViewModel = appViewModel.loginViewModel {
+                    InitializationView(
+                        loginViewModel: loginViewModel
+                    )
+                } else if let error = appViewModel.error {
+                    ErrorView(error: error)
+                }
+            } else {
+                LoadinScreen()
+            }
+        }
+    }
+}
+
+/**
+ * Required to handle errors during initialization of `LoginViewModel`.
+ */
+class AppViewModel: ObservableObject {
+    var loginViewModel: LoginViewModel?
+    var error: Error?
+    @Published var isInitialized = false
+
+    init() {
+        Task {
+            do {
+                self.loginViewModel = try await LoginViewModel()
+                DispatchQueue.main.async { [weak self] in
+                    self?.isInitialized = true
+                }
+            } catch {
+                self.error = error
+            }
         }
     }
 }

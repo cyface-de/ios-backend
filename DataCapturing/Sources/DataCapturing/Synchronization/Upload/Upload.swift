@@ -55,7 +55,7 @@ class CoreDataBackedUpload: Upload {
         return Int64(identifier)
     }
     /// A cache for the actual measurement to upload, so we don't have to reload it from the database all the time.
-    var _measurement: Measurement?
+    var _measurement: FinishedMeasurement?
     /// A cache for the measurements metadata, so we don't have to reload it from the database all the time.
     var metaDataCache: MetaData?
     /// A cache for the binary data to upload.
@@ -67,7 +67,7 @@ class CoreDataBackedUpload: Upload {
     ///
     /// After the first call this is retrieved from a local cache and not reloaded from the local storage.
     /// To refresh the values, you need use a new instance of this class.
-    private func measurement() throws -> Measurement {
+    private func measurement() throws -> FinishedMeasurement {
         let persistenceLayer = dataStoreStack.persistenceLayer()
         if _measurement == nil {
             let loadedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
@@ -153,7 +153,7 @@ class CoreDataBackedUpload: Upload {
     }
 
     /// Load a measurement from CoreData and return the measurement together with the initial modality.
-    private func measurement(identifier: Int64) throws -> (Measurement, String) {
+    private func measurement(identifier: Int64) throws -> (FinishedMeasurement, String) {
         let persistenceLayer = dataStoreStack.persistenceLayer()
         let measurement = try persistenceLayer.load(measurementIdentifiedBy: identifier)
 

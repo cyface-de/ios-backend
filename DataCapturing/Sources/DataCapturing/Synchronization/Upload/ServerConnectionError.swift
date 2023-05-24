@@ -28,7 +28,7 @@ import Alamofire
  - Since: 1.0.0
  */
 public enum ServerConnectionError: Error {
-    /// If authentication was carried out but was not successful.
+    /// If authentication was carried out but was not successful. The username of the failed authentication attempt is provided as a parameter.
     case authenticationNotSuccessful(String)
     /// Error occuring if this client tried to communicate with the server without proper authentication.
     case notAuthenticated(String)

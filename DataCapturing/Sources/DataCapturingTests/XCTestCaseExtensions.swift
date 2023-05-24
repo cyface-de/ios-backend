@@ -10,12 +10,12 @@ import XCTest
 @testable import DataCapturing
 
 extension XCTestCase {
-    public func testBundle() -> Bundle? {
+    public static func testBundle() -> Bundle? {
         return Bundle.module
     }
 
-    public func appBundle() -> Bundle? {
-        let mainBundle = Bundle(for: DataCapturingService.self)
+    public static func appBundle() -> Bundle? {
+        let mainBundle = Bundle(for: CoreDataStack.self)
         let appBundle = Bundle(url: mainBundle.bundleURL.appendingPathComponent("DataCapturing_DataCapturing.bundle"))
         return appBundle
     }

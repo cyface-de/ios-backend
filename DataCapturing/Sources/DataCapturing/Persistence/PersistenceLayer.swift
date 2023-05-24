@@ -29,7 +29,7 @@ public protocol PersistenceLayer {
      Deletes the measurement from the data storag.
 
      - Parameters:
-        - measurement: The identifier of the measurement to delete from the data storage.
+     - measurement: The identifier of the measurement to delete from the data storage.
      - Throws: `PersistenceError.measurementNotLoadable`
      */
     func delete(measurement: Int64) throws
@@ -40,6 +40,9 @@ public protocol PersistenceLayer {
      - Parameter event: The event to delete
      */
     func delete(event: Event) throws
+
+    // TODO: Aus history wieder herstellen. Das wird in den Tests benötigt.
+    func delete() throws
 
     /**
      Strips the provided measurement of all file stored sensor values (i.e. accelerations, rotations, directions).
@@ -53,49 +56,49 @@ public protocol PersistenceLayer {
      Creates a new `MeasurementMO` in data storage.
 
      - Parameters:
-        - at: The time the measurement has been started at.
-        - inMode: The transportation mode the new measurement is created in.
+     - at: The time the measurement has been started at.
+     - inMode: The transportation mode the new measurement is created in.
      - Returns: The newly created model object for the measurement.
      - Throws: `PersistenceError.inconsistentState`
      */
-    func createMeasurement(at time: Date, inMode mode: String) throws -> Measurement
+    func createMeasurement(at time: Date, inMode mode: String) throws -> FinishedMeasurement
     /**
      Creates a new `Event` at the current time.
 
      - Parameters:
-        - of: The type of the logged `Event`.
-        - withValue: An optional value providing further information about the event
+     - of: The type of the logged `Event`.
+     - withValue: An optional value providing further information about the event
      */
-    func createEvent(of type: EventType, withValue: String?, time: Date, parent: inout Measurement) throws -> Event
+    func createEvent(of type: EventType, withValue: String?, time: Date, parent: inout FinishedMeasurement) throws -> Event
     /**
      This adds a new track to the end of the list of tracks of the provided measurement. New locations are always written to the last track. You need to call this method before adding any locations to a measurement.
 
      - Parameter to: The measurement to add the new track to.
      */
-    func appendNewTrack(to measurement: inout Measurement) throws
+    func appendNewTrack(to measurement: inout FinishedMeasurement) throws
 
     /// Save the provided `Measurement` via CoreData
-    func save(measurement: Measurement) throws -> Measurement
+    func save(measurement: FinishedMeasurement) throws -> FinishedMeasurement
     /**
      Stores the provided `locations` to the most recent track in the measurement. Please make sure to call `appendNewTrack(:to)` with the same measurement at least once before using this method.
 
      - Parameters:
-        - locations: An array of `GeoLocation` instances, ordered by timestamp to store in the database.
-        - in: The measurement to store the `location` and `accelerations` to.
+     - locations: An array of `GeoLocation` instances, ordered by timestamp to store in the database.
+     - in: The measurement to store the `location` and `accelerations` to.
      - Throws: `PersistenceError.dataNotLoadable`, Some unspecified errors from within CoreData.
      */
-    func save(locations: [LocationCacheEntry], in measurement: inout Measurement) throws
+    func save(locations: [GeoLocation], in measurement: inout FinishedMeasurement) throws
 
     /**
      Stores the provided `SensorValue`-objects to the provided measurement. The default value for each array is an empty array. This allows to store only one type of `SensorValue`.
 
      - Parameters:
-        - accelerations: An array of acceleration `SensorValue` instances to store.
-        - rotations: An array of rotation `SensorValue` instances to store.
-        - directions: An array of direction `SensorValue` instances to store.
-        - in: The measurement to store the `accelerations` to.
+     - accelerations: An array of acceleration `SensorValue` instances to store.
+     - rotations: An array of rotation `SensorValue` instances to store.
+     - directions: An array of direction `SensorValue` instances to store.
+     - in: The measurement to store the `accelerations` to.
      */
-    func save(accelerations: [SensorValue], rotations: [SensorValue], directions: [SensorValue], in measurement: inout Measurement) throws
+    func save(accelerations: [SensorValue], rotations: [SensorValue], directions: [SensorValue], in measurement: inout FinishedMeasurement) throws
 
     // MARK: - Database Reading Methods
 
@@ -106,7 +109,7 @@ public protocol PersistenceLayer {
      - Returns: The requested measurement as a model object.
      - Throws: `PersistenceError.measurementNotLoadable`, Some unspecified errors from within CoreData.
      */
-    func load(measurementIdentifiedBy identifier: Int64) throws -> Measurement
+    func load(measurementIdentifiedBy identifier: Int64) throws -> FinishedMeasurement
 
     /**
      Loads all the measurements from the data storage.
@@ -114,7 +117,7 @@ public protocol PersistenceLayer {
      - Returns: An array of all measurements currently stored on this device.
      - Throws: Some unspecified errors from within CoreData.
      */
-    func loadMeasurements() throws -> [Measurement]
+    func loadMeasurements() throws -> [FinishedMeasurement]
 
     /**
      Retrieves the list of all events of a certain `EventType` belonging to a `MeasurementMO` from the database.
@@ -122,14 +125,14 @@ public protocol PersistenceLayer {
      - Parameter typed: The `EventType` to load the `Event` objects for.
      - Parameter forMeasurement: The `MeasurementMO` object the loaded `Event` objects belong to.
      */
-    func loadEvents(typed type: EventType, forMeasurement measurement: Measurement) throws -> [Event]
+    func loadEvents(typed type: EventType, forMeasurement measurement: FinishedMeasurement) throws -> [Event]
 
     /**
      Loads only those measurements that have not been synchronized to a Cyface database yet and that are synchronizable at the moment.
 
      - Returns: An array containing all the not synchronized measurements.
      */
-    func loadSynchronizableMeasurements() throws -> [Measurement]
+    func loadSynchronizableMeasurements() throws -> [FinishedMeasurement]
 
     /**
      Provides only the valid locations within a cleaned geo location track. This excludes locations occuring because of geo location jitter and pauses.
@@ -146,20 +149,20 @@ public protocol PersistenceLayer {
      - Parameter measurement: The measurement to count the geo locations for
      - Returns: The count of locations measured in the measurement
      */
-    func countGeoLocations(forMeasurement measurement: Measurement) throws -> Int
+    func countGeoLocations(forMeasurement measurement: FinishedMeasurement) throws -> Int
 }
 
 // This extension is required to implement methods using default values.
 extension PersistenceLayer {
-    func createEvent(of type: EventType, withValue: String? = nil, time: Date = Date(), parent: inout Measurement) throws -> Event {
+    func createEvent(of type: EventType, withValue: String? = nil, time: Date = Date(), parent: inout FinishedMeasurement) throws -> Event {
         return try createEvent(of: type, withValue: withValue, time: time, parent: &parent)
     }
 
-    func save(accelerations: [SensorValue] = [], rotations: [SensorValue] = [], directions: [SensorValue] = [], in measurement: inout Measurement) throws {
+    public func save(accelerations: [SensorValue] = [], rotations: [SensorValue] = [], directions: [SensorValue] = [], in measurement: inout FinishedMeasurement) throws {
         try save(accelerations: accelerations, rotations: rotations, directions: directions, in: &measurement)
     }
 
-    func createMeasurement(at time: Date = Date(), inMode mode: String = "BICYCLE") throws -> Measurement {
+    func createMeasurement(at time: Date = Date(), inMode mode: String = "BICYCLE") throws -> FinishedMeasurement {
         try createMeasurement(at: time, inMode: mode)
     }
 }
@@ -192,16 +195,16 @@ public class CoreDataPersistenceLayer {
      Public constructor usable by external callers.
 
      - Parameters:
-        - withDistanceCalculator: An algorithm used to calculate the distance between geo locations.
-        - manager: A manager for the CoreData stack use by this `PersistenceLayer`.
+     - withDistanceCalculator: An algorithm used to calculate the distance between geo locations.
+     - manager: A manager for the CoreData stack use by this `PersistenceLayer`.
      */
     public init(onManager manager: CoreDataStack, withDistanceCalculator: DistanceCalculationStrategy = DefaultDistanceCalculationStrategy()) {
         self.distanceCalculator = withDistanceCalculator
         self.manager = manager
     }
 
-    /// The next identifier to assign to a new `Measurement`.
-    private func nextIdentifier() throws -> Int64 {
+    /// The next identifier to assign to a new `Measurement`. This is no private since it is used by unit tests.
+    func nextIdentifier() throws -> Int64 {
         let persistentStore = manager.persistentContainer.persistentStoreCoordinator.persistentStores[0]
         let coordinator = manager.persistentContainer.persistentStoreCoordinator
 
@@ -230,8 +233,8 @@ public class CoreDataPersistenceLayer {
      Internal load method, loading the provided `measurement` on the provided `context`.
 
      - Parameters:
-        - measurementIdentifiedBy: The `measurement` to load.
-        - from: The CoreData `context` to load the `measurement` from.
+     - measurementIdentifiedBy: The `measurement` to load.
+     - from: The CoreData `context` to load the `measurement` from.
      - Returns: The `MeasurementMO` object for the provided identifier or `nil` if no such mesurement exists.
      */
     private func load(measurementIdentifiedBy identifier: Int64, from context: NSManagedObjectContext) throws -> MeasurementMO? {
@@ -257,7 +260,7 @@ public class CoreDataPersistenceLayer {
      - Parameter from: The measurement to collect the geo locations from.
      - Returns: An array containing all the collected geo locations from all tracks of the provided measurement.
      */
-    public static func collectGeoLocations(from measurement: Measurement) -> [GeoLocation] {
+    public static func collectGeoLocations(from measurement: FinishedMeasurement) -> [GeoLocation] {
         var ret = [GeoLocation]()
 
         for track in measurement.tracks {
@@ -276,7 +279,7 @@ public class CoreDataPersistenceLayer {
      - Parameter from: The array of `Measurement` instances to extract the identifiers for.
      - Returns: A collection containing all the device wide unqiue identifiers of the provided measurements.
      */
-    public static func extractIdentifiers(from measurements: [Measurement]) -> [Int64] {
+    public static func extractIdentifiers(from measurements: [FinishedMeasurement]) -> [Int64] {
         var ret = [Int64]()
         for measurement in measurements {
             ret.append(measurement.identifier)
@@ -288,10 +291,10 @@ public class CoreDataPersistenceLayer {
      Traverses all tracks captured as part of a measurement and provides each track and geo location to a callback.
 
      - Parameters:
-        - ofMeasurement: The measurement to traverse the tracks for
-        - call: A callback function receiving the track and geo location pairs.
+     - ofMeasurement: The measurement to traverse the tracks for
+     - call: A callback function receiving the track and geo location pairs.
      */
-    public static func traverseTracks(ofMeasurement measurement: Measurement, call closure: (Track, GeoLocation) -> Void) {
+    public static func traverseTracks(ofMeasurement measurement: FinishedMeasurement, call closure: (Track, GeoLocation) -> Void) {
         for track in measurement.tracks {
             track.locations.forEach { location in closure(track, location) }
         }
@@ -309,7 +312,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
                 throw PersistenceError.measurementNotLoadable(measurementIdentifier)
             }
 
-            let localMeasurement = try Measurement(managedObject: measurement)
+            let localMeasurement = try FinishedMeasurement(managedObject: measurement)
             let accelerationFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
             try accelerationFile.remove(from: localMeasurement)
             let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
@@ -322,7 +325,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
     }
 
     public func delete(event: Event) throws {
-        try manager.wrapInContext { context in
+        /*try manager.wrapInContext { context in
             guard let objectId = event.objectId else {
                 throw PersistenceError.inconsistentState
             }
@@ -335,7 +338,13 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
             }
             context.delete(eventMO)
             try context.save()
-        }
+        }*/
+    }
+
+    public func delete() throws {
+        /*
+         
+         */
     }
 
     public func clean(measurement: Int64) throws {
@@ -346,7 +355,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
             }
 
             measurementMO.synchronized = true
-            let localMeasurement = try Measurement(managedObject: measurementMO)
+            let localMeasurement = try FinishedMeasurement(managedObject: measurementMO)
             let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
             try accelerationsFile.remove(from: localMeasurement)
             let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
@@ -358,7 +367,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
         }
     }
 
-    public func createMeasurement(at time: Date, inMode mode: String) throws -> Measurement {
+    public func createMeasurement(at time: Date, inMode mode: String) throws -> FinishedMeasurement {
         return try manager.wrapInContextReturn { context in
             // This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
             var identifier = try nextIdentifier()
@@ -373,14 +382,14 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
             measurementMO.synchronizable = false
             try context.save()
 
-            var measurement = try Measurement(managedObject: measurementMO)
+            var measurement = try FinishedMeasurement(managedObject: measurementMO)
             _ = try createEvent(of: .modalityTypeChange, withValue: mode, parent: &measurement)
 
             return measurement
         }
     }
 
-    public func createEvent(of type: EventType, withValue: String? = nil, time: Date = Date(), parent: inout Measurement) throws -> Event {
+    public func createEvent(of type: EventType, withValue: String? = nil, time: Date = Date(), parent: inout FinishedMeasurement) throws -> Event {
         return try manager.wrapInContextReturn { context in
             let eventMO = EventMO(context: context)
             eventMO.typeEnum = type
@@ -390,7 +399,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
                 throw PersistenceError.inconsistentState
             }
             measurementMO.addToEvents(eventMO)
-            let event = Event(managedObject: eventMO, parent: parent)
+            let event = Event(managedObject: eventMO)
             parent.events.append(event)
 
             try context.save()
@@ -398,8 +407,8 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
         }
     }
 
-    public func appendNewTrack(to measurement: inout Measurement) throws {
-        try manager.wrapInContext { context in
+    public func appendNewTrack(to measurement: inout FinishedMeasurement) throws {
+        /*try manager.wrapInContext { context in
             guard let measurementObjectId = measurement.objectId else {
                 throw PersistenceError.inconsistentState
             }
@@ -412,11 +421,11 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
 
             try context.save()
             measurement.tracks.append(try Track(managedObject: trackMO, parent: measurement))
-        }
+        }*/
     }
 
-    public func save(measurement: Measurement) throws -> Measurement {
-        try manager.wrapInContextReturn { context in
+    public func save(measurement: FinishedMeasurement) throws -> FinishedMeasurement {
+        /*try manager.wrapInContextReturn { context in
             if let objectId = measurement.objectId {
                 guard let managedObjectMeasurement = try context.existingObject(with: objectId) as? MeasurementMO else {
                     throw PersistenceError.dataNotLoadable(measurement: measurement.identifier)
@@ -437,10 +446,11 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
 
                 return try Measurement(managedObject: newManagedMeasurement)
             }
-        }
+        }*/
+        return FinishedMeasurement(identifier: 0)
     }
 
-    public func save(locations: [LocationCacheEntry], in measurement: inout Measurement) throws {
+    public func save(locations: [GeoLocation], in measurement: inout FinishedMeasurement) throws {
         os_log(
             "Storing %{PUBLIC}d locations to measurement %{PUBLIC}d!",
             log: OSLog.persistence,
@@ -448,7 +458,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
             locations.count,
             measurement.identifier
         )
-        try manager.wrapInContext { context in
+        /*try manager.wrapInContext { context in
 
             guard let measurementMO = try load(measurementIdentifiedBy: measurement.identifier, from: context) else {
                 throw PersistenceError.measurementNotLoadable(measurement.identifier)
@@ -482,10 +492,9 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
                     accuracy: location.accuracy,
                     speed: location.speed,
                     time: location.time,
-                    isValid: location.isValid,
                     altitude: location.altitude,
-                    verticalAccuracy: location.verticalAccuracy,
-                    parent: track)
+                    verticalAccuracy: location.verticalAccuracy
+                )
                 try track.append(location: geoLocation)
                 let dbLocation = try GeoLocationMO(location: &geoLocation, context: context)
                 dbTrack.addToLocations(dbLocation)
@@ -512,10 +521,10 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
                 measurement.identifier,
                 measurement.trackLength
             )
-        }
+        }*/
     }
 
-    public func save(accelerations: [SensorValue] = [], rotations: [SensorValue] = [], directions: [SensorValue] = [], in measurement: inout Measurement) throws {
+    public func save(accelerations: [SensorValue] = [], rotations: [SensorValue] = [], directions: [SensorValue] = [], in measurement: inout FinishedMeasurement) throws {
         try manager.wrapInContext { context in
 
             debugPrint("Storing \(accelerations.count) accelerations \(rotations.count) rotations and \(directions.count) directions.")
@@ -554,33 +563,33 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
         }
     }
 
-    public func load(measurementIdentifiedBy identifier: Int64) throws -> Measurement {
+    public func load(measurementIdentifiedBy identifier: Int64) throws -> FinishedMeasurement {
         return try manager.wrapInContextReturn { context in
             do {
                 guard let unwrappedMeasurement = try self.load(measurementIdentifiedBy: identifier, from: context) else {
                     throw PersistenceError.measurementNotLoadable(identifier)
                 }
-                return try Measurement(managedObject: unwrappedMeasurement)
+                return try FinishedMeasurement(managedObject: unwrappedMeasurement)
             } catch {
                 throw PersistenceError.measurementNotLoadable(identifier)
             }
         }
     }
 
-    public func loadMeasurements() throws -> [Measurement] {
+    public func loadMeasurements() throws -> [FinishedMeasurement] {
         return try manager.wrapInContextReturn { context in
             let request = MeasurementMO.fetchRequest()
-            var ret = [Measurement]()
+            var ret = [FinishedMeasurement]()
             for fetchResult in try context.fetch(request) {
-                let measurement = try Measurement(managedObject: fetchResult)
+                let measurement = try FinishedMeasurement(managedObject: fetchResult)
                 ret.append(measurement)
             }
             return ret
         }
     }
 
-    public func loadEvents(typed type: EventType, forMeasurement measurement: Measurement) throws -> [Event] {
-        return try manager.wrapInContextReturn { context in
+    public func loadEvents(typed type: EventType, forMeasurement measurement: FinishedMeasurement) throws -> [Event] {
+        /*return try manager.wrapInContextReturn { context in
             guard let measurementObjectId = measurement.objectId else {
                 throw PersistenceError.inconsistentState
             }
@@ -593,23 +602,24 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
 
             var ret = [Event]()
             for fetchResult in try context.fetch(request) {
-                let event = Event(managedObject: fetchResult, parent: measurement)
+                let event = Event(managedObject: fetchResult)
                 ret.append(event)
             }
             return ret
-        }
+        }*/
+        return [Event]()
     }
 
-    public func loadSynchronizableMeasurements() throws -> [Measurement] {
+    public func loadSynchronizableMeasurements() throws -> [FinishedMeasurement] {
         return try manager.wrapInContextReturn { context in
             let request: NSFetchRequest<MeasurementMO> = MeasurementMO.fetchRequest()
             // Fetch only not synchronized measurements
             request.predicate = NSPredicate(format: "synchronized == %@ AND synchronizable == %@",
-                                        argumentArray: [ NSNumber(value: false), NSNumber(value: true)])
+                                            argumentArray: [ NSNumber(value: false), NSNumber(value: true)])
 
-            var ret = [Measurement]()
+            var ret = [FinishedMeasurement]()
             for fetchResult in try context.fetch(request) {
-                let measurement = try Measurement(managedObject: fetchResult)
+                let measurement = try FinishedMeasurement(managedObject: fetchResult)
                 ret.append(measurement)
             }
             return ret
@@ -617,7 +627,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
     }
 
     public func loadClean(track: inout Track) throws -> [GeoLocation] {
-        return try manager.wrapInContextReturn { context in
+        /*return try manager.wrapInContextReturn { context in
             let request = GeoLocationMO.fetchRequest()
             guard let parentObjectId = track.objectId else {
                 throw PersistenceError.inconsistentState
@@ -628,16 +638,17 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
 
             var ret = [GeoLocation]()
             for fetchResult in try context.fetch(request) {
-                let location = GeoLocation(managedObject: fetchResult, parent: track)
+                let location = GeoLocation(managedObject: fetchResult)
                 ret.append(location)
             }
             return ret
-        }
+        }*/
+        return [GeoLocation]()
     }
 
 
-    public func countGeoLocations(forMeasurement measurement: Measurement) throws -> Int {
-        try manager.wrapInContextReturn { context in
+    public func countGeoLocations(forMeasurement measurement: FinishedMeasurement) throws -> Int {
+        /*try manager.wrapInContextReturn { context in
             guard let measurementObjectId = measurement.objectId else {
                 throw PersistenceError.inconsistentState
             }
@@ -646,7 +657,8 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
             locationRequest.predicate = NSPredicate(format: "track.measurement = %@", measurementObjectId)
 
             return try context.count(for: locationRequest)
-        }
+        }*/
+        return 0
     }
 }
 
@@ -661,9 +673,9 @@ public enum PersistenceError: Error {
     /// If a measurement was not loaded successfully.
     case measurementNotLoadable(Int64)
     /// If a track from a measurement could not be loaded
-    case trackNotLoadable(Track, Measurement)
+    case trackNotLoadable(Track, FinishedMeasurement)
     /// If a track was not persistent (i.e. had not valid objectId) at a place where only persistent tracks are valid
-    case nonPersistentTrackEncountered(Track, Measurement)
+    case nonPersistentTrackEncountered(Track, FinishedMeasurement)
     /// If measurements could not be loaded in bulk.
     case measurementsNotLoadable
     /// If some data belonging to a measurement could not be loaded.

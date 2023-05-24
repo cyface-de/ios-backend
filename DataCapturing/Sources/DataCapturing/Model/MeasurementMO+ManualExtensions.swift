@@ -14,12 +14,12 @@ import CoreData
 extension MeasurementMO {
     /// Update this managed object with the property values from a `Measurement`. This might be used for saving the `Measurement` to CoreData.
     /// - throws: On internal CoreData errors, if the `objectId` of this `Measurement` or some part of it are not consistent with CoreData or if the locations captured by the `Measurement` are not strongly monotonically increasing.
-    func update(from measurement: Measurement) throws {
+    func update(from measurement: FinishedMeasurement) throws {
         self.synchronizable = measurement.synchronizable
         self.synchronized = measurement.synchronized
         self.trackLength = measurement.trackLength
 
-        guard let context = managedObjectContext else {
+        /*guard let context = managedObjectContext else {
             throw PersistenceError.inconsistentState
         }
 
@@ -47,7 +47,7 @@ extension MeasurementMO {
             } else {
                 insertIntoEvents(try EventMO(event: &event, context: context), at: i)
             }
-        }
+        }*/
 
         // TODO: Delete obsolete events and tracks here. This is not necessary for our current uses cases, but should be added to complete this code conceptually.
     }

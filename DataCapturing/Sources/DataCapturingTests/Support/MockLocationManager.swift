@@ -28,15 +28,27 @@ import CoreLocation
  - Version: 1.0.0
  - Since: 4.0.0
  */
-class TestLocationManager: LocationManager {
+class MockLocationManager: LocationManager {
 
-    weak var locationDelegate: CLLocationManagerDelegate?
+    var location: CLLocation? = CLLocation(
+            latitude: 37.3317,
+            longitude: -122.0325086
+        )
 
+    var locationDelegate: CLLocationManagerDelegate?
+    var distanceFilter: CLLocationDistance = 10
+    var pausesLocationUpdatesAutomatically = false
+    var allowsBackgroundLocationUpdates = true
+    var timer: Timer?
+
+    func requestWhenInUseAuthorization() { }
     func startUpdatingLocation() {
-        print("start updating location")
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] t in
+            self?.locationDelegate?.locationManager!(CLLocationManager(), didUpdateLocations: [CLLocation(latitude: 15.0, longitude: 15.0)])
+        }
     }
-
     func stopUpdatingLocation() {
-        print("stop updating location")
+        timer?.invalidate()
+        timer = nil
     }
 }

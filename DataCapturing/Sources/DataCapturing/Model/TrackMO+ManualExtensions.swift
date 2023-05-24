@@ -24,16 +24,15 @@ extension TrackMO {
     /// Initialize a CoreData managed track object from the properties of a `Track`.
     convenience init(track: inout Track, context: NSManagedObjectContext) throws {
         self.init(context: context)
-        track.objectId = self.objectID
-
         try update(from: track)
     }
 
+    // TODO: All these update methods should not be necessary anymore.
     /// Refresh the properties of this managed object from the provided `Track`.
     func update(from track: Track) throws {
-        try updateLocations(from: track)
+        //try updateLocations(from: track)
 
-        try updateAltitudes(from: track)
+        //try updateAltitudes(from: track)
 
         // TODO: Delete invalid locations from managed location. This should not happen in our current use cases but would still be necessary conceptually.
     }
@@ -60,7 +59,7 @@ extension TrackMO {
         return typedLocations
     }
 
-    private func updateLocations(from track: Track) throws {
+    /*private func updateLocations(from track: Track) throws {
         for i in 0..<track.locations.count {
             var location = track.locations[i]
 
@@ -68,14 +67,10 @@ extension TrackMO {
                 fatalError()
             }
 
-            if let locationObjectId = location.objectId {
-                guard let managedLocation = try context.existingObject(with: locationObjectId) as? GeoLocationMO else {
-                    throw PersistenceError.inconsistentState
-                }
-                try managedLocation.update(from: location)
-            } else {
-                insertIntoLocations(try GeoLocationMO(location: &location, context: context), at: i)
+            /*guard let managedLocation = try context.existingObject(with: locationObjectId) as? GeoLocationMO else {
+                throw PersistenceError.inconsistentState
             }
+            try managedLocation.update(from: location)*/
         }
     }
 
@@ -95,5 +90,5 @@ extension TrackMO {
                 insertIntoAltitudes(try AltitudeMO(altitude: &altitude, context: context), at: index)
             }
         }
-    }
+    }*/
 }

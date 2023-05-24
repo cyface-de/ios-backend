@@ -26,10 +26,8 @@ import CoreData
  - Author: Klemens Muthmann
  */
 public class Altitude: CustomStringConvertible {
-    /// The database identifier used by CoreData to identify this object in the database.
-    var objectId: NSManagedObjectID?
     /// The relative altitude change since the last measured value, in meters.
-    let relativeAltitude: Double
+    public let relativeAltitude: Double
     /// The currently measured pressure in kilopascals .
     let pressure: Double
     /// The time this was measured.

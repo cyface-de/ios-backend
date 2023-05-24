@@ -28,7 +28,7 @@ import CoreLocation
  - Version: 1.1.0
  - Since: 4.0.0
  */
-class TestDataCapturingService: DataCapturingService {
+/*class TestMeasurement: DataCapturing.Measurement {
 
     /// The timer used to simulate location updates every second, like in the real app.
     var timer: DispatchSourceTimer?
@@ -61,4 +61,4 @@ class TestDataCapturingService: DataCapturingService {
     private func generateLocation() -> CLLocation {
         return CLLocation(coordinate: CLLocationCoordinate2D(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0)), altitude: Double.random(in: 0.0...8848.0), horizontalAccuracy: Double.random(in: 0.0...20.0), verticalAccuracy: Double.random(in: 0.0...20.0), course: Double.random(in: 0.0...1.0), speed: Double.random(in: 0.0...80.0), timestamp: Date())
     }
-}
+}*/

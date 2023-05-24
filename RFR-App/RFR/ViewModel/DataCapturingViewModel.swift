@@ -23,20 +23,14 @@ class DataCapturingViewModel: ObservableObject {
             }
         }
     }
-    var dataCapturingService: DataCapturingService?
+    var dataStoreStack: DataStoreStack?
 
     init() {
         do {
-            let coreDataStack = try CoreDataStack()
+            self.dataStoreStack = try CoreDataStack()
             Task {
                 do {
-                    try await coreDataStack.setup()
-                    dataCapturingService = DataCapturingServiceImpl(
-                        lifecycleQueue: DispatchQueue(label: "lifecylce"),
-                        capturingQueue: DispatchQueue.global(qos: .userInitiated),
-                        savingInterval: TimeInterval(1.0),
-                        dataStoreStack: coreDataStack
-                    )
+                    try await dataStoreStack?.setup()
                     DispatchQueue.main.async { [weak self] in
                         self?.isInitialized = true
                     }
@@ -53,12 +47,12 @@ class DataCapturingViewModel: ObservableObject {
         isInitialized: Bool,
         showError: Bool,
         error: Error?,
-        dataCapturingService: DataCapturingService
+        dataStoreStack: DataStoreStack
     ) {
         self.isInitialized = isInitialized
         self.showError = showError
         self.error = error
-        self.dataCapturingService = dataCapturingService
+        self.dataStoreStack = dataStoreStack
     }
 
     private func handleError(_ error: Error) {

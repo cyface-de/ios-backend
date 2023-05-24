@@ -33,7 +33,7 @@ import os.log
  - Version: 5.0.0
  - Since: 1.0.0
  */
-public class MovebisDataCapturingService: DataCapturingServiceImpl {
+public class MovebisDataCapturingService: MeasurementImpl {
 
     // MARK: - Properties
 

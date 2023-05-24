@@ -20,24 +20,25 @@
 import Foundation
 import DataCapturing
 
+// TODO: Remove this
 class ControlBarViewModel: ObservableObject {
 
-    let dataCapturingService: DataCapturingService
+    let measurement: DataCapturing.Measurement
     @Published var showError = false
     var error: Error?
 
-    init(dataCapturingService: DataCapturingService) {
-        self.dataCapturingService = dataCapturingService
+    init(measurement: DataCapturing.Measurement) {
+        self.measurement = measurement
     }
 
     func onPlayPausePressed() {
         do {
-            if dataCapturingService.isRunning {
-                try dataCapturingService.pause()
-            } else if dataCapturingService.currentMeasurement == nil {
-                try dataCapturingService.start(inMode: "BICYCLE")
+            if measurement.isRunning {
+                try measurement.pause()
+            } else if measurement.isPaused {
+                try measurement.resume()
             } else {
-                try dataCapturingService.resume()
+                try measurement.start(inMode: "BICYCLE")
             }
         } catch {
             handleError(error)
@@ -46,7 +47,7 @@ class ControlBarViewModel: ObservableObject {
 
     func onStopPressed() {
         do {
-            try dataCapturingService.stop()
+            try measurement.stop()
         } catch {
             handleError(error)
         }

@@ -24,21 +24,25 @@ import CoreLocation
  Protocol which enables us to provide mock location managers to unit tests.
  This only implements the methods required by the `DataCapturingService`, since we need to only mock those away.
 
+ The idea behind this is described in detail for example here: https://rwhtechnology.com/blog/unit-test-cllocationmanager-with-mock/
+
  - Author: Klemens Muthmann
  - Version: 1.0.0
  - Since: 4.0.0
  */
-protocol LocationManager {
+public protocol LocationManager {
     /// A wrapper for the delegate receiving the location updates.
     var locationDelegate: CLLocationManagerDelegate? { get set }
+    var authorizationStatus: CLAuthorizationStatus { get }
     /// Starts listening for location updates and delivering new update to the delegate.
     func startUpdatingLocation()
     /// Stops location updates. No further updates are delivered to the delegate after this point.
     func stopUpdatingLocation()
+    func requestAlwaysAuthorization()
 }
 
 extension CLLocationManager: LocationManager {
-    var locationDelegate: CLLocationManagerDelegate? {
+    public var locationDelegate: CLLocationManagerDelegate? {
         get {
             return self.delegate
         }
