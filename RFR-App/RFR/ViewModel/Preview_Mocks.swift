@@ -89,6 +89,17 @@ class MockAuthenticator: CredentialsAuthenticator {
 }
 
 class MockDataStoreStack: DataStoreStack {
+    func wrapInContextReturn<T>(_ block: (NSManagedObjectContext) throws -> T) throws -> T {
+        return try block(NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType))
+    }
+
+    private var nextIdentifier = UInt64(0)
+
+    func nextValidIdentifier() throws -> UInt64 {
+        nextIdentifier += 1
+        return nextIdentifier
+    }
+
     func wrapInContext(_ block: (NSManagedObjectContext) throws -> Void) throws {
 
     }

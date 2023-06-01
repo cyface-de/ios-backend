@@ -28,24 +28,77 @@ A single row in the measurements overview displaying all the measurements in a l
  */
 struct MeasurementCell: View {
     /// The view model containing all information from a measurement required to display a single row in the measurements overview.
-    var viewModel: MeasurementCellViewModel
+    var measurement: Measurement
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("\(viewModel.measurement.id)) \(viewModel.measurement.name)")
+            Text("\(measurement.id)) \(measurement.title)")
                 .font(.headline)
             HStack {
-                Text("\(viewModel.details)")
+                Text("\(measurement.details)")
                 Spacer()
-                viewModel.synchedSymbol.padding([.trailing])
+                measurement.synchedSymbol.padding([.trailing])
             }
         }
     }
 }
 
 struct MeasurementCell_Previews: PreviewProvider {
+    static let measurements = [
+        Measurement(
+            id: 0,
+            startTime: Date(timeIntervalSince1970: 10_000),
+            synchronizationState: .synchronizable,
+            _maxSpeed: 10.0,
+            _meanSpeed: 10.0,
+            _distance: 10.0,
+            _duration: 5_000,
+            _inclination: 5.0,
+            _lowestPoint: 0.0,
+            _highestPoint: 2.0,
+            _avoidedEmissions: 2.0,
+            heightProfile: [
+                Altitude(
+                    id: 0,
+                    timestamp: Date(timeIntervalSince1970: 10_000),
+                    height: 4.0
+                ),
+                Altitude(
+                    id: 1,
+                    timestamp: Date(timeIntervalSince1970: 10_100),
+                    height: 7.2
+                )
+            ]
+        ),
+        Measurement(
+            id: 1,
+            startTime: Date(timeIntervalSince1970: 20_000),
+            synchronizationState: .synchronizing,
+            _maxSpeed: 20.0,
+            _meanSpeed: 20.0,
+            _distance: 20.0,
+            _duration: 10_000,
+            _inclination: 10.0,
+            _lowestPoint: 1.0,
+            _highestPoint: 4.0,
+            _avoidedEmissions: 4.0,
+            heightProfile: [
+                Altitude(
+                    id: 3,
+                    timestamp: Date(timeIntervalSince1970: 20_100),
+                    height: 3.5
+                ),
+                Altitude(
+                    id: 4,
+                    timestamp: Date(timeIntervalSince1970: 20_200),
+                    height: 5.4
+                )
+            ]
+        )
+    ]
+    
     static var previews: some View {
-        MeasurementCell(viewModel: MeasurementCellViewModel(measurement: exampleMeasurements[0]))
-        MeasurementCell(viewModel: MeasurementCellViewModel(measurement: exampleMeasurements[1]))
+        MeasurementCell(measurement: measurements[0])
+        MeasurementCell(measurement: measurements[1])
     }
 }

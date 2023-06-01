@@ -48,7 +48,7 @@ struct MainView: View {
                                     .font(.footnote)
                             }
                             .tag(1)
-                        LiveView(viewModel: LiveViewModel())
+                        LiveView(viewModel: LiveViewModel(dataStoreStack: dataStoreStack))
                             .tabItem {
                                 Image(systemName: "location.fill")
                                 Text("Live")

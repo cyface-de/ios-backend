@@ -19,6 +19,8 @@
 
 import Foundation
 import CoreLocation
+import Combine
+import OSLog
 @testable import DataCapturing
 
 /**
@@ -28,37 +30,69 @@ import CoreLocation
  - Version: 1.1.0
  - Since: 4.0.0
  */
-/*class TestMeasurement: DataCapturing.Measurement {
+class TestMeasurement: DataCapturing.Measurement {
+    var measurementMessages = PassthroughSubject<DataCapturing.Message, Never>()
+
+    var isRunning: Bool = false
+
+    var isPaused: Bool = false
 
     /// The timer used to simulate location updates every second, like in the real app.
     var timer: DispatchSourceTimer?
+    var altitudeTimer: DispatchSourceTimer?
 
-    override func startCapturing(savingEvery time: TimeInterval, for event: EventType) throws -> Event? {
-        let event = try super.startCapturing(savingEvery: time, for: event)
+    func start(inMode modality: String) throws {
         timer = DispatchSource.makeTimerSource()
-        timer!.setEventHandler { [weak self] in
-            guard let self = self else {
-                return
-            }
+        altitudeTimer = DispatchSource.makeTimerSource()
 
-            let location = self.generateLocation()
-            self.locationManager(CLLocationManager(), didUpdateLocations: [location])
+        timer?.setEventHandler { [weak self] in
+            let location = TestFixture.randomLocation()
+            self?.measurementMessages.send(Message.capturedLocation(location))
         }
-        timer!.schedule(deadline: .now(), repeating: 1)
-        timer!.resume()
-        return event
+        altitudeTimer?.setEventHandler { [weak self] in
+            let altitude = TestFixture.randomAltitude()
+            self?.measurementMessages.send(Message.capturedAltitude(altitude))
+        }
+
+        timer?.schedule(deadline: .now(), repeating: 1)
+        altitudeTimer?.schedule(deadline: .now(), repeating: 0.5)
+        isRunning = true
+        isPaused = false
+        self.measurementMessages.send(Message.started(timestamp: Date()))
+        timer?.resume()
+        altitudeTimer?.resume()
     }
 
-    override func stopCapturing() {
-        super.stopCapturing()
+    func stop() throws {
         timer?.cancel()
+        altitudeTimer?.cancel()
         timer = nil
+        altitudeTimer = nil
+        isRunning = false
+        isPaused = false
+        os_log("Sending stop event", log: OSLog.test, type: .debug)
+        self.measurementMessages.send(Message.stopped(timestamp: Date()))
+        self.measurementMessages.send(completion: .finished)
     }
 
-    /**
-     Generates a random location anywhere on earth.
-     */
-    private func generateLocation() -> CLLocation {
-        return CLLocation(coordinate: CLLocationCoordinate2D(latitude: Double.random(in: -90.0...90.0), longitude: Double.random(in: -180.0...180.0)), altitude: Double.random(in: 0.0...8848.0), horizontalAccuracy: Double.random(in: 0.0...20.0), verticalAccuracy: Double.random(in: 0.0...20.0), course: Double.random(in: 0.0...1.0), speed: Double.random(in: 0.0...80.0), timestamp: Date())
+    func pause() throws {
+        timer?.suspend()
+        altitudeTimer?.suspend()
+        isPaused = true
+        isRunning = false
+        self.measurementMessages.send(Message.paused(timestamp: Date()))
+        self.measurementMessages.send(completion: .finished)
     }
-}*/
+
+    func resume() throws {
+        timer?.resume()
+        altitudeTimer?.resume()
+        isPaused = false
+        isRunning = true
+        self.measurementMessages.send(Message.resumed(timestamp: Date()))
+    }
+
+    func changeModality(to modality: String) {
+        self.measurementMessages.send(Message.modalityChanged(to: modality))
+    }
+}

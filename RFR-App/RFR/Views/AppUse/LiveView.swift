@@ -27,7 +27,7 @@ import SwiftUI
  */
 struct LiveView: View {
     /// The view model used by this `View`.
-    @StateObject var viewModel = LiveViewModel()
+    @ObservedObject var viewModel: LiveViewModel
 
     var body: some View {
         VStack {
@@ -61,12 +61,14 @@ struct LiveView_Previews: PreviewProvider {
         LiveView(viewModel: LiveViewModel(
             speed: 21.0,
             averageSpeed: 15.0,
-            measurementState: .stopped
+            measurementState: .stopped,
+            dataStoreStack: MockDataStoreStack()
             )
         )
 
         LiveView(viewModel: LiveViewModel(
-            measurementState: .running
+            measurementState: .running,
+            dataStoreStack: MockDataStoreStack()
         ))
     }
 }
@@ -83,7 +85,7 @@ struct LiveStatisticsView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Fahrt 23").font(.largeTitle)
+            Text(viewModel.measurementName).font(.largeTitle)
             HStack {
                 Text("Geschwindigkeit")
                 Spacer()

@@ -21,22 +21,6 @@ import Foundation
 import CoreData
 
 extension TrackMO {
-    /// Initialize a CoreData managed track object from the properties of a `Track`.
-    convenience init(track: inout Track, context: NSManagedObjectContext) throws {
-        self.init(context: context)
-        try update(from: track)
-    }
-
-    // TODO: All these update methods should not be necessary anymore.
-    /// Refresh the properties of this managed object from the provided `Track`.
-    func update(from track: Track) throws {
-        //try updateLocations(from: track)
-
-        //try updateAltitudes(from: track)
-
-        // TODO: Delete invalid locations from managed location. This should not happen in our current use cases but would still be necessary conceptually.
-    }
-
     /**
      The altitudes in this measurement already cast to the correct type.
      */
@@ -58,37 +42,4 @@ extension TrackMO {
 
         return typedLocations
     }
-
-    /*private func updateLocations(from track: Track) throws {
-        for i in 0..<track.locations.count {
-            var location = track.locations[i]
-
-            guard let context = managedObjectContext else {
-                fatalError()
-            }
-
-            /*guard let managedLocation = try context.existingObject(with: locationObjectId) as? GeoLocationMO else {
-                throw PersistenceError.inconsistentState
-            }
-            try managedLocation.update(from: location)*/
-        }
-    }
-
-    private func updateAltitudes(from track: Track) throws {
-        try track.altitudes.enumerated().forEach { (index, value) in
-            var altitude = value
-            guard let context = managedObjectContext else {
-                fatalError()
-            }
-
-            if let altitudeObjectId = altitude.objectId {
-                guard let managedAltitude = try context.existingObject(with: altitudeObjectId) as? AltitudeMO else {
-                    throw PersistenceError.inconsistentState
-                }
-                try managedAltitude.update(from: altitude)
-            } else {
-                insertIntoAltitudes(try AltitudeMO(altitude: &altitude, context: context), at: index)
-            }
-        }
-    }*/
 }

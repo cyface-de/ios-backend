@@ -19,19 +19,20 @@
 
 import Foundation
 import CoreData
+import CoreLocation
 
 /**
  The class extended here is generated during the build process, by CoreData from the data model file.
  */
 extension GeoLocationMO {
     /// Initializes a managed object from an existing `GeoLocation`.
-    convenience init(location: inout GeoLocation, context: NSManagedObjectContext) throws {
+    convenience init(location: GeoLocation, context: NSManagedObjectContext) {
         self.init(context: context)
-        try update(from: location)
+        update(from: location)
     }
 
     /// Update this managed object with the values from the provided `GeoLocation`.
-    func update(from location: GeoLocation) throws {
+    func update(from location: GeoLocation) {
         self.lat = location.latitude
         self.lon = location.longitude
         self.accuracy = location.accuracy
@@ -39,6 +40,34 @@ extension GeoLocationMO {
         self.time = location.time
         self.verticalAccuracy = location.verticalAccuracy
         self.altitude = location.altitude
+    }
+
+    public func distance(to location: GeoLocationMO) -> Double {
+        guard let selfTime = self.time, let locationTime = location.time else {
+            return 0.0
+        }
+
+        let selfLocation = CLLocation(
+            coordinate: CLLocationCoordinate2D(
+                latitude: self.lat,
+                longitude: self.lon
+            ),
+            altitude: self.altitude,
+            horizontalAccuracy: self.accuracy,
+            verticalAccuracy: self.verticalAccuracy,
+            timestamp: selfTime
+        )
+        let otherLocation = CLLocation(
+            coordinate: CLLocationCoordinate2D(
+                latitude: location.lat,
+                longitude: location.lon),
+            altitude: location.altitude,
+            horizontalAccuracy: location.accuracy,
+            verticalAccuracy: location.verticalAccuracy,
+            timestamp: locationTime
+        )
+
+        return otherLocation.distance(from: selfLocation)
     }
 
 }

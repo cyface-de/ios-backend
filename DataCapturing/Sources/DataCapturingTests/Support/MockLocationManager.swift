@@ -29,6 +29,7 @@ import CoreLocation
  - Since: 4.0.0
  */
 class MockLocationManager: LocationManager {
+    var authorizationStatus = CLAuthorizationStatus.authorizedAlways
 
     var location: CLLocation? = CLLocation(
             latitude: 37.3317,
@@ -50,5 +51,8 @@ class MockLocationManager: LocationManager {
     func stopUpdatingLocation() {
         timer?.invalidate()
         timer = nil
+    }
+    func requestAlwaysAuthorization() {
+        locationDelegate?.locationManager?(CLLocationManager(), didChangeAuthorization: .authorizedAlways)
     }
 }

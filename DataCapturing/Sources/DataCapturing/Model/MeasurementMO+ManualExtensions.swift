@@ -17,7 +17,6 @@ extension MeasurementMO {
     func update(from measurement: FinishedMeasurement) throws {
         self.synchronizable = measurement.synchronizable
         self.synchronized = measurement.synchronized
-        self.trackLength = measurement.trackLength
 
         /*guard let context = managedObjectContext else {
             throw PersistenceError.inconsistentState
@@ -57,9 +56,17 @@ extension MeasurementMO {
      */
     public func typedTracks() -> [TrackMO] {
         guard let typedTracks = tracks?.array as? [TrackMO] else {
-            fatalError("Unable to cast altitudes to the correct type!")
+            fatalError("Unable to cast tracks to the correct type!")
         }
 
         return typedTracks
+    }
+
+    public func typedEvents() -> [EventMO] {
+        guard let typedEvents = events?.array as? [EventMO] else {
+            fatalError("Unable to cast events to the correct type!")
+        }
+
+        return typedEvents
     }
 }

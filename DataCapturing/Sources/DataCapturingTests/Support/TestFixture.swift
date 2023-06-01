@@ -55,12 +55,12 @@ struct TestFixture {
     static func randomLocation(timestamp: Date = Date()) -> GeoLocation {
         return GeoLocation(
             latitude: Double.random(in: -90.0 ... 90.0),
-            longitude: Double.random(in: 0.0 ..< 360.0),
+            longitude: Double.random(in: -180.0 ..< 180.0),
             accuracy: Double.random(in: 2.0 ... 15.0),
-            speed: Double.random(in: 0.0 ... 10.0),
+            speed: Double.random(in: 0.0 ... 80.0),
             time: timestamp,
-            altitude: 0.0,
-            verticalAccuracy: 0.0
+            altitude: Double.random(in: 0.0...8848.0),
+            verticalAccuracy: Double.random(in: 0.1...20.0)
         )
     }
 
@@ -74,5 +74,9 @@ struct TestFixture {
     /// Create fixture acceleration with random values. This is for example important if accurate compression is an issue for your test.
     static func randomAcceleration() -> SensorValue {
         return SensorValue(timestamp: Date(timeIntervalSince1970: TimeInterval(Double.random(in: 0.0 ... 1571302762.0))), x: Double.random(in: 0.0 ... 40.0), y: Double.random(in: 0.0 ... 40.0), z: Double.random(in: 0.0 ... 40.0))
+    }
+
+    static func randomAltitude() -> Altitude {
+        return Altitude(relativeAltitude: Double.random(in: 0.0 ... 20.0), time: Date())
     }
 }

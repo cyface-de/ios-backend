@@ -42,11 +42,9 @@ struct MeasurementsView: View {
                 List {
                     ForEach(viewModel.measurements) {measurement in
                         NavigationLink(destination: MeasurementView(
-                            viewModel: MeasurementViewViewModel(
-                                dataStoreStack: viewModel.dataStoreStack,
-                                measurement: measurement
-                            ))) {
-                            MeasurementCell(viewModel: MeasurementCellViewModel(measurement: measurement))
+                            measurement: measurement
+                            )) {
+                            MeasurementCell(measurement: measurement)
                         }
                     }
                 }
@@ -56,11 +54,11 @@ struct MeasurementsView: View {
 }
 
 /// Some example data to use for testing views depending on a `Measurement`.
-let exampleMeasurements = [
+/*let exampleMeasurements = [
     Measurement(id: 1, name: "Fahrt zu Oma", distance: 3.0, startTime: Date(), synchronizationState: .synchronizable),
     Measurement(id: 2, name: "Arbeit", distance: 10.0, startTime: Date(), synchronizationState: .synchronizing),
     Measurement(id: 3, name: "Supermarkt", distance: 2.3, startTime: Date(), synchronizationState: .synchronized)
-]
+]*/
 
 #if DEBUG
 struct MeasurementsView_Previews: PreviewProvider {

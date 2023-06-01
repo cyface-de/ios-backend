@@ -397,6 +397,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
             //self.handle(event: .serviceStopped(measurement: currentMeasurement, event: event), status: .success)
             measurementMessages.send(.stopped(timestamp: Date()))
+            measurementMessages.send(completion: .finished)
             /*os_log(
                 "Stopped data capturing service for measurement %{PUBLIC}d.",
                 log: OSLog.capturing,
@@ -429,12 +430,15 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
             stopCapturing()
             isPaused = true
+
             /*let persistenceLayer = dataStoreStack.persistenceLayer()
             var measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
             let event = try persistenceLayer.createEvent(of: .lifecyclePause, parent: &measurement)*/
 
             //handle(event: .servicePaused(measurement: currentMeasurement, event: event), status: .success)
             measurementMessages.send(.paused(timestamp: Date()))
+            //measurementMessages.send(completion: .finished)
+            //messageCancellable = nil
             /*os_log(
                 "Paused data capturing service for measurement ${PUBLIC}d.\nDistance Covered: %{PUBLIC}f",
                 log: OSLog.capturing,
@@ -474,6 +478,8 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
                 //handle(event: .serviceResumed(measurement: currentMeasurement, event: startEvent), status: .success)
             measurementMessages.send(.resumed(timestamp: Date()))
+            //messageCancellable?.cancel()
+            //messageCancellable = nil
                 /*os_log("Resumed data capturing service for measurement %{PUBLIC}d.",
                        log: OSLog.capturing,
                        type: .info,

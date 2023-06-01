@@ -12,6 +12,7 @@ let speedFormatter = {
     nf.minimumFractionDigits = 1
     nf.maximumFractionDigits = 2
     nf.multiplier = 3.6
+    nf.minimum = 0.0
 
     return nf
 }()

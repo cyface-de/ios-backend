@@ -43,7 +43,8 @@ class LiveViewModel: ObservableObject {
     @Published var lastCapturedLongitude: String
     @Published var lastCapturedLatitude: String
     /// The name to display for this ``Measurement``.
-    var measurementName: String
+    @Published var measurementName: String
+    var dataStoreStack: DataStoreStack
     /// How to display the distance already travelled during this ``Measurement``.
     @Published var distance: String
     /// How to display the duration this ``Measurement`` has already taken.
@@ -56,6 +57,7 @@ class LiveViewModel: ObservableObject {
     /// The currently captured measurement or `nil` if no measurement is active.
     private var locations = [[GeoLocation]]()
     private var altitudes = [[DataCapturing.Altitude]]()
+    private var dataStorageProcess: CapturedDataStorage?
     var measurement: DataCapturing.Measurement {
         get {
             if let measurement = self._measurement {
@@ -65,7 +67,7 @@ class LiveViewModel: ObservableObject {
 
                 registerLifecycleFlows(measurement)
                 let locationsFlow = measurement.measurementMessages.filter { if case Message.capturedLocation = $0 { return true } else { return false } }.compactMap {if case let Message.capturedLocation(location) = $0 { return location } else { return nil }}
-                locationsFlow.compactMap { location in speedFormatter.string(from: location.speed as NSNumber) }.receive(on: RunLoop.main).assign(to: &$speed)
+                locationsFlow.compactMap { location in "\(speedFormatter.string(from: location.speed as NSNumber) ?? "0.0") km/h" }.receive(on: RunLoop.main).assign(to: &$speed)
 
                 let trackFlow = locationsFlow
                     .compactMap { [weak self] location in
@@ -90,6 +92,8 @@ class LiveViewModel: ObservableObject {
                 }
                 distanceFlow.compactMap {
                     distanceFormatter.string(from: $0 as NSNumber)
+                }.map { formattedDistance in
+                    "\(formattedDistance) km"
                 }
                 .receive(on: RunLoop.main)
                 .assign(to: &$distance)
@@ -109,11 +113,14 @@ class LiveViewModel: ObservableObject {
                     if counter==0 {
                         return 0.0
                     } else {
-                        return sum/Double(counter) as NSNumber
+                        return sum/Double(counter)
                     }
                 }
                 .compactMap {
-                    speedFormatter.string(from: $0)
+                    speedFormatter.string(from: $0 as NSNumber)
+                }
+                .map { formattedSpeed in
+                    "\(formattedSpeed) km/h"
                 }
                 .receive(on: RunLoop.main)
                 .assign(to: &$averageSpeed)
@@ -182,14 +189,20 @@ class LiveViewModel: ObservableObject {
                     .compactMap {
                         riseFormatter.string(from: $0 as NSNumber)
                     }
+                    .map { formattedRise in
+                        "\(formattedRise) m"
+                    }
                     .receive(on: RunLoop.main)
                     .assign(to: &$rise)
 
                 distanceFlow.map {
-                    Double(truncating: $0 as NSNumber) * LiveViewModel.averageCarbonEmissionsPerMeter
+                    RFR.avoidedEmissions($0)
                 }
                 .compactMap {
                     emissionsFormatter.string(from: $0 as NSNumber)
+                }
+                .map { formattedEmissions in
+                    "\(formattedEmissions) g CO₂"
                 }
                 .receive(on: RunLoop.main)
                 .assign(to: &$avoidedEmissions)
@@ -203,9 +216,6 @@ class LiveViewModel: ObservableObject {
     private var cancellables = [AnyCancellable]()
     @Published var error: Error?
     
-    /// The average carbon emissions per kilometer in gramms, based on data from Statista (https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/)
-    static let averageCarbonEmissionsPerMeter = 0.117
-
     init(
         speed: Double = 0.0,
         averageSpeed: Double = 0.0,
@@ -215,7 +225,8 @@ class LiveViewModel: ObservableObject {
         distance: Double = 0.0,
         duration: TimeInterval = 0.0,
         rise: Double = 0.0,
-        avoidedEmissions: Double = 0.0
+        avoidedEmissions: Double = 0.0,
+        dataStoreStack: DataStoreStack
     ) {
         guard let formattedSpeed = speedFormatter.string(from: speed as NSNumber) else {
             fatalError()
@@ -259,6 +270,7 @@ class LiveViewModel: ObservableObject {
         self.duration = formattedDuration
         self.rise = "\(formattedRise) m"
         self.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
+        self.dataStoreStack = dataStoreStack
     }
 
     /**
@@ -270,6 +282,7 @@ class LiveViewModel: ObservableObject {
                 try measurement.stop()
                 cancellables.forEach { $0.cancel() }
                 cancellables.removeAll(keepingCapacity: true)
+                self.dataStorageProcess = nil
                 self._measurement = nil
             }
         } catch {
@@ -287,6 +300,10 @@ class LiveViewModel: ObservableObject {
             } else if measurement.isPaused {
                 try measurement.resume()
             } else {
+                let dataStorage = CapturedCoreDataStorage(dataStoreStack, 5.0)
+                let identifier = try dataStorage.subscribe(to: measurement, "BICYCLE") {}
+                self.dataStorageProcess = dataStorage
+                self.measurementName = "Fahrt \(identifier)"
                 try measurement.start(inMode: "BICYCLE")
             }
         } catch {
@@ -315,76 +332,6 @@ class LiveViewModel: ObservableObject {
         })
         stoppedEvents.receive(on: RunLoop.main).assign(to: &$measurementState)
     }
-
-    // TODO: This should be communicated using a Combine publisher from DataCapturingService
-    func handle(event: DataCapturingEvent, status: Status) {
-        switch status {
-        case .success:
-            switch event {
-                // TODO: Is it really necessary to add the event parameter here?
-            case .serviceStarted(measurement: let measurementIdentifier, event: _):
-                DispatchQueue.main.async { [weak self] in
-                    guard let measurementIdentifier = measurementIdentifier else {
-                        fatalError()
-                    }
-
-                    self?.measurementName = "Messung \(measurementIdentifier)"
-                    self?.measurementState = .running
-                }
-            case .servicePaused(measurement: _, event: _):
-                DispatchQueue.main.async { [weak self] in
-                    self?.measurementState = .paused
-                }
-            case .serviceResumed(measurement: _, event: _):
-                DispatchQueue.main.async { [weak self] in
-                    self?.measurementState = .running
-                }
-            case .serviceStopped(measurement: _, event: _):
-                DispatchQueue.main.async { [weak self] in
-                    self?.measurementState = .stopped
-                }
-            case .geoLocationAcquired(position: let location):
-                updateBasedOn(location: location)
-            default:
-                os_log("Unknown event %@.", log: OSLog.capturingEvent, type: .info, event.description)
-            }
-        case .error(let error):
-            os_log("Event $@ failed. %@", event.description, error.localizedDescription)
-        }
-    }
-
-    private func updateBasedOn(location: LocationCacheEntry) {
-        /*guard let capturedMeasurement = dataCapturingService.capturedMeasurement else {
-         return
-         }
-         let avoidedEmissions = capturedMeasurement.trackLength * LiveViewModel.averageCarbonEmissionsPerMeter
-         DispatchQueue.main.async { [weak self] in
-         if let formattedSpeed = speedFormatter.string(from: location.speed as NSNumber) {
-         self?.speed = "\(formattedSpeed) km/h"
-         }
-         if let formattedLatitude = locationFormatter.string(from: location.latitude as NSNumber) {
-         self?.lastCapturedLatitude = formattedLatitude
-         }
-         if let formattedLongitude = locationFormatter.string(from: location.longitude as NSNumber) {
-         self?.lastCapturedLongitude = formattedLongitude
-         }
-         if let formattedAverageSpeed = speedFormatter.string(from: capturedMeasurement.averageSpeed() as NSNumber) {
-         self?.averageSpeed = "\(formattedAverageSpeed) km/h"
-         }
-         if let formattedAvoidedEmissions = emissionsFormatter.string(from: avoidedEmissions as NSNumber) {
-         self?.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
-         }
-         if let formattedDistance = distanceFormatter.string(from: capturedMeasurement.trackLength as NSNumber) {
-         self?.distance = "\(formattedDistance) km"
-         }
-         if let formattedDuration = timeFormatter.string(from: capturedMeasurement.totalDuration()) {
-         self?.duration = formattedDuration
-         }
-         if let formattedRise = riseFormatter.string(from: capturedMeasurement.summedHeight() as NSNumber) {
-         self?.rise = formattedRise
-         }
-         }*/
-    }
 }
 
 /**
@@ -401,6 +348,3 @@ enum MeasurementState {
     /// The ``Measurement`` is stopped. No ``Measurement`` is currently active.
     case stopped
 }
-
-/// Some example data used to render previews of the UI.
-// let viewModelExample = LiveViewModel(speed: "21 km/h", averageSpeed: "15 km/h", measurementState: .stopped, position: (51.507222, -0.1275), measurementName: "Fahrt 23", distance: "7,4 km", duration: "00:21:04", rise: "732 m", avoidedEmissions: "0,7 kg")

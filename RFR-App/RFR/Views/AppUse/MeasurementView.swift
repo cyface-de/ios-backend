@@ -29,71 +29,83 @@ import MapKit
  */
 struct MeasurementView: View {
     /// The view model used by this view to get the information necessary to display a measurement.
-    @ObservedObject var viewModel: MeasurementViewViewModel
+    var measurement: Measurement
     @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.75155, longitude: 11.97411), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5))
 
     var body: some View {
-        if let error = viewModel.error {
-            ErrorView(error: error)
-        } else if viewModel.isInitialized {
-            TabView {
-                List {
-                    Section(header: Text("Geschwindigkeit")) {
-                        KeyValueView(key: "Max", value: "\(viewModel.maxSpeed) (\u{2205} \(viewModel.meanSpeed))")
-                    }
-                    Section(header: Text("Strecke")) {
-                        KeyValueView(key: "Distanz", value: viewModel.distance)
-                        KeyValueView(key: "Dauer", value: viewModel.duration)
-                    }
-                    Section(header: Text("Höhenprofil")) {
-                        Chart(viewModel.heightProfile) {
-                            LineMark(
-                                x: .value("Zeit", $0.timestamp),
-                                y: .value("Höhe", $0.height)
-                            )
-                        }.padding()
-                        KeyValueView(key: "Anstieg", value: viewModel.inclination)
-                        KeyValueView(key: "Tiefster Punkt", value: viewModel.lowestPoint)
-                        KeyValueView(key: "Höchster Punkt", value: viewModel.highestPoint)
-                    }
-                    Section(header: Text("Vermiedender CO\u{2082} Ausstoß")) {
-                        Text(viewModel.avoidedEmissions)
-                    }
-                }.tabItem {
-                    Image(systemName: "chart.xyaxis.line")
-                    Text("Statistiken")
+        TabView {
+            List {
+                Section(header: Text("Geschwindigkeit")) {
+                    KeyValueView(key: "Max", value: "\(measurement.maxSpeed) (\u{2205} \(measurement.meanSpeed))")
                 }
+                Section(header: Text("Strecke")) {
+                    KeyValueView(key: "Distanz", value: measurement.distance)
+                    KeyValueView(key: "Dauer", value: measurement.duration)
+                }
+                Section(header: Text("Höhenprofil")) {
+                    Chart(measurement.heightProfile) {
+                        LineMark(
+                            x: .value("Zeit", $0.timestamp),
+                            y: .value("Höhe", $0.height)
+                        )
+                    }.padding()
+                    KeyValueView(key: "Anstieg", value: measurement.inclination)
+                    KeyValueView(key: "Tiefster Punkt", value: measurement.lowestPoint)
+                    KeyValueView(key: "Höchster Punkt", value: measurement.highestPoint)
+                }
+                Section(header: Text("Vermiedender CO\u{2082} Ausstoß")) {
+                    Text(measurement.avoidedEmissions)
+                }
+            }.tabItem {
+                Image(systemName: "chart.xyaxis.line")
+                Text("Statistiken")
+            }
 
-                Map(coordinateRegion: $region)
-                    .frame(width: 400, height: 300)
-                    .tabItem {
-                        Image(systemName: "map")
-                        Text("Karte")
-                    }
-            }
-            .navigationTitle(viewModel.title)
-        } else {
-            ProgressView {
-                Text("Bitte warten")
-            }
+            Map(coordinateRegion: $region)
+                .frame(width: 400, height: 300)
+                .tabItem {
+                    Image(systemName: "map")
+                    Text("Karte")
+                }
         }
+        .navigationTitle(measurement.title)
     }
 }
 
 #if DEBUG
 struct MeasurementView_Previews: PreviewProvider {
+    static var  measurement: Measurement {
+        let ret = Measurement(
+            id: 0,
+            startTime: Date(timeIntervalSince1970: 10_000),
+            synchronizationState: .synchronized,
+            _maxSpeed: 10.0,
+            _meanSpeed: 10.0,
+            _distance: 200.0,
+            _duration: 5_000,
+            _inclination: 20.0,
+            _lowestPoint: 0.0,
+            _highestPoint: 400.0,
+            _avoidedEmissions: 45.0,
+            heightProfile: [
+                Altitude(
+                    id: 0,
+                    timestamp: Date(timeIntervalSince1970: 10_000),
+                    height: 5.0
+                ),
+                Altitude(
+                    id: 1,
+                    timestamp: Date(timeIntervalSince1970: 10_100),
+                    height: 4.5
+                )
+            ]
+        )
+        return ret
+    }
+
     static var previews: some View {
         MeasurementView(
-            viewModel: MeasurementViewViewModel(
-                dataStoreStack: MockDataStoreStack(),
-                measurement: Measurement(
-                    id: 0,
-                    name: "Titel",
-                    distance: 10.2,
-                    startTime: Date(),
-                    synchronizationState: .synchronizable
-                )
-            )
+            measurement: measurement
         )
     }
 }

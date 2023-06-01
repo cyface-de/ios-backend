@@ -52,6 +52,24 @@ func summedHeight(timelines: [AltitudeTimeline]) -> Double {
     return sum
 }
 
+/// The average carbon emissions per kilometer in gramms, based on data from Statista (https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/)
+let averageCarbonEmissionsPerMeter = 0.117
+
+func avoidedEmissions(_ distanceInMeters: Double) -> Double {
+    return distanceInMeters * averageCarbonEmissionsPerMeter
+}
+
+func coveredDistance(tracks: [TrackMO]) -> Double {
+    var ret = 0.0
+    tracks.forEach { track in
+        var prevLocation: GeoLocationMO?
+        track.typedLocations().forEach { location in
+            ret += prevLocation?.distance(to: location) ?? 0.0
+            prevLocation = location
+        }
+    }
+    return ret
+}
 
 protocol AltitudeTimeline {
     var sattelite: [SatteliteAltitude] { get }

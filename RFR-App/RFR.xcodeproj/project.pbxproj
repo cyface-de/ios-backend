@@ -39,8 +39,6 @@
 		AAC9D2F129840682003C4CC7 /* AsyncButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2F029840682003C4CC7 /* AsyncButton.swift */; };
 		AAC9D2F429840D83003C4CC7 /* MeasurementCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2F329840D83003C4CC7 /* MeasurementCell.swift */; };
 		AAC9D2F729891A8D003C4CC7 /* Measurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2F629891A8D003C4CC7 /* Measurement.swift */; };
-		AAC9D2F929891B22003C4CC7 /* MeasurementCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2F829891B22003C4CC7 /* MeasurementCellViewModel.swift */; };
-		AAC9D2FB298954CE003C4CC7 /* MeasurementViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2FA298954CE003C4CC7 /* MeasurementViewViewModel.swift */; };
 		AAC9D2FD29895526003C4CC7 /* Altitude.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2FC29895526003C4CC7 /* Altitude.swift */; };
 		AAC9D2FF29895D16003C4CC7 /* KeyValueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D2FE29895D16003C4CC7 /* KeyValueView.swift */; };
 		AAC9D30129897042003C4CC7 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC9D30029897042003C4CC7 /* MainView.swift */; };
@@ -108,8 +106,6 @@
 		AAC9D2F229840B9E003C4CC7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AAC9D2F329840D83003C4CC7 /* MeasurementCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementCell.swift; sourceTree = "<group>"; };
 		AAC9D2F629891A8D003C4CC7 /* Measurement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Measurement.swift; sourceTree = "<group>"; };
-		AAC9D2F829891B22003C4CC7 /* MeasurementCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementCellViewModel.swift; sourceTree = "<group>"; };
-		AAC9D2FA298954CE003C4CC7 /* MeasurementViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementViewViewModel.swift; sourceTree = "<group>"; };
 		AAC9D2FC29895526003C4CC7 /* Altitude.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Altitude.swift; sourceTree = "<group>"; };
 		AAC9D2FE29895D16003C4CC7 /* KeyValueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyValueView.swift; sourceTree = "<group>"; };
 		AAC9D30029897042003C4CC7 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -239,8 +235,6 @@
 			isa = PBXGroup;
 			children = (
 				AAC9D2E72983DEC3003C4CC7 /* LiveViewModel.swift */,
-				AAC9D2F829891B22003C4CC7 /* MeasurementCellViewModel.swift */,
-				AAC9D2FA298954CE003C4CC7 /* MeasurementViewViewModel.swift */,
 				AACB767E29BF5E8A00A9DB6F /* ControlBarViewModel.swift */,
 				AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */,
 				AAA1AAB129DC36A5002CBC91 /* LoginViewModel.swift */,
@@ -480,7 +474,6 @@
 				AAA1AAB829E6E729002CBC91 /* ErrorView.swift in Sources */,
 				AA87D06E2982ADE8002F6B3B /* LiveView.swift in Sources */,
 				AA87D09B2982B4CB002F6B3B /* MeasurementView.swift in Sources */,
-				AAC9D2FB298954CE003C4CC7 /* MeasurementViewViewModel.swift in Sources */,
 				AACB768929C0989300A9DB6F /* RFRError.swift in Sources */,
 				AAC9D2F129840682003C4CC7 /* AsyncButton.swift in Sources */,
 				AAC9D2FD29895526003C4CC7 /* Altitude.swift in Sources */,
@@ -491,7 +484,6 @@
 				AA87D06C2982ADE8002F6B3B /* RFRApp.swift in Sources */,
 				AAEA84392A1BAF3E00DFA28D /* CredentialsView.swift in Sources */,
 				AACB768C29C1C24B00A9DB6F /* InitializationView.swift in Sources */,
-				AAC9D2F929891B22003C4CC7 /* MeasurementCellViewModel.swift in Sources */,
 				AAC9D2F429840D83003C4CC7 /* MeasurementCell.swift in Sources */,
 				AAA1AABA29E6FAE0002CBC91 /* SynchronizationViewModel.swift in Sources */,
 				AAC9D2FF29895D16003C4CC7 /* KeyValueView.swift in Sources */,

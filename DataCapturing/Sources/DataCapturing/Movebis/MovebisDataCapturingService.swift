@@ -79,7 +79,7 @@ public class MovebisDataCapturingService: MeasurementImpl {
         // Ask the user for its ok with data tracking.
         manager.requestAlwaysAuthorization()
 
-        let authorizationStatus = CLLocationManager.authorizationStatus()
+        let authorizationStatus = manager.authorizationStatus
         if authorizationStatus != .authorizedWhenInUse && authorizationStatus != .authorizedAlways {
             // User has not authorized access to location information.
             os_log("Location service not authorized!", log: MovebisDataCapturingService.log, type: .default)

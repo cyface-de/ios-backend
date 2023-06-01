@@ -10,13 +10,13 @@ import CoreData
 
 extension AltitudeMO {
     /// Initialize a CoreData managed track object from the properties of a `Track`.
-    convenience init(altitude: inout Altitude, context: NSManagedObjectContext) throws {
+    convenience init(altitude: Altitude, context: NSManagedObjectContext) {
         self.init(context: context)
 
-        try update(from: altitude)
+        update(from: altitude)
     }
 
-    func update(from altitude: Altitude) throws {
+    func update(from altitude: Altitude) {
         self.time = altitude.time
         self.altitude = altitude.relativeAltitude
     }

@@ -38,18 +38,21 @@ class PersistenceTests: XCTestCase {
     let defaultMode = "BICYCLE"
     /// Load the data model for the test data stack.
     static let dataModel = try! CoreDataStack.load(bundle: XCTestCase.appBundle()!)
+    let coreDataStack = CoreDataStack(
+        storeType: NSInMemoryStoreType,
+        migrator: CoreDataMigrator(),
+        modelName: "CyfaceModel",
+        model: PersistenceTests.dataModel,
+        bundle: XCTestCase.appBundle()!
+    )
 
     /// Initializes the test enviroment by saving some test data to the test `PersistenceLayer`.
     override func setUp() async throws {
         try await super.setUp()
-        let expectation = self.expectation(description: "CoreDataStack initialized successfully!")
 
         let manager = CoreDataStack(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: PersistenceTests.dataModel, bundle: XCTestCase.appBundle()!)
         let bundle = Bundle(for: type(of: manager))
         try await manager.setup()
-        defer {
-            expectation.fulfill()
-        }
 
         self.oocut = manager.persistenceLayer()
         var measurement = try self.oocut.createMeasurement(at: Date(timeIntervalSince1970: 10_000), inMode: self.defaultMode)
@@ -322,4 +325,44 @@ class PersistenceTests: XCTestCase {
         XCTAssertEqual(fixtureGeoLocations.count, 5)
 
     }
+
+    func testStoreCapturedData() async throws {
+        // Arrange
+        try await coreDataStack.setup()
+        let oocut = CapturedCoreDataStorage(coreDataStack, 1.0)
+        let mockMeasurement = TestMeasurement()
+        // TODO: How to provide the initial modality
+        let expectation = expectation(description: "Data Storage finished!")
+        /*let cancellable = mockMeasurement.measurementMessages.sink(receiveCompletion: { completion in
+            print("COMPLETE")
+            expectation.fulfill()
+        }) { message in
+            print("\(message)")
+        }*/
+        try oocut.subscribe(to: mockMeasurement, "TEST_MODE") {
+            expectation.fulfill()
+        }
+
+        // Act
+        try mockMeasurement.start(inMode: "BICYCLE")
+        // Capture data for 5 seconds
+        let waitTime = 5.0
+        try await Task.sleep(nanoseconds: UInt64(waitTime * Double(NSEC_PER_SEC)))
+        try mockMeasurement.stop()
+
+        // Assert
+        wait(for: [expectation], timeout: 10.0)
+        try coreDataStack.wrapInContext { context in
+            let fetchRequest = MeasurementMO.fetchRequest()
+            let measurements = try fetchRequest.execute()
+
+            XCTAssertEqual(measurements.count, 1)
+            XCTAssertEqual(measurements[0].typedTracks().count, 1)
+            XCTAssertEqual(measurements[0].typedEvents().count, 3)
+            XCTAssertGreaterThanOrEqual(measurements[0].typedTracks()[0].typedLocations().count, 4)
+        }
+    }
+
+    // TODO: Test pause and resume
+    // TODO: test stop and start again
 }

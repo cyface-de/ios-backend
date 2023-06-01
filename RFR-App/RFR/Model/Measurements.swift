@@ -46,9 +46,9 @@ class Measurements: ObservableObject {
                 var sumOfAvoidedEmissions = 0.0
                 var maxAvoidedEmissions = 0.0
                 measurements.forEach { measurement in
-                    let distance = measurement.trackLength
+                    /*let distance = measurement.trackLength
                     maxDistance = max(maxDistance, distance)
-                    summedDistance += distance
+                    summedDistance += distance*/
 
                     var measurementDuration = TimeInterval()
                     measurement.typedTracks().forEach { track in
@@ -62,9 +62,9 @@ class Measurements: ObservableObject {
                     }
                     totalDuration += measurementDuration
 
-                    let avoidedEmissions = measurement.trackLength * LiveViewModel.averageCarbonEmissionsPerMeter
+                    /*let avoidedEmissions = measurement.trackLength * LiveViewModel.averageCarbonEmissionsPerMeter
                     maxAvoidedEmissions = max(maxAvoidedEmissions, avoidedEmissions)
-                    sumOfAvoidedEmissions += avoidedEmissions
+                    sumOfAvoidedEmissions += avoidedEmissions*/
 
                     let height = summedHeight(timelines: measurement.typedTracks())
                     maxIncline = max(height, maxIncline)

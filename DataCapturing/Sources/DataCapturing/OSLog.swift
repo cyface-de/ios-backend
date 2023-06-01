@@ -9,7 +9,7 @@ import Foundation
 import OSLog
 
 extension OSLog {
-    private static var subsystem = Bundle.main.bundleIdentifier!
+    public static var subsystem = Bundle.main.bundleIdentifier!
 
     static let persistence = OSLog(subsystem: subsystem, category: "persistence")
     static let capturing = OSLog(subsystem: subsystem, category: "capturing")

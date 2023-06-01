@@ -23,8 +23,11 @@ import OSLog
 
 public protocol DataStoreStack {
     func wrapInContext(_ block: (NSManagedObjectContext) throws -> Void) throws
+    func wrapInContextReturn<T>(_ block: (NSManagedObjectContext) throws -> T) throws -> T
     func setup() async throws
     func persistenceLayer() -> PersistenceLayer
+    /// This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
+    func nextValidIdentifier() throws -> UInt64
 }
 // TODO: Rename this to CoreDataStack and move it to the Persistence group.
 /**
@@ -45,6 +48,8 @@ public class CoreDataStack: DataStoreStack {
     /// The type of the store to use. In production this should usually be `NSSQLiteStoreType`. In a test environment you might use `NSInMemoryStoreType`. Both values are defined by *CoreData*.
     private let storeType: String
     private let bundle: Bundle
+    /// The identifier that has been assigned the last to a new `Measurement`.
+    private var lastIdentifier: UInt64?
 
     /// The `NSPersistentContainer` used by this *CoreData* stack.
     var persistentContainer: NSPersistentContainer
@@ -174,6 +179,32 @@ public class CoreDataStack: DataStoreStack {
         }
     }
 
+    /// The next identifier to assign to a new `Measurement`. This is no private since it is used by unit tests.
+    private func nextIdentifier() throws -> UInt64 {
+        let persistentStore = persistentContainer.persistentStoreCoordinator.persistentStores[0]
+        let coordinator = persistentContainer.persistentStoreCoordinator
+
+        if lastIdentifier == nil {
+            // identifier is already stored as metadata.
+            if let currentIdentifier = coordinator.metadata(for: persistentStore)["de.cyface.mid"] as? UInt64 {
+                lastIdentifier = currentIdentifier
+                // identifier is not yet stored, create an entry
+            } else {
+                lastIdentifier = UInt64(0)
+                coordinator.setMetadata(["de.cyface.mid": lastIdentifier as Any], for: persistentStore)
+            }
+        }
+
+        guard let lastIdentifier = lastIdentifier else {
+            throw PersistenceError.inconsistentState
+        }
+
+        let nextIdentifier = lastIdentifier + 1
+        self.lastIdentifier = nextIdentifier
+        coordinator.setMetadata(["de.cyface.mid": nextIdentifier], for: persistentStore)
+        return nextIdentifier
+    }
+
     /**
      Wrap a block of data inside a valid `NSManagedObjectContext`. As long as control is not handed to any other thread, it is save to use managed objects within that block.
 
@@ -219,6 +250,19 @@ public class CoreDataStack: DataStoreStack {
         } else {
             fatalError()
         }
+    }
+
+    public func nextValidIdentifier() throws -> UInt64 {
+        var fetchedMeasurements = [MeasurementMO]()
+        var identifier = UInt64(0)
+        repeat {
+            identifier = try nextIdentifier()
+            let fetchRequest = persistentContainer
+                .managedObjectModel
+                .fetchRequestFromTemplate(withName: "measurementByIdentifier", substitutionVariables: ["identifier": identifier])
+            fetchedMeasurements = try fetchRequest?.execute() as? [MeasurementMO] ?? []
+        } while !fetchedMeasurements.isEmpty
+        return identifier
     }
 
     /**

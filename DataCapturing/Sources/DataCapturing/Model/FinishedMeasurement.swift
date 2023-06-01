@@ -66,8 +66,8 @@ public class FinishedMeasurement: Hashable, Equatable {
             identifier: managedObject.identifier,
             synchronizable: managedObject.synchronizable,
             synchronized: managedObject.synchronized,
-            time: managedObject.time!,
-            trackLength: managedObject.trackLength)
+            time: managedObject.time!
+        )
 
         if let eventMOs = managedObject.events?.array as? [EventMO] {
 
