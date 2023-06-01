@@ -33,9 +33,9 @@ public class UploadProcess {
     /// The URL to the Cyface data collector.
     let apiUrl: URL
     /// Callback called on successful upload.
-    let onSuccess: (UInt64) -> Void
+    let onSuccess: (Upload) -> Void
     /// Callback called on a failed upload.
-    let onFailure: (UInt64, Error) -> Void
+    let onFailure: (Upload, Error) -> Void
     /// An Alamofire `Session` to use for sending requests and receiving responses.
     let session: Session
     /// Authenticator to get authentication tokens from the upload URL, if the current user is a valid one.
@@ -47,7 +47,7 @@ public class UploadProcess {
     /// - Parameter sessionRegistry: You may reuse some `SessionRegistry` here or provide one backed by persistent storage. If the sessions are not stored somewhere nothing bad will happen, except from a few unecessary uploads, which could have been resumed.
     /// - Parameter onSuccess: Called on succeful completion of the process. Provides the uploaded measurements device wide unique identifier as a parameter.
     /// - Parameter onFailure: Called on failed upload process. Provides the measurements device wide unique identifier of the measurement, that failed to upload, together with the error information.
-    public init(apiUrl: URL, session: Session = AF, sessionRegistry: SessionRegistry, authenticator: Authenticator, onSuccess: @escaping (UInt64) -> Void, onFailure: @escaping (UInt64, Error) -> Void) {
+    public init(apiUrl: URL, session: Session = AF, sessionRegistry: SessionRegistry, authenticator: Authenticator, onSuccess: @escaping (Upload) -> Void, onFailure: @escaping (Upload, Error) -> Void) {
         self.openSessions = sessionRegistry
         self.apiUrl = apiUrl
         self.onSuccess = onSuccess
@@ -61,7 +61,7 @@ public class UploadProcess {
         authenticator.authenticate(onSuccess: { token in
             self.onSuccessfulAuthentication(authToken: token, upload: upload)
         }, onFailure: { error in
-            self.onFailure(upload.identifier, error)
+            self.onFailure(upload, error)
         })
     }
 
@@ -107,7 +107,7 @@ public class UploadProcess {
     /// Called if an upload pre request was successful.
     private func onSuccessfulPreRequest(authToken: String, sessionIdentifier: String, upload: Upload) {
         let uploadRequest = UploadRequest(session: session)
-        openSessions.register(session: sessionIdentifier, measurement: upload)
+        openSessions.register(session: sessionIdentifier, upload: upload)
 
         uploadRequest.request(
             authToken: authToken,
@@ -124,7 +124,7 @@ public class UploadProcess {
 
         if upload.failedUploadsCounter > 3 {
             upload.failedUploadsCounter = 0
-            onFailure(upload.identifier, error)
+            onFailure(upload, error)
         } else {
             let statusRequest = StatusRequest(apiUrl: apiUrl, session: session, authToken: authToken)
 

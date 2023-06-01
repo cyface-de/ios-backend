@@ -282,8 +282,9 @@ public class CyfaceSynchronizer: Synchronizer {
             onFailure: failureHandler)
 
         for measurement in measurements {
-            handle(.synchronizationStarted(measurement: measurement.identifier), .success)
-            let upload = CoreDataBackedUpload(dataStoreStack: dataStoreStack, identifier: UInt64(measurement.identifier))
+            // TODO: This should be carried out using Combine
+            handle(.synchronizationStarted(measurement: measurement), .success)
+            let upload = CoreDataBackedUpload(dataStoreStack: dataStoreStack, measurement: measurement)
             uploadProcess.upload(upload)
         }
     }
@@ -291,15 +292,15 @@ public class CyfaceSynchronizer: Synchronizer {
     /**
      Handles the successful synchronization of a single measurement.
 
-     - Parameter measurement: The synchronized measurement.
+     - Parameter upload: The successful upload.
      */
-    private func successHandler(measurement: UInt64) {
+    private func successHandler(upload: Upload) {
         do {
             let persistenceLayer = dataStoreStack.persistenceLayer()
-            try cleaner.clean(measurement: Int64(measurement), from: persistenceLayer)
-            handle(.synchronizationFinished(measurement: Int64(measurement)), .success)
+            try cleaner.clean(measurement: upload.measurement, from: persistenceLayer)
+            handle(.synchronizationFinished(measurement: upload.measurement), .success)
         } catch let error {
-            handle(.synchronizationFinished(measurement: Int64(measurement)), .error(error))
+            handle(.synchronizationFinished(measurement: upload.measurement), .error(error))
         }
 
         synchronizationFinishedHandler()
@@ -312,10 +313,10 @@ public class CyfaceSynchronizer: Synchronizer {
         - measurement: The measurement for which the synchronization failed.
         - error: The error causing the failure.
      */
-    private func failureHandler(measurement: UInt64, error: Error) {
-        os_log("Unable to upload data for measurement: %d!", log: CyfaceSynchronizer.log, type: .error, measurement)
+    private func failureHandler(upload: Upload, error: Error) {
+        os_log("Unable to upload data for measurement: %d!", log: CyfaceSynchronizer.log, type: .error, upload.measurement.identifier)
         os_log("Error: %{public}@", log: CyfaceSynchronizer.log, type: .error, error.localizedDescription)
-        handle(.synchronizationFinished(measurement: Int64(measurement)), .error(error))
+        handle(.synchronizationFinished(measurement: upload.measurement), .error(error))
         synchronizationFinishedHandler()
     }
 
@@ -378,7 +379,7 @@ public protocol Cleaner {
         - Some unspecified errors from within CoreData.
         - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
      */
-    func clean(measurement: Int64, from persistenceLayer: PersistenceLayer) throws
+    func clean(measurement: FinishedMeasurement, from persistenceLayer: PersistenceLayer) throws
 }
 
 /**
@@ -395,8 +396,8 @@ public class DeletionCleaner: Cleaner {
         // Nothing to do here
     }
 
-    public func clean(measurement: Int64, from persistenceLayer: PersistenceLayer) throws {
-        try persistenceLayer.delete(measurement: measurement)
+    public func clean(measurement: FinishedMeasurement, from persistenceLayer: PersistenceLayer) throws {
+        try persistenceLayer.delete(measurement: measurement.identifier)
     }
 }
 
@@ -414,7 +415,7 @@ public class AccelerationPointRemovalCleaner: Cleaner {
         // Nothing to do here
     }
 
-    public func clean(measurement: Int64, from persistenceLayer: PersistenceLayer) throws {
-        try persistenceLayer.clean(measurement: measurement)
+    public func clean(measurement: FinishedMeasurement, from persistenceLayer: PersistenceLayer) throws {
+        try persistenceLayer.clean(measurement: measurement.identifier)
     }
 }

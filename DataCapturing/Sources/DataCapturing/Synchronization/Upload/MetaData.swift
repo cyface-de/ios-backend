@@ -47,7 +47,7 @@ var installationIdentifier: String {
  - author: Klemens Muthmann
  - version: 1.0.0
  */
-struct MetaData: Encodable {
+public struct MetaData: Encodable {
     /// The number of locations of the transmittable measurement.
     let locationCount: UInt64
     /// The data format used to encode the payload data.

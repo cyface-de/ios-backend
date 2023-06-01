@@ -48,7 +48,7 @@ protocol FileSupport {
      - Throws: If accessing the data file has not been successful.
      - Returns: The local URL identifying the file to write to.
      */
-    func write(serializable: Serializable, to measurement: Int64) throws -> URL
+    func write(serializable: Serializable, to measurement: UInt64) throws -> URL
     /**
      Removes the file for the provided `FinishedMeasurement` instance.
      */
@@ -66,7 +66,7 @@ extension FileSupport {
      - Returns: The path to the file as an URL.
      - Throws: Some internal file system error on failure of creating the file at the required path.
      */
-    fileprivate func path(for measurement: Int64) throws -> URL {
+    fileprivate func path(for measurement: UInt64) throws -> URL {
         let measurementIdentifier = measurement
         let root = "Application Support"
         let measurementDirectory = "measurements"
@@ -157,7 +157,7 @@ public struct SensorValueFile: FileSupport {
      - Throws: `BinarySerializationError.emptyData` if the provided `serializable` array is empty.
      - Throws: `BinaryEncodingError` if encoding fails.
      */
-    func write(serializable: [SensorValue], to measurement: Int64) throws -> URL {
+    func write(serializable: [SensorValue], to measurement: UInt64) throws -> URL {
         let sensorValueData = try serializer.serialize(serializable: serializable)
         let sensorValueFilePath = try path(for: measurement)
 
@@ -248,7 +248,7 @@ public struct MeasurementFile: FileSupport {
      - Throws: `FileSupportError.notReadable` If the data file was not readable.
      - Throws: Some unspecified undocumented file system error if file was not accessible.
     */
-    func write(serializable: FinishedMeasurement, to measurement: Int64) throws -> URL {
+    func write(serializable: FinishedMeasurement, to measurement: UInt64) throws -> URL {
         let measurementData = try data(from: serializable)
         let measurementFilePath = try path(for: measurement)
 

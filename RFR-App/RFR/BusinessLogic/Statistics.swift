@@ -9,6 +9,11 @@ import Foundation
 import OSLog
 import DataCapturing
 
+/// The minimum number of meters before the ascend is increased, to filter sensor noise.
+let ascendThresholdMeters = 2.0
+/// The minimum accuracy in meters for GNSS altitudes to be used in ascend calculation.
+let verticalAccuracyThresholdMeters = 12.0
+
 /// Calculate the accumulated height value for this measurement.
 func summedHeight(timelines: [AltitudeTimeline]) -> Double {
     var sum = 0.0
@@ -22,12 +27,12 @@ func summedHeight(timelines: [AltitudeTimeline]) -> Double {
                 if isFirst {
                     previousAltitude = satteliteAltitude.value
                     isFirst = false
-                } else if !(satteliteAltitude.accuracy > DataCapturing.FinishedMeasurement.verticalAccuracyThresholdMeters) {
+                } else if !(satteliteAltitude.accuracy > verticalAccuracyThresholdMeters) {
 
                     let currentAltitude = satteliteAltitude.value
                     let altitudeChange = currentAltitude - previousAltitude
 
-                    if abs(altitudeChange) > DataCapturing.FinishedMeasurement.ascendThresholdMeters {
+                    if abs(altitudeChange) > ascendThresholdMeters {
                         if altitudeChange > 0.0 {
                             sum += altitudeChange
                         }

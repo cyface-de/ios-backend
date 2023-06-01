@@ -32,7 +32,7 @@ public protocol PersistenceLayer {
      - measurement: The identifier of the measurement to delete from the data storage.
      - Throws: `PersistenceError.measurementNotLoadable`
      */
-    func delete(measurement: Int64) throws
+    func delete(measurement: UInt64) throws
 
     /**
      Deletes one event from the database.
@@ -50,7 +50,7 @@ public protocol PersistenceLayer {
      - Parameter measurement: The identifier of the measurement to strip.
      - Throws: `PersistenceError.measurementNotLoadable`
      */
-    func clean(measurement: Int64) throws
+    func clean(measurement: UInt64) throws
 
     /**
      Creates a new `MeasurementMO` in data storage.
@@ -109,7 +109,7 @@ public protocol PersistenceLayer {
      - Returns: The requested measurement as a model object.
      - Throws: `PersistenceError.measurementNotLoadable`, Some unspecified errors from within CoreData.
      */
-    func load(measurementIdentifiedBy identifier: Int64) throws -> FinishedMeasurement
+    func load(measurementIdentifiedBy identifier: UInt64) throws -> FinishedMeasurement
 
     /**
      Loads all the measurements from the data storage.
@@ -183,7 +183,7 @@ public class CoreDataPersistenceLayer {
     private let manager: CoreDataStack
 
     /// The identifier that has been assigned the last to a new `Measurement`.
-    var lastIdentifier: Int64?
+    var lastIdentifier: UInt64?
 
     // TODO: This should not be part of the persistence layer.
     /// Used to update a measurements length, each time new locations are added.
@@ -204,17 +204,17 @@ public class CoreDataPersistenceLayer {
     }
 
     /// The next identifier to assign to a new `Measurement`. This is no private since it is used by unit tests.
-    func nextIdentifier() throws -> Int64 {
+    func nextIdentifier() throws -> UInt64 {
         let persistentStore = manager.persistentContainer.persistentStoreCoordinator.persistentStores[0]
         let coordinator = manager.persistentContainer.persistentStoreCoordinator
 
         if lastIdentifier == nil {
             // identifier is already stored as metadata.
-            if let currentIdentifier = coordinator.metadata(for: persistentStore)["de.cyface.mid"] as? Int64 {
+            if let currentIdentifier = coordinator.metadata(for: persistentStore)["de.cyface.mid"] as? UInt64 {
                 lastIdentifier = currentIdentifier
                 // identifier is not yet stored, create an entry
             } else {
-                lastIdentifier = Int64(0)
+                lastIdentifier = UInt64(0)
                 coordinator.setMetadata(["de.cyface.mid": lastIdentifier as Any], for: persistentStore)
             }
         }
@@ -237,7 +237,7 @@ public class CoreDataPersistenceLayer {
      - from: The CoreData `context` to load the `measurement` from.
      - Returns: The `MeasurementMO` object for the provided identifier or `nil` if no such mesurement exists.
      */
-    private func load(measurementIdentifiedBy identifier: Int64, from context: NSManagedObjectContext) throws -> MeasurementMO? {
+    private func load(measurementIdentifiedBy identifier: UInt64, from context: NSManagedObjectContext) throws -> MeasurementMO? {
         let fetchRequest = MeasurementMO.fetchRequest()
         // The following needs to use an Objective-C number. That is why `measurementIdentifier` is wrapped in `NSNumber`
         fetchRequest.predicate = NSPredicate(format: "identifier==%@", NSNumber(value: identifier))
@@ -279,8 +279,8 @@ public class CoreDataPersistenceLayer {
      - Parameter from: The array of `Measurement` instances to extract the identifiers for.
      - Returns: A collection containing all the device wide unqiue identifiers of the provided measurements.
      */
-    public static func extractIdentifiers(from measurements: [FinishedMeasurement]) -> [Int64] {
-        var ret = [Int64]()
+    public static func extractIdentifiers(from measurements: [FinishedMeasurement]) -> [UInt64] {
+        var ret = [UInt64]()
         for measurement in measurements {
             ret.append(measurement.identifier)
         }
@@ -303,9 +303,10 @@ public class CoreDataPersistenceLayer {
 
 // MARK: - PersistenceLayer protocol implementation
 
+// TODO: Remove all database write operations.
 extension CoreDataPersistenceLayer: PersistenceLayer {
 
-    public func delete(measurement: Int64) throws {
+    public func delete(measurement: UInt64) throws {
         try manager.wrapInContext { context in
             let measurementIdentifier = measurement
             guard let measurement = try load(measurementIdentifiedBy: measurement, from: context) else {
@@ -347,7 +348,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
          */
     }
 
-    public func clean(measurement: Int64) throws {
+    public func clean(measurement: UInt64) throws {
         try manager.wrapInContext { context in
             let measurementIdentifier = measurement
             guard let measurementMO = try load(measurementIdentifiedBy: measurementIdentifier, from: context) else {
@@ -377,7 +378,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
 
             let measurementMO = MeasurementMO(context: context)
             measurementMO.time = time
-            measurementMO.identifier = identifier
+            measurementMO.identifier = Int64(identifier)
             measurementMO.synchronized = false
             measurementMO.synchronizable = false
             try context.save()
@@ -563,7 +564,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
         }
     }
 
-    public func load(measurementIdentifiedBy identifier: Int64) throws -> FinishedMeasurement {
+    public func load(measurementIdentifiedBy identifier: UInt64) throws -> FinishedMeasurement {
         return try manager.wrapInContextReturn { context in
             do {
                 guard let unwrappedMeasurement = try self.load(measurementIdentifiedBy: identifier, from: context) else {
@@ -671,7 +672,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
  */
 public enum PersistenceError: Error {
     /// If a measurement was not loaded successfully.
-    case measurementNotLoadable(Int64)
+    case measurementNotLoadable(UInt64)
     /// If a track from a measurement could not be loaded
     case trackNotLoadable(Track, FinishedMeasurement)
     /// If a track was not persistent (i.e. had not valid objectId) at a place where only persistent tracks are valid
@@ -679,11 +680,11 @@ public enum PersistenceError: Error {
     /// If measurements could not be loaded in bulk.
     case measurementsNotLoadable
     /// If some data belonging to a measurement could not be loaded.
-    case dataNotLoadable(measurement: Int64)
+    case dataNotLoadable(measurement: UInt64)
     /// If it is impossible to load the last generated identifier. This can only happen if the system settings have been tempered with.
     case inconsistentState
     /// On trying to load a not yet synchronized `Measurement`. This is usually a `Measurement` with en `objectId` of `nil`.
-    case unsynchronizedMeasurement(identifier: Int64)
+    case unsynchronizedMeasurement(identifier: UInt64)
 }
 
 extension PersistenceError: LocalizedError {

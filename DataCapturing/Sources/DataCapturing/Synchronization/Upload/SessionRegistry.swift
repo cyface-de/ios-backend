@@ -36,14 +36,15 @@ public struct SessionRegistry {
         // Nothing to do here
     }
 
-    /// Provide the session for the `Measurement` or `nil` if no open session is available.
-    func session(for measurement: Upload) -> String? {
-        return openSessions[measurement.identifier]
+    /// Provide the session for the ``Upload`` or `nil` if no open session is available.
+    func session(for upload: Upload) -> String? {
+        return openSessions[upload.measurement.identifier]
     }
 
     /// Register a `session`for the provided `Measurement`
     /// - Parameter session: The complete REST URL to the session.
-    mutating func register(session: String, measurement: Upload) {
-        openSessions[measurement.identifier] = session
+    /// - Parameter upload: The ``Upload`` to register this session for.
+    mutating func register(session: String, upload: Upload) {
+        openSessions[upload.measurement.identifier] = session
     }
 }

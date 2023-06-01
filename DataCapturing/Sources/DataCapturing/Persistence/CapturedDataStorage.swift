@@ -105,6 +105,7 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                             case .stopped(timestamp: let time):
                                 os_log("Storing stopped event to database.", log: OSLog.persistence, type: .debug)
                                 measurement.addToEvents(EventMO(event: Event(time: time, type: .lifecycleStop), context: context))
+                                measurement.synchronizable = true
                             default:
                                 os_log("Message %{PUBLIC}@ irrelevant for data storage and thus ignored.",log: OSLog.persistence, type: .debug, message.description)
                             }

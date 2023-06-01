@@ -45,7 +45,7 @@ class PreRequest {
     /// - Parameter upload: The upload information
     /// - Parameter onSuccess: Callback after the request finished successfully.
     /// - Parameter onFailure: Callback after the request failed for some reason.
-    func request(authToken: String, upload: Upload, onSuccess: @escaping (String, String, Upload) -> Void, onFailure: @escaping (UInt64, Error) -> Void) {
+    func request(authToken: String, upload: Upload, onSuccess: @escaping (String, String, Upload) -> Void, onFailure: @escaping (Upload, Error) -> Void) {
         do {
             let metaData = try upload.metaData()
             let data = try upload.data()
@@ -59,8 +59,6 @@ class PreRequest {
             headers.add(name: "User-Agent", value: "Cyface-iOS-Client/\(metaData.applicationVersion) (gzip)")
             headers.add(name: "Connection", value: "Keep-Alive")
 
-            let measurementIdentifier = metaData.measurementId
-
             session.request(
                 apiUrl.appendingPathComponent("measurements"),
                 method: .post,
@@ -68,12 +66,11 @@ class PreRequest {
                 encoder: JSONParameterEncoder.default,
                 headers: headers
             ).response { response in
-
                 guard let response = response.response else {
                     if let error = response.error {
-                        onFailure(measurementIdentifier, ServerConnectionError.alamofireError(error))
+                        onFailure(upload, ServerConnectionError.alamofireError(error))
                     } else {
-                        onFailure(measurementIdentifier, ServerConnectionError.noResponse)
+                        onFailure(upload, ServerConnectionError.noResponse)
                     }
                     return
                 }
@@ -82,19 +79,19 @@ class PreRequest {
 
                 if status == 200 {
                     guard let location = response.headers["Location"] else {
-                        onFailure(measurementIdentifier, ServerConnectionError.noLocation)
+                        onFailure(upload, ServerConnectionError.noLocation)
                         return
                     }
 
                     onSuccess(authToken, location, upload)
                 } else if status == 412 {
-                    onFailure(measurementIdentifier, ServerConnectionError.uploadNotAccepted(measurementIdentifier: Int64(measurementIdentifier)))
+                    onFailure(upload, ServerConnectionError.uploadNotAccepted(upload: upload))
                 } else {
-                    onFailure(measurementIdentifier, ServerConnectionError.requestFailed(httpStatusCode: status))
+                    onFailure(upload, ServerConnectionError.requestFailed(httpStatusCode: status))
                 }
             }
         } catch {
-            onFailure(upload.identifier, error)
+            onFailure(upload, error)
         }
     }
 }

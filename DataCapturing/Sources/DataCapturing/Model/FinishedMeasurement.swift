@@ -35,11 +35,11 @@ import OSLog
  */
 public class FinishedMeasurement: Hashable, Equatable {
     /// The minimum number of meters before the ascend is increased, to filter sensor noise.
-    public static let ascendThresholdMeters = 2.0
+    //public static let ascendThresholdMeters = 2.0
     /// The minimum accuracy in meters for GNSS altitudes to be used in ascend calculation.
-    public static let verticalAccuracyThresholdMeters = 12.0
+    //public static let verticalAccuracyThresholdMeters = 12.0
     /// A device wide unique identifier for this measurement. Usually set by incrementing a counter.
-    public let identifier: Int64
+    public let identifier: UInt64
     /// A flag, marking this `Measurement` as either ready for data syncrhonization or not.
     public var synchronizable: Bool
     /// A flag, marking this `Measurement` as either synchronized or not.
@@ -47,7 +47,22 @@ public class FinishedMeasurement: Hashable, Equatable {
     /// The time when this measurement was started.
     public let time: Date
     /// The calculated length of the `Measurement`. See `DistanceCalculationStrategy` for further details.
-    public var trackLength: Double
+    public var trackLength: Double {
+        return tracks.map { track in
+            return track.locations
+        }
+        .map { locations in
+            var prevLocation: GeoLocation?
+            var ret = 0.0
+            locations.forEach { location in
+                ret += prevLocation?.distance(from: location) ?? 0.0
+            }
+            return 0.0
+        }
+        .reduce(0.0) { accumulator, partSum in
+            accumulator + partSum
+        }
+    }
     /// The user events that occurred during this `Measurement`.
     public var events: [Event]
     /// The tracks containing all the data this `Measurement` has captured.
@@ -63,7 +78,7 @@ public class FinishedMeasurement: Hashable, Equatable {
      */
     convenience init(managedObject: MeasurementMO) throws {
         self.init(
-            identifier: managedObject.identifier,
+            identifier: UInt64(managedObject.identifier),
             synchronizable: managedObject.synchronizable,
             synchronized: managedObject.synchronized,
             time: managedObject.time!
@@ -93,18 +108,16 @@ public class FinishedMeasurement: Hashable, Equatable {
      - Parameters:
         - identifier: A device wide unique identifier for this measurement. Usually set by incrementing a counter.
         - synchronizable: A flag, marking this `Measurement` as either ready for data syncrhonization or not.
-        -  synchronized: A flag, marking this `Measurement` as either synchronized or not.
-        - timestamp: The UNIX timestamp in milliseconds since the 1st of January 1970, when this measurement was started.
-        - trackLength: The calculated length of the `Measurement`. See `DistanceCalculationStrategy` for further details.
+        - synchronized: A flag, marking this `Measurement` as either synchronized or not.
+        - time: The time this measurement was captured.
         - events: The user events that occurred during this `Measurement`.
         - tracks: The tracks containing all the data this `Measurement` has captured.
      */
     public init(
-        identifier: Int64,
+        identifier: UInt64,
         synchronizable: Bool = false,
         synchronized: Bool = false,
         time: Date = Date(),
-        trackLength: Double = 0.0,
         events: [Event] = [Event](),
         tracks: [Track] = [Track]()
     ) {
@@ -112,7 +125,6 @@ public class FinishedMeasurement: Hashable, Equatable {
         self.synchronizable = synchronizable
         self.synchronized = synchronized
         self.time = time
-        self.trackLength = trackLength
         self.events = events
         self.tracks = tracks
     }
@@ -122,18 +134,18 @@ public class FinishedMeasurement: Hashable, Equatable {
 
      - Parameter track: The `Track` to add.
      */
-    func append(track: Track) {
+    /*func append(track: Track) {
         tracks.append(track)
-    }
+    }*/
 
     /**
      Add an `Event` to the list of events captured during this `Measurement`.
 
      - Parameter event: The `Event` to add to the `Measurement`.
      */
-    func append(event: Event) {
+    /*func append(event: Event) {
         events.append(event)
-    }
+    }*/
 
     /// Required by the `Hashable` protocol to produce a hash for this object.
     public func hash(into hasher: inout Hasher) {
@@ -147,7 +159,7 @@ public class FinishedMeasurement: Hashable, Equatable {
 
     // TODO: Remove everything below?
     /// Provide the average speed of this measurement in m/s.
-    public func averageSpeed() -> Double {
+    //public func averageSpeed() -> Double {
         /*var sum = 0.0
         var counter = 0
         tracks.forEach { track in
@@ -160,14 +172,14 @@ public class FinishedMeasurement: Hashable, Equatable {
         }
 
         if counter==0 {*/
-            return 0.0
+            //return 0.0
         /*} else {
             return sum/Double(counter)
         }*/
-    }
+    //}
 
     /// Provide the total duration of this measurement.
-    public func totalDuration() -> TimeInterval {
+    /*public func totalDuration() -> TimeInterval {
         var totalTime = TimeInterval()
         tracks.forEach { track in
             guard let firstTime = track.locations.first?.time, let lastTime = track.locations.last?.time else {
@@ -179,10 +191,10 @@ public class FinishedMeasurement: Hashable, Equatable {
         }
 
         return totalTime
-    }
+    }*/
 
     /// Calculate the accumulated height value for this measurement.
-    public func summedHeight() -> Double {
+    /*public func summedHeight() -> Double {
         var sum = 0.0
         tracks.forEach { track in
 
@@ -222,5 +234,5 @@ public class FinishedMeasurement: Hashable, Equatable {
             }
         }
         return sum
-    }
+    }*/
 }

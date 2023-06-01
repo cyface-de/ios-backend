@@ -47,7 +47,7 @@ public enum ServerConnectionError: Error {
     /// The upload location provided by a status request was no a valid URL.
     case invalidUploadLocation(String)
     /// Thrown if the server did not accept the upload of a measurement for some reason
-    case uploadNotAccepted(measurementIdentifier: Int64)
+    case uploadNotAccepted(upload: Upload)
 }
 
 extension ServerConnectionError: LocalizedError {
@@ -133,7 +133,7 @@ Tell the user that a pre request failed because no data upload location was prov
 Tell the user that an upload failed because the session used for that upload was invalid.
 """)
             return String.localizedStringWithFormat(errorMessage, session)
-        case .uploadNotAccepted(measurementIdentifier: let measurementIdentifier):
+        case .uploadNotAccepted(upload: let upload):
             let errorMessage =  NSLocalizedString(
                 "de.cyface.error.ServerConnectionError.uploadNotAccepted",
                 value: "The server did not accept the upload of the measurement",
@@ -142,7 +142,7 @@ Tell the user that for some reason the server did not accept the upload of measu
 There are several possible reasons for that, which are server specific.
 One example would be a measurement without any location data.
 """)
-            return String.localizedStringWithFormat(errorMessage, measurementIdentifier)
+            return String.localizedStringWithFormat(errorMessage, upload.measurement.identifier)
         }
     }
 }

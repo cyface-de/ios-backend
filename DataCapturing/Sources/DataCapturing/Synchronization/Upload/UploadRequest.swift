@@ -39,8 +39,8 @@ class UploadRequest {
     }
 
     /// Send the request for the provided `upload`.
-    func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0, onSuccess: @escaping (UInt64) -> Void, onFailure: @escaping (String, String, Upload, Error) -> Void) {
-        os_log("Uploading measurement %{public}d to session %{public}@.", log: log, type: .debug, upload.identifier, sessionIdentifier)
+    func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0, onSuccess: @escaping (Upload) -> Void, onFailure: @escaping (String, String, Upload, Error) -> Void) {
+        os_log("Uploading measurement %{public}d to session %{public}@.", log: log, type: .debug, upload.measurement.identifier, sessionIdentifier)
             do {
                 let metaData = try upload.metaData()
                 let data = try upload.data()
@@ -62,7 +62,7 @@ class UploadRequest {
                 let status = response.statusCode
 
                 if status == 201 {
-                    onSuccess(upload.identifier)
+                    onSuccess(upload)
                 } else {
                     onFailure(authToken, sessionIdentifier, upload, ServerConnectionError.requestFailed(httpStatusCode: status))
                 }

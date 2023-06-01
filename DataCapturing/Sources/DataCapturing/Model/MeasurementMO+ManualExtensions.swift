@@ -69,4 +69,17 @@ extension MeasurementMO {
 
         return typedEvents
     }
+
+    public func trackLength() -> Double {
+        return typedTracks().map { $0.typedLocations() }.map { locations in
+            var prevLocation: GeoLocationMO?
+            var ret = 0.0
+            locations.forEach { location in
+                ret += prevLocation?.distance(to: location) ?? 0.0
+                prevLocation = location
+            }
+            return ret
+        }
+        .reduce(0.0) { $0 + $1 }
+    }
 }

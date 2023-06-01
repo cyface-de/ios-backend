@@ -123,7 +123,7 @@ class MockPersistenceLayer: PersistenceLayer {
         DataCapturing.FinishedMeasurement(identifier: 2)
     ]
 
-    func delete(measurement: Int64) throws {
+    func delete(measurement: UInt64) throws {
 
     }
 
@@ -135,7 +135,7 @@ class MockPersistenceLayer: PersistenceLayer {
         
     }
 
-    func clean(measurement: Int64) throws {
+    func clean(measurement: UInt64) throws {
 
     }
 
@@ -163,7 +163,7 @@ class MockPersistenceLayer: PersistenceLayer {
 
     }
 
-    func load(measurementIdentifiedBy identifier: Int64) throws -> DataCapturing.FinishedMeasurement {
+    func load(measurementIdentifiedBy identifier: UInt64) throws -> DataCapturing.FinishedMeasurement {
         return DataCapturing.FinishedMeasurement(identifier: 0)
     }
 

@@ -19,6 +19,7 @@
 
 import Foundation
 
+// TODO: Remove this!
 /**
  Events occuring during capturing and transmitting data.
  
@@ -64,28 +65,28 @@ public enum DataCapturingEvent: CustomStringConvertible {
      - measurement: The device wide unique identifier of the measurement for which the service has started
      - event: The event stored for this service start
      */
-    case serviceStarted(measurement: Int64?, event: Event)
+    case serviceStarted(measurement: UInt64?, event: Event)
     /**
      Used to notify the client application of a successful pause of the `DataCapturingService`.
 
      - measurement: The device wide unique identifier of the measurement for which the service has paused
      - event: The event stored for this service pause
      */
-    case servicePaused(measurement: Int64?, event: Event)
+    case servicePaused(measurement: UInt64?, event: Event)
     /**
      Used to notify the client application of a successful resume of the `DataCapturingService`.
 
      - measurement: The device wide unique identifier of the measurement for which the service has resumed
      - event: The event stored for this service resume
     */
-    case serviceResumed(measurement: Int64?, event: Event)
+    case serviceResumed(measurement: UInt64?, event: Event)
     /**
      Used to notify the client application of a successful stop of the `DataCapturingService`.
 
      - measurement: The device wide unique identifier of the measurement for which the service has stopped
      - event: The event stored for this service stop
      */
-    case serviceStopped(measurement: Int64?, event: Event)
+    case serviceStopped(measurement: UInt64?, event: Event)
     /**
      Occurs if the `DataCapturingService` has finished synchronizing a measurement.
      This does not necessarily mean, that the synchronization was successful.
@@ -93,13 +94,13 @@ public enum DataCapturingEvent: CustomStringConvertible {
 
      - measurement: The measurement which finished synchronization.
      */
-    case synchronizationFinished(measurement: Int64)
+    case synchronizationFinished(measurement: FinishedMeasurement)
     /**
      Occurs when the synchronization of a measurement has started.
 
      - measurement: The measurement the gets synchronized.
      */
-    case synchronizationStarted(measurement: Int64)
+    case synchronizationStarted(measurement: FinishedMeasurement)
 
     /// A stringyfied variant of this object, mostly used for human readable representation during debugging sessions.
     public var description: String {
@@ -112,8 +113,8 @@ public enum DataCapturingEvent: CustomStringConvertible {
         case .servicePaused(let measurementIdentifier, let event): return "servicePaused(\(String(describing: measurementIdentifier)), \(event))"
         case .serviceResumed(let measurementIdentifier, let event): return "serviceResumed(\(String(describing: measurementIdentifier)), \(event))"
         case .serviceStopped(let measurementIdentifier, let event): return "serviceStopped(\(String(describing: measurementIdentifier)), \(event))"
-        case .synchronizationFinished(let measurementIdentifier): return "synchronizationFinished(\(measurementIdentifier))"
-        case .synchronizationStarted(let measurementIdentifier): return "synchronizationStarted(\(measurementIdentifier))"
+        case .synchronizationFinished(let measurement): return "synchronizationFinished(\(measurement.identifier))"
+        case .synchronizationStarted(let measurement): return "synchronizationStarted(\(measurement.identifier))"
         }
     }
 }

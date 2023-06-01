@@ -50,10 +50,10 @@ class StatusRequest {
     func request(
         sessionIdentifier: String,
         upload: Upload,
-        onFinished: @escaping (UInt64) -> Void,
+        onFinished: @escaping (Upload) -> Void,
         onResume: @escaping (String, String, Upload) -> Void,
         onAborted: @escaping (String, Upload) -> Void,
-        onFailure: @escaping (UInt64, Error) -> Void
+        onFailure: @escaping (Upload, Error) -> Void
     ) {
         do {
             let metaData = try upload.metaData()
@@ -75,22 +75,22 @@ class StatusRequest {
             // always send the total upload size, no matter if you did just sent a chunk
             headers.add(name: "Content-Range", value: "bytes */\(data.count)")
             guard let requestUrl = URL(string: sessionIdentifier) else {
-                onFailure(upload.identifier, ServerConnectionError.invalidUploadLocation(sessionIdentifier))
+                onFailure(upload, ServerConnectionError.invalidUploadLocation(sessionIdentifier))
                 return
             }
 
             session.request(requestUrl, method: .put).response { response in
                 guard let response = response.response else {
                     if let error = response.error {
-                        return onFailure(upload.identifier, ServerConnectionError.alamofireError(error))
+                        return onFailure(upload, ServerConnectionError.alamofireError(error))
                     } else {
-                        return onFailure(upload.identifier, ServerConnectionError.noResponse)
+                        return onFailure(upload, ServerConnectionError.noResponse)
                     }
                 }
 
                 switch response.statusCode {
                 case 200:
-                    onFinished(upload.identifier)
+                    onFinished(upload)
                     // Upload abgeschlossen. Ignorieren
                 case 308:
                     onResume(self.authToken, sessionIdentifier, upload)
@@ -99,11 +99,11 @@ class StatusRequest {
                     onAborted(self.authToken, upload)
                     // Upload neu starten
                 default:
-                    onFailure(upload.identifier, ServerConnectionError.requestFailed(httpStatusCode: response.statusCode))
+                    onFailure(upload, ServerConnectionError.requestFailed(httpStatusCode: response.statusCode))
                 }
             }
         } catch {
-            onFailure(upload.identifier, error)
+            onFailure(upload, error)
         }
     }
 }

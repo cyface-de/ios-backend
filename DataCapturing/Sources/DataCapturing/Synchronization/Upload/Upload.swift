@@ -25,12 +25,12 @@ import Foundation
  - author: Klemens Muthmann
  - version: 1.0.0
  */
-protocol Upload {
+public protocol Upload {
     /// The amount of failed uploads before retrying is stopped.
     var failedUploadsCounter: Int {get set}
 
-    /// The device wide unique identifier of the measurement to upload.
-    var identifier: UInt64 { get }
+    /// The ``FinishedMeasurement`` to upload.
+    var measurement: FinishedMeasurement { get }
 
     /// Provide the upload meta data of the measurement to upload.
     func metaData() throws -> MetaData
@@ -48,44 +48,19 @@ protocol Upload {
 class CoreDataBackedUpload: Upload {
     /// A wrapper for the `NSPersistentContainer` and the corresponding initialization code.
     var dataStoreStack: DataStoreStack
-    /// The device wide unique identifier of the measurement to upload.
-    var identifier: UInt64
-    /// The device wide unique measurement identifier as a signed 64 bit integer.
-    var _identifier: Int64 {
-        return Int64(identifier)
-    }
     /// A cache for the actual measurement to upload, so we don't have to reload it from the database all the time.
-    var _measurement: FinishedMeasurement?
+    var measurement: FinishedMeasurement
     /// A cache for the measurements metadata, so we don't have to reload it from the database all the time.
-    var metaDataCache: MetaData?
-    /// A cache for the binary data to upload.
     var dataCache: Data?
     /// A counter of the number of failed attempts to run this upload. This can be used to stop retrying after a certain amount of retries.
     var failedUploadsCounter = 0
-
-    /// Provide the measurement to upload from CoreData.
-    ///
-    /// After the first call this is retrieved from a local cache and not reloaded from the local storage.
-    /// To refresh the values, you need use a new instance of this class.
-    private func measurement() throws -> FinishedMeasurement {
-        let persistenceLayer = dataStoreStack.persistenceLayer()
-        if _measurement == nil {
-            let loadedMeasurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
-
-            _measurement = loadedMeasurement
-            return loadedMeasurement
-        } else {
-            guard let loadedMeasurement = _measurement else {
-                throw MeasurementError.faultError
-            }
-
-            return loadedMeasurement
-        }
+    var identifier: UInt64 {
+        measurement.identifier
     }
 
     /// Make a new instance of this class, connected to a CoreData storage and associated with a measurement, via its `identifier`.
-    init(dataStoreStack: DataStoreStack, identifier: UInt64) {
-        self.identifier = identifier
+    init(dataStoreStack: DataStoreStack, measurement: FinishedMeasurement) {
+        self.measurement = measurement
         self.dataStoreStack = dataStoreStack
     }
 
@@ -94,42 +69,36 @@ class CoreDataBackedUpload: Upload {
     /// After the first call this is retrieved from a local cache and not reloaded from storage.
     /// To refresh the values, you need use a new instance of this class.
     func metaData() throws -> MetaData {
-        if let ret = metaDataCache {
-            return ret
-        } else {
-            let persistenceLayer = dataStoreStack.persistenceLayer()
-            let (measurement, initialModality) = try measurement(identifier: _identifier)
-
-            let bundle = Bundle.main
-            guard let appVersion = bundle.infoDictionary?["CFBundleShortVersionString"] as? String else {
-                throw ServerConnectionError.dataError("Application version was missing!")
-            }
-
-            let length = measurement.trackLength
-
-            let locationCount = try persistenceLayer.countGeoLocations(forMeasurement: measurement)
-
-            let (startLocationLat, startLocationLon, startLocationTs) = try startLocation()
-
-            let (endLocationLat, endLocationLon, endLocationTs) = try endLocation()
-
-            let ret = MetaData(
-                locationCount: UInt64(locationCount),
-                formatVersion: Int(dataFormatVersion),
-                startLocLat: startLocationLat,
-                startLocLon: startLocationLon,
-                startLocTS: startLocationTs,
-                endLocLat: endLocationLat,
-                endLocLon: endLocationLon,
-                endLocTS: endLocationTs,
-                measurementId: UInt64(measurement.identifier),
-                osVersion: "iOS \(ProcessInfo.processInfo.operatingSystemVersionString)",
-                applicationVersion: appVersion,
-                length: length,
-                modality: initialModality)
-            metaDataCache = ret
-            return ret
+        let bundle = Bundle.main
+        guard let appVersion = bundle.infoDictionary?["CFBundleShortVersionString"] as? String else {
+            throw ServerConnectionError.dataError("Application version was missing!")
         }
+
+        let length = measurement.trackLength
+
+        let locationCount = measurement.tracks.map { $0.locations.count }.reduce(0) { $0 + $1 }
+
+        let (startLocationLat, startLocationLon, startLocationTs) = try startLocation()
+
+        let (endLocationLat, endLocationLon, endLocationTs) = try endLocation()
+
+        let operatingSystemVersion = ProcessInfo.processInfo.operatingSystemVersionString
+        let range = operatingSystemVersion.range(of: "Version ")!
+
+        return MetaData(
+            locationCount: UInt64(locationCount),
+            formatVersion: Int(dataFormatVersion),
+            startLocLat: startLocationLat,
+            startLocLon: startLocationLon,
+            startLocTS: startLocationTs,
+            endLocLat: endLocationLat,
+            endLocLon: endLocationLon,
+            endLocTS: endLocationTs,
+            measurementId: UInt64(measurement.identifier),
+            osVersion: "iOS \(operatingSystemVersion[range.upperBound..<operatingSystemVersion.endIndex])",
+            applicationVersion: appVersion,
+            length: length,
+            modality: try initialModality())
     }
 
     /// Serialize the data from the measurement to upload into a binary format.
@@ -143,36 +112,24 @@ class CoreDataBackedUpload: Upload {
         if let ret = dataCache {
             return ret
         } else {
-            let persistenceLayer = dataStoreStack.persistenceLayer()
             let serializer = MeasurementSerializer()
 
-            let measurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
             let ret = try serializer.serializeCompressed(serializable: measurement)
             return ret
         }
     }
 
     /// Load a measurement from CoreData and return the measurement together with the initial modality.
-    private func measurement(identifier: Int64) throws -> (FinishedMeasurement, String) {
-        let persistenceLayer = dataStoreStack.persistenceLayer()
-        let measurement = try persistenceLayer.load(measurementIdentifiedBy: identifier)
-
-        let modalityTypeChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
-        guard !modalityTypeChangeEvents.isEmpty else {
-            throw ServerConnectionError.modalityError("No modality type information available!")
-        }
-        guard let initialModality = modalityTypeChangeEvents[0].value else {
+    private func initialModality() throws -> String {
+        guard let initialModality = measurement.events.filter({ if case $0.type = EventType.modalityTypeChange { return true } else { return false }}).min(by: { $0.time < $1.time })?.value else {
             throw ServerConnectionError.modalityError("Invalid modality change event with no value encountered!")
         }
 
-        return (measurement, initialModality)
+        return initialModality
     }
 
     /// Provide the start location of the measurement to upload as a triple of latitude, longitude and timestamp or all `nil` if the measurement has no locations.
     func startLocation() throws -> (Double?, Double?, Date?) {
-        let persistenceLayer = dataStoreStack.persistenceLayer()
-        let measurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
-
         guard !measurement.tracks.isEmpty else {
             return (nil, nil, nil)
         }
@@ -186,9 +143,6 @@ class CoreDataBackedUpload: Upload {
 
     /// Provide the end location of the measurement to upload as a triple of latitude, longitude and timestamp or all `nil` if the measurement has not locations.
     func endLocation() throws -> (Double?, Double?, Date?) {
-        let persistenceLayer = dataStoreStack.persistenceLayer()
-        let measurement = try persistenceLayer.load(measurementIdentifiedBy: Int64(identifier))
-
         guard !measurement.tracks.isEmpty else {
             return (nil, nil, nil)
         }

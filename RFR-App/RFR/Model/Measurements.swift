@@ -46,9 +46,9 @@ class Measurements: ObservableObject {
                 var sumOfAvoidedEmissions = 0.0
                 var maxAvoidedEmissions = 0.0
                 measurements.forEach { measurement in
-                    /*let distance = measurement.trackLength
+                    let distance = measurement.trackLength()
                     maxDistance = max(maxDistance, distance)
-                    summedDistance += distance*/
+                    summedDistance += distance
 
                     var measurementDuration = TimeInterval()
                     measurement.typedTracks().forEach { track in
@@ -62,18 +62,18 @@ class Measurements: ObservableObject {
                     }
                     totalDuration += measurementDuration
 
-                    /*let avoidedEmissions = measurement.trackLength * LiveViewModel.averageCarbonEmissionsPerMeter
+                    let avoidedEmissions = distance * averageCarbonEmissionsPerMeter
                     maxAvoidedEmissions = max(maxAvoidedEmissions, avoidedEmissions)
-                    sumOfAvoidedEmissions += avoidedEmissions*/
+                    sumOfAvoidedEmissions += avoidedEmissions
 
                     let height = summedHeight(timelines: measurement.typedTracks())
                     maxIncline = max(height, maxIncline)
                     sumIncline += height
                 }
-                var meanDistance = summedDistance / Double(measurements.count)
-                var meanDuration = totalDuration / Double(measurements.count)
-                var meanAvoidedEmissions = sumOfAvoidedEmissions / Double(measurements.count)
-                var meanIncline = sumIncline / Double(measurements.count)
+                let meanDistance = summedDistance / Double(measurements.count)
+                let meanDuration = totalDuration / Double(measurements.count)
+                let meanAvoidedEmissions = sumOfAvoidedEmissions / Double(measurements.count)
+                let meanIncline = sumIncline / Double(measurements.count)
 
                 self.maxDistance = "\(distanceFormatter.string(from: maxDistance as NSNumber)!) km"
                 self.meansDistance = "\(distanceFormatter.string(from: (meanDistance.isNaN ? 0 : meanDistance) as NSNumber)!) km"
