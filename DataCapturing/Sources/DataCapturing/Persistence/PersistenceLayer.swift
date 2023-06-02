@@ -313,13 +313,21 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
                 throw PersistenceError.measurementNotLoadable(measurementIdentifier)
             }
 
-            let localMeasurement = try FinishedMeasurement(managedObject: measurement)
-            let accelerationFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
-            try accelerationFile.remove(from: localMeasurement)
-            let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
-            try rotationsFile.remove(from: localMeasurement)
-            let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
-            try directionsFile.remove(from: localMeasurement)
+            let accelerationFile = SensorValueFile(
+                measurement: measurement,
+                fileType: SensorValueFileType.accelerationValueType
+            )
+            try accelerationFile.delete()
+            let rotationsFile = SensorValueFile(
+                measurement: measurement,
+                fileType: SensorValueFileType.rotationValueType
+            )
+            try rotationsFile.delete()
+            let directionsFile = SensorValueFile(
+                measurement: measurement,
+                fileType: SensorValueFileType.directionValueType
+            )
+            try directionsFile.delete()
             context.delete(measurement)
             try context.save()
         }
@@ -356,13 +364,21 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
             }
 
             measurementMO.synchronized = true
-            let localMeasurement = try FinishedMeasurement(managedObject: measurementMO)
-            let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
-            try accelerationsFile.remove(from: localMeasurement)
-            let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
-            try rotationsFile.remove(from: localMeasurement)
-            let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
-            try directionsFile.remove(from: localMeasurement)
+            let accelerationsFile = SensorValueFile(
+                measurement: measurementMO,
+                fileType: SensorValueFileType.accelerationValueType
+            )
+            try accelerationsFile.delete()
+            let rotationsFile = SensorValueFile(
+                measurement: measurementMO,
+                fileType: SensorValueFileType.rotationValueType
+            )
+            try rotationsFile.delete()
+            let directionsFile = SensorValueFile(
+                measurement: measurementMO,
+                fileType: SensorValueFileType.directionValueType
+            )
+            try directionsFile.delete()
 
             try context.save()
         }
@@ -526,16 +542,16 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
     }
 
     public func save(accelerations: [SensorValue] = [], rotations: [SensorValue] = [], directions: [SensorValue] = [], in measurement: inout FinishedMeasurement) throws {
-        try manager.wrapInContext { context in
+        /*try manager.wrapInContext { context in
 
             debugPrint("Storing \(accelerations.count) accelerations \(rotations.count) rotations and \(directions.count) directions.")
 
-            let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
+            let accelerationsFile = SensorValueFile(measurement: fileType: SensorValueFileType.accelerationValueType)
             let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
             let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
             if !accelerations.isEmpty {
                 do {
-                    _ = try accelerationsFile.write(serializable: accelerations, to: measurement.identifier)
+                    _ = try accelerationsFile.write(serializable: accelerations)
                 } catch {
                     debugPrint("Unable to write data to file \(accelerationsFile.fileName)!")
                     throw error
@@ -544,7 +560,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
 
             if !rotations.isEmpty {
                 do {
-                    _ = try rotationsFile.write(serializable: rotations, to: measurement.identifier)
+                    _ = try rotationsFile.write(serializable: rotations)
                 } catch {
                     debugPrint("Unable to write data to file \(rotationsFile.fileName)!")
                     throw error
@@ -553,7 +569,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
 
             if !directions.isEmpty {
                 do {
-                    _ = try directionsFile.write(serializable: directions, to: measurement.identifier)
+                    _ = try directionsFile.write(serializable: directions)
                 } catch {
                     debugPrint("Unable to write data to file \(directionsFile.fileName)!")
                     throw error
@@ -561,7 +577,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
             }
 
             try context.save()
-        }
+        }*/
     }
 
     public func load(measurementIdentifiedBy identifier: UInt64) throws -> FinishedMeasurement {

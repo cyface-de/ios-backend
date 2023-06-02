@@ -67,6 +67,9 @@ public class FinishedMeasurement: Hashable, Equatable {
     public var events: [Event]
     /// The tracks containing all the data this `Measurement` has captured.
     public var tracks: [Track]
+    public let accelerationDate: Data
+    public let rotationData: Data
+    public let directionData: Data
 
     /**
      Initialize a new `Measurement` from an existing CoreData managed object.
@@ -77,11 +80,18 @@ public class FinishedMeasurement: Hashable, Equatable {
      - throws: `InconstantData.locationOrderViolation` if the timestamps of the locations in this measurement are not strongly monotonically increasing.
      */
     convenience init(managedObject: MeasurementMO) throws {
+        let accelerationFile = SensorValueFile(measurement: managedObject, fileType: .accelerationValueType)
+        let directionFile = SensorValueFile(measurement: managedObject, fileType: .directionValueType)
+        let rotationFile = SensorValueFile(measurement: managedObject, fileType: .rotationValueType)
+
         self.init(
             identifier: UInt64(managedObject.identifier),
             synchronizable: managedObject.synchronizable,
             synchronized: managedObject.synchronized,
-            time: managedObject.time!
+            time: managedObject.time!,
+            accelerationData: try accelerationFile.data(),
+            rotationData: try rotationFile.data(),
+            directionData: try directionFile.data()
         )
 
         if let eventMOs = managedObject.events?.array as? [EventMO] {
@@ -98,6 +108,7 @@ public class FinishedMeasurement: Hashable, Equatable {
                 tracks.append(track)
             }
         }
+
     }
 
     /**
@@ -119,7 +130,10 @@ public class FinishedMeasurement: Hashable, Equatable {
         synchronized: Bool = false,
         time: Date = Date(),
         events: [Event] = [Event](),
-        tracks: [Track] = [Track]()
+        tracks: [Track] = [Track](),
+        accelerationData: Data = Data(),
+        rotationData: Data = Data(),
+        directionData: Data = Data()
     ) {
         self.identifier = identifier
         self.synchronizable = synchronizable
@@ -127,6 +141,9 @@ public class FinishedMeasurement: Hashable, Equatable {
         self.time = time
         self.events = events
         self.tracks = tracks
+        self.accelerationDate = accelerationData
+        self.rotationData = rotationData
+        self.directionData = directionData
     }
 
     /**

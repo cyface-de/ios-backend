@@ -82,16 +82,54 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                             return
                         }
 
-                        messages.forEach { message in
+                        let accelerationsFile = SensorValueFile(
+                            measurement: measurement,
+                            fileType: SensorValueFileType.accelerationValueType
+                        )
+                        let rotationsFile = SensorValueFile(
+                            measurement: measurement,
+                            fileType: SensorValueFileType.rotationValueType
+                        )
+                        let directionsFile = SensorValueFile(
+                            measurement: measurement,
+                            fileType: SensorValueFileType.directionValueType
+                        )
+
+                        try messages.forEach { message in
                             switch message {
                             case .capturedLocation(let location):
-                                os_log("Storing location to database.", log: OSLog.persistence, type: .debug)
+                                os_log(
+                                    "Storing location to database.",
+                                    log: OSLog.persistence,
+                                    type: .debug
+                                )
                                 if let lastTrack = measurement.typedTracks().last {
                                     lastTrack.addToLocations(GeoLocationMO(location: location, context: context))
                                 }
                             case .capturedAltitude(let altitude):
                                 if let lastTrack = measurement.typedTracks().last {
                                     lastTrack.addToAltitudes(AltitudeMO(altitude: altitude, context: context))
+                                }
+                            case .capturedRotation(let rotation):
+                                do {
+                                    _ = try rotationsFile.write(serializable: [rotation])
+                                } catch {
+                                    debugPrint("Unable to write data to file \(rotationsFile.fileName)!")
+                                    throw error
+                                }
+                            case .capturedDirection(let direction):
+                                do {
+                                    _ = try directionsFile.write(serializable: [direction])
+                                } catch {
+                                    debugPrint("Unable to write data to file \(directionsFile.fileName)!")
+                                    throw error
+                                }
+                            case .capturedAcceleration(let acceleration):
+                                do {
+                                    _ = try accelerationsFile.write(serializable: [acceleration])
+                                } catch {
+                                    debugPrint("Unable to write data to file \(accelerationsFile.fileName)!")
+                                    throw error
                                 }
                             case .started(timestamp: let time):
                                 os_log("Storing started event to database.", log: OSLog.persistence, type: .debug)
@@ -114,7 +152,7 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                         try context.save()
                     }
                 } catch {
-                    os_log("Unable to store location! Error %{PUBLIC}@",log: OSLog.persistence ,type: .error, error.localizedDescription)
+                    os_log("Unable to store data! Error %{PUBLIC}@",log: OSLog.persistence ,type: .error, error.localizedDescription)
                 }
             }.store(in: &cancellables)
         return ret

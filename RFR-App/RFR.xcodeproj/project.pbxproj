@@ -48,6 +48,9 @@
 		AACB768729BF67E800A9DB6F /* DataCapturingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */; };
 		AACB768929C0989300A9DB6F /* RFRError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768829C0989300A9DB6F /* RFRError.swift */; };
 		AACB768C29C1C24B00A9DB6F /* InitializationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768B29C1C24B00A9DB6F /* InitializationView.swift */; };
+		AAE8E4662A29F2B5005AA4F1 /* schkeuditz.csv in Resources */ = {isa = PBXBuildFile; fileRef = AAE8E4652A29F2B5005AA4F1 /* schkeuditz.csv */; };
+		AAE8E4682A29F302005AA4F1 /* AlleyCatMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E4672A29F302005AA4F1 /* AlleyCatMarker.swift */; };
+		AAE8E46A2A29F35A005AA4F1 /* köthen.csv in Resources */ = {isa = PBXBuildFile; fileRef = AAE8E4692A29F35A005AA4F1 /* köthen.csv */; };
 		AAEA84392A1BAF3E00DFA28D /* CredentialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEA84382A1BAF3E00DFA28D /* CredentialsView.swift */; };
 /* End PBXBuildFile section */
 
@@ -115,6 +118,9 @@
 		AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingViewModel.swift; sourceTree = "<group>"; };
 		AACB768829C0989300A9DB6F /* RFRError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRError.swift; sourceTree = "<group>"; };
 		AACB768B29C1C24B00A9DB6F /* InitializationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitializationView.swift; sourceTree = "<group>"; };
+		AAE8E4652A29F2B5005AA4F1 /* schkeuditz.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = schkeuditz.csv; sourceTree = "<group>"; };
+		AAE8E4672A29F302005AA4F1 /* AlleyCatMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlleyCatMarker.swift; sourceTree = "<group>"; };
+		AAE8E4692A29F35A005AA4F1 /* köthen.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "köthen.csv"; sourceTree = "<group>"; };
 		AAEA84382A1BAF3E00DFA28D /* CredentialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -172,6 +178,7 @@
 		AA87D06A2982ADE8002F6B3B /* RFR */ = {
 			isa = PBXGroup;
 			children = (
+				AAE8E4642A29F26F005AA4F1 /* Resources */,
 				AAC9D2F229840B9E003C4CC7 /* Info.plist */,
 				AAC9D2ED2984061D003C4CC7 /* Components */,
 				AA87D09E2983DC49002F6B3B /* ViewModel */,
@@ -271,6 +278,7 @@
 				AAC9D2F629891A8D003C4CC7 /* Measurement.swift */,
 				AAC9D2FC29895526003C4CC7 /* Altitude.swift */,
 				AAA1AABB29E84519002CBC91 /* Measurements.swift */,
+				AAE8E4672A29F302005AA4F1 /* AlleyCatMarker.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -288,6 +296,15 @@
 				AACB768829C0989300A9DB6F /* RFRError.swift */,
 			);
 			path = Error;
+			sourceTree = "<group>";
+		};
+		AAE8E4642A29F26F005AA4F1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AAE8E4652A29F2B5005AA4F1 /* schkeuditz.csv */,
+				AAE8E4692A29F35A005AA4F1 /* köthen.csv */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		AAEA843A2A1CB9CC00DFA28D /* AppStart */ = {
@@ -429,7 +446,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAE8E4662A29F2B5005AA4F1 /* schkeuditz.csv in Resources */,
 				AA87D0732982ADE9002F6B3B /* Preview Assets.xcassets in Resources */,
+				AAE8E46A2A29F35A005AA4F1 /* köthen.csv in Resources */,
 				AA87D0702982ADE9002F6B3B /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -471,6 +490,7 @@
 				AAA1AAB229DC36A5002CBC91 /* LoginViewModel.swift in Sources */,
 				AAA1AABE29E8895A002CBC91 /* Formatter.swift in Sources */,
 				AA87D0992982B43F002F6B3B /* StatisticsView.swift in Sources */,
+				AAE8E4682A29F302005AA4F1 /* AlleyCatMarker.swift in Sources */,
 				AAA1AAB829E6E729002CBC91 /* ErrorView.swift in Sources */,
 				AA87D06E2982ADE8002F6B3B /* LiveView.swift in Sources */,
 				AA87D09B2982B4CB002F6B3B /* MeasurementView.swift in Sources */,
@@ -662,7 +682,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.3;
+				MARKETING_VERSION = 0.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -696,7 +716,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.3;
+				MARKETING_VERSION = 0.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

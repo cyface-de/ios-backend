@@ -107,11 +107,11 @@ class MeasurementSerializer: BinarySerializer {
     /// The targeted amount of places after the comma to use for storing geo locations.
     static let geoLocationAccuracy = 6
     /// File handle to store acceleration values to
-    let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
+    //let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
     /// File handle to store rotation values to
-    let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
+    //let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
     /// File handle to store direction values to
-    let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
+    //let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
 
     /**
      Serializes the provided `measurement` into its Cyface Binary Format specification in the form:
@@ -182,12 +182,9 @@ class MeasurementSerializer: BinarySerializer {
         }
         protosMeasurement.locationRecords = records
 
-        let accelerationsData = try accelerationsFile.data(for: measurement)
-        protosMeasurement.accelerationsBinary = accelerationsData
-        let directionsData = try directionsFile.data(for: measurement)
-        protosMeasurement.directionsBinary = directionsData
-        let rotationsData = try rotationsFile.data(for: measurement)
-        protosMeasurement.rotationsBinary = rotationsData
+        protosMeasurement.accelerationsBinary = measurement.accelerationDate
+        protosMeasurement.directionsBinary = measurement.directionData
+        protosMeasurement.rotationsBinary = measurement.rotationData
         let serializedData = try protosMeasurement.serializedData()
         var ret = Data(dataFormatVersionBytes)
         ret.append(serializedData)
