@@ -1,9 +1,9 @@
-longitude,latitude,description
-51.751117,11.973984,Marktplatz Köthen
-51.75243880654433,11.948543178133846,Piratenspielplatz
-51.766749,11.931790,Forellenhof
-51.766687,11.983936,Kinder- und Bowlingwelt Köthen
-51.754960,12.001494,Kaufland Köthen (Merziener Straße)
-51.747082,12.005348,Gnetscher Straße, Nähe Stadtbäckerei Rödel
-51.743019,11.971916,Jürgenweg (Höhe NP)
-51.755023,11.976503,Schloss Köthen, Haus des Dürerbundes
+latitude,longitude,description
+11.973984,51.751117,Marktplatz Köthen
+11.948543178133846,51.75243880654433,Piratenspielplatz
+11.931790,51.766749,Forellenhof
+11.983936,51.766687,Kinder- und Bowlingwelt Köthen
+12.001494,51.754960,Kaufland Köthen (Merziener Straße)
+12.005348,51.747082,Gnetscher Straße, Nähe Stadtbäckerei Rödel
+11.971916,51.743019,Jürgenweg (Höhe NP)
+11.976503,51.755023,Schloss Köthen, Haus des Dürerbundes

@@ -17,6 +17,7 @@
  * along with the Read-for-Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
  */
 import MapKit
+import CoreLocation
 import SwiftUI
 
 /**
@@ -139,6 +140,11 @@ struct ControlBarView: View {
     }
 }
 
+struct Marker: Identifiable {
+    let id = UUID()
+    var location: MapMarker
+}
+
 /**
  A view showing focused details such as the current position or speed of the active measurement.
 
@@ -148,10 +154,18 @@ struct ControlBarView: View {
 struct LiveDetailsView: View {
     @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.5515, longitude: 12.2388), span: MKCoordinateSpan( latitudeDelta: 0.9, longitudeDelta: 0.9))
     @ObservedObject var viewModel: LiveViewModel
+    @State var markers = [Marker]()
 
     var body: some View {
         TabView {
-            Map(coordinateRegion: $region, showsUserLocation: true, userTrackingMode: .constant(.follow))
+            Map(
+                coordinateRegion: $region,
+                showsUserLocation: true,
+                userTrackingMode: .constant(.follow),
+                annotationItems: markers
+            ) { marker in
+                marker.location
+            }
                 .padding([.top])
                 .tabItem {
                     Image(systemName: "map")
@@ -168,6 +182,20 @@ struct LiveDetailsView: View {
                 Image(systemName: "speedometer")
                 Text("Geschwindigkeit")
             }
+        }
+        .onAppear {
+            let schkeuditzData = loadAlleyCatData(fileName: "schkeuditz", ext: "csv")
+            let köthenData = loadAlleyCatData(fileName: "köthen", ext: "csv")
+            var data = [AlleyCatMarker]()
+            data.append(contentsOf: schkeuditzData)
+            data.append(contentsOf: köthenData)
+
+            var markers = [Marker]()
+            data.forEach { marker in
+                markers.append(Marker(location: MapMarker(coordinate: CLLocationCoordinate2D(latitude: marker.latitude, longitude: marker.longitude), tint: .red)))
+            }
+
+            self.markers.append(contentsOf: markers)
         }
     }
 }
