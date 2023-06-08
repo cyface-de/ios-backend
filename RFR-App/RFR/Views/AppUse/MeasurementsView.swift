@@ -30,6 +30,7 @@ import MapKit
  */
 struct MeasurementsView: View {
     @ObservedObject var viewModel: MeasurementsViewModel
+    @StateObject var voucherViewModel: VoucherViewModel
 
     var body: some View {
         VStack {
@@ -41,14 +42,24 @@ struct MeasurementsView: View {
                 }
             } else {
                 List {
-                    ForEach(viewModel.measurements) {measurement in
-                        NavigationLink(destination: MeasurementView(
-                            measurement: measurement
+                    Section(header: Text("Abgeschlossene Messungen")) {
+                        ForEach(viewModel.measurements) {measurement in
+                            NavigationLink(destination: MeasurementView(
+                                measurement: measurement
                             )) {
-                            MeasurementCell(measurement: measurement)
+                                MeasurementCell(measurement: measurement)
+                            }
                         }
                     }
+                    .headerProminence(.increased)
                 }
+
+                Spacer()
+                voucherViewModel.view()
+            }
+        }.onAppear {
+            Task {
+                try await voucherViewModel.refreshModel()
             }
         }
     }

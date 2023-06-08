@@ -17,6 +17,9 @@
 		AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */; };
 		AA87D0992982B43F002F6B3B /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D0982982B43F002F6B3B /* StatisticsView.swift */; };
 		AA87D09B2982B4CB002F6B3B /* MeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D09A2982B4CB002F6B3B /* MeasurementView.swift */; };
+		AA8FC7652A2CE82B006D52F3 /* Voucher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8FC7642A2CE82B006D52F3 /* Voucher.swift */; };
+		AA8FC7672A2CE9F2006D52F3 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8FC7662A2CE9F2006D52F3 /* Credentials.swift */; };
+		AA8FC7692A2DB438006D52F3 /* VoucherViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8FC7682A2DB438006D52F3 /* VoucherViewModel.swift */; };
 		AAA1AAAC29D57BB2002CBC91 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAAB29D57BB2002CBC91 /* Router.swift */; };
 		AAA1AAAE29D6FB8D002CBC91 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAAD29D6FB8D002CBC91 /* OSLog.swift */; };
 		AAA1AAB029DB1F0C002CBC91 /* Preview_Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */; };
@@ -51,6 +54,9 @@
 		AAE8E4662A29F2B5005AA4F1 /* schkeuditz.csv in Resources */ = {isa = PBXBuildFile; fileRef = AAE8E4652A29F2B5005AA4F1 /* schkeuditz.csv */; };
 		AAE8E4682A29F302005AA4F1 /* AlleyCatMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E4672A29F302005AA4F1 /* AlleyCatMarker.swift */; };
 		AAE8E46A2A29F35A005AA4F1 /* köthen.csv in Resources */ = {isa = PBXBuildFile; fileRef = AAE8E4692A29F35A005AA4F1 /* köthen.csv */; };
+		AAE8E46D2A2A33BB005AA4F1 /* VoucherOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E46C2A2A33BB005AA4F1 /* VoucherOverview.swift */; };
+		AAE8E46F2A2A33E3005AA4F1 /* VoucherReached.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E46E2A2A33E3005AA4F1 /* VoucherReached.swift */; };
+		AAE8E4712A2A33F5005AA4F1 /* VoucherEnabled.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E4702A2A33F5005AA4F1 /* VoucherEnabled.swift */; };
 		AAEA84392A1BAF3E00DFA28D /* CredentialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEA84382A1BAF3E00DFA28D /* CredentialsView.swift */; };
 		AAFB60992A31BFA9008AEC76 /* UIKitMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAFB60982A31BFA9008AEC76 /* UIKitMapView.swift */; };
 /* End PBXBuildFile section */
@@ -88,6 +94,9 @@
 		AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementsView.swift; sourceTree = "<group>"; };
 		AA87D0982982B43F002F6B3B /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 		AA87D09A2982B4CB002F6B3B /* MeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementView.swift; sourceTree = "<group>"; };
+		AA8FC7642A2CE82B006D52F3 /* Voucher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Voucher.swift; sourceTree = "<group>"; };
+		AA8FC7662A2CE9F2006D52F3 /* Credentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
+		AA8FC7682A2DB438006D52F3 /* VoucherViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherViewModel.swift; sourceTree = "<group>"; };
 		AAA1AAAB29D57BB2002CBC91 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		AAA1AAAD29D6FB8D002CBC91 /* OSLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLog.swift; sourceTree = "<group>"; };
 		AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preview_Mocks.swift; sourceTree = "<group>"; };
@@ -122,6 +131,9 @@
 		AAE8E4652A29F2B5005AA4F1 /* schkeuditz.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = schkeuditz.csv; sourceTree = "<group>"; };
 		AAE8E4672A29F302005AA4F1 /* AlleyCatMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlleyCatMarker.swift; sourceTree = "<group>"; };
 		AAE8E4692A29F35A005AA4F1 /* köthen.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "köthen.csv"; sourceTree = "<group>"; };
+		AAE8E46C2A2A33BB005AA4F1 /* VoucherOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherOverview.swift; sourceTree = "<group>"; };
+		AAE8E46E2A2A33E3005AA4F1 /* VoucherReached.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherReached.swift; sourceTree = "<group>"; };
+		AAE8E4702A2A33F5005AA4F1 /* VoucherEnabled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherEnabled.swift; sourceTree = "<group>"; };
 		AAEA84382A1BAF3E00DFA28D /* CredentialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsView.swift; sourceTree = "<group>"; };
 		AAFB60982A31BFA9008AEC76 /* UIKitMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitMapView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -251,6 +263,7 @@
 				AAA1AAB929E6FAE0002CBC91 /* SynchronizationViewModel.swift */,
 				AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */,
 				AAA1AAC929EEDC0A002CBC91 /* RegistrationViewModel.swift */,
+				AA8FC7682A2DB438006D52F3 /* VoucherViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -281,6 +294,8 @@
 				AAC9D2FC29895526003C4CC7 /* Altitude.swift */,
 				AAA1AABB29E84519002CBC91 /* Measurements.swift */,
 				AAE8E4672A29F302005AA4F1 /* AlleyCatMarker.swift */,
+				AA8FC7642A2CE82B006D52F3 /* Voucher.swift */,
+				AA8FC7662A2CE9F2006D52F3 /* Credentials.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -309,6 +324,16 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		AAE8E46B2A2A33A7005AA4F1 /* Voucher */ = {
+			isa = PBXGroup;
+			children = (
+				AAE8E46C2A2A33BB005AA4F1 /* VoucherOverview.swift */,
+				AAE8E46E2A2A33E3005AA4F1 /* VoucherReached.swift */,
+				AAE8E4702A2A33F5005AA4F1 /* VoucherEnabled.swift */,
+			);
+			path = Voucher;
+			sourceTree = "<group>";
+		};
 		AAEA843A2A1CB9CC00DFA28D /* AppStart */ = {
 			isa = PBXGroup;
 			children = (
@@ -326,6 +351,7 @@
 		AAEA843B2A1CB9D500DFA28D /* AppUse */ = {
 			isa = PBXGroup;
 			children = (
+				AAE8E46B2A2A33A7005AA4F1 /* Voucher */,
 				AA87D06D2982ADE8002F6B3B /* LiveView.swift */,
 				AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */,
 				AA87D0982982B43F002F6B3B /* StatisticsView.swift */,
@@ -478,8 +504,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				AACB767F29BF5E8A00A9DB6F /* ControlBarViewModel.swift in Sources */,
+				AAE8E4712A2A33F5005AA4F1 /* VoucherEnabled.swift in Sources */,
 				AAA1AAC629EEDB76002CBC91 /* HCaptchaView.swift in Sources */,
 				AAC9D2E82983DEC3003C4CC7 /* LiveViewModel.swift in Sources */,
+				AA8FC7672A2CE9F2006D52F3 /* Credentials.swift in Sources */,
 				AAA1AAAE29D6FB8D002CBC91 /* OSLog.swift in Sources */,
 				AAA1AACE29EFD0F8002CBC91 /* RegistrationDetailsView.swift in Sources */,
 				AAC9D2EF29840651003C4CC7 /* LabelledDivider.swift in Sources */,
@@ -488,6 +516,7 @@
 				AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */,
 				AACB768729BF67E800A9DB6F /* DataCapturingViewModel.swift in Sources */,
 				AAA1AACA29EEDC0A002CBC91 /* RegistrationViewModel.swift in Sources */,
+				AAE8E46D2A2A33BB005AA4F1 /* VoucherOverview.swift in Sources */,
 				AAA1AAB429E540D0002CBC91 /* MeasurementsViewModel.swift in Sources */,
 				AAA1AACC29EEDC63002CBC91 /* RegistrationRequest.swift in Sources */,
 				AAA1AAB229DC36A5002CBC91 /* LoginViewModel.swift in Sources */,
@@ -503,6 +532,7 @@
 				AAC9D30129897042003C4CC7 /* MainView.swift in Sources */,
 				AAA1AAB029DB1F0C002CBC91 /* Preview_Mocks.swift in Sources */,
 				AAA1AAAC29D57BB2002CBC91 /* Router.swift in Sources */,
+				AA8FC7652A2CE82B006D52F3 /* Voucher.swift in Sources */,
 				AAA1AAC129ED4544002CBC91 /* Statistics.swift in Sources */,
 				AA87D06C2982ADE8002F6B3B /* RFRApp.swift in Sources */,
 				AAEA84392A1BAF3E00DFA28D /* CredentialsView.swift in Sources */,
@@ -513,7 +543,9 @@
 				AACB768529BF671600A9DB6F /* LoadinScreen.swift in Sources */,
 				AAFB60992A31BFA9008AEC76 /* UIKitMapView.swift in Sources */,
 				AAA1AABC29E84519002CBC91 /* Measurements.swift in Sources */,
+				AA8FC7692A2DB438006D52F3 /* VoucherViewModel.swift in Sources */,
 				AAC9D2EC29840601003C4CC7 /* RegistrationView.swift in Sources */,
+				AAE8E46F2A2A33E3005AA4F1 /* VoucherReached.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

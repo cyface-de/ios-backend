@@ -52,3 +52,10 @@ let riseFormatter = {
 
     return formatter
 }()
+let dateFormatter = {
+    let formatter = DateFormatter()
+    formatter.locale = Locale.current
+    formatter.dateStyle = .short
+
+    return formatter
+}()

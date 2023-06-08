@@ -12,6 +12,7 @@ enum RFRError: Error {
     case invalidUrl(url: String)
     case missingAuthenticator
     case unableToLoadMeasurement(measurement: Measurement)
+    case missingVoucher
 }
 
 extension RFRError: LocalizedError {
@@ -36,7 +37,7 @@ extension RFRError: LocalizedError {
                 "de.cyface.error.rfrerror.missingAuthenticator",
                 value: "Authenticator has not been assigned yet!",
                 comment: "Tell the user, that there was no authenticator. This error should not occur under normal circumstances."
-                )
+            )
 
             return errorMessage
         case .unableToLoadMeasurement(measurement: let measurement):
@@ -46,6 +47,13 @@ extension RFRError: LocalizedError {
                 comment: "Tell the user that a measurement could not be loaded. The device wide unique identifier of the measurement is provided as the first parameter.")
 
             return String.localizedStringWithFormat(errorMessage, measurement.id)
+        case .missingVoucher:
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.rfrerror.missingVoucher",
+                value: "Unable to load your voucher",
+                comment: "Explain that no valid voucher information was found for the current user.")
+
+            return errorMessage
         }
     }
 }

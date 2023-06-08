@@ -32,7 +32,7 @@ struct MainView: View {
     @ObservedObject var syncViewModel: SynchronizationViewModel
 
     var body: some View {
-        if let dataStoreStack = viewModel.dataStoreStack {
+        if let dataStoreStack = viewModel.dataStoreStack, let incentivesEndpoint = URL(string: RFRApp.incentivesUrl) {
             NavigationStack {
                 VStack {
                     TabView(selection: $selectedTab) {
@@ -40,6 +40,10 @@ struct MainView: View {
                             viewModel: MeasurementsViewModel(
                                 dataStoreStack: dataStoreStack,
                                 uploadPublisher: syncViewModel.uploadStatusPublisher
+                            ),
+                            voucherViewModel: VoucherViewModel(
+                                authenticator: syncViewModel.synchronizer.authenticator,
+                                url: incentivesEndpoint
                             )
                         )
                             .tabItem {

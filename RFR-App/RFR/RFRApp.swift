@@ -28,9 +28,10 @@ import SwiftUI
 @main
 struct RFRApp: App {
     // TODO: Put this into some configuration file
-    static let authenticationEndpoint = "https://s2-b.cyface.de/api/v3"
-    static let uploadEndpoint = "https://s2-b.cyface.de/api/v3"
-    static let registrationUrl = "https://s2-b.cyface.de/provider/api/v1/"
+    static let authenticationEndpoint = "https://s1-b.cyface.de/api/v3"
+    static let uploadEndpoint = "https://s1-b.cyface.de/api/v3"
+    static let registrationUrl = "https://s1-b.cyface.de/provider/api/v1/"
+    static let incentivesUrl = "https://staging.cyface.de/incentives/api/v1/"
     @StateObject var appViewModel = AppViewModel()
 
     var body: some Scene {
