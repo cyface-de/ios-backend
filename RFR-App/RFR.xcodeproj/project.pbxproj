@@ -52,6 +52,7 @@
 		AAE8E4682A29F302005AA4F1 /* AlleyCatMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E4672A29F302005AA4F1 /* AlleyCatMarker.swift */; };
 		AAE8E46A2A29F35A005AA4F1 /* köthen.csv in Resources */ = {isa = PBXBuildFile; fileRef = AAE8E4692A29F35A005AA4F1 /* köthen.csv */; };
 		AAEA84392A1BAF3E00DFA28D /* CredentialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEA84382A1BAF3E00DFA28D /* CredentialsView.swift */; };
+		AAFB60992A31BFA9008AEC76 /* UIKitMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAFB60982A31BFA9008AEC76 /* UIKitMapView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -122,6 +123,7 @@
 		AAE8E4672A29F302005AA4F1 /* AlleyCatMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlleyCatMarker.swift; sourceTree = "<group>"; };
 		AAE8E4692A29F35A005AA4F1 /* köthen.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "köthen.csv"; sourceTree = "<group>"; };
 		AAEA84382A1BAF3E00DFA28D /* CredentialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsView.swift; sourceTree = "<group>"; };
+		AAFB60982A31BFA9008AEC76 /* UIKitMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitMapView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -331,6 +333,7 @@
 				AAC9D2F329840D83003C4CC7 /* MeasurementCell.swift */,
 				AAC9D2FE29895D16003C4CC7 /* KeyValueView.swift */,
 				AAC9D30029897042003C4CC7 /* MainView.swift */,
+				AAFB60982A31BFA9008AEC76 /* UIKitMapView.swift */,
 			);
 			path = AppUse;
 			sourceTree = "<group>";
@@ -508,6 +511,7 @@
 				AAA1AABA29E6FAE0002CBC91 /* SynchronizationViewModel.swift in Sources */,
 				AAC9D2FF29895D16003C4CC7 /* KeyValueView.swift in Sources */,
 				AACB768529BF671600A9DB6F /* LoadinScreen.swift in Sources */,
+				AAFB60992A31BFA9008AEC76 /* UIKitMapView.swift in Sources */,
 				AAA1AABC29E84519002CBC91 /* Measurements.swift in Sources */,
 				AAC9D2EC29840601003C4CC7 /* RegistrationView.swift in Sources */,
 			);

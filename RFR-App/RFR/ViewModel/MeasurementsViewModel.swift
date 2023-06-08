@@ -8,6 +8,8 @@
 import Foundation
 import DataCapturing
 import Combine
+import CoreLocation
+import MapKit
 
 class MeasurementsViewModel: ObservableObject {
     /// The measurements displayed by this view.
@@ -51,6 +53,11 @@ class MeasurementsViewModel: ObservableObject {
         var highestPoint = 0.0
         var heightProfile = [Altitude]()
         let tracks = measurement.typedTracks()
+        var coordinates = [CLLocationCoordinate2D]()
+        var minimumLatitude = 90.0
+        var minimumLongitude = 180.0
+        var maximumLatitude = -90.0
+        var maximumLongitude = -180.0
         for track in tracks {
             let locations = track.typedLocations()
             guard let firstLocationTime = locations.first?.time else {
@@ -65,6 +72,13 @@ class MeasurementsViewModel: ObservableObject {
                 maxSpeed = max(maxSpeed, location.speed)
                 sumSpeed += location.speed
                 locationCount += 1
+
+                coordinates.append(CLLocationCoordinate2D(latitude: location.lat, longitude: location.lon))
+
+                minimumLatitude = min(minimumLatitude, location.lat)
+                minimumLongitude = min(minimumLongitude, location.lon)
+                maximumLatitude = max(maximumLatitude, location.lat)
+                maximumLongitude = max(maximumLongitude, location.lon)
             }
 
             track.typedAltitudes().enumerated().forEach { (index, altitude) in
@@ -75,6 +89,20 @@ class MeasurementsViewModel: ObservableObject {
         }
         let inclination = summedHeight(timelines: measurement.typedTracks())
         let distance = coveredDistance(tracks: tracks)
+
+        let latitudeDistance = maximumLatitude - minimumLatitude
+        let longitudeDistance = maximumLongitude - minimumLongitude
+
+        let southWestCorner = CLLocation(latitude: minimumLatitude, longitude: minimumLongitude)
+        let northWestCorner = CLLocation(latitude: maximumLatitude, longitude: minimumLongitude)
+        //let southEastCorner = CLLocation(latitude: minimumLatitude, longitude: maximumLongitude)
+        let northEastCorner = CLLocation(latitude: maximumLatitude, longitude: maximumLongitude)
+        let center = CLLocationCoordinate2D(
+            latitude: northWestCorner.coordinate.latitude - latitudeDistance/2,
+            longitude: northWestCorner.coordinate.longitude + longitudeDistance/2
+        )
+        let northSouthReach = southWestCorner.distance(from: northWestCorner)
+        let eastWestReach = northWestCorner.distance(from: northEastCorner)
         return Measurement(
             id: UInt64(measurement.identifier),
             startTime: measurement.time ?? Date(),
@@ -87,7 +115,13 @@ class MeasurementsViewModel: ObservableObject {
             _lowestPoint: lowestPoint,
             _highestPoint: highestPoint,
             _avoidedEmissions: avoidedEmissions(distance),
-            heightProfile: heightProfile
+            heightProfile: heightProfile,
+            region: MKCoordinateRegion(
+                center: center,
+                latitudinalMeters: northSouthReach + northSouthReach * 0.15,
+                longitudinalMeters: eastWestReach + eastWestReach * 0.15
+            ),
+            track: coordinates
             )
     }
 

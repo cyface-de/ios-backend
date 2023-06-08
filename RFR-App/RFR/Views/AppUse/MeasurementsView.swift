@@ -20,6 +20,7 @@
 import SwiftUI
 import DataCapturing
 import Combine
+import MapKit
 
 /**
  A view showing the lists of measurements capture by this device.
@@ -62,11 +63,40 @@ struct MeasurementsView: View {
 
 #if DEBUG
 struct MeasurementsView_Previews: PreviewProvider {
+    static var viewModel: MeasurementsViewModel {
+        let ret = MeasurementsViewModel(
+            dataStoreStack: MockDataStoreStack(),
+            uploadPublisher: PassthroughSubject<UploadStatus, Never>()
+        )
+        ret.measurements = [
+            Measurement(
+                id: 0,
+                startTime: Date(timeIntervalSince1970: 10_000),
+                synchronizationState: .synchronizing,
+                _maxSpeed: 2.0,
+                _meanSpeed: 2.0,
+                _distance: 2.0,
+                _duration: 100.0,
+                _inclination: 5.0,
+                _lowestPoint: 0.0,
+                _highestPoint: 10.0,
+                _avoidedEmissions: 4.0,
+                heightProfile: [],
+                region: MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.75155, longitude: 11.97411), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)),
+                track: [
+                ]
+            )
+        ]
+        ret.isLoading = false
+        return ret
+    }
+
     static var previews: some View {
         MeasurementsView(
-            viewModel: MeasurementsViewModel(
-                dataStoreStack: MockDataStoreStack(),
-                uploadPublisher: PassthroughSubject<UploadStatus, Never>()
+            viewModel: viewModel,
+            voucherViewModel: VoucherViewModel(
+                authenticator: MockAuthenticator(),
+                url: URL(string: RFRApp.uploadEndpoint)!
             )
         )
     }

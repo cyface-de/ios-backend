@@ -18,6 +18,7 @@
  */
 
 import SwiftUI
+import MapKit
 
 /**
 A single row in the measurements overview displaying all the measurements in a list.
@@ -68,6 +69,9 @@ struct MeasurementCell_Previews: PreviewProvider {
                     timestamp: Date(timeIntervalSince1970: 10_100),
                     height: 7.2
                 )
+            ],
+            region: MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.75155, longitude: 11.97411), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)),
+            track: [
             ]
         ),
         Measurement(
@@ -93,6 +97,9 @@ struct MeasurementCell_Previews: PreviewProvider {
                     timestamp: Date(timeIntervalSince1970: 20_200),
                     height: 5.4
                 )
+            ],
+            region: MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.75155, longitude: 11.97411), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)),
+            track: [
             ]
         )
     ]

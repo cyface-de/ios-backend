@@ -21,6 +21,8 @@ import Foundation
 import DataCapturing
 import Combine
 import SwiftUI
+import CoreLocation
+import MapKit
 
 /**
  A struct representing a measurement as required by the user interface of the application.`
@@ -98,6 +100,8 @@ struct Measurement: Identifiable {
 
         return "\(startTime.formatted()) (\(formattedDistance) km)"
     }
+    let region: MKCoordinateRegion
+    let track: [CLLocationCoordinate2D]
 
     func change(state: SynchronizationState) -> Measurement {
         return Measurement(
@@ -112,7 +116,9 @@ struct Measurement: Identifiable {
             _lowestPoint: self._lowestPoint,
             _highestPoint: self._highestPoint,
             _avoidedEmissions: self._avoidedEmissions,
-            heightProfile: heightProfile)
+            heightProfile: heightProfile,
+            region: self.region,
+            track: self.track)
     }
 
     /*init(identifier: UInt64, dataStoreStack: DataStoreStack) {
