@@ -38,8 +38,6 @@ struct Measurement: Identifiable {
     let startTime: Date
     /// The state of  synchronizting this measurement.
     let synchronizationState: SynchronizationState
-    //@Published var error: Error?
-    //@Published var isInitialized = false
 
     let _maxSpeed: Double
     var maxSpeed: String {
@@ -120,75 +118,6 @@ struct Measurement: Identifiable {
             region: self.region,
             track: self.track)
     }
-
-    /*init(identifier: UInt64, dataStoreStack: DataStoreStack) {
-        self.id = identifier
-        self.dataStoreStack = dataStoreStack
-        do {
-            try dataStoreStack.wrapInContext { [weak self] context in
-                guard let self = self else {
-                    return
-                }
-
-                let request = MeasurementMO.fetchRequest()
-                request.predicate = NSPredicate(format: "identifier == %d", id)
-                let fetchResult = try request.execute()
-
-                guard fetchResult.count == 1 else {
-                    fatalError("Invalid database state. There are multiple measurements with the same identifier.")
-                }
-
-                guard let coreDataMeasurement = fetchResult.first else {
-                    throw RFRError.unableToLoadMeasurement(measurement: self)
-                }
-
-                var maxSpeed = 0.0
-                var sumSpeed = 0.0
-                var locationCount = 0
-                var summedDuration = TimeInterval()
-                var lowestPoint = 0.0
-                var highestPoint = 0.0
-                let tracks = coreDataMeasurement.typedTracks()
-                for track in tracks {
-                    let locations = track.typedLocations()
-                    guard let firstLocationTime = locations.first?.time else {
-                        continue
-                    }
-                    guard let lastLocationTime = locations.last?.time else {
-                        continue
-                    }
-                    summedDuration += lastLocationTime.timeIntervalSince(firstLocationTime)
-
-                    locations.forEach { location in
-                        maxSpeed = max(maxSpeed, location.speed)
-                        sumSpeed += location.speed
-                        locationCount += 1
-                    }
-
-                    track.typedAltitudes().enumerated().forEach { [weak self] (index, altitude) in
-                        self?.heightProfile.append(Altitude(id: Int64(index), timestamp: altitude.time!, height: altitude.altitude))
-                        lowestPoint = min(lowestPoint, altitude.altitude)
-                        highestPoint = max(highestPoint, altitude.altitude)
-                    }
-                }
-                let inclination = summedHeight(timelines: coreDataMeasurement.typedTracks())
-
-                self.maxSpeed = "\(speedFormatter.string(from: maxSpeed as NSNumber)!) km/h"
-                self.meanSpeed = "\(speedFormatter.string(from: (sumSpeed / Double(locationCount)) as NSNumber)!) km/h"
-                // TODO: This iterates twice. Not very effective. Might become a problem with larger datasets.
-                self._distance = coveredDistance(tracks: tracks)
-                self.duration = timeFormatter.string(from: summedDuration)!
-                self.inclination = "\(riseFormatter.string(from: inclination as NSNumber)!) m"
-                self.lowestPoint = "\(riseFormatter.string(from: lowestPoint as NSNumber)!) m"
-                self.highestPoint = "\(riseFormatter.string(from: highestPoint as NSNumber)!) m"
-                self.avoidedEmissions = "\(emissionsFormatter.string(from: (RFR.avoidedEmissions(self._distance)) as NSNumber)!) kg"
-
-                isInitialized = true
-            }
-        } catch {
-            self.error = error
-        }
-    }*/
 }
 
 /**
