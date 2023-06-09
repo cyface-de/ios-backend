@@ -63,13 +63,15 @@ struct LiveView_Previews: PreviewProvider {
             speed: 21.0,
             averageSpeed: 15.0,
             measurementState: .stopped,
-            dataStoreStack: MockDataStoreStack()
+            dataStoreStack: MockDataStoreStack(),
+            dataStorageInterval: 5.0
             )
         )
 
         LiveView(viewModel: LiveViewModel(
             measurementState: .running,
-            dataStoreStack: MockDataStoreStack()
+            dataStoreStack: MockDataStoreStack(),
+            dataStorageInterval: 5.0
         ))
     }
 }
@@ -132,7 +134,7 @@ struct ControlBarView: View {
                 Image(systemName: "playpause.fill")
             }
             .frame(maxWidth: .infinity, minHeight: 44)
-            Button(action: viewModel.onStopPressed){
+            Button(action: viewModel.onStopPressed) {
                 Image(systemName: "stop.fill")
             }
             .frame(maxWidth: .infinity, minHeight: 44)

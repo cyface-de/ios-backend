@@ -11,7 +11,12 @@ import OSLog
 import CoreData
 
 public protocol CapturedDataStorage {
-    func subscribe(to measurement: Measurement,_ initialMode: String, _ receiveCompletion: @escaping (() -> Void)) throws -> UInt64
+    func createMeasurement(_ initialMode: String) throws -> UInt64
+    func subscribe(
+        to measurement: Measurement,
+        _ identifier: UInt64,
+        _ receiveCompletion: @escaping (() -> Void)) throws
+    func unsubscribe()
 }
 
 /**
@@ -33,7 +38,12 @@ public class CapturedCoreDataStorage {
         self.interval = interval
     }
 
-    private func createMeasurement(_ initialMode: String) throws -> UInt64 {
+
+}
+
+extension CapturedCoreDataStorage: CapturedDataStorage {
+
+    public func createMeasurement(_ initialMode: String) throws -> UInt64 {
         return try dataStoreStack.wrapInContextReturn { context in
             let time = Date()
             let measurementMO = MeasurementMO(context: context)
@@ -47,12 +57,13 @@ public class CapturedCoreDataStorage {
             return identifier
         }
     }
-}
 
-extension CapturedCoreDataStorage: CapturedDataStorage {
     /// Recievie updates from the provided ``Measurement`` and store the data to a ``DataStoreStack``.
-    public func subscribe(to measurement: Measurement, _ initialMode: String, _ receiveCompletion: @escaping (() -> Void)) throws -> UInt64 {
-        let ret = try createMeasurement(initialMode)
+    public func subscribe(
+        to measurement: Measurement,
+        _ identifier: UInt64,
+        _ receiveCompletion: @escaping (() -> Void)
+    ) throws {
         let cachedFlow = measurement.measurementMessages.collect(.byTime(cachingQueue, 1.0))
         cachedFlow
             .sink(receiveCompletion: { _ in
@@ -65,7 +76,7 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
             }) { [weak self] (messages: [Message]) in
                 do {
                     try self?.dataStoreStack.wrapInContext { context in
-                        guard let measurementRequest = context.persistentStoreCoordinator?.managedObjectModel.fetchRequestFromTemplate(withName: "measurementByIdentifier", substitutionVariables: ["identifier": ret]) else {
+                        guard let measurementRequest = context.persistentStoreCoordinator?.managedObjectModel.fetchRequestFromTemplate(withName: "measurementByIdentifier", substitutionVariables: ["identifier": identifier]) else {
                             os_log(
                                 "Unable to load measurement fetch request.",
                                 log: OSLog.persistence,
@@ -155,6 +166,12 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                     os_log("Unable to store data! Error %{PUBLIC}@",log: OSLog.persistence ,type: .error, error.localizedDescription)
                 }
             }.store(in: &cancellables)
-        return ret
+    }
+
+    public func unsubscribe() {
+        cancellables.forEach { cancellable in
+            cancellable.cancel()
+        }
+        cancellables.removeAll(keepingCapacity: true)
     }
 }

@@ -40,8 +40,8 @@ class LiveViewModel: ObservableObject {
     /// The state the active ``Measurement`` is in.
     @Published var measurementState: MeasurementState
     /// The current position in geographic coordinates of longitude and latitude.
-    @Published var lastCapturedLongitude: String
-    @Published var lastCapturedLatitude: String
+    //@Published var lastCapturedLongitude: String
+    //@Published var lastCapturedLatitude: String
     /// The name to display for this ``Measurement``.
     @Published var measurementName: String
     var dataStoreStack: DataStoreStack
@@ -57,7 +57,7 @@ class LiveViewModel: ObservableObject {
     /// The currently captured measurement or `nil` if no measurement is active.
     private var locations = [[GeoLocation]]()
     private var altitudes = [[DataCapturing.Altitude]]()
-    private var dataStorageProcess: CapturedDataStorage?
+    private var dataStorageProcess: CapturedDataStorage
     var measurement: DataCapturing.Measurement {
         get {
             if let measurement = self._measurement {
@@ -99,22 +99,7 @@ class LiveViewModel: ObservableObject {
                 .assign(to: &$distance)
 
                 trackFlow.map { tracks in
-                    var sum = 0.0
-                    var counter = 0
-                    tracks.forEach { track in
-                        track.forEach { location in
-                            //if location.isValid {
-                            sum += location.speed
-                            counter += 1
-                            //}
-                        }
-                    }
-
-                    if counter==0 {
-                        return 0.0
-                    } else {
-                        return sum/Double(counter)
-                    }
+                    RFR.averageSpeed(timelines: tracks)
                 }
                 .compactMap {
                     speedFormatter.string(from: $0 as NSNumber)
@@ -127,17 +112,7 @@ class LiveViewModel: ObservableObject {
 
                 trackFlow
                     .map { tracks in
-                        return tracks.map { track in
-                            var totalTime = TimeInterval()
-                            if let firstTime = track.first?.time,
-                               let lastTime = track.last?.time {
-                                totalTime += lastTime.timeIntervalSince(firstTime)
-                            }
-                            return totalTime
-                        }
-                        .reduce(0.0) { accumulator, next in
-                            accumulator + next
-                        }
+                        return RFR.duration(timelines: tracks)
                     }
                     .compactMap {
                         timeFormatter.string(from: $0)
@@ -213,6 +188,7 @@ class LiveViewModel: ObservableObject {
         }
     }
     private var _measurement: DataCapturing.Measurement?
+    private var identifier: UInt64?
     private var cancellables = [AnyCancellable]()
     @Published var error: Error?
     
@@ -220,23 +196,18 @@ class LiveViewModel: ObservableObject {
         speed: Double = 0.0,
         averageSpeed: Double = 0.0,
         measurementState: MeasurementState = .stopped,
-        position: (Double, Double) = (0.0, 0.0),
         measurementName: String = "",
         distance: Double = 0.0,
         duration: TimeInterval = 0.0,
         rise: Double = 0.0,
         avoidedEmissions: Double = 0.0,
-        dataStoreStack: DataStoreStack
+        dataStoreStack: DataStoreStack,
+        dataStorageInterval: Double
     ) {
+        self.dataStorageProcess = CapturedCoreDataStorage(dataStoreStack, dataStorageInterval)
+        self.dataStoreStack = dataStoreStack
+        
         guard let formattedSpeed = speedFormatter.string(from: speed as NSNumber) else {
-            fatalError()
-        }
-
-        guard let formattedLongitude = locationFormatter.string(from: position.1 as NSNumber) else {
-            fatalError()
-        }
-
-        guard let formattedLatitude = locationFormatter.string(from: position.0 as NSNumber) else {
             fatalError()
         }
 
@@ -263,14 +234,55 @@ class LiveViewModel: ObservableObject {
         self.speed = "\(formattedSpeed) km/h"
         self.averageSpeed = "\(averageFormattedSpeed) km/h"
         self.measurementState = measurementState
-        self.lastCapturedLongitude = formattedLongitude
-        self.lastCapturedLatitude = formattedLatitude
         self.measurementName = measurementName
         self.distance = "\(formattedDistance) km"
         self.duration = formattedDuration
         self.rise = "\(formattedRise) m"
         self.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
-        self.dataStoreStack = dataStoreStack
+    }
+
+    private func format(
+        speed: Double,
+        averageSpeed: Double,
+        measurementState: MeasurementState,
+        measurementName: String,
+        distance: Double,
+        duration: TimeInterval,
+        rise: Double,
+        avoidedEmissions: Double
+    ) {
+        guard let formattedSpeed = speedFormatter.string(from: speed as NSNumber) else {
+            fatalError()
+        }
+
+        guard let averageFormattedSpeed = speedFormatter.string(from: averageSpeed as NSNumber) else {
+            fatalError()
+        }
+
+        guard let formattedAvoidedEmissions = emissionsFormatter.string(from: avoidedEmissions as NSNumber) else {
+            fatalError()
+        }
+
+        guard let formattedDistance = distanceFormatter.string(from: distance as NSNumber) else {
+            fatalError()
+        }
+
+        guard let formattedDuration = timeFormatter.string(from: duration) else {
+            fatalError()
+        }
+
+        guard let formattedRise = riseFormatter.string(from: rise as NSNumber) else {
+            fatalError()
+        }
+
+        self.speed = "\(formattedSpeed) km/h"
+        self.averageSpeed = "\(averageFormattedSpeed) km/h"
+        self.measurementState = measurementState
+        self.measurementName = measurementName
+        self.distance = "\(formattedDistance) km"
+        self.duration = formattedDuration
+        self.rise = "\(formattedRise) m"
+        self.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
     }
 
     /**
@@ -280,9 +292,9 @@ class LiveViewModel: ObservableObject {
         do {
             if measurement.isRunning || measurement.isPaused {
                 try measurement.stop()
+                self.dataStorageProcess.unsubscribe()
                 cancellables.forEach { $0.cancel() }
                 cancellables.removeAll(keepingCapacity: true)
-                self.dataStorageProcess = nil
                 self._measurement = nil
             }
         } catch {
@@ -297,14 +309,26 @@ class LiveViewModel: ObservableObject {
         do {
             if measurement.isRunning {
                 try measurement.pause()
+                dataStorageProcess.unsubscribe()
             } else if measurement.isPaused {
-                try measurement.resume()
+                if let identifier = self.identifier {
+                    try self.dataStorageProcess.subscribe(
+                        to: measurement,
+                        identifier
+                    ) {}
+
+                    try measurement.resume()
+                }
             } else {
-                let dataStorage = CapturedCoreDataStorage(dataStoreStack, 5.0)
-                let identifier = try dataStorage.subscribe(to: measurement, "BICYCLE") {}
-                self.dataStorageProcess = dataStorage
-                self.measurementName = "Fahrt \(identifier)"
-                try measurement.start(inMode: "BICYCLE")
+                self.identifier = try self.dataStorageProcess.createMeasurement("BICYCLE")
+                if let identifier = self.identifier {
+                    try self.dataStorageProcess.subscribe(
+                        to: measurement,
+                        identifier
+                    ) {}
+                    self.measurementName = "Fahrt \(identifier)"
+                    try measurement.start(inMode: "BICYCLE")
+                }
             }
         } catch {
             self.error = error
@@ -331,6 +355,41 @@ class LiveViewModel: ObservableObject {
             self?.locations.removeAll(keepingCapacity: true)
         })
         stoppedEvents.receive(on: RunLoop.main).assign(to: &$measurementState)
+    }
+
+    private func currentMeasurementState() throws -> MeasurementState {
+        try dataStoreStack.wrapInContextReturn { context in
+            let request = MeasurementMO.fetchRequest()
+            if let pausedMeasurement = try request.execute().first(where: {!$0.synchronizable && !$0.synchronized}) {
+                return MeasurementState.paused
+            } else {
+                return MeasurementState.stopped
+            }
+        }
+    }
+
+    private func loadFromPaused() throws {
+        try dataStoreStack.wrapInContext { context in
+            let request = MeasurementMO.fetchRequest()
+            guard let measurementMO = try request.execute().first(where: {!$0.synchronizable && !$0.synchronized}) else {
+                return
+            }
+            let identifier = UInt64(measurementMO.identifier)
+
+            let tracks = measurementMO.typedTracks()
+            let distance = coveredDistance(tracks: tracks)
+            self.identifier = UInt64(identifier)
+            format(
+                speed: 0.0,
+                averageSpeed: RFR.averageSpeed(timelines: tracks),
+                measurementState: .paused,
+                measurementName: "Fahrt \(identifier)",
+                distance: distance,
+                duration: RFR.duration(timelines: tracks),
+                rise: summedHeight(timelines: tracks),
+                avoidedEmissions: RFR.avoidedEmissions(distance)
+            )
+        }
     }
 }
 

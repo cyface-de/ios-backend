@@ -76,9 +76,54 @@ func coveredDistance(tracks: [TrackMO]) -> Double {
     return ret
 }
 
+func averageSpeed(timelines: [MeasurementTimeline]) -> Double {
+    return averageSpeed(timelines: timelines.map { $0.measurements })
+}
+
+func averageSpeed(timelines: [[MeasurementPoint]]) -> Double {
+    var sum = 0.0
+    var counter = 0
+    timelines.forEach { timeline in
+        timeline.forEach { point in
+            //if location.isValid {
+            sum += point.speed
+            counter += 1
+            //}
+        }
+    }
+
+    if counter==0 {
+        return 0.0
+    } else {
+        return sum/Double(counter)
+    }
+}
+
+func duration(timelines: [MeasurementTimeline]) -> Double {
+    return duration(timelines: timelines.map { $0.measurements })
+}
+
+func duration(timelines: [[MeasurementPoint]]) -> Double {
+    return timelines.map { timeline in
+        var totalTime = TimeInterval()
+        if let firstTime = timeline.first?.timestamp,
+           let lastTime = timeline.last?.timestamp {
+            totalTime += lastTime.timeIntervalSince(firstTime)
+        }
+        return totalTime
+    }
+    .reduce(0.0) { accumulator, next in
+        accumulator + next
+    }
+}
+
 protocol AltitudeTimeline {
     var sattelite: [SatteliteAltitude] { get }
     var barometric: [BarometricAltitude] { get }
+}
+
+protocol MeasurementTimeline {
+    var measurements: [MeasurementPoint] { get }
 }
 
 protocol SatteliteAltitude {
@@ -86,11 +131,16 @@ protocol SatteliteAltitude {
     var accuracy: Double { get }
 }
 
+protocol MeasurementPoint {
+    var speed: Double { get }
+    var timestamp: Date? { get }
+}
+
 protocol BarometricAltitude {
     var value: Double { get }
 }
 
-extension TrackMO: AltitudeTimeline {
+extension TrackMO: AltitudeTimeline, MeasurementTimeline {
     var barometric: [BarometricAltitude] {
         self.typedAltitudes()
     }
@@ -98,9 +148,17 @@ extension TrackMO: AltitudeTimeline {
     var sattelite: [SatteliteAltitude] {
         self.typedLocations()
     }
+
+    var measurements: [MeasurementPoint] {
+        return typedLocations()
+    }
 }
 
-extension GeoLocationMO: SatteliteAltitude {
+extension GeoLocationMO: SatteliteAltitude, MeasurementPoint {
+    var timestamp: Date? {
+        self.time
+    }
+
     var value: Double {
         self.altitude
     }
@@ -114,6 +172,14 @@ extension AltitudeMO: BarometricAltitude {
     var value: Double {
         self.altitude
     }
+}
+
+extension GeoLocation: MeasurementPoint {
+    var timestamp: Date? {
+        self.time
+    }
+
+
 }
 
 func loadAlleyCatData(fileName: String, ext: String) -> [AlleyCatMarker] {
