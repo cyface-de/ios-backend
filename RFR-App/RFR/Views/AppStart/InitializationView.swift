@@ -10,6 +10,7 @@ import DataCapturing
 
 struct InitializationView: View {
     @StateObject var viewModel = DataCapturingViewModel()
+    var privacyPolicy = PrivacyPolicy()
     @ObservedObject var loginViewModel: LoginViewModel
 
     var body: some View {
@@ -31,10 +32,23 @@ struct InitializationView: View {
                             )
                         )
                     )
-                } else {
+                } else if privacyPolicy.mostRecentAccepted() {
                     LoginView(
                         viewModel: loginViewModel
                     )
+                } else {
+                    VStack {
+                        WebView(url: privacyPolicy.url)
+                        Button(action:  {
+                            privacyPolicy.onAccepted()
+                        }) {
+                            Text("Akzeptieren")
+                            .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    .padding([.leading, .trailing])
+                    .buttonStyle(.borderedProminent)
                 }
             }.onAppear {
                 Task {
