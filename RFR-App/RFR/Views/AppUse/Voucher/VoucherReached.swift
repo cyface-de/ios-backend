@@ -44,6 +44,7 @@ struct VoucherReached: View {
     }
 }
 
+#if DEBUG
 struct VoucherReached_Previews: PreviewProvider {
     static var previews: some View {
         VoucherReached(
@@ -54,3 +55,4 @@ struct VoucherReached_Previews: PreviewProvider {
         )
     }
 }
+#endif

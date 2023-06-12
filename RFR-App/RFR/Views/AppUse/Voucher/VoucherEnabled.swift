@@ -27,6 +27,7 @@ struct VoucherEnabled: View {
     }
 }
 
+#if DEBUG
 struct VoucherEnabled_Previews: PreviewProvider {
     static var viewModel: VoucherViewModel {
         let ret = VoucherViewModel(
@@ -44,3 +45,4 @@ struct VoucherEnabled_Previews: PreviewProvider {
         )
     }
 }
+#endif
