@@ -56,6 +56,7 @@ public class FinishedMeasurement: Hashable, Equatable {
             var ret = 0.0
             locations.forEach { location in
                 ret += prevLocation?.distance(from: location) ?? 0.0
+                prevLocation = location
             }
             return 0.0
         }
