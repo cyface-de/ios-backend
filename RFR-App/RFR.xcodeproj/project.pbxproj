@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA3C061F2A39D8CD002BD585 /* OAuthAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C061E2A39D8CD002BD585 /* OAuthAuthenticator.swift */; };
+		AA3C06212A39E4B4002BD585 /* OAuthTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06202A39E4B4002BD585 /* OAuthTest.swift */; };
+		AA3C06232A39F3BC002BD585 /* auth.conf.json in Resources */ = {isa = PBXBuildFile; fileRef = AA3C06222A39F3BC002BD585 /* auth.conf.json */; };
+		AA3C06272A3A0BB4002BD585 /* auth.conf.json.changeme in Resources */ = {isa = PBXBuildFile; fileRef = AA3C06262A3A0BB4002BD585 /* auth.conf.json.changeme */; };
 		AA87D06C2982ADE8002F6B3B /* RFRApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D06B2982ADE8002F6B3B /* RFRApp.swift */; };
 		AA87D06E2982ADE8002F6B3B /* LiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D06D2982ADE8002F6B3B /* LiveView.swift */; };
 		AA87D0702982ADE9002F6B3B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA87D06F2982ADE9002F6B3B /* Assets.xcassets */; };
@@ -85,6 +89,10 @@
 /* Begin PBXFileReference section */
 		AA11963C29924961008161C4 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		AA11963D29924A6F008161C4 /* COPYING */ = {isa = PBXFileReference; lastKnownFileType = text; path = COPYING; sourceTree = "<group>"; };
+		AA3C061E2A39D8CD002BD585 /* OAuthAuthenticator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthAuthenticator.swift; sourceTree = "<group>"; };
+		AA3C06202A39E4B4002BD585 /* OAuthTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthTest.swift; sourceTree = "<group>"; };
+		AA3C06222A39F3BC002BD585 /* auth.conf.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = auth.conf.json; sourceTree = "<group>"; };
+		AA3C06262A3A0BB4002BD585 /* auth.conf.json.changeme */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = auth.conf.json.changeme; sourceTree = "<group>"; };
 		AA87D0682982ADE8002F6B3B /* RFR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RFR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA87D06B2982ADE8002F6B3B /* RFRApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRApp.swift; sourceTree = "<group>"; };
 		AA87D06D2982ADE8002F6B3B /* LiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveView.swift; sourceTree = "<group>"; };
@@ -229,6 +237,7 @@
 			isa = PBXGroup;
 			children = (
 				AA87D07C2982ADE9002F6B3B /* RFRTests.swift */,
+				AA3C06202A39E4B4002BD585 /* OAuthTest.swift */,
 			);
 			path = RFRTests;
 			sourceTree = "<group>";
@@ -282,6 +291,7 @@
 				AAA1AABD29E8895A002CBC91 /* Formatter.swift */,
 				AAA1AAC029ED4544002CBC91 /* Statistics.swift */,
 				AAA1AACB29EEDC63002CBC91 /* RegistrationRequest.swift */,
+				AA3C061E2A39D8CD002BD585 /* OAuthAuthenticator.swift */,
 			);
 			path = BusinessLogic;
 			sourceTree = "<group>";
@@ -330,6 +340,8 @@
 				AAFB609E2A33261F008AEC76 /* PrivacyPolicies */,
 				AAE8E4652A29F2B5005AA4F1 /* schkeuditz.csv */,
 				AAE8E4692A29F35A005AA4F1 /* köthen.csv */,
+				AA3C06222A39F3BC002BD585 /* auth.conf.json */,
+				AA3C06262A3A0BB4002BD585 /* auth.conf.json.changeme */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -499,6 +511,8 @@
 				AAFB60A02A332645008AEC76 /* privacy-policy-de.html in Resources */,
 				AA87D0732982ADE9002F6B3B /* Preview Assets.xcassets in Resources */,
 				AAE8E46A2A29F35A005AA4F1 /* köthen.csv in Resources */,
+				AA3C06232A39F3BC002BD585 /* auth.conf.json in Resources */,
+				AA3C06272A3A0BB4002BD585 /* auth.conf.json.changeme in Resources */,
 				AAFB60A22A332657008AEC76 /* privacy-policy-en.html in Resources */,
 				AA87D0702982ADE9002F6B3B /* Assets.xcassets in Resources */,
 			);
@@ -526,6 +540,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AACB767F29BF5E8A00A9DB6F /* ControlBarViewModel.swift in Sources */,
+				AA3C061F2A39D8CD002BD585 /* OAuthAuthenticator.swift in Sources */,
 				AAE8E4712A2A33F5005AA4F1 /* VoucherEnabled.swift in Sources */,
 				AAA1AAC629EEDB76002CBC91 /* HCaptchaView.swift in Sources */,
 				AAC9D2E82983DEC3003C4CC7 /* LiveViewModel.swift in Sources */,
@@ -578,6 +593,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA87D07D2982ADE9002F6B3B /* RFRTests.swift in Sources */,
+				AA3C06212A39E4B4002BD585 /* OAuthTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

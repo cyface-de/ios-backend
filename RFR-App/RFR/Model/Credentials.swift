@@ -16,11 +16,11 @@ class Credentials: ObservableObject {
         self.password = password
     }
 
-    func save() throws {
+    func save(issuer: String) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
             kSecAttrAccount as String: username,
-            kSecAttrServer as String: RFRApp.authenticationEndpoint,
+            kSecAttrServer as String: issuer,
             kSecValueData as String: password.data(using: String.Encoding.utf8)!
         ]
 
@@ -31,10 +31,10 @@ class Credentials: ObservableObject {
         }
     }
 
-    static func search() throws -> Credentials{
+    static func search(issuer: String) throws -> Credentials{
         let query: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
-            kSecAttrServer as String: RFRApp.authenticationEndpoint,
+            kSecAttrServer as String: issuer,
             kSecMatchLimit as String: kSecMatchLimitOne,
             kSecReturnAttributes as String: true,
             kSecReturnData as String: true

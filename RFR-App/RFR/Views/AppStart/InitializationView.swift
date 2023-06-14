@@ -50,11 +50,11 @@ struct InitializationView: View {
                     .padding([.leading, .trailing])
                     .buttonStyle(.borderedProminent)
                 }
-            }.onAppear {
+            }/*.onAppear {
                 Task {
                     await loginViewModel.onViewModelInitialized()
                 }
-            }
+            }*/
 
         } else {
             if let error = viewModel.error {

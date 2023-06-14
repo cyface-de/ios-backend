@@ -1,0 +1,5 @@
+{
+    "issuer": "{{Change this}}",
+    "clientId": "{{Change this}}",
+    "clientSecret": "{{Change this}}"
+}
