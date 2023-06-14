@@ -10,7 +10,7 @@ import DataCapturing
 
 struct InitializationView: View {
     @StateObject var viewModel = DataCapturingViewModel()
-    var privacyPolicy = PrivacyPolicy()
+    @StateObject var privacyPolicy = PrivacyPolicy()
     @ObservedObject var loginViewModel: LoginViewModel
 
     var body: some View {
@@ -32,7 +32,7 @@ struct InitializationView: View {
                             )
                         )
                     )
-                } else if privacyPolicy.mostRecentAccepted() {
+                } else if privacyPolicy.mostRecentWasAccepted {
                     LoginView(
                         viewModel: loginViewModel
                     )
@@ -47,7 +47,7 @@ struct InitializationView: View {
                         }
                         .buttonStyle(.borderedProminent)
                     }
-                    .padding([.leading, .trailing])
+                    .padding([.leading, .trailing, .bottom])
                     .buttonStyle(.borderedProminent)
                 }
             }/*.onAppear {

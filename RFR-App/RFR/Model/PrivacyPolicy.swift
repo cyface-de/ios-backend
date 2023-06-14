@@ -27,9 +27,10 @@ import Foundation
  - Version: 1.0.0
  - Since: 1.0.0
  */
-class PrivacyPolicy {
+class PrivacyPolicy: ObservableObject {
     // MARK: - Properties
     private static let acceptedVersionKey = "de.cyface.rfr.privacypolicyversion"
+    @Published var mostRecentWasAccepted: Bool
 
     /// The URL to the current privacy policy.
     let url: URL = {
@@ -45,6 +46,10 @@ class PrivacyPolicy {
     /// The current version of the privacy policy.
     static let currentVersion = 1
 
+    init() {
+        mostRecentWasAccepted = PrivacyPolicy.highestAcceptedVersion() >= PrivacyPolicy.currentVersion
+    }
+
     // MARK: - Methods
     /**
      Return the location of a privacy policy file as a URL.
@@ -59,18 +64,16 @@ class PrivacyPolicy {
         return ret
     }
 
-    func mostRecentAccepted() -> Bool {
-        return highestAcceptedVersion() >= PrivacyPolicy.currentVersion
-    }
-
     /**
      Called when the user accepted the privacy policy.
      */
     func onAccepted() {
         UserDefaults.standard.setValue(PrivacyPolicy.currentVersion, forKey: PrivacyPolicy.acceptedVersionKey)
+        UserDefaults.standard.synchronize()
+        self.mostRecentWasAccepted = PrivacyPolicy.highestAcceptedVersion() >= PrivacyPolicy.currentVersion
     }
 
-    private func highestAcceptedVersion() -> Int {
+    private static func highestAcceptedVersion() -> Int {
         return UserDefaults.standard.integer(forKey: PrivacyPolicy.acceptedVersionKey)
     }
 }
