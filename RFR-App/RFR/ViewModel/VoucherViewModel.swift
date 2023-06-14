@@ -58,7 +58,7 @@ class VoucherViewModel: ObservableObject {
             )
         } else if voucherCount > 0 && accumulatedKilometers >= VoucherViewModel.requiredKilometers && voucher == nil {
             VoucherReached(viewModel: self)
-        } else if let voucher = voucher {
+        } else if voucher != nil {
             VoucherEnabled(viewModel: self)
         } else {
             EmptyView()
