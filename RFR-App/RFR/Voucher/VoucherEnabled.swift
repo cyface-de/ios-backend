@@ -19,7 +19,7 @@ struct VoucherEnabled: View {
                     .padding()
                 Text("1x 15 Freiminuten auf die nächste Ausleihe in Schkeuditz - nextbike Nordsachsen")
                     .padding()
-                Text("gültig bis: \(dateFormatter.string(from: voucher.until))")
+                //Text("gültig bis: \(dateFormatter.string(from: voucher.until))")
             }
         } else {
             ErrorView(error: RFRError.missingVoucher)
@@ -32,9 +32,13 @@ struct VoucherEnabled_Previews: PreviewProvider {
     static var viewModel: VoucherViewModel {
         let ret = VoucherViewModel(
             authenticator: MockAuthenticator(),
-            url: URL(string: RFRApp.incentivesUrl)!
+            url: URL(string: RFRApp.incentivesUrl)!,
+            dataStoreStack: MockDataStoreStack()
         )
-        ret.voucher = Voucher(code: "abcdefg", until: Date(timeIntervalSince1970: 10_000))
+        ret.voucher = Voucher(
+            code: "abcdefg",
+            until: "2023-12-31T23:59:59Z"
+        )
 
         return ret
     }

@@ -8,6 +8,7 @@
 import Foundation
 import OSLog
 import DataCapturing
+import CoreLocation
 
 /// The minimum number of meters before the ascend is increased, to filter sensor noise.
 let ascendThresholdMeters = 2.0
@@ -199,6 +200,7 @@ func loadAlleyCatData(fileName: String, ext: String) -> [AlleyCatMarker] {
     rows.removeFirst()
 
     var markers = [AlleyCatMarker]()
+    var isStart = true
     for row in rows {
         let columns = row.components(separatedBy: ",")
         guard let longitude = Double(columns[0]) else {
@@ -210,11 +212,15 @@ func loadAlleyCatData(fileName: String, ext: String) -> [AlleyCatMarker] {
         let description = columns[2]
 
         let marker = AlleyCatMarker(
-            longitude: longitude,
-            latitude: latitude,
-            description: description
+            location: CLLocationCoordinate2D(
+                latitude: latitude,
+                longitude: longitude
+            ),
+            description: description,
+            markerType: isStart ? .start : .standard
         )
         markers.append(marker)
+        isStart = false
     }
 
     return markers

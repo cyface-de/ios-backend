@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with the Read-for-Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
  */
-import MapKit
-import CoreLocation
 import SwiftUI
 
 /**
@@ -39,7 +37,7 @@ struct LiveView: View {
                 Spacer()
             }
             Divider()
-            ControlBarView(viewModel: viewModel)
+            ControlBar(viewModel: viewModel)
                 .padding()
         }
     }
@@ -65,7 +63,7 @@ struct LiveView_Previews: PreviewProvider {
             measurementState: .stopped,
             dataStoreStack: MockDataStoreStack(),
             dataStorageInterval: 5.0
-            )
+        )
         )
 
         LiveView(viewModel: LiveViewModel(
@@ -120,59 +118,23 @@ struct LiveStatisticsView: View {
 }
 
 /**
- A view showing controls for the active measurement.
-
- - Author: Klemens Muthmann
- - Version: 1.0.0
- */
-struct ControlBarView: View {
-    @ObservedObject var viewModel: LiveViewModel
-
-    var body: some View {
-        HStack {
-            Button(action: viewModel.onPlayPausePressed) {
-                Image(systemName: "playpause.fill")
-            }
-            .frame(maxWidth: .infinity, minHeight: 44)
-            Button(action: viewModel.onStopPressed) {
-                Image(systemName: "stop.fill")
-            }
-            .frame(maxWidth: .infinity, minHeight: 44)
-        }
-    }
-}
-
-struct Marker: Identifiable {
-    let id = UUID()
-    var location: MapMarker
-}
-
-/**
  A view showing focused details such as the current position or speed of the active measurement.
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
  */
 struct LiveDetailsView: View {
-    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.5515, longitude: 12.2388), span: MKCoordinateSpan( latitudeDelta: 0.9, longitudeDelta: 0.9))
     @ObservedObject var viewModel: LiveViewModel
-    @State var markers = [Marker]()
+    
 
     var body: some View {
         TabView {
-            Map(
-                coordinateRegion: $region,
-                showsUserLocation: true,
-                userTrackingMode: .constant(.follow),
-                annotationItems: markers
-            ) { marker in
-                marker.location
+           MainMap()
+            .padding([.top])
+            .tabItem {
+                Image(systemName: "map")
+                Text("Position")
             }
-                .padding([.top])
-                .tabItem {
-                    Image(systemName: "map")
-                    Text("Position")
-                }
             VStack {
                 Text("Geschwindigkeit")
                     .font(.largeTitle)
@@ -184,20 +146,6 @@ struct LiveDetailsView: View {
                 Image(systemName: "speedometer")
                 Text("Geschwindigkeit")
             }
-        }
-        .onAppear {
-            let schkeuditzData = loadAlleyCatData(fileName: "schkeuditz", ext: "csv")
-            let köthenData = loadAlleyCatData(fileName: "köthen", ext: "csv")
-            var data = [AlleyCatMarker]()
-            data.append(contentsOf: schkeuditzData)
-            data.append(contentsOf: köthenData)
-
-            var markers = [Marker]()
-            data.forEach { marker in
-                markers.append(Marker(location: MapMarker(coordinate: CLLocationCoordinate2D(latitude: marker.latitude, longitude: marker.longitude), tint: .red)))
-            }
-
-            self.markers.append(contentsOf: markers)
         }
     }
 }

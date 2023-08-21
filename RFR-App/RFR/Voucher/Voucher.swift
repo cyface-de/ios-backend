@@ -37,19 +37,24 @@ class Vouchers {
         } else {
             let token = try await authenticator.authenticate()
             let headers: HTTPHeaders = [
-                "Authorization": "Basic \(token)",
+                "Authorization": "Bearer \(token)",
                 "Accept": "application/json"
             ]
             let voucherURL = url.appending(component: "voucher")
 
             let voucher = try await withUnsafeThrowingContinuation { continuation in
-                let request = AF.request(voucherURL, headers: headers) { response in
-                    if let body = response.httpBody {
-                        let voucher = try Vouchers.decoder.decode(Voucher.self, from: body)
-                        continuation.resume(returning: voucher)
-                    } else {
-                        continuation.resume(throwing: VoucherRequestError.noData)
-                    }
+                let request = AF
+                    .request(voucherURL, headers: headers)
+                    .validate()
+                    .response { response in
+                        do {
+                            if let body = response.data {
+                                let voucher = try Vouchers.decoder.decode(Voucher.self, from: body)
+                                continuation.resume(returning: voucher)
+                            }
+                        } catch {
+                            continuation.resume(throwing: error)
+                        }
                 }
                 request.resume()
             }
@@ -99,7 +104,7 @@ class Vouchers {
 
 struct Voucher: Codable {
     let code: String
-    let until: Date
+    let until: String
 }
 
 struct Count: Codable {

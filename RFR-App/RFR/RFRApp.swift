@@ -28,47 +28,13 @@ import SwiftUI
 @main
 struct RFRApp: App {
     // TODO: Put this into some configuration file
-    static let authenticationEndpoint = "https://s2-b.cyface.de/api/v3"
-    static let uploadEndpoint = "https://s2-b.cyface.de/api/v3"
-    static let registrationUrl = "https://s2-b.cyface.de/provider/api/v1/"
+    static let uploadEndpoint = "https://s2-b.cyface.de/api/v4"
     static let incentivesUrl = "https://staging.cyface.de/incentives/api/v1/"
-    @StateObject var appViewModel = AppViewModel()
+    @UIApplicationDelegateAdaptor(RFR.AppDelegate.self) var appDelegate
 
     var body: some Scene {
         WindowGroup {
-            if appViewModel.isInitialized {
-                if let loginViewModel = appViewModel.loginViewModel {
-                    InitializationView(
-                        loginViewModel: loginViewModel
-                    )
-                } else if let error = appViewModel.error {
-                    ErrorView(error: error)
-                }
-            } else {
-                LoadinScreen()
-            }
-        }
-    }
-}
-
-/**
- * Required to handle errors during initialization of `LoginViewModel`.
- */
-class AppViewModel: ObservableObject {
-    var loginViewModel: LoginViewModel?
-    var error: Error?
-    @Published var isInitialized = false
-
-    init() {
-        Task {
-            do {
-                self.loginViewModel = try await LoginViewModel()
-                DispatchQueue.main.async { [weak self] in
-                    self?.isInitialized = true
-                }
-            } catch {
-                self.error = error
-            }
+            InitializationView(appDelegate: appDelegate)
         }
     }
 }

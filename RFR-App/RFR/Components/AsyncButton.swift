@@ -106,6 +106,7 @@ extension AsyncButton where Label == Image {
     }
 }
 
+#if DEBUG
 struct AsyncButton_Previews: PreviewProvider {
     static var previews: some View {
         AsyncButton("Button") {
@@ -113,3 +114,4 @@ struct AsyncButton_Previews: PreviewProvider {
         }
     }
 }
+#endif

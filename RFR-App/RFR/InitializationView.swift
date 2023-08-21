@@ -11,31 +11,25 @@ import DataCapturing
 struct InitializationView: View {
     @StateObject var viewModel = DataCapturingViewModel()
     @StateObject var privacyPolicy = PrivacyPolicy()
-    @ObservedObject var loginViewModel: LoginViewModel
+    @State private var loggedIn: Bool = false
+    @State private var error: Error?
+    let appDelegate: AppDelegate
 
     var body: some View {
         if viewModel.isInitialized,
-            let apiUrl = URL(string: RFRApp.uploadEndpoint),
             let dataStoreStack = viewModel.dataStoreStack {
 
             Group {
-                if loginViewModel.isAuthenticated {
+                if loggedIn {
                     MainView(
-                        isAuthenticated: $loginViewModel.isAuthenticated,
                         viewModel: viewModel,
                         syncViewModel: SynchronizationViewModel(
-                            synchronizer: CyfaceSynchronizer(
-                                apiURL: apiUrl,
-                                dataStoreStack: dataStoreStack,
-                                cleaner: AccelerationPointRemovalCleaner(),
-                                authenticator: loginViewModel.authenticator
-                            )
+                            synchronizer: MockSynchronizer()
                         )
                     )
                 } else if privacyPolicy.mostRecentWasAccepted {
-                    LoginView(
-                        viewModel: loginViewModel
-                    )
+                    OAuthLoginView(appDelegate: appDelegate, loggedIn: $loggedIn, error: $error)
+
                 } else {
                     VStack {
                         WebView(url: privacyPolicy.url)
@@ -50,18 +44,14 @@ struct InitializationView: View {
                     .padding([.leading, .trailing, .bottom])
                     .buttonStyle(.borderedProminent)
                 }
-            }/*.onAppear {
-                Task {
-                    await loginViewModel.onViewModelInitialized()
-                }
-            }*/
+            }
 
-        } else {
+        /*} else {
             if let error = viewModel.error {
                 ErrorView(error: error)
             } else {
                 LoadinScreen()
-            }
+            }*/
         }
     }
 }
@@ -76,11 +66,7 @@ struct InitializationView_Previews: PreviewProvider {
                 error: nil,
                 dataStoreStack: MockDataStoreStack()
             ),
-            loginViewModel: LoginViewModel(
-                credentials: Credentials(),
-                error: nil,
-                authenticator: MockAuthenticator()
-            )
+            appDelegate: AppDelegate()
         )
     }
 }

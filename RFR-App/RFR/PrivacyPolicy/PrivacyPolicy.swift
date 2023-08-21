@@ -44,7 +44,7 @@ class PrivacyPolicy: ObservableObject {
     }()
 
     /// The current version of the privacy policy.
-    static let currentVersion = 1
+    static let currentVersion = 2
 
     init() {
         mostRecentWasAccepted = PrivacyPolicy.highestAcceptedVersion() >= PrivacyPolicy.currentVersion

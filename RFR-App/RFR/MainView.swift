@@ -27,7 +27,6 @@ import SwiftUI
  */
 struct MainView: View {
     @State private var selectedTab = 2
-    @Binding var isAuthenticated: Bool
     @ObservedObject var viewModel: DataCapturingViewModel
     @ObservedObject var syncViewModel: SynchronizationViewModel
 
@@ -43,7 +42,7 @@ struct MainView: View {
                             ),
                             voucherViewModel: VoucherViewModel(
                                 authenticator: syncViewModel.synchronizer.authenticator,
-                                url: incentivesEndpoint
+                                url: incentivesEndpoint, dataStoreStack: dataStoreStack
                             )
                         )
                             .tabItem {
@@ -84,18 +83,6 @@ struct MainView: View {
                             Spacer()
                         }
                     }
-                    ToolbarItem(placement: .automatic) {
-                        Button(action: {
-                            isAuthenticated = false
-                            syncViewModel.deactivate()
-                        }) {
-                            VStack {
-                                Image(systemName: "power.circle")
-                                Text("Abmelden")
-                                    .font(.footnote)
-                            }
-                        }
-                    }
 
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {
@@ -124,7 +111,6 @@ struct MainView_Previews: PreviewProvider {
     @State static var isAuthenticated = true
     static var previews: some View {
         MainView(
-            isAuthenticated: $isAuthenticated,
             viewModel: DataCapturingViewModel(
                 isInitialized: false,
                 showError: false,

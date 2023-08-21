@@ -29,7 +29,7 @@ class SynchronizationViewModel: ObservableObject {
     }
 
     func synchronize() {
-        synchronizer.syncChecked()
+        synchronizer.sync()
     }
 
     func deactivate() {

@@ -16,6 +16,9 @@ enum RFRError: Error {
     case missingAuthenticationBody
     case missingCredentials
     case missingAuthenticatorConfiguration
+    case unableToAuthenticate
+    case formattingFailed(number: NSNumber)
+    case voucherOverviewFailed
 }
 
 extension RFRError: LocalizedError {
@@ -82,6 +85,29 @@ extension RFRError: LocalizedError {
                 "de.cyface.error.rfrerror.missingAuthenticatorConfiguration",
                 value: "Authenticator configuration file was missing.",
                 comment: "Explain that the configuration for the authenticator is missing. This should not happen, since this file is included as a build artifact and should always be available.")
+
+            return errorMessage
+        case .unableToAuthenticate:
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.rfrerror.unableToAuthenticate",
+                value: "Unable to Authenticate your user account. The Authentication Server might be down or you have provided invalid credentials. Please log out and back in again.",
+                comment: "The system was unable to get a valid authentication token from the server. Either the server is not available or the user used invalid Credentials."
+            )
+
+            return errorMessage
+        case .formattingFailed(number: let number):
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.rfrerror.formattingFailed",
+                value: "Unable to format the number %@ into a valid String representation!",
+                comment: "Explain to the user, that the system was unable to format a number for display on the screen. The number is given as the first argument. This should not happen and is evidence for a serious implementation bug.")
+
+            return String.localizedStringWithFormat(errorMessage, number)
+        case .voucherOverviewFailed:
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.rfrerror.voucherOverviewFailed",
+                value: "Unable to load voucher overview.",
+                comment: "Explain to the user, that the system was unable to load the voucher overview."
+            )
 
             return errorMessage
         }

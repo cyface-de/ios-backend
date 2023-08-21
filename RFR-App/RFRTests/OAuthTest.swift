@@ -12,7 +12,7 @@ final class OAuthTest: XCTestCase {
 
     /// This test requires a working identity provider to run, so it is set to be ignored by default.
     func ignore_test() async throws {
-        let authenticator = OAuthAuthenticator(
+        let authenticator = NativeOAuthAuthenticator(
             issuer: URL(string: "https://auth.cyface.de:8443/realms/rfr/")!,
             clientId: "ios-app",
             clientSecret: "lj2nKA9PbKnMdYej1hqxtm8pCoGxLcgL"

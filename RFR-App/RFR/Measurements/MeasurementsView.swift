@@ -95,13 +95,19 @@ struct MeasurementsView_Previews: PreviewProvider {
         return ret
     }
 
+    static var voucherViewModel: VoucherViewModel {
+        let ret = try! VoucherViewModel(
+            authenticator: MockAuthenticator(),
+            url: URL(string: RFRApp.uploadEndpoint)!,
+            dataStoreStack: MockDataStoreStack()
+        )
+        return ret
+    }
+
     static var previews: some View {
         MeasurementsView(
             viewModel: viewModel,
-            voucherViewModel: VoucherViewModel(
-                authenticator: MockAuthenticator(),
-                url: URL(string: RFRApp.uploadEndpoint)!
-            )
+            voucherViewModel: voucherViewModel
         )
     }
 }

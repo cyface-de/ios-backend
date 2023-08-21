@@ -27,6 +27,10 @@ import CoreLocation
 /**
  The view model for the live view showing the current capturing session and providing buttons to control it.
 
+ This class is responsbile for creating all the objects required during a ``Measurement`` and connecting those objects using the Combine framework. After a pause or a stop command all Combine connections are removed.
+
+ The most important connections are the ones to the published properties, used by the ``LiveView`` and the ones to a ``CapturedDataStorage`` for saving all captured data to the provided ``DataStoreStack``.
+
  - Author: Klemens Muthmann
  - Version: 1.0.0
  - SeeAlso: ``LiveView``
@@ -39,12 +43,8 @@ class LiveViewModel: ObservableObject {
     @Published var averageSpeed: String
     /// The state the active ``Measurement`` is in.
     @Published var measurementState: MeasurementState
-    /// The current position in geographic coordinates of longitude and latitude.
-    //@Published var lastCapturedLongitude: String
-    //@Published var lastCapturedLatitude: String
     /// The name to display for this ``Measurement``.
     @Published var measurementName: String
-    var dataStoreStack: DataStoreStack
     /// How to display the distance already travelled during this ``Measurement``.
     @Published var distance: String
     /// How to display the duration this ``Measurement`` has already taken.
@@ -53,11 +53,15 @@ class LiveViewModel: ObservableObject {
     @Published var rise: String
     /// How to display the avoided emissions during the active ``Measurement``.
     @Published var avoidedEmissions: String
-    @Published var hasLocationFix = Image(systemName: "location")
-    /// The currently captured measurement or `nil` if no measurement is active.
+    /// Access to the underlying data store.
+    private var dataStoreStack: DataStoreStack
+    /// The geo locations captured during the current ``Measurement``. This is an array of arrays to represent different tracks separated by pauses.
     private var locations = [[GeoLocation]]()
+    /// The altitudes captured during the current ``Measurement``. This is an array of arrays to represent different tracks seperated by pauses.
     private var altitudes = [[DataCapturing.Altitude]]()
+    /// The ``CapturedDataStorage`` used to save data arriving from the current ``Measurement``to a ``DataStoreStack``
     private var dataStorageProcess: CapturedDataStorage
+    /// The current ``Measurement`` presented by the current ``LiveView``.
     var measurement: DataCapturing.Measurement {
         get {
             if let measurement = self._measurement {
@@ -66,29 +70,35 @@ class LiveViewModel: ObservableObject {
                 let measurement = MeasurementImpl()
 
                 registerLifecycleFlows(measurement)
+                // Only location captured events
                 let locationsFlow = measurement.measurementMessages.filter { if case Message.capturedLocation = $0 { return true } else { return false } }.compactMap {if case let Message.capturedLocation(location) = $0 { return location } else { return nil }}
+                // Use the most recent location to provide the speed value
                 locationsFlow.compactMap { location in "\(speedFormatter.string(from: location.speed as NSNumber) ?? "0.0") km/h" }.receive(on: RunLoop.main).assign(to: &$speed)
 
+                // Organize all received locations into the local locations array, and stream that array for further processing
                 let trackFlow = locationsFlow
                     .compactMap { [weak self] location in
                         let endIndex = max((self?.locations.count ?? 0)-1, 0)
                         self?.locations[endIndex].append(location)
                         return self?.locations
                     }
+                // Calculate and store distance covered, by all the tracks from the current measurement.
                 let distanceFlow = trackFlow.map {(tracks: [[GeoLocation]]) in
-                    return tracks.map { track in
-                        var trackLength = 0.0
-                        var prevLocation: GeoLocation? = nil
-                        for location in track {
-                            if let prevLocation = prevLocation {
-                                trackLength += location.distance(from: prevLocation)
+                    return tracks
+                        .map { track in
+                            var trackLength = 0.0
+                            var prevLocation: GeoLocation? = nil
+                            for location in track {
+                                if let prevLocation = prevLocation {
+                                    trackLength += location.distance(from: prevLocation)
+                                }
+                                prevLocation = location
                             }
-                            prevLocation = location
+                            return trackLength
                         }
-                        return trackLength
-                    }.reduce(0.0) { accumulator, next in
-                        accumulator + next
-                    }
+                        .reduce(0.0) { accumulator, next in
+                            accumulator + next
+                        }
                 }
                 distanceFlow.compactMap {
                     distanceFormatter.string(from: $0 as NSNumber)
@@ -98,6 +108,7 @@ class LiveViewModel: ObservableObject {
                 .receive(on: RunLoop.main)
                 .assign(to: &$distance)
 
+                // Calculate and store average speed over all the tracks from this measurement.
                 trackFlow.map { tracks in
                     RFR.averageSpeed(timelines: tracks)
                 }
@@ -110,6 +121,7 @@ class LiveViewModel: ObservableObject {
                 .receive(on: RunLoop.main)
                 .assign(to: &$averageSpeed)
 
+                // Calculate and store the total duration for all the tracks in this measurement.
                 trackFlow
                     .map { tracks in
                         return RFR.duration(timelines: tracks)
@@ -120,6 +132,7 @@ class LiveViewModel: ObservableObject {
                     .receive(on: RunLoop.main)
                     .assign(to: &$duration)
 
+                // Calculate the total rise for all the tracks in this measurement.
                 measurement.measurementMessages
                     .filter {
                         if case Message.capturedAltitude = $0 {
@@ -170,6 +183,7 @@ class LiveViewModel: ObservableObject {
                     .receive(on: RunLoop.main)
                     .assign(to: &$rise)
 
+                // 
                 distanceFlow.map {
                     RFR.avoidedEmissions($0)
                 }
@@ -187,11 +201,23 @@ class LiveViewModel: ObservableObject {
             }
         }
     }
+    /// The internal cache for the ``Measurement`` currently running.
     private var _measurement: DataCapturing.Measurement?
+    /// The identifier of the currently captured ``Measurement``
     private var identifier: UInt64?
+    /// Store the
     private var cancellables = [AnyCancellable]()
+    /// Captures and publishes any error produced by this model.
     @Published var error: Error?
-    
+
+    /**
+     Initialize an object of this class.
+
+     By default most of the parameters are set to some default null value.
+     However you must provide a ``DataStoreStack`` to store the data captured during a ``Measurement`` as well as the interval for how often to save captured data.
+
+     - Parameter dataStorageInterval: The time in seconds of how often to store data to the `dataStoreStack`. Data captured in between is queued and then bulk inserted.
+     */
     init(
         speed: Double = 0.0,
         averageSpeed: Double = 0.0,
@@ -241,6 +267,7 @@ class LiveViewModel: ObservableObject {
         self.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
     }
 
+    /// Formats all the live statistics so they can be displayed nicely.
     private func format(
         speed: Double,
         averageSpeed: Double,
@@ -288,108 +315,120 @@ class LiveViewModel: ObservableObject {
     /**
      Called if the user presses the stop button.
      */
-    func onStopPressed() {
-        do {
-            if measurement.isRunning || measurement.isPaused {
-                try measurement.stop()
-                self.dataStorageProcess.unsubscribe()
-                cancellables.forEach { $0.cancel() }
-                cancellables.removeAll(keepingCapacity: true)
-                self._measurement = nil
-            }
-        } catch {
-            self.error = error
+    func onStopPressed() throws {
+        if measurement.isRunning || measurement.isPaused {
+            try measurement.stop()
+            self.dataStorageProcess.unsubscribe()
+            cancellables.forEach { $0.cancel() }
+            cancellables.removeAll(keepingCapacity: true)
+            self._measurement = nil
         }
     }
 
     /**
-     Called if the user presses the play/pause button.
+     Called if the user presses the play button.
      */
-    func onPlayPausePressed() {
-        do {
-            if measurement.isRunning {
-                try measurement.pause()
-                dataStorageProcess.unsubscribe()
-            } else if measurement.isPaused {
-                if let identifier = self.identifier {
-                    try self.dataStorageProcess.subscribe(
-                        to: measurement,
-                        identifier
-                    ) {}
+    func onPlayPressed() throws {
+        if measurement.isPaused {
+            if let identifier = self.identifier {
+                try self.dataStorageProcess.subscribe(
+                    to: measurement,
+                    identifier
+                ) {}
 
-                    try measurement.resume()
-                }
-            } else {
-                self.identifier = try self.dataStorageProcess.createMeasurement("BICYCLE")
-                if let identifier = self.identifier {
-                    try self.dataStorageProcess.subscribe(
-                        to: measurement,
-                        identifier
-                    ) {}
-                    self.measurementName = "Fahrt \(identifier)"
-                    try measurement.start(inMode: "BICYCLE")
-                }
+                try measurement.resume()
             }
-        } catch {
-            self.error = error
+        } else if !measurement.isPaused && !measurement.isRunning{ // Is stopped
+            self.identifier = try self.dataStorageProcess.createMeasurement("BICYCLE")
+            if let identifier = self.identifier {
+                try self.dataStorageProcess.subscribe(
+                    to: measurement,
+                    identifier
+                ) {}
+                self.measurementName = "Measurement \(identifier)"
+                try measurement.start(inMode: "BICYCLE")
+            }
         }
     }
 
+    /// Called if the user presses the pause button.
+    func onPausePressed() throws {
+        if measurement.isRunning {
+            try measurement.pause()
+            dataStorageProcess.unsubscribe()
+        }
+    }
+
+    /// Register all the Combine flows required to capture lifecycle events such as `start`, `stop`, `pause` and `resume`.
     private func registerLifecycleFlows(_ measurement: DataCapturing.Measurement) {
-        measurement.measurementMessages.filter { if case .hasFix = $0 { return true } else { return false }}.map { _ in Image(systemName: "location") }.receive(on: RunLoop.main).assign(to: &$hasLocationFix)
-        measurement.measurementMessages.filter { if case .fixLost = $0 { return true } else { return false }}.map { _ in Image(systemName: "location.slash")}.receive(on: RunLoop.main).assign(to: &$hasLocationFix)
-        let startedFlow = measurement.measurementMessages.filter { if case Message.started = $0 { return true } else { return false }}.map { _ in MeasurementState.running }
-        startedFlow.receive(on: RunLoop.main).assign(to: &$measurementState)
-        cancellables.append(startedFlow.sink { [weak self] _ in self?.locations.append([GeoLocation]())
-            self?.altitudes.append([DataCapturing.Altitude]())
-        })
-        measurement.measurementMessages.filter { if case Message.paused = $0 { return true } else { return false }}.map { _ in MeasurementState.paused}.receive(on: RunLoop.main).assign(to: &$measurementState)
-        let resumedFlow = measurement.measurementMessages.filter { if case Message.resumed = $0 { return true } else { return false }}.map { _ in MeasurementState.running}
-        resumedFlow.receive(on: RunLoop.main).assign(to: &$measurementState)
-        cancellables.append(resumedFlow.sink { [weak self] _ in
-            self?.locations.append([GeoLocation]())
-            self?.altitudes.append([DataCapturing.Altitude]())
-        })
-        let stoppedEvents = measurement.measurementMessages.filter { if case Message.stopped = $0 { return true} else { return false }}.map { _ in MeasurementState.stopped}
-        cancellables.append(stoppedEvents.sink {[weak self] _ in
-            self?.locations.removeAll(keepingCapacity: true)
-        })
-        stoppedEvents.receive(on: RunLoop.main).assign(to: &$measurementState)
+        startFlow(measurement)
+        pauseFlow(measurement)
+        resumeFlow(measurement)
+        stopFlow(measurement)
+
     }
 
-    private func currentMeasurementState() throws -> MeasurementState {
-        try dataStoreStack.wrapInContextReturn { context in
-            let request = MeasurementMO.fetchRequest()
-            if let pausedMeasurement = try request.execute().first(where: {!$0.synchronizable && !$0.synchronized}) {
-                return MeasurementState.paused
-            } else {
-                return MeasurementState.stopped
+    /// Setup Combine flow to handle ``Measurement`` start events.
+    private func startFlow(_ measurement: DataCapturing.Measurement) {
+        // Setting state
+        let startedFlow = measurement.measurementMessages
+            .filter { if case Message.started = $0 { return true } else { return false }}
+            .map { _ in MeasurementState.running }
+        startedFlow
+            .receive(on: RunLoop.main)
+            .assign(to: &$measurementState)
+        // Append collections for the first track
+        startedFlow
+            .sink { [weak self] _ in
+                self?.locations.append([GeoLocation]())
+                self?.altitudes.append([DataCapturing.Altitude]())
             }
-        }
+            .store(in: &cancellables)
     }
 
-    private func loadFromPaused() throws {
-        try dataStoreStack.wrapInContext { context in
-            let request = MeasurementMO.fetchRequest()
-            guard let measurementMO = try request.execute().first(where: {!$0.synchronizable && !$0.synchronized}) else {
-                return
-            }
-            let identifier = UInt64(measurementMO.identifier)
+    /// Setup Combine flow to handle ``Measurement`` pause events.
+    private func pauseFlow(_ measurement: DataCapturing.Measurement) {
+        // Handle pause event
+        measurement.measurementMessages
+            .filter { if case Message.paused = $0 { return true } else { return false }}
+            .map { _ in MeasurementState.paused}
+            .receive(on: RunLoop.main)
+            .assign(to: &$measurementState)
+    }
 
-            let tracks = measurementMO.typedTracks()
-            let distance = coveredDistance(tracks: tracks)
-            self.identifier = UInt64(identifier)
-            format(
-                speed: 0.0,
-                averageSpeed: RFR.averageSpeed(timelines: tracks),
-                measurementState: .paused,
-                measurementName: "Fahrt \(identifier)",
-                distance: distance,
-                duration: RFR.duration(timelines: tracks),
-                rise: summedHeight(timelines: tracks),
-                avoidedEmissions: RFR.avoidedEmissions(distance)
-            )
-        }
+    /// Setup Combine flow to handle ``Measurement`` resume events.
+    private func resumeFlow(_ measurement: DataCapturing.Measurement) {
+        let resumedFlow = measurement.measurementMessages
+            .filter { if case Message.resumed = $0 { return true } else { return false }}
+            .map { _ in MeasurementState.running}
+        resumedFlow
+            .receive(on: RunLoop.main).assign(to: &$measurementState)
+        // Append collections for the next track
+        resumedFlow
+            .sink { [weak self] _ in
+                self?.locations.append([GeoLocation]())
+                self?.altitudes.append([DataCapturing.Altitude]())
+            }
+            .store(in: &cancellables)
+    }
+
+    /// Setup Combine flow to handle ``Measurement`` stop events.
+    private func stopFlow(_ measurement: DataCapturing.Measurement) {
+        let stoppedEvents = measurement.measurementMessages
+            .filter { if case Message.stopped = $0 { return true} else { return false }}
+            .map { _ in MeasurementState.stopped}
+        // Setting state
+        stoppedEvents
+            .receive(on: RunLoop.main)
+            .assign(to: &$measurementState)
+        // Clear storage for altitudes and locations.
+        stoppedEvents
+            .sink {[weak self] _ in
+                self?.locations.removeAll(keepingCapacity: true)
+                self?.altitudes.removeAll(keepingCapacity: true)
+            }
+            .store(in: &cancellables)
+
     }
 }
 

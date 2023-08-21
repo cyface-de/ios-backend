@@ -50,7 +50,8 @@ struct VoucherReached_Previews: PreviewProvider {
         VoucherReached(
             viewModel: VoucherViewModel(
                 authenticator: MockAuthenticator(),
-                url: URL(string: RFRApp.incentivesUrl)!
+                url: URL(string: RFRApp.incentivesUrl)!,
+                dataStoreStack: MockDataStoreStack()
             )
         )
     }
