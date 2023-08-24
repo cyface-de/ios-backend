@@ -21,7 +21,7 @@ import Alamofire
 
 /**
  A request send to receive status information about an open upload session from the server.
-
+ 
  - author: Klemens Muthmann
  - version: 1.0.0
  */
@@ -32,78 +32,73 @@ class StatusRequest {
     let session: Session
     /// JWT token to authenticate with. Get one by using an `Authenticator`.
     let authToken: String
-
+    
     /// Make a new request for a specific Cyface API.
     init(apiUrl: URL, session: Session, authToken: String) {
         self.apiUrl = apiUrl
         self.session = session
         self.authToken = authToken
     }
-
+    
     /// Start the request
     /// - Parameter sessionIdentifier: The URL to the open session for which to request status information.
     /// - Parameter upload: The data to upload.
-    /// - Parameter onFinished: Called when the status was that the request has been finished.
-    /// - Parameter onResume: Called when the status was that the request should be resumed.
-    /// - Parameter onAborted: Called when the status was that the request was aborted, for example if it timed out on server side.
-    /// - Parameter onFailure: Called if the status request failed.
     func request(
         sessionIdentifier: String,
-        upload: Upload,
-        onFinished: @escaping (Upload) -> Void,
-        onResume: @escaping (String, String, Upload) -> Void,
-        onAborted: @escaping (String, Upload) -> Void,
-        onFailure: @escaping (Upload, Error) -> Void
-    ) {
-        do {
-            let metaData = try upload.metaData()
-            let data = try upload.data()
-
-            var headers = metaData.asHeader
-            guard let host = apiUrl.host else {
-                fatalError()
-            }
-            headers.add(name: "Authorization", value: "Bearer \(authToken)")
-            headers.add(name: "Accept-Encoding", value: "gzip")
-            headers.add(name: "User-Agent", value: "Google-HTTP-Java-Client/1.39.2 (gzip)")
-            headers.add(name: "Content-Type", value: "application/octet-stream")
-            headers.add(name: "Host", value: host)
-            headers.add(name: "Connection", value: "Keep-Alive")
-            // empty body
-            headers.add(name: "content-length", value: "0")
-            // ask where to continue, here: "how much of the 4 bytes upload did you receive?"
-            // always send the total upload size, no matter if you did just sent a chunk
-            headers.add(name: "Content-Range", value: "bytes */\(data.count)")
-            guard let requestUrl = URL(string: sessionIdentifier) else {
-                onFailure(upload, ServerConnectionError.invalidUploadLocation(sessionIdentifier))
-                return
-            }
-
-            session.request(requestUrl, method: .put).response { response in
-                guard let response = response.response else {
-                    if let error = response.error {
-                        return onFailure(upload, ServerConnectionError.alamofireError(error))
-                    } else {
-                        return onFailure(upload, ServerConnectionError.noResponse)
-                    }
-                }
-
-                switch response.statusCode {
-                case 200:
-                    onFinished(upload)
-                    // Upload abgeschlossen. Ignorieren
-                case 308:
-                    onResume(self.authToken, sessionIdentifier, upload)
-                    // Upload fortsetzen
-                case 404:
-                    onAborted(self.authToken, upload)
-                    // Upload neu starten
-                default:
-                    onFailure(upload, ServerConnectionError.requestFailed(httpStatusCode: response.statusCode))
-                }
-            }
-        } catch {
-            onFailure(upload, error)
+        upload: Upload
+    ) async throws -> Response {
+        let metaData = try upload.metaData()
+        let data = try upload.data()
+        
+        var headers = metaData.asHeader
+        guard let host = apiUrl.host else {
+            fatalError()
         }
+        headers.add(name: "Authorization", value: "Bearer \(authToken)")
+        headers.add(name: "Accept-Encoding", value: "gzip")
+        headers.add(name: "User-Agent", value: "Google-HTTP-Java-Client/1.39.2 (gzip)")
+        headers.add(name: "Content-Type", value: "application/octet-stream")
+        headers.add(name: "Host", value: host)
+        headers.add(name: "Connection", value: "Keep-Alive")
+        // empty body
+        headers.add(name: "content-length", value: "0")
+        // ask where to continue, here: "how much of the 4 bytes upload did you receive?"
+        // always send the total upload size, no matter if you did just sent a chunk
+        headers.add(name: "Content-Range", value: "bytes */\(data.count)")
+        guard let requestUrl = URL(string: sessionIdentifier) else {
+            throw ServerConnectionError.invalidUploadLocation(sessionIdentifier)
+        }
+        
+        let response = await session.request(requestUrl, method: .put).serializingData().response
+        guard let response = response.response else {
+            if let error = response.error {
+                throw ServerConnectionError.alamofireError(error)
+            } else {
+                throw ServerConnectionError.noResponse
+            }
+        }
+        
+        switch response.statusCode {
+        case 200:
+            return Response.finished
+            // Upload abgeschlossen. Ignorieren
+        case 308:
+            return Response.resume
+            // Upload fortsetzen
+        case 404:
+            return Response.aborted
+            // Upload neu starten
+        default:
+            throw ServerConnectionError.requestFailed(httpStatusCode: response.statusCode)
+        }
+    }
+    
+    enum Response {
+        /// When the status was that the request has been finished.
+        case finished
+        /// When the status was that the request should be resumed.
+        case resume
+        /// When the status was that the request was aborted, for example if it timed out on server side.
+        case aborted
     }
 }

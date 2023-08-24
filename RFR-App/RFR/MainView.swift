@@ -18,6 +18,7 @@
  */
 
 import SwiftUI
+import DataCapturing
 
 /**
  The main application view allowing to switch subviews using a `TabView`.
@@ -41,8 +42,9 @@ struct MainView: View {
                                 uploadPublisher: syncViewModel.uploadStatusPublisher
                             ),
                             voucherViewModel: VoucherViewModel(
-                                authenticator: syncViewModel.synchronizer.authenticator,
-                                url: incentivesEndpoint, dataStoreStack: dataStoreStack
+                                authenticator: syncViewModel.authenticator,
+                                url: incentivesEndpoint,
+                                dataStoreStack: dataStoreStack
                             )
                         )
                             .tabItem {
@@ -86,7 +88,9 @@ struct MainView: View {
 
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {
-                            syncViewModel.synchronize()
+                            Task {
+                                await syncViewModel.synchronize()
+                            }
                         }) {
                             VStack {
                                 Image(systemName: "icloud.and.arrow.up")
@@ -118,7 +122,9 @@ struct MainView_Previews: PreviewProvider {
                 dataStoreStack: MockDataStoreStack()
             ),
             syncViewModel: SynchronizationViewModel(
-                synchronizer: MockSynchronizer()
+                dataStoreStack: MockDataStoreStack(),
+                apiEndpoint: URL(string: "http://localhost")!,
+                sessionRegistry: SessionRegistry()
             )
         )
     }

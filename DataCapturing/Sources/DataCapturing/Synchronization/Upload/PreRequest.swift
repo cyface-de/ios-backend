@@ -43,55 +43,50 @@ class PreRequest {
     /// Send the request
     /// - Parameter authToken: Get this JWT token from an `Authenticator`.
     /// - Parameter upload: The upload information
-    /// - Parameter onSuccess: Callback after the request finished successfully.
-    /// - Parameter onFailure: Callback after the request failed for some reason.
-    func request(authToken: String, upload: Upload, onSuccess: @escaping (String, String, Upload) -> Void, onFailure: @escaping (Upload, Error) -> Void) {
-        do {
-            let metaData = try upload.metaData()
-            let data = try upload.data()
+    func request(authToken: String, upload: Upload) async throws -> Response {
+        let metaData = try upload.metaData()
+        let data = try upload.data()
 
-            var headers: HTTPHeaders = []
-            headers.add(name: "Content-Type", value: "application/json; charset=UTF-8")
-            headers.add(name: "Authorization", value: "Bearer \(authToken)")
-            headers.add(name: "x-upload-content-length", value: "\(data.count)")
-            headers.add(name: "x-upload-content-type", value: "application/octet-stream")
-            headers.add(name: "Accept-Encoding", value: "gzip")
-            headers.add(name: "User-Agent", value: "Cyface-iOS-Client/\(metaData.applicationVersion) (gzip)")
-            headers.add(name: "Connection", value: "Keep-Alive")
+        var headers: HTTPHeaders = []
+        headers.add(name: "Content-Type", value: "application/json; charset=UTF-8")
+        headers.add(name: "Authorization", value: "Bearer \(authToken)")
+        headers.add(name: "x-upload-content-length", value: "\(data.count)")
+        headers.add(name: "x-upload-content-type", value: "application/octet-stream")
+        headers.add(name: "Accept-Encoding", value: "gzip")
+        headers.add(name: "User-Agent", value: "Cyface-iOS-Client/\(metaData.applicationVersion) (gzip)")
+        headers.add(name: "Connection", value: "Keep-Alive")
 
-            session.request(
-                apiUrl.appendingPathComponent("measurements"),
-                method: .post,
-                parameters: metaData,
-                encoder: JSONParameterEncoder.default,
-                headers: headers
-            ).response { response in
-                guard let response = response.response else {
-                    if let error = response.error {
-                        onFailure(upload, ServerConnectionError.alamofireError(error))
-                    } else {
-                        onFailure(upload, ServerConnectionError.noResponse)
-                    }
-                    return
-                }
-
-                let status = response.statusCode
-
-                if status == 200 {
-                    guard let location = response.headers["Location"] else {
-                        onFailure(upload, ServerConnectionError.noLocation)
-                        return
-                    }
-
-                    onSuccess(authToken, location, upload)
-                } else if status == 412 {
-                    onFailure(upload, ServerConnectionError.uploadNotAccepted(upload: upload))
-                } else {
-                    onFailure(upload, ServerConnectionError.requestFailed(httpStatusCode: status))
-                }
+        let response = await session.request(
+            apiUrl.appendingPathComponent("measurements"),
+            method: .post,
+            parameters: metaData,
+            encoder: JSONParameterEncoder.default,
+            headers: headers
+        ).serializingData().response
+        guard let response = response.response else {
+            if let error = response.error {
+                throw ServerConnectionError.alamofireError(error)
+            } else {
+                throw ServerConnectionError.noResponse
             }
-        } catch {
-            onFailure(upload, error)
         }
+
+        let status = response.statusCode
+
+        if status == 200 {
+            guard let location = response.headers["Location"] else {
+                throw ServerConnectionError.noLocation
+            }
+
+            return .success(location: location)
+        } else if status == 412 {
+            throw ServerConnectionError.uploadNotAccepted(upload: upload)
+        } else {
+            throw ServerConnectionError.requestFailed(httpStatusCode: status)
+        }
+    }
+
+    enum Response {
+        case success(location: String)
     }
 }

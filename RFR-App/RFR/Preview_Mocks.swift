@@ -8,80 +8,13 @@
 import Foundation
 import DataCapturing
 import CoreData
+import OSLog
 
-/*class MockDataCapturingService: DataCapturingService {
-
-    let dataStoreStack: DataStoreStack = MockDataStoreStack()
-
-    var isRunning: Bool
-
-    var isPaused: Bool
-
-    var currentMeasurement: Int64?
-
-    var capturedMeasurement: DataCapturing.Measurement?
-
-    var handler: [((DataCapturing.DataCapturingEvent, DataCapturing.Status) -> Void)]
-
-    init(state: MeasurementState) {
-        self.currentMeasurement = nil
-        self.capturedMeasurement = nil
-        self.handler = [((DataCapturing.DataCapturingEvent, DataCapturing.Status) -> Void)]()
-
-        switch state {
-        case .paused:
-            isRunning = false
-            isPaused = true
-        case .running:
-            isRunning = true
-            isPaused = false
-        case .stopped:
-            isRunning = false
-            isPaused = false
-        }
-    }
-
-    func setup() {
-
-    }
-
-    func start(inMode modality: String) throws {
-
-    }
-
-    func stop() throws {
-
-    }
-
-    func pause() throws {
-
-    }
-
-    func resume() throws {
-
-    }
-
-    func changeModality(to modality: String) {
-
-    }
-}*/
-
-class MockAuthenticator: CredentialsAuthenticator {
-    var username: String?
-
-    var password: String?
-
-    var authenticationEndpoint: URL
-
-    init() {
-        self.username = ""
-        self.password = ""
-        self.authenticationEndpoint = URL(string: "http://localhost")!
-    }
-
+class MockAuthenticator: Authenticator {
     func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
-
+        fatalError("Not implemented")
     }
+
 
     func authenticate() async throws -> String {
         return "test"
@@ -189,6 +122,9 @@ class MockPersistenceLayer: PersistenceLayer {
 }
 
 class MockSynchronizer: Synchronizer {
+
+    let log = OSLog(subsystem: "MockSynchronizer", category: "de.cyface.app")
+
     var handler: [(DataCapturing.DataCapturingEvent, DataCapturing.Status) -> Void] = []
 
     var syncOnWiFiOnly: Bool = true
@@ -200,7 +136,7 @@ class MockSynchronizer: Synchronizer {
     }
 
     func sync() {
-
+        os_log("Mock Synchronizing", log: log, type: .debug)
     }
 
     func activate() throws {

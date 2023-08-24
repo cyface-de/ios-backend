@@ -14,6 +14,7 @@ struct InitializationView: View {
     @State private var loggedIn: Bool = false
     @State private var error: Error?
     let appDelegate: AppDelegate
+    let sessionRegistry = SessionRegistry()
 
     var body: some View {
         if viewModel.isInitialized,
@@ -24,7 +25,9 @@ struct InitializationView: View {
                     MainView(
                         viewModel: viewModel,
                         syncViewModel: SynchronizationViewModel(
-                            synchronizer: MockSynchronizer()
+                            dataStoreStack: dataStoreStack,
+                            apiEndpoint: URL(string: RFRApp.uploadEndpoint)!,
+                            sessionRegistry: sessionRegistry
                         )
                     )
                 } else if privacyPolicy.mostRecentWasAccepted {

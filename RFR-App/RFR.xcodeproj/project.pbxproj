@@ -20,6 +20,7 @@
 		AA6C489B2A9365B200C3633D /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = AA6C489A2A9365B200C3633D /* AppAuthCore */; };
 		AA6C489D2A936D2100C3633D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6C489C2A936D2100C3633D /* AppDelegate.swift */; };
 		AA6C489F2A938EDB00C3633D /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6C489E2A938EDB00C3633D /* LoginViewController.swift */; };
+		AA6C48A12A94F73100C3633D /* OAuthAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6C48A02A94F73100C3633D /* OAuthAuthenticator.swift */; };
 		AA87D06C2982ADE8002F6B3B /* RFRApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D06B2982ADE8002F6B3B /* RFRApp.swift */; };
 		AA87D06E2982ADE8002F6B3B /* LiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D06D2982ADE8002F6B3B /* LiveView.swift */; };
 		AA87D0702982ADE9002F6B3B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA87D06F2982ADE9002F6B3B /* Assets.xcassets */; };
@@ -99,6 +100,7 @@
 		AA6C48952A93629800C3633D /* OAuthLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthLoginView.swift; sourceTree = "<group>"; };
 		AA6C489C2A936D2100C3633D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AA6C489E2A938EDB00C3633D /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		AA6C48A02A94F73100C3633D /* OAuthAuthenticator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthAuthenticator.swift; sourceTree = "<group>"; };
 		AA87D0682982ADE8002F6B3B /* RFR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RFR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA87D06B2982ADE8002F6B3B /* RFRApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRApp.swift; sourceTree = "<group>"; };
 		AA87D06D2982ADE8002F6B3B /* LiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveView.swift; sourceTree = "<group>"; };
@@ -224,6 +226,7 @@
 			children = (
 				AA6C48952A93629800C3633D /* OAuthLoginView.swift */,
 				AA6C489E2A938EDB00C3633D /* LoginViewController.swift */,
+				AA6C48A02A94F73100C3633D /* OAuthAuthenticator.swift */,
 			);
 			path = Login;
 			sourceTree = "<group>";
@@ -551,6 +554,7 @@
 				AA3C06562A4180DC002BD585 /* MainMap.swift in Sources */,
 				AAFB609D2A3325DE008AEC76 /* PrivacyPolicy.swift in Sources */,
 				AA6C48962A93629800C3633D /* OAuthLoginView.swift in Sources */,
+				AA6C48A12A94F73100C3633D /* OAuthAuthenticator.swift in Sources */,
 				AA6C489D2A936D2100C3633D /* AppDelegate.swift in Sources */,
 				AA3C062A2A3AF8B9002BD585 /* ControlBar.swift in Sources */,
 				AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */,

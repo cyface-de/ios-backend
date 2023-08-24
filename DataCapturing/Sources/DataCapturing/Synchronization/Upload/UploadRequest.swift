@@ -39,36 +39,30 @@ class UploadRequest {
     }
 
     /// Send the request for the provided `upload`.
-    func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0, onSuccess: @escaping (Upload) -> Void, onFailure: @escaping (String, String, Upload, Error) -> Void) {
+    func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0) async throws -> Upload {
         os_log("Uploading measurement %{public}d to session %{public}@.", log: log, type: .debug, upload.measurement.identifier, sessionIdentifier)
-            do {
-                let metaData = try upload.metaData()
-                let data = try upload.data()
+        let metaData = try upload.metaData()
+        let data = try upload.data()
 
-                var headers = metaData.asHeader
-                headers.add(name: "Content-Length", value: String(data.count-continueOnByte))
-                headers.add(name: "Content-Range", value: "bytes \(continueOnByte)-\(data.count-1)/\(data.count)")
+        var headers = metaData.asHeader
+        headers.add(name: "Content-Length", value: String(data.count-continueOnByte))
+        headers.add(name: "Content-Range", value: "bytes \(continueOnByte)-\(data.count-1)/\(data.count)")
 
-                session.upload(data[continueOnByte..<data.count], to: sessionIdentifier, method: .put, headers: headers).response { response in
-                guard let response = response.response else {
-                    if let error = response.error {
-                        onFailure(authToken, sessionIdentifier, upload, error)
-                    } else {
-                        onFailure(authToken, sessionIdentifier, upload, ServerConnectionError.noResponse)
-                    }
-                    return
-                }
-
-                let status = response.statusCode
-
-                if status == 201 {
-                    onSuccess(upload)
-                } else {
-                    onFailure(authToken, sessionIdentifier, upload, ServerConnectionError.requestFailed(httpStatusCode: status))
-                }
+        let response = await session.upload(data[continueOnByte..<data.count], to: sessionIdentifier, method: .put, headers: headers).serializingData().response
+        guard let response = response.response else {
+            if let error = response.error {
+                throw error
+            } else {
+                throw ServerConnectionError.noResponse
             }
-        } catch {
-            onFailure(authToken, sessionIdentifier, upload, error)
+        }
+
+        let status = response.statusCode
+
+        if status == 201 {
+            return upload
+        } else {
+            throw ServerConnectionError.requestFailed(httpStatusCode: status)
         }
     }
 }

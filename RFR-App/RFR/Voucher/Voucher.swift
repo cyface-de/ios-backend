@@ -11,7 +11,7 @@ import DataCapturing
 
 class Vouchers {
     private static let decoder = JSONDecoder()
-    let authenticator: any DataCapturing.Authenticator
+    let authenticator: DataCapturing.Authenticator
     let url: URL
     var count: Int {
         get async throws {
@@ -26,7 +26,7 @@ class Vouchers {
     }
     private var _voucher: Voucher?
 
-    init(authenticator: any DataCapturing.Authenticator, url: URL) {
+    init(authenticator: DataCapturing.Authenticator, url: URL) {
         self.authenticator = authenticator
         self.url = url
     }

@@ -59,8 +59,8 @@ public protocol Synchronizer {
 
     /**
      Tries to synchronize all measurements after checking for a proper connection. If `syncOnWiFiOnly` is true, this will only work if the device is connected to a WiFi network.
-    */
-    func syncChecked()
+     */
+    func syncChecked() async throws
 
     /**
      Synchronize all measurements now.
@@ -71,7 +71,7 @@ public protocol Synchronizer {
      However only one synchronization can be active at a given time.
      If you call this during an active synchronization it is going to return without doing anything.
      */
-    func sync()
+    func sync() async throws
 
     /**
      Starts background synchronization as prepared in this objects initializer.
@@ -146,12 +146,12 @@ public class CyfaceSynchronizer: Synchronizer {
      Initializer that sets the initial value of all the properties and prepares the background synchronization job.
 
      - Parameters:
-        - apiURL: The URL to a Cyface API
-        - coreDataStack: Stack used to access *CoreData*.
-        - cleaner: A strategy for cleaning the persistent storage after data synchronization.
-        - sessionRegistry: A registry to store open server sessions, to try to repeat instead of restart an upload.
-        - authenticator: The authenticator to use to check on the server on whether the current user is valid or not.
-        - handler: The handler to call, when synchronization for a measurement has finished.
+     - apiURL: The URL to a Cyface API
+     - coreDataStack: Stack used to access *CoreData*.
+     - cleaner: A strategy for cleaning the persistent storage after data synchronization.
+     - sessionRegistry: A registry to store open server sessions, to try to repeat instead of restart an upload.
+     - authenticator: The authenticator to use to check on the server on whether the current user is valid or not.
+     - handler: The handler to call, when synchronization for a measurement has finished.
      */
     public init(apiURL: URL, dataStoreStack: DataStoreStack, cleaner: Cleaner, sessionRegistry: SessionRegistry = SessionRegistry(), authenticator: Authenticator) {
         self.dataStoreStack = dataStoreStack
@@ -167,7 +167,9 @@ public class CyfaceSynchronizer: Synchronizer {
                 return
             }
 
-            self.syncChecked()
+            Task {
+                try await self.syncChecked()
+            }
         }
     }
 
@@ -181,37 +183,26 @@ public class CyfaceSynchronizer: Synchronizer {
 
     // MARK: - API Methods
 
-    public func syncChecked() {
-        self.isReachableCheckingQueue.sync {
-            if syncOnWiFiOnly && isReachableOnEthernetOrWifi {
-                sync()
-            } else if !syncOnWiFiOnly && isReachable {
-                sync()
-            }
+    public func syncChecked() async throws {
+        if syncOnWiFiOnly && isReachableOnEthernetOrWifi {
+            try await sync()
+        } else if !syncOnWiFiOnly && isReachable {
+            try await sync()
         }
     }
 
-    public func sync() {
-        serverSynchronizationQueue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-
-            // TODO: This can lead to a crash as it is possible that two executions step over this.
-            if self.synchronizationInProgress {
-                return
-            } else {
-                self.synchronizationInProgress = true
-            }
-
-            do {
-                let persistenceLayer = self.dataStoreStack.persistenceLayer()
-                let measurements = try persistenceLayer.loadSynchronizableMeasurements()
-                self.handle(synchronizableMeasurements: measurements, status: .success)
-            } catch let error {
-                self.handle(synchronizableMeasurements: nil, status: .error(error))
-            }
+    // TODO: This needs to run as a synchronized background task
+    public func sync() async throws {
+        if self.synchronizationInProgress {
+            return
+        } else {
+            self.synchronizationInProgress = true
         }
+
+        let persistenceLayer = self.dataStoreStack.persistenceLayer()
+        let measurements = try persistenceLayer.loadSynchronizableMeasurements()
+        let authToken = try await authenticator.authenticate()
+        self.handle(synchronizableMeasurements: measurements, authToken: authToken)
     }
 
     public func activate() throws {
@@ -224,21 +215,25 @@ public class CyfaceSynchronizer: Synchronizer {
             throw SynchronizerError.unableToBuildReachabilityManager
         }
         // Initial sync
-        syncChecked()
-        let reachabilityManagerStarted = reachabilityManager.startListening { status in
+        Task {
+            try await syncChecked()
+        }
+        let reachabilityManagerStarted = reachabilityManager.startListening { [weak self] status in
             switch status {
             case .reachable(.ethernetOrWiFi):
-                self.isReachableOnEthernetOrWifi = true
-                self.isReachable = true
+                self?.isReachableOnEthernetOrWifi = true
+                self?.isReachable = true
             case .notReachable:
-                self.isReachableOnEthernetOrWifi = false
-                self.isReachable = false
+                self?.isReachableOnEthernetOrWifi = false
+                self?.isReachable = false
             default:
-                self.isReachableOnEthernetOrWifi = false
-                self.isReachable = true
+                self?.isReachableOnEthernetOrWifi = false
+                self?.isReachable = true
             }
 
-            self.syncChecked()
+            Task { [weak self] in
+                try await self?.syncChecked()
+            }
         }
         guard reachabilityManagerStarted else {
             throw SynchronizerError.reachabilityStartFailed
@@ -260,10 +255,10 @@ public class CyfaceSynchronizer: Synchronizer {
      Synchronizes the array of provided measurements if the status was successful and measurements are provided
 
      - Parameters:
-        - synchronizableMeasurements: The synchronizable measurements to synchronize or `nil` if they have not been loaded.
-        - status: Provides the status of whether loading the measurements was successful or not.
+     - synchronizableMeasurements: The synchronizable measurements to synchronize or `nil` if they have not been loaded.
+     - status: Provides the status of whether loading the measurements was successful or not.
      */
-    private func handle(synchronizableMeasurements: [FinishedMeasurement]?, status: Status) {
+    private func handle(synchronizableMeasurements: [FinishedMeasurement]?, authToken: String) {
         guard let measurements = synchronizableMeasurements else {
             return
         }
@@ -276,16 +271,20 @@ public class CyfaceSynchronizer: Synchronizer {
         }
         let uploadProcess = UploadProcess(
             apiUrl: apiURL,
-            sessionRegistry: sessionRegistry,
-            authenticator: authenticator,
-            onSuccess: successHandler,
-            onFailure: failureHandler)
+            sessionRegistry: sessionRegistry)
 
         for measurement in measurements {
             // TODO: This should be carried out using Combine
             handle(.synchronizationStarted(measurement: measurement), .success)
             let upload = CoreDataBackedUpload(dataStoreStack: dataStoreStack, measurement: measurement)
-            uploadProcess.upload(upload)
+            Task {
+                do {
+                    let result = try await uploadProcess.upload(authToken: authToken, upload)
+                    successHandler(upload: result)
+                } catch {
+                    failureHandler(upload: upload, error: error)
+                }
+            }
         }
     }
 
@@ -310,8 +309,8 @@ public class CyfaceSynchronizer: Synchronizer {
      Handles the failed synchronization of a single measurement.
 
      - Parameters:
-        - measurement: The measurement for which the synchronization failed.
-        - error: The error causing the failure.
+     - measurement: The measurement for which the synchronization failed.
+     - error: The error causing the failure.
      */
     private func failureHandler(upload: Upload, error: Error) {
         os_log("Unable to upload data for measurement: %d!", log: CyfaceSynchronizer.log, type: .error, upload.measurement.identifier)
@@ -371,13 +370,13 @@ public protocol Cleaner {
      Cleans the database after a measurement has been synchronized.
 
      - Parameters:
-        - measurement: The measurement to clean.
-        - from: The `PersistenceLayer` to call for cleaning the data.
+     - measurement: The measurement to clean.
+     - from: The `PersistenceLayer` to call for cleaning the data.
      - Throws:
-        - `PersistenceError.measurementNotLoadable` If the measurement to delete was not available.
-        - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
-        - Some unspecified errors from within CoreData.
-        - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
+     - `PersistenceError.measurementNotLoadable` If the measurement to delete was not available.
+     - `PersistenceError.noContext` If there is no current context and no background context can be created. If this happens something is seriously wrong with CoreData.
+     - Some unspecified errors from within CoreData.
+     - Some internal file system error on failure of creating or accessing the accelerations file at the required path.
      */
     func clean(measurement: FinishedMeasurement, from persistenceLayer: PersistenceLayer) throws
 }

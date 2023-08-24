@@ -45,21 +45,21 @@ public protocol Upload {
  - author: Klemens Muthmann
  - version 1.0.0
  */
-class CoreDataBackedUpload: Upload {
+public class CoreDataBackedUpload: Upload {
     /// A wrapper for the `NSPersistentContainer` and the corresponding initialization code.
     var dataStoreStack: DataStoreStack
     /// A cache for the actual measurement to upload, so we don't have to reload it from the database all the time.
-    var measurement: FinishedMeasurement
+    public var measurement: FinishedMeasurement
     /// A cache for the measurements metadata, so we don't have to reload it from the database all the time.
     var dataCache: Data?
     /// A counter of the number of failed attempts to run this upload. This can be used to stop retrying after a certain amount of retries.
-    var failedUploadsCounter = 0
+    public var failedUploadsCounter = 0
     var identifier: UInt64 {
         measurement.identifier
     }
 
     /// Make a new instance of this class, connected to a CoreData storage and associated with a measurement, via its `identifier`.
-    init(dataStoreStack: DataStoreStack, measurement: FinishedMeasurement) {
+    public init(dataStoreStack: DataStoreStack, measurement: FinishedMeasurement) {
         self.measurement = measurement
         self.dataStoreStack = dataStoreStack
     }
@@ -68,7 +68,7 @@ class CoreDataBackedUpload: Upload {
     ///
     /// After the first call this is retrieved from a local cache and not reloaded from storage.
     /// To refresh the values, you need use a new instance of this class.
-    func metaData() throws -> MetaData {
+    public func metaData() throws -> MetaData {
         let bundle = Bundle.main
         guard let appVersion = bundle.infoDictionary?["CFBundleShortVersionString"] as? String else {
             throw ServerConnectionError.dataError("Application version was missing!")
@@ -108,7 +108,7 @@ class CoreDataBackedUpload: Upload {
     /// To refresh the values, you need use a new instance of this class.
     ///
     /// - throws: Either a `SerializationError` if serialization of the measurement failes for some reason or a CoreData error if loading the measurement fails.
-    func data() throws -> Data {
+    public func data() throws -> Data {
         if let ret = dataCache {
             return ret
         } else {

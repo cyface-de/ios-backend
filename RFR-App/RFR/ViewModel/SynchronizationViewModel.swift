@@ -11,28 +11,51 @@ import OSLog
 import Combine
 
 class SynchronizationViewModel: ObservableObject {
-    var synchronizer: Synchronizer
     @Published var error: Error?
     let uploadStatusPublisher: PassthroughSubject<UploadStatus, Never>
+    let dataStoreStack: DataStoreStack
+    let apiEndpoint: URL
+    let sessionRegistry: SessionRegistry
+    // TODO: Inject this.
+    let authenticator = OAuthAuthenticator()
 
-    init(synchronizer: Synchronizer) {
-        self.synchronizer = synchronizer
+    init(dataStoreStack: DataStoreStack, apiEndpoint: URL, sessionRegistry: SessionRegistry) {
+        self.dataStoreStack = dataStoreStack
         self.uploadStatusPublisher = PassthroughSubject<UploadStatus, Never>()
         self.error = nil
+        self.apiEndpoint = apiEndpoint
+        self.sessionRegistry = sessionRegistry
 
-        self.synchronizer.handler.append(handle)
-        do {
+        //self.synchronizer.handler.append(handle)
+        /*do {
             try synchronizer.activate()
+        } catch {
+            self.error = error
+        }*/
+    }
+
+    func synchronize() async {
+        // TODO: Run this on a background thread
+        let uploadProcess = UploadProcess(apiUrl: apiEndpoint, sessionRegistry: sessionRegistry)
+        do {
+            let measurements = try dataStoreStack.persistenceLayer().loadSynchronizableMeasurements()
+            for measurement in measurements {
+                uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .started))
+                do {
+                    let upload = CoreDataBackedUpload(dataStoreStack: dataStoreStack, measurement: measurement)
+                    let authToken = try await authenticator.authenticate()
+                    let result = try await uploadProcess.upload(authToken: authToken, upload)
+                    uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedSuccessfully))
+                } catch {
+                    uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedWithError(cause: error)))
+                }
+            }
         } catch {
             self.error = error
         }
     }
 
-    func synchronize() {
-        synchronizer.sync()
-    }
-
-    func deactivate() {
+    /*func deactivate() {
         synchronizer.deactivate()
     }
 
@@ -51,11 +74,11 @@ class SynchronizationViewModel: ObservableObject {
         case .error(let error):
             self.error = error
         }
-    }
+    }*/
 
-    deinit {
+    /*deinit {
         synchronizer.deactivate()
-    }
+    }*/
 }
 
 struct UploadStatus {
@@ -65,5 +88,6 @@ struct UploadStatus {
 
 enum UploadStatusType {
     case started
-    case finished
+    case finishedSuccessfully
+    case finishedWithError(cause: Error)
 }

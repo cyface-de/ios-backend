@@ -15,7 +15,6 @@ class LoginViewController: UIViewController {
     let issuer = "https://auth.cyface.de:8443/realms/rfr"
     let clientId = "ios-app"
     let redirectURI = "de.cyface.app.r4r:/oauth2redirect/"
-    let appAuthStateKey = "de.cyface.authstate"
     let appDelegate: AppDelegate
     var delegate: LoginViewControllerDelegate?
     let log = OSLog(subsystem: "LoginViewController", category: "de.cyface")
@@ -33,7 +32,7 @@ class LoginViewController: UIViewController {
         print("did load")
         super.viewDidLoad()
         // Do any additional setup after loading the view
-        loadState()
+        self.authState = OAuthAuthenticator.loadState(OAuthAuthenticator.appAuthStateKey)
         print("Auth state \(self.authState)")
         if let authState = self.authState, authState.isAuthorized {
             delegate?.onLoggedIn()
@@ -46,6 +45,7 @@ class LoginViewController: UIViewController {
         }
     }
 
+    // TODO: Move this to the Authenticator
     func doAuth() throws {
         print("do auth")
         guard let issuer = URL(string: issuer) else {
@@ -104,26 +104,9 @@ class LoginViewController: UIViewController {
 
     func setAuthState(_ authState: OIDAuthState?) {
         self.authState = authState
-        self.saveState()
+        OAuthAuthenticator.saveState(authState, OAuthAuthenticator.appAuthStateKey)
     }
 
-    func saveState() {
-        if let authState = self.authState {
-            let archivedAuthState = NSKeyedArchiver.archivedData(withRootObject: authState)
-            UserDefaults.standard.set(archivedAuthState, forKey: self.appAuthStateKey)
-        } else {
-            UserDefaults.standard.removeObject(forKey: self.appAuthStateKey)
-        }
-        UserDefaults.standard.synchronize()
-    }
-
-    func loadState() {
-        if let archivedAuthState = UserDefaults.standard.object(forKey: self.appAuthStateKey) as? Data {
-            if let authState = NSKeyedUnarchiver.unarchiveObject(with: archivedAuthState) as? OIDAuthState {
-                self.authState = authState
-            }
-        }
-    }
 }
 
 protocol LoginViewControllerDelegate {
