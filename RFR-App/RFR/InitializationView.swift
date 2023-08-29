@@ -10,7 +10,6 @@ import DataCapturing
 
 struct InitializationView: View {
     @StateObject var viewModel = DataCapturingViewModel()
-    @StateObject var privacyPolicy = PrivacyPolicy()
     @State private var loggedIn: Bool = false
     @State private var error: Error?
     let appDelegate: AppDelegate
@@ -18,7 +17,7 @@ struct InitializationView: View {
 
     var body: some View {
         if viewModel.isInitialized,
-            let dataStoreStack = viewModel.dataStoreStack {
+           let dataStoreStack = viewModel.dataStoreStack {
 
             Group {
                 if loggedIn {
@@ -30,31 +29,16 @@ struct InitializationView: View {
                             sessionRegistry: sessionRegistry
                         )
                     )
-                } else if privacyPolicy.mostRecentWasAccepted {
+                } else {
                     OAuthLoginView(appDelegate: appDelegate, loggedIn: $loggedIn, error: $error)
 
-                } else {
-                    VStack {
-                        WebView(url: privacyPolicy.url)
-                        Button(action:  {
-                            privacyPolicy.onAccepted()
-                        }) {
-                            Text("Akzeptieren")
-                            .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                    .padding([.leading, .trailing, .bottom])
-                    .buttonStyle(.borderedProminent)
                 }
             }
 
-        /*} else {
-            if let error = viewModel.error {
-                ErrorView(error: error)
-            } else {
-                LoadinScreen()
-            }*/
+        } else if let error = viewModel.error {
+            ErrorView(error: error)
+        } else {
+            LoadinScreen()
         }
     }
 }

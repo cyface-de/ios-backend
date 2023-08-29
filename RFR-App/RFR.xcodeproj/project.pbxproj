@@ -63,10 +63,6 @@
 		AAE8E46F2A2A33E3005AA4F1 /* VoucherReached.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E46E2A2A33E3005AA4F1 /* VoucherReached.swift */; };
 		AAE8E4712A2A33F5005AA4F1 /* VoucherEnabled.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E4702A2A33F5005AA4F1 /* VoucherEnabled.swift */; };
 		AAFB60992A31BFA9008AEC76 /* UIKitMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAFB60982A31BFA9008AEC76 /* UIKitMapView.swift */; };
-		AAFB609B2A331C68008AEC76 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAFB609A2A331C68008AEC76 /* PrivacyPolicyView.swift */; };
-		AAFB609D2A3325DE008AEC76 /* PrivacyPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAFB609C2A3325DE008AEC76 /* PrivacyPolicy.swift */; };
-		AAFB60A02A332645008AEC76 /* privacy-policy-de.html in Resources */ = {isa = PBXBuildFile; fileRef = AAFB609F2A332645008AEC76 /* privacy-policy-de.html */; };
-		AAFB60A22A332657008AEC76 /* privacy-policy-en.html in Resources */ = {isa = PBXBuildFile; fileRef = AAFB60A12A332657008AEC76 /* privacy-policy-en.html */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -146,10 +142,6 @@
 		AAE8E46E2A2A33E3005AA4F1 /* VoucherReached.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherReached.swift; sourceTree = "<group>"; };
 		AAE8E4702A2A33F5005AA4F1 /* VoucherEnabled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherEnabled.swift; sourceTree = "<group>"; };
 		AAFB60982A31BFA9008AEC76 /* UIKitMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitMapView.swift; sourceTree = "<group>"; };
-		AAFB609A2A331C68008AEC76 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
-		AAFB609C2A3325DE008AEC76 /* PrivacyPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicy.swift; sourceTree = "<group>"; };
-		AAFB609F2A332645008AEC76 /* privacy-policy-de.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "privacy-policy-de.html"; sourceTree = "<group>"; };
-		AAFB60A12A332657008AEC76 /* privacy-policy-en.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "privacy-policy-en.html"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -241,15 +233,6 @@
 			path = Statistics;
 			sourceTree = "<group>";
 		};
-		AA3C06522A417FF5002BD585 /* PrivacyPolicy */ = {
-			isa = PBXGroup;
-			children = (
-				AAFB609A2A331C68008AEC76 /* PrivacyPolicyView.swift */,
-				AAFB609C2A3325DE008AEC76 /* PrivacyPolicy.swift */,
-			);
-			path = PrivacyPolicy;
-			sourceTree = "<group>";
-		};
 		AA87D05F2982ADE8002F6B3B = {
 			isa = PBXGroup;
 			children = (
@@ -278,7 +261,6 @@
 			isa = PBXGroup;
 			children = (
 				AA3C064E2A3E4878002BD585 /* Login */,
-				AA3C06522A417FF5002BD585 /* PrivacyPolicy */,
 				AA3C06282A3AF89D002BD585 /* Live */,
 				AA3C064C2A3E46CF002BD585 /* Measurements */,
 				AA3C064B2A3E4621002BD585 /* Voucher */,
@@ -376,22 +358,12 @@
 		AAE8E4642A29F26F005AA4F1 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				AAFB609E2A33261F008AEC76 /* PrivacyPolicies */,
 				AAE8E4652A29F2B5005AA4F1 /* schkeuditz.csv */,
 				AAE8E4692A29F35A005AA4F1 /* köthen.csv */,
 				AA3C06222A39F3BC002BD585 /* auth.conf.json */,
 				AA3C06262A3A0BB4002BD585 /* auth.conf.json.changeme */,
 			);
 			path = Resources;
-			sourceTree = "<group>";
-		};
-		AAFB609E2A33261F008AEC76 /* PrivacyPolicies */ = {
-			isa = PBXGroup;
-			children = (
-				AAFB609F2A332645008AEC76 /* privacy-policy-de.html */,
-				AAFB60A12A332657008AEC76 /* privacy-policy-en.html */,
-			);
-			path = PrivacyPolicies;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -510,13 +482,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				AAE8E4662A29F2B5005AA4F1 /* schkeuditz.csv in Resources */,
-				AAFB60A02A332645008AEC76 /* privacy-policy-de.html in Resources */,
 				AA87D0732982ADE9002F6B3B /* Preview Assets.xcassets in Resources */,
 				AAE8E46A2A29F35A005AA4F1 /* köthen.csv in Resources */,
 				AA3C06232A39F3BC002BD585 /* auth.conf.json in Resources */,
 				AA3C06302A3B03C8002BD585 /* Localizable.strings in Resources */,
 				AA3C06272A3A0BB4002BD585 /* auth.conf.json.changeme in Resources */,
-				AAFB60A22A332657008AEC76 /* privacy-policy-en.html in Resources */,
 				AA3C062D2A3B03C8002BD585 /* InfoPlist.strings in Resources */,
 				AA87D0702982ADE9002F6B3B /* Assets.xcassets in Resources */,
 			);
@@ -552,7 +522,6 @@
 				AAC9D2EF29840651003C4CC7 /* LabelledDivider.swift in Sources */,
 				AAC9D2F729891A8D003C4CC7 /* Measurement.swift in Sources */,
 				AA3C06562A4180DC002BD585 /* MainMap.swift in Sources */,
-				AAFB609D2A3325DE008AEC76 /* PrivacyPolicy.swift in Sources */,
 				AA6C48962A93629800C3633D /* OAuthLoginView.swift in Sources */,
 				AA6C48A12A94F73100C3633D /* OAuthAuthenticator.swift in Sources */,
 				AA6C489D2A936D2100C3633D /* AppDelegate.swift in Sources */,
@@ -575,7 +544,6 @@
 				AA8FC7652A2CE82B006D52F3 /* Voucher.swift in Sources */,
 				AAA1AAC129ED4544002CBC91 /* Statistics.swift in Sources */,
 				AA87D06C2982ADE8002F6B3B /* RFRApp.swift in Sources */,
-				AAFB609B2A331C68008AEC76 /* PrivacyPolicyView.swift in Sources */,
 				AACB768C29C1C24B00A9DB6F /* InitializationView.swift in Sources */,
 				AAC9D2F429840D83003C4CC7 /* MeasurementCell.swift in Sources */,
 				AAA1AABA29E6FAE0002CBC91 /* SynchronizationViewModel.swift in Sources */,
