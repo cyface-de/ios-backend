@@ -77,6 +77,7 @@ class VoucherViewModel: ObservableObject {
     @ViewBuilder
     func view() -> some View {
         if voucherCount > 0 && accumulatedKilometers < VoucherViewModel.requiredKilometers {
+            Spacer()
             VoucherOverview(
                 viewModel: VoucherOverviewModel(
                         accumulatedKilometers: accumulatedKilometers,
@@ -85,8 +86,10 @@ class VoucherViewModel: ObservableObject {
                     )
             )
         } else if voucherCount > 0 && accumulatedKilometers >= VoucherViewModel.requiredKilometers && voucher == nil {
+            Spacer()
             VoucherReached(viewModel: self)
         } else if voucher != nil {
+            Spacer()
             VoucherEnabled(viewModel: self)
         } else {
             EmptyView()

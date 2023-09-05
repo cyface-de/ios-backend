@@ -52,9 +52,9 @@ struct MeasurementsView: View {
                         }
                     }
                     .headerProminence(.increased)
-                }
+                }.clipped()
 
-                Spacer()
+                //Spacer()
                 voucherViewModel.view()
             }
         }.onAppear {
