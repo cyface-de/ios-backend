@@ -29,7 +29,6 @@ import DataCapturing
 struct MainView: View {
     @State private var selectedTab = 2
     @ObservedObject var viewModel: DataCapturingViewModel
-    @ObservedObject var syncViewModel: SynchronizationViewModel
 
     var body: some View {
         if let dataStoreStack = viewModel.dataStoreStack, let incentivesEndpoint = URL(string: RFRApp.incentivesUrl) {
@@ -37,12 +36,9 @@ struct MainView: View {
                 VStack {
                     TabView(selection: $selectedTab) {
                         MeasurementsView(
-                            viewModel: MeasurementsViewModel(
-                                dataStoreStack: dataStoreStack,
-                                uploadPublisher: syncViewModel.uploadStatusPublisher
-                            ),
+                            viewModel: viewModel.measurementsViewModel,
                             voucherViewModel: VoucherViewModel(
-                                authenticator: syncViewModel.authenticator,
+                                authenticator: viewModel.syncViewModel.authenticator,
                                 url: incentivesEndpoint,
                                 dataStoreStack: dataStoreStack
                             )
@@ -54,10 +50,7 @@ struct MainView: View {
                             }
                             .tag(1)
                         LiveView(
-                            viewModel: LiveViewModel(
-                                dataStoreStack: dataStoreStack,
-                                dataStorageInterval: 5.0
-                            )
+                            viewModel: viewModel.liveViewModel
                         )
                             .tabItem {
                                 Image(systemName: "location.fill")
@@ -89,7 +82,7 @@ struct MainView: View {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {
                             Task {
-                                await syncViewModel.synchronize()
+                                await viewModel.syncViewModel.synchronize()
                             }
                         }) {
                             VStack {
@@ -118,13 +111,7 @@ struct MainView_Previews: PreviewProvider {
             viewModel: DataCapturingViewModel(
                 isInitialized: false,
                 showError: false,
-                error: nil,
                 dataStoreStack: MockDataStoreStack()
-            ),
-            syncViewModel: SynchronizationViewModel(
-                dataStoreStack: MockDataStoreStack(),
-                apiEndpoint: URL(string: "http://localhost")!,
-                sessionRegistry: SessionRegistry()
             )
         )
     }

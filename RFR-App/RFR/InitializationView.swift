@@ -7,27 +7,21 @@
 
 import SwiftUI
 import DataCapturing
+import Combine
 
 struct InitializationView: View {
-    @StateObject var viewModel = DataCapturingViewModel()
+    @StateObject var viewModel: DataCapturingViewModel
     @State private var loggedIn: Bool = false
     @State private var error: Error?
     let appDelegate: AppDelegate
-    let sessionRegistry = SessionRegistry()
 
     var body: some View {
-        if viewModel.isInitialized,
-           let dataStoreStack = viewModel.dataStoreStack {
+        if viewModel.isInitialized {
 
             Group {
                 if loggedIn {
                     MainView(
-                        viewModel: viewModel,
-                        syncViewModel: SynchronizationViewModel(
-                            dataStoreStack: dataStoreStack,
-                            apiEndpoint: URL(string: RFRApp.uploadEndpoint)!,
-                            sessionRegistry: sessionRegistry
-                        )
+                        viewModel: viewModel
                     )
                 } else {
                     OAuthLoginView(appDelegate: appDelegate, loggedIn: $loggedIn, error: $error)
@@ -35,7 +29,7 @@ struct InitializationView: View {
                 }
             }
 
-        } else if let error = viewModel.error {
+        } else if let error = self.error {
             ErrorView(error: error)
         } else {
             LoadinScreen()
@@ -50,7 +44,6 @@ struct InitializationView_Previews: PreviewProvider {
             viewModel: DataCapturingViewModel(
                 isInitialized: true,
                 showError: false,
-                error: nil,
                 dataStoreStack: MockDataStoreStack()
             ),
             appDelegate: AppDelegate()

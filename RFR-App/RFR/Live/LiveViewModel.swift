@@ -35,7 +35,6 @@ import CoreLocation
  - Version: 1.0.0
  - SeeAlso: ``LiveView``
  */
-@MainActor
 class LiveViewModel: ObservableObject {
     /// How to display the current speed of the user.
     @Published var speed: String
@@ -68,6 +67,9 @@ class LiveViewModel: ObservableObject {
                 return measurement
             } else {
                 let measurement = MeasurementImpl()
+                measurement.measurementMessages
+                    .receive(on: DispatchQueue.main)
+                    .assign(to: &$message)
 
                 registerLifecycleFlows(measurement)
                 // Only location captured events
@@ -209,6 +211,8 @@ class LiveViewModel: ObservableObject {
     private var cancellables = [AnyCancellable]()
     /// Captures and publishes any error produced by this model.
     @Published var error: Error?
+    /// Always contains the most recent message received from the Cyface SDK.
+    @Published var message: Message = Message.receivedNothingYet
 
     /**
      Initialize an object of this class.
@@ -232,7 +236,6 @@ class LiveViewModel: ObservableObject {
     ) {
         self.dataStorageProcess = CapturedCoreDataStorage(dataStoreStack, dataStorageInterval)
         self.dataStoreStack = dataStoreStack
-        
         guard let formattedSpeed = speedFormatter.string(from: speed as NSNumber) else {
             fatalError()
         }
@@ -318,10 +321,12 @@ class LiveViewModel: ObservableObject {
     func onStopPressed() throws {
         if measurement.isRunning || measurement.isPaused {
             try measurement.stop()
-            self.dataStorageProcess.unsubscribe()
-            cancellables.forEach { $0.cancel() }
+            cancellables.forEach {
+                $0.cancel()
+            }
             cancellables.removeAll(keepingCapacity: true)
-            self._measurement = nil
+            _measurement = nil
+            dataStorageProcess.unsubscribe()
         }
     }
 
@@ -330,8 +335,8 @@ class LiveViewModel: ObservableObject {
      */
     func onPlayPressed() throws {
         if measurement.isPaused {
-            if let identifier = self.identifier {
-                try self.dataStorageProcess.subscribe(
+            if let identifier = identifier {
+                try dataStorageProcess.subscribe(
                     to: measurement,
                     identifier
                 ) {}
@@ -339,13 +344,13 @@ class LiveViewModel: ObservableObject {
                 try measurement.resume()
             }
         } else if !measurement.isPaused && !measurement.isRunning{ // Is stopped
-            self.identifier = try self.dataStorageProcess.createMeasurement("BICYCLE")
-            if let identifier = self.identifier {
-                try self.dataStorageProcess.subscribe(
+            identifier = try dataStorageProcess.createMeasurement("BICYCLE")
+            if let identifier = identifier {
+                try dataStorageProcess.subscribe(
                     to: measurement,
                     identifier
                 ) {}
-                self.measurementName = "Measurement \(identifier)"
+                measurementName = "Measurement \(identifier)"
                 try measurement.start(inMode: "BICYCLE")
             }
         }
@@ -421,9 +426,12 @@ class LiveViewModel: ObservableObject {
         stoppedEvents
             .receive(on: RunLoop.main)
             .assign(to: &$measurementState)
+        // Clean state of this model.
         // Clear storage for altitudes and locations.
         stoppedEvents
             .sink {[weak self] _ in
+                os_log("Cleanup after Stop.")
+
                 self?.locations.removeAll(keepingCapacity: true)
                 self?.altitudes.removeAll(keepingCapacity: true)
             }

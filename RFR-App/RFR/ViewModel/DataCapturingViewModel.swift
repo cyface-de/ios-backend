@@ -11,54 +11,58 @@ import DataCapturing
 
 class DataCapturingViewModel: ObservableObject {
     @Published var isInitialized = false
-    @Published var showError = false
-    var error: Error? {
-        didSet {
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else {
-                    return
-                }
-
-                self.showError = true
-            }
-        }
-    }
     var dataStoreStack: DataStoreStack?
+    let liveViewModel: LiveViewModel
+    let measurementsViewModel: MeasurementsViewModel
+    let syncViewModel: SynchronizationViewModel
+    let sessionRegistry = SessionRegistry()
 
-    init() {
-        do {
-            self.dataStoreStack = try CoreDataStack()
+    init() throws {
+            let dataStoreStack = try CoreDataStack()
+            liveViewModel = LiveViewModel(
+                dataStoreStack: dataStoreStack,
+                dataStorageInterval: 5.0
+            )
+            syncViewModel = SynchronizationViewModel(
+                dataStoreStack: dataStoreStack,
+                apiEndpoint: URL(string: RFRApp.uploadEndpoint)!,
+                sessionRegistry: sessionRegistry
+            )
+            measurementsViewModel = MeasurementsViewModel(
+                dataStoreStack: dataStoreStack,
+                uploadPublisher: syncViewModel.uploadStatusPublisher
+            )
+            measurementsViewModel.subscribe(to: liveViewModel)
+            self.dataStoreStack = dataStoreStack
             Task {
-                do {
-                    try await dataStoreStack?.setup()
-                    DispatchQueue.main.async { [weak self] in
-                        self?.isInitialized = true
-                    }
-                } catch {
-                    handleError(error)
+                try await dataStoreStack.setup()
+                try measurementsViewModel.setup()
+                DispatchQueue.main.async { [weak self] in
+                    self?.isInitialized = true
                 }
             }
-        } catch {
-            handleError(error)
-        }
     }
 
     init(
         isInitialized: Bool,
         showError: Bool,
-        error: Error?,
         dataStoreStack: DataStoreStack
     ) {
         self.isInitialized = isInitialized
-        self.showError = showError
-        self.error = error
         self.dataStoreStack = dataStoreStack
+        liveViewModel = LiveViewModel(
+            dataStoreStack: dataStoreStack,
+            dataStorageInterval: 5.0
+        )
+        syncViewModel = SynchronizationViewModel(
+            dataStoreStack: dataStoreStack,
+            apiEndpoint: URL(string: RFRApp.uploadEndpoint)!,
+            sessionRegistry: sessionRegistry
+        )
+        measurementsViewModel = MeasurementsViewModel(
+            dataStoreStack: dataStoreStack,
+            uploadPublisher: syncViewModel.uploadStatusPublisher
+        )
     }
 
-    private func handleError(_ error: Error) {
-        self.error = error
-        DispatchQueue.main.async { [weak self] in
-            self?.showError = true
-        }
-    }
 }

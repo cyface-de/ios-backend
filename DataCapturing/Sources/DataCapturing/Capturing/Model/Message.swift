@@ -7,7 +7,14 @@
 
 import Foundation
 
+/**
+ An enumeration of all the messages required during a measurement.
+
+ - Author: Klemens Muthmann
+ - Version 1.0.0
+ */
 public enum Message: CustomStringConvertible {
+    /// A human readable description for each message type.
     public var description: String {
         switch self {
         case .capturedLocation(let location):
@@ -34,13 +41,20 @@ public enum Message: CustomStringConvertible {
             return "Fix lost"
         case .modalityChanged(let modality):
             return "Modality changed to \(modality)"
+        case .receivedNothingYet:
+            return "No messages have been received so far"
         }
     }
 
+    /// The message sent if a new geo location was captured.
     case capturedLocation(GeoLocation)
+    /// The message sent if a new altitude was captured.
     case capturedAltitude(Altitude)
+    /// The message sent if a new acceleration was captured.
     case capturedAcceleration(SensorValue)
+    /// The message sent if a new rotation was captured.
     case capturedRotation(SensorValue)
+    /// The message sent if a new direction was captured.
     case capturedDirection(SensorValue)
     case started(timestamp: Date)
     case stopped(timestamp: Date)
@@ -49,4 +63,5 @@ public enum Message: CustomStringConvertible {
     case hasFix
     case fixLost
     case modalityChanged(to: String)
+    case receivedNothingYet
 }

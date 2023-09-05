@@ -27,14 +27,35 @@ import SwiftUI
  */
 @main
 struct RFRApp: App {
+
     // TODO: Put this into some configuration file
     static let uploadEndpoint = "https://s2-b.cyface.de/api/v4"
     static let incentivesUrl = "https://staging.cyface.de/incentives/api/v1/"
     @UIApplicationDelegateAdaptor(RFR.AppDelegate.self) var appDelegate
+    @ObservedObject var appModel = AppModel()
 
     var body: some Scene {
         WindowGroup {
-            InitializationView(appDelegate: appDelegate)
+            if let viewModel = appModel.viewModel {
+                InitializationView(viewModel: viewModel, appDelegate: appDelegate)
+            } else if let error = appModel.error {
+                ErrorView(error: error)
+            } else {
+                ProgressView()
+            }
+        }
+    }
+}
+
+class AppModel: ObservableObject {
+    @Published var viewModel: DataCapturingViewModel?
+    @Published var error: Error?
+
+    init() {
+        do {
+            self.viewModel = try DataCapturingViewModel()
+        } catch {
+            self.error = error
         }
     }
 }
