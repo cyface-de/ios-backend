@@ -1,9 +1,9 @@
 /*
  * Copyright 2023 Cyface GmbH
  *
- * This file is part of the Cyface SDK for iOS.
+ * This file is part of the Ready for Robots App.
  *
- * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * The Ready for Robots App is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
