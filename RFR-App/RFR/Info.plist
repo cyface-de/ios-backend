@@ -2,10 +2,19 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>de.cyface.app.r4r</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>de.cyface.app.r4r</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

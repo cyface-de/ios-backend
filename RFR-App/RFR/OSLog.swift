@@ -15,4 +15,5 @@ extension OSLog {
     static let synchronization = OSLog(subsystem: subsystem, category: "synchronization")
     static let measurement = OSLog(subsystem: subsystem, category: "measurement")
     static let authorization = OSLog(subsystem: subsystem, category: "authorization")
+    static let system = OSLog(subsystem: subsystem, category: "system")
 }

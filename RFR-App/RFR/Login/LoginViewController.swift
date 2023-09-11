@@ -37,6 +37,7 @@ class LoginViewController: UIViewController {
     // TODO: read this from config file
     /// The address for the identity provider, that issues authentication tokens.
     let issuer = "https://auth.cyface.de:8443/realms/rfr"
+    //let issuer = "http://localhost:8081/realms/rfr"
     /// The identifier of this client as required by the identity provider.
     let clientId = "ios-app"
     /// The local redirect URI the identity provider is supposed to call after authentication has been finished.
@@ -79,11 +80,9 @@ class LoginViewController: UIViewController {
 
 
     override func viewDidLoad() {
-        print("did load")
         super.viewDidLoad()
         // Do any additional setup after loading the view
         self.authState = OAuthAuthenticator.loadState(OAuthAuthenticator.appAuthStateKey)
-        print("Auth state \(self.authState)")
         if let authState = self.authState, authState.isAuthorized {
             delegate?.onLoggedIn()
         } else {
@@ -98,7 +97,6 @@ class LoginViewController: UIViewController {
     // TODO: Move this to the Authenticator
     /// Starts the authentication process.
     @objc func doAuth() throws {
-        print("do auth")
         guard let issuer = URL(string: issuer) else {
             throw RFRError.invalidUrl(url: issuer)
         }
@@ -108,7 +106,7 @@ class LoginViewController: UIViewController {
         }
 
         // Discover endpoints
-        OIDAuthorizationService.discoverConfiguration(forIssuer: issuer) { [unowned self] configuration, error in
+        OIDAuthorizationService.discoverConfiguration(forIssuer: issuer, completion: { [unowned self] configuration, error in
             guard let config = configuration else {
                 os_log(
                     "Error retrieving discovery document: %@.",
@@ -144,13 +142,13 @@ class LoginViewController: UIViewController {
                 } else {
                     os_log(
                         "Authorization error: %@",
-                        log: log,
+                        log: OSLog.authorization,
                         type: .error,
                         error?.localizedDescription ?? "DEFAULT_ERROR"
                     )
                 }
             }
-        }
+        })
     }
 
     /// Set and save the current authentication state.
