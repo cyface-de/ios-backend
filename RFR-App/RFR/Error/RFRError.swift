@@ -19,6 +19,12 @@
 
 import Foundation
 
+/**
+ Error causes processed by the Ready for Robots application.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 enum RFRError: Error {
     case initializationFailed(cause: Error)
     case invalidUrl(url: String)
