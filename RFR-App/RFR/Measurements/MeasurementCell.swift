@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with the Read-for-Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
  */
-
 import SwiftUI
 import MapKit
 
