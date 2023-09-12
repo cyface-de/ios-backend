@@ -19,6 +19,8 @@ enum RFRError: Error {
     case unableToAuthenticate
     case formattingFailed(number: NSNumber)
     case voucherOverviewFailed
+    /// Thrown if a background upload does not provide a `HTTPURLResponse`.
+    case invalidResponse
 }
 
 extension RFRError: LocalizedError {
@@ -107,6 +109,14 @@ extension RFRError: LocalizedError {
                 "de.cyface.error.rfrerror.voucherOverviewFailed",
                 value: "Unable to load voucher overview.",
                 comment: "Explain to the user, that the system was unable to load the voucher overview."
+            )
+
+            return errorMessage
+        case .invalidResponse:
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.rfrerror.invalidResponse",
+                value: "Unable to process response!",
+                comment: "Explain to the user, that an HTTP network response returned an invalid status response. The status code is provided as the first parameter."
             )
 
             return errorMessage

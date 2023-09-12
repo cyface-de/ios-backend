@@ -18,11 +18,12 @@
  */
 
 import Foundation
-import Alamofire
 
 // TODO: Repeat Request after Authentication has failed
 /**
  A state machine for the complete upload process of a single measurement from this device to a Cyface Data Collector service.
+
+ It orchestrates the different requests required by the Cyface Upload Protocol.
 
  - author: Klemens Muthmann
  - version: 1.0.0
@@ -33,14 +34,14 @@ public class UploadProcess {
     /// The URL to the Cyface data collector.
     let apiUrl: URL
     /// An Alamofire `Session` to use for sending requests and receiving responses.
-    let session: Session
+    let session: URLSession
 
     /// Makes a new `UploadProcess` using the supplied properties.
     ///
     /// - Parameter apiUrl: The root URL for the Cyface API.
     /// - Parameter session: An optional Alamofire `Session`. Use this to inject a session, for example for mocking. If not used the standard Alamofire `Session` is used, which should be fine for most use cases.
     /// - Parameter sessionRegistry: You may reuse some `SessionRegistry` here or provide one backed by persistent storage. If the sessions are not stored somewhere nothing bad will happen, except from a few unecessary uploads, which could have been resumed.
-    public init(apiUrl: URL, session: Session = AF, sessionRegistry: SessionRegistry) {
+    public init(apiUrl: URL, session: URLSession = URLSession.shared, sessionRegistry: SessionRegistry) {
         self.openSessions = sessionRegistry
         self.apiUrl = apiUrl
         self.session = session

@@ -18,7 +18,6 @@
  */
 
 import Foundation
-import Alamofire
 import OSLog
 
 /**
@@ -29,12 +28,12 @@ import OSLog
  */
 class UploadRequest {
     /// The URL to the Cyface API receiving the data.
-    let session: Session
+    let session: URLSession
     /// The logger used by objects of this class.
     let log: OSLog = OSLog(subsystem: "UploadRequest", category: "de.cyface")
 
     /// Initialize the request using the provided Alamofire `Session` for execution.
-    init(session: Session) {
+    init(session: URLSession) {
         self.session = session
     }
 
@@ -44,17 +43,22 @@ class UploadRequest {
         let metaData = try upload.metaData()
         let data = try upload.data()
 
-        var headers = metaData.asHeader
-        headers.add(name: "Content-Length", value: String(data.count-continueOnByte))
-        headers.add(name: "Content-Range", value: "bytes \(continueOnByte)-\(data.count-1)/\(data.count)")
+        guard let url = URL(string: sessionIdentifier) else {
+            throw ServerConnectionError.sessionIdentifierFormatInvalid(sessionIdentifier)
+        }
 
-        let response = await session.upload(data[continueOnByte..<data.count], to: sessionIdentifier, method: .put, headers: headers).serializingData().response
-        guard let response = response.response else {
-            if let error = response.error {
-                throw error
-            } else {
-                throw ServerConnectionError.noResponse
-            }
+        // Background uploads are only valid from files, so writing the data to a file at first.
+        let tempDataFile = try copyToTemp(data: data[continueOnByte..<data.count], sessionIdentifier: url)
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        metaData.add(to: &request)
+        request.setValue(String(data.count-continueOnByte), forHTTPHeaderField: "Content-Length")
+        request.setValue("bytes \(continueOnByte)-\(data.count-1)/\(data.count)", forHTTPHeaderField: "Content-Range")
+
+        let (_, response) = try await session.upload(for: request, fromFile: tempDataFile)
+        guard let response = response as? HTTPURLResponse else {
+            throw ServerConnectionError.noResponse
         }
 
         let status = response.statusCode
@@ -65,4 +69,14 @@ class UploadRequest {
             throw ServerConnectionError.requestFailed(httpStatusCode: status)
         }
     }
+}
+
+func copyToTemp(data: Data, sessionIdentifier: URL) throws -> URL {
+    let filename = sessionIdentifier.lastPathComponent
+    let target = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+    if FileManager.default.fileExists(atPath: target.relativePath) {
+        try FileManager.default.removeItem(at: target)
+    }
+    try data.write(to: target)
+    return target
 }

@@ -18,7 +18,6 @@
  */
 import Foundation
 import AppAuth
-import Alamofire
 import DataCapturing
 
 /**

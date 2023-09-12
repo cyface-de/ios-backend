@@ -18,7 +18,6 @@
  */
 
 import Foundation
-import Alamofire
 
 /**
  A request telling the server, that the app wants to upload a measurement.
@@ -32,10 +31,12 @@ class PreRequest {
     /// A URL running an appropriate Cyface Server
     let apiUrl: URL
     /// The Alamofire `Session` to use for uploading the data.
-    let session: Session
+    let session: URLSession
+    /// Encoder to write the meta data as JSON into the requests body.
+    let jsonEncoder = JSONEncoder()
 
     /// Make a new pre request from a Cyface API URL and an Alamofire `Session`.
-    init(apiUrl: URL, session: Session) {
+    init(apiUrl: URL, session: URLSession) {
         self.apiUrl = apiUrl
         self.session = session
     }
@@ -47,34 +48,28 @@ class PreRequest {
         let metaData = try upload.metaData()
         let data = try upload.data()
 
-        var headers: HTTPHeaders = []
-        headers.add(name: "Content-Type", value: "application/json; charset=UTF-8")
-        headers.add(name: "Authorization", value: "Bearer \(authToken)")
-        headers.add(name: "x-upload-content-length", value: "\(data.count)")
-        headers.add(name: "x-upload-content-type", value: "application/octet-stream")
-        headers.add(name: "Accept-Encoding", value: "gzip")
-        headers.add(name: "User-Agent", value: "Cyface-iOS-Client/\(metaData.applicationVersion) (gzip)")
-        headers.add(name: "Connection", value: "Keep-Alive")
+        let requestUrl = apiUrl.appendingPathComponent("measurements")
 
-        let response = await session.request(
-            apiUrl.appendingPathComponent("measurements"),
-            method: .post,
-            parameters: metaData,
-            encoder: JSONParameterEncoder.default,
-            headers: headers
-        ).serializingData().response
-        guard let response = response.response else {
-            if let error = response.error {
-                throw ServerConnectionError.alamofireError(error)
-            } else {
+        var request = URLRequest(url: requestUrl)
+        request.setValue("application/json; charset=UTF-8", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("\(data.count)", forHTTPHeaderField: "x-upload-content-length")
+        request.setValue("application/octet-stream", forHTTPHeaderField: "x-upload-content-type")
+        request.setValue("gzip", forHTTPHeaderField: "Accept-Encoding")
+        request.setValue("Cyface-iOS-Client/\(metaData.applicationVersion) (gzip)", forHTTPHeaderField: "User-Agent")
+        request.setValue("Keep-Alive", forHTTPHeaderField: "Connection")
+        request.httpMethod = "POST"
+
+        let jsonData = try jsonEncoder.encode(metaData)
+        let (_, response) = try await session.upload(for: request, from: jsonData)
+        guard let response = response as? HTTPURLResponse else {
                 throw ServerConnectionError.noResponse
-            }
         }
 
         let status = response.statusCode
 
         if status == 200 {
-            guard let location = response.headers["Location"] else {
+            guard let location = response.value(forHTTPHeaderField: "Location") else {
                 throw ServerConnectionError.noLocation
             }
 

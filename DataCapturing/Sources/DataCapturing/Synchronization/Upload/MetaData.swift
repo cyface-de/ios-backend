@@ -18,7 +18,6 @@
  */
 
 import Foundation
-import Alamofire
 
 /// A name that tells the system which kind of iOS device this is.
 var modelIdentifier: String {
@@ -79,39 +78,36 @@ public struct MetaData: Encodable {
     /// The type of the device transmitting the data.
     let deviceType = modelIdentifier
 
-    /// The meta data formatted as HTTP header data.
-    var asHeader: HTTPHeaders {
-        var headers: HTTPHeaders = [
-            "Content-Type": "application/octet-stream",
-            "deviceId": deviceId,
-            "measurementId": String(measurementId),
-            "locationCount": String(locationCount),
-            "formatVersion": String(formatVersion),
-            "deviceType": deviceType,
-            "osVersion": osVersion,
-            "appVersion": applicationVersion,
-            "length": String(length),
-            "modality": modality
-        ]
+    /// Add this meta data to an `URLRequest` formatted as an HTTP header.
+    func add(to request: inout URLRequest) {
+        request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type" )
+        request.setValue(deviceId, forHTTPHeaderField: "deviceId")
+        request.setValue(String(measurementId), forHTTPHeaderField: "measurementId")
+        request.setValue(String(locationCount), forHTTPHeaderField: "locationCount")
+        request.setValue(String(formatVersion), forHTTPHeaderField: "formatVersion")
+        request.setValue(deviceType, forHTTPHeaderField: "deviceType")
+        request.setValue(osVersion, forHTTPHeaderField: "osVersion")
+        request.setValue(applicationVersion, forHTTPHeaderField: "appVersion")
+        request.setValue(String(length), forHTTPHeaderField: "length")
+        request.setValue(modality, forHTTPHeaderField: "modality")
+
         if let startLocLat = startLocLat {
-            headers.add(name: "startLocLat", value: String(startLocLat))
+            request.setValue(String(startLocLat), forHTTPHeaderField: "startLocLat")
         }
         if let startLocLon = startLocLon {
-            headers.add(name: "startLocLon", value: String(startLocLon))
+            request.setValue(String(startLocLon), forHTTPHeaderField: "startLocLon")
         }
         if let startLocTS = startLocTS {
-            headers.add(name: "startLocTS", value: String(convertToUtcTimestamp(date: startLocTS)))
+            request.setValue(String(convertToUtcTimestamp(date: startLocTS)), forHTTPHeaderField: "startLocTS")
         }
         if let endLocLat = endLocLat {
-            headers.add(name: "endLocLat", value: String(endLocLat))
+            request.setValue(String(endLocLat), forHTTPHeaderField: "endLocLat")
         }
         if let endLocLon = endLocLon {
-            headers.add(name: "endLocLon", value: String(endLocLon))
+            request.setValue(String(endLocLon), forHTTPHeaderField: "endLocLon")
         }
         if let endLocTS = endLocTS {
-                headers.add(name: "endLocTS", value: String(convertToUtcTimestamp(date: endLocTS)))
+            request.setValue(String(convertToUtcTimestamp(date: endLocTS)), forHTTPHeaderField: "endLocTS")
         }
-
-        return headers
     }
 }

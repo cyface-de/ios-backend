@@ -121,33 +121,4 @@ class MockPersistenceLayer: PersistenceLayer {
     }
 }
 
-class MockSynchronizer: Synchronizer {
-
-    let log = OSLog(subsystem: "MockSynchronizer", category: "de.cyface.app")
-
-    var handler: [(DataCapturing.DataCapturingEvent, DataCapturing.Status) -> Void] = []
-
-    var syncOnWiFiOnly: Bool = true
-
-    var authenticator: DataCapturing.Authenticator = MockAuthenticator()
-
-    func syncChecked() {
-
-    }
-
-    func sync() {
-        os_log("Mock Synchronizing", log: log, type: .debug)
-    }
-
-    func activate() throws {
-
-    }
-
-    func deactivate() {
-        
-    }
-
-
-}
-
 #endif

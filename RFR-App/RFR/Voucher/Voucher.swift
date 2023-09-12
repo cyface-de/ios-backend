@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Alamofire
 import DataCapturing
 
 class Vouchers {
@@ -36,28 +35,24 @@ class Vouchers {
             return voucher
         } else {
             let token = try await authenticator.authenticate()
-            let headers: HTTPHeaders = [
-                "Authorization": "Bearer \(token)",
-                "Accept": "application/json"
-            ]
             let voucherURL = url.appending(component: "voucher")
 
-            let voucher = try await withUnsafeThrowingContinuation { continuation in
-                let request = AF
-                    .request(voucherURL, headers: headers)
-                    .validate()
-                    .response { response in
-                        do {
-                            if let body = response.data {
-                                let voucher = try Vouchers.decoder.decode(Voucher.self, from: body)
-                                continuation.resume(returning: voucher)
-                            }
-                        } catch {
-                            continuation.resume(throwing: error)
-                        }
-                }
-                request.resume()
+            var request = URLRequest(url: voucherURL)
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let response = response as? HTTPURLResponse else {
+                throw VoucherRequestError.invalidResponse
             }
+
+            guard response.statusCode==200 else {
+                throw VoucherRequestError.requestFailed(statusCode: response.statusCode)
+            }
+
+            let voucher = try Vouchers.decoder.decode(Voucher.self, from: data)
+
             self._voucher = voucher
 
             return voucher
@@ -70,34 +65,26 @@ class Vouchers {
         } else {
             let token = try await authenticator.authenticate()
 
-            let headers: HTTPHeaders = [
-                "Authorization": "Bearer \(token)",
-                "Accept": "application/json"
-            ]
-
             let incentivesCountURL = url.appending(component:"voucher_count")
 
-            return try await withCheckedThrowingContinuation { continuation in
-                AF.request(incentivesCountURL, headers: headers).validate().responseData { response in
+            var request = URLRequest(url: incentivesCountURL)
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-                    switch response.result {
-                    case .failure(let failure):
-                        continuation.resume(throwing: VoucherRequestError.requestFailed(cause: failure))
-                    case .success:
-                        if let body = response.data {
-                            do {
-                                let voucherCount = try Vouchers.decoder.decode(Count.self, from: body)
-                                self._count = voucherCount.vouchers
-                                continuation.resume(returning: voucherCount.vouchers)
-                            } catch {
-                                continuation.resume(throwing: error)
-                            }
-                        } else {
-                            continuation.resume(throwing: VoucherRequestError.noData)
-                        }
-                    }
-                }.resume()
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let response = response as? HTTPURLResponse else {
+                throw VoucherRequestError.invalidResponse
             }
+
+            guard response.statusCode == 200 else {
+                throw VoucherRequestError.requestFailed(statusCode: response.statusCode)
+            }
+
+            let voucherCount = try Vouchers.decoder.decode(Count.self, from: data)
+            self._count = voucherCount.vouchers
+
+            return voucherCount.vouchers
         }
     }
 }
@@ -112,6 +99,8 @@ struct Count: Codable {
 }
 
 enum VoucherRequestError: Error {
-    case noData
-    case requestFailed(cause: AFError)
+    /// If the HTTP status code is not as expected.
+    case requestFailed(statusCode: Int)
+    /// If the response received is no valid `HTTPURLResponse`.
+    case invalidResponse
 }
