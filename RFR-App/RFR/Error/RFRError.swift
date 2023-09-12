@@ -104,7 +104,8 @@ extension RFRError: LocalizedError {
             let errorMessage = NSLocalizedString(
                 "de.cyface.error.rfrerror.missingAuthenticatorConfiguration",
                 value: "Authenticator configuration file was missing.",
-                comment: "Explain that the configuration for the authenticator is missing. This should not happen, since this file is included as a build artifact and should always be available.")
+                comment: "Explain that the configuration for the authenticator is missing. This should not happen, since this file is included as a build artifact and should always be available."
+            )
 
             return errorMessage
         case .unableToAuthenticate:
@@ -119,7 +120,8 @@ extension RFRError: LocalizedError {
             let errorMessage = NSLocalizedString(
                 "de.cyface.error.rfrerror.formattingFailed",
                 value: "Unable to format the number %@ into a valid String representation!",
-                comment: "Explain to the user, that the system was unable to format a number for display on the screen. The number is given as the first argument. This should not happen and is evidence for a serious implementation bug.")
+                comment: "Explain to the user, that the system was unable to format a number for display on the screen. The number is given as the first argument. This should not happen and is evidence for a serious implementation bug."
+            )
 
             return String.localizedStringWithFormat(errorMessage, number)
         case .voucherOverviewFailed:
