@@ -30,7 +30,7 @@ import Sentry
  - Version: 1.0.0
  - Since: 3.1.2
  */
-class SynchronizationViewModel: ObservableObject {
+class SynchronizationViewModel: NSObject, ObservableObject {
     /// Showing an error dialog if not `nil`.
     @Published var error: Error?
     /// A publisher about changes to the ``UploadStatus`` of the currently synchronizing measurements.
