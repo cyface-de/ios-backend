@@ -43,7 +43,7 @@ struct VoucherEnabled_Previews: PreviewProvider {
     static var viewModel: VoucherViewModel {
         let ret = VoucherViewModel(
             authenticator: MockAuthenticator(),
-            url: URL(string: RFRApp.incentivesUrl)!,
+            url: try! ConfigLoader.load().getIncentivesUrl(),
             dataStoreStack: MockDataStoreStack()
         )
         ret.voucher = Voucher(

@@ -19,29 +19,38 @@
 import SwiftUI
 import DataCapturing
 import Combine
+import OSLog
+import AppAuthCore
 
 struct InitializationView: View {
     @StateObject var viewModel: DataCapturingViewModel
-    @State private var loggedIn: Bool = false
+    @StateObject var loginStatus = LoginStatus()
     @State private var error: Error?
-    let appDelegate: AppDelegate
+    let incentivesEndpoint: URL
 
     var body: some View {
-        if viewModel.isInitialized {
+        if let error = self.error {
+            ErrorView(error: error)
+        } else if viewModel.isInitialized {
 
             Group {
-                if loggedIn {
+                if loginStatus.isLoggedIn {
                     MainView(
-                        viewModel: viewModel
+                        viewModel: viewModel,
+                        incentivesUrl: incentivesEndpoint
                     )
                 } else {
-                    OAuthLoginView(appDelegate: appDelegate, loggedIn: $loggedIn, error: $error)
-
+                    OAuthLoginView(
+                        authenticator: viewModel.authenticator,
+                        error: $error
+                    )
+                    .onOpenURL(perform: { url in
+                        viewModel.authenticator.callback(url: url)
+                    })
                 }
             }
+            .environmentObject(loginStatus)
 
-        } else if let error = self.error {
-            ErrorView(error: error)
         } else {
             LoadinScreen()
         }
@@ -49,16 +58,18 @@ struct InitializationView: View {
 }
 
 #if DEBUG
-struct InitializationView_Previews: PreviewProvider {
-    static var previews: some View {
-        InitializationView(
-            viewModel: DataCapturingViewModel(
-                isInitialized: true,
-                showError: false,
-                dataStoreStack: MockDataStoreStack()
-            ),
-            appDelegate: AppDelegate()
-        )
-    }
+#Preview {
+    var config = try! ConfigLoader.load()
+
+    return InitializationView(
+        viewModel: DataCapturingViewModel(
+            isInitialized: true,
+            showError: false,
+            dataStoreStack: MockDataStoreStack(),
+            authenticator: MockAuthenticator(),
+            uploadEndpoint: try! config.getUploadEndpoint()
+        ),
+        incentivesEndpoint: try! config.getIncentivesUrl()
+    )
 }
 #endif

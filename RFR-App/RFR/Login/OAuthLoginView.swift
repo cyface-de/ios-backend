@@ -19,16 +19,21 @@
 
 import Foundation
 import SwiftUI
+import DataCapturing
+import OSLog
 
 struct OAuthLoginView: UIViewControllerRepresentable {
-    let appDelegate: AppDelegate
-    @Binding var loggedIn: Bool
-    @Binding var error: Error?
+    let authenticator: Authenticator
+    @EnvironmentObject var loginStatus: LoginStatus
+    @Binding var error: Error? {
+        didSet {
+            os_log("Failed to Authenticate. %s", log: OSLog.authorization, type: .debug, error?.localizedDescription ?? "")
+        }
+    }
 
     func makeUIViewController(context: Context) -> LoginViewController {
         // Return the ViewController
-        let ret = LoginViewController(appDelegate: appDelegate)
-        ret.delegate = context.coordinator
+        let ret = LoginViewController(authenticator: authenticator, delegate: context.coordinator)
         return ret
     }
 
@@ -49,7 +54,7 @@ struct OAuthLoginView: UIViewControllerRepresentable {
 
         func onLoggedIn() {
             DispatchQueue.main.async { [weak self] in
-                self?.parent.loggedIn = true
+                self?.parent.loginStatus.isLoggedIn = true
             }
         }
 
@@ -61,11 +66,14 @@ struct OAuthLoginView: UIViewControllerRepresentable {
     }
 }
 
-struct UIKitViewController_Previews: PreviewProvider {
-    @State static var loggedIn: Bool = true
-    @State static var error: Error? = nil
+#if DEBUG
+#Preview {
+    @State var loggedIn = true
+    @State var error: Error? = nil
 
-    static var previews: some View {
-        OAuthLoginView(appDelegate: AppDelegate(), loggedIn: $loggedIn, error: $error)
-    }
+    return OAuthLoginView(
+        authenticator: MockAuthenticator(),
+        error: $error
+    )
 }
+#endif

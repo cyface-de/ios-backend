@@ -28,92 +28,140 @@ import DataCapturing
  */
 struct MainView: View {
     @State private var selectedTab = 2
+    @State private var error: Error?
     @ObservedObject var viewModel: DataCapturingViewModel
+    @EnvironmentObject var loginStatus: LoginStatus
+    let incentivesUrl: URL
 
     var body: some View {
-        if let dataStoreStack = viewModel.dataStoreStack, let incentivesEndpoint = URL(string: RFRApp.incentivesUrl) {
-            NavigationStack {
-                VStack {
-                    TabView(selection: $selectedTab) {
-                        MeasurementsView(
-                            viewModel: viewModel.measurementsViewModel,
-                            voucherViewModel: VoucherViewModel(
-                                authenticator: viewModel.syncViewModel.authenticator,
-                                url: incentivesEndpoint,
-                                dataStoreStack: dataStoreStack
+        if let error = error {
+            ErrorView(error: error)
+        } else {
+            if let dataStoreStack = viewModel.dataStoreStack {
+                NavigationStack {
+                    VStack {
+                        TabView(selection: $selectedTab) {
+                            MeasurementsView(
+                                viewModel: viewModel.measurementsViewModel,
+                                voucherViewModel: VoucherViewModel(
+                                    authenticator: viewModel.syncViewModel.authenticator,
+                                    url: incentivesUrl,
+                                    dataStoreStack: dataStoreStack
+                                )
                             )
-                        )
                             .tabItem {
                                 Image(systemName: "list.bullet")
                                 Text("Fahrten")
                                     .font(.footnote)
                             }
                             .tag(1)
-                        LiveView(
-                            viewModel: viewModel.liveViewModel
-                        )
+                            LiveView(
+                                viewModel: viewModel.liveViewModel
+                            )
                             .tabItem {
                                 Image(systemName: "location.fill")
                                 Text("Live")
                             }
                             .tag(2)
-                        StatisticsView(
-                            viewModel: Measurements(coreDataStack: dataStoreStack)
-                        )
+                            StatisticsView(
+                                viewModel: Measurements(coreDataStack: dataStoreStack)
+                            )
                             .tabItem {
                                 Image(systemName: "chart.xyaxis.line")
                                 Text("Statistiken")
                                     .font(.footnote)
                             }
                             .tag(3)
-                    }
-                }
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        HStack {
-                            Image("RFR-Logo")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                            Spacer()
                         }
                     }
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .principal) {
+                            HStack {
+                                Image("RFR-Logo")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                Spacer()
+                            }
+                        }
 
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: {
-                            Task {
-                                await viewModel.syncViewModel.synchronize()
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button(action: {
+                                Task {
+                                    await viewModel.syncViewModel.synchronize()
+                                }
+                            }) {
+                                VStack {
+                                    Image(systemName: "icloud.and.arrow.up")
+                                    Text("Daten übertragen")
+                                        .font(.footnote)
+                                }
                             }
-                        }) {
-                            VStack {
-                                Image(systemName: "icloud.and.arrow.up")
-                                Text("Daten übertragen")
-                                    .font(.footnote)
+                        }
+
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            NavigationLink(destination: {
+                                ProfileView(authenticator: viewModel.authenticator)
+                            }) {
+                                VStack {
+                                    Image(systemName: "person")
+                                    Text("Profil").font(.footnote)
+                                }
                             }
+                        }
+
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            NavigationLink(destination: {ImpressumView()}) {
+                                VStack {
+                                    Image(systemName: "info.circle")
+                                    Text("Impressum").font(.footnote)
+                                }
+                            }
+                        }
+
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button(
+                                action: {
+                                    Task {
+                                        do {
+                                            try await viewModel.authenticator.logout()
+                                            loginStatus.isLoggedIn = false
+                                        } catch {
+                                            self.error = error
+                                        }
+                                    }
+                                }) {
+                                    VStack {
+                                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                                        Text("Abmelden").font(.footnote)
+                                    }
+                                }
                         }
                     }
                 }
-            }
-        } else {
-            HStack {
-                Image(systemName: "exclamationmark.triangle")
-                Text("Error: Data Capturing Service was not yet initialized!")
+            } else {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle")
+                    Text("Error: Data Capturing Service was not yet initialized!")
+                }
             }
         }
     }
 }
 
 #if DEBUG
-struct MainView_Previews: PreviewProvider {
-    @State static var isAuthenticated = true
-    static var previews: some View {
-        MainView(
-            viewModel: DataCapturingViewModel(
-                isInitialized: false,
-                showError: false,
-                dataStoreStack: MockDataStoreStack()
-            )
-        )
-    }
+#Preview {
+    @State var isAuthenticated = true
+    let config = try! ConfigLoader.load()
+
+    return MainView(
+        viewModel: DataCapturingViewModel(
+            isInitialized: false,
+            showError: false,
+            dataStoreStack: MockDataStoreStack(), 
+            authenticator: MockAuthenticator(), 
+            uploadEndpoint: try! config.getUploadEndpoint()
+        ), incentivesUrl: try! config.getIncentivesUrl()
+    )
 }
 #endif

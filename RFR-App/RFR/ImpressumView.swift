@@ -16,21 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
-import AppAuthCore
-import UIKit
-import OSLog
+import SwiftUI
 
-class AppDelegate: NSObject, UIApplicationDelegate {
-    var currentAuthorizationFlow: OIDExternalUserAgentSession?
-
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        os_log("Opened App via callback from @%.", log: OSLog.system, type: .info, url.absoluteString)
-
-        if let authorizationFlow = self.currentAuthorizationFlow, authorizationFlow.resumeExternalUserAgentFlow(with: url) {
-            self.currentAuthorizationFlow = nil
-            return true
-        }
-
-        return false
+struct ImpressumView: View {
+    var body: some View {
+        Text("Impressum")
     }
 }
+
+#if DEBUG
+#Preview {
+    ImpressumView()
+}
+#endif

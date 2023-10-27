@@ -31,6 +31,18 @@ class MockAuthenticator: Authenticator {
     func authenticate() async throws -> String {
         return "test"
     }
+
+    func delete() async throws {
+        print("Deleting User")
+    }
+
+    func logout() async throws {
+         print("Logout")
+    }
+
+    func callback(url: URL) {
+        print("Called back")
+    }
 }
 
 class MockDataStoreStack: DataStoreStack {
@@ -59,8 +71,6 @@ class MockDataStoreStack: DataStoreStack {
 }
 
 class MockPersistenceLayer: PersistenceLayer {
-
-
 
     let measurements = [
         DataCapturing.FinishedMeasurement(identifier: 0),

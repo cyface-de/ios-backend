@@ -38,5 +38,34 @@ public protocol Authenticator {
     @available(*, deprecated)
     func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void)
 
+    /// Authenticate asynchronously in the background and return the aqcuired authentication token.
     func authenticate() async throws -> String
+
+    /// Delete the currently authenticated user.
+    func delete() async throws
+
+    /// Log out the currently authenticated user.
+    func logout() async throws
+
+    /// Called after finishing a successful authentication flow.
+    ///
+    /// @param url: The deep link URL used to call this.
+    func callback(url: URL)
+}
+
+public enum AuthenticationError: Error {
+    case notImplemented
+}
+
+extension AuthenticationError: LocalizedError {
+    public var errorDescription: String? {
+        return switch self {
+        case .notImplemented:
+            NSLocalizedString(
+                "de.cyface.datacapturing.error.authenticationerror.notimplemented",
+                value: "This function has not been implemented.",
+                comment: "Communicate that a function was called that was not implemented. This should not happen in production."
+            )
+        }
+    }
 }

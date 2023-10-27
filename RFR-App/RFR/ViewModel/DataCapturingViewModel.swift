@@ -8,19 +8,25 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * The Ready for Robots App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots App. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import Foundation
 import CoreMotion
 import DataCapturing
 
+/**
+ The view model backing views that need to interact with the
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 class DataCapturingViewModel: ObservableObject {
     @Published var isInitialized = false
     var dataStoreStack: DataStoreStack?
@@ -28,38 +34,47 @@ class DataCapturingViewModel: ObservableObject {
     let measurementsViewModel: MeasurementsViewModel
     let syncViewModel: SynchronizationViewModel
     let sessionRegistry = SessionRegistry()
+    let authenticator: Authenticator
+    private let uploadEndpoint: URL
 
-    init() throws {
-            let dataStoreStack = try CoreDataStack()
-            liveViewModel = LiveViewModel(
-                dataStoreStack: dataStoreStack,
-                dataStorageInterval: 5.0
-            )
-            syncViewModel = SynchronizationViewModel(
-                dataStoreStack: dataStoreStack,
-                apiEndpoint: URL(string: RFRApp.uploadEndpoint)!,
-                sessionRegistry: sessionRegistry
-            )
-            measurementsViewModel = MeasurementsViewModel(
-                dataStoreStack: dataStoreStack,
-                uploadPublisher: syncViewModel.uploadStatusPublisher
-            )
-            measurementsViewModel.subscribe(to: liveViewModel)
-            self.dataStoreStack = dataStoreStack
-            Task {
-                try await dataStoreStack.setup()
-                try measurementsViewModel.setup()
-                DispatchQueue.main.async { [weak self] in
-                    self?.isInitialized = true
-                }
+    init(authenticator: Authenticator, uploadEndpoint: URL) throws {
+        self.uploadEndpoint = uploadEndpoint
+        self.authenticator = authenticator
+        let dataStoreStack = try CoreDataStack()
+        liveViewModel = LiveViewModel(
+            dataStoreStack: dataStoreStack,
+            dataStorageInterval: 5.0
+        )
+        syncViewModel = SynchronizationViewModel(
+            authenticator: authenticator,
+            dataStoreStack: dataStoreStack,
+            apiEndpoint: uploadEndpoint,
+            sessionRegistry: sessionRegistry
+        )
+        measurementsViewModel = MeasurementsViewModel(
+            dataStoreStack: dataStoreStack,
+            uploadPublisher: syncViewModel.uploadStatusPublisher
+        )
+        measurementsViewModel.subscribe(to: liveViewModel)
+        self.dataStoreStack = dataStoreStack
+        Task {
+            try await dataStoreStack.setup()
+            try measurementsViewModel.setup()
+            DispatchQueue.main.async { [weak self] in
+                self?.isInitialized = true
             }
+        }
     }
 
     init(
         isInitialized: Bool,
         showError: Bool,
-        dataStoreStack: DataStoreStack
+        dataStoreStack: DataStoreStack,
+        authenticator: Authenticator,
+        uploadEndpoint: URL
     ) {
+        self.uploadEndpoint = uploadEndpoint
+        self.authenticator = authenticator
         self.isInitialized = isInitialized
         self.dataStoreStack = dataStoreStack
         liveViewModel = LiveViewModel(
@@ -67,8 +82,9 @@ class DataCapturingViewModel: ObservableObject {
             dataStorageInterval: 5.0
         )
         syncViewModel = SynchronizationViewModel(
+            authenticator: authenticator,
             dataStoreStack: dataStoreStack,
-            apiEndpoint: URL(string: RFRApp.uploadEndpoint)!,
+            apiEndpoint: uploadEndpoint,
             sessionRegistry: sessionRegistry
         )
         measurementsViewModel = MeasurementsViewModel(

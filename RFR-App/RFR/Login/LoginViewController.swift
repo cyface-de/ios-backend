@@ -21,6 +21,7 @@ import AppAuth
 import OSLog
 
 import Foundation
+import DataCapturing
 
 /**
  A UIKit `UIViewController` presenting the applications login screen.
@@ -32,28 +33,18 @@ import Foundation
  - Version: 1.0.0
  */
 class LoginViewController: UIViewController {
-    /// The AppAuth frameworks object storing the authentication state of the user using this application.
-    var authState: OIDAuthState?
-    // TODO: read this from config file
-    /// The address for the identity provider, that issues authentication tokens.
-    let issuer = "https://auth.cyface.de:8443/realms/rfr"
-    //let issuer = "http://localhost:8081/realms/rfr"
-    /// The identifier of this client as required by the identity provider.
-    let clientId = "ios-app"
-    /// The local redirect URI the identity provider is supposed to call after authentication has been finished.
-    let redirectURI = "de.cyface.app.r4r:/oauth2redirect/"
-    /// The application, which is required to store and load the authentication state of this application.
-    let appDelegate: AppDelegate
-    /// An old style delegate used to handle events, that might occur during authentication and need to be handled by the app.
-    var delegate: LoginViewControllerDelegate?
     /// A button shown on this view, to restart authentication if it fails.
     var authenticateButton: UIButton!
+    let authenticator: Authenticator
+    let delegate: LoginViewControllerDelegate
 
     /**
      Create a new object of this class, providing the application delegate as the sole parameter.
      */
-    init(appDelegate: AppDelegate) {
-        self.appDelegate = appDelegate
+    init(authenticator: Authenticator, delegate: LoginViewControllerDelegate) {
+        //self.appDelegate = appDelegate
+        self.authenticator = authenticator
+        self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -81,82 +72,21 @@ class LoginViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view
-        self.authState = OAuthAuthenticator.loadState(OAuthAuthenticator.appAuthStateKey)
-        if let authState = self.authState, authState.isAuthorized {
-            delegate?.onLoggedIn()
-        } else {
+        if let oauthAuthenticator = authenticator as? OAuthAuthenticator {
+            oauthAuthenticator.callbackController = self
+        }
+    }
+
+    @objc func doAuth() {
+        Task {
             do {
-                try doAuth()
+                _ = try await authenticator.authenticate()
+                delegate.onLoggedIn()
             } catch {
-                delegate?.onError(error: error)
+                delegate.onError(error: error)
             }
         }
     }
-
-    // TODO: Move this to the Authenticator
-    /// Starts the authentication process.
-    @objc func doAuth() throws {
-        guard let issuer = URL(string: issuer) else {
-            throw RFRError.invalidUrl(url: issuer)
-        }
-
-        guard let redirectURI = URL(string: redirectURI) else {
-            throw RFRError.invalidUrl(url: redirectURI)
-        }
-
-        // Discover endpoints
-        OIDAuthorizationService.discoverConfiguration(forIssuer: issuer, completion: { [unowned self] configuration, error in
-            guard let config = configuration else {
-                os_log(
-                    "Error retrieving discovery document: %@.",
-                    log: OSLog.authorization,
-                    type: .error,
-                    error?.localizedDescription ?? "DEFAULT_ERROR"
-                )
-                return
-            }
-
-            // Build Authentication Request
-            let request = OIDAuthorizationRequest(
-                configuration: config,
-                clientId: self.clientId,
-                clientSecret: nil,
-                scopes: [OIDScopeOpenID, OIDScopeProfile],
-                redirectURL: redirectURI,
-                responseType: OIDResponseTypeCode,
-                additionalParameters: nil
-            )
-            self.appDelegate.currentAuthorizationFlow = OIDAuthState.authState(
-                byPresenting: request,
-                presenting: self
-            ) { [weak self] authState, error in
-                guard let self = self else {
-                    return
-                }
-
-                if let authState = authState {
-                    self.setAuthState(authState)
-
-                    delegate?.onLoggedIn()
-                } else {
-                    os_log(
-                        "Authorization error: %@",
-                        log: OSLog.authorization,
-                        type: .error,
-                        error?.localizedDescription ?? "DEFAULT_ERROR"
-                    )
-                }
-            }
-        })
-    }
-
-    /// Set and save the current authentication state.
-    func setAuthState(_ authState: OIDAuthState?) {
-        self.authState = authState
-        OAuthAuthenticator.saveState(authState, OAuthAuthenticator.appAuthStateKey)
-    }
-
 }
 
 /**

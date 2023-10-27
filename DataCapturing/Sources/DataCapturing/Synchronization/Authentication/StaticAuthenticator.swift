@@ -33,7 +33,6 @@ import Foundation
  - Since: 2.0.0
  */
 public class StaticAuthenticator: Authenticator {
-
     // MARK: - Properties
 
     /// The token used for authentication.
@@ -68,5 +67,17 @@ public class StaticAuthenticator: Authenticator {
                 authenticateContinuation.resume(throwing: error)
             })
         }
+    }
+
+    public func delete() async throws {
+        throw AuthenticationError.notImplemented
+    }
+
+    public func logout() async throws {
+        throw AuthenticationError.notImplemented
+    }
+
+    public func callback(url: URL) {
+        // Nothing to do here.
     }
 }
