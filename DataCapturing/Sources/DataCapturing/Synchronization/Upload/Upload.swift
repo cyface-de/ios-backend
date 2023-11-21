@@ -37,6 +37,9 @@ public protocol Upload {
 
     /// Provide the actual data of the measurement to upload.
     func data() throws -> Data
+
+    /// A function carried out on a successful upload.
+    func onSuccess() throws
 }
 
 /**
@@ -119,6 +122,25 @@ public class CoreDataBackedUpload: Upload {
         }
     }
 
+    public func onSuccess() throws {
+        try dataStoreStack.wrapInContext { context in
+            let request = MeasurementMO.fetchRequest()
+            request.predicate = NSPredicate(format: "identifier == %d", measurement.identifier)
+            let response = try request.execute()
+            guard response.count == 1 else {
+                throw MeasurementError.inconsistentState
+            }
+
+            guard let databaseMeasurement = response.first else {
+                throw MeasurementError.notAvailable(measurement: measurement)
+            }
+
+            databaseMeasurement.synchronizable = false
+            databaseMeasurement.synchronized = true
+            try context.save()
+        }
+    }
+
     /// Load a measurement from CoreData and return the measurement together with the initial modality.
     private func initialModality() throws -> String {
         guard let initialModality = measurement.events.filter({ if case $0.type = EventType.modalityTypeChange { return true } else { return false }}).min(by: { $0.time < $1.time })?.value else {
@@ -165,4 +187,7 @@ enum MeasurementError: Error {
     /// Thrown if the managed object loaded from the database is currently a fault.
     /// This usually means that managed object was accessed at the wrong time or from the wrong thread.
     case faultError
+    case notAvailable(measurement: FinishedMeasurement)
+    /// Thrown if the database is in an inconsistent state.
+    case inconsistentState
 }

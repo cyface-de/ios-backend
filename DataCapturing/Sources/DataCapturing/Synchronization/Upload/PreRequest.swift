@@ -74,6 +74,8 @@ class PreRequest {
             }
 
             return .success(location: location)
+        } else if status == 409 {
+            return .exists
         } else if status == 412 {
             throw ServerConnectionError.uploadNotAccepted(upload: upload)
         } else {
@@ -83,5 +85,6 @@ class PreRequest {
 
     enum Response {
         case success(location: String)
+        case exists
     }
 }

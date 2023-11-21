@@ -178,6 +178,7 @@ class MeasurementsViewModel: ObservableObject {
 
     /// Update the measurement in the measurement list and provide the updated list.
     private func update(measurement id: UInt64, syncState: UploadStatusType) -> [Measurement] {
+        os_log(.debug, log: OSLog.synchronization, "Updating measurement %d status to %@", id, syncState.description)
         return measurements.map { measurement in
             if measurement.id == id {
                 switch syncState {

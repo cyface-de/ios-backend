@@ -104,11 +104,22 @@ struct UploadStatus {
  - Author: Klemens Muthmann
  - Version: 1.0.0
  */
-enum UploadStatusType {
+enum UploadStatusType: CustomStringConvertible {
     /// Upload has been started
     case started
     /// Upload was finished successfully.
     case finishedSuccessfully
     /// Upload failed because of the provided error.
     case finishedWithError(cause: Error)
+
+    var description: String {
+        switch(self) {
+        case .started:
+            "started"
+        case .finishedSuccessfully:
+            "finishedSuccessfully"
+        case .finishedWithError(cause: let error):
+            "finishedWithError: \(error.localizedDescription)"
+        }
+    }
 }

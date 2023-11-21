@@ -65,6 +65,7 @@ public class DefaultUploadProcess: UploadProcess {
 
             switch response {
             case .finished:
+                try upload.onSuccess()
                 return upload
             case .resume:
                 return try await onSuccessfulStatusRequest(authToken: authToken, sessionIdentifier: currentSession, upload: upload)
@@ -78,7 +79,12 @@ public class DefaultUploadProcess: UploadProcess {
 
             switch response {
             case .success(location: let location):
-                return try await onSuccessfulPreRequest(authToken: authToken, sessionIdentifier: location, upload: upload)
+                let finishedUpload = try await onSuccessfulPreRequest(authToken: authToken, sessionIdentifier: location, upload: upload)
+                try finishedUpload.onSuccess()
+                return finishedUpload
+            case .exists:
+                try upload.onSuccess()
+                return upload
             }
         }
     }
@@ -107,6 +113,8 @@ public class DefaultUploadProcess: UploadProcess {
         switch response {
         case .success(location: let location):
             return try await onSuccessfulPreRequest(authToken: authToken, sessionIdentifier: location, upload: upload)
+        case .exists:
+            return upload
         }
     }
 

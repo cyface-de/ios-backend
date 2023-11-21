@@ -89,6 +89,9 @@ struct Measurement: Identifiable {
         case .synchronizable:
             Image(systemName: "icloud.and.arrow.up")
                 .font(.subheadline)
+        case .unsynchronizable:
+            Image(systemName: "xmark.icloud")
+                .font(.subheadline)
         }
     }
     var details: String {
@@ -132,12 +135,15 @@ enum SynchronizationState {
     case synchronizable
     case synchronizing
     case synchronized
+    case unsynchronizable
 
     static func from(measurement: MeasurementMO) -> SynchronizationState {
         if measurement.synchronized {
             return .synchronized
+        } else if measurement.synchronizable {
+            return .synchronizable
         } else {
-            return synchronizable
+            return .unsynchronizable
         }
     }
 }
