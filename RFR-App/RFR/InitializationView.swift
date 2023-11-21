@@ -65,7 +65,13 @@ struct InitializationView: View {
         viewModel: DataCapturingViewModel(
             isInitialized: true,
             showError: false,
-            dataStoreStack: MockDataStoreStack(),
+            dataStoreStack: MockDataStoreStack(
+                persistenceLayer: MockPersistenceLayer(measurements: [
+                    FinishedMeasurement(identifier: 0),
+                    FinishedMeasurement(identifier: 1),
+                    FinishedMeasurement(identifier: 2)
+                ])
+            ),
             authenticator: MockAuthenticator(),
             uploadEndpoint: try! config.getUploadEndpoint()
         ),

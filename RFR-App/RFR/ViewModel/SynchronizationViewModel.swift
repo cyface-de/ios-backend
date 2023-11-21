@@ -35,23 +35,20 @@ class SynchronizationViewModel: ObservableObject {
     let uploadStatusPublisher: PassthroughSubject<UploadStatus, Never>
     /// The data store stack used to access data storage to read measurements from.
     let dataStoreStack: DataStoreStack
-    /// The endpoint of a Cyface Data Collector compatible service to upload data to.
-    let apiEndpoint: URL
-    /// A registry for running and resumable upload sessions.
-    let sessionRegistry: SessionRegistry
     /// Used to get a proper authentication token for uploading data to the server.
     let authenticator: Authenticator
+    /// A builder responsible for creating new ``UploadProcess`` instances on each new upload.
+    let processBuilder: UploadProcessBuilder
 
     /// Create a new completely initialized object of this class.
     /// Nothing surprising is happening here.
     /// All the properties are initialized with the provided values `nil` or a default value if possible.
-    init(authenticator: Authenticator, dataStoreStack: DataStoreStack, apiEndpoint: URL, sessionRegistry: SessionRegistry) {
+    init(authenticator: Authenticator, dataStoreStack: DataStoreStack, uploadProcessBuilder: UploadProcessBuilder) {
         self.dataStoreStack = dataStoreStack
         self.uploadStatusPublisher = PassthroughSubject<UploadStatus, Never>()
         self.error = nil
-        self.apiEndpoint = apiEndpoint
-        self.sessionRegistry = sessionRegistry
         self.authenticator = authenticator
+        self.processBuilder = uploadProcessBuilder
 
         //self.synchronizer.handler.append(handle)
         /*do {
@@ -64,17 +61,21 @@ class SynchronizationViewModel: ObservableObject {
     /// Start synchronization for all local but not yet synchronized measurements.
     func synchronize() async {
         // TODO: Run this on a background thread
-        let uploadProcess = UploadProcess(apiUrl: apiEndpoint, sessionRegistry: sessionRegistry)
+        let uploadProcess = processBuilder.build()
         do {
             let measurements = try dataStoreStack.persistenceLayer().loadSynchronizableMeasurements()
+            os_log("Synchronizing %d measurements!", log: OSLog.synchronization, type: .debug, measurements.count)
             for measurement in measurements {
+                os_log(.debug, log: OSLog.synchronization, "Starting synchronization of measurement %d!", measurement.identifier)
                 uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .started))
                 do {
                     let upload = CoreDataBackedUpload(dataStoreStack: dataStoreStack, measurement: measurement)
                     let authToken = try await authenticator.authenticate()
                     _ = try await uploadProcess.upload(authToken: authToken, upload)
+                    os_log(.debug, log: OSLog.synchronization, "Successfully finished synchronization of measurement %d!", measurement.identifier)
                     uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedSuccessfully))
                 } catch {
+                    os_log(.error, log: OSLog.synchronization, "Failed synchronizing measurement %d!", measurement.identifier)
                     uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedWithError(cause: error)))
                 }
             }

@@ -48,8 +48,10 @@ class DataCapturingViewModel: ObservableObject {
         syncViewModel = SynchronizationViewModel(
             authenticator: authenticator,
             dataStoreStack: dataStoreStack,
-            apiEndpoint: uploadEndpoint,
-            sessionRegistry: sessionRegistry
+            uploadProcessBuilder: DefaultUploadProcessBuilder(
+                apiEndpoint: uploadEndpoint,
+                sessionRegistry: sessionRegistry
+            )
         )
         measurementsViewModel = MeasurementsViewModel(
             dataStoreStack: dataStoreStack,
@@ -83,9 +85,11 @@ class DataCapturingViewModel: ObservableObject {
         )
         syncViewModel = SynchronizationViewModel(
             authenticator: authenticator,
-            dataStoreStack: dataStoreStack,
-            apiEndpoint: uploadEndpoint,
-            sessionRegistry: sessionRegistry
+            dataStoreStack: dataStoreStack, 
+            uploadProcessBuilder: DefaultUploadProcessBuilder(
+                apiEndpoint: uploadEndpoint,
+                sessionRegistry: sessionRegistry
+            )
         )
         measurementsViewModel = MeasurementsViewModel(
             dataStoreStack: dataStoreStack,

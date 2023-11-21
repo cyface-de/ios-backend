@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>apiEndpoint</key>
+	<string>http://localhost:8082/api/v2/</string>
+	<key>redirectUri</key>
+	<string>de.cyface.app.r4r:/oauth2redirect/</string>
+	<key>clientId</key>
+	<string>ios-app</string>
+	<key>issuer</key>
+	<string>http://localhost:8081/realms/rfr</string>
+	<key>incentivesUrl</key>
+	<string>http://localhost:8082/incentives/api/v1</string>
+	<key>uploadEndpoint</key>
+	<string>http://localhost:8082/api/v4/</string>
+</dict>
+</plist>

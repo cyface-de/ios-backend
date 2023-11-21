@@ -17,6 +17,7 @@
  * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
 import SwiftUI
+import DataCapturing
 
 /**
  A view showing controls for the active measurement.
@@ -74,7 +75,15 @@ struct ControlBar_Previews: PreviewProvider {
     static var previews: some View {
         ControlBar(
             viewModel: LiveViewModel(
-                dataStoreStack: MockDataStoreStack(),
+                dataStoreStack: MockDataStoreStack(
+                    persistenceLayer: MockPersistenceLayer(
+                        measurements: [
+                            FinishedMeasurement(identifier: 0),
+                            FinishedMeasurement(identifier: 1),
+                            FinishedMeasurement(identifier: 2)
+                        ]
+                    )
+                ),
                 dataStorageInterval: 5.0
             )
         )
@@ -82,7 +91,15 @@ struct ControlBar_Previews: PreviewProvider {
         ControlBar(
             viewModel: LiveViewModel(
                 measurementState: .running,
-                dataStoreStack: MockDataStoreStack(),
+                dataStoreStack: MockDataStoreStack(
+                    persistenceLayer: MockPersistenceLayer(
+                        measurements: [
+                            FinishedMeasurement(identifier: 0),
+                            FinishedMeasurement(identifier: 1),
+                            FinishedMeasurement(identifier: 2)
+                        ]
+                    )
+                ),
                 dataStorageInterval: 5.0
             )
         )
@@ -90,7 +107,15 @@ struct ControlBar_Previews: PreviewProvider {
         ControlBar(
             viewModel: LiveViewModel(
                 measurementState: .paused,
-                dataStoreStack: MockDataStoreStack(),
+                dataStoreStack: MockDataStoreStack(
+                    persistenceLayer: MockPersistenceLayer(
+                        measurements: [
+                            FinishedMeasurement(identifier: 0),
+                            FinishedMeasurement(identifier: 1),
+                            FinishedMeasurement(identifier: 2)
+                        ]
+                    )
+                ),
                 dataStorageInterval: 5.0
             )
         )

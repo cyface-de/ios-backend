@@ -46,6 +46,12 @@ class MockAuthenticator: Authenticator {
 }
 
 class MockDataStoreStack: DataStoreStack {
+    let mockPersistenceLayer: MockPersistenceLayer
+
+    init(persistenceLayer: MockPersistenceLayer) {
+        self.mockPersistenceLayer = persistenceLayer
+    }
+
     func wrapInContextReturn<T>(_ block: (NSManagedObjectContext) throws -> T) throws -> T {
         return try block(NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType))
     }
@@ -66,17 +72,21 @@ class MockDataStoreStack: DataStoreStack {
     }
 
     func persistenceLayer() -> DataCapturing.PersistenceLayer {
-        return MockPersistenceLayer()
+        return mockPersistenceLayer
     }
 }
 
 class MockPersistenceLayer: PersistenceLayer {
 
-    let measurements = [
+    var measurements = [FinishedMeasurement]()/*[
         DataCapturing.FinishedMeasurement(identifier: 0),
         DataCapturing.FinishedMeasurement(identifier: 1),
         DataCapturing.FinishedMeasurement(identifier: 2)
-    ]
+    ]*/
+
+    init(measurements: [FinishedMeasurement]) {
+        self.measurements.append(contentsOf: measurements)
+    }
 
     func delete(measurement: UInt64) throws {
 
@@ -131,7 +141,7 @@ class MockPersistenceLayer: PersistenceLayer {
     }
 
     func loadSynchronizableMeasurements() throws -> [DataCapturing.FinishedMeasurement] {
-        return [DataCapturing.FinishedMeasurement]()
+        return measurements.filter { $0.synchronizable}
     }
 
     func loadClean(track: inout DataCapturing.Track) throws -> [DataCapturing.GeoLocation] {

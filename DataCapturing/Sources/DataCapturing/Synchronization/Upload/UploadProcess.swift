@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2023 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -19,6 +19,13 @@
 
 import Foundation
 
+public protocol UploadProcess {
+    /// Start the upload process for the provided `Upload`.
+    /// Called after authentication with the Cyface data collector service was successful.
+    /// - returns: The successful upload
+    func upload(authToken: String, _ upload: Upload) async throws -> Upload
+}
+
 // TODO: Repeat Request after Authentication has failed
 /**
  A state machine for the complete upload process of a single measurement from this device to a Cyface Data Collector service.
@@ -28,7 +35,7 @@ import Foundation
  - author: Klemens Muthmann
  - version: 1.0.0
  */
-public class UploadProcess {
+public class DefaultUploadProcess: UploadProcess {
     /// Session registry storing sessions open for resume.
     var openSessions: SessionRegistry
     /// The URL to the Cyface data collector.
@@ -41,15 +48,12 @@ public class UploadProcess {
     /// - Parameter apiUrl: The root URL for the Cyface API.
     /// - Parameter session: An optional Alamofire `Session`. Use this to inject a session, for example for mocking. If not used the standard Alamofire `Session` is used, which should be fine for most use cases.
     /// - Parameter sessionRegistry: You may reuse some `SessionRegistry` here or provide one backed by persistent storage. If the sessions are not stored somewhere nothing bad will happen, except from a few unecessary uploads, which could have been resumed.
-    public init(apiUrl: URL, session: URLSession = URLSession.shared, sessionRegistry: SessionRegistry) {
+    init(apiUrl: URL, session: URLSession = URLSession.shared, sessionRegistry: SessionRegistry) {
         self.openSessions = sessionRegistry
         self.apiUrl = apiUrl
         self.session = session
     }
 
-    /// Start the upload process for the provided `Upload`.
-    /// Called after authentication with the Cyface data collector service was successful.
-    /// - returns: The successful upload
     public func upload(authToken: String, _ upload: Upload) async throws -> Upload {
         if let currentSession = openSessions.session(for: upload) {
             let statusRequest = StatusRequest(apiUrl: apiUrl, session: session, authToken: authToken)

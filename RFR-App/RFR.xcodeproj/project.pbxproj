@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA3C06212A39E4B4002BD585 /* OAuthTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06202A39E4B4002BD585 /* OAuthTest.swift */; };
 		AA3C06232A39F3BC002BD585 /* auth.conf.json in Resources */ = {isa = PBXBuildFile; fileRef = AA3C06222A39F3BC002BD585 /* auth.conf.json */; };
 		AA3C06272A3A0BB4002BD585 /* auth.conf.json.changeme in Resources */ = {isa = PBXBuildFile; fileRef = AA3C06262A3A0BB4002BD585 /* auth.conf.json.changeme */; };
 		AA3C062A2A3AF8B9002BD585 /* ControlBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06292A3AF8B9002BD585 /* ControlBar.swift */; };
@@ -16,6 +15,7 @@
 		AA3C06512A40ED57002BD585 /* VoucherOverviewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06502A40ED57002BD585 /* VoucherOverviewModel.swift */; };
 		AA3C06562A4180DC002BD585 /* MainMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06552A4180DC002BD585 /* MainMap.swift */; };
 		AA45BDA22AE6B420003FCB17 /* LoginStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA45BDA12AE6B420003FCB17 /* LoginStatus.swift */; };
+		AA6239A72B0CB088007875BF /* SynchronizationViewModelTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA199DE02AF038FD00DE4D4A /* SynchronizationViewModelTest.swift */; };
 		AA6C48962A93629800C3633D /* OAuthLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6C48952A93629800C3633D /* OAuthLoginView.swift */; };
 		AA6C48992A9365B200C3633D /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AA6C48982A9365B200C3633D /* AppAuth */; };
 		AA6C489B2A9365B200C3633D /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = AA6C489A2A9365B200C3633D /* AppAuthCore */; };
@@ -25,7 +25,6 @@
 		AA87D06E2982ADE8002F6B3B /* LiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D06D2982ADE8002F6B3B /* LiveView.swift */; };
 		AA87D0702982ADE9002F6B3B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA87D06F2982ADE9002F6B3B /* Assets.xcassets */; };
 		AA87D0732982ADE9002F6B3B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA87D0722982ADE9002F6B3B /* Preview Assets.xcassets */; };
-		AA87D07D2982ADE9002F6B3B /* RFRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D07C2982ADE9002F6B3B /* RFRTests.swift */; };
 		AA87D0872982ADE9002F6B3B /* RFRUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D0862982ADE9002F6B3B /* RFRUITests.swift */; };
 		AA87D0892982ADE9002F6B3B /* RFRUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D0882982ADE9002F6B3B /* RFRUITestsLaunchTests.swift */; };
 		AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */; };
@@ -89,7 +88,7 @@
 /* Begin PBXFileReference section */
 		AA11963C29924961008161C4 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		AA11963D29924A6F008161C4 /* COPYING */ = {isa = PBXFileReference; lastKnownFileType = text; path = COPYING; sourceTree = "<group>"; };
-		AA3C06202A39E4B4002BD585 /* OAuthTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthTest.swift; sourceTree = "<group>"; };
+		AA199DE02AF038FD00DE4D4A /* SynchronizationViewModelTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynchronizationViewModelTest.swift; sourceTree = "<group>"; };
 		AA3C06222A39F3BC002BD585 /* auth.conf.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = auth.conf.json; sourceTree = "<group>"; };
 		AA3C06262A3A0BB4002BD585 /* auth.conf.json.changeme */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = auth.conf.json.changeme; sourceTree = "<group>"; };
 		AA3C06292A3AF8B9002BD585 /* ControlBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBar.swift; sourceTree = "<group>"; };
@@ -107,7 +106,6 @@
 		AA87D06F2982ADE9002F6B3B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA87D0722982ADE9002F6B3B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		AA87D0782982ADE9002F6B3B /* RFRTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RFRTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA87D07C2982ADE9002F6B3B /* RFRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRTests.swift; sourceTree = "<group>"; };
 		AA87D0822982ADE9002F6B3B /* RFRUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RFRUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA87D0862982ADE9002F6B3B /* RFRUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRUITests.swift; sourceTree = "<group>"; };
 		AA87D0882982ADE9002F6B3B /* RFRUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRUITestsLaunchTests.swift; sourceTree = "<group>"; };
@@ -308,8 +306,7 @@
 		AA87D07B2982ADE9002F6B3B /* RFRTests */ = {
 			isa = PBXGroup;
 			children = (
-				AA87D07C2982ADE9002F6B3B /* RFRTests.swift */,
-				AA3C06202A39E4B4002BD585 /* OAuthTest.swift */,
+				AA199DE02AF038FD00DE4D4A /* SynchronizationViewModelTest.swift */,
 			);
 			path = RFRTests;
 			sourceTree = "<group>";
@@ -576,8 +573,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA87D07D2982ADE9002F6B3B /* RFRTests.swift in Sources */,
-				AA3C06212A39E4B4002BD585 /* OAuthTest.swift in Sources */,
+				AA6239A72B0CB088007875BF /* SynchronizationViewModelTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

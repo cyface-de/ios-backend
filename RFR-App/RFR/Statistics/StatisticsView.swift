@@ -17,6 +17,7 @@
  * along with the Read-for-Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
  */
 import SwiftUI
+import DataCapturing
 
 /**
  A view showing statistics about all the measurements captured by this device.
@@ -54,7 +55,15 @@ struct StatisticsView: View {
 #if DEBUG
 struct StatisticsView_Previews: PreviewProvider {
     static var previews: some View {
-        StatisticsView(viewModel: Measurements(coreDataStack: MockDataStoreStack()))
+        StatisticsView(viewModel: Measurements(coreDataStack: MockDataStoreStack(
+            persistenceLayer: MockPersistenceLayer(
+                measurements: [
+                    FinishedMeasurement(identifier: 0),
+                    FinishedMeasurement(identifier: 1),
+                    FinishedMeasurement(identifier: 2)
+                ]
+            )
+        )))
     }
 }
 #endif

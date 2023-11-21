@@ -17,6 +17,7 @@
  * along with the Read-for-Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
  */
 import SwiftUI
+import DataCapturing
 
 /**
  A view for showing information about the current measurement and providing controls for that
@@ -61,14 +62,30 @@ struct LiveView_Previews: PreviewProvider {
             speed: 21.0,
             averageSpeed: 15.0,
             measurementState: .stopped,
-            dataStoreStack: MockDataStoreStack(),
+            dataStoreStack: MockDataStoreStack(
+                persistenceLayer: MockPersistenceLayer(
+                    measurements: [
+                        FinishedMeasurement(identifier: 0),
+                        FinishedMeasurement(identifier: 1),
+                        FinishedMeasurement(identifier: 2)
+                    ]
+                )
+            ),
             dataStorageInterval: 5.0
         )
         )
 
         LiveView(viewModel: LiveViewModel(
             measurementState: .running,
-            dataStoreStack: MockDataStoreStack(),
+            dataStoreStack: MockDataStoreStack(
+                persistenceLayer: MockPersistenceLayer(
+                    measurements: [
+                        FinishedMeasurement(identifier: 0),
+                        FinishedMeasurement(identifier: 1),
+                        FinishedMeasurement(identifier: 2)
+                    ]
+                )
+            ),
             dataStorageInterval: 5.0
         ))
     }

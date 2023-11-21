@@ -17,6 +17,7 @@
  * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
 import SwiftUI
+import DataCapturing
 
 struct VoucherEnabled: View {
     @ObservedObject var viewModel: VoucherViewModel
@@ -44,7 +45,15 @@ struct VoucherEnabled_Previews: PreviewProvider {
         let ret = VoucherViewModel(
             authenticator: MockAuthenticator(),
             url: try! ConfigLoader.load().getIncentivesUrl(),
-            dataStoreStack: MockDataStoreStack()
+            dataStoreStack: MockDataStoreStack(
+                persistenceLayer: MockPersistenceLayer(
+                    measurements: [
+                        FinishedMeasurement(identifier: 0),
+                        FinishedMeasurement(identifier: 1),
+                        FinishedMeasurement(identifier: 2)
+                    ]
+                )
+            )
         )
         ret.voucher = Voucher(
             code: "abcdefg",

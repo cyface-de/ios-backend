@@ -68,7 +68,15 @@ struct MeasurementsView: View {
 struct MeasurementsView_Previews: PreviewProvider {
     static var viewModel: MeasurementsViewModel {
         let ret = MeasurementsViewModel(
-            dataStoreStack: MockDataStoreStack(),
+            dataStoreStack: MockDataStoreStack(
+                persistenceLayer: MockPersistenceLayer(
+                    measurements: [
+                        FinishedMeasurement(identifier: 0),
+                        FinishedMeasurement(identifier: 1),
+                        FinishedMeasurement(identifier: 2)
+                    ]
+                )
+            ),
             uploadPublisher: PassthroughSubject<UploadStatus, Never>()
         )
         ret.measurements = [
@@ -98,7 +106,15 @@ struct MeasurementsView_Previews: PreviewProvider {
         let ret = VoucherViewModel(
             authenticator: MockAuthenticator(),
             url: try! ConfigLoader.load().getIncentivesUrl(),
-            dataStoreStack: MockDataStoreStack()
+            dataStoreStack: MockDataStoreStack(
+                persistenceLayer: MockPersistenceLayer(
+                    measurements: [
+                        FinishedMeasurement(identifier: 0),
+                        FinishedMeasurement(identifier: 1),
+                        FinishedMeasurement(identifier: 2)
+                    ]
+                )
+            )
         )
         return ret
     }
