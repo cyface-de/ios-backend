@@ -22,8 +22,19 @@ import Foundation
 struct ConfigLoader {
 
     static func load() throws -> Config {
+        let currentConfiguration = Bundle.main.object(forInfoDictionaryKey: "Configuration") as! String
 
-        let configFilePath = Bundle.main.path(forResource: "conf", ofType: "json")
+        let configFilePath = switch currentConfiguration {
+        case "Debug Development", "Release Development":
+            Bundle.main.path(forResource: "Development", ofType: "json")
+        case "Debug Staging", "Release Staging":
+            Bundle.main.path(forResource: "Staging", ofType: "json")
+        case "Debug Production", "Release Production":
+            Bundle.main.path(forResource: "Production", ofType: "json")
+        default:
+            fatalError("Unknown Build Configuration used! Unable to load configuration!")
+        }
+
         let jsonText = try String(contentsOfFile: configFilePath!)
         let jsonData = jsonText.data(using: .utf8)!
         let jsonDecoder = JSONDecoder()

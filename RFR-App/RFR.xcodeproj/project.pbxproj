@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA199DE62AFD0EF400DE4D4A /* Development.json in Resources */ = {isa = PBXBuildFile; fileRef = AA199DE52AFD0EF400DE4D4A /* Development.json */; };
+		AA199DE82AFD0F0C00DE4D4A /* Staging.json in Resources */ = {isa = PBXBuildFile; fileRef = AA199DE72AFD0F0C00DE4D4A /* Staging.json */; };
+		AA199DEA2AFD0F1D00DE4D4A /* Production.json in Resources */ = {isa = PBXBuildFile; fileRef = AA199DE92AFD0F1D00DE4D4A /* Production.json */; };
 		AA3C06232A39F3BC002BD585 /* auth.conf.json in Resources */ = {isa = PBXBuildFile; fileRef = AA3C06222A39F3BC002BD585 /* auth.conf.json */; };
 		AA3C06272A3A0BB4002BD585 /* auth.conf.json.changeme in Resources */ = {isa = PBXBuildFile; fileRef = AA3C06262A3A0BB4002BD585 /* auth.conf.json.changeme */; };
 		AA3C062A2A3AF8B9002BD585 /* ControlBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06292A3AF8B9002BD585 /* ControlBar.swift */; };
@@ -34,7 +37,6 @@
 		AA8FC7692A2DB438006D52F3 /* VoucherViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8FC7682A2DB438006D52F3 /* VoucherViewModel.swift */; };
 		AA9AF31D2AEA8E9E0003BE54 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9AF31C2AEA8E9E0003BE54 /* Config.swift */; };
 		AA9AF31F2AEA8EAD0003BE54 /* ConfigLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9AF31E2AEA8EAD0003BE54 /* ConfigLoader.swift */; };
-		AA9AF3212AEA90550003BE54 /* conf.json in Resources */ = {isa = PBXBuildFile; fileRef = AA9AF3202AEA90550003BE54 /* conf.json */; };
 		AAA1AAAE29D6FB8D002CBC91 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAAD29D6FB8D002CBC91 /* OSLog.swift */; };
 		AAA1AAB029DB1F0C002CBC91 /* Preview_Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */; };
 		AAA1AAB429E540D0002CBC91 /* MeasurementsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAB329E540CF002CBC91 /* MeasurementsViewModel.swift */; };
@@ -69,7 +71,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		AA87D0792982ADE9002F6B3B /* PBXContainerItemProxy */ = {
+		AA6239932B0CA408007875BF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AA87D0602982ADE8002F6B3B /* Project object */;
 			proxyType = 1;
@@ -89,6 +91,9 @@
 		AA11963C29924961008161C4 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		AA11963D29924A6F008161C4 /* COPYING */ = {isa = PBXFileReference; lastKnownFileType = text; path = COPYING; sourceTree = "<group>"; };
 		AA199DE02AF038FD00DE4D4A /* SynchronizationViewModelTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynchronizationViewModelTest.swift; sourceTree = "<group>"; };
+		AA199DE52AFD0EF400DE4D4A /* Development.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Development.json; sourceTree = "<group>"; };
+		AA199DE72AFD0F0C00DE4D4A /* Staging.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Staging.json; sourceTree = "<group>"; };
+		AA199DE92AFD0F1D00DE4D4A /* Production.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Production.json; sourceTree = "<group>"; };
 		AA3C06222A39F3BC002BD585 /* auth.conf.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = auth.conf.json; sourceTree = "<group>"; };
 		AA3C06262A3A0BB4002BD585 /* auth.conf.json.changeme */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = auth.conf.json.changeme; sourceTree = "<group>"; };
 		AA3C06292A3AF8B9002BD585 /* ControlBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBar.swift; sourceTree = "<group>"; };
@@ -100,7 +105,7 @@
 		AA6C48952A93629800C3633D /* OAuthLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthLoginView.swift; sourceTree = "<group>"; };
 		AA6C489E2A938EDB00C3633D /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		AA6C48A02A94F73100C3633D /* OAuthAuthenticator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthAuthenticator.swift; sourceTree = "<group>"; };
-		AA87D0682982ADE8002F6B3B /* RFR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RFR.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA87D0682982ADE8002F6B3B /* Ready for Robots Development.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Ready for Robots Development.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA87D06B2982ADE8002F6B3B /* RFRApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRApp.swift; sourceTree = "<group>"; };
 		AA87D06D2982ADE8002F6B3B /* LiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveView.swift; sourceTree = "<group>"; };
 		AA87D06F2982ADE9002F6B3B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -116,7 +121,6 @@
 		AA8FC7682A2DB438006D52F3 /* VoucherViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherViewModel.swift; sourceTree = "<group>"; };
 		AA9AF31C2AEA8E9E0003BE54 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		AA9AF31E2AEA8EAD0003BE54 /* ConfigLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigLoader.swift; sourceTree = "<group>"; };
-		AA9AF3202AEA90550003BE54 /* conf.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = conf.json; sourceTree = "<group>"; };
 		AAA1AAAD29D6FB8D002CBC91 /* OSLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLog.swift; sourceTree = "<group>"; };
 		AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preview_Mocks.swift; sourceTree = "<group>"; };
 		AAA1AAB329E540CF002CBC91 /* MeasurementsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementsViewModel.swift; sourceTree = "<group>"; };
@@ -255,7 +259,7 @@
 		AA87D0692982ADE8002F6B3B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AA87D0682982ADE8002F6B3B /* RFR.app */,
+				AA87D0682982ADE8002F6B3B /* Ready for Robots Development.app */,
 				AA87D0782982ADE9002F6B3B /* RFRTests.xctest */,
 				AA87D0822982ADE9002F6B3B /* RFRUITests.xctest */,
 			);
@@ -290,7 +294,9 @@
 				AAA5CEB12AC56E4A0088AFA6 /* ProfileView.swift */,
 				AA9AF31C2AEA8E9E0003BE54 /* Config.swift */,
 				AA9AF31E2AEA8EAD0003BE54 /* ConfigLoader.swift */,
-				AA9AF3202AEA90550003BE54 /* conf.json */,
+				AA199DE52AFD0EF400DE4D4A /* Development.json */,
+				AA199DE72AFD0F0C00DE4D4A /* Staging.json */,
+				AA199DE92AFD0F1D00DE4D4A /* Production.json */,
 			);
 			path = RFR;
 			sourceTree = "<group>";
@@ -398,7 +404,7 @@
 				AA6C489A2A9365B200C3633D /* AppAuthCore */,
 			);
 			productName = RFR;
-			productReference = AA87D0682982ADE8002F6B3B /* RFR.app */;
+			productReference = AA87D0682982ADE8002F6B3B /* Ready for Robots Development.app */;
 			productType = "com.apple.product-type.application";
 		};
 		AA87D0772982ADE9002F6B3B /* RFRTests */ = {
@@ -412,9 +418,11 @@
 			buildRules = (
 			);
 			dependencies = (
-				AA87D07A2982ADE9002F6B3B /* PBXTargetDependency */,
+				AA6239942B0CA408007875BF /* PBXTargetDependency */,
 			);
 			name = RFRTests;
+			packageProductDependencies = (
+			);
 			productName = RFRTests;
 			productReference = AA87D0782982ADE9002F6B3B /* RFRTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -444,7 +452,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1420;
+				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1420;
 				TargetAttributes = {
 					AA87D0672982ADE8002F6B3B = {
@@ -490,10 +498,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA9AF3212AEA90550003BE54 /* conf.json in Resources */,
+				AA199DE82AFD0F0C00DE4D4A /* Staging.json in Resources */,
+				AA199DEA2AFD0F1D00DE4D4A /* Production.json in Resources */,
 				AAE8E4662A29F2B5005AA4F1 /* schkeuditz.csv in Resources */,
 				AA87D0732982ADE9002F6B3B /* Preview Assets.xcassets in Resources */,
 				AAE8E46A2A29F35A005AA4F1 /* köthen.csv in Resources */,
+				AA199DE62AFD0EF400DE4D4A /* Development.json in Resources */,
 				AA3C06232A39F3BC002BD585 /* auth.conf.json in Resources */,
 				AA3C06302A3B03C8002BD585 /* Localizable.strings in Resources */,
 				AA3C06272A3A0BB4002BD585 /* auth.conf.json.changeme in Resources */,
@@ -589,10 +599,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		AA87D07A2982ADE9002F6B3B /* PBXTargetDependency */ = {
+		AA6239942B0CA408007875BF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AA87D0672982ADE8002F6B3B /* RFR */;
-			targetProxy = AA87D0792982ADE9002F6B3B /* PBXContainerItemProxy */;
+			targetProxy = AA6239932B0CA408007875BF /* PBXContainerItemProxy */;
 		};
 		AA87D0842982ADE9002F6B3B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -621,7 +631,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		AA87D08A2982ADE9002F6B3B /* Debug */ = {
+		AA199DEB2AFD153900DE4D4A /* Debug Production */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -680,9 +690,218 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
-			name = Debug;
+			name = "Debug Production";
 		};
-		AA87D08B2982ADE9002F6B3B /* Release */ = {
+		AA199DEC2AFD153900DE4D4A /* Debug Production */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RFR/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
+				PRODUCT_NAME = "Ready for Robots";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Debug Production";
+		};
+		AA199DED2AFD153900DE4D4A /* Debug Production */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFRTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ready for Robots Development.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ready for Robots Development";
+			};
+			name = "Debug Production";
+		};
+		AA199DEE2AFD153900DE4D4A /* Debug Production */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFRUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = RFR;
+			};
+			name = "Debug Production";
+		};
+		AA199DEF2AFD153C00DE4D4A /* Debug Staging */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = "Debug Staging";
+		};
+		AA199DF02AFD153C00DE4D4A /* Debug Staging */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RFR/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.staging;
+				PRODUCT_NAME = "Ready for Robots Staging";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Debug Staging";
+		};
+		AA199DF12AFD153C00DE4D4A /* Debug Staging */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFRTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ready for Robots Development.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ready for Robots Development";
+			};
+			name = "Debug Staging";
+		};
+		AA199DF22AFD153C00DE4D4A /* Debug Staging */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFRUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = RFR;
+			};
+			name = "Debug Staging";
+		};
+		AA199DF32AFD153F00DE4D4A /* Release Staging */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -735,9 +954,138 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
-			name = Release;
+			name = "Release Staging";
 		};
-		AA87D08D2982ADE9002F6B3B /* Debug */ = {
+		AA199DF42AFD153F00DE4D4A /* Release Staging */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RFR/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.staging;
+				PRODUCT_NAME = "Ready for Robots Staging";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Release Staging";
+		};
+		AA199DF52AFD153F00DE4D4A /* Release Staging */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFRTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ready for Robots Development.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ready for Robots Development";
+			};
+			name = "Release Staging";
+		};
+		AA199DF62AFD153F00DE4D4A /* Release Staging */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFRUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = RFR;
+			};
+			name = "Release Staging";
+		};
+		AA199DF72AFD154100DE4D4A /* Release Production */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = "Release Production";
+		};
+		AA199DF82AFD154100DE4D4A /* Release Production */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -763,7 +1111,7 @@
 				);
 				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Ready for Robots";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -771,9 +1119,163 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
-			name = Debug;
+			name = "Release Production";
 		};
-		AA87D08E2982ADE9002F6B3B /* Release */ = {
+		AA199DF92AFD154100DE4D4A /* Release Production */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFRTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ready for Robots Development.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ready for Robots Development";
+			};
+			name = "Release Production";
+		};
+		AA199DFA2AFD154100DE4D4A /* Release Production */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFRUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = RFR;
+			};
+			name = "Release Production";
+		};
+		AA87D08A2982ADE9002F6B3B /* Debug Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = "Debug Development";
+		};
+		AA87D08B2982ADE9002F6B3B /* Release Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = "Release Development";
+		};
+		AA87D08D2982ADE9002F6B3B /* Debug Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -798,8 +1300,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.dev;
+				PRODUCT_NAME = "Ready for Robots Development";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -807,9 +1309,45 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
-			name = Release;
+			name = "Debug Development";
 		};
-		AA87D0902982ADE9002F6B3B /* Debug */ = {
+		AA87D08E2982ADE9002F6B3B /* Release Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
+				DEVELOPMENT_TEAM = 45GZ5C9N64;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RFR/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.dev;
+				PRODUCT_NAME = "Ready for Robots Development";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Release Development";
+		};
+		AA87D0902982ADE9002F6B3B /* Debug Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -818,18 +1356,18 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFRTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RFR.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RFR";
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ready for Robots Development.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ready for Robots Development";
 			};
-			name = Debug;
+			name = "Debug Development";
 		};
-		AA87D0912982ADE9002F6B3B /* Release */ = {
+		AA87D0912982ADE9002F6B3B /* Release Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -838,18 +1376,18 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFRTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RFR.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RFR";
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ready for Robots Development.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ready for Robots Development";
 			};
-			name = Release;
+			name = "Release Development";
 		};
-		AA87D0932982ADE9002F6B3B /* Debug */ = {
+		AA87D0932982ADE9002F6B3B /* Debug Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -865,9 +1403,9 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = RFR;
 			};
-			name = Debug;
+			name = "Debug Development";
 		};
-		AA87D0942982ADE9002F6B3B /* Release */ = {
+		AA87D0942982ADE9002F6B3B /* Release Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -883,7 +1421,7 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = RFR;
 			};
-			name = Release;
+			name = "Release Development";
 		};
 /* End XCBuildConfiguration section */
 
@@ -891,38 +1429,54 @@
 		AA87D0632982ADE8002F6B3B /* Build configuration list for PBXProject "RFR" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AA87D08A2982ADE9002F6B3B /* Debug */,
-				AA87D08B2982ADE9002F6B3B /* Release */,
+				AA87D08A2982ADE9002F6B3B /* Debug Development */,
+				AA199DEF2AFD153C00DE4D4A /* Debug Staging */,
+				AA199DEB2AFD153900DE4D4A /* Debug Production */,
+				AA87D08B2982ADE9002F6B3B /* Release Development */,
+				AA199DF32AFD153F00DE4D4A /* Release Staging */,
+				AA199DF72AFD154100DE4D4A /* Release Production */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = "Debug Development";
 		};
 		AA87D08C2982ADE9002F6B3B /* Build configuration list for PBXNativeTarget "RFR" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AA87D08D2982ADE9002F6B3B /* Debug */,
-				AA87D08E2982ADE9002F6B3B /* Release */,
+				AA87D08D2982ADE9002F6B3B /* Debug Development */,
+				AA199DF02AFD153C00DE4D4A /* Debug Staging */,
+				AA199DEC2AFD153900DE4D4A /* Debug Production */,
+				AA87D08E2982ADE9002F6B3B /* Release Development */,
+				AA199DF42AFD153F00DE4D4A /* Release Staging */,
+				AA199DF82AFD154100DE4D4A /* Release Production */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = "Debug Development";
 		};
 		AA87D08F2982ADE9002F6B3B /* Build configuration list for PBXNativeTarget "RFRTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AA87D0902982ADE9002F6B3B /* Debug */,
-				AA87D0912982ADE9002F6B3B /* Release */,
+				AA87D0902982ADE9002F6B3B /* Debug Development */,
+				AA199DF12AFD153C00DE4D4A /* Debug Staging */,
+				AA199DED2AFD153900DE4D4A /* Debug Production */,
+				AA87D0912982ADE9002F6B3B /* Release Development */,
+				AA199DF52AFD153F00DE4D4A /* Release Staging */,
+				AA199DF92AFD154100DE4D4A /* Release Production */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = "Debug Development";
 		};
 		AA87D0922982ADE9002F6B3B /* Build configuration list for PBXNativeTarget "RFRUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AA87D0932982ADE9002F6B3B /* Debug */,
-				AA87D0942982ADE9002F6B3B /* Release */,
+				AA87D0932982ADE9002F6B3B /* Debug Development */,
+				AA199DF22AFD153C00DE4D4A /* Debug Staging */,
+				AA199DEE2AFD153900DE4D4A /* Debug Production */,
+				AA87D0942982ADE9002F6B3B /* Release Development */,
+				AA199DF62AFD153F00DE4D4A /* Release Staging */,
+				AA199DFA2AFD154100DE4D4A /* Release Production */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = "Debug Development";
 		};
 /* End XCConfigurationList section */
 

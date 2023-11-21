@@ -73,11 +73,11 @@ class Measurements: ObservableObject {
                     }
                     totalDuration += measurementDuration
 
-                    let avoidedEmissions = distance * averageCarbonEmissionsPerMeter
+                    let avoidedEmissions = distance * Statistics.averageCarbonEmissionsPerMeter
                     maxAvoidedEmissions = max(maxAvoidedEmissions, avoidedEmissions)
                     sumOfAvoidedEmissions += avoidedEmissions
 
-                    let height = summedHeight(timelines: measurement.typedTracks())
+                    let height = Statistics.summedHeight(timelines: measurement.typedTracks())
                     maxIncline = max(height, maxIncline)
                     sumIncline += height
                 }

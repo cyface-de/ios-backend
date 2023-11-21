@@ -1,18 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>apiEndpoint</key>
-	<string>https://s1-b.cyface.de/provider/api/v2/</string>
-	<key>redirectUri</key>
-	<string>de.cyface.app.r4r:/oauth2redirect/</string>
-	<key>clientId</key>
-	<string>ios-app</string>
-	<key>issuer</key>
-	<string>https://auth.cyface.de:8443/realms/rfr</string>
-	<key>incentivesUrl</key>
-	<string>https://staging.cyface.de/incentives/api/v1/</string>
-	<key>uploadEndpoint</key>
-	<string>https://s1-b.cyface.de/api/v4/</string>
-</dict>
-</plist>
+{
+	"apiEndpoint":"https://s1-b.cyface.de/provider/api/v2/",
+	"redirectUri":"de.cyface.app.r4r:/oauth2redirect/",
+	"clientId":"ios-app",
+	"issuer":"https://auth.cyface.de:8443/realms/rfr",
+	"incentivesUrl":"https://staging.cyface.de/incentives/api/v1/",
+	"uploadEndpoint":"https://s1-b.cyface.de/api/v4/",
+}

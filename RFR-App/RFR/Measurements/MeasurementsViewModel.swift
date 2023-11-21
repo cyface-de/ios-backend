@@ -138,8 +138,8 @@ class MeasurementsViewModel: ObservableObject {
                 highestPoint = max(highestPoint, altitude.altitude)
             }
         }
-        let inclination = summedHeight(timelines: measurement.typedTracks())
-        let distance = coveredDistance(tracks: tracks)
+        let inclination = Statistics.summedHeight(timelines: measurement.typedTracks())
+        let distance = Statistics.coveredDistance(tracks: tracks)
 
         let latitudeDistance = maximumLatitude - minimumLatitude
         let longitudeDistance = maximumLongitude - minimumLongitude
@@ -165,7 +165,7 @@ class MeasurementsViewModel: ObservableObject {
             _inclination: inclination,
             _lowestPoint: lowestPoint,
             _highestPoint: highestPoint,
-            _avoidedEmissions: avoidedEmissions(distance),
+            _avoidedEmissions: Statistics.avoidedEmissions(distance),
             heightProfile: heightProfile,
             region: MKCoordinateRegion(
                 center: center,

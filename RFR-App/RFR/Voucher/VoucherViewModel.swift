@@ -71,7 +71,7 @@ class VoucherViewModel: ObservableObject {
             try dataStoreStack.wrapInContext { context in
                 let request = MeasurementMO.fetchRequest()
                 try request.execute().forEach { measurement in
-                    let distanceInMeters = coveredDistance(tracks: measurement.typedTracks())
+                    let distanceInMeters = Statistics.coveredDistance(tracks: measurement.typedTracks())
                     let distanceInKilometers = distanceInMeters / 1_000
                     accumulatedKilometers += distanceInKilometers
                 }

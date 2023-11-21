@@ -111,7 +111,7 @@ class LiveViewModel: ObservableObject {
 
                 // Calculate and store average speed over all the tracks from this measurement.
                 trackFlow.map { tracks in
-                    RFR.averageSpeed(timelines: tracks)
+                    Statistics.averageSpeed(timelines: tracks)
                 }
                 .compactMap {
                     speedFormatter.string(from: $0 as NSNumber)
@@ -125,7 +125,7 @@ class LiveViewModel: ObservableObject {
                 // Calculate and store the total duration for all the tracks in this measurement.
                 trackFlow
                     .map { tracks in
-                        return RFR.duration(timelines: tracks)
+                        return Statistics.duration(timelines: tracks)
                     }
                     .compactMap {
                         timeFormatter.string(from: $0)
@@ -186,7 +186,7 @@ class LiveViewModel: ObservableObject {
 
                 // 
                 distanceFlow.map {
-                    RFR.avoidedEmissions($0)
+                    Statistics.avoidedEmissions($0)
                 }
                 .compactMap {
                     emissionsFormatter.string(from: $0 as NSNumber)

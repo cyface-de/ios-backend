@@ -39,8 +39,8 @@ struct MainMap: View {
             }
         }
         .onAppear {
-            let schkeuditzData = loadAlleyCatData(fileName: "schkeuditz", ext: "csv")
-            let köthenData = loadAlleyCatData(fileName: "köthen", ext: "csv")
+            let schkeuditzData = Statistics.loadAlleyCatData(fileName: "schkeuditz", ext: "csv")
+            let köthenData = Statistics.loadAlleyCatData(fileName: "köthen", ext: "csv")
 
             self.markers.append(contentsOf: schkeuditzData)
             self.markers.append(contentsOf: köthenData)

@@ -69,7 +69,7 @@ struct Measurement: Identifiable {
     }
     let _avoidedEmissions: Double
     var avoidedEmissions: String {
-        "\(emissionsFormatter.string(from: (RFR.avoidedEmissions(self._distance)) as NSNumber)!) kg"
+        "\(emissionsFormatter.string(from: (Statistics.avoidedEmissions(self._distance)) as NSNumber)!) kg"
     }
     /// The title to display for the ``Measurement``
     var title: String {
