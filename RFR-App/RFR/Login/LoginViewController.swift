@@ -75,6 +75,7 @@ class LoginViewController: UIViewController {
         super.viewDidLoad()
         if let oauthAuthenticator = authenticator as? OAuthAuthenticator {
             oauthAuthenticator.callbackController = self
+            os_log(.debug, log: OSLog.authorization, "Starting Authentication with Server %@", oauthAuthenticator.issuer.absoluteString)
         }
     }
 

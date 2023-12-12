@@ -13,7 +13,7 @@ public protocol UploadProcessBuilder {
 
 public class DefaultUploadProcessBuilder: UploadProcessBuilder {
     /// The endpoint of a Cyface Data Collector compatible service to upload data to.
-    let apiEndpoint: URL
+    public let apiEndpoint: URL
     /// A registry for running and resumable upload sessions.
     let sessionRegistry: SessionRegistry
 

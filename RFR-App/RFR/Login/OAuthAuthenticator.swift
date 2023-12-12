@@ -41,7 +41,7 @@ class OAuthAuthenticator {
             saveState(authState, OAuthAuthenticator.appAuthStateKey)
         }
     }
-    private let issuer: URL
+    public let issuer: URL
     private let redirectUri: URL
     private let apiEndpoint: URL
     private let clientId: String
@@ -68,6 +68,7 @@ class OAuthAuthenticator {
             return try await withCheckedThrowingContinuation { continuation in
                 OIDAuthorizationService.discoverConfiguration(forIssuer: issuer) { configuration, error in
                     if let config = configuration {
+                        os_log("Authentication: Settings discovered!", log: OSLog.authorization, type: .debug)
                         continuation.resume(returning: config)
                     } else {
                         continuation.resume(
@@ -97,6 +98,7 @@ class OAuthAuthenticator {
                 additionalParameters: nil
             )
             DispatchQueue.main.async {
+                os_log("Authentication: Authorization Endpoint: %@", log: OSLog.authorization, type: .debug, config.authorizationEndpoint.absoluteString)
                 let currentAuthorizationFlow = OIDAuthState.authState(
                     byPresenting: request,
                     presenting: callbackWindow
@@ -205,6 +207,7 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
      */
     func authenticate() async throws -> String {
         os_log("Authentication: Starting Authentication", log: OSLog.authorization, type: .debug)
+        os_log("Address used to access identity provider %@", log: OSLog.authorization, type: .debug)
         if let authState = loadState(OAuthAuthenticator.appAuthStateKey), authState.refreshToken != nil {
             let result: String = try await withCheckedThrowingContinuation { continuation in
                 authState.performAction(freshTokens: { (accessToken, idToken, error) in

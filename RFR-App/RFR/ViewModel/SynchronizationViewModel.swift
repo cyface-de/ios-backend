@@ -69,6 +69,13 @@ class SynchronizationViewModel: ObservableObject {
                     uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedSuccessfully))
                 } catch {
                     os_log(.error, log: OSLog.synchronization, "Failed synchronizing measurement %d!", measurement.identifier)
+                    if let defaultUploadProcessBuilder = processBuilder as? DefaultUploadProcessBuilder {
+                        os_log(.error, log: OSLog.synchronization, "Data Collector API Address: %@", defaultUploadProcessBuilder.apiEndpoint.absoluteString)
+                    }
+                    if let oAuthAuthenticator = authenticator as? OAuthAuthenticator {
+                        os_log(.error, log: OSLog.authorization, "Identity Provider Address: %@", oAuthAuthenticator.issuer.absoluteString)
+                    }
+                    os_log("Synchronization failed due to: %@", log: OSLog.synchronization, type: .error, error.localizedDescription)
                     uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedWithError(cause: error)))
                 }
             }
