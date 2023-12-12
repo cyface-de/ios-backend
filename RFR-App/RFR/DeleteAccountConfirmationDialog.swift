@@ -54,7 +54,9 @@ struct DeleteAccountConfirmationDialog: View {
     }
 }
 
+#if DEBUG
 #Preview {
     DeleteAccountConfirmationDialog(authenticator: MockAuthenticator(), error: .constant(nil))
         .environmentObject(LoginStatus())
 }
+#endif
