@@ -129,49 +129,6 @@ struct Statistics {
             accumulator + next
         }
     }
-
-    static func loadAlleyCatData(fileName: String, ext: String) -> [AlleyCatMarker] {
-        guard let filepath = Bundle.main.path(forResource: fileName, ofType: ext) else {
-            return [AlleyCatMarker]()
-        }
-
-        var data = ""
-        do {
-            data = try String(contentsOfFile: filepath)
-        } catch {
-            print(error)
-            return [AlleyCatMarker]()
-        }
-
-        var rows = data.components(separatedBy: "\n")
-        rows.removeFirst()
-
-        var markers = [AlleyCatMarker]()
-        var isStart = true
-        for row in rows {
-            let columns = row.components(separatedBy: ",")
-            guard let longitude = Double(columns[0]) else {
-                continue
-            }
-            guard let latitude = Double(columns[1]) else {
-                continue
-            }
-            let description = columns[2]
-
-            let marker = AlleyCatMarker(
-                location: CLLocationCoordinate2D(
-                    latitude: latitude,
-                    longitude: longitude
-                ),
-                description: description,
-                markerType: isStart ? .start : .standard
-            )
-            markers.append(marker)
-            isStart = false
-        }
-
-        return markers
-    }
 }
 
 protocol AltitudeTimeline {
