@@ -61,6 +61,17 @@
                ReferencedContainer = "container:RFR.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AA1E40622B17EAF100CACBE6"
+               BuildableName = "Ready for Robots UITests.xctest"
+               BlueprintName = "Ready for Robots UITests"
+               ReferencedContainer = "container:RFR.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

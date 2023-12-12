@@ -42,6 +42,7 @@ struct ControlBar: View {
             }
             .frame(maxWidth: .infinity, minHeight: 44)
             .disabled(MeasurementState.running != viewModel.measurementState)
+            .accessibilityIdentifier("de.cyface.rfr.button.pause")
 
             Button(action: {
                 do {
@@ -54,6 +55,7 @@ struct ControlBar: View {
             }
             .frame(maxWidth: .infinity, minHeight: 44)
             .disabled(MeasurementState.running == viewModel.measurementState)
+            .accessibilityIdentifier("de.cyface.rfr.button.play")
 
             Button(action: {
                 do {
@@ -66,6 +68,7 @@ struct ControlBar: View {
             }
             .frame(maxWidth: .infinity, minHeight: 44)
             .disabled(MeasurementState.stopped == viewModel.measurementState)
+            .accessibilityIdentifier("de.cyface.rfr.button.stop")
         }
     }
 }

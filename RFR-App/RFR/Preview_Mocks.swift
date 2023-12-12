@@ -24,9 +24,8 @@ import OSLog
 
 class MockAuthenticator: Authenticator {
     func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
-        fatalError("Not implemented")
+        onSuccess("fake-token")
     }
-
 
     func authenticate() async throws -> String {
         return "test"

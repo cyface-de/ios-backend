@@ -49,13 +49,6 @@ class SynchronizationViewModel: ObservableObject {
         self.error = nil
         self.authenticator = authenticator
         self.processBuilder = uploadProcessBuilder
-
-        //self.synchronizer.handler.append(handle)
-        /*do {
-            try synchronizer.activate()
-        } catch {
-            self.error = error
-        }*/
     }
 
     /// Start synchronization for all local but not yet synchronized measurements.

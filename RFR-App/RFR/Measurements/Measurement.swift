@@ -30,14 +30,14 @@ import MapKit
  - Author: Klemens Muthmann
  - Version: 1.0.0
  */
-struct Measurement: Identifiable {
+class Measurement: Identifiable, ObservableObject {
     /// The identifier to use this object as part of a `List` or a `ForEach`. This may be the system wide unique measurement identifier, also used by the database.
     let id: UInt64
     /// The total distance travelled while measuring this.
     /// The time and date at which this measurement started.
     let startTime: Date
     /// The state of  synchronizting this measurement.
-    let synchronizationState: SynchronizationState
+    @Published var synchronizationState: SynchronizationState
 
     let _maxSpeed: Double
     var maxSpeed: String {
@@ -104,7 +104,39 @@ struct Measurement: Identifiable {
     let region: MKCoordinateRegion
     let track: [CLLocationCoordinate2D]
 
-    func change(state: SynchronizationState) -> Measurement {
+    init(
+        id: UInt64,
+        startTime: Date,
+        synchronizationState: SynchronizationState,
+        _maxSpeed: Double,
+        _meanSpeed: Double,
+        _distance: Double,
+        _duration: Double,
+        _inclination: Double,
+        _lowestPoint: Double,
+        _highestPoint: Double,
+        _avoidedEmissions: Double,
+        heightProfile: [Altitude],
+        region: MKCoordinateRegion,
+        track: [CLLocationCoordinate2D]
+    ) {
+        self.id = id
+        self.startTime = startTime
+        self.synchronizationState = synchronizationState
+        self._maxSpeed = _maxSpeed
+        self._meanSpeed = _meanSpeed
+        self._distance = _distance
+        self._duration = _duration
+        self._inclination = _inclination
+        self._lowestPoint = _lowestPoint
+        self._highestPoint = _highestPoint
+        self._avoidedEmissions = _avoidedEmissions
+        self.heightProfile = heightProfile
+        self.region = region
+        self.track = track
+    }
+
+    /*func change(state: SynchronizationState) -> Measurement {
         return Measurement(
             id: self.id,
             startTime: self.startTime,
@@ -119,7 +151,18 @@ struct Measurement: Identifiable {
             _avoidedEmissions: self._avoidedEmissions,
             heightProfile: heightProfile,
             region: self.region,
-            track: self.track)
+            track: self.track
+        )
+    }*/
+}
+
+extension Measurement: Hashable {
+    static func == (lhs: Measurement, rhs: Measurement) -> Bool {
+        return lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 

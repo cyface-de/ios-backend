@@ -20,8 +20,46 @@ import SwiftUI
 
 struct ImpressumView: View {
     var body: some View {
-        Text("Impressum")
+        List {
+            Section(header: Text("Herausgeber")) {
+                Text("""
+Cyface GmbH
+Behringstraße 46
+01159 Dresden
+Deutschland
+""")
+                Text("""
+Vertreten durch:
+Dr. Klemens Muthmann
+""")
+                Text("""
+E-Mail: mail@cyface.de
+Telefon: +49 351 6 475 2580
+""")
+                Text("""
+Amtsgericht Dresden
+HRB: 36726
+USt.-Id.: DE-312598748
+""")
+            }
+            Section(header: Text("Haftungshinweis")) {
+                Text("""
+Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.
+""")
+            }
+
+                    Section(header: Text("Datenschutz")) {
+                        NavigationLink("Datenschutzbestimmungen") {
+                            DataProtection()
+                        }
+
+            }
+                //.frame(alignment: .leading)
+                //.padding(.leading)
+        }.navigationTitle("Impressum")
+
     }
+    //}
 }
 
 #if DEBUG

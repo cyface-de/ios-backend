@@ -28,7 +28,7 @@ import MapKit
  */
 struct MeasurementView: View {
     /// The view model used by this view to get the information necessary to display a measurement.
-    var measurement: Measurement
+    @ObservedObject var measurement: Measurement
     /*@State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.75155, longitude: 11.97411), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5))*/
 
     var body: some View {

@@ -25,11 +25,7 @@ import OSLog
 struct OAuthLoginView: UIViewControllerRepresentable {
     let authenticator: Authenticator
     @EnvironmentObject var loginStatus: LoginStatus
-    @Binding var error: Error? {
-        didSet {
-            os_log("Failed to Authenticate. %s", log: OSLog.authorization, type: .debug, error?.localizedDescription ?? "")
-        }
-    }
+    @Binding var errors: [String]
 
     func makeUIViewController(context: Context) -> LoginViewController {
         // Return the ViewController
@@ -59,8 +55,14 @@ struct OAuthLoginView: UIViewControllerRepresentable {
         }
 
         func onError(error: Error) {
+            os_log("Failed to Authenticate. %@", log: OSLog.authorization, type: .error, error.localizedDescription)
+
             DispatchQueue.main.async { [weak self] in
-                self?.parent.error = error
+                if case OAuthAuthenticatorError.missingAuthState = error {
+                    os_log("Ignoring missing auth state and showing login form again!", log: OSLog.authorization, type: .debug)
+                } else {
+                    self?.parent.errors.append(error.localizedDescription)
+                }
             }
         }
     }
@@ -69,11 +71,11 @@ struct OAuthLoginView: UIViewControllerRepresentable {
 #if DEBUG
 #Preview {
     @State var loggedIn = true
-    @State var error: Error? = nil
+    @State var errors: [String] = []
 
     return OAuthLoginView(
         authenticator: MockAuthenticator(),
-        error: $error
+        errors: $errors
     )
 }
 #endif

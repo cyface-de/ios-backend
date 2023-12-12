@@ -28,7 +28,7 @@ A single row in the measurements overview displaying all the measurements in a l
  */
 struct MeasurementCell: View {
     /// The view model containing all information from a measurement required to display a single row in the measurements overview.
-    var measurement: Measurement
+    @ObservedObject var measurement: Measurement
 
     var body: some View {
         VStack(alignment: .leading) {

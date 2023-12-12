@@ -70,7 +70,9 @@ class OAuthAuthenticator {
                     if let config = configuration {
                         continuation.resume(returning: config)
                     } else {
-                        continuation.resume(throwing: OAuthAuthenticatorError.discoveryFailed(cause: error))
+                        continuation.resume(
+                            throwing: OAuthAuthenticatorError.discoveryFailed(cause: error?.localizedDescription ?? "unkown error")
+                        )
                     }
                 }
             }
@@ -298,14 +300,7 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
         }
     }
 
-    // Welcher viewController ist das hier? Wahrscheinlich der selbe wie beim Login.
-    // So wird das in der Beispielapp gemacht. Offensichtlich wird einfach der Anfang der Fensterhierarchie geladen.
-    /*
-     private func getViewController() -> UIViewController {
-     let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene
-     return scene!.keyWindow!.rootViewController!
-     }
-     */
+    /// Send logout request to identity server and reset AppAuth auth state.
     func logout() async throws {
         os_log("Authentication: Logging Out", log: OSLog.authorization, type: .debug)
         guard let idToken = self.idToken else {
@@ -338,10 +333,6 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
                     return
                 }
 
-                /*guard let callbackController = self.callbackController else {
-                 fatalError()
-                 //throw OAuthAuthenticatorError.missingCallbackController
-                 }*/
                 let callbackController = rootViewController()
                 let agent = OIDExternalUserAgentIOS(presenting: callbackController)
                 self.currentAuthorizationFlow = OIDAuthorizationService.present(
@@ -381,7 +372,7 @@ enum OAuthAuthenticatorError: Error {
     case invalidResponse
     case errorResponse(status: Int)
     case missingAuthState(cause: Error?)
-    case discoveryFailed(cause: Error?)
+    case discoveryFailed(cause: String)
     case missingCallbackController
     case missingResponse
 }
@@ -441,10 +432,10 @@ This was caused by %s.
                     comment:
 """
 Tell the user, that the OAuth discovery failed for some reason.
-The actual reason is provided as an error, as the first argument.
+The actual reason is provided as a String message, as the first argument.
 """
                 ),
-                cause?.localizedDescription ?? "cause unknown"
+                cause
             )
         case .missingCallbackController:
             NSLocalizedString(

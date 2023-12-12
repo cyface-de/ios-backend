@@ -42,7 +42,7 @@ struct MeasurementsView: View {
             } else {
                 List {
                     Section(header: Text("Abgeschlossene Messungen")) {
-                        ForEach(viewModel.measurements) {measurement in
+                        ForEach($viewModel.measurements) {$measurement in
                             NavigationLink(destination: MeasurementView(
                                 measurement: measurement
                             )) {
@@ -65,8 +65,7 @@ struct MeasurementsView: View {
 }
 
 #if DEBUG
-struct MeasurementsView_Previews: PreviewProvider {
-    static var viewModel: MeasurementsViewModel {
+    var viewModel: MeasurementsViewModel {
         let ret = MeasurementsViewModel(
             dataStoreStack: MockDataStoreStack(
                 persistenceLayer: MockPersistenceLayer(
@@ -102,7 +101,7 @@ struct MeasurementsView_Previews: PreviewProvider {
         return ret
     }
 
-    static var voucherViewModel: VoucherViewModel {
+    var voucherViewModel: VoucherViewModel {
         let ret = VoucherViewModel(
             authenticator: MockAuthenticator(),
             url: try! ConfigLoader.load().getIncentivesUrl(),
@@ -119,11 +118,10 @@ struct MeasurementsView_Previews: PreviewProvider {
         return ret
     }
 
-    static var previews: some View {
-        MeasurementsView(
+    #Preview {
+       return MeasurementsView(
             viewModel: viewModel,
             voucherViewModel: voucherViewModel
         )
     }
-}
 #endif

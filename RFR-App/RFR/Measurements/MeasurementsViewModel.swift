@@ -53,11 +53,20 @@ class MeasurementsViewModel: ObservableObject {
         self.measurements = [Measurement]()
         self.dataStoreStack = dataStoreStack
         uploadSubscription = uploadPublisher
-            .receive(on: syncQueue).map {
-                return self.update(measurement: $0.id, syncState: $0.status)
+            .receive(on: DispatchQueue.main).sink { [weak self] status in
+                self?.measurements.filter { measurement in
+                    measurement.id == status.id
+                }.forEach { measurement in
+                    switch status.status {
+                    case .started:
+                        measurement.synchronizationState = .synchronizing
+                    case .finishedWithError(cause: _):
+                        measurement.synchronizationState = .unsynchronizable
+                    default:
+                        measurement.synchronizationState = .synchronized
+                    }
+                }
             }
-            .receive(on: DispatchQueue.main)
-            .assign(to: \.measurements, on: self)
     }
 
     func setup() throws {
@@ -174,23 +183,6 @@ class MeasurementsViewModel: ObservableObject {
             ),
             track: coordinates
             )
-    }
-
-    /// Update the measurement in the measurement list and provide the updated list.
-    private func update(measurement id: UInt64, syncState: UploadStatusType) -> [Measurement] {
-        os_log(.debug, log: OSLog.synchronization, "Updating measurement %d status to %@", id, syncState.description)
-        return measurements.map { measurement in
-            if measurement.id == id {
-                switch syncState {
-                case .started:
-                    return measurement.change(state: .synchronizing)
-                default:
-                    return measurement.change(state: .synchronized)
-                }
-            } else {
-                return measurement
-            }
-        }
     }
 
     private func refresh() throws {

@@ -35,6 +35,13 @@ struct RFRApp: App {
         WindowGroup {
             if let viewModel = appModel.viewModel, let incentivesUrl = appModel.incentivesUrl {
                 InitializationView(viewModel: viewModel, incentivesEndpoint: incentivesUrl)
+                #if DEBUG
+                    .transaction { transaction in
+                    if CommandLine.arguments.contains("enable-testing") {
+                        transaction.animation = nil
+                    }
+                }
+                #endif
             } else if let error = appModel.error {
                 ErrorView(error: error)
             } else {
@@ -69,9 +76,9 @@ class AppModel: ObservableObject {
             let apiEndpoint = try config.getApiEndpoint()
             self.incentivesUrl = try config.getIncentivesUrl()
 
-            let authenticator = OAuthAuthenticator(
+            let authenticator = createAuthenticator(
                 issuer: issuer,
-                redirectUri: redirectURI,
+                redirectURI: redirectURI,
                 apiEndpoint: apiEndpoint,
                 clientId: clientId
             )
@@ -79,5 +86,27 @@ class AppModel: ObservableObject {
         } catch {
             self.error = error
         }
+    }
+
+    private func createAuthenticator(issuer: URL, redirectURI: URL, apiEndpoint: URL, clientId: String) -> Authenticator {
+        #if DEBUG
+        if CommandLine.arguments.contains("enable-testing") {
+            return MockAuthenticator()
+        } else {
+            return OAuthAuthenticator(
+                issuer: issuer,
+                redirectUri: redirectURI,
+                apiEndpoint: apiEndpoint,
+                clientId: clientId
+            )
+        }
+        #else
+        return OAuthAuthenticator(
+            issuer: issuer,
+            redirectUri: redirectURI,
+            apiEndpoint: apiEndpoint,
+            clientId: clientId
+        )
+        #endif
     }
 }

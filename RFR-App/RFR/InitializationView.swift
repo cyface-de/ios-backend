@@ -25,42 +25,42 @@ import AppAuthCore
 struct InitializationView: View {
     @StateObject var viewModel: DataCapturingViewModel
     @StateObject var loginStatus = LoginStatus()
-    @State private var error: Error?
     let incentivesEndpoint: URL
+    @State var loginNavigationState: [String] = []
 
     var body: some View {
-        if let error = self.error {
-            ErrorView(error: error)
-        } else if viewModel.isInitialized {
-
-            Group {
-                if loginStatus.isLoggedIn {
+            if viewModel.isInitialized && loginStatus.isLoggedIn {
                     MainView(
                         viewModel: viewModel,
                         incentivesUrl: incentivesEndpoint
                     )
-                } else {
+                    .environmentObject(loginStatus)
+
+            } else if viewModel.isInitialized && !loginStatus.isLoggedIn {
+                NavigationStack(path: $loginNavigationState) {
                     OAuthLoginView(
                         authenticator: viewModel.authenticator,
-                        error: $error
+                        errors: $loginNavigationState
                     )
                     .onOpenURL(perform: { url in
                         viewModel.authenticator.callback(url: url)
                     })
+                    .environmentObject(loginStatus)
+                    .navigationTitle("Anmeldung")
+                    .navigationDestination(for: String.self) { errorMessage in
+                        ErrorTextView(errorMessage: errorMessage)
+                    }
                 }
+            } else {
+                LoadinScreen()
             }
-            .environmentObject(loginStatus)
-
-        } else {
-            LoadinScreen()
-        }
     }
 }
 
 #if DEBUG
-#Preview {
-    var config = try! ConfigLoader.load()
+let config = try! ConfigLoader.load()
 
+#Preview {
     return InitializationView(
         viewModel: DataCapturingViewModel(
             isInitialized: true,
@@ -76,6 +76,23 @@ struct InitializationView: View {
             uploadEndpoint: try! config.getUploadEndpoint()
         ),
         incentivesEndpoint: try! config.getIncentivesUrl()
+    )
+}
+
+#Preview {
+    return InitializationView(
+        viewModel: DataCapturingViewModel(
+            isInitialized: true,
+            showError: false,
+            dataStoreStack: MockDataStoreStack(
+                persistenceLayer: MockPersistenceLayer(
+                    measurements: []
+                )
+            ),
+                authenticator: MockAuthenticator(),
+            uploadEndpoint: try! config.getUploadEndpoint()),
+        incentivesEndpoint: try! config.getIncentivesUrl(),
+        loginNavigationState: ["test"]
     )
 }
 #endif

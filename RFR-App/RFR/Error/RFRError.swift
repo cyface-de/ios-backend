@@ -143,3 +143,69 @@ extension RFRError: LocalizedError {
         }
     }
 }
+
+extension RFRError: Hashable {
+    static func == (lhs: RFRError, rhs: RFRError) -> Bool {
+        switch (lhs, rhs) {
+        case (.initializationFailed(let l), .initializationFailed(let r)):
+            return l.localizedDescription == r.localizedDescription
+        case (.invalidUrl(let l), .invalidUrl(let r)):
+            return l == r
+        case (.missingAuthenticator, .missingAuthenticator):
+            return true
+        case (.unableToLoadMeasurement(let l), .unableToLoadMeasurement(let r)):
+            return l == r
+        case (.missingVoucher, .missingVoucher):
+            return true
+        case (.missingAuthenticationBody, .missingAuthenticationBody):
+            return true
+        case (.missingCredentials, .missingCredentials):
+            return true
+        case (.missingAuthenticatorConfiguration, .missingAuthenticatorConfiguration):
+            return true
+        case (.unableToAuthenticate, .unableToAuthenticate):
+            return true
+        case (.formattingFailed(number: let l), .formattingFailed(number: let r)):
+            return l == r
+        case (.voucherOverviewFailed, .voucherOverviewFailed):
+            return true
+        case (.invalidResponse, .invalidResponse):
+            return true
+        default:
+            return false
+        }
+    }
+
+    func hash(into hasher: inout Hasher) {
+        switch self {
+        case .initializationFailed(cause: let error):
+            hasher.combine(0)
+            hasher.combine(error.localizedDescription)
+        case .invalidUrl(url: let url):
+            hasher.combine(1)
+            hasher.combine(url)
+        case .missingAuthenticator:
+            hasher.combine(2)
+        case .unableToLoadMeasurement(measurement: let measurement):
+            hasher.combine(3)
+            hasher.combine(measurement)
+        case .missingVoucher:
+            hasher.combine(4)
+        case .missingAuthenticationBody:
+            hasher.combine(5)
+        case .missingCredentials:
+            hasher.combine(6)
+        case .missingAuthenticatorConfiguration:
+            hasher.combine(7)
+        case .unableToAuthenticate:
+            hasher.combine(8)
+        case .formattingFailed(number: let number):
+            hasher.combine(9)
+            hasher.combine(number)
+        case .voucherOverviewFailed:
+            hasher.combine(10)
+        case .invalidResponse:
+            hasher.combine(11)
+        }
+    }
+}

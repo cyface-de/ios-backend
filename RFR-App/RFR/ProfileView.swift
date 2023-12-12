@@ -22,28 +22,25 @@ import DataCapturing
 struct ProfileView: View {
     let authenticator: Authenticator
     @State var error: Error?
-    @EnvironmentObject var loginStatus: LoginStatus
+    @State var deleteButtonPressed: Bool = false
 
     var body: some View {
         if let error = error {
             ErrorView(error: error)
         } else {
             List {
-                // TODO: Add a confirmation dialoge
                 Button(action: {
-                    Task {
-                        do {
-                            try await authenticator.delete()
-                            try await (authenticator as! OAuthAuthenticator).logout()
-                            loginStatus.isLoggedIn = false
-                        } catch {
-                            self.error = error
-                        }
-                    }
+                    deleteButtonPressed.toggle()
                 }, label: {
                     Text("Nutzerprofil und alle zugehörigen Daten löschen.")
                 })
                 .tint(.red)
+                .sheet(isPresented: $deleteButtonPressed, content: {
+                    DeleteAccountConfirmationDialog(
+                        authenticator: authenticator,
+                        error: $error
+                    )
+                })
             }
         }
     }
@@ -52,5 +49,13 @@ struct ProfileView: View {
 #if DEBUG
 #Preview {
     ProfileView(authenticator: MockAuthenticator())
+}
+
+#Preview {
+    ProfileView(authenticator: MockAuthenticator(), deleteButtonPressed: true)
+}
+
+#Preview {
+    ProfileView(authenticator: MockAuthenticator(), error: RFRError.unableToAuthenticate)
 }
 #endif
