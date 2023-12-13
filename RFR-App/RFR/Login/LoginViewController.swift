@@ -59,8 +59,12 @@ class LoginViewController: UIViewController {
         view.backgroundColor = .systemBackground
 
         authenticateButton = UIButton(type: .system)
-        authenticateButton.setTitle("Anmelden oder Registrieren", for: .normal)
-        authenticateButton.accessibilityIdentifier = "de.cyface."
+        let title = NSLocalizedString(
+            "loginButtonLabel",
+            comment: "The title of the button asking the user to start the login process."
+        )
+        authenticateButton.setTitle(title, for: .normal)
+        authenticateButton.accessibilityIdentifier = "de.cyface.rfr.button.login"
         authenticateButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(authenticateButton)
 

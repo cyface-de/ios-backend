@@ -349,7 +349,7 @@ class LiveViewModel: ObservableObject {
                     to: measurement,
                     identifier
                 ) {}
-                measurementName = "Measurement \(identifier)"
+                measurementName = String(localized: "measurement \(identifier)", comment: "Title label of a running measurement.")
                 try measurement.start(inMode: "BICYCLE")
             }
         }

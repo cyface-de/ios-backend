@@ -46,7 +46,10 @@ struct InitializationView: View {
                         viewModel.authenticator.callback(url: url)
                     })
                     .environmentObject(loginStatus)
-                    .navigationTitle("Anmeldung")
+                    .navigationTitle(String(
+                        localized: "login",
+                        comment: "Labels the login action"
+                    ))
                     .navigationDestination(for: String.self) { errorMessage in
                         ErrorTextView(errorMessage: errorMessage)
                     }

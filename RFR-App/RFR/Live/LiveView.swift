@@ -105,27 +105,27 @@ struct LiveStatisticsView: View {
         VStack(alignment: .leading) {
             Text(viewModel.measurementName).font(.largeTitle)
             HStack {
-                Text("Geschwindigkeit")
+                Text("Geschwindigkeit", comment: "Label for the current speed, the user is going during a running measurement.")
                 Spacer()
-                Text("\(viewModel.speed) (\u{2205} \(viewModel.averageSpeed))")
+                Text("\(viewModel.speed) (\u{2205} \(viewModel.averageSpeed))", comment: "Value for the current speed, the user is going during a running measurement.")
             }
             HStack {
-                Text("Strecke")
+                Text("Strecke", comment: "Label for the length of the route the user has been going during the running measurement.")
                 Spacer()
                 Text(viewModel.distance)
             }
             HStack {
-                Text("Fahrtzeit")
+                Text("Fahrtzeit", comment: "Label for the time the user has spent, with the running measurement.")
                 Spacer()
                 Text(viewModel.duration)
             }
             HStack {
-                Text("Anstieg")
+                Text("Anstieg", comment: "Label for the ascent so far of the running measurement.")
                 Spacer()
                 Text(viewModel.rise)
             }
             HStack {
-                Text("Vermiedener CO\u{2082} Ausstoß")
+                Text("Vermiedener CO\u{2082} Ausstoß", comment: "Label for the so far avoided emissions during the running measurement in comparison to going the same route by car.")
                 Spacer()
                 Text(viewModel.avoidedEmissions)
             }
@@ -150,10 +150,10 @@ struct LiveDetailsView: View {
             .padding([.top])
             .tabItem {
                 Image(systemName: "map")
-                Text("Position")
+                Text("Position", comment: "Tab label for selecting to show the map view during a measurement.")
             }
             VStack {
-                Text("Geschwindigkeit")
+                Text("Geschwindigkeit", comment: "Label for the current speed shown to the user during an active measurement.")
                     .font(.largeTitle)
                 Text(viewModel.speed)
                     .font(.system(size: 36))
@@ -161,7 +161,7 @@ struct LiveDetailsView: View {
             }
             .tabItem {
                 Image(systemName: "speedometer")
-                Text("Geschwindigkeit")
+                Text("Geschwindigkeit", comment: "Tab label for showing the current speed instead of a map during a measurement.")
             }
         }
     }

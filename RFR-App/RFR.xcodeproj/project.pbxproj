@@ -126,6 +126,8 @@
 		AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementsView.swift; sourceTree = "<group>"; };
 		AA87D0982982B43F002F6B3B /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 		AA87D09A2982B4CB002F6B3B /* MeasurementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementView.swift; sourceTree = "<group>"; };
+		AA8FBA952B28AFC4000ADC84 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		AA8FBA962B29B0A2000ADC84 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		AA8FC7642A2CE82B006D52F3 /* Voucher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Voucher.swift; sourceTree = "<group>"; };
 		AA8FC7682A2DB438006D52F3 /* VoucherViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherViewModel.swift; sourceTree = "<group>"; };
 		AA9AF31C2AEA8E9E0003BE54 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
@@ -640,6 +642,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				AA3C062C2A3B03C8002BD585 /* de */,
+				AA8FBA962B29B0A2000ADC84 /* en */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -648,6 +651,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				AA3C062F2A3B03C8002BD585 /* de */,
+				AA8FBA952B28AFC4000ADC84 /* en */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

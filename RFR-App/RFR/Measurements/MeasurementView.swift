@@ -52,7 +52,7 @@ struct MeasurementView: View {
                     KeyValueView(key: "Tiefster Punkt", value: measurement.lowestPoint)
                     KeyValueView(key: "Höchster Punkt", value: measurement.highestPoint)
                 }
-                Section(header: Text("Vermiedender CO\u{2082} Ausstoß")) {
+                Section(header: Text("Vermiedener CO\u{2082} Ausstoß")) {
                     Text(measurement.avoidedEmissions)
                 }
             }.tabItem {
