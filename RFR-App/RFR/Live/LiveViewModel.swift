@@ -74,7 +74,7 @@ class LiveViewModel: ObservableObject {
                 // Only location captured events
                 let locationsFlow = measurement.measurementMessages.filter { if case Message.capturedLocation = $0 { return true } else { return false } }.compactMap {if case let Message.capturedLocation(location) = $0 { return location } else { return nil }}
                 // Use the most recent location to provide the speed value
-                locationsFlow.compactMap { location in "\(speedFormatter.string(from: location.speed as NSNumber) ?? "0.0") km/h" }.receive(on: RunLoop.main).assign(to: &$speed)
+                locationsFlow.filter {location in location.speed >= 0.0 }.compactMap { location in "\(speedFormatter.string(from: location.speed as NSNumber) ?? "0.0") km/h" }.receive(on: RunLoop.main).assign(to: &$speed)
 
                 // Organize all received locations into the local locations array, and stream that array for further processing
                 let trackFlow = locationsFlow
@@ -113,6 +113,7 @@ class LiveViewModel: ObservableObject {
                 trackFlow.map { tracks in
                     Statistics.averageSpeed(timelines: tracks)
                 }
+                .filter { $0 >= 0.0}
                 .compactMap {
                     speedFormatter.string(from: $0 as NSNumber)
                 }
