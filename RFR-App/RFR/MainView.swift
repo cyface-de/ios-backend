@@ -76,15 +76,27 @@ struct MainView: View {
                     }
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
+                        // Show RFR Logo
                         ToolbarItem(placement: .principal) {
                             HStack {
-                                Image("RFR-Logo")
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
+                                // This is an ugly workaround from Stackoverflow.
+                                // Appaerantly it is impossible to scale the logo correctly any other way.
+                                Text("Logo")
+                                    .font(.title)
+                                    .foregroundStyle(.clear)
+                                    .overlay {
+                                        Image("RFR-Logo")
+                                            .resizable()
+                                            .scaledToFill()
+                                            .padding(.leading)
+                                    }
+                                    .accessibilityElement(children: .combine)
+                                    .accessibilityLabel("Logo")
                                 Spacer()
                             }
                         }
 
+                        // Show Submit Data action
                         ToolbarItem(placement: .navigationBarTrailing) {
                             Button(action: {
                                 Task {
@@ -99,43 +111,46 @@ struct MainView: View {
                             }
                         }
 
+                        // Show the menu with all the less important stuff, most users are not going to use.
                         ToolbarItem(placement: .navigationBarTrailing) {
-                            NavigationLink(destination: {
-                                ProfileView(authenticator: viewModel.authenticator)
-                            }) {
-                                VStack {
-                                    Image(systemName: "person")
-                                    Text("Profil").font(.footnote)
-                                }
-                            }
-                        }
-
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            NavigationLink(destination: {ImpressumView()}) {
-                                VStack {
-                                    Image(systemName: "info.circle")
-                                    Text("Impressum").font(.footnote)
-                                }
-                            }
-                        }
-
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button(
-                                action: {
-                                    Task {
-                                        do {
-                                            try await viewModel.authenticator.logout()
-                                            loginStatus.isLoggedIn = false
-                                        } catch {
-                                            self.error = error
-                                        }
-                                    }
+                            Menu {
+                                NavigationLink(destination: {
+                                    ProfileView(authenticator: viewModel.authenticator)
                                 }) {
                                     VStack {
-                                        Image(systemName: "rectangle.portrait.and.arrow.right")
-                                        Text("Abmelden").font(.footnote)
+                                        Image(systemName: "person")
+                                        Text("Profil").font(.footnote)
                                     }
                                 }
+                                NavigationLink(destination: {ImpressumView()}) {
+                                    VStack {
+                                        Image(systemName: "info.circle")
+                                        Text("Impressum").font(.footnote)
+                                    }
+                                }
+                                Button(
+                                    action: {
+                                        Task {
+                                            do {
+                                                try await viewModel.authenticator.logout()
+                                                loginStatus.isLoggedIn = false
+                                            } catch {
+                                                self.error = error
+                                            }
+                                        }
+                                    }) {
+                                        VStack {
+                                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                                            Text("Abmelden").font(.footnote)
+                                        }
+                                    }
+                            } label: {
+                                VStack {
+                                    Image(systemName: "person")
+                                    Text("info", comment: "All menu entries")
+                                        .font(.footnote)
+                                }
+                            }
                         }
                     }
                 }

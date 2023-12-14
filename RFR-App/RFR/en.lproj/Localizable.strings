@@ -137,6 +137,9 @@ The returned status code is provided as an Int as the first parameter! */
 /* No comment provided by engineer. */
 "I am human" = "I am a human";
 
+/* All menu entries */
+"info" = "Info";
+
 /* No comment provided by engineer. */
 "Karte" = "Map";
 
