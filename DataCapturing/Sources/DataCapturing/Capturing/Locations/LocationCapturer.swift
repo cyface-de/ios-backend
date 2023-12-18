@@ -57,6 +57,7 @@ public class LocationCapturer: NSObject {
             //}
         } else {
             self.coreLocationManager.requestAlwaysAuthorization()
+            self.coreLocationManager.startUpdatingLocation()
         }
         return messagePublisher.eraseToAnyPublisher()
     }
