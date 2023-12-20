@@ -1,5 +1,5 @@
 {
-    "uploadEndpoint": "https://s2-b.cyface.de/provider/api/v2/",
+    "uploadEndpoint": "https://s2-b.cyface.de/api/v4/",
     "incentivesUrl": "https://app.cyface.de/incentives/api/v1/",
     "issuer": "https://auth.cyface.de:8443/realms/rfr",
     "clientId": "ios-app",
