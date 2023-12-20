@@ -70,13 +70,20 @@ struct Statistics {
         return sum
     }
 
-    /// The average carbon emissions per kilometer in gramms, based on data from Statista (https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/)
-    static let averageCarbonEmissionsPerMeter = 0.117
+    /// Quelle: Verkehr in Zahlen 2018/2019: 47. Jahrgang Hamburg: DVV Media Group, 2018, 371 S. --> https://www.hvv-schulprojekte.de/unterrichtsmaterialien/kraftstoffverbrauch/#:~:text=Spezifischer%20Kraftstoffverbrauch%20der%20Pkw%20in%20Deutschland&text=Die%20Angaben%20f%C3%BCr%20jeden%20Autotyp,100%20km%20f%C3%BCr%20Benzin%2DPkw.
+    /// Quelle 2: Deutscher Bundestag: https://www.bundestag.de/resource/blob/660794/dfdee26b00e44b018b04a187f0c6843e/WD-8-056-19-pdf-data.pdf
+    /// Benzin: (2370 g/l * 7,7 l/100 km) / 100.000 = 0,18249 g/m
+    /// Diesel: (2650 g/l * 6,8 l/100 km) / 100.000 = 0,1802 g/m
+    /// Vertielung Diesel vs Bezin (Quelle: https://de.statista.com/statistik/daten/studie/994393/umfrage/verteilung-der-kraftstoffarten-zugelassener-pkw-in-deutschland/#:~:text=Am%201.,Prozent%20im%20Vergleich%20zum%20Vorjahr.)
+    /// 63% Bezin vs 30% Diesel
+    /// (0,18249 g/m * 63 + 0,1802 g/m * 30) / 93 = 0,180938709677419 g/m
+    static let averageCarbonEmissionsInGrammsPerMeter = 0.180938709677419
 
     static func avoidedEmissions(_ distanceInMeters: Double) -> Double {
-        return distanceInMeters * averageCarbonEmissionsPerMeter
+        return distanceInMeters * averageCarbonEmissionsInGrammsPerMeter
     }
 
+    /// Calculate the distance covered by all the provided tracks in meters. Distance covered during a pause is left out.
     static func coveredDistance(tracks: [TrackMO]) -> Double {
         var ret = 0.0
         tracks.forEach { track in
