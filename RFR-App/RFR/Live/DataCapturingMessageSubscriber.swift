@@ -16,23 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with the Ready for Robots App. If not, see <http://www.gnu.org/licenses/>.
  */
-import SwiftUI
 
-// TODO: Remove this and exchange with alert modifier
+import Foundation
+import Combine
+import DataCapturing
+
 /**
- A view to display any error message.
- */
-struct ErrorView: View {
-    /// The error to display information for.
-    let error: Error
-    
-    var body: some View {
-        ErrorTextView(errorMessage: error.localizedDescription)
-    }
-}
+ Base protocol for all parties interested in receiving ``Message`` objects from the *Cyface* ``Measurement``, during data capturing.
 
-#if DEBUG
-#Preview {
-    ErrorView(error: RFRError.missingAuthenticator)
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
+ */
+protocol DataCapturingMessageSubscriber {
+    func subscribe(to messages: some Publisher<Message, Never>)
 }
-#endif

@@ -8,13 +8,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * The Ready for Robots App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots App. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import Foundation
@@ -24,24 +24,37 @@ import Foundation
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 enum RFRError: Error {
+    /// If application initialisation failed for `cause` reason.
     case initializationFailed(cause: Error)
+    /// If some parsed URL was invalid. Should not happen, since all URLs are currently hard coded.
     case invalidUrl(url: String)
+    /// If no authenticator was available to authenticate with the keycloak identity provider.
     case missingAuthenticator
+    /// If the data store stack was unable to retrieve a ``Measurement``
     case unableToLoadMeasurement(measurement: Measurement)
+    /// If no voucher could be loaded but should be available.
     case missingVoucher
+    /// If the body from an authentication request was not available for parsing.
     case missingAuthenticationBody
+    /// If no credentials have been provided for an auth request.
     case missingCredentials
+    /// If the ``Authenticator`` could not be created because no configuration was available.
     case missingAuthenticatorConfiguration
+    /// If for some unspecified reason the system was unable to authentiate.
     case unableToAuthenticate
+    /// If a number could not be formatted for the current localization.
     case formattingFailed(number: NSNumber)
+    /// If communicating with the voucher server failed and thus no overview can and should be shown.
     case voucherOverviewFailed
     /// Thrown if a background upload does not provide a `HTTPURLResponse`.
     case invalidResponse
 }
 
 extension RFRError: LocalizedError {
+    /// Localizable description of the error, containing information for translation and a message for the user to act on.
     var errorDescription: String? {
         switch self {
         case .initializationFailed(cause: let error):

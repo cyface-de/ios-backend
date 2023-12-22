@@ -8,13 +8,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * The Ready for Robots App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots App. If not, see <http://www.gnu.org/licenses/>.
  */
 import Foundation
 import DataCapturing
@@ -22,9 +22,10 @@ import Combine
 import CoreLocation
 import MapKit
 import OSLog
+import SwiftUI
 
 /**
- The view model used by the ``MeasurementsView``.
+ The view model used by the ``MeasurementsView`` and ``StatisticsView``.
 
  Its core is a list of measurements that must be refreshed after each upload and when new measurements are created by the user.
 
@@ -32,10 +33,14 @@ import OSLog
 
  It also provides an optional ``error``, in case anything unforseen has happened.
 
+ **ATTENTION:** It is important to call `setup after creation of an instance of this class, before actually using it. Otherwise `isLoading` will never become `true`.`
+
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 class MeasurementsViewModel: ObservableObject {
+    // MARK: - Properties
     /// The measurements displayed by this view.
     @Published var measurements: [Measurement]
     @Published var isLoading = true
@@ -44,8 +49,20 @@ class MeasurementsViewModel: ObservableObject {
     var uploadSubscription: AnyCancellable?
     var measurementEventsSubscription: AnyCancellable?
     let dataStoreStack: DataStoreStack
+    // Statistics
+    @Published var distance: String = ""
+    @Published var duration: String = ""
+    @Published var lowestPoint: String = ""
+    @Published var highestPoint: String = ""
+    @Published var incline: String = ""
+    @Published var avoidedEmissions: String = ""
+    @Published var maxAvoidedEmissions: String = ""
+    @Published var meanAvoidedEmissions: String = ""
 
+    // MARK: - Initializers
     // TODO: Why is it not possible to call this async? It is going to take some time for larger amounts of measurements.
+    /// Create a new object of this class.
+    /// It gets data from the provided `dataStoreStack` and receives data upload information from the provided `uploadPublisher`.
     init(
         dataStoreStack: DataStoreStack,
         uploadPublisher: some Publisher<UploadStatus, Never>
@@ -69,39 +86,21 @@ class MeasurementsViewModel: ObservableObject {
             }
     }
 
+    /// Load the measurement data from the database asynchronously and update all the published properties.
+    /// This finishes object initialization and causes the `isLoading` property to become `true`, which should trigger a redraw of the UI with the actual valid data.
     func setup() throws {
         try dataStoreStack.wrapInContext { context in
             let request = MeasurementMO.fetchRequest()
             try request.execute().forEach { measurement in
                 measurements.append(load(measurement: measurement))
             }
-            isLoading = false
+            DispatchQueue.main.async { [weak self] in
+                self?.updateStatistics()
+                self?.isLoading = false
+            }
         }
     }
 
-    /// Subscribe to changes received from the ``LiveView`` of this model. This ensures, that new measurements acquired during the current session, appear on screen if finished.
-    func subscribe(to liveViewModel: LiveViewModel) {
-        Task {
-            os_log("Subscribing measurements view model to updates from live view!", log: OSLog.measurement, type: .debug)
-            measurementEventsSubscription = liveViewModel.$message.filter {
-                os_log("Filtering for messages for stopped event! Received %@", log: OSLog.measurement, type: .debug, $0.description)
-                if case Message.stopped(timestamp: _) = $0 {
-                    os_log("Receiving stopped event", log: OSLog.measurement, type: .debug)
-                    return true
-                } else {
-                    return false
-
-                }
-            }.sink { [weak self] message in
-                    os_log("Updating view model with new measurement.")
-                    do {
-                        try self?.refresh()
-                    } catch {
-                        self?.error = error
-                    }
-                }
-        }
-    }
 
     /// Convert a database measurement into its representation as required by the user interface.
     private func load(measurement: MeasurementMO) -> Measurement {
@@ -185,7 +184,8 @@ class MeasurementsViewModel: ObservableObject {
             )
     }
 
-    private func refresh() throws {
+    /// Causes a reload and redrawn each time measurement data changes.
+    private func onMeasurementsChanged() throws {
         try dataStoreStack.wrapInContext { context in
             let measurementRequest = MeasurementMO.fetchRequest()
             let storedMeasurements = try measurementRequest.execute()
@@ -201,9 +201,111 @@ class MeasurementsViewModel: ObservableObject {
                 DispatchQueue.main.async { [weak self] in
                     if let self = self {
                         self.measurements.append(self.load(measurement: filtered))
+                        updateStatistics()
                     }
                 }
             }
+        }
+    }
+
+    /// Refresh the statistics values based on the current ``measurements`` array.
+    private func updateStatistics() {
+        let meanDistance = summedDistance() / Double(measurements.count)
+
+        self.distance = "\(distanceFormatter.string(from: maxDistance() as NSNumber)!) km (\u{2205} \(distanceFormatter.string(from: (meanDistance.isNaN ? 0 : meanDistance) as NSNumber)!) km)"
+        let totalDuration = totalDuration()
+        let meanDuration = totalDuration / Double(measurements.count)
+
+        self.duration = "\(timeFormatter.string(from: totalDuration)!) (\u{2205} \(timeFormatter.string(from: meanDuration.isNaN ? 0 : meanDuration)!))"
+
+        self.lowestPoint = "\(riseFormatter.string(from: calculateLowestPoint() as NSNumber)!) m"
+        self.highestPoint = "\(riseFormatter.string(from: calculateHighestPoint() as NSNumber)!) m"
+
+        let meanIncline = summedIncline() / Double(measurements.count)
+
+        self.incline = "max \(riseFormatter.string(from: maxIncline() as NSNumber)!) m (\u{2205} \(riseFormatter.string(from: meanIncline.isNaN ? 0 : meanIncline as NSNumber)!) m)"
+
+        self.avoidedEmissions = "\(emissionsFormatter.string(from: sumOfAvoidedEmissions() as NSNumber)!) g"
+
+        self.maxAvoidedEmissions = "\(emissionsFormatter.string(from: calculateMaxAvoidedEmissions() as NSNumber)!) g"
+
+        let meanAvoidedEmissions = sumOfAvoidedEmissions() / Double(measurements.count)
+        self.meanAvoidedEmissions = "\(emissionsFormatter.string(from: meanAvoidedEmissions.isNaN ? 0 : meanAvoidedEmissions as NSNumber)!) g"
+    }
+
+    /// Calculate the distance sum of all ``measurements`` in meters.
+    private func summedDistance() -> Double {
+        return measurements.map { $0._distance }.reduce(0.0) {
+            $0 + $1
+        }
+    }
+
+    /// Search for the length of the longest ``measurement`` in meters.
+    private func maxDistance() -> Double {
+        return measurements.map { $0._distance }.max() ?? 0.0
+    }
+
+    /// Calculate the total duration of all captured ``measurements``.
+    private func totalDuration() -> TimeInterval {
+        return measurements.map { $0._duration }.reduce(TimeInterval()) {
+            $0 + $1
+        }
+    }
+
+    /// Calculate the deepest depth reached with respect to the starting height in meters.
+    private func calculateLowestPoint() -> Double {
+        return measurements.map { $0._lowestPoint }.min() ?? 0.0
+    }
+
+    /// Calculate the highest height reached with respect to the starting height in meters.
+    private func calculateHighestPoint() -> Double {
+        return measurements.map { $0._highestPoint }.max() ?? 0.0
+    }
+
+    /// Calculate the sum of all positive inclinations from all captured ``measurements`` in meters.
+    private func summedIncline() -> Double {
+        return measurements.map { $0._inclination }.reduce(0.0) { $0 + $1 }
+    }
+
+    /// Search for the inclination of the measurement with the most inclination among all the captured ``measurements`` in meters.
+    private func maxIncline() -> Double {
+        return measurements.map { $0._inclination }.max() ?? 0.0
+    }
+
+    /// Calculate the sum of all the avoided emissions wth respect to car traffic for all captured ``measurements`` in gram.
+    private func sumOfAvoidedEmissions() -> Double {
+        return measurements.map { $0._avoidedEmissions }.reduce(0.0) { $0 + $1 }
+    }
+
+    /// Search for the avoided emissions of the captured measurement with the most avoided emissions in gram.
+    private func calculateMaxAvoidedEmissions() -> Double {
+        return measurements.map { $0._avoidedEmissions }.max() ?? 0.0
+    }
+}
+
+extension MeasurementsViewModel: DataCapturingMessageSubscriber {
+
+    /// Subscribe to changes received from the ``LiveView`` of this model. This ensures, that new measurements acquired during the current session, appear on screen if finished.
+    func subscribe(to messages: some Publisher<Message, Never>) {
+        Task {
+            os_log("Subscribing measurements view model to updates from live view!", log: OSLog.measurement, type: .debug)
+            measurementEventsSubscription = messages.filter {
+                os_log("Filtering for messages for stopped event! Received %@", log: OSLog.measurement, type: .debug, $0.description)
+                if case Message.stopped(timestamp: _) = $0 {
+                    os_log("Receiving stopped event", log: OSLog.measurement, type: .debug)
+                    return true
+                } else {
+                    return false
+
+                }
+            }.sink { [weak self] message in
+                    os_log("Updating view model with new measurement.")
+                    do {
+                        try self?.onMeasurementsChanged()
+                    } catch {
+                        self?.error = error
+                    }
+                }
         }
     }
 }

@@ -1,20 +1,20 @@
 /*
  * Copyright 2023 Cyface GmbH
  *
- * This file is part of the Read-for-Robots iOS App.
+ * This file is part of the Ready for Robots iOS App.
  *
- * The Read-for-Robots iOS App is free software: you can redistribute it and/or modify
+ * The Ready for Robots iOS App is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Read-for-Robots iOS App is distributed in the hope that it will be useful,
+ * The Ready for Robots iOS App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Read-for-Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
  */
 import SwiftUI
 import DataCapturing
@@ -24,6 +24,7 @@ import DataCapturing
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 @main
 struct RFRApp: App {
@@ -57,15 +58,20 @@ struct RFRApp: App {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 class AppModel: ObservableObject {
+    // MARK: - Properties
+    /// The central view model branching of all the other view models required by the application.
     @Published var viewModel: DataCapturingViewModel?
     /// Tells the view about errors occuring during initialization.
     @Published var error: Error?
     /// This applications configuration file.
     var config: Config?
+    /// The internet address of the root of the incentives API.
     var incentivesUrl: URL?
 
+    // MARK: - Initializers
     init() {
         do {
             let config = try ConfigLoader.load()
@@ -88,6 +94,8 @@ class AppModel: ObservableObject {
         }
     }
 
+    // MARK: - Methods
+    /// A method to create the correct authenticator for either a testing or a production environment.
     private func createAuthenticator(issuer: URL, redirectURI: URL, apiEndpoint: URL, clientId: String) -> Authenticator {
         #if DEBUG
         if CommandLine.arguments.contains("enable-testing") {

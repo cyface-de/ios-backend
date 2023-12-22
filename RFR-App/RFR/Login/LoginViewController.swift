@@ -8,13 +8,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * The Ready for Robots App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots App. If not, see <http://www.gnu.org/licenses/>.
  */
 import UIKit
 import AppAuth
@@ -31,13 +31,18 @@ import DataCapturing
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 class LoginViewController: UIViewController {
+    // MARK: - Properties
     /// A button shown on this view, to restart authentication if it fails.
     var authenticateButton: UIButton!
+    /// The authenticator handling the authentication process.
     let authenticator: Authenticator
+    /// The delegate to report success or errors from the login process, so the rest of the user interface can react to it.
     let delegate: LoginViewControllerDelegate
 
+    // MARK: - Initializers
     /**
      Create a new object of this class, providing the application delegate as the sole parameter.
      */
@@ -53,6 +58,7 @@ class LoginViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Methods
     /// Method to create the view for this `UIViewController`.
     override func loadView() {
         view = UIView()
@@ -83,6 +89,7 @@ class LoginViewController: UIViewController {
         }
     }
 
+    /// Start the authentication process asyncronously.
     @objc func doAuth() {
         Task {
             do {
@@ -100,8 +107,11 @@ class LoginViewController: UIViewController {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 protocol LoginViewControllerDelegate {
+    /// Handle a successful login.
     func onLoggedIn()
+    /// Handle an error occuring during the login process.
     func onError(error: Error)
 }

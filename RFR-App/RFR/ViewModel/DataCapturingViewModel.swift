@@ -26,17 +26,27 @@ import DataCapturing
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 class DataCapturingViewModel: ObservableObject {
+    // MARK: - Properties
+    /// A flag that is set as soon as tje datastore connection is up and running.
     @Published var isInitialized = false
+    /// The stack used to access the data store.
     var dataStoreStack: DataStoreStack?
+    /// The view model used by the view for controlling the live measurement.
     let liveViewModel: LiveViewModel
+    /// The view model used to show information about the captured measurements.
     let measurementsViewModel: MeasurementsViewModel
+    /// The view model used to handle measurement synchronization.
     let syncViewModel: SynchronizationViewModel
-    let sessionRegistry = SessionRegistry()
+    // TODO: All of this only concerns the `SynchronizationViewModel` and thus should only appear there.
+    /// The authenticator used to authenticate for data uploads
     let authenticator: Authenticator
+    /// The location to upload data to.
     private let uploadEndpoint: URL
 
+    // MARK: - Initializers
     init(authenticator: Authenticator, uploadEndpoint: URL) throws {
         self.uploadEndpoint = uploadEndpoint
         self.authenticator = authenticator
@@ -50,14 +60,14 @@ class DataCapturingViewModel: ObservableObject {
             dataStoreStack: dataStoreStack,
             uploadProcessBuilder: DefaultUploadProcessBuilder(
                 apiEndpoint: uploadEndpoint,
-                sessionRegistry: sessionRegistry
+                sessionRegistry: SessionRegistry()
             )
         )
         measurementsViewModel = MeasurementsViewModel(
             dataStoreStack: dataStoreStack,
             uploadPublisher: syncViewModel.uploadStatusPublisher
         )
-        measurementsViewModel.subscribe(to: liveViewModel)
+        measurementsViewModel.subscribe(to: liveViewModel.$message)
         self.dataStoreStack = dataStoreStack
         Task {
             try await dataStoreStack.setup()
@@ -88,7 +98,7 @@ class DataCapturingViewModel: ObservableObject {
             dataStoreStack: dataStoreStack, 
             uploadProcessBuilder: DefaultUploadProcessBuilder(
                 apiEndpoint: uploadEndpoint,
-                sessionRegistry: sessionRegistry
+                sessionRegistry: SessionRegistry()
             )
         )
         measurementsViewModel = MeasurementsViewModel(

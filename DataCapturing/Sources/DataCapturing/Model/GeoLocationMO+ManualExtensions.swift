@@ -42,6 +42,7 @@ extension GeoLocationMO {
         self.altitude = location.altitude
     }
 
+    /// Provide the distance in meters between this location and the provided location.
     public func distance(to location: GeoLocationMO) -> Double {
         guard let selfTime = self.time, let locationTime = location.time else {
             return 0.0

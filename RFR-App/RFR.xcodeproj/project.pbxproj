@@ -12,13 +12,9 @@
 		AA199DEA2AFD0F1D00DE4D4A /* Production.json in Resources */ = {isa = PBXBuildFile; fileRef = AA199DE92AFD0F1D00DE4D4A /* Production.json */; };
 		AA1E40592B175C5300CACBE6 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1E40582B175C5300CACBE6 /* WebView.swift */; };
 		AA1E405B2B1764C900CACBE6 /* DataProtection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1E405A2B1764C900CACBE6 /* DataProtection.swift */; };
-		AA1E40662B17EAF200CACBE6 /* Ready_for_Robots_UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1E40652B17EAF200CACBE6 /* Ready_for_Robots_UITests.swift */; };
-		AA1E40682B17EAF200CACBE6 /* Ready_for_Robots_UITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1E40672B17EAF200CACBE6 /* Ready_for_Robots_UITestsLaunchTests.swift */; };
 		AA1E40722B17EB0B00CACBE6 /* SynchronizeMeasurementUITest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1E405C2B17A14D00CACBE6 /* SynchronizeMeasurementUITest.swift */; };
 		AA1E40742B17EC9900CACBE6 /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = AA1E40732B17EC9900CACBE6 /* AppAuthCore */; };
 		AA1E40762B17EC9E00CACBE6 /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AA1E40752B17EC9E00CACBE6 /* AppAuth */; };
-		AA3C06232A39F3BC002BD585 /* auth.conf.json in Resources */ = {isa = PBXBuildFile; fileRef = AA3C06222A39F3BC002BD585 /* auth.conf.json */; };
-		AA3C06272A3A0BB4002BD585 /* auth.conf.json.changeme in Resources */ = {isa = PBXBuildFile; fileRef = AA3C06262A3A0BB4002BD585 /* auth.conf.json.changeme */; };
 		AA3C062A2A3AF8B9002BD585 /* ControlBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06292A3AF8B9002BD585 /* ControlBar.swift */; };
 		AA3C062D2A3B03C8002BD585 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA3C062B2A3B03C8002BD585 /* InfoPlist.strings */; };
 		AA3C06302A3B03C8002BD585 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA3C062E2A3B03C8002BD585 /* Localizable.strings */; };
@@ -34,7 +30,6 @@
 		AA87D06C2982ADE8002F6B3B /* RFRApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D06B2982ADE8002F6B3B /* RFRApp.swift */; };
 		AA87D06E2982ADE8002F6B3B /* LiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D06D2982ADE8002F6B3B /* LiveView.swift */; };
 		AA87D0702982ADE9002F6B3B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA87D06F2982ADE9002F6B3B /* Assets.xcassets */; };
-		AA87D0732982ADE9002F6B3B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA87D0722982ADE9002F6B3B /* Preview Assets.xcassets */; };
 		AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */; };
 		AA87D0992982B43F002F6B3B /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D0982982B43F002F6B3B /* StatisticsView.swift */; };
 		AA87D09B2982B4CB002F6B3B /* MeasurementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87D09A2982B4CB002F6B3B /* MeasurementView.swift */; };
@@ -47,7 +42,6 @@
 		AAA1AAB429E540D0002CBC91 /* MeasurementsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAB329E540CF002CBC91 /* MeasurementsViewModel.swift */; };
 		AAA1AAB829E6E729002CBC91 /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAB729E6E729002CBC91 /* ErrorView.swift */; };
 		AAA1AABA29E6FAE0002CBC91 /* SynchronizationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAB929E6FAE0002CBC91 /* SynchronizationViewModel.swift */; };
-		AAA1AABC29E84519002CBC91 /* Measurements.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AABB29E84519002CBC91 /* Measurements.swift */; };
 		AAA1AABE29E8895A002CBC91 /* Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AABD29E8895A002CBC91 /* Formatter.swift */; };
 		AAA1AAC129ED4544002CBC91 /* Statistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAC029ED4544002CBC91 /* Statistics.swift */; };
 		AAA1AAC429EED663002CBC91 /* HCaptcha in Frameworks */ = {isa = PBXBuildFile; productRef = AAA1AAC329EED663002CBC91 /* HCaptcha */; };
@@ -67,12 +61,12 @@
 		AACB768729BF67E800A9DB6F /* DataCapturingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */; };
 		AACB768929C0989300A9DB6F /* RFRError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768829C0989300A9DB6F /* RFRError.swift */; };
 		AACB768C29C1C24B00A9DB6F /* InitializationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768B29C1C24B00A9DB6F /* InitializationView.swift */; };
-		AADFB9182B1DD963004F02C8 /* ErrorTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AADFB9172B1DD963004F02C8 /* ErrorTextView.swift */; };
-		AAE8E4662A29F2B5005AA4F1 /* schkeuditz.csv in Resources */ = {isa = PBXBuildFile; fileRef = AAE8E4652A29F2B5005AA4F1 /* schkeuditz.csv */; };
-		AAE8E46A2A29F35A005AA4F1 /* köthen.csv in Resources */ = {isa = PBXBuildFile; fileRef = AAE8E4692A29F35A005AA4F1 /* köthen.csv */; };
 		AAE8E46D2A2A33BB005AA4F1 /* VoucherOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E46C2A2A33BB005AA4F1 /* VoucherOverview.swift */; };
 		AAE8E46F2A2A33E3005AA4F1 /* VoucherReached.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E46E2A2A33E3005AA4F1 /* VoucherReached.swift */; };
 		AAE8E4712A2A33F5005AA4F1 /* VoucherEnabled.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E4702A2A33F5005AA4F1 /* VoucherEnabled.swift */; };
+		AAEF3B452B3187F100BDE7FE /* DataCapturingMessageSubscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEF3B442B3187F100BDE7FE /* DataCapturingMessageSubscriber.swift */; };
+		AAEF3B492B3425C800BDE7FE /* COPYING-APPENDIX-DE in Resources */ = {isa = PBXBuildFile; fileRef = AAEF3B482B3425C800BDE7FE /* COPYING-APPENDIX-DE */; };
+		AAEF3B4B2B3590AA00BDE7FE /* ErrorTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEF3B4A2B3590AA00BDE7FE /* ErrorTextView.swift */; };
 		AAFB60992A31BFA9008AEC76 /* UIKitMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAFB60982A31BFA9008AEC76 /* UIKitMapView.swift */; };
 /* End PBXBuildFile section */
 
@@ -104,10 +98,6 @@
 		AA1E405A2B1764C900CACBE6 /* DataProtection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProtection.swift; sourceTree = "<group>"; };
 		AA1E405C2B17A14D00CACBE6 /* SynchronizeMeasurementUITest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynchronizeMeasurementUITest.swift; sourceTree = "<group>"; };
 		AA1E40632B17EAF100CACBE6 /* Ready for Robots UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Ready for Robots UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA1E40652B17EAF200CACBE6 /* Ready_for_Robots_UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ready_for_Robots_UITests.swift; sourceTree = "<group>"; };
-		AA1E40672B17EAF200CACBE6 /* Ready_for_Robots_UITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ready_for_Robots_UITestsLaunchTests.swift; sourceTree = "<group>"; };
-		AA3C06222A39F3BC002BD585 /* auth.conf.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = auth.conf.json; sourceTree = "<group>"; };
-		AA3C06262A3A0BB4002BD585 /* auth.conf.json.changeme */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = auth.conf.json.changeme; sourceTree = "<group>"; };
 		AA3C06292A3AF8B9002BD585 /* ControlBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBar.swift; sourceTree = "<group>"; };
 		AA3C062C2A3B03C8002BD585 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		AA3C062F2A3B03C8002BD585 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -120,8 +110,7 @@
 		AA87D0682982ADE8002F6B3B /* Ready for Robots Development.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Ready for Robots Development.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA87D06B2982ADE8002F6B3B /* RFRApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRApp.swift; sourceTree = "<group>"; };
 		AA87D06D2982ADE8002F6B3B /* LiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveView.swift; sourceTree = "<group>"; };
-		AA87D06F2982ADE9002F6B3B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		AA87D0722982ADE9002F6B3B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		AA87D06F2982ADE9002F6B3B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../Assets.xcassets; sourceTree = "<group>"; };
 		AA87D0782982ADE9002F6B3B /* RFRTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RFRTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA87D0962982B3ED002F6B3B /* MeasurementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementsView.swift; sourceTree = "<group>"; };
 		AA87D0982982B43F002F6B3B /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
@@ -137,7 +126,6 @@
 		AAA1AAB329E540CF002CBC91 /* MeasurementsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementsViewModel.swift; sourceTree = "<group>"; };
 		AAA1AAB729E6E729002CBC91 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
 		AAA1AAB929E6FAE0002CBC91 /* SynchronizationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynchronizationViewModel.swift; sourceTree = "<group>"; };
-		AAA1AABB29E84519002CBC91 /* Measurements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Measurements.swift; sourceTree = "<group>"; };
 		AAA1AABD29E8895A002CBC91 /* Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatter.swift; sourceTree = "<group>"; };
 		AAA1AAC029ED4544002CBC91 /* Statistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics.swift; sourceTree = "<group>"; };
 		AAA5CEAF2AC56E090088AFA6 /* ImpressumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImpressumView.swift; sourceTree = "<group>"; };
@@ -146,7 +134,7 @@
 		AAC9D2E72983DEC3003C4CC7 /* LiveViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveViewModel.swift; sourceTree = "<group>"; };
 		AAC9D2EE29840651003C4CC7 /* LabelledDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelledDivider.swift; sourceTree = "<group>"; };
 		AAC9D2F029840682003C4CC7 /* AsyncButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncButton.swift; sourceTree = "<group>"; };
-		AAC9D2F229840B9E003C4CC7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		AAC9D2F229840B9E003C4CC7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AAC9D2F329840D83003C4CC7 /* MeasurementCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementCell.swift; sourceTree = "<group>"; };
 		AAC9D2F629891A8D003C4CC7 /* Measurement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Measurement.swift; sourceTree = "<group>"; };
 		AAC9D2FC29895526003C4CC7 /* Altitude.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Altitude.swift; sourceTree = "<group>"; };
@@ -157,12 +145,12 @@
 		AACB768629BF67E800A9DB6F /* DataCapturingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingViewModel.swift; sourceTree = "<group>"; };
 		AACB768829C0989300A9DB6F /* RFRError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRError.swift; sourceTree = "<group>"; };
 		AACB768B29C1C24B00A9DB6F /* InitializationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitializationView.swift; sourceTree = "<group>"; };
-		AADFB9172B1DD963004F02C8 /* ErrorTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorTextView.swift; sourceTree = "<group>"; };
-		AAE8E4652A29F2B5005AA4F1 /* schkeuditz.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = schkeuditz.csv; sourceTree = "<group>"; };
-		AAE8E4692A29F35A005AA4F1 /* köthen.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "köthen.csv"; sourceTree = "<group>"; };
 		AAE8E46C2A2A33BB005AA4F1 /* VoucherOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherOverview.swift; sourceTree = "<group>"; };
 		AAE8E46E2A2A33E3005AA4F1 /* VoucherReached.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherReached.swift; sourceTree = "<group>"; };
 		AAE8E4702A2A33F5005AA4F1 /* VoucherEnabled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherEnabled.swift; sourceTree = "<group>"; };
+		AAEF3B442B3187F100BDE7FE /* DataCapturingMessageSubscriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCapturingMessageSubscriber.swift; sourceTree = "<group>"; };
+		AAEF3B482B3425C800BDE7FE /* COPYING-APPENDIX-DE */ = {isa = PBXFileReference; lastKnownFileType = text; path = "COPYING-APPENDIX-DE"; sourceTree = "<group>"; };
+		AAEF3B4A2B3590AA00BDE7FE /* ErrorTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorTextView.swift; sourceTree = "<group>"; };
 		AAFB60982A31BFA9008AEC76 /* UIKitMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitMapView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -201,8 +189,6 @@
 			isa = PBXGroup;
 			children = (
 				AA1E405C2B17A14D00CACBE6 /* SynchronizeMeasurementUITest.swift */,
-				AA1E40652B17EAF200CACBE6 /* Ready_for_Robots_UITests.swift */,
-				AA1E40672B17EAF200CACBE6 /* Ready_for_Robots_UITestsLaunchTests.swift */,
 			);
 			path = "Ready for Robots UITests";
 			sourceTree = "<group>";
@@ -214,6 +200,7 @@
 				AA3C06292A3AF8B9002BD585 /* ControlBar.swift */,
 				AA87D06D2982ADE8002F6B3B /* LiveView.swift */,
 				AA3C06552A4180DC002BD585 /* MainMap.swift */,
+				AAEF3B442B3187F100BDE7FE /* DataCapturingMessageSubscriber.swift */,
 			);
 			path = Live;
 			sourceTree = "<group>";
@@ -260,7 +247,6 @@
 			children = (
 				AA87D0982982B43F002F6B3B /* StatisticsView.swift */,
 				AAA1AAC029ED4544002CBC91 /* Statistics.swift */,
-				AAA1AABB29E84519002CBC91 /* Measurements.swift */,
 			);
 			path = Statistics;
 			sourceTree = "<group>";
@@ -268,6 +254,7 @@
 		AA87D05F2982ADE8002F6B3B = {
 			isa = PBXGroup;
 			children = (
+				AAEF3B482B3425C800BDE7FE /* COPYING-APPENDIX-DE */,
 				AA11963D29924A6F008161C4 /* COPYING */,
 				AA11963C29924961008161C4 /* README.md */,
 				AA87D09C2982B511002F6B3B /* Packages */,
@@ -297,15 +284,9 @@
 				AA3C064C2A3E46CF002BD585 /* Measurements */,
 				AA3C064B2A3E4621002BD585 /* Voucher */,
 				AA3C064F2A3E4C9E002BD585 /* Statistics */,
-				AAC9D2F229840B9E003C4CC7 /* Info.plist */,
-				AA3C062E2A3B03C8002BD585 /* Localizable.strings */,
-				AA3C062B2A3B03C8002BD585 /* InfoPlist.strings */,
 				AAC9D2ED2984061D003C4CC7 /* Components */,
 				AA87D09E2983DC49002F6B3B /* ViewModel */,
 				AACB768A29C0989D00A9DB6F /* Error */,
-				AA87D06F2982ADE9002F6B3B /* Assets.xcassets */,
-				AAE8E4642A29F26F005AA4F1 /* Resources */,
-				AA87D0712982ADE9002F6B3B /* Preview Content */,
 				AAA1AAAF29DB1F0C002CBC91 /* Preview_Mocks.swift */,
 				AACB768429BF671600A9DB6F /* LoadinScreen.swift */,
 				AA87D06B2982ADE8002F6B3B /* RFRApp.swift */,
@@ -317,22 +298,12 @@
 				AAA5CEB12AC56E4A0088AFA6 /* ProfileView.swift */,
 				AA9AF31C2AEA8E9E0003BE54 /* Config.swift */,
 				AA9AF31E2AEA8EAD0003BE54 /* ConfigLoader.swift */,
-				AA199DE52AFD0EF400DE4D4A /* Development.json */,
-				AA199DE72AFD0F0C00DE4D4A /* Staging.json */,
-				AA199DE92AFD0F1D00DE4D4A /* Production.json */,
 				AA1E40582B175C5300CACBE6 /* WebView.swift */,
 				AA1E405A2B1764C900CACBE6 /* DataProtection.swift */,
 				AAC610632B231B070083AED5 /* DeleteAccountConfirmationDialog.swift */,
+				AAE8E4642A29F26F005AA4F1 /* Resources */,
 			);
 			path = RFR;
-			sourceTree = "<group>";
-		};
-		AA87D0712982ADE9002F6B3B /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				AA87D0722982ADE9002F6B3B /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		AA87D07B2982ADE9002F6B3B /* RFRTests */ = {
@@ -383,7 +354,7 @@
 			children = (
 				AAA1AAB729E6E729002CBC91 /* ErrorView.swift */,
 				AACB768829C0989300A9DB6F /* RFRError.swift */,
-				AADFB9172B1DD963004F02C8 /* ErrorTextView.swift */,
+				AAEF3B4A2B3590AA00BDE7FE /* ErrorTextView.swift */,
 			);
 			path = Error;
 			sourceTree = "<group>";
@@ -391,10 +362,13 @@
 		AAE8E4642A29F26F005AA4F1 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				AAE8E4652A29F2B5005AA4F1 /* schkeuditz.csv */,
-				AAE8E4692A29F35A005AA4F1 /* köthen.csv */,
-				AA3C06222A39F3BC002BD585 /* auth.conf.json */,
-				AA3C06262A3A0BB4002BD585 /* auth.conf.json.changeme */,
+				AA87D06F2982ADE9002F6B3B /* Assets.xcassets */,
+				AA3C062E2A3B03C8002BD585 /* Localizable.strings */,
+				AAC9D2F229840B9E003C4CC7 /* Info.plist */,
+				AA3C062B2A3B03C8002BD585 /* InfoPlist.strings */,
+				AA199DE52AFD0EF400DE4D4A /* Development.json */,
+				AA199DE72AFD0F0C00DE4D4A /* Staging.json */,
+				AA199DE92AFD0F1D00DE4D4A /* Production.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -527,15 +501,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAEF3B492B3425C800BDE7FE /* COPYING-APPENDIX-DE in Resources */,
 				AA199DE82AFD0F0C00DE4D4A /* Staging.json in Resources */,
 				AA199DEA2AFD0F1D00DE4D4A /* Production.json in Resources */,
-				AAE8E4662A29F2B5005AA4F1 /* schkeuditz.csv in Resources */,
-				AA87D0732982ADE9002F6B3B /* Preview Assets.xcassets in Resources */,
-				AAE8E46A2A29F35A005AA4F1 /* köthen.csv in Resources */,
 				AA199DE62AFD0EF400DE4D4A /* Development.json in Resources */,
-				AA3C06232A39F3BC002BD585 /* auth.conf.json in Resources */,
 				AA3C06302A3B03C8002BD585 /* Localizable.strings in Resources */,
-				AA3C06272A3A0BB4002BD585 /* auth.conf.json.changeme in Resources */,
 				AA3C062D2A3B03C8002BD585 /* InfoPlist.strings in Resources */,
 				AA87D0702982ADE9002F6B3B /* Assets.xcassets in Resources */,
 			);
@@ -556,8 +526,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA1E40722B17EB0B00CACBE6 /* SynchronizeMeasurementUITest.swift in Sources */,
-				AA1E40662B17EAF200CACBE6 /* Ready_for_Robots_UITests.swift in Sources */,
-				AA1E40682B17EAF200CACBE6 /* Ready_for_Robots_UITestsLaunchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -570,14 +538,15 @@
 				AA3C06512A40ED57002BD585 /* VoucherOverviewModel.swift in Sources */,
 				AAC9D2E82983DEC3003C4CC7 /* LiveViewModel.swift in Sources */,
 				AAA1AAAE29D6FB8D002CBC91 /* OSLog.swift in Sources */,
+				AAEF3B452B3187F100BDE7FE /* DataCapturingMessageSubscriber.swift in Sources */,
 				AAC9D2EF29840651003C4CC7 /* LabelledDivider.swift in Sources */,
 				AAA5CEB02AC56E090088AFA6 /* ImpressumView.swift in Sources */,
 				AAC9D2F729891A8D003C4CC7 /* Measurement.swift in Sources */,
 				AA3C06562A4180DC002BD585 /* MainMap.swift in Sources */,
 				AA6C48962A93629800C3633D /* OAuthLoginView.swift in Sources */,
 				AA6C48A12A94F73100C3633D /* OAuthAuthenticator.swift in Sources */,
+				AAEF3B4B2B3590AA00BDE7FE /* ErrorTextView.swift in Sources */,
 				AA3C062A2A3AF8B9002BD585 /* ControlBar.swift in Sources */,
-				AADFB9182B1DD963004F02C8 /* ErrorTextView.swift in Sources */,
 				AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */,
 				AACB768729BF67E800A9DB6F /* DataCapturingViewModel.swift in Sources */,
 				AAE8E46D2A2A33BB005AA4F1 /* VoucherOverview.swift in Sources */,
@@ -606,7 +575,6 @@
 				AAC9D2FF29895D16003C4CC7 /* KeyValueView.swift in Sources */,
 				AACB768529BF671600A9DB6F /* LoadinScreen.swift in Sources */,
 				AAFB60992A31BFA9008AEC76 /* UIKitMapView.swift in Sources */,
-				AAA1AABC29E84519002CBC91 /* Measurements.swift in Sources */,
 				AA8FC7692A2DB438006D52F3 /* VoucherViewModel.swift in Sources */,
 				AAC610642B231B070083AED5 /* DeleteAccountConfirmationDialog.swift in Sources */,
 				AAA5CEB22AC56E4A0088AFA6 /* ProfileView.swift in Sources */,
@@ -726,12 +694,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RFR/Info.plist;
+				INFOPLIST_FILE = RFR/Resources/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
@@ -744,7 +712,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.1;
+				MARKETING_VERSION = 3.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "Ready for Robots";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -843,12 +811,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RFR/Info.plist;
+				INFOPLIST_FILE = RFR/Resources/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
@@ -861,7 +829,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.1;
+				MARKETING_VERSION = 3.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.staging;
 				PRODUCT_NAME = "Ready for Robots Staging";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -954,12 +922,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RFR/Info.plist;
+				INFOPLIST_FILE = RFR/Resources/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
@@ -972,7 +940,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.1;
+				MARKETING_VERSION = 3.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.staging;
 				PRODUCT_NAME = "Ready for Robots Staging";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1065,12 +1033,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RFR/Info.plist;
+				INFOPLIST_FILE = RFR/Resources/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
@@ -1083,7 +1051,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.1;
+				MARKETING_VERSION = 3.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "Ready for Robots";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1660,12 +1628,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RFR/Info.plist;
+				INFOPLIST_FILE = RFR/Resources/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
@@ -1678,7 +1646,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.1;
+				MARKETING_VERSION = 3.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.dev;
 				PRODUCT_NAME = "Ready for Robots Development";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1696,12 +1664,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_ASSET_PATHS = "\"RFR/Preview Content\"";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RFR/Info.plist;
+				INFOPLIST_FILE = RFR/Resources/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
@@ -1714,7 +1682,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.1;
+				MARKETING_VERSION = 3.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.dev;
 				PRODUCT_NAME = "Ready for Robots Development";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

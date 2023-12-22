@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -23,17 +23,41 @@ import CoreLocation
 import Combine
 import os.log
 
+/**
+This protocol defines a measurements data together with its lifecycle during data capturing.
+
+ This is probably the most central part of the Cyface SDK for iOS, as it steers the actual data capturing.
+ Data received from this process could be stored to a data storage using for example an implementation of `DataStoreStack`.
+ It can also be transmitted to a Cyface data collector server using using an implementation of `UploadProcess`.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 12.0.0
+ */
 public protocol Measurement {
-    //var dataStoreStack: DataStoreStack { get }
-    // var handler: [((DataCapturingEvent, Status) -> Void)] { get set }
+    /// A combine subject used to receive messages during data capturing and forwarding them, to whoever wants to listen.
     var measurementMessages: PassthroughSubject<Message, Never> { get }
+    /// A flag to get information about whether this measurement is currently running (`true`) or not (`false`).
     var isRunning: Bool { get }
+    /// A flag to get information about whether this measurement is currently paused (`true`) or not (`false`).
     var isPaused: Bool { get }
-    //func setup()
+    /// Start this measurement.
+    ///
+    /// - Parameter inMode: The transportation mode initially used for this measurement (such as BICYCLE, CAR, etc.). To get a list of valid modalities, consult the documentation of your data collector server.
     func start(inMode modality: String) throws
+    /// Stop this measurement for sure in contrast to a pause you can not resume after stopping.
+    /// This throws an exception if not currently running or paused.
     func stop() throws
+    /// Pause this measurement and continue sometime in the future.
+    /// This throws an exception if not currently running.
     func pause() throws
+    /// Resume a paused measurement.
+    /// This throws an exception if not currently paused.
     func resume() throws
+    /// Switch the transportation mode of this measurement from now on.
+    /// This can be used if the user for example switches from walking to public transport.
+    ///
+    /// - Parameter modality: The modality to switch to.
     func changeModality(to modality: String)
 }
 
@@ -68,7 +92,7 @@ public class MeasurementImpl {
 
     private let locationCapturer: LocationCapturer
 
-    // TODO: Switch to Combine
+    // TODO: Switch to Combine --> Make this a publisher on its own. Will have to read up on how to achieve this.
     /// A list of listeners that are notified of important events during data capturing.
     // public var handler = [((DataCapturingEvent, Status) -> Void)]()
     //@Published var mostRecentMessage: Message
@@ -96,15 +120,8 @@ public class MeasurementImpl {
      Creates a new completely initialized `DataCapturingService` accessing data a certain amount of times per second.
 
      - Parameters:
-     - sensorManager: An instance of `CMMotionManager`.
-     There should be only one instance of this type in your application.
-     Since it seems to be impossible to create that instance inside a framework at the moment, you have to provide it via this parameter.
-     - accelerometerInterval: The accelerometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
-     - gyroInterval: The gyroscope update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
-     - directionsInterval: The magnetometer update interval in Hertz. By default this is set to the supported maximum of 100 Hz.
-     - savingInterval: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
-     - dataManager: The `CoreData` stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
-     - eventHandler: An optional handler used by the capturing process to inform about `DataCapturingEvent`s.
+        - capturingQueue: The background queue to run data capturing on, so the UI is not blocked.
+        - locationManagerFactory: A factory creating a *CoreLocation* `LocationManager` on demand. This can also be used to inject a mock implementation.
      */
     public init(
         //lifecycleQueue: DispatchQueue,
@@ -325,15 +342,8 @@ extension MeasurementImpl: Measurement {
     /**
      Starts the capturing process.
 
-     This startup procedure is asynchronous.
-     The event handler provided to the initializer receives a `DataCapturingEvent.serviceStarted`, after the startup has finished.
-     If an error happened during this process, it is provided as part of this handlers `Status` argument.
-
      - Parameters:
-     - modality: The mode of transportation to use for the newly created measurement. This should be something like "car" or "bicycle".
-
-     - Throws:
-     - `DataCapturingError.isPaused` if the service was paused and thus starting it makes no sense. If you need to continue call `resume(((DataCapturingEvent) -> Void))`.
+        - modality: The mode of transportation to use for the newly created measurement. This should be something like "car" or "bicycle".
      */
     public func start(inMode modality: String) throws {
         try lifecycleQueue.sync {
@@ -367,12 +377,9 @@ Starting data capturing on paused service. Finishing paused measurements and sta
     }
 
     /**
-     Stops the currently running or paused data capturing process or does nothing if the process is not
-     running.
+     Stops the currently running or paused data capturing process.
 
-     - Throws:
-     - `PersistenceError` If the currently captured measurement was not found in the database.
-     - Some unspecified errors from within *CoreData*.
+     - Throws: `DataCapturingError.notPaused` or `DataCapturingError.notRunning` if the measurement is not running or paused.
      */
     public func stop() throws {
         try lifecycleQueue.sync {
@@ -410,9 +417,8 @@ Starting data capturing on paused service. Finishing paused measurements and sta
     /**
      Pauses the current data capturing measurement for the moment. No data is captured until `resume()` has been called, but upon the call to `resume()` the last measurement will be continued instead of beginning a new now.
 
-     - Throws:
-     - `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.
-     - `DataCapturingError.isPaused` if the service was already paused and pausing it again makes no sense.
+     - Throws: `DataCaturingError.notRunning` if the service was not running and thus pausing it makes no sense.
+     - Throws: `DataCapturingError.isPaused` if the service was already paused and pausing it again makes no sense.
      */
     public func pause() throws {
         try lifecycleQueue.sync {
@@ -452,10 +458,9 @@ Starting data capturing on paused service. Finishing paused measurements and sta
     /**
      Resumes the current data capturing with the data capturing measurement that was running when `pause()` was called. A call to this method is only valid after a call to `pause()`. It is going to fail if used after `start()` or `stop()`.
 
-     - Throws:
-     - `DataCapturingError.notPaused`: If the service was not paused and thus resuming it makes no sense.
-     - `DataCapturingError.isRunning`: If the service was running and thus resuming it makes no sense.
-     - `DataCapturingError.noCurrentMeasurement`: If no current measurement is available while resuming data capturing.
+     - Throws: `DataCapturingError.notPaused`: If the service was not paused and thus resuming it makes no sense.
+     - Throws: `DataCapturingError.isRunning`: If the service was running and thus resuming it makes no sense.
+     - Throws: `DataCapturingError.noCurrentMeasurement`: If no current measurement is available while resuming data capturing.
      */
     public func resume() throws {
         try lifecycleQueue.sync {
@@ -528,6 +533,8 @@ Starting data capturing on paused service. Finishing paused measurements and sta
  This struct exists to save time on a new location by just storing it away. It needs to be converted to a GeoLocation prior to persitent storage.
 
  - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 11.0.0
  */
 public struct LocationCacheEntry: Equatable, Hashable, CustomStringConvertible {
     /// The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion.

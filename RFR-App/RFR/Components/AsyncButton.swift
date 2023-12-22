@@ -8,22 +8,22 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * The Ready for Robots App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots App. If not, see <http://www.gnu.org/licenses/>.
  */
-import Foundation
 import SwiftUI
 
 /**
  A button, that shows a spinner icon, while the action it triggered is processed.
 
- - author: Klemens Muthmann
- - version: 1.0.0
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
  */
 struct AsyncButton<Label: View>: View {
     /// The action to trigger, when this button is pressed.
@@ -34,9 +34,9 @@ struct AsyncButton<Label: View>: View {
     @ViewBuilder var label: () -> Label
 
     /// The starting state of being disabled.
-    @State private var isDisabled = false
+    @State var isDisabled = false
     /// The starting state of showing a progress view.
-    @State private var showProgressView = false
+    @State var showProgressView = false
 
     var body: some View {
         Button(
@@ -107,11 +107,17 @@ extension AsyncButton where Label == Image {
 }
 
 #if DEBUG
-struct AsyncButton_Previews: PreviewProvider {
-    static var previews: some View {
-        AsyncButton("Button") {
+#Preview("Active") {
+    AsyncButton("Button") {
 
-        }
     }
+}
+
+#Preview("Progress") {
+    AsyncButton(action: {}, label: {Text("Button")}, showProgressView: true)
+}
+
+#Preview("Inactive") {
+    AsyncButton(action: {}, label: {Text("Button")}, isDisabled: true)
 }
 #endif

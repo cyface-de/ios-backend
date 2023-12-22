@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019-2023 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -27,7 +27,7 @@ import CoreLocation
  The idea behind this is described in detail for example here: https://rwhtechnology.com/blog/unit-test-cllocationmanager-with-mock/
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 4.0.0
  */
 public protocol LocationManager {

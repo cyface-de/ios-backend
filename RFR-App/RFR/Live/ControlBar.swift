@@ -8,13 +8,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * The Ready for Robots App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots App. If not, see <http://www.gnu.org/licenses/>.
  */
 import SwiftUI
 import DataCapturing
@@ -24,10 +24,21 @@ import DataCapturing
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 struct ControlBar: View {
+    /// The view model backing this view.
     @ObservedObject var viewModel: LiveViewModel
+    /// If an error occured during the measurement, this will have a value and can be displayed to the user.
     @State var error: Error?
+    /// This is `true` if an error should be shown and `false` otherwise.
+    var isShowingError: Binding<Bool> {
+        Binding {
+            error != nil
+        } set: { _ in
+            error = nil
+        }
+    }
 
     var body: some View {
         HStack {
@@ -70,58 +81,86 @@ struct ControlBar: View {
             .disabled(MeasurementState.stopped == viewModel.measurementState)
             .accessibilityIdentifier("de.cyface.rfr.button.stop")
         }
+        .alert(
+            "error",
+            isPresented: isShowingError,
+            presenting: error) { error in
+                // If you want buttons other than OK, add here
+            } message: { error in
+                Text(error.localizedDescription)
+            }
     }
 }
 
 #if DEBUG
-struct ControlBar_Previews: PreviewProvider {
-    static var previews: some View {
-        ControlBar(
-            viewModel: LiveViewModel(
-                dataStoreStack: MockDataStoreStack(
-                    persistenceLayer: MockPersistenceLayer(
-                        measurements: [
-                            FinishedMeasurement(identifier: 0),
-                            FinishedMeasurement(identifier: 1),
-                            FinishedMeasurement(identifier: 2)
-                        ]
-                    )
-                ),
-                dataStorageInterval: 5.0
-            )
+#Preview("Stopped") {
+    ControlBar(
+        viewModel: LiveViewModel(
+            dataStoreStack: MockDataStoreStack(
+                persistenceLayer: MockPersistenceLayer(
+                    measurements: [
+                        FinishedMeasurement(identifier: 0),
+                        FinishedMeasurement(identifier: 1),
+                        FinishedMeasurement(identifier: 2)
+                    ]
+                )
+            ),
+            dataStorageInterval: 5.0
         )
+    )
+}
 
-        ControlBar(
-            viewModel: LiveViewModel(
-                measurementState: .running,
-                dataStoreStack: MockDataStoreStack(
-                    persistenceLayer: MockPersistenceLayer(
-                        measurements: [
-                            FinishedMeasurement(identifier: 0),
-                            FinishedMeasurement(identifier: 1),
-                            FinishedMeasurement(identifier: 2)
-                        ]
-                    )
-                ),
-                dataStorageInterval: 5.0
-            )
+#Preview("Running") {
+    ControlBar(
+        viewModel: LiveViewModel(
+            measurementState: .running,
+            dataStoreStack: MockDataStoreStack(
+                persistenceLayer: MockPersistenceLayer(
+                    measurements: [
+                        FinishedMeasurement(identifier: 0),
+                        FinishedMeasurement(identifier: 1),
+                        FinishedMeasurement(identifier: 2)
+                    ]
+                )
+            ),
+            dataStorageInterval: 5.0
         )
+    )
+}
 
-        ControlBar(
-            viewModel: LiveViewModel(
-                measurementState: .paused,
-                dataStoreStack: MockDataStoreStack(
-                    persistenceLayer: MockPersistenceLayer(
-                        measurements: [
-                            FinishedMeasurement(identifier: 0),
-                            FinishedMeasurement(identifier: 1),
-                            FinishedMeasurement(identifier: 2)
-                        ]
-                    )
-                ),
-                dataStorageInterval: 5.0
-            )
+#Preview("Paused") {
+    ControlBar(
+        viewModel: LiveViewModel(
+            measurementState: .paused,
+            dataStoreStack: MockDataStoreStack(
+                persistenceLayer: MockPersistenceLayer(
+                    measurements: [
+                        FinishedMeasurement(identifier: 0),
+                        FinishedMeasurement(identifier: 1),
+                        FinishedMeasurement(identifier: 2)
+                    ]
+                )
+            ),
+            dataStorageInterval: 5.0
         )
-    }
+    )
+}
+
+#Preview("Showing Error") {
+    ControlBar(
+        viewModel: LiveViewModel(
+            dataStoreStack: MockDataStoreStack(
+                persistenceLayer: MockPersistenceLayer(
+                    measurements: [
+                        FinishedMeasurement(identifier: 0),
+                        FinishedMeasurement(identifier: 1),
+                        FinishedMeasurement(identifier: 2)
+                    ]
+                )
+            ),
+            dataStorageInterval: 5.0
+        ),
+        error: DataCapturingError.isPaused
+    )
 }
 #endif

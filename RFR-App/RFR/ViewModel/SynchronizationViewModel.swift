@@ -27,6 +27,7 @@ import UIKit
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 class SynchronizationViewModel: ObservableObject {
     /// Showing an error dialog if not `nil`.
@@ -90,6 +91,7 @@ class SynchronizationViewModel: ObservableObject {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 struct UploadStatus {
     /// The measurement identifier of this status.
@@ -103,6 +105,7 @@ struct UploadStatus {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 enum UploadStatusType: CustomStringConvertible {
     /// Upload has been started

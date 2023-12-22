@@ -22,11 +22,14 @@ import Foundation
 /**
  A wrapper for the current login status.
 
- This is used for passing it around as a reference object.
+ This could just be a boolean property.
+ However to pass it around as an environment object, it is easier to work with an instance of a custom class.
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.2.1
  */
 class LoginStatus: ObservableObject {
+    /// The current login status. This is `true` if the user has been logged in; `false` otherwise.
     @Published var isLoggedIn = false
 }

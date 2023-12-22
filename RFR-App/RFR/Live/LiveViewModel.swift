@@ -1,20 +1,20 @@
 /*
  * Copyright 2023 Cyface GmbH
  *
- * This file is part of the Read-for-Robots iOS App.
+ * This file is part of the Ready for Robots iOS App.
  *
- * The Read-for-Robots iOS App is free software: you can redistribute it and/or modify
+ * The Ready for Robots iOS App is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Read-for-Robots iOS App is distributed in the hope that it will be useful,
+ * The Ready for Robots iOS App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Read-for-Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
  */
 import Foundation
 import DataCapturing
@@ -32,6 +32,7 @@ import CoreLocation
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  - SeeAlso: ``LiveView``
  */
 class LiveViewModel: ObservableObject {
@@ -47,8 +48,8 @@ class LiveViewModel: ObservableObject {
     @Published var distance: String
     /// How to display the duration this ``Measurement`` has already taken.
     @Published var duration: String
-    /// How to display the current rise during the active ``Measurement``.
-    @Published var rise: String
+    /// How to display the current inclination during the active ``Measurement``.
+    @Published var inclination: String
     /// How to display the avoided emissions during the active ``Measurement``.
     @Published var avoidedEmissions: String
     /// Access to the underlying data store.
@@ -183,7 +184,7 @@ class LiveViewModel: ObservableObject {
                         "\(formattedRise) m"
                     }
                     .receive(on: RunLoop.main)
-                    .assign(to: &$rise)
+                    .assign(to: &$inclination)
 
                 // 
                 distanceFlow.map {
@@ -207,7 +208,7 @@ class LiveViewModel: ObservableObject {
     private var _measurement: DataCapturing.Measurement?
     /// The identifier of the currently captured ``Measurement``
     private var identifier: UInt64?
-    /// Store the
+    /// Store all the running *Combine* process, while they run.
     private var cancellables = [AnyCancellable]()
     /// Captures and publishes any error produced by this model.
     @Published var error: Error?
@@ -220,6 +221,15 @@ class LiveViewModel: ObservableObject {
      By default most of the parameters are set to some default null value.
      However you must provide a ``DataStoreStack`` to store the data captured during a ``Measurement`` as well as the interval for how often to save captured data.
 
+     - Parameter speed: How to display the current speed of the user.
+     - Parameter averageSpeed: How to display the average speed of the user.
+     - Parameter measurementState: The state the active ``Measurement`` is in.
+     - Parameter measurementName: The name to display for this ``Measurement``.
+     - Parameter distance: How to display the distance already travelled during this ``Measurement``.
+     - Parameter duration: How to display the duration this ``Measurement`` has already taken.
+     - Parameter inclination: How to display the current inclination during the active ``Measurement``.
+     - Parameter avoidedEmissions: How to display the avoided emissions during the active ``Measurement``.
+     - Parameter dataStoreStack: Access to the underlying data store.
      - Parameter dataStorageInterval: The time in seconds of how often to store data to the `dataStoreStack`. Data captured in between is queued and then bulk inserted.
      */
     init(
@@ -229,7 +239,7 @@ class LiveViewModel: ObservableObject {
         measurementName: String = "",
         distance: Double = 0.0,
         duration: TimeInterval = 0.0,
-        rise: Double = 0.0,
+        inclination: Double = 0.0,
         avoidedEmissions: Double = 0.0,
         dataStoreStack: DataStoreStack,
         dataStorageInterval: Double
@@ -256,7 +266,7 @@ class LiveViewModel: ObservableObject {
             fatalError()
         }
 
-        guard let formattedRise = riseFormatter.string(from: rise as NSNumber) else {
+        guard let formattedInclination = riseFormatter.string(from: inclination as NSNumber) else {
             fatalError()
         }
 
@@ -266,7 +276,7 @@ class LiveViewModel: ObservableObject {
         self.measurementName = measurementName
         self.distance = "\(formattedDistance) km"
         self.duration = formattedDuration
-        self.rise = "\(formattedRise) m"
+        self.inclination = "\(formattedInclination) m"
         self.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
     }
 
@@ -311,7 +321,7 @@ class LiveViewModel: ObservableObject {
         self.measurementName = measurementName
         self.distance = "\(formattedDistance) km"
         self.duration = formattedDuration
-        self.rise = "\(formattedRise) m"
+        self.inclination = "\(formattedRise) m"
         self.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
     }
 
@@ -321,12 +331,12 @@ class LiveViewModel: ObservableObject {
     func onStopPressed() throws {
         if measurement.isRunning || measurement.isPaused {
             try measurement.stop()
-            cancellables.forEach {
+            self.cancellables.forEach {
                 $0.cancel()
             }
-            cancellables.removeAll(keepingCapacity: true)
-            _measurement = nil
-            dataStorageProcess.unsubscribe()
+            self.cancellables.removeAll(keepingCapacity: true)
+            self._measurement = nil
+            self.dataStorageProcess.unsubscribe()
         }
     }
 
@@ -360,7 +370,6 @@ class LiveViewModel: ObservableObject {
     func onPausePressed() throws {
         if measurement.isRunning {
             try measurement.pause()
-            dataStorageProcess.unsubscribe()
         }
     }
 
@@ -445,6 +454,7 @@ class LiveViewModel: ObservableObject {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 enum MeasurementState {
     /// The ``Measurement`` is active at the moment.

@@ -141,6 +141,9 @@ The returned status code is provided as an Int as the first parameter! */
 "E-Mail: mail@cyface.de\nTelefon: +49 351 6 475 2580" = "E-Mail: mail@cyface.de\nTelefon: +49 351 6 475 2580";
 
 /* No comment provided by engineer. */
+"error" = "Fehler";
+
+/* No comment provided by engineer. */
 "Error: Data Capturing Service was not yet initialized!" = "Datenaufzeichnungsdienst war noch nicht gestartet.";
 
 /* No comment provided by engineer. */

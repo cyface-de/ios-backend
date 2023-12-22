@@ -8,19 +8,27 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * The Ready for Robots App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots App. If not, see <http://www.gnu.org/licenses/>.
  */
 import Foundation
 import OSLog
 import DataCapturing
 import CoreLocation
 
+// TODO: This should probably become part of the MeasurementsViewModel
+/**
+ A collection of static utility methods for calculating statistics.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
+ */
 struct Statistics {
     /// The minimum number of meters before the ascend is increased, to filter sensor noise.
     static let ascendThresholdMeters = 2.0
@@ -79,6 +87,7 @@ struct Statistics {
     /// (0,18249 g/m * 63 + 0,1802 g/m * 30) / 93 = 0,180938709677419 g/m
     static let averageCarbonEmissionsInGrammsPerMeter = 0.180938709677419
 
+    /// Calculate the avoided emissions for a covered distance, if that distance was covered by bike instead of by car.
     static func avoidedEmissions(_ distanceInMeters: Double) -> Double {
         return distanceInMeters * averageCarbonEmissionsInGrammsPerMeter
     }
@@ -96,10 +105,13 @@ struct Statistics {
         return ret
     }
 
+    /// Calculate the average speed over an array of ``MeasurementTimeline`` instances.
     static func averageSpeed(timelines: [MeasurementTimeline]) -> Double {
         return averageSpeed(timelines: timelines.map { $0.measurements })
     }
 
+    /// Calculate the average speed over an array of arrays of ``MeasurementPoint`` instances.
+    /// This rather peculiar representation is created from the fact, that a measurement might consist of multiple tracks interrupted by pauses.
     static func averageSpeed(timelines: [[MeasurementPoint]]) -> Double {
         var sum = 0.0
         var counter = 0
@@ -119,10 +131,12 @@ struct Statistics {
         }
     }
 
+    /// Calculate the average speed over an array of ``MeasurementTimeline`` instances.
     static func duration(timelines: [MeasurementTimeline]) -> Double {
         return duration(timelines: timelines.map { $0.measurements })
     }
 
+    /// Calculate the average speed over an array of arrays of ``MeasurementPoint`` instances.
     static func duration(timelines: [[MeasurementPoint]]) -> Double {
         return timelines.map { timeline in
             var totalTime = TimeInterval()
@@ -138,25 +152,71 @@ struct Statistics {
     }
 }
 
+/**
+ A timeline of sattelite based and barometric altitude values.
+
+ This protocol is required to make CoreData model objects compatible with the statistics.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
+ */
 protocol AltitudeTimeline {
     var sattelite: [SatteliteAltitude] { get }
     var barometric: [BarometricAltitude] { get }
 }
 
+/**
+ A timeline of ``MeasurementPoint`` instances.
+
+ This protocol is required to make CoreData model objects compatible with the statistics.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
+ */
 protocol MeasurementTimeline {
     var measurements: [MeasurementPoint] { get }
 }
 
+/**
+ A timeline of ``SatteliteAltitude`` values.
+
+ This protocol is required to make CoreData model objects compatible with the statistics.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
+ */
 protocol SatteliteAltitude {
     var value: Double { get }
     var accuracy: Double { get }
 }
 
+/**
+ A single measurement point at a certain time of a certain speed.
+
+ This protocol is required to make CoreData model objects compatible with the statistics.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
+ */
 protocol MeasurementPoint {
     var speed: Double { get }
     var timestamp: Date? { get }
 }
 
+/**
+ A barometric altitude value as reported by the phones altitude API.
+
+ This protocol is required to make CoreData model objects compatible with the statistics.
+
+ - SeeAlso: The Apple documentation to get the exact meaning of this value. It is the raw value reported by the API.
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
+ */
 protocol BarometricAltitude {
     var value: Double { get }
 }

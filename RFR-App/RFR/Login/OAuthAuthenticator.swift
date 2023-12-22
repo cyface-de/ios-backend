@@ -8,13 +8,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * The Ready for Robots App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots App. If not, see <http://www.gnu.org/licenses/>.
  */
 import Foundation
 import AppAuth
@@ -24,8 +24,13 @@ import OSLog
 /**
  An ``DataCapturing.Authenticator`` implementation to realize an OAuth Auth flow.
 
+ The implementation uses the [AppAuth framework](https://github.com/openid/AppAuth-iOS).
+ The process starts an embedded browser window which communicates with the identity server.
+ This ensures, that the application does not get the login information from the user and cannot be missused.
+
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  */
 class OAuthAuthenticator {
     // MARK: - Static Properties
@@ -35,22 +40,43 @@ class OAuthAuthenticator {
     private static let appAuthStateKey = "de.cyface.authstate"
 
     // MARK: - Properties
+    /// The `UIViewController` to call after the login process in the embedded browser window has finished.
     var callbackController: UIViewController? = nil
+    /// The internal AppAuth auth state.
+    /// This is the central place from the framework, where auth information is stored.
     private var authState: OIDAuthState? {
         didSet {
             saveState(authState, OAuthAuthenticator.appAuthStateKey)
         }
     }
+    /// The issuer is the identity provider used to authenticate with a Ready for Robots account. Ready for Robots uses Keycloak as identity provider.
     public let issuer: URL
+    /// A URI used by the identity provider to hand control back to the application.
+    /// This URI is registered in the system and allows to deep link directly to the login page.
     private let redirectUri: URL
+    /// The API endpoint is required to call the management API for functions not provided via the OAuth2 / OpenID standard.
+    /// One example is the delete function.
     private let apiEndpoint: URL
+    /// The identifier registered for this client with the identity provider.
     private let clientId: String
+    /// The auth flow used by AppAuth.
+    /// This must be registered here, like stated by the AppAuth documetation.
     private var currentAuthorizationFlow: OIDExternalUserAgentSession?
+    /// The configuration of the identity provider server.
+    /// This contains all the relevant URLs for communicating with the identity provider server.
     private var config: OIDServiceConfiguration?
+    /// The current identity token, containing information about the authenticated user.
+    /// [Siehe](https://auth0.com/blog/id-token-access-token-what-is-the-difference/)
     private var idToken: String?
 
     // MARK: - Initializers
-    /// - Parameter apiEndpoint: The endpoint running the Cyface API containing user self management.
+    /// Creates a new `OAuthAuthenticator` initialized for using a specific identity provider.
+    ///
+    /// - Parameters:
+    ///     - issuer: The issuer is the identity provider used to authenticate with a Ready for Robots account. Ready for Robots uses Keycloak as identity provider.
+    ///     - redirectUri: A URI used by the identity provider to hand control back to the application.
+    ///     - apiEndpoint: The endpoint running the Cyface API containing user self management.
+    ///     - clientId: The identifier registered for this client with the identity provider.
     init(issuer: URL, redirectUri: URL, apiEndpoint: URL, clientId: String) {
         self.issuer = issuer
         self.redirectUri = redirectUri
@@ -59,7 +85,17 @@ class OAuthAuthenticator {
         self.authState = loadState(OAuthAuthenticator.appAuthStateKey)
     }
 
+    // MARK: - Methods
+    /// Provide the view controller that started this application. This is required to hand control back to the application after the login process finished.
+    func rootViewController() -> UIViewController {
+        let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+        return scene!.keyWindow!.rootViewController!
+    }
+
     // MARK: - Private Methods
+    /// Do a discovery call with the identity provider.
+    /// - Throws: ``OAuthAuthenticatorError.discoveryFailed`` on any error during authentication.
+    /// The cause for this error is provided as a paramter to the thrown error.
     private func serviceDiscovery() async throws -> OIDServiceConfiguration {
         os_log("Authentication: Discovering Settings", log: OSLog.authorization, type: .debug)
         if let config = self.config {
@@ -80,6 +116,7 @@ class OAuthAuthenticator {
         }
     }
 
+    /// Do the actual authentication call and return control back to the application after having finished.
     private func doAuth(presenting callbackWindow: UIViewController) async throws {
         os_log("Authentication: Doing Authentication", log: OSLog.authorization, type: .debug)
         let clientId = clientId
@@ -117,11 +154,6 @@ class OAuthAuthenticator {
         }
     }
 
-    func rootViewController() -> UIViewController {
-        let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene
-        return scene!.keyWindow!.rootViewController!
-    }
-
     // TODO: Store state in keychain
     /// Store the authentication state between application restarts.
     private func saveState(_ authState: OIDAuthState?, _ appAuthStateKey: String) {
@@ -149,6 +181,13 @@ class OAuthAuthenticator {
     }
 
     // MARK: - Internal Data Structures
+    /**
+     Represents a parsed JWT token, with all the detail information.
+
+     - Author: Klemens Muthmann
+     - Version: 1.0.0
+     - Since: 3.1.2
+     */
     struct JWTToken {
         private static let jsonDecoder = JSONDecoder()
         let header: Substring
@@ -157,6 +196,7 @@ class OAuthAuthenticator {
         let token: String
         let decoded: Decoded
 
+        /// Parse and create a JWT token from its `String` representation.
         init(from token: String) throws {
             let splitToken = token.split(separator: ".")
 
@@ -183,10 +223,14 @@ class OAuthAuthenticator {
             }
         }
 
+        /**
+         Return the JWT token in its `String` representation.
+         */
         func asString() -> String {
             return token
         }
 
+        /// Provide a `UUID` as a `Decodable` so it can be used by a `JSONDecoder`.
         struct Decoded: Decodable {
             let sub: UUID
         }
@@ -253,10 +297,9 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
         } else {
             throw RFRError.unableToAuthenticate
         }
-        //}
-
     }
 
+    /// Delete the logged in user rethrowing all occuring errors.
     func delete() async throws {
         let request: URLRequest = try await withCheckedThrowingContinuation { continuation in
             authState?.performAction { accessToken, idToken, error in
@@ -295,6 +338,9 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
         }
     }
 
+    // TODO: try to remove this and see if login process works as expected.
+    /// According to the AppAuth documentation this is necessary after successful authentication.
+    /// However it seems from several debugging sessions, that it is never called.
     func callback(url: URL) {
         os_log("Opened App via callback from @%.", log: OSLog.system, type: .info, url.absoluteString)
 
@@ -311,25 +357,13 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
             fatalError()
         }
 
-
-
         let request = await OIDEndSessionRequest(
-            // Was steht in den Metadaten und wo bekomme ich diese her?
-            // Es ist eine OIDServiceConfiguration die als Parameter übergeben wird.
-            // Was ist eine OIDServiceConfiguration. Von wo kommt der Parameter.
-            // Das ist das Ergebnis des Discovery Calls.
             configuration: try serviceDiscovery(),
-            // Welches Token ist das? Woher bekomme ich es?
-            // Siehe: https://auth0.com/blog/id-token-access-token-what-is-the-difference/
-            // Man bekommt es aus dem authroization request
             idTokenHint: idToken,
-            // Wohin muss diese URL zeigen? Injezirt wird sie zum Beispiel per Konfigurationsdatei, ist also statisch.
             postLogoutRedirectURL: redirectUri,
             additionalParameters: nil
         )
 
-        // Was ist eine user agent session? Wo kommt diese her?
-        // Was passiert mit der userAgentSession noch? Warum muss sie als Attribut gespeichert werden?
         let _ = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<OIDEndSessionResponse, Error>) in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
@@ -341,7 +375,6 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
                 self.currentAuthorizationFlow = OIDAuthorizationService.present(
                     request,
                     externalUserAgent: agent!
-                    // Was muss dieser Handler machen, und wo kommt er her?
                 ){ response, error in
                     os_log("Authentication: Received logout response.", log: OSLog.authorization, type: .debug)
                     if let error = error {

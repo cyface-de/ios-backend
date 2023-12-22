@@ -1,20 +1,20 @@
 /*
  * Copyright 2023 Cyface GmbH
  *
- * This file is part of the Read-for-Robots iOS App.
+ * This file is part of the Ready for Robots iOS App.
  *
- * The Read-for-Robots iOS App is free software: you can redistribute it and/or modify
+ * The Ready for Robots iOS App is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Read-for-Robots iOS App is distributed in the hope that it will be useful,
+ * The Ready for Robots iOS App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Read-for-Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots iOS App. If not, see <http://www.gnu.org/licenses/>.
  */
 import SwiftUI
 import MapKit
@@ -24,6 +24,7 @@ A single row in the measurements overview displaying all the measurements in a l
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.1.2
  - SeeAlso: ``MeasurementsView``
  */
 struct MeasurementCell: View {
@@ -43,8 +44,8 @@ struct MeasurementCell: View {
     }
 }
 
-struct MeasurementCell_Previews: PreviewProvider {
-    static let measurements = [
+#if DEBUG
+    let previewMeasurements = [
         Measurement(
             id: 0,
             startTime: Date(timeIntervalSince1970: 10_000),
@@ -103,8 +104,11 @@ struct MeasurementCell_Previews: PreviewProvider {
         )
     ]
     
-    static var previews: some View {
-        MeasurementCell(measurement: measurements[0])
-        MeasurementCell(measurement: measurements[1])
-    }
+#Preview("Synchronizable Measurement") {
+    MeasurementCell(measurement: previewMeasurements[0])
 }
+
+#Preview("Synchronizing Measurement") {
+    MeasurementCell(measurement: previewMeasurements[1])
+}
+#endif

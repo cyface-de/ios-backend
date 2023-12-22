@@ -8,39 +8,63 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * The Ready for Robots App is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ * along with the Ready for Robots App. If not, see <http://www.gnu.org/licenses/>.
  */
 import Foundation
 import DataCapturing
 
+/**
+Model object representing the collection of vouchers on the server.
+
+ This class is responsible for creating the connection to the voucher API, retrieving vouchers and that state of the collection of vouchers.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
+ */
 class Vouchers {
+    // MARK: - Static Properties
+    /// Used to decode JSON server responses.
     private static let decoder = JSONDecoder()
+    // MARK: - Properties
+    /// Used to authenticate with the voucher Server.
     let authenticator: DataCapturing.Authenticator
+    /// The internet address of the root of the voucher API.
     let url: URL
+    /// the number of vouchers available on the server.
     var count: Int {
         get async throws {
             return try await requestCount()
         }
     }
+    /// Local cache for the number of vouchers on the server.
     private var _count: Int?
+    /// Get the next valid voucher.
     private var voucher: Voucher {
         get async throws {
             return try await requestVoucher()
         }
     }
+    /// Local cache for the last retrieved valid voucher from the server.
     private var _voucher: Voucher?
 
+    // MARK: - Initializers
+    /// Create a new object of this class, using the provided authenticator to authenticate with the auth server and using the API at the provided `url`.
     init(authenticator: DataCapturing.Authenticator, url: URL) {
         self.authenticator = authenticator
         self.url = url
     }
 
+    // MARK: - Methods
+    /// Returns the next valid voucher or a local copy.
+    /// Each user can get a new voucher only once.
+    /// As soon as the first voucher has been retrieved, a call to this method is going to return the same voucher each time.
     func requestVoucher() async throws -> Voucher {
         if let voucher = self._voucher {
             return voucher
@@ -70,6 +94,9 @@ class Vouchers {
         }
     }
 
+    // MARK: - Private Methods
+    /// Provide the count of valid vouchers from the server or from local cache.
+    /// This means that the count is not always up to date.
     private func requestCount() async throws -> Int {
         if let count = _count {
             return count
@@ -100,15 +127,41 @@ class Vouchers {
     }
 }
 
+// MARK: - Support Structures
+/**
+ A struct representing a single voucher as returned by the server.
+
+ This is required by the Swift `JSONDecoder` to decode responses from the server.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
+ */
 struct Voucher: Codable {
     let code: String
     let until: String
 }
 
+/**
+ A struct representing the count of vouchers still available on the server.
+
+ This is required by the Swift `JSONDecoder` to decode responses from the server.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
+ */
 struct Count: Codable {
     let vouchers: Int
 }
 
+/**
+ Errors that might occur while communicating with the voucher API.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.1.2
+ */
 enum VoucherRequestError: Error {
     /// If the HTTP status code is not as expected.
     case requestFailed(statusCode: Int)
