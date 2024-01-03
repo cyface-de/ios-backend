@@ -27,34 +27,25 @@ A single user initiated event during the capturing of a `Measurement`.
  - Version 1.0.0
  - since: 11.0.0
  */
-public class Event: CustomStringConvertible {
-    /// The database identifier of the event or `nil` if the event has not been saved yet.
-    var objectId: NSManagedObjectID?
+public struct Event: CustomStringConvertible {
     /// The time the event occured at.
     public let time: Date
     /// The type of the event.
     public let type: EventType
     /// An optional value if that is necessary.
     public var value: String?
-    /// The `Measurement` during which the event occured.
-    public let measurement: Measurement
 
     /**
      An initializer, creating a new `Event` from a database managed object.
 
-     After a call to this initializer, the `objectId` will be set to the provied `managedObject` objectId.
-
      - Parameters:
             - managedObject: The managed event object used to populate the new `Event` instance.
-            - parent: The `Measurement` this event should be added to.
-     - Attention: CoreData changes the objectId as soon as a new instance is written from the `NSManagedObjectContext` to the underlying database. So if you call `context.save()` after this contrxutor, the objectId might become invalid. Loading the object from the database prior to its usage provides a save instance.
      */
-    convenience init(managedObject: EventMO, parent: Measurement) {
-        guard let managedObjectTimeAsDate = managedObject.time as? Date else {
+    init(managedObject: EventMO) {
+        guard let managedObjectTimeAsDate = managedObject.time else {
             fatalError()
         }
-        self.init(time: managedObjectTimeAsDate, type: managedObject.typeEnum, value: managedObject.value, measurement: parent)
-        self.objectId = managedObject.objectID
+        self.init(time: managedObjectTimeAsDate, type: managedObject.typeEnum, value: managedObject.value)
     }
 
     /**
@@ -66,17 +57,15 @@ If this instance is persisted via CoreData, its `objectId` must be set to the ap
      - time: The time the event occured at.
      - type: The type of the event.
      - value: An optional value if that is necessary.
-     - measurement: The `Measurement` during which the event occured.
      */
-    init(time: Date=Date(), type: EventType, value: String?=nil, measurement: Measurement) {
+    public init(time: Date=Date(), type: EventType, value: String?=nil) {
         self.time = time
         self.type = type
         self.value = value
-        self.measurement = measurement
     }
 
    /// A stringified variant of this object. Mostly used to pretty print instances during debugging.
     public var description: String {
-        "Event(type: \(type), time: \(time), value: \(String(describing: value)), measurement: \(measurement.identifier))"
+        "Event(type: \(type), time: \(time), value: \(String(describing: value)))"
     }
 }

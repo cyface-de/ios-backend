@@ -18,7 +18,6 @@
  */
 
 import Foundation
-import Alamofire
 
 /**
  A request telling the server, that the app wants to upload a measurement.
@@ -32,10 +31,12 @@ class PreRequest {
     /// A URL running an appropriate Cyface Server
     let apiUrl: URL
     /// The Alamofire `Session` to use for uploading the data.
-    let session: Session
+    let session: URLSession
+    /// Encoder to write the meta data as JSON into the requests body.
+    let jsonEncoder = JSONEncoder()
 
     /// Make a new pre request from a Cyface API URL and an Alamofire `Session`.
-    init(apiUrl: URL, session: Session) {
+    init(apiUrl: URL, session: URLSession) {
         self.apiUrl = apiUrl
         self.session = session
     }
@@ -43,58 +44,47 @@ class PreRequest {
     /// Send the request
     /// - Parameter authToken: Get this JWT token from an `Authenticator`.
     /// - Parameter upload: The upload information
-    /// - Parameter onSuccess: Callback after the request finished successfully.
-    /// - Parameter onFailure: Callback after the request failed for some reason.
-    func request(authToken: String, upload: Upload, onSuccess: @escaping (String, String, Upload) -> Void, onFailure: @escaping (UInt64, Error) -> Void) {
-        do {
-            let metaData = try upload.metaData()
-            let data = try upload.data()
+    func request(authToken: String, upload: Upload) async throws -> Response {
+        let metaData = try upload.metaData()
+        let data = try upload.data()
 
-            var headers: HTTPHeaders = []
-            headers.add(name: "Content-Type", value: "application/json; charset=UTF-8")
-            headers.add(name: "Authorization", value: "Bearer \(authToken)")
-            headers.add(name: "x-upload-content-length", value: "\(data.count)")
-            headers.add(name: "x-upload-content-type", value: "application/octet-stream")
-            headers.add(name: "Accept-Encoding", value: "gzip")
-            headers.add(name: "User-Agent", value: "Cyface-iOS-Client/\(metaData.applicationVersion) (gzip)")
-            headers.add(name: "Connection", value: "Keep-Alive")
+        let requestUrl = apiUrl.appendingPathComponent("measurements")
 
-            let measurementIdentifier = metaData.measurementId
+        var request = URLRequest(url: requestUrl)
+        request.setValue("application/json; charset=UTF-8", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("\(data.count)", forHTTPHeaderField: "x-upload-content-length")
+        request.setValue("application/octet-stream", forHTTPHeaderField: "x-upload-content-type")
+        request.setValue("gzip", forHTTPHeaderField: "Accept-Encoding")
+        request.setValue("Cyface-iOS-Client/\(metaData.applicationVersion) (gzip)", forHTTPHeaderField: "User-Agent")
+        request.setValue("Keep-Alive", forHTTPHeaderField: "Connection")
+        request.httpMethod = "POST"
 
-            session.request(
-                apiUrl.appendingPathComponent("measurements"),
-                method: .post,
-                parameters: metaData,
-                encoder: JSONParameterEncoder.default,
-                headers: headers
-            ).response { response in
-
-                guard let response = response.response else {
-                    if let error = response.error {
-                        onFailure(measurementIdentifier, ServerConnectionError.alamofireError(error))
-                    } else {
-                        onFailure(measurementIdentifier, ServerConnectionError.noResponse)
-                    }
-                    return
-                }
-
-                let status = response.statusCode
-
-                if status == 200 {
-                    guard let location = response.headers["Location"] else {
-                        onFailure(measurementIdentifier, ServerConnectionError.noLocation)
-                        return
-                    }
-
-                    onSuccess(authToken, location, upload)
-                } else if status == 412 {
-                    onFailure(measurementIdentifier, ServerConnectionError.uploadNotAccepted(measurementIdentifier: Int64(measurementIdentifier)))
-                } else {
-                    onFailure(measurementIdentifier, ServerConnectionError.requestFailed(httpStatusCode: status))
-                }
-            }
-        } catch {
-            onFailure(upload.identifier, error)
+        let jsonData = try jsonEncoder.encode(metaData)
+        let (_, response) = try await session.upload(for: request, from: jsonData)
+        guard let response = response as? HTTPURLResponse else {
+                throw ServerConnectionError.noResponse
         }
+
+        let status = response.statusCode
+
+        if status == 200 {
+            guard let location = response.value(forHTTPHeaderField: "Location") else {
+                throw ServerConnectionError.noLocation
+            }
+
+            return .success(location: location)
+        } else if status == 409 {
+            return .exists
+        } else if status == 412 {
+            throw ServerConnectionError.uploadNotAccepted(upload: upload)
+        } else {
+            throw ServerConnectionError.requestFailed(httpStatusCode: status)
+        }
+    }
+
+    enum Response {
+        case success(location: String)
+        case exists
     }
 }

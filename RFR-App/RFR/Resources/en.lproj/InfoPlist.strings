@@ -1,0 +1,6 @@
+/* Privacy - Location Always and When In Use Usage Description */
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Please allow the route to be recorded in the background so that we can provide your municipality with your data to determine robot readiness.";
+
+/* Privacy - Location When In Use Usage Description */
+"NSLocationWhenInUseUsageDescription" = "Please allow the route to be recorded in the background so that we can provide your municipality with your data to determine robot readiness.";
+

@@ -37,16 +37,31 @@ struct TestFixture {
         - longitude: The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction
         - accuracy: The estimated accuracy of the measurement in meters
         - speed: The speed the device was moving during the measurement in meters per second
-        - timestamp: The time the measurement happened at in milliseconds since the 1st of january 1970
-        - isValid: Whether or not this is a valid location in a cleaned track
+        - time: The time the measurement happened at in milliseconds since the 1st of january 1970
      */
-    static func location(latitude: Double = 2.0, longitude: Double = 2.0, accuracy: Double = 1.0, speed: Double = 10.0, timestamp: Date = Date(), isValid: Bool = true) -> LocationCacheEntry {
-        return LocationCacheEntry(latitude: latitude, longitude: longitude, accuracy: accuracy, speed: speed, timestamp: timestamp, isValid: isValid)
+    static func location(latitude: Double = 2.0, longitude: Double = 2.0, accuracy: Double = 1.0, speed: Double = 10.0, timestamp: Date = Date()) -> GeoLocation {
+        return GeoLocation(
+            latitude: latitude,
+            longitude: longitude,
+            accuracy: accuracy,
+            speed: speed,
+            time: timestamp,
+            altitude: 0.0,
+            verticalAccuracy: 0.0
+        )
     }
 
     /// Create a random `LocationCacheEntry` with a fixed timestamp. If that entry should be added to a measurement, make sure that the timestamp is strong monotonically increasing.
-    static func randomLocation(timestamp: Date = Date()) -> LocationCacheEntry {
-        return LocationCacheEntry(latitude: Double.random(in: -90.0 ... 90.0), longitude: Double.random(in: 0.0 ..< 360.0), accuracy: Double.random(in: 2.0 ... 15.0), speed: Double.random(in: 0.0 ... 10.0), timestamp: timestamp, isValid: true)
+    static func randomLocation(timestamp: Date = Date()) -> GeoLocation {
+        return GeoLocation(
+            latitude: Double.random(in: -90.0 ... 90.0),
+            longitude: Double.random(in: -180.0 ..< 180.0),
+            accuracy: Double.random(in: 2.0 ... 15.0),
+            speed: Double.random(in: 0.0 ... 80.0),
+            time: timestamp,
+            altitude: Double.random(in: 0.0...8848.0),
+            verticalAccuracy: Double.random(in: 0.1...20.0)
+        )
     }
 
     /**
@@ -59,5 +74,9 @@ struct TestFixture {
     /// Create fixture acceleration with random values. This is for example important if accurate compression is an issue for your test.
     static func randomAcceleration() -> SensorValue {
         return SensorValue(timestamp: Date(timeIntervalSince1970: TimeInterval(Double.random(in: 0.0 ... 1571302762.0))), x: Double.random(in: 0.0 ... 40.0), y: Double.random(in: 0.0 ... 40.0), z: Double.random(in: 0.0 ... 40.0))
+    }
+
+    static func randomAltitude() -> Altitude {
+        return Altitude(relativeAltitude: Double.random(in: 0.0 ... 20.0), time: Date())
     }
 }

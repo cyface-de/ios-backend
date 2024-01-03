@@ -14,12 +14,11 @@ import CoreData
 extension MeasurementMO {
     /// Update this managed object with the property values from a `Measurement`. This might be used for saving the `Measurement` to CoreData.
     /// - throws: On internal CoreData errors, if the `objectId` of this `Measurement` or some part of it are not consistent with CoreData or if the locations captured by the `Measurement` are not strongly monotonically increasing.
-    func update(from measurement: Measurement) throws {
+    func update(from measurement: FinishedMeasurement) throws {
         self.synchronizable = measurement.synchronizable
         self.synchronized = measurement.synchronized
-        self.trackLength = measurement.trackLength
 
-        guard let context = managedObjectContext else {
+        /*guard let context = managedObjectContext else {
             throw PersistenceError.inconsistentState
         }
 
@@ -47,9 +46,40 @@ extension MeasurementMO {
             } else {
                 insertIntoEvents(try EventMO(event: &event, context: context), at: i)
             }
-        }
+        }*/
 
         // TODO: Delete obsolete events and tracks here. This is not necessary for our current uses cases, but should be added to complete this code conceptually.
     }
 
+    /**
+     The altitudes in this measurement already cast to the correct type.
+     */
+    public func typedTracks() -> [TrackMO] {
+        guard let typedTracks = tracks?.array as? [TrackMO] else {
+            fatalError("Unable to cast tracks to the correct type!")
+        }
+
+        return typedTracks
+    }
+
+    public func typedEvents() -> [EventMO] {
+        guard let typedEvents = events?.array as? [EventMO] else {
+            fatalError("Unable to cast events to the correct type!")
+        }
+
+        return typedEvents
+    }
+
+    public func trackLength() -> Double {
+        return typedTracks().map { $0.typedLocations() }.map { locations in
+            var prevLocation: GeoLocationMO?
+            var ret = 0.0
+            locations.forEach { location in
+                ret += prevLocation?.distance(to: location) ?? 0.0
+                prevLocation = location
+            }
+            return ret
+        }
+        .reduce(0.0) { $0 + $1 }
+    }
 }

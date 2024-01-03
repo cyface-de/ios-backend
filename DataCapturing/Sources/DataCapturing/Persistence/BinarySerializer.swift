@@ -107,11 +107,11 @@ class MeasurementSerializer: BinarySerializer {
     /// The targeted amount of places after the comma to use for storing geo locations.
     static let geoLocationAccuracy = 6
     /// File handle to store acceleration values to
-    let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
+    //let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
     /// File handle to store rotation values to
-    let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
+    //let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
     /// File handle to store direction values to
-    let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
+    //let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
 
     /**
      Serializes the provided `measurement` into its Cyface Binary Format specification in the form:
@@ -124,7 +124,7 @@ class MeasurementSerializer: BinarySerializer {
      - Parameter serializable: The measurement to serialize.
      - Throws: if either converting the provided data or reading the sensor values fails.
      */
-    func serialize(serializable measurement: Measurement) throws -> Data {
+    func serialize(serializable measurement: FinishedMeasurement) throws -> Data {
         var protosMeasurement = De_Cyface_Protos_Model_MeasurementBytes()
         protosMeasurement.formatVersion = UInt32(dataFormatVersion)
         protosMeasurement.events = serialize(events: measurement.events)
@@ -143,7 +143,7 @@ class MeasurementSerializer: BinarySerializer {
 
         var records = protosMeasurement.locationRecords
         for location in measurement.tracks.flatMap({track in track.locations}) {
-            let timestamp = location.timestamp
+            let timestamp = convertToUtcTimestamp(date: location.time)
             let accuracy = location.accuracy
             let latitude = location.latitude
             let longitude = location.longitude
@@ -182,12 +182,9 @@ class MeasurementSerializer: BinarySerializer {
         }
         protosMeasurement.locationRecords = records
 
-        let accelerationsData = try accelerationsFile.data(for: measurement)
-        protosMeasurement.accelerationsBinary = accelerationsData
-        let directionsData = try directionsFile.data(for: measurement)
-        protosMeasurement.directionsBinary = directionsData
-        let rotationsData = try rotationsFile.data(for: measurement)
-        protosMeasurement.rotationsBinary = rotationsData
+        protosMeasurement.accelerationsBinary = measurement.accelerationDate
+        protosMeasurement.directionsBinary = measurement.directionData
+        protosMeasurement.rotationsBinary = measurement.rotationData
         let serializedData = try protosMeasurement.serializedData()
         var ret = Data(dataFormatVersionBytes)
         ret.append(serializedData)
@@ -200,7 +197,7 @@ class MeasurementSerializer: BinarySerializer {
         var ret = [De_Cyface_Protos_Model_Event]()
         for event in events {
             ret.append(De_Cyface_Protos_Model_Event.with {
-                $0.timestamp = DataCapturingService.convertToUtcTimestamp(date: event.time)
+                $0.timestamp = convertToUtcTimestamp(date: event.time)
                 if let value = event.value {
                     $0.value = value
                 }
@@ -277,7 +274,7 @@ class SensorValueSerializer: BinarySerializer {
             let xValue = values[valueIndex].x
             let yValue = values[valueIndex].y
             let zValue = values[valueIndex].z
-            let utcTimestamp = DataCapturingService.convertToUtcTimestamp(date: timestamp)
+            let utcTimestamp = convertToUtcTimestamp(date: timestamp)
             do {
                 timestamps.append(try timestampDiffValue.diff(value: Int64(utcTimestamp)))
             } catch {

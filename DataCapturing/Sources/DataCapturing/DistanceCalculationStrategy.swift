@@ -20,6 +20,7 @@
 import Foundation
 import CoreLocation
 
+// TODO: Remove this. Should have been implemented as part of an application or different library.
 /**
  This protocol provides a way to calculate the distance between two geo locations in meters.
  Different implementations are possible.

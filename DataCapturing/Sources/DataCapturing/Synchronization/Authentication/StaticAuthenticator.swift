@@ -33,7 +33,6 @@ import Foundation
  - Since: 2.0.0
  */
 public class StaticAuthenticator: Authenticator {
-
     // MARK: - Properties
 
     /// The token used for authentication.
@@ -57,5 +56,28 @@ public class StaticAuthenticator: Authenticator {
         } else {
             onFailure(ServerConnectionError.notAuthenticated("No JWT token provided for authentication."))
         }
+    }
+
+    public func authenticate() async throws -> String {
+        typealias AuthenticateContinuation = CheckedContinuation<String, Error>
+        return try await withCheckedThrowingContinuation { (authenticateContinuation: AuthenticateContinuation) in
+            authenticate(onSuccess: { jwtToken in
+                authenticateContinuation.resume(returning: jwtToken)
+            }, onFailure: { error in
+                authenticateContinuation.resume(throwing: error)
+            })
+        }
+    }
+
+    public func delete() async throws {
+        throw AuthenticationError.notImplemented
+    }
+
+    public func logout() async throws {
+        throw AuthenticationError.notImplemented
+    }
+
+    public func callback(url: URL) {
+        // Nothing to do here.
     }
 }

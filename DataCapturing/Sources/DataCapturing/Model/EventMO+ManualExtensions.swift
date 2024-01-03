@@ -38,17 +38,13 @@ extension EventMO {
     /**
      An initializer used to create an event managed object from a regular `Event` instance.
 
-     This also refreshes the provided events `objectId` to this newly created managed objects objectId.
-
      - Parameters:
         - event: The `Event` used to populate this new managed object.
         - context: The `NSManagedObjectContext` to store the managed object to.
      */
-    convenience init(event: inout Event, context: NSManagedObjectContext) throws {
+    convenience init(event: Event, context: NSManagedObjectContext) {
         self.init(context: context)
-        event.objectId = self.objectID
-
-        try update(from: event)
+        update(from: event)
     }
 
     /**
@@ -57,27 +53,10 @@ extension EventMO {
      This can for example be used to store the update managed object afterwards with a call to `context.save()`.
 
      - Parameter event: The `Event` to refresh this managed object from.
-     - Throws PersistenceError.unsynchronizedMeasurement: If the parent measurement of the `Event` is not stored in the database.
-     - Throws PersistenceError.inconsistentState: If there is no `NSManagedObjectContext` associated with this managed object.
-     - Throws PersistenceError.measurementNotLoadable: If the parent measurement could not be retrieved from the database.
      */
-    func update(from event: Event) throws {
+    func update(from event: Event) {
         self.type = event.type.rawValue
         self.time = event.time
         self.value = event.value
-
-        guard let managedParentObjectId = event.measurement.objectId else {
-            throw PersistenceError.unsynchronizedMeasurement(identifier: event.measurement.identifier)
-        }
-
-        guard let context = managedObjectContext else {
-            throw PersistenceError.inconsistentState
-        }
-
-        guard let managedParent = try context.existingObject(with: managedParentObjectId) as? MeasurementMO else {
-            throw PersistenceError.measurementNotLoadable(event.measurement.identifier)
-        }
-
-        self.measurement = managedParent
     }
 }

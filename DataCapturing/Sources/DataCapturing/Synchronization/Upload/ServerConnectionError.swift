@@ -18,7 +18,6 @@
  */
 
 import Foundation
-import Alamofire
 
 /**
  A structure encapsulating errors used by server connections.
@@ -28,7 +27,7 @@ import Alamofire
  - Since: 1.0.0
  */
 public enum ServerConnectionError: Error {
-    /// If authentication was carried out but was not successful.
+    /// If authentication was carried out but was not successful. The username of the failed authentication attempt is provided as a parameter.
     case authenticationNotSuccessful(String)
     /// Error occuring if this client tried to communicate with the server without proper authentication.
     case notAuthenticated(String)
@@ -36,8 +35,6 @@ public enum ServerConnectionError: Error {
     case modalityError(String)
     /// Thrown if some measurement metadata was not encodable as an UTF-8 String.
     case dataError(String)
-    /// Rethrow an error from within Alamofire.
-    case alamofireError(AFError)
     /// Server did not send a response and client timed out.
     case noResponse
     /// The request failed. The failure status code is provided.
@@ -47,7 +44,9 @@ public enum ServerConnectionError: Error {
     /// The upload location provided by a status request was no a valid URL.
     case invalidUploadLocation(String)
     /// Thrown if the server did not accept the upload of a measurement for some reason
-    case uploadNotAccepted(measurementIdentifier: Int64)
+    case uploadNotAccepted(upload: Upload)
+    /// Caused by an invalidly formatted server session identifier. This must be a valid URL pointing to the address of the session on the server.
+    case sessionIdentifierFormatInvalid(String)
 }
 
 extension ServerConnectionError: LocalizedError {
@@ -91,15 +90,6 @@ Tell the user that processing some binary data failed. \
 The reason is provided as the first parameter.
 """)
             return String.localizedStringWithFormat(errorMessage, reason)
-        case .alamofireError(let error):
-            let errorMessage =  NSLocalizedString(
-                "de.cyface.error.ServerConnectionError.alamofireError",
-                value: "Internal error! Reason: %@",
-                comment: """
-Tell the user that the Alamofire library produced an error \
-The reason is provided as the first parameter.
-""")
-            return String.localizedStringWithFormat(errorMessage, error.localizedDescription)
         case .noResponse:
             let errorMessage =  NSLocalizedString(
                 "de.cyface.error.ServerConnectionError.noResponse",
@@ -133,7 +123,7 @@ Tell the user that a pre request failed because no data upload location was prov
 Tell the user that an upload failed because the session used for that upload was invalid.
 """)
             return String.localizedStringWithFormat(errorMessage, session)
-        case .uploadNotAccepted(measurementIdentifier: let measurementIdentifier):
+        case .uploadNotAccepted(upload: let upload):
             let errorMessage =  NSLocalizedString(
                 "de.cyface.error.ServerConnectionError.uploadNotAccepted",
                 value: "The server did not accept the upload of the measurement",
@@ -142,7 +132,17 @@ Tell the user that for some reason the server did not accept the upload of measu
 There are several possible reasons for that, which are server specific.
 One example would be a measurement without any location data.
 """)
-            return String.localizedStringWithFormat(errorMessage, measurementIdentifier)
+            return String.localizedStringWithFormat(errorMessage, upload.measurement.identifier)
+        case .sessionIdentifierFormatInvalid(let sessionIdentifier):
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.ServerConnectionError.sessionIdentifierFormatInvalid",
+                value: "Wrongly formatted identifier of the an upload session. Expected a valid URL but got %@!",
+                comment: """
+Tell the user that the upload session was not correctly formatted and thus an uplod was not possible. The true session is provided as the first parameter.
+The expected format is the URL of the session resource on the server.
+"""
+            )
+            return String.localizedStringWithFormat(errorMessage, sessionIdentifier)
         }
     }
 }

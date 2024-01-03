@@ -17,8 +17,7 @@
  * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
-import CoreData
+import CoreLocation
 
 /**
  One geo location measurement provided by the system.
@@ -35,8 +34,6 @@ import CoreData
 public class GeoLocation: CustomStringConvertible {
 
     // MARK: - Properties
-    /// The database identifier this object has been stored under or `nil` if this object was not stored yet.
-    var objectId: NSManagedObjectID?
     /// The locations latitude coordinate as a value from -90.0 to 90.0 in south and north direction.
     public let latitude: Double
     /// The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.
@@ -45,37 +42,33 @@ public class GeoLocation: CustomStringConvertible {
     public let accuracy: Double
     /// The speed the device was moving during the measurement in meters per second.
     public let speed: Double
-    /// The time the measurement happened at in milliseconds since the 1st of january 1970.
-    public let timestamp: UInt64
-    /// Whether or not this is a valid location in a cleaned track.
-    public let isValid: Bool
-    /// The track this location belongs to
-    public let track: Track
+    /// The time the measurement happened.
+    public let time: Date
+    /// The height change in meters in comparison to the last measured location.
+    public let altitude: Double
+    /// The accuracy of the heigt informatio as provided by the geo location sensor.
+    public let verticalAccuracy: Double
     /// A human readable description of this object.
     public var description: String {
-        return "GeoLocation (latitude: \(latitude), longitude: \(longitude), accuracy: \(accuracy), speed: \(speed), timestamp: \(timestamp))"
+        return "GeoLocation (latitude: \(latitude), longitude: \(longitude), accuracy: \(accuracy), speed: \(speed), timestamp: \(time.debugDescription))"
     }
 
     /**
-     Creates a new `GeoLocation` from a CoreData managed object as the child of the provided `Track`.
-
-     After creation you should make sure, that the location is actually added to the `parent` via a call to append.
+     Creates a new `GeoLocation` from a CoreData managed object.
 
      - Parameters
         - managedObject: The CoreData managed object to populate this object from.
-        - parent: The parent track, this object should belong to.
      */
-    convenience init(managedObject: GeoLocationMO, parent: Track) {
+    convenience init(managedObject: GeoLocationMO) {
         self.init(
             latitude: managedObject.lat,
             longitude: managedObject.lon,
             accuracy: managedObject.accuracy,
             speed: managedObject.speed,
-            timestamp: UInt64(managedObject.timestamp),
-            isValid: managedObject.isPartOfCleanedTrack,
-            parent: parent)
-        // TODO: This does not really work, as the objectId for new managed objects changes after they are written to the database (i.e. after the context is synchronized via context.save())
-        self.objectId = managedObject.objectID
+            time: managedObject.time!,
+            altitude: managedObject.altitude,
+            verticalAccuracy: managedObject.verticalAccuracy
+        )
     }
 
     /**
@@ -88,17 +81,45 @@ public class GeoLocation: CustomStringConvertible {
         - longitude: The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.
         - accuracy: The estimated accuracy of the measurement in meters.
         - speed: The speed the device was moving during the measurement in meters per second.
-        - timestamp: The time the measurement happened at in milliseconds since the 1st of january 1970.
-        - isValid: Whether or not this is a valid location in a cleaned track.
-        - parent: The track this location belongs to
+        - time: The time the measurement happened.
+        - altitude: The height change in meters in comparison to the last measured location.
+        - verticalAccuracy: The accuracy of the heigt informatio as provided by the geo location sensor.
      */
-    public init(latitude: Double, longitude: Double, accuracy: Double, speed: Double, timestamp: UInt64, isValid: Bool = true, parent: Track) {
+    public init(
+        latitude: Double,
+        longitude: Double,
+        accuracy: Double,
+        speed: Double,
+        time: Date,
+        altitude: Double,
+        verticalAccuracy: Double
+    ) {
         self.latitude = latitude
         self.longitude = longitude
         self.accuracy = accuracy
         self.speed = speed
-        self.timestamp = timestamp
-        self.isValid = isValid
-        self.track = parent
+        self.time = time
+        self.altitude = altitude
+        self.verticalAccuracy = verticalAccuracy
+    }
+
+    public func distance(from previousLocation: CLLocation) -> Double {
+        let clLocation = CLLocation(latitude: latitude, longitude: longitude)
+        return clLocation.distance(from: previousLocation)
+    }
+
+    public func distance(from previousLocation: GeoLocationMO) -> Double {
+        let previousCLLocation = CLLocation(latitude: previousLocation.lat, longitude: previousLocation.lon)
+        return distance(from: previousCLLocation)
+    }
+
+    public func distance(from previousLocationLatLonCoordinates: (Double, Double)) -> Double {
+        return distance(from: CLLocation(
+            latitude: previousLocationLatLonCoordinates.0,
+            longitude: previousLocationLatLonCoordinates.1))
+    }
+
+    public func distance(from previousLocation: GeoLocation) -> Double {
+        return distance(from: CLLocation(latitude: previousLocation.latitude, longitude: previousLocation.longitude))
     }
 }

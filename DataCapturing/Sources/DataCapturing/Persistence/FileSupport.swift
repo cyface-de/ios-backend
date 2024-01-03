@@ -37,6 +37,7 @@ protocol FileSupport {
     var fileName: String { get }
     /// The file extension of the file to store.
     var fileExtension: String { get }
+    var measurement: MeasurementMO { get }
 
     // MARK: - Methods
     /**
@@ -44,15 +45,14 @@ protocol FileSupport {
      
      - Parameters:
         - serializable: The data to append.
-        - to: The measurement to append the data to.
      - Throws: If accessing the data file has not been successful.
      - Returns: The local URL identifying the file to write to.
      */
-    func write(serializable: Serializable, to measurement: Int64) throws -> URL
+    func write(serializable: Serializable) throws -> URL
     /**
-     Removes the file for the provided `MeasurementMO` instance.
+     Removes the file for the provided `FinishedMeasurement` instance.
      */
-    func remove(from measurement: Measurement) throws
+    func delete() throws
 }
 
 // MARK: - Implementation
@@ -66,8 +66,8 @@ extension FileSupport {
      - Returns: The path to the file as an URL.
      - Throws: Some internal file system error on failure of creating the file at the required path.
      */
-    fileprivate func path(for measurement: Int64) throws -> URL {
-        let measurementIdentifier = measurement
+    fileprivate func path() throws -> URL {
+        let measurementIdentifier = measurement.identifier
         let root = "Application Support"
         let measurementDirectory = "measurements"
         let fileManager = FileManager.default
@@ -94,8 +94,8 @@ extension FileSupport {
      - Parameter from: The measurement to delete the data from.
      - Throws: Some internal file system error on failure of creating the file at the required path.
      */
-    func remove(from measurement: Measurement) throws {
-        let filePath = try path(for: measurement.identifier)
+    func delete() throws {
+        let filePath = try path()
         let parent = filePath.deletingLastPathComponent()
         let fileManager = FileManager.default
 
@@ -122,6 +122,7 @@ extension FileSupport {
  - Note: This class was called `AccelerationsFile` prior to SDK version 6.0.0.
  */
 public struct SensorValueFile: FileSupport {
+
     // MARK: - Properties
 
     /// A serializer to transform between sensor values and the Cyface Binary Format.
@@ -137,10 +138,12 @@ public struct SensorValueFile: FileSupport {
         return fileType.fileExtension
     }
     let fileType: SensorValueFileType
+    let measurement: MeasurementMO
 
     /// Public initializer for external systems to access sensor value data.
-    public init(fileType: SensorValueFileType) {
+    public init(measurement: MeasurementMO, fileType: SensorValueFileType) {
         self.fileType = fileType
+        self.measurement = measurement
     }
 
     // MARK: - Methods
@@ -151,15 +154,14 @@ public struct SensorValueFile: FileSupport {
 
      - Parameters:
         - serializable: The array of sensor values to write.
-        - to: The measurement to write the sensor values to.
      - Returns: The file system URL of the file that was written to.
      - Throws: Some internal file system error on failure of creating the file at the required path.
      - Throws: `BinarySerializationError.emptyData` if the provided `serializable` array is empty.
      - Throws: `BinaryEncodingError` if encoding fails.
      */
-    func write(serializable: [SensorValue], to measurement: Int64) throws -> URL {
+    func write(serializable: [SensorValue]) throws -> URL {
         let sensorValueData = try serializer.serialize(serializable: serializable)
-        let sensorValueFilePath = try path(for: measurement)
+        let sensorValueFilePath = try path()
 
         let fileHandle = try FileHandle(forWritingTo: sensorValueFilePath)
         defer { fileHandle.closeFile()}
@@ -175,13 +177,12 @@ public struct SensorValueFile: FileSupport {
     /**
      Loads all sensor values from the provided measurement. This accesses the file system to get the data from the local sensor value storage file.
 
-     - Parameter from: The measurement to load the sensor values from.
      - Throws: If the file containing the sensor values was not readable.
      - Returns: An array of all the sensor values from the provided measurement.
     */
-    public func load(from measurement: Measurement) throws -> [SensorValue] {
+    public func load() throws -> [SensorValue] {
         do {
-            let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
+            let fileHandle = try FileHandle(forReadingFrom: path())
             defer {fileHandle.closeFile()}
             let data = fileHandle.readDataToEndOfFile()
             return try serializer.deserialize(data: data)
@@ -193,15 +194,14 @@ public struct SensorValueFile: FileSupport {
     /**
      Provides the binary data for the sensor values of the provided measurement.
 
-     - Parameter for: The measurement to provide data for.
      - Returns: The serialized sensor values in Cyface Binary Format.
      - Throws:
         - `FileSupportError.notReadable` If the data file was not readable.
         - Some unspecified undocumented file system error if file was not accessible.
     */
-    func data(for measurement: Measurement) throws -> Data {
+    func data() throws -> Data {
         do {
-            let fileHandle = try FileHandle(forReadingFrom: path(for: measurement.identifier))
+            let fileHandle = try FileHandle(forReadingFrom: path())
             defer {fileHandle.closeFile()}
             return fileHandle.readDataToEndOfFile()
         } catch let error {
@@ -218,6 +218,7 @@ public struct SensorValueFile: FileSupport {
  - Since: 2.0.0
  */
 public struct MeasurementFile: FileSupport {
+    typealias Serializable = FinishedMeasurement
 
     // MARK: - Properties
 
@@ -233,24 +234,22 @@ public struct MeasurementFile: FileSupport {
     var fileExtension: String {
         return "cyf"
     }
+    let measurement: MeasurementMO
 
     // MARK: - Methods
 
     /**
      Write a file containing a serialized measurement in Cyface Binary Format, to the local file system data storage.
 
-     - Parameters:
-        - serializable: The measurement to write.
-        - to: The measurement to write to.
      - Returns: A file system URL pointing to the written file.
      - Throws: `SerializationError.missingData` If no track data was found.
      - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
      - Throws: `FileSupportError.notReadable` If the data file was not readable.
      - Throws: Some unspecified undocumented file system error if file was not accessible.
     */
-    func write(serializable: Measurement, to measurement: Int64) throws -> URL {
-        let measurementData = try data(from: serializable)
-        let measurementFilePath = try path(for: measurement)
+    func write(serializable: FinishedMeasurement) throws -> URL {
+        let measurementData = try data(serializable: serializable)
+        let measurementFilePath = try path()
 
         if let measurementData = measurementData {
             let measurementFileHandle = try FileHandle(forWritingTo: measurementFilePath)
@@ -271,7 +270,7 @@ public struct MeasurementFile: FileSupport {
      - Throws: `FileSupportError.notReadable` If the data to write could not be read from the database.
      - Throws: Some unspecified undocumented file system error if file was not accessible.
      */
-    func data(from serializable: Measurement) throws -> Data? {
+    func data(serializable: FinishedMeasurement) throws -> Data? {
         let serializer = MeasurementSerializer()
 
         do {

@@ -1,0 +1,271 @@
+/* No comment provided by engineer. */
+"%lld x 15 Minuten nextbike Gutscheine übrig" = "%lld x 15 Minuten nextbike Gutscheine übrig";
+
+/* No comment provided by engineer. */
+"1x 15 Freiminuten auf die nächste Ausleihe in Schkeuditz - nextbike Nordsachsen" = "1x 15 Freiminuten auf die nächste Ausleihe in Schkeuditz - nextbike Nordsachsen";
+
+/* No comment provided by engineer. */
+"Abbrechen" = "Abbrechen";
+
+/* No comment provided by engineer. */
+"Abgeschlossene Messungen" = "Abgeschlossene Messungen";
+
+/* No comment provided by engineer. */
+"Abmelden" = "Abmelden";
+
+/* No comment provided by engineer. */
+"Achtung" = "Achtung";
+
+/* No comment provided by engineer. */
+"Akzeptieren" = "Akzeptieren";
+
+/* No comment provided by engineer. */
+"Amtsgericht Dresden\nHRB: 36726\nUSt.-Id.: DE-312598748" = "Amtsgericht Dresden\nHRB: 36726\nUSt.-Id.: DE-312598748";
+
+/* Label for the ascent so far of the running measurement. */
+"Anstieg" = "Anstieg";
+
+/* No comment provided by engineer. */
+"Bitte geben Sie ein gültiges Passwort ein. " = "Bitte geben Sie ein gültiges Passwort ein.";
+
+/* No comment provided by engineer. */
+"Bitte geben Sie eine gültige E-Mail Adresse ein" = "Bitte geben Sie eine gültige E-Mail Adresse ein.";
+
+/* No comment provided by engineer. */
+"Bitte warten!" = "Bitte warten!";
+
+/* No comment provided by engineer. */
+"Cyface GmbH\nBehringstraße 46\n01159 Dresden\nDeutschland" = "Cyface GmbH\nBehringstraße 46\n01159 Dresden\nDeutschland";
+
+/* No comment provided by engineer. */
+"Daten übertragen" = "Daten übertragen";
+
+/* No comment provided by engineer. */
+"Datenschutz" = "Datenschutz";
+
+/* No comment provided by engineer. */
+"Datenschutzbestimmungen" = "Datenschutzbestimmungen";
+
+/* Tell the user, that the OAuth discovery failed for some reason.
+The actual reason is provided as a String message, as the first argument. */
+"de.cyface.error.oauthauthenticationerror.discoveryFailed" = "Es war nicht möglich die Einstellungen für die Authentifizierung vom Identitätsanbieter zu laden. Dies wurde durch %s verursacht. Dies kann auftreten, wenn der Identitätsanbieter gewartet wird oder derzeit nicht erreichbar ist, weil Ihr Telefon zum Beispiel keine funktionsfähige Internetverbindung hat. Bitte stellen Sie sicher, dass sie mit dem Internet verbunden sind und wiederholen Sie den Vorgang später. Falls das Problem auch nach einiger Zeit noch auftritt, wenden Sie sich an den Anbieter dieser Anwendung.";
+
+/* Tell the user, that the wrong HTTP status code was recieved. It should be 200. The actual value is provided as the first argument. */
+"de.cyface.error.oauthauthenticationerror.errorResponse" = "HTTP Status Code %d empfangen. Erwartet war 200 OK. Dieser Fehler kann zum Beispiel durch eine Serverwartung auftreten. Bitte wiederholen Sie den Vorgang zu einem späteren Zeitpunkt. Falls der Fehler über längere Zeit auftritt, wenden Sie sich bitte an den Anbieter dieser Anwendung.";
+
+/* Tell the user, that the response was not an HTTP response. This should not happen unless there is some serious implemenetation error. */
+"de.cyface.error.oauthauthenticationerror.invalidResponse" = "Die Antwort war keine gültige HTTP Antwort. Dieser Fehler sollte normalerweise nicht passieren. Es kann sein, dass Sie eine fehlerbehaftete Zwischenversion verwenden. Bitte aktualisieren Sie die Anwendung oder warten Sie auf die neueste Version.";
+
+/* Tell the user that an invalid JWT token was encountered! */
+"de.cyface.error.oauthauthenticationerror.invalidtoken" = "Es wurde eine falsch formatierte Authentifizierung empfangen. Dies lässt sich meistens auf einen Fehler bei der Einstellung des Identitätsanbieters zurückführen. Bitte wenden Sie sich an den Anbieter dieser Anwendung, um weitere Hinweise zu erhalten.";
+
+/* Tell the user, that the internal auth state did not exist.
+Since it is gracefully initialized before used for the first time, this is an error, that should not happen in production.
+The cause of this error is provided as the first parameter. */
+"de.cyface.error.oauthauthenticationerror.missingAuthState" = "Die Anwendung konnte den Stand der Authentifizierung nicht ermitteln. Dies deutet auf einen ernsthaften Fehler in der Umsetzung der Anwendung hin. Es könnte sein, dass Sie eine fehlerbehaftete Zwischenversion haben. Bitte aktualisieren Sie die Anwendung oder warten Sie auf die nächste Aktualisierung. Falls Sie Hilfe brauchen, wenden Sie sich bitte an den Anbieter dieser Anwendung.";
+
+/* Tell the user, that OAuth was called in a wrong state. Namely there was no ViewController provided to return to, after successful authentication. */
+"de.cyface.error.oauthauthenticationerror.missingCallackController" = "Authentifizierung schlug fehl, weil die Anwendung nicht weiß, welchen Bildschirm sie nach Abschluss der Anmeldung anzeigen soll. Dies sollte nur auftreten, wenn Sie eine fehlerbehaftete Zwischenversion verwenden. Bitte aktualisieren Sie die Anwendung. Falls Sie Hilfe benötigen, wenden Sie sich bitte an den Anbieter dieser Anwendung.";
+
+/* This error should not happen on a properly developed system. Tell the user to call for support! */
+"de.cyface.error.oauthauthenticationerror.missingresponse" = "Authentifizierungsanfrage wurde ohne Antwort aber auch ohne Fehler abgebrochen. Es ist unmöglich mit einem der beiden Fälle fortzufahren. Dies deutet auf eine fehlerhafte Zwischenversion der Anwendung hin. Bitte aktualisieren Sie die Anwendung und wenden Sie sich an den Anbieter dieser Anwendung, wenn Sie Unterstützung benötigen.";
+
+/* Tell the user that you received no valid auth token on a refresh request. This should actually not happen and points to some serious implementation mistakes. */
+"de.cyface.error.oauthauthenticatorerror.tokenMissing" = "Die Authentifizierung konnte nicht erneuert werden.";
+
+/* Tell the user that the e-mail address used for registration is not available anymore.
+In such cases the user either uses an e-mail address not belonging to her/him/them or tries to reregister, which is not permitted.
+To reset the password, the user needs to contact the Cyface support. */
+"de.cyface.error.RegistrationError.emailUsed" = "Die eingegebene E-Mail Adresse ist bereits vergeben. Bitte versuchen Sie es mit einer anderen E-Mail Adresse. Falls Sie Ihr Passwort vergessen haben, nehmen Sie bitte Kontakt mit unseren Service - Mitarbeitern auf, um ihr Passwort zurückzusetzen!";
+
+/* Tell the user that the iPhones software stack produced some error while trying to send a registration request.
+The causing error message is provided as the first parameter and is of type String. It might not be internationalized! */
+"de.cyface.error.RegistrationError.internalError" = "Ihr Telefon hat, während der Registrierung, den folgenden unerwarteten Fehler produziert:\n%@";
+
+/* Tell the user that the response the system got from sending a registration request was not of the correct type. */
+"de.cyface.error.RegistrationError.invalidResponseType" = "Antwort einer Registrierungsanfrage muss eine HTTP Antwort sein!";
+
+/* Tell the user that to many requests have been send in short succession by his phone. The user should try again after some time has passed. */
+"de.cyface.error.RegistrationError.tooManyRequests" = "Sie haben den Server zu oft angefragt. Bitte warten Sie einen Moment und versuchen es dann erneut!";
+
+/* Tell the user that an unexpected client error occurred. The most common cause is, that the user is offline. */
+"de.cyface.error.RegistrationError.unexpectedClientError" = "Das Absenden der Anfrage hat einen nicht erwarteten Fehler in Ihrem Telefon verursacht! Möglicherweise sind sie offline oder aus anderen Gründen gerade nicht in der Lage die Anfrage abzusenden. Bitte stellen Sie sicher, dass Sie Zugriff auf das Internet haben, bevor Sie es erneut versuchen.";
+
+/* Tell the user that the Cyface server encountered some unknown internal problems. */
+"de.cyface.error.RegistrationError.unexpectedServerError" = "Der Server meldet einen internen Fehler und konnte Ihre Anfrage daher nicht ausführen. Bitte versuchen Sie es erneut oder setzen Sie sich mit einem Service - Mitarbeiter in Verbindung.";
+
+/* Tell the user that the server returned a status code, which is not expected within the current protocol.
+The returned status code is provided as an Int as the first parameter! */
+"de.cyface.error.RegistrationError.unexpectedStatusCode" = "Unerwarteten Status vom Server empfangen. Möglicherweise ist der Server mit dem Ihre App kommuniziert kein Ready-for-Robots Server.";
+
+/* Explain to the user, that the system was unable to format a number for display on the screen. The number is given as the first argument. This should not happen and is evidence for a serious implementation bug. */
+"de.cyface.error.rfrerror.formattingFailed" = "Die Zahl %@ konnte nicht in Text umgewandelt werden!";
+
+/* Tell the user, that initialization of the Ready for Robots application failed. Futher details are available from the provided cause. The cause is the one and only parameter to this error. */
+"de.cyface.error.rfrerror.initializationFailed" = "Start der Anwendung ist fehlgeschlagen, weil: %@!";
+
+/* Explain to the user, that an HTTP network response returned an invalid status response. The status code is provided as the first parameter. */
+"de.cyface.error.rfrerror.invalidResponse" = "Server Antwort konnte nicht verarbeitet werden!";
+
+/* Tell the user, that the URL used for contacting the Cyface server was an invalid URL. The actual value is provided as the first parameter. */
+"de.cyface.error.rfrerror.invalidUrl" = "Ungültige Internetadresse %@!";
+
+/* Explain that the authentication request did not return a valid token. */
+"de.cyface.error.rfrerror.missingAuthenticationBody" = "Antwort der Authentifizierung enthielt keine Daten.";
+
+/* Tell the user, that there was no authenticator. This error should not occur under normal circumstances. */
+"de.cyface.error.rfrerror.missingAuthenticator" = "Es fehlt ein gültiger Authenticator!";
+
+/* Explain that the configuration for the authenticator is missing. This should not happen, since this file is included as a build artifact and should always be available. */
+"de.cyface.error.rfrerror.missingAuthenticatorConfiguration" = "Es fehlt eine gültige Authenticator Konfiguration.";
+
+/* Explain that an authenticator needs credentials, before authentication is possible. */
+"de.cyface.error.rfrerror.missingCredentials" = "Zugangsdaten zur Authentifizierung fehlen. Anfrage wird abgebrochen.";
+
+/* Explain that no valid voucher information was found for the current user. */
+"de.cyface.error.rfrerror.missingVoucher" = "Ihr Gutschein konnte nicht geladen werden.";
+
+/* The system was unable to get a valid authentication token from the server. Either the server is not available or the user used invalid Credentials. */
+"de.cyface.error.rfrerror.unableToAuthenticate" = "Ihr Benutzerkonto konnte nicht authentifiziert werden. Möglicherweise ist der Authentifizierungsserver ausgefallen oder Sie haben ungültige Anmeldeinformationen angegeben. Bitte melden Sie sich ab und wieder an.";
+
+/* Tell the user that a measurement could not be loaded. The device wide unique identifier of the measurement is provided as the first parameter. */
+"de.cyface.error.rfrerror.unableToLoadMeasurement" = "Messung %@ konnte nicht geladen werden!";
+
+/* Explain to the user, that the system was unable to load the voucher overview. */
+"de.cyface.error.rfrerror.voucherOverviewFailed" = "Gutscheinübersicht konnte nicht geladen werden.";
+
+/* No comment provided by engineer. */
+"E-Mail Adresse" = "E-Mail Adresse";
+
+/* No comment provided by engineer. */
+"E-Mail: mail@cyface.de\nTelefon: +49 351 6 475 2580" = "E-Mail: mail@cyface.de\nTelefon: +49 351 6 475 2580";
+
+/* No comment provided by engineer. */
+"error" = "Fehler";
+
+/* No comment provided by engineer. */
+"Error: Data Capturing Service was not yet initialized!" = "Datenaufzeichnungsdienst war noch nicht gestartet.";
+
+/* No comment provided by engineer. */
+"Fahrten" = "Fahrten";
+
+/* Label for the time the user has spent, with the running measurement. */
+"Fahrtzeit" = "Fahrtzeit";
+
+/* No comment provided by engineer. */
+"Fehler" = "Fehler";
+
+/* Label for the current speed, the user is going during a running measurement. */
+"Geschwindigkeit" = "Geschwindigkeit";
+
+/* No comment provided by engineer. */
+"gültig bis: %@" = "gültig bis: %@";
+
+/* No comment provided by engineer. */
+"Gutschein anzeigen" = "Gutschein anzeigen";
+
+/* No comment provided by engineer. */
+"Gutscheincode: %@" = "Gutscheincode: %@";
+
+/* No comment provided by engineer. */
+"Haftungshinweis" = "Haftungshinweis";
+
+/* No comment provided by engineer. */
+"Herausgeber" = "Herausgeber";
+
+/* No comment provided by engineer. */
+"Höhe" = "Höhe";
+
+/* No comment provided by engineer. */
+"Höhenprofil" = "Höhenprofil";
+
+/* No comment provided by engineer. */
+"I am human" = "Ich bin ein Mensch";
+
+/* No comment provided by engineer. */
+"Impressum" = "Impressum";
+
+/* All menu entries */
+"info" = "Info";
+
+/* No comment provided by engineer. */
+"Karte" = "Karte";
+
+/* No comment provided by engineer. */
+"Live" = "Live";
+
+/* Labels the login action */
+"login" = "Anmelden";
+
+/* The title of the button asking the user to start the login process. */
+"loginButtonLabel" = "Anmelden oder Registrieren";
+
+/* No comment provided by engineer. */
+"Maximale Strecke" = "Maximale Strecke";
+
+/* Title label of a running measurement. */
+"measurement %llu" = "Messung %llu";
+
+/* No comment provided by engineer. */
+"nextbike Gutschein freigeschaltet" = "nextbike Gutschein freigeschaltet";
+
+/* No comment provided by engineer. */
+"Noch %@ von %@ km bis zum Gutschein" = "Noch %@ von %@ km bis zum Gutschein";
+
+/* No comment provided by engineer. */
+"Noch %lf von %lf km bis zum Gutschein" = "Noch %lf von %lf km bis zum Gutschein";
+
+/* No comment provided by engineer. */
+"Nutzerprofil und alle zugehörigen Daten löschen." = "Nutzerprofil und alle zugehörigen Daten löschen.";
+
+/* No comment provided by engineer. */
+"Passwort" = "Passwort";
+
+/* No comment provided by engineer. */
+"Passwort wiederholen" = "Passwort wiederholen";
+
+/* Tab label for selecting to show the map view during a measurement. */
+"Position" = "Position";
+
+/* No comment provided by engineer. */
+"Profil" = "Profil";
+
+/* No comment provided by engineer. */
+"Register New Account" = "Neues Benutzerkonto anlegen";
+
+/* No comment provided by engineer. */
+"Registrieren" = "Registrieren";
+
+/* No comment provided by engineer. */
+"Registrieren Sie sich bitte über die [Ready for Robots Plattform](https://auth.cyface.de:8443/realms/rfr/protocol/openid-connect/auth?client_id=ios-app&redirect_uri=de.cyface.app.r4r%3A%2Foauth2redirect&response_type=code&scope=openid)" = "Bitte registrieren Sie sich auf der [Ready for Robots platform](https://auth.cyface.de:8443/realms/rfr/protocol/openid-connect/auth?client_id=ios-app&redirect_uri=de.cyface.app.r4r%3A%2Foauth2redirect&response_type=code&scope=openid)";
+
+/* No comment provided by engineer. */
+"Statistiken" = "Statistiken";
+
+/* Label for the length of the route the user has been going during the running measurement. */
+"Strecke" = "Strecke";
+
+/* No comment provided by engineer. */
+"Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich." = "Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.";
+
+/* No comment provided by engineer. */
+"Username" = "Nutzername";
+
+/* Label for the so far avoided emissions during the running measurement in comparison to going the same route by car. */
+"Vermiedener CO₂ Ausstoß" = "Vermiedener CO₂ Ausstoß";
+
+/* No comment provided by engineer. */
+"Vertreten durch:\nDr. Klemens Muthmann" = "Vertreten durch:\nDr. Klemens Muthmann";
+
+/* No comment provided by engineer. */
+"Wenn Sie auf \"Wirklich Löschen\" klicken, wird ihr Zugang und alle ihre erfassten Daten unwiderbringlich gelöscht. Möchten Sie Ihr Nutzerprofil wirklich löschen?" = "Wenn Sie auf \"Wirklich Löschen\" klicken, wird ihr Zugang und alle ihre erfassten Daten unwiderbringlich gelöscht. Möchten Sie Ihr Nutzerprofil wirklich löschen?";
+
+/* No comment provided by engineer. */
+"Wirklich Löschen" = "Wirklich Löschen";
+
+/* No comment provided by engineer. */
+"Zeit" = "Zeit";
+
+/* No comment provided by engineer. */
+"Zurück" = "Zurück";
+

@@ -1,0 +1,6 @@
+/* Privacy - Location Always and When In Use Usage Description */
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Bitte erlauben Sie die Aufzeichnung der Strecke im Hintergrund, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
+
+/* Privacy - Location When In Use Usage Description */
+"NSLocationWhenInUseUsageDescription" = "Bitte erlauben Sie die Aufzeichnung der Strecke, damit wir Ihrer Kommune Ihre Daten zur Ermittlung der Bereitschaft für Roboter zur Verfügung stellen können.";
+

@@ -18,7 +18,6 @@
  */
 
 import Foundation
-import Alamofire
 import OSLog
 
 /**
@@ -29,46 +28,55 @@ import OSLog
  */
 class UploadRequest {
     /// The URL to the Cyface API receiving the data.
-    let session: Session
+    let session: URLSession
     /// The logger used by objects of this class.
     let log: OSLog = OSLog(subsystem: "UploadRequest", category: "de.cyface")
 
     /// Initialize the request using the provided Alamofire `Session` for execution.
-    init(session: Session) {
+    init(session: URLSession) {
         self.session = session
     }
 
     /// Send the request for the provided `upload`.
-    func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0, onSuccess: @escaping (UInt64) -> Void, onFailure: @escaping (String, String, Upload, Error) -> Void) {
-        os_log("Uploading measurement %{public}d to session %{public}@.", log: log, type: .debug, upload.identifier, sessionIdentifier)
-            do {
-                let metaData = try upload.metaData()
-                let data = try upload.data()
+    func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0) async throws -> Upload {
+        os_log("Uploading measurement %{public}d to session %{public}@.", log: log, type: .debug, upload.measurement.identifier, sessionIdentifier)
+        let metaData = try upload.metaData()
+        let data = try upload.data()
 
-                var headers = metaData.asHeader
-                headers.add(name: "Content-Length", value: String(data.count-continueOnByte))
-                headers.add(name: "Content-Range", value: "bytes \(continueOnByte)-\(data.count-1)/\(data.count)")
+        guard let url = URL(string: sessionIdentifier) else {
+            throw ServerConnectionError.sessionIdentifierFormatInvalid(sessionIdentifier)
+        }
 
-                session.upload(data[continueOnByte..<data.count], to: sessionIdentifier, method: .put, headers: headers).response { response in
-                guard let response = response.response else {
-                    if let error = response.error {
-                        onFailure(authToken, sessionIdentifier, upload, error)
-                    } else {
-                        onFailure(authToken, sessionIdentifier, upload, ServerConnectionError.noResponse)
-                    }
-                    return
-                }
+        // Background uploads are only valid from files, so writing the data to a file at first.
+        let tempDataFile = try copyToTemp(data: data[continueOnByte..<data.count], sessionIdentifier: url)
 
-                let status = response.statusCode
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        metaData.add(to: &request)
+        request.setValue(String(data.count-continueOnByte), forHTTPHeaderField: "Content-Length")
+        request.setValue("bytes \(continueOnByte)-\(data.count-1)/\(data.count)", forHTTPHeaderField: "Content-Range")
 
-                if status == 201 {
-                    onSuccess(upload.identifier)
-                } else {
-                    onFailure(authToken, sessionIdentifier, upload, ServerConnectionError.requestFailed(httpStatusCode: status))
-                }
-            }
-        } catch {
-            onFailure(authToken, sessionIdentifier, upload, error)
+        let (_, response) = try await session.upload(for: request, fromFile: tempDataFile)
+        guard let response = response as? HTTPURLResponse else {
+            throw ServerConnectionError.noResponse
+        }
+
+        let status = response.statusCode
+
+        if status == 201 {
+            return upload
+        } else {
+            throw ServerConnectionError.requestFailed(httpStatusCode: status)
         }
     }
+}
+
+func copyToTemp(data: Data, sessionIdentifier: URL) throws -> URL {
+    let filename = sessionIdentifier.lastPathComponent
+    let target = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+    if FileManager.default.fileExists(atPath: target.relativePath) {
+        try FileManager.default.removeItem(at: target)
+    }
+    try data.write(to: target)
+    return target
 }

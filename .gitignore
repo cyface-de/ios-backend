@@ -44,6 +44,7 @@ DerivedData/
 *.xcscmblueprint
 *.xcworkspace
 DataCapturing/Source/Persistence/measurement.pb.swift
+**/auth.conf.json
 
 ## Obj-C/Swift specific
 *.hmap
@@ -58,10 +59,10 @@ playground.xcworkspace
 # Swift Package Manager
 #
 # Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
-# Packages/
-# Package.pins
-# Package.resolved
-# .build/
+Packages/
+Package.pins
+Package.resolved
+.build/
 
 # CocoaPods
 #

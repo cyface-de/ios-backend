@@ -1,0 +1,223 @@
+/* No comment provided by engineer. */
+"%lld x 15 Minuten nextbike Gutscheine übrig" = "%lld x 15 minute Nextbike vouchers available";
+
+/* No comment provided by engineer. */
+"1x 15 Freiminuten auf die nächste Ausleihe in Schkeuditz - nextbike Nordsachsen" = "1x 15 free minutes on the next rental in Schkeuditz - Nextbike North Saxony";
+
+/* No comment provided by engineer. */
+"Abbrechen" = "Cancel";
+
+/* No comment provided by engineer. */
+"Abgeschlossene Messungen" = "Finished Measurements";
+
+/* No comment provided by engineer. */
+"Abmelden" = "Log Out";
+
+/* No comment provided by engineer. */
+"Achtung" = "Attention";
+
+/* No comment provided by engineer. */
+"Akzeptieren" = "Accept";
+
+/* No comment provided by engineer. */
+"Amtsgericht Dresden\nHRB: 36726\nUSt.-Id.: DE-312598748" = "District Court Dresden\nHRB: 36726\nUSt.-Id.: DE-312598748";
+
+/* Label for the ascent so far of the running measurement. */
+"Anstieg" = "Ascent";
+
+/* No comment provided by engineer. */
+"Bitte geben Sie ein gültiges Passwort ein. " = "Please enter a valid password.";
+
+/* No comment provided by engineer. */
+"Bitte geben Sie eine gültige E-Mail Adresse ein" = "Please enter a valid email address.";
+
+/* No comment provided by engineer. */
+"Bitte warten!" = "Please wait!";
+
+/* No comment provided by engineer. */
+"Daten übertragen" = "Submit Data";
+
+/* No comment provided by engineer. */
+"Datenschutz" = "Privacy";
+
+/* No comment provided by engineer. */
+"Datenschutzbestimmungen" = "Privacy Policy";
+
+/* Tell the user that the e-mail address used for registration is not available anymore.
+In such cases the user either uses an e-mail address not belonging to her/him/them or tries to reregister, which is not permitted.
+To reset the password, the user needs to contact the Cyface support. */
+"de.cyface.error.RegistrationError.emailUsed" = "The email address you entered is already taken. Please try a different email address. If you have forgotten your password, please contact our service staff to reset your password!";
+
+/* Tell the user that the iPhones software stack produced some error while trying to send a registration request.
+The causing error message is provided as the first parameter and is of type String. It might not be internationalized! */
+"de.cyface.error.RegistrationError.internalError" = "Your phone produced the following unexpected error during registration:\n%@";
+
+/* Tell the user that the response the system got from sending a registration request was not of the correct type. */
+"de.cyface.error.RegistrationError.invalidResponseType" = "The response to a registration request must be an HTTP response!";
+
+/* Tell the user that to many requests have been send in short succession by his phone. The user should try again after some time has passed. */
+"de.cyface.error.RegistrationError.tooManyRequests" = "You have requested the server too many times. Please wait a moment and then try again!";
+
+/* Tell the user that an unexpected client error occurred. The most common cause is, that the user is offline. */
+"de.cyface.error.RegistrationError.unexpectedClientError" = "Sending the request caused an unexpected error in your phone! You may be offline or not able to send the request for other reasons. Please make sure you have internet access before trying again.";
+
+/* Tell the user that the Cyface server encountered some unknown internal problems. */
+"de.cyface.error.RegistrationError.unexpectedServerError" = "The server reported an internal error and was therefore unable to complete your request. Please try again or contact a service representative.";
+
+/* Tell the user that the server returned a status code, which is not expected within the current protocol.
+The returned status code is provided as an Int as the first parameter! */
+"de.cyface.error.RegistrationError.unexpectedStatusCode" = "Received unexpected status from server. The server your app communicates with may not be a Ready-for-Robots server.";
+
+/* Tell the user, that initialization of the Ready for Robots application failed. Futher details are available from the provided cause. The cause is the one and only parameter to this error. */
+"de.cyface.error.rfrerror.initializationFailed" = "Application startup failed! Reason: %@!";
+
+/* Tell the user, that the URL used for contacting the Cyface server was an invalid URL. The actual value is provided as the first parameter. */
+"de.cyface.error.rfrerror.invalidUrl" = "Invalid Internetaddress %@!";
+
+/* Explain that the authentication request did not return a valid token. */
+"de.cyface.error.rfrerror.missingAuthenticationBody" = "Authentication response did not contain any data.";
+
+/* Tell the user, that there was no authenticator. This error should not occur under normal circumstances. */
+"de.cyface.error.rfrerror.missingAuthenticator" = "A valid authenticator is missing!";
+
+/* Explain that the configuration for the authenticator is missing. This should not happen, since this file is included as a build artifact and should always be available. */
+"de.cyface.error.rfrerror.missingAuthenticatorConfiguration" = "A valid authenticator configuration is missing.";
+
+/* Explain that an authenticator needs credentials, before authentication is possible. */
+"de.cyface.error.rfrerror.missingCredentials" = "Credentials for authentication are missing. Request is canceled.";
+
+/* Explain that no valid voucher information was found for the current user. */
+"de.cyface.error.rfrerror.missingVoucher" = "Your voucher could not be loaded.";
+
+/* Tell the user that a measurement could not be loaded. The device wide unique identifier of the measurement is provided as the first parameter. */
+"de.cyface.error.rfrerror.unableToLoadMeasurement" = "Measurement %@ could not be loaded!";
+
+/* No comment provided by engineer. */
+"E-Mail Adresse" = "E-Mail Address";
+
+/* No comment provided by engineer. */
+"E-Mail: mail@cyface.de\nTelefon: +49 351 6 475 2580" = "E-Mail: mail@cyface.de\nFon: +49 351 6 475 2580";
+
+/* No comment provided by engineer. */
+"error" = "Error";
+
+/* No comment provided by engineer. */
+"Error: Data Capturing Service was not yet initialized!" = "Data recording service had not yet started.";
+
+/* No comment provided by engineer. */
+"Fahrten" = "Trips";
+
+/* Label for the time the user has spent, with the running measurement. */
+"Fahrtzeit" = "Travel Time";
+
+/* No comment provided by engineer. */
+"Fehler" = "Error";
+
+/* Label for the current speed, the user is going during a running measurement. */
+"Geschwindigkeit" = "Speed";
+
+/* No comment provided by engineer. */
+"gültig bis: %@" = "valid until: %@";
+
+/* No comment provided by engineer. */
+"Gutschein anzeigen" = "Show voucher";
+
+/* No comment provided by engineer. */
+"Gutscheincode: %@" = "Voucher Code: %@";
+
+/* No comment provided by engineer. */
+"Haftungshinweis" = "Disclaimer";
+
+/* No comment provided by engineer. */
+"Herausgeber" = "Publisher";
+
+/* No comment provided by engineer. */
+"Höhe" = "Height";
+
+/* No comment provided by engineer. */
+"Höhenprofil" = "Height Profile";
+
+/* No comment provided by engineer. */
+"I am human" = "I am a human";
+
+/* All menu entries */
+"info" = "Info";
+
+/* No comment provided by engineer. */
+"Karte" = "Map";
+
+/* No comment provided by engineer. */
+"Live" = "Live";
+
+/* Labels the login action */
+"login" = "Login";
+
+/* The title of the button asking the user to start the login process. */
+"loginButtonLabel" = "Login or Register";
+
+/* No comment provided by engineer. */
+"Maximale Strecke" = "Maximum distance";
+
+/* Title label of a running measurement. */
+"measurement %llu" = "Measurement %llu";
+
+/* No comment provided by engineer. */
+"nextbike Gutschein freigeschaltet" = "Nextbike voucher activated";
+
+/* No comment provided by engineer. */
+"Noch %@ von %@ km bis zum Gutschein" = "Still %@ of required %@ km until voucher is enabled";
+
+/* No comment provided by engineer. */
+"Noch %lf von %lf km bis zum Gutschein" = "Still %lf of %lf km to the voucher";
+
+/* No comment provided by engineer. */
+"Nutzerprofil und alle zugehörigen Daten löschen." = "Delete user profile and all associated data.";
+
+/* No comment provided by engineer. */
+"Passwort" = "Password";
+
+/* No comment provided by engineer. */
+"Passwort wiederholen" = "Repeat Password";
+
+/* Tab label for selecting to show the map view during a measurement. */
+"Position" = "Position";
+
+/* No comment provided by engineer. */
+"Register New Account" = "Register New Account";
+
+/* No comment provided by engineer. */
+"Registrieren" = "Register";
+
+/* No comment provided by engineer. */
+"Registrieren Sie sich bitte über die [Ready for Robots Plattform](https://auth.cyface.de:8443/realms/rfr/protocol/openid-connect/auth?client_id=ios-app&redirect_uri=de.cyface.app.r4r%3A%2Foauth2redirect&response_type=code&scope=openid)" = "Please register via the [Ready for Robots platform](https://auth.cyface.de:8443/realms/rfr/protocol/openid-connect/auth?client_id=ios-app&redirect_uri=de.cyface.app.r4r%3A%2Foauth2redirect&response_type=code&scope=openid)";
+
+/* No comment provided by engineer. */
+"Statistiken" = "Statistics";
+
+/* Label for the length of the route the user has been going during the running measurement. */
+"Strecke" = "Route";
+
+/* No comment provided by engineer. */
+"Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich." = "Despite careful content control, we assume no liability for the content of external links. The operators are solely responsible for the content of the linked pages.";
+
+/* No comment provided by engineer. */
+"Username" = "Username";
+
+/* Label for the so far avoided emissions during the running measurement in comparison to going the same route by car. */
+"Vermiedener CO₂ Ausstoß" = "Avoided CO₂ emissions";
+
+/* No comment provided by engineer. */
+"Vertreten durch:\nDr. Klemens Muthmann" = "Represented by:\nDr. Klemens Muthmann";
+
+/* No comment provided by engineer. */
+"Wenn Sie auf \"Wirklich Löschen\" klicken, wird ihr Zugang und alle ihre erfassten Daten unwiderbringlich gelöscht. Möchten Sie Ihr Nutzerprofil wirklich löschen?" = "If you click on “Really delete”, your access and all of your recorded data will be irretrievably deleted. Do you really want to delete your user profile?";
+
+/* No comment provided by engineer. */
+"Wirklich Löschen" = "Really delete";
+
+/* No comment provided by engineer. */
+"Zeit" = "Time";
+
+/* No comment provided by engineer. */
+"Zurück" = "Back";
+

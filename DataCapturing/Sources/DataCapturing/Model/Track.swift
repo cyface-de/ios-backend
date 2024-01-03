@@ -30,12 +30,10 @@ Represents a single continuously measured track of geo location and associated s
  - since: 11.0.0
  */
 public class Track {
-    /// The database identifier used by CoreData to identify this object in the database.
-    var objectId: NSManagedObjectID?
     /// The locations constituting this track.
     public var locations: [GeoLocation]
-    /// The measurement this track belongs to.
-    let measurement: Measurement
+    /// The barometric altitudes captured for this track. If the device does not support an altimeter, this array is empty.
+    public var altitudes: [Altitude]
 
     /**
      A copy initializer creating a new `Track` based of the values of a CoreData managed object.
@@ -44,45 +42,33 @@ public class Track {
 
      - Parameters:
         - managedObject: The CoreData object to initialize all the properties of the new `Track` from.
-        - parent: The parent `Measurement` of the track.
      - throws: `InconsistentData.locationOrderViolation` if the order of the locations in the `managedObject` is not strongly monotonically increasing.
      */
-    convenience init(managedObject: TrackMO, parent: Measurement) throws {
-        self.init(parent: parent)
-        self.objectId = managedObject.objectID
+    convenience init(managedObject: TrackMO) throws {
+        self.init()
 
-        if let geoLocationMOs = managedObject.locations?.array as? [GeoLocationMO] {
-            for geoLocationMO in geoLocationMOs {
-                try append(location: GeoLocation(managedObject: geoLocationMO, parent: self))
-            }
+        var locations = [GeoLocation]()
+        for geoLocationMO in managedObject.typedLocations() {
+            locations.append(GeoLocation(managedObject: geoLocationMO))
         }
+        self.locations = locations
+
+        var altitudes = [Altitude]()
+        for altitude in managedObject.typedAltitudes() {
+            altitudes.append(Altitude(managedObject: altitude))
+        }
+        self.altitudes = altitudes
+
+        //if let altitudeMOs = managedObject.al
     }
 
     /**
      An initializer for a new empty `Track`.
 
-     Initially this `Track` is not stored via CoreData and thus its objectId is going to be `nil`. The `objectId` will be updated as sson as the parent `Measurement` is saved via CoreData.
-
      - Parameter parent: The parent `Measurement` of this new `Track`.
      */
-    init(parent: Measurement) {
+    init() {
         self.locations = [GeoLocation]()
-        self.measurement = parent
-    }
-
-    /**
-     Append a `GeoLocation` to the end of this `Track`.
-
-     The appended location must have this `Track` as its parent.
-
-     - Parameter location: The location to append.
-     - Throws InconsistentData.locationOrderViolated: If the newly added locations timestamp is smaller then the one from the previous location.
-     */
-    func append(location: GeoLocation) throws {
-        guard (locations.last?.timestamp ?? 0) < location.timestamp else {
-            throw InconsistentData.locationOrderViolated
-        }
-
-        self.locations.append(location)
+        self.altitudes = [Altitude]()
     }
 }

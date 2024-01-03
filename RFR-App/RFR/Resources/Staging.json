@@ -1,0 +1,8 @@
+{
+	"apiEndpoint":"https://s1-b.cyface.de/provider/api/v2/",
+	"redirectUri":"de.cyface.app.r4r:/oauth2redirect/",
+	"clientId":"ios-app",
+	"issuer":"https://auth.cyface.de:8443/realms/rfr",
+	"incentivesUrl":"https://staging.cyface.de/incentives/api/v1/",
+	"uploadEndpoint":"https://s1-b.cyface.de/api/v4/",
+}

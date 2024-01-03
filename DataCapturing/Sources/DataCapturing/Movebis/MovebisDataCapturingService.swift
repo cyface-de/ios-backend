@@ -33,7 +33,7 @@ import os.log
  - Version: 5.0.0
  - Since: 1.0.0
  */
-public class MovebisDataCapturingService: DataCapturingService {
+public class MovebisDataCapturingService: MeasurementImpl {
 
     // MARK: - Properties
 
@@ -79,7 +79,7 @@ public class MovebisDataCapturingService: DataCapturingService {
         // Ask the user for its ok with data tracking.
         manager.requestAlwaysAuthorization()
 
-        let authorizationStatus = CLLocationManager.authorizationStatus()
+        let authorizationStatus = manager.authorizationStatus
         if authorizationStatus != .authorizedWhenInUse && authorizationStatus != .authorizedAlways {
             // User has not authorized access to location information.
             os_log("Location service not authorized!", log: MovebisDataCapturingService.log, type: .default)

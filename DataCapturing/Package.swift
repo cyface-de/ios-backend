@@ -1,12 +1,30 @@
 // swift-tools-version: 5.6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
+/*
+ * Copyright 2019-2023 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import PackageDescription
 
 let package = Package(
     name: "DataCapturing",
     platforms: [
-        .iOS(.v12),
+        .iOS(.v14),
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -18,8 +36,6 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // DataCompression Library to handle complicated ObjectiveC compression API.
         .package(name: "DataCompression", url: "https://github.com/mw99/DataCompression.git", from: "3.0.0"),
-        // Alamofire handles the Network traffic.
-        .package(name: "Alamofire", url: "https://github.com/Alamofire/Alamofire.git", from: "5.6.1"),
         // Apple library to handle Protobuf conversion for transmitting files in the Protobuf format.
         .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.6.0"),
 
@@ -37,7 +53,6 @@ let package = Package(
         .target(
             name: "DataCapturing",
             dependencies: [
-                .byName(name: "Alamofire"),
                 .byName(name: "DataCompression"),
                 .byName(name: "SwiftProtobuf"),
             ]),
