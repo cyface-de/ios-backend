@@ -18,6 +18,7 @@
  */
 import SwiftUI
 import DataCapturing
+import Sentry
 
 /**
  Entry point to the application showing the first view.
@@ -31,6 +32,18 @@ struct RFRApp: App {
 
     /// The application, which is required to store and load the authentication state of this application.
     @StateObject var appModel = AppModel()
+
+    init() {
+        SentrySDK.start { options in
+            options.dsn = "https://cfb4e7e71da45d9d7fc312d2d350c951@o4506585719439360.ingest.sentry.io/4506585723437056"
+            options.debug = false // Enabled debug when first installing is always helpful
+
+            // Enable tracing to capture 100% of transactions for performance monitoring.
+            // Use 'options.tracesSampleRate' to set the sampling rate.
+            // We recommend setting a sample rate in production.
+            options.enableTracing = true
+        }
+    }
 
     var body: some Scene {
         WindowGroup {
