@@ -71,6 +71,15 @@ class DataCapturingViewModel: ObservableObject {
         self.dataStoreStack = dataStoreStack
         Task {
             try await dataStoreStack.setup()
+            try dataStoreStack.wrapInContext { context in
+                let request = MeasurementMO.fetchRequest()
+                request.predicate = NSPredicate(format: "synchronized=false AND synchronizable=false")
+                let result = try request.execute()
+                for measurementModelObject in result {
+                    measurementModelObject.synchronizable = true
+                }
+                try context.save()
+            }
             try measurementsViewModel.setup()
             DispatchQueue.main.async { [weak self] in
                 self?.isInitialized = true
