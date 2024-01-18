@@ -4,5 +4,6 @@
 	"clientId":"ios-app",
 	"issuer":"http://localhost:8081/realms/rfr",
 	"incentivesUrl":"http://localhost:8082/incentives/api/v1",
-	"uploadEndpoint":"http://localhost:8080/api/v4/"
+	"uploadEndpoint":"http://localhost:8080/api/v4/",
+    "enableSentryTracing": "true"
 }

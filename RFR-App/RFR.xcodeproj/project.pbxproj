@@ -21,6 +21,7 @@
 		AA3C06512A40ED57002BD585 /* VoucherOverviewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06502A40ED57002BD585 /* VoucherOverviewModel.swift */; };
 		AA3C06562A4180DC002BD585 /* MainMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06552A4180DC002BD585 /* MainMap.swift */; };
 		AA45BDA22AE6B420003FCB17 /* LoginStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA45BDA12AE6B420003FCB17 /* LoginStatus.swift */; };
+		AA4C48F02B5812C900164175 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = AA4C48EF2B5812C900164175 /* Sentry */; };
 		AA6239A72B0CB088007875BF /* SynchronizationViewModelTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA199DE02AF038FD00DE4D4A /* SynchronizationViewModelTest.swift */; };
 		AA6C48962A93629800C3633D /* OAuthLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6C48952A93629800C3633D /* OAuthLoginView.swift */; };
 		AA6C48992A9365B200C3633D /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AA6C48982A9365B200C3633D /* AppAuth */; };
@@ -168,6 +169,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA4C48F02B5812C900164175 /* Sentry in Frameworks */,
 				AA6C48992A9365B200C3633D /* AppAuth in Frameworks */,
 				AAA1AAC429EED663002CBC91 /* HCaptcha in Frameworks */,
 				AACB768329BF639F00A9DB6F /* DataCapturing in Frameworks */,
@@ -405,6 +407,7 @@
 				AA87D0642982ADE8002F6B3B /* Sources */,
 				AA87D0652982ADE8002F6B3B /* Frameworks */,
 				AA87D0662982ADE8002F6B3B /* Resources */,
+				624DF0D6543446EE898A1474 /* Upload Debug Symbols to Sentry */,
 			);
 			buildRules = (
 			);
@@ -416,6 +419,7 @@
 				AAA1AAC329EED663002CBC91 /* HCaptcha */,
 				AA6C48982A9365B200C3633D /* AppAuth */,
 				AA6C489A2A9365B200C3633D /* AppAuthCore */,
+				AA4C48EF2B5812C900164175 /* Sentry */,
 			);
 			productName = RFR;
 			productReference = AA87D0682982ADE8002F6B3B /* Ready for Robots Development.app */;
@@ -477,6 +481,7 @@
 			packageReferences = (
 				AAA1AAC229EED663002CBC91 /* XCRemoteSwiftPackageReference "HCaptcha-ios-sdk" */,
 				AA6C48972A9365B200C3633D /* XCRemoteSwiftPackageReference "AppAuth-iOS" */,
+				AA4C48EE2B5812C800164175 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 			);
 			productRefGroup = AA87D0692982ADE8002F6B3B /* Products */;
 			projectDirPath = "";
@@ -721,6 +726,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 			};
 			name = "Debug Production";
 		};
@@ -838,6 +844,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 			};
 			name = "Debug Staging";
 		};
@@ -949,6 +956,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 			};
 			name = "Release Staging";
 		};
@@ -1060,6 +1068,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 			};
 			name = "Release Production";
 		};
@@ -1655,6 +1664,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 			};
 			name = "Debug Development";
 		};
@@ -1691,6 +1701,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 			};
 			name = "Release Development";
 		};
@@ -1792,6 +1803,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		AA4C48EE2B5812C800164175 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.18.0;
+			};
+		};
 		AA6C48972A9365B200C3633D /* XCRemoteSwiftPackageReference "AppAuth-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/openid/AppAuth-iOS";
@@ -1821,6 +1840,11 @@
 			package = AA6C48972A9365B200C3633D /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
 			productName = AppAuth;
 		};
+		AA4C48EF2B5812C900164175 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4C48EE2B5812C800164175 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
+		};
 		AA6C48982A9365B200C3633D /* AppAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AA6C48972A9365B200C3633D /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
@@ -1841,6 +1865,24 @@
 			productName = DataCapturing;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		624DF0D6543446EE898A1474 /* Upload Debug Symbols to Sentry */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			name = "Upload Debug Symbols to Sentry";
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+			);
+			outputPaths = (
+			);
+			shellPath = /bin/sh;
+			shellScript = "# This script is responsable to upload debug symbols and source context for Sentry.\nif which sentry-cli >/dev/null; then\nexport SENTRY_ORG=cyface-gmbh\nexport SENTRY_PROJECT=apple-ios\nERROR=$(sentry-cli debug-files upload --include-sources \"$DWARF_DSYM_FOLDER_PATH\" 2>&1 >/dev/null)\nif [ ! $? -eq 0 ]; then\necho \"warning: sentry-cli - $ERROR\"\nfi\nelse\necho \"warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 	};
 	rootObject = AA87D0602982ADE8002F6B3B /* Project object */;
 }

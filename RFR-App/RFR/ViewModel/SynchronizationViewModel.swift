@@ -21,6 +21,7 @@ import DataCapturing
 import OSLog
 import Combine
 import UIKit
+import Sentry
 
 /**
  View Model used as an interface to synchronize measurements and keep the UI up to date about synchronization progress.
@@ -69,6 +70,7 @@ class SynchronizationViewModel: ObservableObject {
                     os_log(.debug, log: OSLog.synchronization, "Successfully finished synchronization of measurement %d!", measurement.identifier)
                     uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedSuccessfully))
                 } catch {
+                    SentrySDK.capture(error: error)
                     os_log(.error, log: OSLog.synchronization, "Failed synchronizing measurement %d!", measurement.identifier)
                     if let defaultUploadProcessBuilder = processBuilder as? DefaultUploadProcessBuilder {
                         os_log(.error, log: OSLog.synchronization, "Data Collector API Address: %@", defaultUploadProcessBuilder.apiEndpoint.absoluteString)
@@ -81,6 +83,7 @@ class SynchronizationViewModel: ObservableObject {
                 }
             }
         } catch {
+            SentrySDK.capture(error: error)
             self.error = error
         }
     }
