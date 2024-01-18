@@ -34,6 +34,7 @@ struct RFRApp: App {
     @StateObject var appModel = AppModel()
 
     init() {
+        let enableTracing = try! appModel.config.getEnableSentryTracing()
         SentrySDK.start { options in
             options.dsn = "https://cfb4e7e71da45d9d7fc312d2d350c951@o4506585719439360.ingest.sentry.io/4506585723437056"
             options.debug = false // Enabled debug when first installing is always helpful
@@ -41,7 +42,7 @@ struct RFRApp: App {
             // Enable tracing to capture 100% of transactions for performance monitoring.
             // Use 'options.tracesSampleRate' to set the sampling rate.
             // We recommend setting a sample rate in production.
-            options.enableTracing = true
+            options.enableTracing = enableTracing
         }
     }
 
@@ -80,14 +81,13 @@ class AppModel: ObservableObject {
     /// Tells the view about errors occuring during initialization.
     @Published var error: Error?
     /// This applications configuration file.
-    var config: Config?
+    var config: Config = try! ConfigLoader.load()
     /// The internet address of the root of the incentives API.
     var incentivesUrl: URL?
 
     // MARK: - Initializers
     init() {
         do {
-            let config = try ConfigLoader.load()
             let clientId = config.clientId
             let uploadEndpoint = try config.getUploadEndpoint()
             let issuer = try config.getIssuerUri()
