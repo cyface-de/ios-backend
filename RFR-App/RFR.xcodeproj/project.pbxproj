@@ -408,6 +408,7 @@
 				AA87D0652982ADE8002F6B3B /* Frameworks */,
 				AA87D0662982ADE8002F6B3B /* Resources */,
 				624DF0D6543446EE898A1474 /* Upload Debug Symbols to Sentry */,
+				AA2B0B6E2B7530B100756DBD /* Highlight TODO and FIXME as warnings */,
 			);
 			buildRules = (
 			);
@@ -540,6 +541,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# This script is responsable to upload debug symbols and source context for Sentry.\nif which sentry-cli >/dev/null; then\nexport SENTRY_ORG=cyface-gmbh\nexport SENTRY_PROJECT=apple-ios\nERROR=$(sentry-cli debug-files upload --include-sources \"$DWARF_DSYM_FOLDER_PATH\" 2>&1 >/dev/null)\nif [ ! $? -eq 0 ]; then\necho \"warning: sentry-cli - $ERROR\"\nfi\nelse\necho \"warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases\"\nfi\n";
+		};
+		AA2B0B6E2B7530B100756DBD /* Highlight TODO and FIXME as warnings */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Highlight TODO and FIXME as warnings";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nTAGS=\"TODO:|FIXME:\"\nfind \"${SRCROOT}/\" \\( -name \"*.h\" -or -name \"*.m\" -or -name \"*.swift\" \\) -print0 | xargs -0 egrep --with-filename --line-number --only-matching \"($TAGS).*\\$\" | perl -p -e \"s/($TAGS)/ warning: \\$1/\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
