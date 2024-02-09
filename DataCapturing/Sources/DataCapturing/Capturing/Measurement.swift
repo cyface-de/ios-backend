@@ -42,9 +42,7 @@ public protocol Measurement {
     /// A flag to get information about whether this measurement is currently paused (`true`) or not (`false`).
     var isPaused: Bool { get }
     /// Start this measurement.
-    ///
-    /// - Parameter inMode: The transportation mode initially used for this measurement (such as BICYCLE, CAR, etc.). To get a list of valid modalities, consult the documentation of your data collector server.
-    func start(inMode modality: String) throws
+    func start() throws
     /// Stop this measurement for sure in contrast to a pause you can not resume after stopping.
     /// This throws an exception if not currently running or paused.
     func stop() throws
@@ -345,7 +343,7 @@ extension MeasurementImpl: Measurement {
      - Parameters:
         - modality: The mode of transportation to use for the newly created measurement. This should be something like "car" or "bicycle".
      */
-    public func start(inMode modality: String) throws {
+    public func start() throws {
         try lifecycleQueue.sync {
             if isPaused {
                 os_log(
