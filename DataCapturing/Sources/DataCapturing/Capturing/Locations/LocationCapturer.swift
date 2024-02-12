@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -29,7 +29,7 @@ import Combine
  This is used to start and stop location capturing and to inform intereseted parties about location changes.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 12.0.0
  */
 public class LocationCapturer: NSObject {

@@ -22,27 +22,39 @@ import OSLog
 import CoreData
 
 /**
+ Protocol for a storage process for captured sensor data.
+
+ Implementations of this protocol are capable of storing captured data to some kind of permanent storage.
+
  - author: Klemens Muthmann
  - version: 1.0.0
  */
 public protocol CapturedDataStorage {
+    /// Create a new measurement within the data store.
     func createMeasurement(_ initialMode: String) throws -> UInt64
+    /// Subscribe to a running measurement and store the data produced by that measurement.
     func subscribe(
         to measurement: Measurement,
         _ identifier: UInt64,
         _ receiveCompletion: @escaping (() -> Void)) throws
+    /// Stop receiving updates from the currently subscribed measurement or do nothing if this was not subscribed at the moment.
     func unsubscribe()
 }
 
 /**
+An implementation of `CapturedDataStorage` for storing the data to a CoreData database.
+
  - author: Klemens Muthmann
  - version: 1.0.0
  */
 public class CapturedCoreDataStorage {
+    /// The `DataStoreStack` to write the captured data to.
     let dataStoreStack: DataStoreStack
+    /// A queue used to buffer received data until writing it as a bulk for performance reasons.
     let cachingQueue = DispatchQueue(label: "de.cyface.cache")
     /// The time interval to wait until the next batch of data is stored to the data storage. Increasing this time should improve performance but increases memory usage.
     let interval: TimeInterval
+    /// The *Combine* cancellables used so new values are transmitted.
     var cancellables = [AnyCancellable]()
 
     /**
