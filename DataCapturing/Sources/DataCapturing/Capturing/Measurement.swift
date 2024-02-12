@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -31,7 +31,7 @@ This protocol defines a measurements data together with its lifecycle during dat
  It can also be transmitted to a Cyface data collector server using using an implementation of `UploadProcess`.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 12.0.0
  */
 public protocol Measurement {
@@ -59,7 +59,6 @@ public protocol Measurement {
     func changeModality(to modality: String)
 }
 
-// TODO: Remove dead code from migration of location capturing to its own class
 /**
  An object of this class handles the lifecycle of starting and stopping data capturing.
  
@@ -76,11 +75,6 @@ public class MeasurementImpl {
     /// `true` if data capturing was running but is currently paused; `false` otherwise.
     public var isPaused:Bool
 
-    /**
-     The *CoreData* stack used to store, retrieve and update captured data to the local system until the App can transmit it to a server.
-     */
-    //public let dataStoreStack: DataStoreStack
-
     // TODO: This should probably be carried out using an actor: See the talk "Protect mutable state with Swift actors" from WWDC 2021
     /// The background queue used to capture data.
     private let capturingQueue: DispatchQueue
@@ -91,9 +85,6 @@ public class MeasurementImpl {
     private let locationCapturer: LocationCapturer
 
     // TODO: Switch to Combine --> Make this a publisher on its own. Will have to read up on how to achieve this.
-    /// A list of listeners that are notified of important events during data capturing.
-    // public var handler = [((DataCapturingEvent, Status) -> Void)]()
-    //@Published var mostRecentMessage: Message
     public var measurementMessages: PassthroughSubject<Message, Never>
 
     // TODO: This should probably be carried out using an actor: See the talk "Protect mutable state with Swift actors" from WWDC 2021
@@ -102,15 +93,7 @@ public class MeasurementImpl {
      Using such a queue prevents successiv calls to these methods to interrupt each other.
      */
     private let lifecycleQueue: DispatchQueue
-
-    // TODO: Handle via Combine
-    /// The interval between data write opertions, during data capturing.
-    //private let savingInterval: TimeInterval
-
-    /// A timer called in regular intervals to save the captured data to the underlying database.
-    //private var backgroundSynchronizationTimer: DispatchSourceTimer?
-    //var fixSubjectCancellable: AnyCancellable?
-    var messageCancellable: AnyCancellable? = nil
+    private var messageCancellable: AnyCancellable? = nil
 
     // MARK: - Initializers
 
@@ -122,10 +105,7 @@ public class MeasurementImpl {
         - locationManagerFactory: A factory creating a *CoreLocation* `LocationManager` on demand. This can also be used to inject a mock implementation.
      */
     public init(
-        //lifecycleQueue: DispatchQueue,
-        capturingQueue: DispatchQueue = DispatchQueue.global(qos: .userInitiated)/*,
-        savingInterval: TimeInterval,
-        dataStoreStack: DataStoreStack*/,
+        capturingQueue: DispatchQueue = DispatchQueue.global(qos: .userInitiated),
         locationManagerFactory: (() -> LocationManager) = {
             let manager = CLLocationManager()
             manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
@@ -138,18 +118,14 @@ public class MeasurementImpl {
             return manager
         }
     ) {
-        //self.dataStoreStack = dataStoreStack
         self.capturingQueue = capturingQueue
         self.lifecycleQueue = DispatchQueue(label: "lifecycle")
-        self.sensorCapturer = SensorCapturer(/*lifecycleQueue: lifecycleQueue, */capturingQueue: capturingQueue)
-        // TODO: Why does LocationCapturer still require the lifecycleQueue
+        self.sensorCapturer = SensorCapturer(capturingQueue: capturingQueue)
         self.locationCapturer = LocationCapturer(lifecycleQueue: lifecycleQueue, locationManagerFactory: locationManagerFactory)
         measurementMessages = PassthroughSubject<Message, Never>()
 
         self.isRunning = false
         self.isPaused = false
-
-        //self.savingInterval = savingInterval
     }
 
 
@@ -159,14 +135,11 @@ public class MeasurementImpl {
     /**
      Internal method for starting the capturing process. This can optionally take in a handler for events occuring during data capturing.
 
-     - Parameter savingEvery: The interval in seconds to wait between saving data to the database. A higher number increses speed but requires more memory and leads to a bigger risk of data loss. A lower number incurs higher demands on the systems processing speed.
-     - Parameter eventType: The type of event causing this start call.
-     - Returns: The event with information about starting the data capturing service
      - Throws:
      - `PersistenceError` If there is no current measurement.
      - Some unspecified errors from within CoreData.
      */
-    func startCapturing(/*savingEvery time: TimeInterval, for eventType: EventType*/) throws {
+    func startCapturing() throws {
         // Preconditions
         guard !isRunning else {
             os_log(
@@ -177,34 +150,9 @@ public class MeasurementImpl {
             return
         }
 
-        /*guard var measurement = capturedMeasurement else {
-            throw DataCapturingError.noCurrentMeasurement
-        }
-
-        // TODO: Why do I need the persistence layer here? It should be possible to create the new track and event directly inside the measurement. Saving it should happen on the first saving run.
-        let persistenceLayer = dataStoreStack.persistenceLayer()
-        try persistenceLayer.appendNewTrack(to: &measurement)
-        let event = try persistenceLayer.createEvent(of: eventType, parent: &measurement)
-
-        // Start the actual sensors.
-        self.fixSubjectCancellable = locationCapturer.fixSubject.sink { [weak self] hasFix in
-            self?.handle(event: hasFix ? DataCapturingEvent.geoLocationFixAcquired: DataCapturingEvent.geoLocationFixLost, status: .success)
-        }
-        self.locationSubjectCancellable = locationCapturer.locationSubject.sink { [weak self] location in
-            self?.handle(event: .geoLocationAcquired(position: location), status: .success)
-        }*/
         messageCancellable = locationCapturer.start().receive(on: lifecycleQueue).merge(
-            with: sensorCapturer.start(/*measurement: measurement*/)
+            with: sensorCapturer.start()
         ).subscribe(measurementMessages)
-
-
-
-        // Start storage to database.
-        /*let backgroundSynchronizationTimer = DispatchSource.makeTimerSource(queue: self.lifecycleQueue)
-        backgroundSynchronizationTimer.setEventHandler(handler: saveCapturedData)
-        backgroundSynchronizationTimer.schedule(deadline: .now(), repeating: time)
-        backgroundSynchronizationTimer.activate()
-        self.backgroundSynchronizationTimer = backgroundSynchronizationTimer*/
 
         self.isRunning = true
     }
@@ -217,126 +165,15 @@ public class MeasurementImpl {
     func stopCapturing() {
         sensorCapturer.stop()
         locationCapturer.stop()
-        /*backgroundSynchronizationTimer?.cancel()
-        //if !locationsCache.isEmpty || !sensorCapturer.isEmpty {
-        saveCapturedData()
-        //}*/
         isRunning = false
-        /*fixSubjectCancellable?.cancel()
-        locationSubjectCancellable?.cancel()*/
     }
 
-    // TODO: Storage should probably be handled by Sensor Capturer and Location Capturer via some strategy.
     // TODO: Sensor Capturer should only handle one type of sensor and be instantiated four times. Once per sensor.
-    /**
-     Method called by the `backgroundSynchronizationTimer` on each invocation.
-
-     This method saves all data from `sensorCapturer` and from `locationsCapturer` caches to the underlying data storage (database and file system) and cleans both caches.
-     */
-    /*func saveCapturedData() {
-        do {
-            guard var currentMeasurement = self.capturedMeasurement else {
-                os_log("No current measurement to save the location to! Data capturing impossible.", log: OSLog.capturing, type: .error)
-                return
-            }
-
-            let localAccelerationsCache = sensorCapturer.accelerations
-            let localRotationsCache = sensorCapturer.rotations
-            let localDirectionsCache = sensorCapturer.directions
-            let localAltitudesCache = sensorCapturer.altitudes
-            let localLocationsCache = locationCapturer.locationsCache
-
-            let persistenceLayer = dataStoreStack.persistenceLayer()
-
-            currentMeasurement.tracks.last?.altitudes.append(contentsOf: localAltitudesCache)
-
-            try persistenceLayer.save(locations: localLocationsCache, in: &currentMeasurement)
-
-            try persistenceLayer.save(
-                accelerations: localAccelerationsCache,
-                rotations: localRotationsCache,
-                directions: localDirectionsCache,
-                in: &currentMeasurement)
-
-
-            // TODO: Shouldn't cleaning these not happen directly after assigning them to local collections. In that case it is of course important to not empty the collection but to assign new, empty ones, to keep the local ones filled.
-            sensorCapturer.accelerations.removeAll(keepingCapacity: true)
-            sensorCapturer.rotations.removeAll(keepingCapacity: true)
-            sensorCapturer.directions.removeAll(keepingCapacity: true)
-            sensorCapturer.altitudes.removeAll(keepingCapacity: true)
-
-            locationCapturer.locationsCache.removeAll(keepingCapacity: true)
-        } catch let error {
-            return os_log("Unable to save captured data. Error %{public}@", log: OSLog.capturing, type: .error, error.localizedDescription)
-        }
-    }*/
-
-    /**
-     Finishes the provided measurement if still open and marks this event in the list of events.
-     This method does not check if the measurement is already finished, so be careful to only call it on non finished measurements.
-
-     - Parameter measurement: The device wide unique identifier of the measurement to finish
-     - Returns: The event marking the finalization of the provided measurement
-     */
-    /*private func finish(measurement: Int64) throws -> Event {
-        let persistenceLayer = dataStoreStack.persistenceLayer()
-        let currentMeasurement = try persistenceLayer.load(measurementIdentifiedBy: measurement)
-        currentMeasurement.synchronizable = true
-        currentMeasurement.events.append(Event(time: Date(), type: .lifecycleStop, value: nil, measurement: currentMeasurement))
-        let savedMeasurement = try persistenceLayer.save(measurement: currentMeasurement)
-
-        guard let event = savedMeasurement.events.last else {
-            fatalError()
-        }
-
-        return event
-    }*/
-
-    /*private func handle(event: DataCapturingEvent, status: Status) {
-        handler.forEach { listener in
-            listener(event, status)
-        }
-    }*/
 }
 
 // MARK: - Measurement
 
 extension MeasurementImpl: Measurement {
-    /*public var capturedMeasurement: Measurement? {
-        let persistenceLayer = dataStoreStack.persistenceLayer()
-        if let currentMeasurement = currentMeasurement {
-            do {
-                return try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
-            } catch {
-                return nil
-            }
-        } else {
-            return nil
-        }
-    }*/
-    /**
-     Puts the `DataCapturingService` in the correct state according to the current database values.
-
-     - Attention: This method must be called before calling any other method from the `DataCapturingService`
-     */
-    /*public func setup() {
-        let persistenceLayer = dataStoreStack.persistenceLayer()
-
-        do {
-            for var measurement in try persistenceLayer.loadMeasurements() {
-                if !measurement.synchronizable && !measurement.synchronized {
-                    currentMeasurement = measurement.identifier
-                    let pauseEvent = try persistenceLayer.createEvent(of: .lifecyclePause, parent: &measurement)
-                    isPaused = true
-                    self.handle(event: .servicePaused(measurement: currentMeasurement, event: pauseEvent), status: .success)
-                }
-            }
-        } catch {
-            // TODO: Probably rather throw some kind of error here.
-            fatalError("Unable to load measurements from database! Reason: \(error)")
-        }
-    }*/
-
     /**
      Starts the capturing process.
 
@@ -353,23 +190,10 @@ Starting data capturing on paused service. Finishing paused measurements and sta
                     log: OSLog.capturing,
                     type: .error
                 )
-                /*if let currentMeasurement = currentMeasurement {
-                    _ = try finish(measurement: currentMeasurement)
-                }*/
                 self.isPaused = false
             }
 
-            /*let persistenceLayer = dataStoreStack.persistenceLayer()
-
-            let measurement = try persistenceLayer.createMeasurement()
-
-            self.currentMeasurement = measurement.identifier*/
-
             try startCapturing()
-            /*if let event = try startCapturing(savingEvery: savingInterval, for: .lifecycleStart) {
-                handle(event: .serviceStarted(measurement: measurement.identifier, event: event), status: .success)
-            }*/
-            // TODO: startCapturing to connect with persistenceLayer, SensorCapturer and LocationCapturer
             measurementMessages.send(.started(timestamp: Date()))
         }
     }
@@ -381,10 +205,6 @@ Starting data capturing on paused service. Finishing paused measurements and sta
      */
     public func stop() throws {
         try lifecycleQueue.sync {
-            /*guard let currentMeasurement = currentMeasurement else {
-                os_log("Trying to stop a stopped service! Ignoring call to stop!", log: OSLog.capturing, type: .error)
-                return
-            }*/
 
             guard isPaused || isRunning else {
                 if !isPaused {
@@ -396,19 +216,10 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
             // Inform about stopped event
             stopCapturing()
-            /*let event = try finish(measurement: currentMeasurement)
-            self.currentMeasurement = nil*/
             isPaused = false
 
-            //self.handle(event: .serviceStopped(measurement: currentMeasurement, event: event), status: .success)
             measurementMessages.send(.stopped(timestamp: Date()))
             measurementMessages.send(completion: .finished)
-            /*os_log(
-                "Stopped data capturing service for measurement %{PUBLIC}d.",
-                log: OSLog.capturing,
-                type: .info,
-                currentMeasurement
-            )*/
         }
     }
 
@@ -428,28 +239,10 @@ Starting data capturing on paused service. Finishing paused measurements and sta
                 throw DataCapturingError.isPaused
             }
 
-            /*guard let currentMeasurement = currentMeasurement else {
-                fatalError("No current measurement available in paused state!")
-            }*/
-
             stopCapturing()
             isPaused = true
 
-            /*let persistenceLayer = dataStoreStack.persistenceLayer()
-            var measurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurement)
-            let event = try persistenceLayer.createEvent(of: .lifecyclePause, parent: &measurement)*/
-
-            //handle(event: .servicePaused(measurement: currentMeasurement, event: event), status: .success)
             measurementMessages.send(.paused(timestamp: Date()))
-            //measurementMessages.send(completion: .finished)
-            //messageCancellable = nil
-            /*os_log(
-                "Paused data capturing service for measurement ${PUBLIC}d.\nDistance Covered: %{PUBLIC}f",
-                log: OSLog.capturing,
-                type: .info,
-                measurement.identifier,
-                measurement.trackLength
-            )*/
         }
     }
 
@@ -470,24 +263,11 @@ Starting data capturing on paused service. Finishing paused measurements and sta
                 throw DataCapturingError.isRunning
             }
 
-            /*guard let currentMeasurement = currentMeasurement else {
-                fatalError("No measurement to resume")
-            }*/
-
-            //if let startEvent = try startCapturing(savingEvery: savingInterval, for: .lifecycleResume) {
             try startCapturing()
             isPaused = false
             isRunning = true
 
-                //handle(event: .serviceResumed(measurement: currentMeasurement, event: startEvent), status: .success)
             measurementMessages.send(.resumed(timestamp: Date()))
-            //messageCancellable?.cancel()
-            //messageCancellable = nil
-                /*os_log("Resumed data capturing service for measurement %{PUBLIC}d.",
-                       log: OSLog.capturing,
-                       type: .info,
-                       currentMeasurement)*/
-            //}
         }
     }
 
@@ -499,28 +279,6 @@ Starting data capturing on paused service. Finishing paused measurements and sta
      */
     public func changeModality(to modality: String) {
         lifecycleQueue.sync {
-            /*guard let currentMeasurementIdentifier = currentMeasurement else {
-                return
-            }
-
-            let persistenceLayer = dataStoreStack.persistenceLayer()
-
-            do {
-                var currentMeasurement = try persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
-
-                let existingModalityChangeEvents = try persistenceLayer.loadEvents(typed: .modalityTypeChange, forMeasurement: currentMeasurement)
-                guard let lastModalityChangeEvent = existingModalityChangeEvents.last else {
-                    fatalError("No valid modality change event!")
-                }
-
-                if lastModalityChangeEvent.value == modality {
-                    return
-                }
-
-                _ = try persistenceLayer.createEvent(of: .modalityTypeChange, withValue: modality, parent: &currentMeasurement)
-            } catch {
-                fatalError("Unable to load measurement identified by \(currentMeasurementIdentifier)!")
-            }*/
             measurementMessages.send(.modalityChanged(to: modality))
         }
     }
