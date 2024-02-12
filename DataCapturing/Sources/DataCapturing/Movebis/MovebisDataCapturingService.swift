@@ -88,19 +88,4 @@ public class MovebisDataCapturingService: MeasurementImpl {
 
         return manager
     }()
-
-    // MARK: - Methods
-
-    /**
-     Starts the capturing process, notifying the `eventHandler`, provided to the constructor of important events.
-
-     The `eventHandler`, that you did provide as a parameter to this objects constructor, is notified of the completion  of the start up process by receiving the event `DataCapturingEvent.serviceStarted`.
-     If you need to run code and be sure that the service has started you need to listen and wait for that event to occur.
-
-     - Throws:
-        - `DataCapturingError.isPaused` if the service was paused and thus it makes no sense to start it. Use `resume()` if you want to continue.
-     */
-    public func start() throws {
-        return try start(inMode: "BICYCLE")
-    }
 }

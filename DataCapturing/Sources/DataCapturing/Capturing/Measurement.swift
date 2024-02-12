@@ -42,9 +42,7 @@ public protocol Measurement {
     /// A flag to get information about whether this measurement is currently paused (`true`) or not (`false`).
     var isPaused: Bool { get }
     /// Start this measurement.
-    ///
-    /// - Parameter inMode: The transportation mode initially used for this measurement (such as BICYCLE, CAR, etc.). To get a list of valid modalities, consult the documentation of your data collector server.
-    func start(inMode modality: String) throws
+    func start() throws
     /// Stop this measurement for sure in contrast to a pause you can not resume after stopping.
     /// This throws an exception if not currently running or paused.
     func stop() throws
@@ -345,7 +343,7 @@ extension MeasurementImpl: Measurement {
      - Parameters:
         - modality: The mode of transportation to use for the newly created measurement. This should be something like "car" or "bicycle".
      */
-    public func start(inMode modality: String) throws {
+    public func start() throws {
         try lifecycleQueue.sync {
             if isPaused {
                 os_log(
@@ -527,73 +525,6 @@ Starting data capturing on paused service. Finishing paused measurements and sta
         }
     }
 }
-
-// TODO: Remove this and split GeoLocation in one class storing all the data and another storing the reference to a measurement (in addition to a reference to the data storing class).
-/**
- This struct exists to save time on a new location by just storing it away. It needs to be converted to a GeoLocation prior to persitent storage.
-
- - Author: Klemens Muthmann
- - Version: 1.0.0
- - Since: 11.0.0
- */
-public struct LocationCacheEntry: Equatable, Hashable, CustomStringConvertible {
-    /// The locations latitude coordinate as a value from -90.0 to 90.0 in south and north diretion.
-    public let latitude: Double
-    /// The locations longitude coordinate as a value from -180.0 to 180.0 in west and east direction.
-    public let longitude: Double
-    /// Ellipsoidal Altitude in meters
-    public let altitude: Double
-    /// The estimated accuracy of the measurement in meters.
-    public let accuracy: Double
-    /// The accuracy of altitude calculations in meters.
-    public let verticalAccuracy: Double
-    /// The speed the device was moving during the measurement in meters per second.
-    public let speed: Double
-    /// The time the measurement happened at.
-    public let time: Date
-    /// Whether or not this is a valid location in a cleaned track.
-    public let isValid: Bool
-
-    /// A stringified version of this object. This should mostly be used for pretty printing during debugging.
-    public var description: String {
-        return """
-        LocationCacheEntry(\
-        latitude: \(latitude),\
-        longitude: \(longitude),\
-        accuracy: \(accuracy),\
-        speed: \(speed),\
-        timestamp: \(time.debugDescription),\
-        isValid: \(isValid)),\
-        altitude: \(altitude),\
-        verticalAccuracy: \(verticalAccuracy))
-        """
-    }
-
-    /**
-     Add this object as a new `GeoLocation` to a `Track`, which becomes the parent track. After this operation, this entry should be appended as a new `GeoLocation` to the end of the `parent`.
-
-     - Parameter parent: The `Track` to add this as a `GeoLocation` to
-     */
-    func storeAsGeoLocation(to parent: inout Track) throws {
-        let location = GeoLocation(
-            latitude: latitude,
-            longitude: longitude,
-            accuracy: accuracy,
-            speed: speed,
-            time: time,
-            altitude: altitude,
-            verticalAccuracy: verticalAccuracy
-        )
-        parent.locations.append(location)
-    }
-}
-
-
-// TODO: Remove these two if not necessary any more.
-/// Provides the current time in milliseconds since january 1st 1970 (UTC).
-/*public func currentTimeInMillisSince1970() -> UInt64 {
-    return convertToUtcTimestamp(date: Date())
-}*/
 
 /// Converts a `Data` object to a UTC milliseconds timestamp since january 1st 1970.
 func convertToUtcTimestamp(date value: Date) -> UInt64 {

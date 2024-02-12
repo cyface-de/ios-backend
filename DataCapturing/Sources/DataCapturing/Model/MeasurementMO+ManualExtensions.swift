@@ -12,6 +12,11 @@ import CoreData
  The class extended here is generated during the build process, by CoreData from the data model file.
  */
 extension MeasurementMO {
+    /// The identifier is actually unsigned, but CoreData is unable to represent this.
+    /// Therefore this computed property provides a convenient conversion.
+    public var unsignedIdentifier: UInt64 {
+        return UInt64(identifier)
+    }
     /// Update this managed object with the property values from a `Measurement`. This might be used for saving the `Measurement` to CoreData.
     /// - throws: On internal CoreData errors, if the `objectId` of this `Measurement` or some part of it are not consistent with CoreData or if the locations captured by the `Measurement` are not strongly monotonically increasing.
     func update(from measurement: FinishedMeasurement) throws {
