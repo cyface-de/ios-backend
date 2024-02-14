@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -23,30 +23,24 @@ import os.log
 import Combine
 
 // TODO: Transform into a Combine Publisher: https://dev.to/leogdion/combine-corelocation-part-1-publishers-delegates-164o
-// TODO: Configure OSLog properly, like in the background-test app
 /**
  A class controlling the lifecycle of a *CoreLocation* session.
 
  This is used to start and stop location capturing and to inform intereseted parties about location changes.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 12.0.0
  */
 public class LocationCapturer: NSObject {
-    /// Logger used by this class.
-    private static let log = OSLog(subsystem: "de.cyface", category: "LocationCapturer")
     /// This is the maximum time between two location updates allowed before the service assumes that it does not have a valid location fix anymore.
     private static let maxAllowedTimeBetweenLocationUpdates = TimeInterval(2.0)
     //private let filter: TrackCleaner
     private var prevLocationUpdateTime: Date?
-    /// Locations are captured approximately once per second on most devices. If you would like to get fewer updates this parameter controls, how many events are skipped before one is reported to your handler. The default value is 1, which reports every event. To receive fewer events you could for example set it to 5 to only receive every fifth event.
-    //private let locationUpdateSkipRate: Int
-    //private var geoLocationEventNumber: Int = 0
+    /// The lifecycle queue of the running `Measurement`. Using the lifecycle queue prevents pause and stop events from finishing if there are still locations to be processed.
     private let lifecycleQueue: DispatchQueue
     /// Flag that is `true` if the system believes to have a valid location fix and `false` otherwise. A valid fix is determined by the time between two location updates.
     var hasFix = false
-    // var locationsCache = [LocationCacheEntry]()
     /// *Combine* publisher to report update events to all registered parties.
     private var messagePublisher: PassthroughSubject<Message, Never>
     /// The status of the authorization given by the user to the application for getting location updates. If this is for example removed during capturing, capturing must stop or it will crash.
@@ -57,19 +51,12 @@ public class LocationCapturer: NSObject {
      */
     private var coreLocationManager: LocationManager
 
-    // TODO: Reintegrate the TrackCleaner directly within applications requiring this functionality.
     /**
      - Parameters:
-            - lifecycleQueue: The background queue to run location capturing on.
+            - lifecycleQueue: The lifecycle queue of the running `Measurement`. Using the lifecycle queue prevents pause and stop events from finishing if there are still locations to be processed.
             - locationManagerFactory: Factory class for creating a `LocationManager`. This factory is mainly used to inject different location manager implementations into an object of this class.
      */
-    init(/*locationUpdateSkipRate: Int = 1, filter: TrackCleaner = DefaultTrackCleaner(), */lifecycleQueue: DispatchQueue, locationManagerFactory: () -> LocationManager) {
-        /*guard locationUpdateSkipRate > 0 else {
-         fatalError("Invalid value 0 for locationUpdateSkipRate!")
-         }*/
-
-        //self.locationUpdateSkipRate = locationUpdateSkipRate
-        //self.filter = filter
+    init(lifecycleQueue: DispatchQueue, locationManagerFactory: () -> LocationManager) {
         self.lifecycleQueue = lifecycleQueue
         self.messagePublisher = PassthroughSubject<Message, Never>()
 
@@ -105,7 +92,7 @@ public class LocationCapturer: NSObject {
     private func checkUpdateTime(location: CLLocation) -> LocationTiming {
         if let prevLocationUpdateTime = self.prevLocationUpdateTime {
             guard prevLocationUpdateTime < location.timestamp else {
-                os_log(.debug, log: LocationCapturer.log, "Skipping location update due to late location.")
+                os_log(.debug, log: OSLog.capturing, "Skipping location update due to late location.")
                 return .notOnTime
             }
 
@@ -137,38 +124,20 @@ extension LocationCapturer: CLLocationManagerDelegate {
      */
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         lifecycleQueue.sync {
-            for location in locations {
-                // Make sure locations are in order and check for GPS fix
-                if checkUpdateTime(location: location) == .onTime {
-                    messagePublisher.send(
-                        .capturedLocation(
-                            GeoLocation(
-                                latitude: location.coordinate.latitude,
-                                longitude: location.coordinate.longitude,
-                                accuracy: location.horizontalAccuracy,
-                                speed: location.speed,
-                                time: location.timestamp,
-                                altitude: location.altitude,
-                                verticalAccuracy: location.verticalAccuracy
-                            )
+            locations.filter { checkUpdateTime(location: $0) == .onTime }.forEach {
+                messagePublisher.send(
+                    .capturedLocation(
+                        GeoLocation(
+                            latitude: $0.coordinate.latitude,
+                            longitude: $0.coordinate.longitude,
+                            accuracy: $0.horizontalAccuracy,
+                            speed: $0.speed,
+                            time: $0.timestamp,
+                            altitude: $0.altitude,
+                            verticalAccuracy: $0.verticalAccuracy
                         )
                     )
-                }
-                // TODO: This filtering should be done by the application
-                // let isValid = filter.isValid(location: location)
-
-
-                /*lifecycleQueue.async(flags: .barrier) {
-                 self.locationsCache.append(geoLocation)
-                 }*/
-
-                /*geoLocationEventNumber += 1
-                 if geoLocationEventNumber == 1 {
-                 locationSubject.send(geoLocation)
-                 }
-                 if geoLocationEventNumber == locationUpdateSkipRate {
-                 geoLocationEventNumber = 0
-                 }*/
+                )
             }
         }
     }
@@ -181,7 +150,7 @@ extension LocationCapturer: CLLocationManagerDelegate {
      - didFailWithError: The reported error.
      */
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        os_log("Location service failed with error: %{public}@!", log: LocationCapturer.log, type: .error, error.localizedDescription)
+        os_log("Location service failed with error: %{public}@!", log: OSLog.capturing, type: .error, error.localizedDescription)
         messagePublisher.send(Message.fixLost)
     }
 

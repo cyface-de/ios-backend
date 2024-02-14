@@ -1,33 +1,60 @@
-//
-//  File.swift
-//  
-//
-//  Created by Klemens Muthmann on 24.05.23.
-//
-
+/*
+ * Copyright 2023-2024 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 import Foundation
 import Combine
 import OSLog
 import CoreData
 
+/**
+ Protocol for a storage process for captured sensor data.
+
+ Implementations of this protocol are capable of storing captured data to some kind of permanent storage.
+
+ - author: Klemens Muthmann
+ - version: 1.0.0
+ */
 public protocol CapturedDataStorage {
+    /// Create a new measurement within the data store.
     func createMeasurement(_ initialMode: String) throws -> UInt64
+    /// Subscribe to a running measurement and store the data produced by that measurement.
     func subscribe(
         to measurement: Measurement,
         _ identifier: UInt64,
         _ receiveCompletion: @escaping (() -> Void)) throws
+    /// Stop receiving updates from the currently subscribed measurement or do nothing if this was not subscribed at the moment.
     func unsubscribe()
 }
 
 /**
+An implementation of `CapturedDataStorage` for storing the data to a CoreData database.
+
  - author: Klemens Muthmann
  - version: 1.0.0
  */
 public class CapturedCoreDataStorage {
+    /// The `DataStoreStack` to write the captured data to.
     let dataStoreStack: DataStoreStack
+    /// A queue used to buffer received data until writing it as a bulk for performance reasons.
     let cachingQueue = DispatchQueue(label: "de.cyface.cache")
     /// The time interval to wait until the next batch of data is stored to the data storage. Increasing this time should improve performance but increases memory usage.
     let interval: TimeInterval
+    /// The *Combine* cancellables used so new values are transmitted.
     var cancellables = [AnyCancellable]()
 
     /**
