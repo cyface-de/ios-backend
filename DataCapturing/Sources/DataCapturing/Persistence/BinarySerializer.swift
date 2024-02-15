@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 Cyface GmbH
+ * Copyright 2018-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -32,7 +32,7 @@ let dataFormatVersionBytes = withUnsafeBytes(of: dataFormatVersion.bigEndian) {
  Protocol that must be fullfilled by a serializer to transform an object into the Cyface binary format. The associated type `Serializable` is a placeholder for the type of object to serialize and deserialize.
  
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 2.0.0
  */
 public protocol BinarySerializer {

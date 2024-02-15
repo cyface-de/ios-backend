@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2022 Cyface GmbH
+ * Copyright 2018 - 2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -24,7 +24,7 @@ import os.log
  The protocol for writing accelerations to a file.
  
  - Author: Klemens Muthmann
- - Version: 3.0.0
+ - Version: 4.0.0
  - Since: 2.0.0
  */
 public protocol FileSupport {
@@ -140,7 +140,7 @@ extension FileSupport {
  Struct implementing the `FileSupport` protocol to store sensor values to a file in Cyface binary format.
  
  - Author: Klemens Muthmann
- - Version:4.0.0
+ - Version:5.0.0
  - Since: 2.0.0
  - Note: This class was called `AccelerationsFile` prior to SDK version 6.0.0.
  */
@@ -231,75 +231,6 @@ struct SensorValueFile: FileSupport {
         }
     }
 }
-
-// TODO: Check if this is really required.
-/**
- Struct implementing the `FileSupport` protocol to serialize whole measurements to a file in Cyface binary format.
-
- - Author: Klemens Muthmann
- - Version:3.0.0
- - Since: 2.0.0
- */
-/*struct MeasurementFile: FileSupport {
-    typealias Serializable = FinishedMeasurement
-
-    // MARK: - Properties
-
-    /// The logger used by objects of this class.
-    private static let logger = OSLog(subsystem: "de.cyface", category: "SDK")
-
-    /// The file name used for measurement files.
-    var fileName = "m"
-
-    /// File extension used for measurement files.
-    var fileExtension = "cyf"
-    let serializer = MeasurementSerializer()
-    let qualifier: String
-
-    // MARK: - Methods
-
-    /**
-     Write a file containing a serialized measurement in Cyface Binary Format, to the local file system data storage.
-
-     - Returns: A file system URL pointing to the written file.
-     - Throws: `SerializationError.missingData` If no track data was found.
-     - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-     - Throws: `FileSupportError.notReadable` If the data file was not readable.
-     - Throws: Some unspecified undocumented file system error if file was not accessible.
-    */
-    public func write(serializable: FinishedMeasurement) throws -> URL {
-        let measurementData = try data(serializable: serializable)
-        let measurementFilePath = try path(qualifier: qualifier)
-
-        if let measurementData = measurementData {
-            let measurementFileHandle = try FileHandle(forWritingTo: measurementFilePath)
-            defer { measurementFileHandle.closeFile() }
-            measurementFileHandle.write(measurementData)
-        }
-
-        return measurementFilePath
-    }
-
-    /**
-     Creates a data representation from some `Measurement` object.
-
-     - Parameter from: A valid object to create a data in Cyface binary format representation for.
-     - Returns: The data in the Cyface binary format.
-     - Throws: `SerializationError.missingData` If no track data was found.
-     - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
-     - Throws: `FileSupportError.notReadable` If the data to write could not be read from the database.
-     - Throws: Some unspecified undocumented file system error if file was not accessible.
-     */
-    func data(serializable: FinishedMeasurement) throws -> Data? {
-        let serializer = MeasurementSerializer()
-
-        do {
-            return try serializer.serializeCompressed(serializable: serializable)
-        } catch {
-            throw FileSupportError.notReadable(cause: error)
-        }
-    }
-}*/
 
 /**
 Errors created by the Cyface SDK associated with accessing the file system.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -26,7 +26,7 @@ Represents a single continuously measured track of geo location and associated s
  Each track is part of a parent `Measurement`. New Tracks are appended to a measurement if the user pauses and resumes capturing of that  `Measurement`.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - since: 11.0.0
  */
 public class Track {
