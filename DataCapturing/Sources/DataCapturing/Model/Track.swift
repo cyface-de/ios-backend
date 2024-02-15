@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -26,7 +26,7 @@ Represents a single continuously measured track of geo location and associated s
  Each track is part of a parent `Measurement`. New Tracks are appended to a measurement if the user pauses and resumes capturing of that  `Measurement`.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - since: 11.0.0
  */
 public class Track {
@@ -44,7 +44,7 @@ public class Track {
         - managedObject: The CoreData object to initialize all the properties of the new `Track` from.
      - throws: `InconsistentData.locationOrderViolation` if the order of the locations in the `managedObject` is not strongly monotonically increasing.
      */
-    convenience init(managedObject: TrackMO) throws {
+    public convenience init(managedObject: TrackMO) throws {
         self.init()
 
         var locations = [GeoLocation]()
@@ -58,8 +58,6 @@ public class Track {
             altitudes.append(Altitude(managedObject: altitude))
         }
         self.altitudes = altitudes
-
-        //if let altitudeMOs = managedObject.al
     }
 
     /**

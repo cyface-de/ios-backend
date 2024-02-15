@@ -45,7 +45,7 @@ public protocol CapturedDataStorage {
 An implementation of `CapturedDataStorage` for storing the data to a CoreData database.
 
  - author: Klemens Muthmann
- - version: 1.0.0
+ - version: 1.0.1
  */
 public class CapturedCoreDataStorage {
     /// The `DataStoreStack` to write the captured data to.
@@ -121,16 +121,16 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                         }
 
                         let accelerationsFile = SensorValueFile(
-                            measurement: measurement,
-                            fileType: SensorValueFileType.accelerationValueType
+                            fileType: SensorValueFileType.accelerationValueType,
+                            qualifier: String(measurement.unsignedIdentifier)
                         )
                         let rotationsFile = SensorValueFile(
-                            measurement: measurement,
-                            fileType: SensorValueFileType.rotationValueType
+                            fileType: SensorValueFileType.rotationValueType,
+                            qualifier: String(measurement.unsignedIdentifier)
                         )
                         let directionsFile = SensorValueFile(
-                            measurement: measurement,
-                            fileType: SensorValueFileType.directionValueType
+                            fileType: SensorValueFileType.directionValueType,
+                            qualifier: String(measurement.unsignedIdentifier)
                         )
 
                         try messages.forEach { message in

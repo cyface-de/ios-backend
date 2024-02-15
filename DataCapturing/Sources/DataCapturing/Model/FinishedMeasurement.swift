@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -17,11 +17,9 @@
  * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
 import CoreData
 import OSLog
 
-// TODO: There probably need to be two kinds of Measurement instances (and other objects in that hierarchy). One is used to create new instances and one is used for already synchronized ones. The reason is, that refreshing the objectId via the context does not work, as the context changes the objectId as soon as a call to context.save() happens. -.-
 /**
  Instances of this class represent a single data capturing session, framed by calls to `DataCapturingService.start` and `DataCapturingService.stop`.
 
@@ -30,14 +28,10 @@ import OSLog
  A `Measurement` can be synchronized to a Cyface server via an instance of `Synchronizer`.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - since: 11.0.0
  */
 public class FinishedMeasurement: Hashable, Equatable {
-    /// The minimum number of meters before the ascend is increased, to filter sensor noise.
-    //public static let ascendThresholdMeters = 2.0
-    /// The minimum accuracy in meters for GNSS altitudes to be used in ascend calculation.
-    //public static let verticalAccuracyThresholdMeters = 12.0
     /// A device wide unique identifier for this measurement. Usually set by incrementing a counter.
     public let identifier: UInt64
     /// A flag, marking this `Measurement` as either ready for data syncrhonization or not.
@@ -68,7 +62,7 @@ public class FinishedMeasurement: Hashable, Equatable {
     public var events: [Event]
     /// The tracks containing all the data this `Measurement` has captured.
     public var tracks: [Track]
-    public let accelerationDate: Data
+    public let accelerationData: Data
     public let rotationData: Data
     public let directionData: Data
 
@@ -81,12 +75,12 @@ public class FinishedMeasurement: Hashable, Equatable {
      - throws: `InconstantData.locationOrderViolation` if the timestamps of the locations in this measurement are not strongly monotonically increasing.
      */
     convenience init(managedObject: MeasurementMO) throws {
-        let accelerationFile = SensorValueFile(measurement: managedObject, fileType: .accelerationValueType)
-        let directionFile = SensorValueFile(measurement: managedObject, fileType: .directionValueType)
-        let rotationFile = SensorValueFile(measurement: managedObject, fileType: .rotationValueType)
+        let accelerationFile = SensorValueFile(fileType: .accelerationValueType, qualifier: String(managedObject.unsignedIdentifier))
+        let directionFile = SensorValueFile(fileType: .directionValueType, qualifier: String(managedObject.unsignedIdentifier))
+        let rotationFile = SensorValueFile(fileType: .rotationValueType, qualifier: String(managedObject.unsignedIdentifier))
 
         self.init(
-            identifier: UInt64(managedObject.identifier),
+            identifier: managedObject.unsignedIdentifier,
             synchronizable: managedObject.synchronizable,
             synchronized: managedObject.synchronized,
             time: managedObject.time!,
@@ -124,6 +118,9 @@ public class FinishedMeasurement: Hashable, Equatable {
         - time: The time this measurement was captured.
         - events: The user events that occurred during this `Measurement`.
         - tracks: The tracks containing all the data this `Measurement` has captured.
+        - accelerationData: The raw captured acceleration data in an appropriate binary format.
+        - rotationData: The raw captured rotation data in an appropriate binary format.
+        - directionData: The raw captured directional data in an appropriate binary format.
      */
     public init(
         identifier: UInt64,
@@ -142,28 +139,10 @@ public class FinishedMeasurement: Hashable, Equatable {
         self.time = time
         self.events = events
         self.tracks = tracks
-        self.accelerationDate = accelerationData
+        self.accelerationData = accelerationData
         self.rotationData = rotationData
         self.directionData = directionData
     }
-
-    /**
-     Add a `Track` to the end of this `Measurement`.
-
-     - Parameter track: The `Track` to add.
-     */
-    /*func append(track: Track) {
-        tracks.append(track)
-    }*/
-
-    /**
-     Add an `Event` to the list of events captured during this `Measurement`.
-
-     - Parameter event: The `Event` to add to the `Measurement`.
-     */
-    /*func append(event: Event) {
-        events.append(event)
-    }*/
 
     /// Required by the `Hashable` protocol to produce a hash for this object.
     public func hash(into hasher: inout Hasher) {
@@ -174,83 +153,4 @@ public class FinishedMeasurement: Hashable, Equatable {
     public static func == (lhs: FinishedMeasurement, rhs: FinishedMeasurement) -> Bool {
         return lhs.identifier == rhs.identifier
     }
-
-    // TODO: Remove everything below?
-    /// Provide the average speed of this measurement in m/s.
-    //public func averageSpeed() -> Double {
-        /*var sum = 0.0
-        var counter = 0
-        tracks.forEach { track in
-            track.locations.forEach { location in
-                if location.isValid {
-                    sum += location.speed
-                    counter += 1
-                }
-            }
-        }
-
-        if counter==0 {*/
-            //return 0.0
-        /*} else {
-            return sum/Double(counter)
-        }*/
-    //}
-
-    /// Provide the total duration of this measurement.
-    /*public func totalDuration() -> TimeInterval {
-        var totalTime = TimeInterval()
-        tracks.forEach { track in
-            guard let firstTime = track.locations.first?.time, let lastTime = track.locations.last?.time else {
-                return
-            }
-
-            totalTime += lastTime.timeIntervalSince(firstTime)
-
-        }
-
-        return totalTime
-    }*/
-
-    /// Calculate the accumulated height value for this measurement.
-    /*public func summedHeight() -> Double {
-        var sum = 0.0
-        tracks.forEach { track in
-
-            if track.altitudes.isEmpty {
-                os_log("Using location values to calculate accumulated height.", log: OSLog.measurement, type: .debug)
-                var previousAltitude = 0.0
-                var isFirst = true
-                track.locations.forEach { location in
-                    if isFirst {
-                        previousAltitude = location.altitude
-                        isFirst = false
-                    } else if !(location.verticalAccuracy > FinishedMeasurement.verticalAccuracyThresholdMeters) {
-
-                        let currentAltitude = location.altitude
-                        let altitudeChange = currentAltitude - previousAltitude
-
-                        if abs(altitudeChange) > FinishedMeasurement.ascendThresholdMeters {
-                            if altitudeChange > 0.0 {
-                                sum += altitudeChange
-                            }
-                            previousAltitude = location.altitude
-                        }
-                    }
-                }
-            } else {
-                os_log("Using altimeter values to calculate accumulated height.", log: OSLog.measurement, type: .debug)
-                var previousAltitude: Double? = nil
-                for altitude in track.altitudes {
-                    if let previousAltitude = previousAltitude {
-                        let relativeAltitudeChange = altitude.relativeAltitude - previousAltitude
-                        if relativeAltitudeChange > 0.1 {
-                            sum += relativeAltitudeChange
-                        }
-                    }
-                    previousAltitude = altitude.relativeAltitude
-                }
-            }
-        }
-        return sum
-    }*/
 }

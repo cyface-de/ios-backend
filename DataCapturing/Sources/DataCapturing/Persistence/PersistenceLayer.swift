@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2023 Cyface GmbH
+ * Copyright 2017-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -171,7 +171,7 @@ extension PersistenceLayer {
  An instance of an object of this class is a wrapper around the CoreData data storage used by the capturing service. It allows CRUD operations on measurements, geo locations and sensor values.
  
  - Author: Klemens Muthmann
- - Version:7.0.0
+ - Version:7.0.1
  - Since: 1.0.0
  - throws: Most methods implemented by this class throw internal CoreData errors. This usually indicates something to be seriously wrong with the device executing the method and are almost never recoverable. Errors from the file system are rethrown on reading and writing sensor values. Those are mostly not recoverable as well. Another common error is an inconstent state of the measurement worked on, such as locations with non strongly monotonically increasing timestamps.
  */
@@ -314,18 +314,18 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
             }
 
             let accelerationFile = SensorValueFile(
-                measurement: measurement,
-                fileType: SensorValueFileType.accelerationValueType
+                fileType: SensorValueFileType.accelerationValueType,
+                qualifier: String(measurementIdentifier)
             )
             try accelerationFile.delete()
             let rotationsFile = SensorValueFile(
-                measurement: measurement,
-                fileType: SensorValueFileType.rotationValueType
+                fileType: SensorValueFileType.rotationValueType,
+                qualifier: String(measurementIdentifier)
             )
             try rotationsFile.delete()
             let directionsFile = SensorValueFile(
-                measurement: measurement,
-                fileType: SensorValueFileType.directionValueType
+                fileType: SensorValueFileType.directionValueType,
+                qualifier: String(measurementIdentifier)
             )
             try directionsFile.delete()
             context.delete(measurement)
@@ -365,18 +365,18 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
 
             measurementMO.synchronized = true
             let accelerationsFile = SensorValueFile(
-                measurement: measurementMO,
-                fileType: SensorValueFileType.accelerationValueType
+                fileType: SensorValueFileType.accelerationValueType,
+                qualifier: String(measurementIdentifier)
             )
             try accelerationsFile.delete()
             let rotationsFile = SensorValueFile(
-                measurement: measurementMO,
-                fileType: SensorValueFileType.rotationValueType
+                fileType: SensorValueFileType.rotationValueType,
+                qualifier: String(measurementIdentifier)
             )
             try rotationsFile.delete()
             let directionsFile = SensorValueFile(
-                measurement: measurementMO,
-                fileType: SensorValueFileType.directionValueType
+                fileType: SensorValueFileType.directionValueType,
+                qualifier: String(measurementIdentifier)
             )
             try directionsFile.delete()
 

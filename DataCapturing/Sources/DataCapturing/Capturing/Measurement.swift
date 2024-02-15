@@ -285,7 +285,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 }
 
 /// Converts a `Data` object to a UTC milliseconds timestamp since january 1st 1970.
-func convertToUtcTimestamp(date value: Date) -> UInt64 {
+public func convertToUtcTimestamp(date value: Date) -> UInt64 {
     return UInt64(value.timeIntervalSince1970 * millisecondsInASecond)
 }
 /// Constant to convert between a timestamp in seconds and milliseconds.
