@@ -121,16 +121,16 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                         }
 
                         let accelerationsFile = SensorValueFile(
-                            measurement: measurement,
-                            fileType: SensorValueFileType.accelerationValueType
+                            fileType: SensorValueFileType.accelerationValueType,
+                            qualifier: String(measurement.unsignedIdentifier)
                         )
                         let rotationsFile = SensorValueFile(
-                            measurement: measurement,
-                            fileType: SensorValueFileType.rotationValueType
+                            fileType: SensorValueFileType.rotationValueType,
+                            qualifier: String(measurement.unsignedIdentifier)
                         )
                         let directionsFile = SensorValueFile(
-                            measurement: measurement,
-                            fileType: SensorValueFileType.directionValueType
+                            fileType: SensorValueFileType.directionValueType,
+                            qualifier: String(measurement.unsignedIdentifier)
                         )
 
                         try messages.forEach { message in

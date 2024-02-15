@@ -314,18 +314,18 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
             }
 
             let accelerationFile = SensorValueFile(
-                measurement: measurement,
-                fileType: SensorValueFileType.accelerationValueType
+                fileType: SensorValueFileType.accelerationValueType,
+                qualifier: String(measurementIdentifier)
             )
             try accelerationFile.delete()
             let rotationsFile = SensorValueFile(
-                measurement: measurement,
-                fileType: SensorValueFileType.rotationValueType
+                fileType: SensorValueFileType.rotationValueType,
+                qualifier: String(measurementIdentifier)
             )
             try rotationsFile.delete()
             let directionsFile = SensorValueFile(
-                measurement: measurement,
-                fileType: SensorValueFileType.directionValueType
+                fileType: SensorValueFileType.directionValueType,
+                qualifier: String(measurementIdentifier)
             )
             try directionsFile.delete()
             context.delete(measurement)
@@ -365,18 +365,18 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
 
             measurementMO.synchronized = true
             let accelerationsFile = SensorValueFile(
-                measurement: measurementMO,
-                fileType: SensorValueFileType.accelerationValueType
+                fileType: SensorValueFileType.accelerationValueType,
+                qualifier: String(measurementIdentifier)
             )
             try accelerationsFile.delete()
             let rotationsFile = SensorValueFile(
-                measurement: measurementMO,
-                fileType: SensorValueFileType.rotationValueType
+                fileType: SensorValueFileType.rotationValueType,
+                qualifier: String(measurementIdentifier)
             )
             try rotationsFile.delete()
             let directionsFile = SensorValueFile(
-                measurement: measurementMO,
-                fileType: SensorValueFileType.directionValueType
+                fileType: SensorValueFileType.directionValueType,
+                qualifier: String(measurementIdentifier)
             )
             try directionsFile.delete()
 

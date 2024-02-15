@@ -44,7 +44,7 @@ public class Track {
         - managedObject: The CoreData object to initialize all the properties of the new `Track` from.
      - throws: `InconsistentData.locationOrderViolation` if the order of the locations in the `managedObject` is not strongly monotonically increasing.
      */
-    convenience init(managedObject: TrackMO) throws {
+    public convenience init(managedObject: TrackMO) throws {
         self.init()
 
         var locations = [GeoLocation]()
@@ -58,8 +58,6 @@ public class Track {
             altitudes.append(Altitude(managedObject: altitude))
         }
         self.altitudes = altitudes
-
-        //if let altitudeMOs = managedObject.al
     }
 
     /**

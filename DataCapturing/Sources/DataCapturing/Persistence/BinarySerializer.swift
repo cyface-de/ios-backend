@@ -35,7 +35,7 @@ let dataFormatVersionBytes = withUnsafeBytes(of: dataFormatVersion.bigEndian) {
  - Version: 1.0.0
  - Since: 2.0.0
  */
-protocol BinarySerializer {
+public protocol BinarySerializer {
 
     /// The type of the item to serialize.
     associatedtype Serializable
@@ -51,16 +51,6 @@ protocol BinarySerializer {
      - `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
      */
     func serialize(serializable: Serializable) throws -> Data
-
-    /**
-     Serializes the provided `measurement` and compresses the returned data.
-     
-     - Parameter serializable: The `serializable` object to serialize
-     - Returns: The serialized measurement in the compressed Cyface binary format
-     - Throws:
-     */
-    func serializeCompressed(serializable: Serializable) throws -> Data
-
 }
 
 // MARK: - Implementation
@@ -75,7 +65,7 @@ extension BinarySerializer {
      - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
      - Returns: A compressed variant of the serialized data.
      */
-    func serializeCompressed(serializable: Serializable) throws -> Data {
+    public func serializeCompressed(serializable: Serializable) throws -> Data {
         let res = try serialize(serializable: serializable)
 
         guard let compressed = res.deflate() else {
@@ -106,12 +96,6 @@ class MeasurementSerializer: BinarySerializer {
     static let centimetersInAMeter = 100.0
     /// The targeted amount of places after the comma to use for storing geo locations.
     static let geoLocationAccuracy = 6
-    /// File handle to store acceleration values to
-    //let accelerationsFile = SensorValueFile(fileType: SensorValueFileType.accelerationValueType)
-    /// File handle to store rotation values to
-    //let rotationsFile = SensorValueFile(fileType: SensorValueFileType.rotationValueType)
-    /// File handle to store direction values to
-    //let directionsFile = SensorValueFile(fileType: SensorValueFileType.directionValueType)
 
     /**
      Serializes the provided `measurement` into its Cyface Binary Format specification in the form:
@@ -124,7 +108,7 @@ class MeasurementSerializer: BinarySerializer {
      - Parameter serializable: The measurement to serialize.
      - Throws: if either converting the provided data or reading the sensor values fails.
      */
-    func serialize(serializable measurement: FinishedMeasurement) throws -> Data {
+    public func serialize(serializable measurement: FinishedMeasurement) throws -> Data {
         var protosMeasurement = De_Cyface_Protos_Model_MeasurementBytes()
         protosMeasurement.formatVersion = UInt32(dataFormatVersion)
         protosMeasurement.events = serialize(events: measurement.events)
@@ -182,7 +166,7 @@ class MeasurementSerializer: BinarySerializer {
         }
         protosMeasurement.locationRecords = records
 
-        protosMeasurement.accelerationsBinary = measurement.accelerationDate
+        protosMeasurement.accelerationsBinary = measurement.accelerationData
         protosMeasurement.directionsBinary = measurement.directionData
         protosMeasurement.rotationsBinary = measurement.rotationData
         let serializedData = try protosMeasurement.serializedData()
@@ -256,7 +240,7 @@ class SensorValueSerializer: BinarySerializer {
      - Throws: `BinarySerializationError.emptyData` if the provided `serializable` array is empty.
      - Throws: `BinaryEncodingError` if encoding fails.
      */
-    func serialize(serializable values: [SensorValue]) throws -> Data {
+    public func serialize(serializable values: [SensorValue]) throws -> Data {
         guard !values.isEmpty else {
             throw BinarySerializationError.emptyData
         }

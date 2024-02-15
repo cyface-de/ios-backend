@@ -30,14 +30,16 @@ import os.log
 public protocol FileSupport {
 
     // MARK: - Properties
-
+    /// Associate this type with the `BinarySerializer` to ensure both use the same type of `Serializable`.
+    associatedtype SpecificSerializer: BinarySerializer
     /// The generic type of the data to store to a file.
     associatedtype Serializable
     /// The name of the file to store.
     var fileName: String { get }
     /// The file extension of the file to store.
     var fileExtension: String { get }
-    var measurement: MeasurementMO { get }
+    var serializer: SpecificSerializer { get }
+    var qualifier: String { get }
 
     // MARK: - Methods
     /**
@@ -60,14 +62,35 @@ public protocol FileSupport {
 extension FileSupport {
 
     /**
+     Write a file containing a serialized measurement in Cyface Binary Format, to the local file system data storage.
+
+     - Parameters:
+        - serializable: The measurement to write.
+     - Returns: A file system URL pointing to the written file.
+     - Throws: `SerializationError.missingData` If no track data was found.
+     - Throws: `SerializationError.invalidData` If the database provided inconsistent and wrongly typed data. Something is seriously wrong in these cases.
+     - Throws: `FileSupportError.notReadable` If the data file was not readable.
+     - Throws: Some unspecified undocumented file system error if file was not accessible.
+    */
+    public func write(serializable: Serializable) throws -> URL where SpecificSerializer.Serializable == Serializable {
+        let data = try serializer.serializeCompressed(serializable: serializable)
+        let filePath = try path(qualifier: qualifier)
+
+        let fileHandle = try FileHandle(forWritingTo: filePath)
+        defer { fileHandle.closeFile() }
+        fileHandle.write(data)
+
+        return filePath
+    }
+
+    /**
      Creates the path to a file containing data in the Cyface binary format.
 
-     - Parameter for: The measurement to create the path to the data file for.
+     - Parameter qualifier:
      - Returns: The path to the file as an URL.
      - Throws: Some internal file system error on failure of creating the file at the required path.
      */
-    fileprivate func path() throws -> URL {
-        let measurementIdentifier = measurement.identifier
+    public func path(qualifier: String) throws -> URL {
         let root = "Application Support"
         let measurementDirectory = "measurements"
         let fileManager = FileManager.default
@@ -77,7 +100,7 @@ extension FileSupport {
         let measurementDirectoryPath = libraryDirectoryUrl
             .appendingPathComponent(root)
             .appendingPathComponent(measurementDirectory)
-            .appendingPathComponent(String(measurementIdentifier))
+            .appendingPathComponent(qualifier)
         try fileManager.createDirectory(at: measurementDirectoryPath, withIntermediateDirectories: true)
 
         let filePath = measurementDirectoryPath.appendingPathComponent(fileName).appendingPathExtension(fileExtension)
@@ -95,7 +118,7 @@ extension FileSupport {
      - Throws: Some internal file system error on failure of creating the file at the required path.
      */
     public func delete() throws {
-        let filePath = try path()
+        let filePath = try path(qualifier: qualifier)
         let parent = filePath.deletingLastPathComponent()
         let fileManager = FileManager.default
 
@@ -121,7 +144,7 @@ extension FileSupport {
  - Since: 2.0.0
  - Note: This class was called `AccelerationsFile` prior to SDK version 6.0.0.
  */
-public struct SensorValueFile: FileSupport {
+struct SensorValueFile: FileSupport {
 
     // MARK: - Properties
 
@@ -129,21 +152,20 @@ public struct SensorValueFile: FileSupport {
     let serializer = SensorValueSerializer()
 
     /// The file name for the file containing the sensor values for one measurement.
-    public var fileName: String {
-        return "accel"
-    }
+    let fileName = "accel"
 
     /// File extension used for files containing accelerations.
-    public var fileExtension: String {
-        return fileType.fileExtension
-    }
+    let fileExtension: String
     let fileType: SensorValueFileType
-    public let measurement: MeasurementMO
+    let qualifier: String
+
+    // MARK: - Initializers
 
     /// Public initializer for external systems to access sensor value data.
-    public init(measurement: MeasurementMO, fileType: SensorValueFileType) {
+    init(fileType: SensorValueFileType, qualifier: String) {
         self.fileType = fileType
-        self.measurement = measurement
+        self.qualifier = qualifier
+        self.fileExtension = fileType.fileExtension
     }
 
     // MARK: - Methods
@@ -159,9 +181,9 @@ public struct SensorValueFile: FileSupport {
      - Throws: `BinarySerializationError.emptyData` if the provided `serializable` array is empty.
      - Throws: `BinaryEncodingError` if encoding fails.
      */
-    public func write(serializable: [SensorValue]) throws -> URL {
+    func write(serializable: [SensorValue]) throws -> URL {
         let sensorValueData = try serializer.serialize(serializable: serializable)
-        let sensorValueFilePath = try path()
+        let sensorValueFilePath = try path(qualifier: qualifier)
 
         let fileHandle = try FileHandle(forWritingTo: sensorValueFilePath)
         defer { fileHandle.closeFile()}
@@ -180,9 +202,9 @@ public struct SensorValueFile: FileSupport {
      - Throws: If the file containing the sensor values was not readable.
      - Returns: An array of all the sensor values from the provided measurement.
     */
-    public func load() throws -> [SensorValue] {
+    func load() throws -> [SensorValue] {
         do {
-            let fileHandle = try FileHandle(forReadingFrom: path())
+            let fileHandle = try FileHandle(forReadingFrom: path(qualifier: qualifier))
             defer {fileHandle.closeFile()}
             let data = fileHandle.readDataToEndOfFile()
             return try serializer.deserialize(data: data)
@@ -201,7 +223,7 @@ public struct SensorValueFile: FileSupport {
     */
     func data() throws -> Data {
         do {
-            let fileHandle = try FileHandle(forReadingFrom: path())
+            let fileHandle = try FileHandle(forReadingFrom: path(qualifier: qualifier))
             defer {fileHandle.closeFile()}
             return fileHandle.readDataToEndOfFile()
         } catch let error {
@@ -210,6 +232,7 @@ public struct SensorValueFile: FileSupport {
     }
 }
 
+// TODO: Check if this is really required.
 /**
  Struct implementing the `FileSupport` protocol to serialize whole measurements to a file in Cyface binary format.
 
@@ -217,8 +240,8 @@ public struct SensorValueFile: FileSupport {
  - Version:3.0.0
  - Since: 2.0.0
  */
-public struct MeasurementFile: FileSupport {
-    public typealias Serializable = FinishedMeasurement
+/*struct MeasurementFile: FileSupport {
+    typealias Serializable = FinishedMeasurement
 
     // MARK: - Properties
 
@@ -226,15 +249,12 @@ public struct MeasurementFile: FileSupport {
     private static let logger = OSLog(subsystem: "de.cyface", category: "SDK")
 
     /// The file name used for measurement files.
-    public var fileName: String {
-        return "m"
-    }
+    var fileName = "m"
 
     /// File extension used for measurement files.
-    public var fileExtension: String {
-        return "cyf"
-    }
-    public let measurement: MeasurementMO
+    var fileExtension = "cyf"
+    let serializer = MeasurementSerializer()
+    let qualifier: String
 
     // MARK: - Methods
 
@@ -249,7 +269,7 @@ public struct MeasurementFile: FileSupport {
     */
     public func write(serializable: FinishedMeasurement) throws -> URL {
         let measurementData = try data(serializable: serializable)
-        let measurementFilePath = try path()
+        let measurementFilePath = try path(qualifier: qualifier)
 
         if let measurementData = measurementData {
             let measurementFileHandle = try FileHandle(forWritingTo: measurementFilePath)
@@ -279,7 +299,7 @@ public struct MeasurementFile: FileSupport {
             throw FileSupportError.notReadable(cause: error)
         }
     }
-}
+}*/
 
 /**
 Errors created by the Cyface SDK associated with accessing the file system.
