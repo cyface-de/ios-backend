@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2022 Cyface GmbH
+ * Copyright 2019 - 2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -171,6 +171,14 @@ class DataMigrationTest: XCTestCase {
 
         // Assert
         try assertV5(onContext: context)
+    }
+
+    func testMigrationV9ToV12() throws {
+        // Arrange, Act
+        let context = try migrate(fromVersion: .version9, toVersion: .version12, usingTestData: "V9TestData")
+
+        // Assert
+        try assertV12(onContext: context)
     }
 
     /**
@@ -346,6 +354,17 @@ class DataMigrationTest: XCTestCase {
     }
 
     /**
+     Assert a successful migration to a Version 12 database.
+
+     - Parameter onContext: The `NSManagedObjectContext` used to store the data to assert.
+     - Throws:
+        - Some unspecificed *CoreData* errors.
+     */
+    func assertV12(onContext: context: NSManagedObjectContext) throws {
+
+    }
+
+    /**
      A test used to create an input data storeage file used by other tests. This is skipped since it is usually only required to run once when a new version of the Cyface data model is released.
 
      - Throws:
@@ -358,9 +377,9 @@ class DataMigrationTest: XCTestCase {
 
         let migrator = CoreDataMigrator()
         let location = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let database = location.appendingPathComponent("V6TestData").appendingPathExtension("sqlite")
+        let database = location.appendingPathComponent("V9TestData").appendingPathExtension("sqlite")
         let container = loadContainer(from: "CyfaceModel", with: "6", from: "de.cyface.DataCapturing", at: database)
-        try DataSetCreatorV5().createData(in: container)
+        try DataSetCreatorV9().createData(in: container)
 
         for store in container.persistentStoreCoordinator.persistentStores {
             try container.persistentStoreCoordinator.remove(store)
