@@ -61,7 +61,7 @@ class SerializationTest: XCTestCase {
     }
 
     /// Store a test fixture to CoreData and provide the measurement identifier.
-    func fixture() throws -> Int64 {
+    func fixture() throws -> UInt64 {
         var measurement = try self.persistenceLayer.createMeasurement(at: Date(), inMode: "BICYCLE")
         try self.persistenceLayer.appendNewTrack(to: &measurement)
 

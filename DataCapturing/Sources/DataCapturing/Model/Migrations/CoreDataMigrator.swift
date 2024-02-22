@@ -23,6 +23,8 @@ import CoreData
 /**
  A protocol implemented by classes responsible for migrating from old to new data models.
 
+ This architecture for data migration is based on information from the following Blog Post: https://williamboles.com/progressive-core-data-migration/
+
  - Author: Klemens Muthmann
  - Version: 1.0.2
  - Since: 4.0.0

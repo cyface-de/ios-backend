@@ -41,7 +41,7 @@ class TestMeasurement: DataCapturing.Measurement {
     var timer: DispatchSourceTimer?
     var altitudeTimer: DispatchSourceTimer?
 
-    func start(inMode modality: String) throws {
+    func start() throws {
         timer = DispatchSource.makeTimerSource()
         altitudeTimer = DispatchSource.makeTimerSource()
 

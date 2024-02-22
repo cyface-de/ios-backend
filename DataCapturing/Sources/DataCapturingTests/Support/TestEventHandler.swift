@@ -15,7 +15,7 @@ An event handler for `DataCapturingEvent` instances, collecting events in the or
  - Author: Klemens Muthmann
  - Version: 1.0.0
  */
-class TestDataCapturingEventHandler {
+/*class TestDataCapturingEventHandler {
     /// The captured event objects in chronological order
     var capturedEvents = [DataCapturingEvent]()
     /// The captured statuses in chronological order
@@ -32,4 +32,4 @@ class TestDataCapturingEventHandler {
         capturedEvents.append(event)
         capturedStatuses.append(status)
     }
-}
+}*/

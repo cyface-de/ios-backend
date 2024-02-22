@@ -103,8 +103,8 @@ class PersistenceTests: XCTestCase {
     /// Tests if cleaning the test measurement from its additional sensor data is successful.
     func testCleanMeasurement() throws {
         let fixture = try XCTUnwrap(fixture)
-        let sensorValueFile = SensorValueFile(fileType: .accelerationValueType)
-        let accelerationCount = try sensorValueFile.load(from: fixture).count
+        let sensorValueFile = SensorValueFile(fileType: .accelerationValueType, qualifier: String(fixture.identifier))
+        let accelerationCount = try sensorValueFile.load().count
         let geoLocationCount = CoreDataPersistenceLayer.collectGeoLocations(from: fixture).count
         XCTAssertEqual(accelerationCount, 3)
         XCTAssertEqual(geoLocationCount, 2)
@@ -112,7 +112,7 @@ class PersistenceTests: XCTestCase {
         try oocut.clean(measurement: fixture.identifier)
 
         let measurementAfterClean = try oocut.load(measurementIdentifiedBy: fixture.identifier)
-        let accelerationsAfterClean = try sensorValueFile.load(from: measurementAfterClean)
+        let accelerationsAfterClean = try sensorValueFile.load()
 
         XCTAssertEqual(accelerationsAfterClean.count, 0, "Accelerations have not been empty after cleaning!")
         let geoLocationCountAfterClean = CoreDataPersistenceLayer.collectGeoLocations(from: measurementAfterClean).count
@@ -140,7 +140,7 @@ class PersistenceTests: XCTestCase {
         try oocut.save(accelerations: [TestFixture.randomAcceleration(), TestFixture.randomAcceleration(), TestFixture.randomAcceleration()], in: &fixture)
         let measurement = try oocut.load(measurementIdentifiedBy: fixture.identifier)
 
-        let mergedSensorValues = try SensorValueFile(fileType: .accelerationValueType).load(from: measurement)
+        let mergedSensorValues = try SensorValueFile(fileType: .accelerationValueType, qualifier: String(measurement.identifier)).load()
         XCTAssertEqual(CoreDataPersistenceLayer.collectGeoLocations(from: measurement).count, 3)
         XCTAssertEqual(mergedSensorValues.count, 6)
     }
@@ -152,7 +152,7 @@ class PersistenceTests: XCTestCase {
 
         XCTAssertEqual(measurement, fixture)
         let events = try oocut.loadEvents(typed: .modalityTypeChange, forMeasurement: measurement)
-        let accelerations = try SensorValueFile(fileType: .accelerationValueType).load(from: measurement)
+        let accelerations = try SensorValueFile(fileType: .accelerationValueType, qualifier: String(measurement.identifier)).load()
         XCTAssertEqual(events.count, 1)
         XCTAssertEqual(events[0].value, defaultMode)
         XCTAssertEqual(CoreDataPersistenceLayer.collectGeoLocations(from: measurement).count, 2)
@@ -288,7 +288,6 @@ class PersistenceTests: XCTestCase {
     /// Tests that loading data for upload to a Cyface data collector works as expected.
     func testLoadUploadData() async throws {
         let coreDataStack = CoreDataStack(storeType: NSInMemoryStoreType, migrator: CoreDataMigrator(), modelName: "CyfaceModel", model: PersistenceTests.dataModel, bundle: XCTestCase.appBundle()!)
-        let bundle = Bundle(for: type(of: coreDataStack))
         try await coreDataStack.setup()
         let persistenceLayer = coreDataStack.persistenceLayer()
         let measurement = try FakeMeasurementImpl
@@ -297,7 +296,7 @@ class PersistenceTests: XCTestCase {
             .addAccelerations(countOfAccelerations: 60)
             .build(persistenceLayer)
 
-        let oocut = CoreDataBackedUpload(dataStoreStack: coreDataStack, identifier: UInt64(measurement.identifier))
+        let oocut = CoreDataBackedUpload(dataStoreStack: coreDataStack, measurement: measurement)
         let metaData = try oocut.metaData()
         let data = try oocut.data()
 
@@ -339,19 +338,19 @@ class PersistenceTests: XCTestCase {
         }) { message in
             print("\(message)")
         }*/
-        try oocut.subscribe(to: mockMeasurement, "TEST_MODE") {
+        try oocut.subscribe(to: mockMeasurement, 0) {
             expectation.fulfill()
         }
 
         // Act
-        try mockMeasurement.start(inMode: "BICYCLE")
+        try mockMeasurement.start()
         // Capture data for 5 seconds
         let waitTime = 5.0
         try await Task.sleep(nanoseconds: UInt64(waitTime * Double(NSEC_PER_SEC)))
         try mockMeasurement.stop()
 
         // Assert
-        wait(for: [expectation], timeout: 10.0)
+        await fulfillment(of: [expectation], timeout: 10.0)
         try coreDataStack.wrapInContext { context in
             let fetchRequest = MeasurementMO.fetchRequest()
             let measurements = try fetchRequest.execute()

@@ -18,7 +18,6 @@
  */
 import Foundation
 import AppAuth
-import DataCapturing
 import OSLog
 
 /**
@@ -32,7 +31,7 @@ import OSLog
  - Version: 1.0.0
  - Since: 3.1.2
  */
-class OAuthAuthenticator {
+public class OAuthAuthenticator {
     // MARK: - Static Properties
     /**
      The key used to identify the stored authentication state within the system shared preferences.
@@ -41,7 +40,7 @@ class OAuthAuthenticator {
 
     // MARK: - Properties
     /// The `UIViewController` to call after the login process in the embedded browser window has finished.
-    var callbackController: UIViewController? = nil
+    public var callbackController: UIViewController? = nil
     /// The internal AppAuth auth state.
     /// This is the central place from the framework, where auth information is stored.
     private var authState: OIDAuthState? {
@@ -77,7 +76,7 @@ class OAuthAuthenticator {
     ///     - redirectUri: A URI used by the identity provider to hand control back to the application.
     ///     - apiEndpoint: The endpoint running the Cyface API containing user self management.
     ///     - clientId: The identifier registered for this client with the identity provider.
-    init(issuer: URL, redirectUri: URL, apiEndpoint: URL, clientId: String) {
+    public init(issuer: URL, redirectUri: URL, apiEndpoint: URL, clientId: String) {
         self.issuer = issuer
         self.redirectUri = redirectUri
         self.clientId = clientId
@@ -238,18 +237,11 @@ class OAuthAuthenticator {
 }
 
 // MARK: - Implementation of Authenticator
-extension OAuthAuthenticator: DataCapturing.Authenticator {
-    /**
-     Unimplemented old style callback method. This method is bound to be removed soon, so no need to implement it.
-     */
-    func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
-        fatalError("Not implemented")
-    }
-
+extension OAuthAuthenticator: Authenticator {
     /**
      Authenticate with the AppAuth framework against an identity provider.
      */
-    func authenticate() async throws -> String {
+    public func authenticate() async throws -> String {
         os_log("Authentication: Starting Authentication", log: OSLog.authorization, type: .debug)
         os_log("Address used to access identity provider %@", log: OSLog.authorization, type: .debug)
         if let authState = loadState(OAuthAuthenticator.appAuthStateKey), authState.refreshToken != nil {
@@ -295,12 +287,12 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
 
             return accessToken
         } else {
-            throw RFRError.unableToAuthenticate
+            throw AuthenticationError.unableToAuthenticate
         }
     }
 
     /// Delete the logged in user rethrowing all occuring errors.
-    func delete() async throws {
+    public func delete() async throws {
         let request: URLRequest = try await withCheckedThrowingContinuation { continuation in
             authState?.performAction { accessToken, idToken, error in
                 if let error = error {
@@ -315,7 +307,11 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
 
                 do {
                     let authToken = try JWTToken(from: accessToken)
-                    var deleteRequest = URLRequest(url: self.apiEndpoint.appending(component: "users").appending(path: authToken.decoded.sub.uuidString))
+                    var deleteRequest = if #available(iOS 16.0, *) {
+                        URLRequest(url: self.apiEndpoint.appending(component: "users").appending(path: authToken.decoded.sub.uuidString))
+                    } else {
+                        URLRequest(url: self.apiEndpoint.appendingPathComponent("users").appendingPathComponent( authToken.decoded.sub.uuidString))
+                    }
 
                     deleteRequest.httpMethod = "DELETE"
                     deleteRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
@@ -341,7 +337,7 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
     // TODO: try to remove this and see if login process works as expected.
     /// According to the AppAuth documentation this is necessary after successful authentication.
     /// However it seems from several debugging sessions, that it is never called.
-    func callback(url: URL) {
+    public func callback(url: URL) {
         os_log("Opened App via callback from @%.", log: OSLog.system, type: .info, url.absoluteString)
 
         if let authorizationFlow = self.currentAuthorizationFlow, authorizationFlow.resumeExternalUserAgentFlow(with: url) {
@@ -350,7 +346,7 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
     }
 
     /// Send logout request to identity server and reset AppAuth auth state.
-    func logout() async throws {
+    public func logout() async throws {
         os_log("Authentication: Logging Out", log: OSLog.authorization, type: .debug)
         guard let idToken = self.idToken else {
             // TODO: Throw proper Exception here.
@@ -402,7 +398,7 @@ extension OAuthAuthenticator: DataCapturing.Authenticator {
  - Author: Klemens Muthmann
  - Version: 1.0.0
  */
-enum OAuthAuthenticatorError: Error {
+public enum OAuthAuthenticatorError: Error {
     case tokenMissing
     case invalidToken
     case invalidResponse
@@ -415,7 +411,7 @@ enum OAuthAuthenticatorError: Error {
 
 extension OAuthAuthenticatorError: LocalizedError {
     /// Internationalized human readable description of the error.
-    var errorDescription: String? {
+    public var errorDescription: String? {
         return switch self {
         case .tokenMissing:
             NSLocalizedString(

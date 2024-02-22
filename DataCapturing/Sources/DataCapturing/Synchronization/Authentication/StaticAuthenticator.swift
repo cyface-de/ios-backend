@@ -47,7 +47,7 @@ public class StaticAuthenticator: Authenticator {
 
     // MARK: - Methods
 
-    public func authenticate(onSuccess: (String) -> Void, onFailure: (Error) -> Void) {
+    private func authenticate(onSuccess: (String) -> Void, onFailure: (Error) -> Void) {
         if let jwtToken = jwtToken {
             if jwtToken.isEmpty {
                 onFailure(ServerConnectionError.notAuthenticated("Provided JWT token was empty."))

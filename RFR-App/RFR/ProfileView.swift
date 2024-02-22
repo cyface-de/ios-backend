@@ -67,6 +67,6 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView(authenticator: MockAuthenticator(), error: RFRError.unableToAuthenticate)
+    ProfileView(authenticator: MockAuthenticator(), error: AuthenticationError.unableToAuthenticate)
 }
 #endif

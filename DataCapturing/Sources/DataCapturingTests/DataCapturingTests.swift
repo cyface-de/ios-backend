@@ -106,7 +106,7 @@ class DataCapturingTests: XCTestCase {
         let cancellable = oocut.measurementMessages.sink { message in
             messages.append(message)
         }
-        try oocut.start(inMode: defaultMode)
+        try oocut.start()
 
         // Assert after start
         XCTAssertTrue(oocut.isRunning)

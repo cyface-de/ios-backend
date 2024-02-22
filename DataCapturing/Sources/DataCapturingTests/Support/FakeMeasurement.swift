@@ -31,11 +31,11 @@ public class FakeMeasurementImpl: FakeMeasurement {
     /// The array of accelerations used for the currently built `Measurement`.
     private var accelerations = [SensorValue]()
     private var tracks = [[GeoLocation]]()
-    private var identifier: Int64
+    private var identifier: UInt64
     private var currentTime = Date()
     private let startingTime = Date()
 
-    init(identifier: Int64) {
+    init(identifier: UInt64) {
         self.identifier = identifier
     }
 
@@ -45,21 +45,20 @@ public class FakeMeasurementImpl: FakeMeasurement {
             synchronizable: false,
             synchronized: false,
             time: Date(),
-            trackLength: Double.random(in: 0..<10_000.0),
             events: [], tracks: [])
-        measurement.append(
+        /*measurement.append(
             event: Event(
                 time: startingTime,
                 type: .modalityTypeChange,
                 value: "BICYCLE"
             )
-        )
+        )*/
 
-        tracks.forEach { locations in
+        /*tracks.forEach { locations in
             let track = Track()
             track.locations = locations
             measurement.append(track: track)
-        }
+        }*/
         var synchronizedMeasurement = try persistenceLayer.save(measurement: measurement)
         try persistenceLayer.save(accelerations: accelerations, in: &synchronizedMeasurement)
         return synchronizedMeasurement
@@ -129,7 +128,7 @@ public class FakeMeasurementImpl: FakeMeasurement {
      - Throws:
         - Some unspecified errors from within CoreData.
      */
-    public static func fakeMeasurement(identifier: Int64) throws -> FakeMeasurement {
+    public static func fakeMeasurement(identifier: UInt64) throws -> FakeMeasurement {
         let ret = FakeMeasurementImpl(identifier: identifier)
         return ret
     }

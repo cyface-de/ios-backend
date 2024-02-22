@@ -28,16 +28,6 @@ An `Authenticator` provides functionality to authenticate this app on a servoer 
  */
 public protocol Authenticator {
 
-    /**
-     Runs the authentication and calls the appropriate function `onSuccess` or `onFailure` when finished.
-
-     - Parameters:
-     - onSuccess: A closure called and supplied with the resulting authentication token, when authentication was successful.
-     - onFailure: A closure called and supplied with the causing error, when authentication was not successful.
-    */
-    @available(*, deprecated)
-    func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void)
-
     /// Authenticate asynchronously in the background and return the aqcuired authentication token.
     func authenticate() async throws -> String
 
@@ -55,6 +45,7 @@ public protocol Authenticator {
 
 public enum AuthenticationError: Error {
     case notImplemented
+    case unableToAuthenticate
 }
 
 extension AuthenticationError: LocalizedError {
@@ -65,6 +56,11 @@ extension AuthenticationError: LocalizedError {
                 "de.cyface.datacapturing.error.authenticationerror.notimplemented",
                 value: "This function has not been implemented.",
                 comment: "Communicate that a function was called that was not implemented. This should not happen in production."
+            )
+        case .unableToAuthenticate:
+            NSLocalizedString(
+                "de.cyface.datacapturing.error.authenticationerror.unabletoauthenticate",
+                comment: "Tell the user that authentication failed. They should check their credentials, check their connection or try again later."
             )
         }
     }
