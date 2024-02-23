@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -54,7 +54,7 @@ public protocol CoreDataMigratorProtocol {
  An implementation of the `CoreDataMigratorProtocol` for the Cyface data model, as used by the Cyface iOS SDK.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 4.0.0
  */
 public class CoreDataMigrator: CoreDataMigratorProtocol {

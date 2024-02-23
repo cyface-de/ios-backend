@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -26,14 +26,12 @@ import Mocker
 A complete integration test for the whole process of uploading a `Measurement` to a Cyface server. All tests are mocking the network calls by either using the *Mocker* library or a custom `URLProtocol`.
 
  - author: Klemens Muthmann
- - version: 1.0.0
+ - version: 1.0.1
  */
 class UploadProcessTest: XCTestCase {
 
     /// An example for a URL hosting a Cyface API endpoint.
     private let apiURL = "http://localhost:8080/api/v3/"
-    /// An example for a URL providing the login endpoint as part of the Cyface API.
-    //private let loginURL = "http://localhost:8080/api/v3/login"
     /// An example for a URL providing the endpoint to upload measurements to.
     private let measurementsURL = "http://localhost:8080/api/v3/measurements"
     /// An example for a URL for a single measurement.
@@ -47,12 +45,9 @@ class UploadProcessTest: XCTestCase {
         let mockedSession = URLSession(configuration: configuration)
 
         let apiURL = try XCTUnwrap(URL(string: apiURL))
-        //let loginURL = try XCTUnwrap(URL(string: loginURL))
         let measurementsURL = try XCTUnwrap(URL(string: measurementsURL))
         let uploadURL = try XCTUnwrap(URL(string: uploadURL))
 
-        //let mockedLoginRequest = Mock(url: loginURL, dataType: .json, statusCode: 200, data: [.post:Data()], additionalHeaders: ["Authorization":"eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTY1MjgxNDExNSwiaWF0IjoxNjUyODE0MTE1fQ.fE8wErQ1TuByQXAI7gi8WDbMsCUQRp3ssQ6CL0yUDUQ"])
-        //mockedLoginRequest.register()
         let mockedMeasurementsRequest = Mock(url:measurementsURL, dataType: .json, statusCode: 200, data: [.post: Data()], additionalHeaders: ["Location": self.uploadURL])
         mockedMeasurementsRequest.register()
         let mockedUploadURLRequest = Mock(url: uploadURL, dataType: .json, statusCode: 201, data: [.put: Data()])
@@ -111,7 +106,7 @@ A mocked upload that does not get data from a CoreData store or something simila
  The test data provided via this upload is randomly generated. The numbers have no meaning.
 
  - author: Klemens Muthmann
- - version: 1.0.0
+ - version: 2.0.0
  */
 class MockUpload: Upload {
     /// The measurement to upload.

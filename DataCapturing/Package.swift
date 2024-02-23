@@ -1,7 +1,7 @@
 // swift-tools-version: 5.6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 /*
- * Copyright 2019-2023 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *

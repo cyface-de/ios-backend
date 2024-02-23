@@ -1,5 +1,5 @@
 /*
-* Copyright 2022 Cyface GmbH
+* Copyright 2022-2024 Cyface GmbH
 *
 * This file is part of the Cyface SDK for iOS.
 *
@@ -24,7 +24,7 @@ import Foundation
  A builder for fake measurements. It provides a fluent API and should be created via the static factory method `fakeMeasurement`.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
+ - Version: 2.0.1
  - since: 10.0.0
  */
 public class FakeMeasurementImpl: FakeMeasurement {
@@ -46,19 +46,7 @@ public class FakeMeasurementImpl: FakeMeasurement {
             synchronized: false,
             time: Date(),
             events: [], tracks: [])
-        /*measurement.append(
-            event: Event(
-                time: startingTime,
-                type: .modalityTypeChange,
-                value: "BICYCLE"
-            )
-        )*/
 
-        /*tracks.forEach { locations in
-            let track = Track()
-            track.locations = locations
-            measurement.append(track: track)
-        }*/
         var synchronizedMeasurement = try persistenceLayer.save(measurement: measurement)
         try persistenceLayer.save(accelerations: accelerations, in: &synchronizedMeasurement)
         return synchronizedMeasurement
