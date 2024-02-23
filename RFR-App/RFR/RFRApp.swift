@@ -31,7 +31,7 @@ import Sentry
 struct RFRApp: App {
 
     /// The application, which is required to store and load the authentication state of this application.
-    @StateObject var appModel = AppModel()
+    @ObservedObject var appModel = AppModel()
 
     init() {
         let enableTracing = try! appModel.config.getEnableSentryTracing()
