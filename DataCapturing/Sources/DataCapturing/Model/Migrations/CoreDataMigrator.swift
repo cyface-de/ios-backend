@@ -117,8 +117,8 @@ public class CoreDataMigrator: CoreDataMigratorProtocol {
                                          destinationOptions: nil)
             } catch let error {
                 throw CoreDataMigrationError.migrationFailed(
-                    sourceModel: sourceModel.description,
-                    destinationModel: destinationModel.description,
+                    sourceModel: migrationStep.sourceVersion.rawValue,
+                    destinationModel: migrationStep.destinationVersion.rawValue,
                     cause: error)
             }
 
