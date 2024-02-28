@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -27,7 +27,7 @@ import OSLog
  A `DataCapturingService` using mocked sensors to run, during tests.
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 2.0.0
  - Since: 4.0.0
  */
 class TestMeasurement: DataCapturing.Measurement {
@@ -41,7 +41,7 @@ class TestMeasurement: DataCapturing.Measurement {
     var timer: DispatchSourceTimer?
     var altitudeTimer: DispatchSourceTimer?
 
-    func start(inMode modality: String) throws {
+    func start() throws {
         timer = DispatchSource.makeTimerSource()
         altitudeTimer = DispatchSource.makeTimerSource()
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -23,20 +23,10 @@ import Foundation
 An `Authenticator` provides functionality to authenticate this app on a servoer for receiving the captured data.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 2.0.0
  */
 public protocol Authenticator {
-
-    /**
-     Runs the authentication and calls the appropriate function `onSuccess` or `onFailure` when finished.
-
-     - Parameters:
-     - onSuccess: A closure called and supplied with the resulting authentication token, when authentication was successful.
-     - onFailure: A closure called and supplied with the causing error, when authentication was not successful.
-    */
-    @available(*, deprecated)
-    func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void)
 
     /// Authenticate asynchronously in the background and return the aqcuired authentication token.
     func authenticate() async throws -> String
@@ -53,8 +43,17 @@ public protocol Authenticator {
     func callback(url: URL)
 }
 
+/*
+ Errors thrown from `Authenticator` instances.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 public enum AuthenticationError: Error {
+    /// Thrown if an authenticator does not provide a certain way of authentication.
     case notImplemented
+    /// General error during authentication.
+    case unableToAuthenticate
 }
 
 extension AuthenticationError: LocalizedError {
@@ -65,6 +64,11 @@ extension AuthenticationError: LocalizedError {
                 "de.cyface.datacapturing.error.authenticationerror.notimplemented",
                 value: "This function has not been implemented.",
                 comment: "Communicate that a function was called that was not implemented. This should not happen in production."
+            )
+        case .unableToAuthenticate:
+            NSLocalizedString(
+                "de.cyface.datacapturing.error.authenticationerror.unabletoauthenticate",
+                comment: "Tell the user that authentication failed. They should check their credentials, check their connection or try again later."
             )
         }
     }

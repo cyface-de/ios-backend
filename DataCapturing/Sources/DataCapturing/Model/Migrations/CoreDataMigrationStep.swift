@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -24,7 +24,7 @@ import CoreData
  One step in a data model migration, migrating the database from one version to the following one.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.1.0
  - Since: 4.0.0
  */
 struct CoreDataMigrationStep {
@@ -34,6 +34,10 @@ struct CoreDataMigrationStep {
     let destinationModel: NSManagedObjectModel
     /// The mapping between both models.
     let mappingModel: NSMappingModel
+    /// The Version of the source model to migrate from.
+    let sourceVersion: CoreDataMigrationVersion
+    /// The Version of the destination model to migrate to.
+    let destinationVersion: CoreDataMigrationVersion
 
     // MARK: - Initializers
 
@@ -43,7 +47,7 @@ struct CoreDataMigrationStep {
      - Parameters:
         - modelName: The name of the model to migrate.
         - sourceVersion: The source version to migrate from.
-        - destinationVersion: the destination version to migrate to.
+        - destinationVersion: The destination version to migrate to.
         - bundle: The bundle containing the model and mapping files.
      - Throws: ``CoreDataMigrationError/modelFileNotFound(modelName:resourceName:)`` If the model file is missing in the application bundle.
      */
@@ -69,6 +73,8 @@ struct CoreDataMigrationStep {
         self.sourceModel = sourceModel
         self.destinationModel = destinationModel
         self.mappingModel = mappingModel
+        self.sourceVersion = sourceVersion
+        self.destinationVersion = destinationVersion
     }
 
     // MARK: - Methods

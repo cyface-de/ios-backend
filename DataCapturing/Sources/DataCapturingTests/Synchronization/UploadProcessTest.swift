@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -19,7 +19,6 @@
  */
 
 import XCTest
-import Alamofire
 import Mocker
 @testable import DataCapturing
 
@@ -27,90 +26,57 @@ import Mocker
 A complete integration test for the whole process of uploading a `Measurement` to a Cyface server. All tests are mocking the network calls by either using the *Mocker* library or a custom `URLProtocol`.
 
  - author: Klemens Muthmann
- - version: 1.0.0
+ - version: 1.0.1
  */
 class UploadProcessTest: XCTestCase {
 
     /// An example for a URL hosting a Cyface API endpoint.
     private let apiURL = "http://localhost:8080/api/v3/"
-    /// An example for a URL providing the login endpoint as part of the Cyface API.
-    private let loginURL = "http://localhost:8080/api/v3/login"
     /// An example for a URL providing the endpoint to upload measurements to.
     private let measurementsURL = "http://localhost:8080/api/v3/measurements"
     /// An example for a URL for a single measurement.
     private let uploadURL = "http://localhost:8080/api/v3/measurements/(4e8508e5d5798049dc40fed3d87c7cde)/"
 
     /// This test carries out a happy path upload process. It uses the *Mocker* framework to avoid actual network requests.
-    func testUpload_HappyPath() throws {
+    func testUpload_HappyPath() async throws {
         // Arrange
-        let configuration = URLSessionConfiguration.af.default
-        configuration.protocolClasses = [MockingURLProtocol.self]
-        let mockedSession = Alamofire.Session(configuration: configuration)
+        let configuration = URLSessionConfiguration.default
+        configuration.protocolClasses = [MockingURLProtocol.self] + (configuration.protocolClasses ?? [])
+        let mockedSession = URLSession(configuration: configuration)
 
         let apiURL = try XCTUnwrap(URL(string: apiURL))
-        let authenticator = CyfaceAuthenticator(authenticationEndpoint: apiURL, session: mockedSession)
-        authenticator.username = "admin"
-        authenticator.password = "secret"
-        let loginURL = try XCTUnwrap(URL(string: loginURL))
         let measurementsURL = try XCTUnwrap(URL(string: measurementsURL))
         let uploadURL = try XCTUnwrap(URL(string: uploadURL))
 
-        let mockedLoginRequest = Mock(url: loginURL, dataType: .json, statusCode: 200, data: [.post:Data()], additionalHeaders: ["Authorization":"eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTY1MjgxNDExNSwiaWF0IjoxNjUyODE0MTE1fQ.fE8wErQ1TuByQXAI7gi8WDbMsCUQRp3ssQ6CL0yUDUQ"])
-        mockedLoginRequest.register()
         let mockedMeasurementsRequest = Mock(url:measurementsURL, dataType: .json, statusCode: 200, data: [.post: Data()], additionalHeaders: ["Location": self.uploadURL])
         mockedMeasurementsRequest.register()
         let mockedUploadURLRequest = Mock(url: uploadURL, dataType: .json, statusCode: 201, data: [.put: Data()])
         mockedUploadURLRequest.register()
 
         let sessionRegistry = SessionRegistry()
-        let expectation = XCTestExpectation(description: "Wait for synchronization to complete.")
-        var transmittedMeasurementIdentifier: UInt64?
-        var receivedError: Error?
-        let onSuccess = {(measurementIdentifier: UInt64) in
-            transmittedMeasurementIdentifier = measurementIdentifier
-            expectation.fulfill()
-        }
-        let onFailure = {(measurementIdentifier: UInt64, error: Error) in
-            transmittedMeasurementIdentifier = measurementIdentifier
-            receivedError = error
-            expectation.fulfill()
-        }
 
-        let oocut = UploadProcess(apiUrl: apiURL, session: mockedSession, sessionRegistry: sessionRegistry, authenticator: authenticator, onSuccess: onSuccess, onFailure: onFailure)
+        let oocut = DefaultUploadProcess(apiUrl: apiURL, session: mockedSession, sessionRegistry: sessionRegistry)
 
-        let mockedUpload = MockUpload(identifier: 1)
+        let mockedUpload = MockUpload(measurement: FinishedMeasurement(identifier: 1))
 
         // Act
-        oocut.upload(mockedUpload)
+        let result = try await oocut.upload(authToken: "mock-token", mockedUpload)
 
-        wait(for: [expectation], timeout: 10.0)
 
         // Assert
-        XCTAssertNotNil(transmittedMeasurementIdentifier)
-        XCTAssertNil(receivedError)
-        XCTAssertEqual(transmittedMeasurementIdentifier, 1)
+        XCTAssertEqual(result.failedUploadsCounter, 0)
+        XCTAssertEqual(result.measurement.identifier, 1)
+        XCTAssertEqual(mockedUpload.wasSuccessful, true)
     }
 
     /// This test checks if the upload process repeats after a failed upload attempt. It uses a custom URLProtocol to avoid actual network calls. This is necessary since *Mocker* does not support changing the response to a request during tests.
-    func testUpload_Repeat() throws {
+    func testUpload_Repeat() async throws {
         // Arrange
         let apiURL = try XCTUnwrap(URL(string: apiURL))
-        let configuration = URLSessionConfiguration.af.default
+        let configuration = URLSessionConfiguration.default
         configuration.protocolClasses = [URLProtocolStub.self]  + (configuration.protocolClasses ?? [])
-        let mockedSession = Session(configuration: configuration)
+        let mockedSession = URLSession(configuration: configuration)
         let sessionRegistry = SessionRegistry()
-        let authenticator = CyfaceAuthenticator(authenticationEndpoint: apiURL, session: mockedSession)
-        authenticator.username = "admin"
-        authenticator.password = "secret"
-        let expectation = XCTestExpectation(description: "UploadProcess finishes.")
-        let onSuccess = { (measurementIdentifier: UInt64) in
-            XCTAssertEqual(measurementIdentifier, 1)
-            expectation.fulfill()
-        }
-        let onFailure = { (measurementIdentifier: UInt64, error: Error) in
-            XCTFail()
-            expectation.fulfill()
-        }
         // Mock Auth Response
         URLProtocolStub.loadingHandler.append({(request: URLRequest) in (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Authorization": "abcdefg"])!,Data())})
         // Mock PreRequest
@@ -122,15 +88,15 @@ class UploadProcessTest: XCTestCase {
         // Mock Successful Upload
         URLProtocolStub.loadingHandler.append({(request: URLRequest) in (HTTPURLResponse(url: request.url!, statusCode: 201, httpVersion: "HTTP/1.1", headerFields: [String: String]())!, Data())})
 
-        let uploadProcess = UploadProcess(apiUrl: apiURL, session: mockedSession, sessionRegistry: sessionRegistry, authenticator: authenticator, onSuccess: onSuccess, onFailure: onFailure)
-        let upload = MockUpload(identifier: 1)
+        let uploadProcess = DefaultUploadProcess(apiUrl: apiURL, session: mockedSession, sessionRegistry: sessionRegistry)
+        let upload = MockUpload(measurement: FinishedMeasurement(identifier: 1))
 
         // Act
-        uploadProcess.upload(upload)
-        wait(for: [expectation], timeout: 10.0)
+        let result = try await uploadProcess.upload(authToken: "mock-token", upload)
 
         // Assert
-        XCTAssertEqual(upload.failedUploadsCounter, 1)
+        XCTAssertEqual(result.failedUploadsCounter, 1)
+        XCTAssertEqual(upload.wasSuccessful, false)
     }
 }
 
@@ -140,19 +106,24 @@ A mocked upload that does not get data from a CoreData store or something simila
  The test data provided via this upload is randomly generated. The numbers have no meaning.
 
  - author: Klemens Muthmann
- - version: 1.0.0
+ - version: 2.0.0
  */
 class MockUpload: Upload {
+    /// The measurement to upload.
+    var measurement: FinishedMeasurement
+
     /// The counter for this uploads failures.
     var failedUploadsCounter: Int = 0
 
-    /// The simulated measurement identifier of the measurement to upload
-    var identifier: UInt64
+    /// Check this to see whether `onSuccess` has been called
+    var wasSuccessful = false
 
     /// Initialize this class with a simulated measurement identifier.
-    init(identifier: UInt64) {
-        self.identifier = identifier
+    init(measurement: FinishedMeasurement) {
+        self.measurement = measurement
     }
+
+    // MARK: - Methods
 
     /// Provide non sense test meta data about this upload.
     func metaData() throws -> MetaData {
@@ -186,6 +157,10 @@ class MockUpload: Upload {
         }
 
         return ret
+    }
+
+    func onSuccess() throws {
+        wasSuccessful = true
     }
 }
 
