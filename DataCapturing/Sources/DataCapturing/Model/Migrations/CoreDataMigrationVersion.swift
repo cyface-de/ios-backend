@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -24,7 +24,7 @@ import Foundation
  It is required to start migrations between the different versions.
 
  - Author: Klemens Muthmann
- - Version: 1.4.0
+ - Version: 1.5.0
  - Since: 4.0.0
  */
 public enum CoreDataMigrationVersion: String, CaseIterable {
@@ -50,6 +50,8 @@ public enum CoreDataMigrationVersion: String, CaseIterable {
     case version10 = "10"
     /// The eleventh version of the model
     case version11 = "11"
+    /// The twelth version of the model
+    case version12 = "12"
 
     // MARK: - Current
 
@@ -88,6 +90,8 @@ public enum CoreDataMigrationVersion: String, CaseIterable {
         case .version10:
             return .version11
         case .version11:
+            return .version12
+        case .version12:
             return nil
         }
     }

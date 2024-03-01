@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2022 Cyface GmbH
+ * Copyright 2018-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -25,7 +25,7 @@ import CoreData
  Tests whether serialization and deserialization into and from the Cyface Binary Format works as expected
 
  - Author: Klemens Muthmann
- - Version: 1.1.4
+ - Version: 1.1.5
  - Since: 1.0.0
  */
 class SerializationTest: XCTestCase {
@@ -61,7 +61,7 @@ class SerializationTest: XCTestCase {
     }
 
     /// Store a test fixture to CoreData and provide the measurement identifier.
-    func fixture() throws -> Int64 {
+    func fixture() throws -> UInt64 {
         var measurement = try self.persistenceLayer.createMeasurement(at: Date(), inMode: "BICYCLE")
         try self.persistenceLayer.appendNewTrack(to: &measurement)
 

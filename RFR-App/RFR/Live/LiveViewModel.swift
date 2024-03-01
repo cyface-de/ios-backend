@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots iOS App.
  *
@@ -31,7 +31,7 @@ import CoreLocation
  The most important connections are the ones to the published properties, used by the ``LiveView`` and the ones to a ``CapturedDataStorage`` for saving all captured data to the provided ``DataStoreStack``.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  - SeeAlso: ``LiveView``
  */
@@ -361,7 +361,7 @@ class LiveViewModel: ObservableObject {
                     identifier
                 ) {}
                 measurementName = String(localized: "measurement \(identifier)", comment: "Title label of a running measurement.")
-                try measurement.start(inMode: "BICYCLE")
+                try measurement.start()
             }
         }
     }

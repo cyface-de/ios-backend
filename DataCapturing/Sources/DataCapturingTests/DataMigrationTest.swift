@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2022 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -26,7 +26,7 @@ import OSLog
  Tests that data migration between different versions of the Cyface data model are going to work as expected.
 
  - Author: Klemens Muthmann
- - Version: 1.2.1
+ - Version: 1.3.0
  - Since: 4.0.0
  */
 class DataMigrationTest: XCTestCase {
@@ -173,6 +173,30 @@ class DataMigrationTest: XCTestCase {
         try assertV5(onContext: context)
     }
 
+    func testMigrationV9ToV10() throws {
+        // Arrange, Act
+        let context = try migrate(fromVersion: .version9, toVersion: .version10, usingTestData: "V9TestData")
+
+        // Assert
+        try assertV10(onContext: context)
+    }
+
+    func testMigrationV10ToV11() throws {
+        // Arrange, Act
+        let context = try migrate(fromVersion: .version10, toVersion: .version11, usingTestData: "V10TestData")
+
+        // Assert
+        try assertV11(onContext: context)
+    }
+
+    func testMigrationV11ToV12() throws {
+        // Arrange, Act
+        let context = try migrate(fromVersion: .version11, toVersion: .version12, usingTestData: "V11TestData")
+
+        // Assert
+        try assertV12(onContext: context)
+    }
+
     /**
      Migrates a test data store `fromVersion` to a not necessarily consecutive `toVersion` using a pregenerated data store as test data.
 
@@ -184,7 +208,7 @@ class DataMigrationTest: XCTestCase {
      */
     func migrate(fromVersion: CoreDataMigrationVersion, toVersion: CoreDataMigrationVersion, usingTestData testDatastore: String) throws -> NSManagedObjectContext {
         // Arrange
-        let migrator = CoreDataMigrator()
+        let migrator = CoreDataMigrator(to: toVersion)
         let bundle = XCTestCase.appBundle()!
         let datastore = FileManager.move(file: testDatastore, fromBundle: XCTestCase.testBundle()!)
         addTeardownBlock {
@@ -345,6 +369,50 @@ class DataMigrationTest: XCTestCase {
         XCTAssertEqual(events02.count, 0)
     }
 
+    func assertV10(onContext context: NSManagedObjectContext) throws {
+        let measurementFetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Measurement")
+        let migratedMeasurements = try context.fetch(measurementFetchRequest)
+
+        XCTAssertGreaterThan(migratedMeasurements.count, 0)
+        // All the counts have been removed for this version.
+        XCTAssertTrue(migratedMeasurements[0].entity.attributesByName.keys.filter {$0=="accelerationsCount"}.isEmpty)
+        XCTAssertTrue(migratedMeasurements[0].entity.attributesByName.keys.filter {$0=="rotationsCount"}.isEmpty)
+        XCTAssertTrue(migratedMeasurements[0].entity.attributesByName.keys.filter {$0=="directionsCount"}.isEmpty)
+    }
+
+    func assertV11(onContext context: NSManagedObjectContext) throws {
+        let measurementFetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Measurement")
+        let migratedMeasurements = try context.fetch(measurementFetchRequest)
+        // Timestamps on GeoLocation and Measurement should be proper Date instances now
+        XCTAssertGreaterThan(migratedMeasurements.count, 0)
+        XCTAssertTrue(migratedMeasurements[0].value(forKey: "time") is Date)
+        // Now find the first `GeoLocation` and check it for having a proper `Date` as a timestamp.
+        let tracks = try XCTUnwrap(migratedMeasurements[0].value(forKey: "tracks") as? NSOrderedSet)
+        XCTAssertGreaterThan(tracks.count, 0)
+        let firstTrack = try XCTUnwrap(tracks.firstObject as? NSManagedObject)
+        let locations = try XCTUnwrap(firstTrack.value(forKey: "locations") as? NSOrderedSet)
+        XCTAssertGreaterThan(locations.count, 0)
+        let firstLocation = try XCTUnwrap(locations.firstObject as? NSManagedObject)
+        XCTAssertTrue(firstLocation.value(forKey: "time") is Date)
+    }
+
+    /**
+     Assert a successful migration to a Version 12 database.
+
+     - Parameter onContext: The `NSManagedObjectContext` used to store the data to assert.
+     - Throws:
+        - Some unspecificed *CoreData* errors.
+     */
+    func assertV12(onContext context: NSManagedObjectContext) throws {
+        // trackLength and isPartOfCleanedTrack should be gone
+        let measurementFetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Measurement")
+        let migratedMeasurements = try context.fetch(measurementFetchRequest)
+
+        XCTAssertEqual(migratedMeasurements.count, 2)
+        XCTAssertTrue(migratedMeasurements[0].entity.attributesByName.keys.filter {$0=="trackLength"}.isEmpty)
+        XCTAssertTrue(migratedMeasurements[0].entity.attributesByName.keys.filter {$0=="isPartOfCleanedTrack"}.isEmpty)
+    }
+
     /**
      A test used to create an input data storeage file used by other tests. This is skipped since it is usually only required to run once when a new version of the Cyface data model is released.
 
@@ -352,21 +420,22 @@ class DataMigrationTest: XCTestCase {
         - Unspecified *CoreData* errors on saving of the data model.
      */
     func skip_testExample() throws {
-        guard let bundle = Bundle(identifier: "de.cyface.DataCapturing") else {
-            fatalError()
-        }
+        let dataModelVersion = "11"
+        let dataSetCreator = DataSetCreatorV11()
+
+        let bundle = Bundle(for: DataMigrationTest.self)
 
         let migrator = CoreDataMigrator()
         let location = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let database = location.appendingPathComponent("V6TestData").appendingPathExtension("sqlite")
-        let container = loadContainer(from: "CyfaceModel", with: "6", from: "de.cyface.DataCapturing", at: database)
-        try DataSetCreatorV5().createData(in: container)
+        let database = location.appendingPathComponent("V\(dataModelVersion)TestData").appendingPathExtension("sqlite")
+        let container = loadContainer(from: "CyfaceModel", path: "DataCapturing_DataCapturing.bundle", with: dataModelVersion, at: database)
+        try dataSetCreator.createData(in: container)
 
         for store in container.persistentStoreCoordinator.persistentStores {
             try container.persistentStoreCoordinator.remove(store)
         }
         migrator.forceWALCheckpointingForStore(at: database, inBundle: bundle)
-        print("done")
+        print("Written Version \(dataModelVersion) to \(location)!")
     }
 
     /**
@@ -374,15 +443,15 @@ class DataMigrationTest: XCTestCase {
 
      - Parameters:
         - from: The data model to load from
+        - path: A subpath if the model is embedded within its bundle. To find out, please have a look at the actual location of your data model.
         - with: The version of the data model to load
-        - from: The bundle containing the model and storage files
         - at: The location of the storage file (usually an SQLite file
      - Returns: The loaded `NSPersistentContainer`
      */
-    func loadContainer(from model: String, with version: String, from bundleIdentifiedBy: String, at location: URL) -> NSPersistentContainer {
-        let modelURL = Bundle(identifier: bundleIdentifiedBy)?.url(forResource: model, withExtension: "momd")
+    func loadContainer(from model: String, path: String, with version: String, at location: URL) -> NSPersistentContainer {
+        let modelURL = Bundle(for: DataMigrationTest.self).url(forResource: "\(path)/\(model)", withExtension: "momd")
         let managedObjectModelBundle = Bundle(url: modelURL!)
-        let managedObjectModelVersionURL = managedObjectModelBundle!.url(forResource: version, withExtension: "mom")
+        let managedObjectModelVersionURL = managedObjectModelBundle?.url(forResource: version, withExtension: "mom")
 
         let managedObjectModel = NSManagedObjectModel.init(contentsOf: managedObjectModelVersionURL!)!
 

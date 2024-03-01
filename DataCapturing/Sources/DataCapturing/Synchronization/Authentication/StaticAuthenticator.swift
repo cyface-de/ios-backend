@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2022 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -29,7 +29,7 @@ import Foundation
  If this is not the case, API calls based on this authenticator are going to fail!
 
  - Author: Klemens Muthmann
- - Version: 1.2.0
+ - Version: 1.3.0
  - Since: 2.0.0
  */
 public class StaticAuthenticator: Authenticator {
@@ -47,7 +47,7 @@ public class StaticAuthenticator: Authenticator {
 
     // MARK: - Methods
 
-    public func authenticate(onSuccess: (String) -> Void, onFailure: (Error) -> Void) {
+    private func authenticate(onSuccess: (String) -> Void, onFailure: (Error) -> Void) {
         if let jwtToken = jwtToken {
             if jwtToken.isEmpty {
                 onFailure(ServerConnectionError.notAuthenticated("Provided JWT token was empty."))

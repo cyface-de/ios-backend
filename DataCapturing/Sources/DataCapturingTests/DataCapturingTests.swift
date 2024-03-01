@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Cyface GmbH
+ * Copyright 2017-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -26,7 +26,7 @@ import CoreData
  This test is intended to test capturing some data in isolation.
 
  - Author: Klemens Muthmann
- - Version: 2.4.0
+ - Version: 2.4.1
  - Since: 1.0.0
  */
 class DataCapturingTests: XCTestCase {
@@ -106,7 +106,7 @@ class DataCapturingTests: XCTestCase {
         let cancellable = oocut.measurementMessages.sink { message in
             messages.append(message)
         }
-        try oocut.start(inMode: defaultMode)
+        try oocut.start()
 
         // Assert after start
         XCTAssertTrue(oocut.isRunning)

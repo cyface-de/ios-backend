@@ -1,7 +1,7 @@
 // swift-tools-version: 5.6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 /*
- * Copyright 2019-2023 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -24,7 +24,7 @@ import PackageDescription
 let package = Package(
     name: "DataCapturing",
     platforms: [
-        .iOS(.v14),
+        .iOS(.v15),
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -35,13 +35,15 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // DataCompression Library to handle complicated ObjectiveC compression API.
-        .package(name: "DataCompression", url: "https://github.com/mw99/DataCompression.git", from: "3.0.0"),
+        .package(url: "https://github.com/mw99/DataCompression.git", from: "3.0.0"),
         // Apple library to handle Protobuf conversion for transmitting files in the Protobuf format.
-        .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.6.0"),
+        .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.6.0"),
+        // Library for handling OAuth Login Process
+        .package(url: "https://github.com/openid/AppAuth-iOS.git", .upToNextMajor(from: "1.6.2")),
 
         // Test Dependencies
         // Mocker provides functionality to Mock Network communication allowing us to test the data transfer layer.
-        .package(name: "Mocker", url: "https://github.com/WeTransfer/Mocker.git", from: "2.5.5"),
+        .package(url: "https://github.com/WeTransfer/Mocker.git", from: "2.5.5"),
 
         // Tools
         // Required to generated DocC documentation
@@ -53,8 +55,9 @@ let package = Package(
         .target(
             name: "DataCapturing",
             dependencies: [
-                .byName(name: "DataCompression"),
-                .byName(name: "SwiftProtobuf"),
+                "DataCompression",
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+                .product(name: "AppAuth", package: "AppAuth-iOS"),
             ]),
         .testTarget(
             name: "DataCapturingTests",

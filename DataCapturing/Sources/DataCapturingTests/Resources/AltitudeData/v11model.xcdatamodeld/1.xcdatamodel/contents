@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21513" systemVersion="21G115" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Altitude" representedClassName="AltitudeMO" syncable="YES" codeGenerationType="class">
+        <attribute name="altitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="measurementIdentifier" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="track" maxCount="1" deletionRule="Nullify" destinationEntity="Track" inverseName="altitudes" inverseEntity="Track"/>
+    </entity>
+    <entity name="GeoLocationWithAltitude" representedClassName="GeoLocationWithAltitudeMO" syncable="YES" codeGenerationType="class">
+        <attribute name="accuracy" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="altitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="isPartOfCleanedTrack" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="lat" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="lon" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="speed" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="verticalAccuracy" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="track" maxCount="1" deletionRule="Nullify" destinationEntity="Track" inverseName="locations" inverseEntity="Track"/>
+    </entity>
+    <entity name="Measurement" representedClassName="MeasurementV11" syncable="YES" codeGenerationType="class">
+        <attribute name="identifier" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="tracks" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Track" inverseName="measurement" inverseEntity="Track"/>
+    </entity>
+    <entity name="Track" representedClassName="TrackV11" syncable="YES" codeGenerationType="class">
+        <relationship name="altitudes" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Altitude" inverseName="track" inverseEntity="Altitude"/>
+        <relationship name="locations" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="GeoLocationWithAltitude" inverseName="track" inverseEntity="GeoLocationWithAltitude"/>
+        <relationship name="measurement" maxCount="1" deletionRule="No Action" destinationEntity="Measurement" inverseName="tracks" inverseEntity="Measurement"/>
+    </entity>
+</model>

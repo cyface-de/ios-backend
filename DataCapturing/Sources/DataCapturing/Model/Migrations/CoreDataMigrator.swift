@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -22,6 +22,8 @@ import CoreData
 
 /**
  A protocol implemented by classes responsible for migrating from old to new data models.
+
+ This architecture for data migration is based on information from the following Blog Post: https://williamboles.com/progressive-core-data-migration/
 
  - Author: Klemens Muthmann
  - Version: 1.0.2
@@ -52,7 +54,7 @@ public protocol CoreDataMigratorProtocol {
  An implementation of the `CoreDataMigratorProtocol` for the Cyface data model, as used by the Cyface iOS SDK.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 4.0.0
  */
 public class CoreDataMigrator: CoreDataMigratorProtocol {
@@ -115,8 +117,8 @@ public class CoreDataMigrator: CoreDataMigratorProtocol {
                                          destinationOptions: nil)
             } catch let error {
                 throw CoreDataMigrationError.migrationFailed(
-                    sourceModel: sourceModel.description,
-                    destinationModel: destinationModel.description,
+                    sourceModel: migrationStep.sourceVersion.rawValue,
+                    destinationModel: migrationStep.destinationVersion.rawValue,
                     cause: error)
             }
 

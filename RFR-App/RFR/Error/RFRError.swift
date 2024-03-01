@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots App.
  *
@@ -23,7 +23,7 @@ import Foundation
  Error causes processed by the Ready for Robots application.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 3.1.2
  */
 enum RFRError: Error {
@@ -43,8 +43,6 @@ enum RFRError: Error {
     case missingCredentials
     /// If the ``Authenticator`` could not be created because no configuration was available.
     case missingAuthenticatorConfiguration
-    /// If for some unspecified reason the system was unable to authentiate.
-    case unableToAuthenticate
     /// If a number could not be formatted for the current localization.
     case formattingFailed(number: NSNumber)
     /// If communicating with the voucher server failed and thus no overview can and should be shown.
@@ -121,14 +119,7 @@ extension RFRError: LocalizedError {
             )
 
             return errorMessage
-        case .unableToAuthenticate:
-            let errorMessage = NSLocalizedString(
-                "de.cyface.error.rfrerror.unableToAuthenticate",
-                value: "Unable to Authenticate your user account. The Authentication Server might be down or you have provided invalid credentials. Please log out and back in again.",
-                comment: "The system was unable to get a valid authentication token from the server. Either the server is not available or the user used invalid Credentials."
-            )
 
-            return errorMessage
         case .formattingFailed(number: let number):
             let errorMessage = NSLocalizedString(
                 "de.cyface.error.rfrerror.formattingFailed",
@@ -176,8 +167,6 @@ extension RFRError: Hashable {
             return true
         case (.missingAuthenticatorConfiguration, .missingAuthenticatorConfiguration):
             return true
-        case (.unableToAuthenticate, .unableToAuthenticate):
-            return true
         case (.formattingFailed(number: let l), .formattingFailed(number: let r)):
             return l == r
         case (.voucherOverviewFailed, .voucherOverviewFailed):
@@ -210,8 +199,6 @@ extension RFRError: Hashable {
             hasher.combine(6)
         case .missingAuthenticatorConfiguration:
             hasher.combine(7)
-        case .unableToAuthenticate:
-            hasher.combine(8)
         case .formattingFailed(number: let number):
             hasher.combine(9)
             hasher.combine(number)
