@@ -29,7 +29,6 @@ import Sentry
  */
 @main
 struct RFRApp: App {
-
     /// The application, which is required to store and load the authentication state of this application.
     @ObservedObject var appModel = AppModel()
 
@@ -80,6 +79,9 @@ class AppModel: ObservableObject {
     @Published var viewModel: DataCapturingViewModel?
     /// Tells the view about errors occuring during initialization.
     @Published var error: Error?
+    /// The UIKit Application Delegate required for functionality not yet ported to SwiftUI.
+    /// Especially reacting to backround network requests needs to be handled here.
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     /// This applications configuration file.
     var config: Config = try! ConfigLoader.load()
     /// The internet address of the root of the incentives API.
@@ -101,7 +103,12 @@ class AppModel: ObservableObject {
                 apiEndpoint: apiEndpoint,
                 clientId: clientId
             )
-            self.viewModel = try DataCapturingViewModel(authenticator: authenticator, uploadEndpoint: uploadEndpoint)
+            let uploadProcessBuilder = BackgroundUploadProcessBuilder(
+                sessionRegistry: SessionRegistry(), 
+                collectorUrl: uploadEndpoint
+            )
+            appDelegate.delegate = uploadProcessBuilder
+            self.viewModel = try DataCapturingViewModel(authenticator: authenticator, uploadProcessBuilder: uploadProcessBuilder)
         } catch {
             self.error = error
         }

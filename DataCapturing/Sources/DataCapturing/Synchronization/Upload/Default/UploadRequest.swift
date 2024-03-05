@@ -38,13 +38,13 @@ class UploadRequest {
     }
 
     /// Send the request for the provided `upload`.
-    func request(authToken: String, sessionIdentifier: String, upload: Upload, continueOnByte: Int = 0) async throws -> Upload {
-        os_log("Uploading measurement %{public}d to session %{public}@.", log: log, type: .debug, upload.measurement.identifier, sessionIdentifier)
+    func request(authToken: String, upload: any Upload, continueOnByte: Int = 0) async throws -> any Upload {
+        os_log("Uploading measurement %{public}d to %{public}@.", log: log, type: .debug, upload.measurement.identifier, upload.location?.absoluteString ?? "Location Missing!")
         let metaData = try upload.metaData()
         let data = try upload.data()
 
-        guard let url = URL(string: sessionIdentifier) else {
-            throw ServerConnectionError.sessionIdentifierFormatInvalid(sessionIdentifier)
+        guard let url = upload.location else {
+            throw ServerConnectionError.invalidUploadLocation("Missing Location")
         }
 
         // Background uploads are only valid from files, so writing the data to a file at first.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -27,24 +27,23 @@ import Foundation
  - author: Klemens Muthmann
  - version: 1.0.0
  */
-public struct SessionRegistry {
+public struct DefaultSessionRegistry: SessionRegistry {
+    // MARK: - Properties
     /// A mapping from the measurement identifier to the REST resource that session is available at.
-    var openSessions = [UInt64: String]()
-
-    /// Provide a public initializer, which is required to use this framework
-    public init() {
-        // Nothing to do here
+    public var openSessions = [UInt64: any Upload]()
+    // MARK: - Methods
+    public mutating func get(measurement: FinishedMeasurement) throws -> (any Upload)? {
+        return openSessions[measurement.identifier]
     }
-
-    /// Provide the session for the ``Upload`` or `nil` if no open session is available.
-    func session(for upload: Upload) -> String? {
-        return openSessions[upload.measurement.identifier]
-    }
-
+    
     /// Register a `session`for the provided `Measurement`
-    /// - Parameter session: The complete REST URL to the session.
     /// - Parameter upload: The ``Upload`` to register this session for.
-    mutating func register(session: String, upload: Upload) {
-        openSessions[upload.measurement.identifier] = session
+    /// - Returns: The universal unique identifier that session has been stored under
+    public mutating func register(upload: any Upload) {
+        openSessions[upload.measurement.identifier] = upload
+    }
+    public mutating func remove(upload: any Upload) {
+        openSessions.removeValue(forKey: upload.measurement.identifier)
     }
 }
+

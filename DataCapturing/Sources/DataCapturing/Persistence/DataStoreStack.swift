@@ -112,22 +112,6 @@ public class CoreDataStack: DataStoreStack {
     }
 
     // MARK: - SetUp
-
-    /**
-     Connects this `CoreDataManager` to the underlying storage, possibly migrating the data model to the current version.
-
-     - Parameter bundle: The bundle containing the data model.
-     - Throws: `CoreDataError.missingModelUrl`
-     */
-    @available(iOS, obsoleted: 13.0, deprecated, message: "Only use this before iOS 13. Use the async/await version of this method on newer systems.")
-    public func setup(bundle: Bundle, completionClosure: @escaping (Error?) -> Void) throws {
-        try migrateStoreIfNeeded(bundle: bundle)
-        self.persistentContainer.loadPersistentStores { _, error in
-            completionClosure(error)
-        }
-    }
-
-    @available(iOS 13.0, *)
     public func setup() async throws {
         // TODO: Remove this parameter as soon as deprecated setup method has been deleted.
         try migrateStoreIfNeeded(bundle: self.bundle)

@@ -15,6 +15,7 @@
 		AA1E40722B17EB0B00CACBE6 /* SynchronizeMeasurementUITest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1E405C2B17A14D00CACBE6 /* SynchronizeMeasurementUITest.swift */; };
 		AA1E40742B17EC9900CACBE6 /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = AA1E40732B17EC9900CACBE6 /* AppAuthCore */; };
 		AA1E40762B17EC9E00CACBE6 /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AA1E40752B17EC9E00CACBE6 /* AppAuth */; };
+		AA2ACAC92B8CDA33007ADE14 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2ACAC82B8CDA33007ADE14 /* AppDelegate.swift */; };
 		AA3C062A2A3AF8B9002BD585 /* ControlBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06292A3AF8B9002BD585 /* ControlBar.swift */; };
 		AA3C062D2A3B03C8002BD585 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA3C062B2A3B03C8002BD585 /* InfoPlist.strings */; };
 		AA3C06302A3B03C8002BD585 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA3C062E2A3B03C8002BD585 /* Localizable.strings */; };
@@ -98,6 +99,7 @@
 		AA1E405A2B1764C900CACBE6 /* DataProtection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProtection.swift; sourceTree = "<group>"; };
 		AA1E405C2B17A14D00CACBE6 /* SynchronizeMeasurementUITest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynchronizeMeasurementUITest.swift; sourceTree = "<group>"; };
 		AA1E40632B17EAF100CACBE6 /* Ready for Robots UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Ready for Robots UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA2ACAC82B8CDA33007ADE14 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AA3C06292A3AF8B9002BD585 /* ControlBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBar.swift; sourceTree = "<group>"; };
 		AA3C062C2A3B03C8002BD585 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		AA3C062F2A3B03C8002BD585 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -300,6 +302,7 @@
 				AA1E40582B175C5300CACBE6 /* WebView.swift */,
 				AA1E405A2B1764C900CACBE6 /* DataProtection.swift */,
 				AAC610632B231B070083AED5 /* DeleteAccountConfirmationDialog.swift */,
+				AA2ACAC82B8CDA33007ADE14 /* AppDelegate.swift */,
 				AAE8E4642A29F26F005AA4F1 /* Resources */,
 			);
 			path = RFR;
@@ -541,6 +544,7 @@
 		};
 		AA2B0B6E2B7530B100756DBD /* Highlight TODO and FIXME as warnings */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -583,6 +587,7 @@
 				AAC9D2F729891A8D003C4CC7 /* Measurement.swift in Sources */,
 				AA3C06562A4180DC002BD585 /* MainMap.swift in Sources */,
 				AA6C48962A93629800C3633D /* OAuthLoginView.swift in Sources */,
+				AA2ACAC92B8CDA33007ADE14 /* AppDelegate.swift in Sources */,
 				AAEF3B4B2B3590AA00BDE7FE /* ErrorTextView.swift in Sources */,
 				AA3C062A2A3AF8B9002BD585 /* ControlBar.swift in Sources */,
 				AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */,

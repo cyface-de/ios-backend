@@ -53,20 +53,21 @@ class UploadProcessTest: XCTestCase {
         let mockedUploadURLRequest = Mock(url: uploadURL, dataType: .json, statusCode: 201, data: [.put: Data()])
         mockedUploadURLRequest.register()
 
-        let sessionRegistry = SessionRegistry()
+        let sessionRegistry = DefaultSessionRegistry()
 
-        let oocut = DefaultUploadProcess(apiUrl: apiURL, session: mockedSession, sessionRegistry: sessionRegistry)
+        var oocut = DefaultUploadProcess(openSessions: sessionRegistry, apiUrl: apiURL, urlSession: mockedSession, uploadFactory: MockUploadFactory())
 
-        let mockedUpload = MockUpload(measurement: FinishedMeasurement(identifier: 1))
+        let mockMeasurement = FinishedMeasurement(identifier: 1)
 
         // Act
-        let result = try await oocut.upload(authToken: "mock-token", mockedUpload)
+        let result = try await oocut.upload(measurement: mockMeasurement, authToken: "mock-token")
 
 
         // Assert
         XCTAssertEqual(result.failedUploadsCounter, 0)
         XCTAssertEqual(result.measurement.identifier, 1)
-        XCTAssertEqual(mockedUpload.wasSuccessful, true)
+        XCTAssertTrue(result is MockUpload)
+        XCTAssertEqual((result as! MockUpload).wasSuccessful, true)
     }
 
     /// This test checks if the upload process repeats after a failed upload attempt. It uses a custom URLProtocol to avoid actual network calls. This is necessary since *Mocker* does not support changing the response to a request during tests.
@@ -76,7 +77,8 @@ class UploadProcessTest: XCTestCase {
         let configuration = URLSessionConfiguration.default
         configuration.protocolClasses = [URLProtocolStub.self]  + (configuration.protocolClasses ?? [])
         let mockedSession = URLSession(configuration: configuration)
-        let sessionRegistry = SessionRegistry()
+        let mockMeasurement = FinishedMeasurement(identifier: 1)
+        let sessionRegistry = DefaultSessionRegistry()
         // Mock Auth Response
         URLProtocolStub.loadingHandler.append({(request: URLRequest) in (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Authorization": "abcdefg"])!,Data())})
         // Mock PreRequest
@@ -88,15 +90,16 @@ class UploadProcessTest: XCTestCase {
         // Mock Successful Upload
         URLProtocolStub.loadingHandler.append({(request: URLRequest) in (HTTPURLResponse(url: request.url!, statusCode: 201, httpVersion: "HTTP/1.1", headerFields: [String: String]())!, Data())})
 
-        let uploadProcess = DefaultUploadProcess(apiUrl: apiURL, session: mockedSession, sessionRegistry: sessionRegistry)
-        let upload = MockUpload(measurement: FinishedMeasurement(identifier: 1))
+        var uploadProcess = DefaultUploadProcess(openSessions: sessionRegistry, apiUrl: apiURL, urlSession: mockedSession, uploadFactory: MockUploadFactory())
 
         // Act
-        let result = try await uploadProcess.upload(authToken: "mock-token", upload)
+        let result = try await uploadProcess.upload(measurement: mockMeasurement, authToken: "mock-token")
 
         // Assert
-        XCTAssertEqual(result.failedUploadsCounter, 1)
-        XCTAssertEqual(upload.wasSuccessful, false)
+        XCTAssertTrue(result is MockUpload)
+        let mockResult = result as! MockUpload
+        XCTAssertEqual(mockResult.failedUploadsCounter, 1)
+        XCTAssertEqual(mockResult.wasSuccessful, false)
     }
 }
 
@@ -106,9 +109,14 @@ A mocked upload that does not get data from a CoreData store or something simila
  The test data provided via this upload is randomly generated. The numbers have no meaning.
 
  - author: Klemens Muthmann
- - version: 2.0.0
+ - version: 2.1.0
  */
 class MockUpload: Upload {
+
+    static func == (lhs: MockUpload, rhs: MockUpload) -> Bool {
+        return lhs.measurement == rhs.measurement
+        }
+    
     /// The measurement to upload.
     var measurement: FinishedMeasurement
 
@@ -117,6 +125,9 @@ class MockUpload: Upload {
 
     /// Check this to see whether `onSuccess` has been called
     var wasSuccessful = false
+
+    /// An optionally empty location to store the upload at.
+    var location: URL?
 
     /// Initialize this class with a simulated measurement identifier.
     init(measurement: FinishedMeasurement) {
@@ -161,6 +172,12 @@ class MockUpload: Upload {
 
     func onSuccess() throws {
         wasSuccessful = true
+    }
+}
+
+struct MockUploadFactory: UploadFactory {
+    func upload(for measurement: DataCapturing.FinishedMeasurement) -> any DataCapturing.Upload {
+        return MockUpload(measurement: measurement)
     }
 }
 

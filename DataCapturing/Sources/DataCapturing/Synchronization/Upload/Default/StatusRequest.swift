@@ -40,12 +40,8 @@ class StatusRequest {
     }
     
     /// Start the request
-    /// - Parameter sessionIdentifier: The URL to the open session for which to request status information.
     /// - Parameter upload: The data to upload.
-    func request(
-        sessionIdentifier: String,
-        upload: Upload
-    ) async throws -> Response {
+    func request(upload: any Upload) async throws -> Response {
         let metaData = try upload.metaData()
         let data = try upload.data()
         
@@ -53,8 +49,8 @@ class StatusRequest {
             fatalError()
         }
 
-        guard let requestUrl = URL(string: sessionIdentifier) else {
-            throw ServerConnectionError.invalidUploadLocation(sessionIdentifier)
+        guard let requestUrl = upload.location else {
+            throw ServerConnectionError.invalidUploadLocation("Missing Location")
         }
 
         var request = URLRequest(url: requestUrl)
@@ -74,7 +70,6 @@ class StatusRequest {
 
         let (_, response) = try await session.data(for: request)
 
-        //let response = await session.request(requestUrl, method: .put).serializingData().response
         guard let response = response as? HTTPURLResponse else {
             throw ServerConnectionError.noResponse
         }

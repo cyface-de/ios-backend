@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -23,15 +23,20 @@ import Foundation
  An upload to a Cyface Data Collector server.
 
  - author: Klemens Muthmann
- - version: 1.0.0
+ - version: 1.2.0
  */
-public protocol Upload {
+public protocol Upload: Equatable {
+    // MARK: - Properties
     /// The amount of failed uploads before retrying is stopped.
     var failedUploadsCounter: Int {get set}
 
     /// The ``FinishedMeasurement`` to upload.
     var measurement: FinishedMeasurement { get }
 
+    /// The location to send the data to or `nil` if no location was requested from the server yet.
+    var location: URL? {get set}
+
+    // MARK: - Methods
     /// Provide the upload meta data of the measurement to upload.
     func metaData() throws -> MetaData
 
@@ -46,25 +51,34 @@ public protocol Upload {
  An upload to a Cyface Data Collector taking data from a CoreData source.
 
  - author: Klemens Muthmann
- - version 1.0.0
+ - version 1.2.0
  */
 public class CoreDataBackedUpload: Upload {
-    /// A wrapper for the `NSPersistentContainer` and the corresponding initialization code.
-    var dataStoreStack: DataStoreStack
+    // MARK: - Public Properties
     /// A cache for the actual measurement to upload, so we don't have to reload it from the database all the time.
     public var measurement: FinishedMeasurement
-    /// A cache for the measurements metadata, so we don't have to reload it from the database all the time.
-    var dataCache: Data?
     /// A counter of the number of failed attempts to run this upload. This can be used to stop retrying after a certain amount of retries.
     public var failedUploadsCounter = 0
+    public var location: URL?
+    // MARK: - Internal Properties
+    /// A wrapper for the `NSPersistentContainer` and the corresponding initialization code.
+    var dataStoreStack: CoreDataStack
+    /// A cache for the measurements metadata, so we don't have to reload it from the database all the time.
+    var dataCache: Data?
     var identifier: UInt64 {
         measurement.identifier
     }
 
+    // MARK: - Initializers
     /// Make a new instance of this class, connected to a CoreData storage and associated with a measurement, via its `identifier`.
-    public init(dataStoreStack: DataStoreStack, measurement: FinishedMeasurement) {
+    public init(dataStoreStack: CoreDataStack, measurement: FinishedMeasurement) {
         self.measurement = measurement
         self.dataStoreStack = dataStoreStack
+    }
+
+    // MARK: - Methods
+    public static func == (lhs: CoreDataBackedUpload, rhs: CoreDataBackedUpload) -> Bool {
+        return lhs.measurement != rhs.measurement
     }
 
     /// Load the meta data of the measurement from the CoreData storage.

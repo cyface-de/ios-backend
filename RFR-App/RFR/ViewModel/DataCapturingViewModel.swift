@@ -43,12 +43,9 @@ class DataCapturingViewModel: ObservableObject {
     // TODO: All of this only concerns the `SynchronizationViewModel` and thus should only appear there.
     /// The authenticator used to authenticate for data uploads
     let authenticator: Authenticator
-    /// The location to upload data to.
-    private let uploadEndpoint: URL
 
     // MARK: - Initializers
-    init(authenticator: Authenticator, uploadEndpoint: URL) throws {
-        self.uploadEndpoint = uploadEndpoint
+    init(authenticator: Authenticator, uploadProcessBuilder: UploadProcessBuilder) throws {
         self.authenticator = authenticator
         let dataStoreStack = try CoreDataStack()
         liveViewModel = LiveViewModel(
@@ -58,10 +55,7 @@ class DataCapturingViewModel: ObservableObject {
         syncViewModel = SynchronizationViewModel(
             authenticator: authenticator,
             dataStoreStack: dataStoreStack,
-            uploadProcessBuilder: DefaultUploadProcessBuilder(
-                apiEndpoint: uploadEndpoint,
-                sessionRegistry: SessionRegistry()
-            )
+            uploadProcessBuilder: uploadProcessBuilder
         )
         measurementsViewModel = MeasurementsViewModel(
             dataStoreStack: dataStoreStack,
@@ -94,7 +88,6 @@ class DataCapturingViewModel: ObservableObject {
         authenticator: Authenticator,
         uploadEndpoint: URL
     ) {
-        self.uploadEndpoint = uploadEndpoint
         self.authenticator = authenticator
         self.isInitialized = isInitialized
         self.dataStoreStack = dataStoreStack
