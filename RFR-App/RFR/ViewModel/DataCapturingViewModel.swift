@@ -45,9 +45,9 @@ class DataCapturingViewModel: ObservableObject {
     let authenticator: Authenticator
 
     // MARK: - Initializers
-    init(authenticator: Authenticator, uploadProcessBuilder: UploadProcessBuilder) throws {
+    init(authenticator: Authenticator, uploadProcessBuilder: UploadProcessBuilder, dataStoreStack: CoreDataStack) throws {
         self.authenticator = authenticator
-        let dataStoreStack = try CoreDataStack()
+        
         liveViewModel = LiveViewModel(
             dataStoreStack: dataStoreStack,
             dataStorageInterval: 5.0
@@ -63,8 +63,6 @@ class DataCapturingViewModel: ObservableObject {
         )
         measurementsViewModel.subscribe(to: liveViewModel.$message)
         self.dataStoreStack = dataStoreStack
-        Task {
-            try await dataStoreStack.setup()
             try dataStoreStack.wrapInContext { context in
                 let request = MeasurementMO.fetchRequest()
                 request.predicate = NSPredicate(format: "synchronized=false AND synchronizable=false")
@@ -78,15 +76,14 @@ class DataCapturingViewModel: ObservableObject {
             DispatchQueue.main.async { [weak self] in
                 self?.isInitialized = true
             }
-        }
     }
 
     init(
         isInitialized: Bool,
         showError: Bool,
-        dataStoreStack: DataStoreStack,
+        dataStoreStack: CoreDataStack,
         authenticator: Authenticator,
-        uploadEndpoint: URL
+        collectorUrl: URL
     ) {
         self.authenticator = authenticator
         self.isInitialized = isInitialized
@@ -99,8 +96,9 @@ class DataCapturingViewModel: ObservableObject {
             authenticator: authenticator,
             dataStoreStack: dataStoreStack, 
             uploadProcessBuilder: DefaultUploadProcessBuilder(
-                apiEndpoint: uploadEndpoint,
-                sessionRegistry: SessionRegistry()
+                collectorUrl: collectorUrl,
+                sessionRegistry: DefaultSessionRegistry(),
+                uploadFactory: CoreDataBackedUploadFactory(dataStoreStack: dataStoreStack)
             )
         )
         measurementsViewModel = MeasurementsViewModel(

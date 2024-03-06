@@ -67,9 +67,9 @@ extension BackgroundUploadProcess: UploadProcess {
             /// If the status request was not successful contnue with a pre request
             return upload
         } else {
+            /// If there is no open session continue by sending a pre request
             let upload = uploadFactory.upload(for: measurement)
             try sessionRegistry.register(upload: upload)
-            /// If there is no open session continue by sending a pre request
             let preRequest = BackgroundPreRequest(
                 collectorUrl: collectorUrl,
                 session: discretionaryUrlSession,

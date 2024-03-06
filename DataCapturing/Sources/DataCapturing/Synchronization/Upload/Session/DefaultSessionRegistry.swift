@@ -30,7 +30,13 @@ import Foundation
 public struct DefaultSessionRegistry: SessionRegistry {
     // MARK: - Properties
     /// A mapping from the measurement identifier to the REST resource that session is available at.
-    public var openSessions = [UInt64: any Upload]()
+    var openSessions = [UInt64: any Upload]()
+
+    // MARK: - Initializers
+    public init() {
+        // Nothing to do here.
+    }
+
     // MARK: - Methods
     public mutating func get(measurement: FinishedMeasurement) throws -> (any Upload)? {
         return openSessions[measurement.identifier]

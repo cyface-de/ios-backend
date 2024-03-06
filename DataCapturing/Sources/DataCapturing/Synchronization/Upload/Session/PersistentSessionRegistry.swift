@@ -29,6 +29,12 @@ public struct PersistentSessionRegistry: SessionRegistry {
     let dataStoreStack: DataStoreStack
     let uploadFactory: UploadFactory
 
+    // MARK: - Initializers
+    public init(dataStoreStack: DataStoreStack, uploadFactory: UploadFactory) {
+        self.dataStoreStack = dataStoreStack
+        self.uploadFactory = uploadFactory
+    }
+
     // MARK: - Methods
     public mutating func get(measurement: FinishedMeasurement) throws -> (any Upload)? {
         return try dataStoreStack.wrapInContextReturn { context in

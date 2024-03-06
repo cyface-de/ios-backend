@@ -36,10 +36,14 @@ public protocol UploadFactory {
  - Author: Klemens Muthmann
  - Version: 1.0.0
  */
-struct CoreDataBackedUploadFactory: UploadFactory {
+public struct CoreDataBackedUploadFactory: UploadFactory {
     let dataStoreStack: CoreDataStack
 
-    func upload(for measurement: FinishedMeasurement) -> any Upload {
+    public init(dataStoreStack: CoreDataStack) {
+        self.dataStoreStack = dataStoreStack
+    }
+
+    public func upload(for measurement: FinishedMeasurement) -> any Upload {
         return CoreDataBackedUpload(dataStoreStack: dataStoreStack, measurement: measurement)
     }
 }
