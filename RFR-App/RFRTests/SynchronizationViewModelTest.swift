@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots iOS App.
  *
@@ -27,7 +27,7 @@ final class SynchronizationViewModelTest: XCTestCase {
         // Arrange
         let mockAuthenticator = MockAuthenticator()
         let testEndpoint = URL(string: "http://localhost:8080/api")!
-        let sessionRegistry = SessionRegistry()
+        let sessionRegistry = DefaultSessionRegistry()
         let mockPersistenceLayer = MockPersistenceLayer(
             measurements: [
                 FinishedMeasurement(identifier: 0, synchronizable: true),
@@ -80,7 +80,43 @@ class MockUploadProcessBuilder: UploadProcessBuilder {
 }
 
 class MockUploadProcess: UploadProcess {
-    func upload(authToken: String, _ upload: DataCapturing.Upload) async throws -> DataCapturing.Upload {
-        return upload
+    func upload(measurement: DataCapturing.FinishedMeasurement, authToken: String) async throws -> any DataCapturing.Upload {
+        return MockUpload(measurement: measurement)
     }
+}
+
+struct MockUpload: Upload {
+    var failedUploadsCounter: Int = 0
+
+    var measurement: DataCapturing.FinishedMeasurement
+    
+    var location: URL?
+    
+    func metaData() throws -> DataCapturing.MetaData {
+        return DataCapturing.MetaData(
+            locationCount: 10,
+            formatVersion: 4,
+            startLocLat: nil,
+            startLocLon: nil,
+            startLocTS: nil,
+            endLocLat: nil,
+            endLocLon: nil,
+            endLocTS: nil,
+            measurementId: measurement.identifier,
+            osVersion: "mock",
+            applicationVersion: "mock",
+            length: 10.0,
+            modality: "BICYCLE"
+        )
+    }
+    
+    func data() throws -> Data {
+        return Data()
+    }
+    
+    func onSuccess() throws {
+        // Nothing to do here
+    }
+    
+
 }

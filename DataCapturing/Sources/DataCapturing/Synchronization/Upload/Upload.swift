@@ -62,7 +62,7 @@ public class CoreDataBackedUpload: Upload {
     public var location: URL?
     // MARK: - Internal Properties
     /// A wrapper for the `NSPersistentContainer` and the corresponding initialization code.
-    var dataStoreStack: CoreDataStack
+    var dataStoreStack: DataStoreStack
     /// A cache for the measurements metadata, so we don't have to reload it from the database all the time.
     var dataCache: Data?
     var identifier: UInt64 {
@@ -71,7 +71,7 @@ public class CoreDataBackedUpload: Upload {
 
     // MARK: - Initializers
     /// Make a new instance of this class, connected to a CoreData storage and associated with a measurement, via its `identifier`.
-    public init(dataStoreStack: CoreDataStack, measurement: FinishedMeasurement) {
+    public init(dataStoreStack: DataStoreStack, measurement: FinishedMeasurement) {
         self.measurement = measurement
         self.dataStoreStack = dataStoreStack
     }

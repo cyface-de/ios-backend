@@ -56,7 +56,7 @@ class SynchronizationViewModel: NSObject, ObservableObject {
     /// Start synchronization for all local but not yet synchronized measurements.
     func synchronize() async {
         // TODO: Run this on a background thread
-        let uploadProcess = processBuilder.build()
+        var uploadProcess = processBuilder.build()
         do {
             let measurements = try dataStoreStack.persistenceLayer().loadSynchronizableMeasurements()
             os_log("Synchronizing %d measurements!", log: OSLog.synchronization, type: .debug, measurements.count)
@@ -64,16 +64,15 @@ class SynchronizationViewModel: NSObject, ObservableObject {
                 os_log(.debug, log: OSLog.synchronization, "Starting synchronization of measurement %d!", measurement.identifier)
                 uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .started))
                 do {
-                    let upload = CoreDataBackedUpload(dataStoreStack: dataStoreStack, measurement: measurement)
                     let authToken = try await authenticator.authenticate()
-                    _ = try await uploadProcess.upload(authToken: authToken, upload)
+                    _ = try await uploadProcess.upload(measurement: measurement, authToken: authToken)
                     os_log(.debug, log: OSLog.synchronization, "Successfully finished synchronization of measurement %d!", measurement.identifier)
                     uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedSuccessfully))
                 } catch {
                     SentrySDK.capture(error: error)
                     os_log(.error, log: OSLog.synchronization, "Failed synchronizing measurement %d!", measurement.identifier)
                     if let defaultUploadProcessBuilder = processBuilder as? DefaultUploadProcessBuilder {
-                        os_log(.error, log: OSLog.synchronization, "Data Collector API Address: %@", defaultUploadProcessBuilder.apiEndpoint.absoluteString)
+                        os_log(.error, log: OSLog.synchronization, "Data Collector API Address: %@", defaultUploadProcessBuilder.collectorUrl.absoluteString)
                     }
                     if let oAuthAuthenticator = authenticator as? OAuthAuthenticator {
                         os_log(.error, log: OSLog.authorization, "Identity Provider Address: %@", oAuthAuthenticator.issuer.absoluteString)

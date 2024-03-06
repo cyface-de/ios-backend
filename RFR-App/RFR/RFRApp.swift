@@ -98,24 +98,28 @@ class AppModel: ObservableObject {
             self.incentivesUrl = try config.getIncentivesUrl()
 
             let dataStoreStack = try CoreDataStack()
-            let authenticator = createAuthenticator(
-                issuer: issuer,
-                redirectURI: redirectURI,
-                apiEndpoint: apiEndpoint,
-                clientId: clientId
-            )
-            let uploadFactory = CoreDataBackedUploadFactory(dataStoreStack: dataStoreStack)
-            let uploadProcessBuilder = BackgroundUploadProcessBuilder(
-                sessionRegistry: PersistentSessionRegistry(dataStoreStack: dataStoreStack, uploadFactory: uploadFactory),
-                collectorUrl: uploadEndpoint,
-                uploadFactory: uploadFactory
-            )
-            appDelegate.delegate = uploadProcessBuilder
             Task {
-                try await dataStoreStack.setup()
-                self.viewModel = try await DataCapturingViewModel(authenticator: authenticator, uploadProcessBuilder: uploadProcessBuilder, dataStoreStack: dataStoreStack)
-            }
+                do {
+                    try await dataStoreStack.setup()
 
+                    let authenticator = createAuthenticator(
+                        issuer: issuer,
+                        redirectURI: redirectURI,
+                        apiEndpoint: apiEndpoint,
+                        clientId: clientId
+                    )
+                    let uploadFactory = CoreDataBackedUploadFactory(dataStoreStack: dataStoreStack)
+                    let uploadProcessBuilder = BackgroundUploadProcessBuilder(
+                        sessionRegistry: PersistentSessionRegistry(dataStoreStack: dataStoreStack, uploadFactory: uploadFactory),
+                        collectorUrl: uploadEndpoint,
+                        uploadFactory: uploadFactory
+                    )
+                    appDelegate.delegate = uploadProcessBuilder
+                    self.viewModel = try DataCapturingViewModel(authenticator: authenticator, uploadProcessBuilder: uploadProcessBuilder, dataStoreStack: dataStoreStack)
+                } catch {
+                    self.error = error
+                }
+            }
         } catch {
             self.error = error
         }

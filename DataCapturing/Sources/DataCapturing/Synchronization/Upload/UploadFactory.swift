@@ -28,6 +28,7 @@
 public protocol UploadFactory {
     /// Create the requested ``Upload`` from the provided ``FinishedMeasurement``.
     func upload(for measurement: FinishedMeasurement) -> any Upload
+    func upload(for session: UploadSession) throws -> any Upload
 }
 
 /**
@@ -37,13 +38,21 @@ public protocol UploadFactory {
  - Version: 1.0.0
  */
 public struct CoreDataBackedUploadFactory: UploadFactory {
-    let dataStoreStack: CoreDataStack
+    let dataStoreStack: DataStoreStack
 
-    public init(dataStoreStack: CoreDataStack) {
+    public init(dataStoreStack: DataStoreStack) {
         self.dataStoreStack = dataStoreStack
     }
 
     public func upload(for measurement: FinishedMeasurement) -> any Upload {
         return CoreDataBackedUpload(dataStoreStack: dataStoreStack, measurement: measurement)
+    }
+
+    public func upload(for session: UploadSession) throws -> any Upload {
+        guard let measurement = session.measurement else {
+            throw PersistenceError.inconsistentState
+        }
+        let finishedMeasurement = try FinishedMeasurement(managedObject: measurement)
+        return CoreDataBackedUpload(dataStoreStack: dataStoreStack, measurement: finishedMeasurement)
     }
 }

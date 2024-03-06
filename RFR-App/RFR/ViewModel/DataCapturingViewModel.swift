@@ -30,8 +30,6 @@ import DataCapturing
  */
 class DataCapturingViewModel: ObservableObject {
     // MARK: - Properties
-    /// A flag that is set as soon as tje datastore connection is up and running.
-    @Published var isInitialized = false
     /// The stack used to access the data store.
     var dataStoreStack: DataStoreStack?
     /// The view model used by the view for controlling the live measurement.
@@ -45,9 +43,9 @@ class DataCapturingViewModel: ObservableObject {
     let authenticator: Authenticator
 
     // MARK: - Initializers
-    init(authenticator: Authenticator, uploadProcessBuilder: UploadProcessBuilder, dataStoreStack: CoreDataStack) throws {
+    init(authenticator: Authenticator, uploadProcessBuilder: UploadProcessBuilder, dataStoreStack: DataStoreStack) throws {
         self.authenticator = authenticator
-        
+
         liveViewModel = LiveViewModel(
             dataStoreStack: dataStoreStack,
             dataStorageInterval: 5.0
@@ -63,30 +61,25 @@ class DataCapturingViewModel: ObservableObject {
         )
         measurementsViewModel.subscribe(to: liveViewModel.$message)
         self.dataStoreStack = dataStoreStack
-            try dataStoreStack.wrapInContext { context in
-                let request = MeasurementMO.fetchRequest()
-                request.predicate = NSPredicate(format: "synchronized=false AND synchronizable=false")
-                let result = try request.execute()
-                for measurementModelObject in result {
-                    measurementModelObject.synchronizable = true
-                }
-                try context.save()
+        try dataStoreStack.wrapInContext { context in
+            let request = MeasurementMO.fetchRequest()
+            request.predicate = NSPredicate(format: "synchronized=false AND synchronizable=false")
+            let result = try request.execute()
+            for measurementModelObject in result {
+                measurementModelObject.synchronizable = true
             }
-            try measurementsViewModel.setup()
-            DispatchQueue.main.async { [weak self] in
-                self?.isInitialized = true
-            }
+            try context.save()
+        }
+        try measurementsViewModel.setup()
     }
 
     init(
-        isInitialized: Bool,
         showError: Bool,
-        dataStoreStack: CoreDataStack,
+        dataStoreStack: DataStoreStack,
         authenticator: Authenticator,
         collectorUrl: URL
     ) {
         self.authenticator = authenticator
-        self.isInitialized = isInitialized
         self.dataStoreStack = dataStoreStack
         liveViewModel = LiveViewModel(
             dataStoreStack: dataStoreStack,
@@ -94,7 +87,7 @@ class DataCapturingViewModel: ObservableObject {
         )
         syncViewModel = SynchronizationViewModel(
             authenticator: authenticator,
-            dataStoreStack: dataStoreStack, 
+            dataStoreStack: dataStoreStack,
             uploadProcessBuilder: DefaultUploadProcessBuilder(
                 collectorUrl: collectorUrl,
                 sessionRegistry: DefaultSessionRegistry(),

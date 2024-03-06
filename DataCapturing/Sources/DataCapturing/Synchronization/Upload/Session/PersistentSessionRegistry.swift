@@ -38,8 +38,7 @@ public struct PersistentSessionRegistry: SessionRegistry {
     // MARK: - Methods
     public mutating func get(measurement: FinishedMeasurement) throws -> (any Upload)? {
         return try dataStoreStack.wrapInContextReturn { context in
-            let storedMeasurement = try measurementFromCoreData(measurement.identifier, context)
-            return try uploadFactory.upload(for: FinishedMeasurement(managedObject: storedMeasurement))
+            return try uploadFromCoreData(measurement: measurement)
         }
     }
 
@@ -56,6 +55,17 @@ public struct PersistentSessionRegistry: SessionRegistry {
     
     public mutating func remove(upload: any Upload) {
         
+    }
+
+    private func uploadFromCoreData(measurement: FinishedMeasurement) throws -> (any Upload)? {
+        let request = UploadSession.fetchRequest()
+        request.predicate = NSPredicate(format: "measurement.identifier=%d", measurement.identifier)
+        request.fetchLimit = 1
+        if let session = try request.execute().first {
+            return try uploadFactory.upload(for: session)
+        } else {
+            return nil
+        }
     }
 
     private func measurementFromCoreData(_ identifier: UInt64, _ context: NSManagedObjectContext) throws -> MeasurementMO {

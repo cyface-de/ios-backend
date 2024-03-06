@@ -100,40 +100,39 @@ extension BackgroundUploadProcess: URLSessionDelegate, URLSessionDataDelegate, U
 
         if let error = error {
             os_log("Upload Error: %{PUBLIC}d", log: OSLog.synchronization, type: .error, error.localizedDescription)
-            //self.error = error
             // TODO: Add proper error handling here
             return
         }
         os_log("Upload was successful!", log: OSLog.synchronization, type: .debug)
-        //let taskIndex = find(task: task.taskIdentifier)
-        // discretionaryTasks.remove(at: taskIndex)
-        // TODO: Im Beispielprojekt testen wie ich an Objekte komme, die zuletzt im Speicher waren. Muss ich die in einer
-        // Datei ablegen oder kann ich sie einfach als Properties behalten. Auf jedenfall brauche ich zum Beispiel das akutelle
-        // Upload Objekt an dieser Stelle, um den Upload nach einem StatusRequest oder einem PreRequest fortsetzen zu können.
 
-        // WAs enthält der Response? Wenn dort der measurement Identifier drin ist, könnte ich an dieser Stelle die Daten neu aus der Datenbank laden und von diesem Zustand aus den nächsten Request starten.
-        // Eventuall müsste ich dieser Klasse dann einen Builder für Uploads mitgeben, damit ich hier keine Referenz zu CoreData benötige.
         guard let url = response.url else {
             os_log("Upload - No URL returned from response!", log: OSLog.synchronization, type: .error)
             return
         }
         os_log("Upload targeted URL: %{PUBLiC}@", log: OSLog.synchronization, type: .debug, url.absoluteString)
-        //let upload = CoreDataBackedUpload(dataStoreStack: , measurement: )
 
         guard let description = task.taskDescription else {
             os_log("Upload - No task description aborting upload!", log: OSLog.synchronization, type: .error)
             return
         }
-        os_log("Upload descrived as %{PUBLIC}@!", log: OSLog.synchronization, type: .debug)
+        os_log("Upload described as %{PUBLIC}@!", log: OSLog.synchronization, type: .debug, description)
+        let descriptionPieces = description.split(separator: ":")
+        guard descriptionPieces.count == 2 else {
+            os_log("Upload - Invalid task description %@.", log: OSLog.synchronization, type: .error, description)
+            return
+        }
+        let responseType = descriptionPieces[0]
+        let measurementIdentifier = UInt64(descriptionPieces[1])
 
-        switch description {
+        switch responseType {
         case "STATUS":
             os_log("STATUS: %{PUBLIC}@", log: OSLog.synchronization, type: .debug, url.absoluteString)
             // TODO: Add proper error handling here
             try? onReceivedStatusRequest(httpStatusCode: response.statusCode)
         case "PREREQUEST":
             os_log("PREREQUEST: %{PUBLIC}@", log: OSLog.synchronization, type: .debug, url.absoluteString)
-            print(headerFields: response.allHeaderFields)
+            let locationValue = response.value(forHTTPHeaderField: "Location") ?? "No Location"
+            os_log("Upload - Received PreRequest to %@", log: OSLog.synchronization, type: .debug, locationValue)
             //os_log("Location: \(response.allHeaderFields["Location"] ?? "NO VALUE")")
             try? onReceivedPreRequest(httpStatusCode: response.statusCode)
         default:
@@ -144,12 +143,6 @@ extension BackgroundUploadProcess: URLSessionDelegate, URLSessionDataDelegate, U
         // TODO
         //lastUploadStatus = httpResponse.statusCode
         //delegate?.errorInvalid()
-    }
-
-    private func print(headerFields: [AnyHashable:Any]) {
-        headerFields.forEach {
-            os_log("HEADER: %{PUBLIC}@", log: OSLog.synchronization, type: .debug, $0.key.debugDescription)
-        }
     }
 
     @objc(URLSessionDidFinishEventsForBackgroundURLSession:) public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
