@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22522" systemVersion="23B92" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22757" systemVersion="23B92" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Altitude" representedClassName="AltitudeMO" syncable="YES" codeGenerationType="class">
         <attribute name="altitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="time" attributeType="Date" usesScalarValueType="NO"/>
@@ -28,6 +28,9 @@
         <attribute name="time" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="events" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Event" inverseName="measurement" inverseEntity="Event"/>
         <relationship name="tracks" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Track" inverseName="measurement" inverseEntity="Track"/>
+        <fetchIndex name="byIdentifier">
+            <fetchIndexElement property="identifier" type="Binary" order="ascending"/>
+        </fetchIndex>
     </entity>
     <entity name="Track" representedClassName="TrackMO" syncable="YES" codeGenerationType="class">
         <relationship name="altitudes" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Altitude" inverseName="track" inverseEntity="Altitude"/>
@@ -48,5 +51,5 @@
         <attribute name="time" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="uploadSession" maxCount="1" deletionRule="Nullify" destinationEntity="UploadSession" inverseName="uploadProtocol" inverseEntity="UploadSession"/>
     </entity>
-    <fetchRequest name="measurementByIdentifier" entity="Measurement" predicateString="identifier == $identifier"/>
+    <fetchRequest name="measurementByIdentifier" entity="Measurement" predicateString="identifier == $identifier" fetchLimit="1"/>
 </model>

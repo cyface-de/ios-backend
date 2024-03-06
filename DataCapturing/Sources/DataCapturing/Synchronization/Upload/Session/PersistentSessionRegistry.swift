@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
-import Foundation
+import CoreData
 
 /**
  A ``SessionRegistry`` capable of keeping sessions between application restarts, by storing them to a persistent storage.
@@ -31,18 +31,34 @@ public struct PersistentSessionRegistry: SessionRegistry {
 
     // MARK: - Methods
     public mutating func get(measurement: FinishedMeasurement) throws -> (any Upload)? {
-        return nil
+        return try dataStoreStack.wrapInContextReturn { context in
+            let storedMeasurement = try measurementFromCoreData(measurement.identifier, context)
+            return try uploadFactory.upload(for: FinishedMeasurement(managedObject: storedMeasurement))
+        }
     }
 
     public mutating func register(upload: any Upload) throws {
-        /*dataStoreStack.wrapInContext { context in
+        try dataStoreStack.wrapInContext { context in
             let uploadSession = UploadSession(context: context)
+            uploadSession.location = upload.location
+            uploadSession.time = Date()
+            uploadSession.measurement = try measurementFromCoreData(upload.measurement.identifier, context)
 
             try context.save()
-        }*/
+        }
     }
     
     public mutating func remove(upload: any Upload) {
         
+    }
+
+    private func measurementFromCoreData(_ identifier: UInt64, _ context: NSManagedObjectContext) throws -> MeasurementMO {
+        let request = MeasurementMO.fetchRequest()
+        request.predicate = NSPredicate(format: "identifier=%d", identifier)
+        request.fetchLimit = 1
+        guard let storedMeasurement = try request.execute().first else {
+            throw PersistenceError.measurementNotLoadable(identifier)
+        }
+        return storedMeasurement
     }
 }
