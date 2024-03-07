@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -21,24 +21,23 @@ import Foundation
 import OSLog
 
 /**
- The actual upload requests sends captured data to a Cyface server.
+ A request to send the data from a ``FinishedMeasurement`` to a Cyface Collector Server.
 
- - author: Klemens Muthmann
- - version: 1.0.0
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
  */
-class UploadRequest {
+struct BackgroundUploadRequest {
+    // MARK: - Properties
     /// The URL to the Cyface API receiving the data.
     let session: URLSession
     /// The logger used by objects of this class.
     let log: OSLog = OSLog(subsystem: "UploadRequest", category: "de.cyface")
-
-    /// Initialize the request using the provided Alamofire `Session` for execution.
-    init(session: URLSession) {
-        self.session = session
-    }
+    let authToken: String
+    let upload: any Upload
+    let continueOnByte: Int = 0
 
     /// Send the request for the provided `upload`.
-    func request(authToken: String, upload: any Upload, continueOnByte: Int = 0) async throws -> any Upload {
+    func send() async throws {
         os_log("Uploading measurement %{public}d to %{public}@.", log: log, type: .debug, upload.measurement.identifier, upload.location?.absoluteString ?? "Location Missing!")
         let metaData = try upload.metaData()
         let data = try upload.data()
@@ -48,7 +47,8 @@ class UploadRequest {
         }
 
         // Background uploads are only valid from files, so writing the data to a file at first.
-        let tempDataFile = try copyToTemp(data: data[continueOnByte..<data.count], filename: url.lastPathComponent)
+        let dataToUpload = data[continueOnByte..<data.count]
+        let tempDataFile = try copyToTemp(data: dataToUpload, filename: url.lastPathComponent)
 
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
@@ -56,17 +56,10 @@ class UploadRequest {
         request.setValue(String(data.count-continueOnByte), forHTTPHeaderField: "Content-Length")
         request.setValue("bytes \(continueOnByte)-\(data.count-1)/\(data.count)", forHTTPHeaderField: "Content-Range")
 
-        let (_, response) = try await session.upload(for: request, fromFile: tempDataFile)
-        guard let response = response as? HTTPURLResponse else {
-            throw ServerConnectionError.noResponse
-        }
-
-        let status = response.statusCode
-
-        if status == 201 {
-            return upload
-        } else {
-            throw ServerConnectionError.requestFailed(httpStatusCode: status)
-        }
+        var uploadTask = session.uploadTask(with: request, fromFile: tempDataFile)
+        uploadTask.countOfBytesClientExpectsToSend = Int64(dataToUpload.count) + headerBytes(request)
+        uploadTask.countOfBytesClientExpectsToReceive = minimumBytesInAnHTTPResponse
+        uploadTask.taskDescription = "UPLOAD:\(upload.measurement.identifier)"
+        uploadTask.resume()
     }
 }

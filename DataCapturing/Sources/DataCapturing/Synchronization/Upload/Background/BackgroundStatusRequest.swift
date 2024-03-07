@@ -1,9 +1,21 @@
-//
-//  File.swift
-//  
-//
-//  Created by Klemens Muthmann on 27.02.24.
-//
+/*
+ * Copyright 2024 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 
@@ -46,18 +58,8 @@ struct BackgroundStatusRequest {
         let statusRequestTesk = session.dataTask(with: request)
         statusRequestTesk.countOfBytesClientExpectsToSend = headerBytes(request) + Int64(httpMethod.lengthOfBytes(using: .utf8))
         // Only two headers "Content-Length" and "Range" are returned in the "worst" case. This is something higher then 30 bytes. The only variable is the value of the Range header, which depends on the actual range string returned. Even for large files, this should in sum with the other fields never exceed 50 bytes.
-        statusRequestTesk.countOfBytesClientExpectsToReceive = 50
+        statusRequestTesk.countOfBytesClientExpectsToReceive = 50 + minimumBytesInAnHTTPResponse
         statusRequestTesk.taskDescription = "STATUS:\(upload.measurement.identifier)"
         statusRequestTesk.resume()
-    }
-
-    private func headerBytes(_ request: URLRequest) -> Int64 {
-        if let fields = request.allHTTPHeaderFields {
-            return fields.map { (key:String, value:String) in
-                return Int64(key.lengthOfBytes(using: .utf8))+Int64(value.lengthOfBytes(using: .utf8))
-            }.reduce(0) { (first: Int64, second: Int64) in first+second }
-        } else {
-            return 0
-        }
     }
 }

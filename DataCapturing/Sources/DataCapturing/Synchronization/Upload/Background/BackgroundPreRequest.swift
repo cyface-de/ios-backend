@@ -52,7 +52,7 @@ struct BackgroundPreRequest {
         request.httpMethod = httpMethod
 
         let jsonData = try jsonEncoder.encode(metaData)
-        let file = storeToBackgroundFile(data: jsonData)
+        let file = try copyToTemp(data: jsonData, filename: "\(upload.measurement.identifier)")
         print("Creating PreRequest with token \(authToken)")
         let preRequestTask = session.uploadTask(with: request, fromFile: file)
         preRequestTask.countOfBytesClientExpectsToSend = headerBytes(request) + Int64(httpMethod.lengthOfBytes(using: .utf8)) + Int64(jsonData.count)
@@ -65,7 +65,9 @@ struct BackgroundPreRequest {
             // The Content Length Header
             Int64("Content-Length".count) +
             // The Content Length value string in number of one byte long characters. This is close to one terrabyte of data, which should be plenty even for the most extreme measurements (there are currently no phones with that much storage, but we will surely be going there).
-            12
+            12 +
+            // Size of the HTTP Response status line
+            minimumBytesInAnHTTPResponse
 
         preRequestTask.taskDescription = "PREREQUEST:\(upload.measurement.identifier)"
         preRequestTask.resume()
@@ -90,24 +92,4 @@ struct BackgroundPreRequest {
         }*/
     }
 
-    private func headerBytes(_ request: URLRequest) -> Int64 {
-        if let fields = request.allHTTPHeaderFields {
-            return fields.map { (key:String, value:String) in
-                return Int64(key.lengthOfBytes(using: .utf8))+Int64(value.lengthOfBytes(using: .utf8))
-            }.reduce(0) { (first: Int64, second: Int64) in first+second }
-        } else {
-            return 0
-        }
-    }
-
-    private func storeToBackgroundFile(data: Data) -> URL {
-        // It is ok to store this to temporary storage, since iOS takes control of the file as soon as we hand it to the
-        // upload task. This means premature removal of the file does not stop the output.
-        // See: https://livefront.com/writing/uploading-data-in-the-background-in-ios/
-        let tempDir = FileManager.default.temporaryDirectory
-        let localURL = tempDir.appendingPathComponent("upload-data")
-        try? data.write(to: localURL)
-
-        return localURL
-    }
 }

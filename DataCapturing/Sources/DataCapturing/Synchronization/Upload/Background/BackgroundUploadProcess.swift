@@ -1,9 +1,21 @@
-//
-//  File.swift
-//  
-//
-//  Created by Klemens Muthmann on 26.02.24.
-//
+/*
+ * Copyright 2024 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import OSLog
@@ -15,6 +27,7 @@ import OSLog
  - Version: 1.0.0
  */
 class BackgroundUploadProcess: NSObject {
+    // MARK: - Properties
     // TODO: There should be only one URLSession per App. Make sure this gets injected.
     /// A `URLSession` to use for sending requests and receiving responses, probably in the background.
     lazy var discretionaryUrlSession: URLSession = {
@@ -38,20 +51,68 @@ class BackgroundUploadProcess: NSObject {
     var sessionRegistry: SessionRegistry
     let collectorUrl: URL
     let uploadFactory: UploadFactory
+    let dataStoreStack: DataStoreStack
 
+    // MARK: - Initializers
     init(
         builder: BackgroundUploadProcessBuilder,
         sessionRegistry: SessionRegistry,
         collectorUrl: URL,
-        uploadFactory: UploadFactory
+        uploadFactory: UploadFactory,
+        dataStoreStack: DataStoreStack
     ) {
         self.builder = builder
         self.sessionRegistry = sessionRegistry
         self.collectorUrl = collectorUrl
         self.uploadFactory = uploadFactory
+        self.dataStoreStack = dataStoreStack
+    }
+
+    // MARK: - Methods
+    private func onReceivedStatusRequest(httpStatusCode: Int) throws {
+        switch httpStatusCode {
+        case 200:
+            os_log("200", log: OSLog.synchronization, type: .debug)
+            //return Response.finished
+            // Upload abgeschlossen. Ignorieren
+        case 308:
+            os_log("308", log: OSLog.synchronization, type: .debug)
+            //return Response.resume
+            // Upload fortsetzen
+        case 404:
+            os_log("404", log: OSLog.synchronization, type: .debug)
+            //return Response.aborted
+            // Upload neu starten
+        default:
+            os_log("%{PUBLIC}d", log: OSLog.synchronization, type: .debug, httpStatusCode)
+            throw ServerConnectionError.requestFailed(httpStatusCode: httpStatusCode)
+        }
+    }
+
+    private func onReceivedPreRequest(httpStatusCode: Int) throws {
+        switch httpStatusCode {
+        case 200:
+            os_log("200", log: OSLog.synchronization, type: .debug)
+            // Upload Request senden
+        case 409:
+            os_log("409", log: OSLog.synchronization, type: .debug)
+            // Upload existiert schon: Abbrechen und als erledigt markieren
+        case 412:
+            os_log("412", log: OSLog.synchronization, type: .debug)
+            // Server akzeptiert diesen Upload nicht. Abbrechen und als erledigt markieren
+            // throw ServerConnectionError.uploadNotAccepted(upload: upload)
+        default:
+            os_log("%{PUBLIC}d", log: OSLog.synchronization, type: .debug, httpStatusCode)
+            throw ServerConnectionError.requestFailed(httpStatusCode: httpStatusCode)
+        }
+    }
+
+    private func onReceivedUploadResponse(httpStatusCode: Int) throws {
+
     }
 }
 
+// MARK: - Implementation of UploadProcess
 extension BackgroundUploadProcess: UploadProcess {
     func upload(measurement: FinishedMeasurement, authToken: String) async throws -> any Upload {
         /// Check for an open session.
@@ -89,6 +150,7 @@ extension BackgroundUploadProcess: UploadProcess {
     }
 }
 
+// MARK: - Implementation of Delegates for URLSession
 extension BackgroundUploadProcess: URLSessionDelegate, URLSessionDataDelegate, URLSessionTaskDelegate {
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let response = task.response as? HTTPURLResponse else {
@@ -122,21 +184,41 @@ extension BackgroundUploadProcess: URLSessionDelegate, URLSessionDataDelegate, U
             return
         }
         let responseType = descriptionPieces[0]
-        let measurementIdentifier = UInt64(descriptionPieces[1])
+        guard let measurementIdentifier = UInt64(descriptionPieces[1]) else {
+            return
+        }
 
-        switch responseType {
-        case "STATUS":
-            os_log("STATUS: %{PUBLIC}@", log: OSLog.synchronization, type: .debug, url.absoluteString)
-            // TODO: Add proper error handling here
-            try? onReceivedStatusRequest(httpStatusCode: response.statusCode)
-        case "PREREQUEST":
-            os_log("PREREQUEST: %{PUBLIC}@", log: OSLog.synchronization, type: .debug, url.absoluteString)
-            let locationValue = response.value(forHTTPHeaderField: "Location") ?? "No Location"
-            os_log("Upload - Received PreRequest to %@", log: OSLog.synchronization, type: .debug, locationValue)
-            //os_log("Location: \(response.allHeaderFields["Location"] ?? "NO VALUE")")
-            try? onReceivedPreRequest(httpStatusCode: response.statusCode)
-        default:
-            os_log("%{PUBLIC}@", log: OSLog.synchronization, type: .debug, description)
+        do {
+            let measurement = try dataStoreStack.wrapInContextReturn { context in
+                let request = MeasurementMO.fetchRequest()
+                request.predicate = NSPredicate(format: "identifier=%d", measurementIdentifier)
+                request.fetchLimit = 1
+                guard let storedMeasurement = try request.execute().first else {
+                    throw PersistenceError.measurementNotLoadable(measurementIdentifier)
+                }
+                return try FinishedMeasurement(managedObject: storedMeasurement)
+            }
+            try sessionRegistry.get(measurement: measurement)
+
+            switch responseType {
+            case "STATUS":
+                os_log("STATUS: %{PUBLIC}@", log: OSLog.synchronization, type: .debug, url.absoluteString)
+                // TODO: Add proper error handling here
+                try? onReceivedStatusRequest(httpStatusCode: response.statusCode)
+            case "PREREQUEST":
+                os_log("PREREQUEST: %{PUBLIC}@", log: OSLog.synchronization, type: .debug, url.absoluteString)
+                let locationValue = response.value(forHTTPHeaderField: "Location") ?? "No Location"
+                os_log("Upload - Received PreRequest to %@", log: OSLog.synchronization, type: .debug, locationValue)
+                //os_log("Location: \(response.allHeaderFields["Location"] ?? "NO VALUE")")
+                try? onReceivedPreRequest(httpStatusCode: response.statusCode)
+            case "UPLOAD":
+                os_log("UPLOAD", log: OSLog.synchronization, type: .debug)
+                try onReceivedUploadResponse(httpStatusCode: response.statusCode)
+            default:
+                os_log("%{PUBLIC}@", log: OSLog.synchronization, type: .debug, description)
+            }
+        } catch {
+            os_log("%{PUBLIC}d", log: OSLog.synchronization, type: .error, error.localizedDescription)
         }
 
 
@@ -152,47 +234,6 @@ extension BackgroundUploadProcess: URLSessionDelegate, URLSessionDataDelegate, U
                 self?.builder.completionHandler = nil
                 completionHandler()
             }
-        }
-    }
-
-    private func onReceivedStatusRequest(httpStatusCode: Int) throws {
-        switch httpStatusCode {
-        case 200:
-            os_log("200", log: OSLog.synchronization, type: .debug)
-            //return Response.finished
-            // Upload abgeschlossen. Ignorieren
-        case 308:
-            os_log("308", log: OSLog.synchronization, type: .debug)
-            //return Response.resume
-            // Upload fortsetzen
-        case 404:
-            os_log("404", log: OSLog.synchronization, type: .debug)
-            //return Response.aborted
-            // Upload neu starten
-        default:
-            os_log("%{PUBLIC}d", log: OSLog.synchronization, type: .debug, httpStatusCode)
-            throw ServerConnectionError.requestFailed(httpStatusCode: httpStatusCode)
-        }
-    }
-
-    private func onReceivedPreRequest(httpStatusCode: Int) throws {
-        switch httpStatusCode {
-        case 200:
-            os_log("200", log: OSLog.synchronization, type: .debug)
-            /*guard let location = response.value(forHTTPHeaderField: "Location") else {
-                throw ServerConnectionError.noLocation
-            }*/
-
-            //return .success(location: location)
-        case 409:
-            os_log("409", log: OSLog.synchronization, type: .debug)
-            //return .exists
-        case 412:
-            os_log("412", log: OSLog.synchronization, type: .debug)
-            //throw ServerConnectionError.uploadNotAccepted(upload: upload)
-        default:
-            os_log("%{PUBLIC}d", log: OSLog.synchronization, type: .debug, httpStatusCode)
-            throw ServerConnectionError.requestFailed(httpStatusCode: httpStatusCode)
         }
     }
 }
