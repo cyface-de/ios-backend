@@ -59,14 +59,14 @@ class SynchronizationViewModel: NSObject, ObservableObject {
         var uploadProcess = processBuilder.build()
         do {
             let measurements = try dataStoreStack.persistenceLayer().loadSynchronizableMeasurements()
-            os_log("Synchronizing %d measurements!", log: OSLog.synchronization, type: .debug, measurements.count)
+            os_log("Sync: Synchronizing %d measurements!", log: OSLog.synchronization, type: .debug, measurements.count)
             for measurement in measurements {
-                os_log(.debug, log: OSLog.synchronization, "Starting synchronization of measurement %d!", measurement.identifier)
+                os_log(.debug, log: OSLog.synchronization, "Sync: Starting synchronization of measurement %d!", measurement.identifier)
                 uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .started))
                 do {
                     let authToken = try await authenticator.authenticate()
                     _ = try await uploadProcess.upload(measurement: measurement, authToken: authToken)
-                    os_log(.debug, log: OSLog.synchronization, "Successfully finished synchronization of measurement %d!", measurement.identifier)
+                    os_log(.debug, log: OSLog.synchronization, "Sync: Run synchronization of measurement %d!", measurement.identifier)
                     uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedSuccessfully))
                 } catch {
                     SentrySDK.capture(error: error)

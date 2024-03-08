@@ -37,7 +37,7 @@ struct BackgroundUploadRequest {
     let continueOnByte: Int = 0
 
     /// Send the request for the provided `upload`.
-    func send() async throws {
+    func send() throws {
         os_log("Uploading measurement %{public}d to %{public}@.", log: log, type: .debug, upload.measurement.identifier, upload.location?.absoluteString ?? "Location Missing!")
         let metaData = try upload.metaData()
         let data = try upload.data()

@@ -28,9 +28,11 @@ import Foundation
  - version: 1.0.0
  */
 public struct DefaultSessionRegistry: SessionRegistry {
+
     // MARK: - Properties
     /// A mapping from the measurement identifier to the REST resource that session is available at.
     var openSessions = [UInt64: any Upload]()
+    var protocols = [UInt64: [RequestType]]()
 
     // MARK: - Initializers
     public init() {
@@ -50,6 +52,15 @@ public struct DefaultSessionRegistry: SessionRegistry {
     }
     public mutating func remove(upload: any Upload) {
         openSessions.removeValue(forKey: upload.measurement.identifier)
+        protocols.removeValue(forKey: upload.measurement.identifier)
+    }
+
+    public mutating func record(upload: any Upload, _ requestType: RequestType, httpStatusCode: Int16, message: String, time: Date) throws {
+        if protocols.index(forKey: upload.measurement.identifier)  != nil {
+            protocols[upload.measurement.identifier]?.append(requestType)
+        } else {
+            protocols[upload.measurement.identifier] = [requestType]
+        }
     }
 }
 

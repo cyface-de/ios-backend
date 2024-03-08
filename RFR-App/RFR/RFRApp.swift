@@ -112,7 +112,9 @@ class AppModel: ObservableObject {
                     let uploadProcessBuilder = BackgroundUploadProcessBuilder(
                         sessionRegistry: PersistentSessionRegistry(dataStoreStack: dataStoreStack, uploadFactory: uploadFactory),
                         collectorUrl: uploadEndpoint,
-                        uploadFactory: uploadFactory
+                        uploadFactory: uploadFactory,
+                        dataStoreStack: dataStoreStack,
+                        authenticator: authenticator
                     )
                     appDelegate.delegate = uploadProcessBuilder
                     self.viewModel = try DataCapturingViewModel(authenticator: authenticator, uploadProcessBuilder: uploadProcessBuilder, dataStoreStack: dataStoreStack)

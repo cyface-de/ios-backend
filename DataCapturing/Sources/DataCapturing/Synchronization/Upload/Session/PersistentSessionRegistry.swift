@@ -52,9 +52,36 @@ public struct PersistentSessionRegistry: SessionRegistry {
             try context.save()
         }
     }
-    
-    public mutating func remove(upload: any Upload) {
-        
+
+    public func record(upload: any Upload, _ requestType: RequestType, httpStatusCode: Int16, message: String, time: Date) throws {
+        try dataStoreStack.wrapInContext { context in
+            let request = UploadSession.fetchRequest()
+            request.predicate = NSPredicate(format: "measurement.identifier=%d", upload.measurement.identifier)
+            request.fetchLimit = 1
+            guard let uploadSession = try request.execute().first else {
+                throw PersistenceError.sessionNotRegistered(upload.measurement)
+            }
+
+            let uploadTask = UploadTask(context: context)
+            uploadTask.command = requestType.rawValue
+            uploadTask.httpStatus = httpStatusCode
+            uploadTask.message = message
+            uploadTask.time = time
+            uploadSession.addToUploadProtocol(uploadTask)
+        }
+    }
+
+    public mutating func remove(upload: any Upload) throws {
+        try dataStoreStack.wrapInContext { context in
+            let request = UploadSession.fetchRequest()
+            request.predicate = NSPredicate(format: "measurement.identifier=%d", upload.measurement.identifier)
+            request.fetchLimit = 1
+            guard let session = try request.execute().first else {
+                throw PersistenceError.sessionNotRegistered(upload.measurement)
+            }
+
+            context.delete(session)
+        }
     }
 
     private func uploadFromCoreData(measurement: FinishedMeasurement) throws -> (any Upload)? {
@@ -77,4 +104,10 @@ public struct PersistentSessionRegistry: SessionRegistry {
         }
         return storedMeasurement
     }
+}
+
+public enum RequestType: Int16 {
+    case status = 0
+    case prerequest = 1
+    case upload = 2
 }

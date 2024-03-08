@@ -179,6 +179,13 @@ struct MockUploadFactory: UploadFactory {
     func upload(for measurement: DataCapturing.FinishedMeasurement) -> any DataCapturing.Upload {
         return MockUpload(measurement: measurement)
     }
+    
+    func upload(for session: DataCapturing.UploadSession) throws -> any DataCapturing.Upload {
+        guard let measurement = session.measurement else {
+            throw PersistenceError.inconsistentState
+        }
+        return MockUpload(measurement: try FinishedMeasurement(managedObject: measurement))
+    }
 }
 
 /**

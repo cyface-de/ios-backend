@@ -243,7 +243,7 @@ extension OAuthAuthenticator: Authenticator {
      */
     public func authenticate() async throws -> String {
         os_log("Authentication: Starting Authentication", log: OSLog.authorization, type: .debug)
-        os_log("Address used to access identity provider %@", log: OSLog.authorization, type: .debug)
+        os_log("Authentication: Address used to access identity provider %@", log: OSLog.authorization, type: .debug, issuer.absoluteString)
         if let authState = loadState(OAuthAuthenticator.appAuthStateKey), authState.refreshToken != nil {
             let result: String = try await withCheckedThrowingContinuation { continuation in
                 authState.performAction(freshTokens: { (accessToken, idToken, error) in

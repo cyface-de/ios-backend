@@ -33,7 +33,7 @@ import SwiftUI
 
  It also provides an optional ``error``, in case anything unforseen has happened.
 
- **ATTENTION:** It is important to call `setup after creation of an instance of this class, before actually using it. Otherwise `isLoading` will never become `true`.`
+ **ATTENTION:** It is important to call `setup after creation of an instance of this class, before actually using it. Otherwise `isLoading` will never become `false`.`
 
  - Author: Klemens Muthmann
  - Version: 1.0.0

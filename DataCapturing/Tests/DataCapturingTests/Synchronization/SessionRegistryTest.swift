@@ -79,4 +79,47 @@ class SessionRegistryTest: XCTestCase {
         // Assert
         XCTAssertEqual(mockUpload, try oocut.get(measurement: mockUpload.measurement) as? MockUpload)
     }
+
+    func testUpdateExistingSession() async throws {
+        // Arrange
+        let uploadFactory = MockUploadFactory()
+        var oocut = PersistentSessionRegistry(dataStoreStack: coreDataStack, uploadFactory: uploadFactory)
+        let mockMeasurement = FinishedMeasurement(identifier: 0)
+        try coreDataStack.wrapInContext { context in
+            let storedMeasurement = MeasurementMO(context: context)
+            storedMeasurement.identifier = Int64(mockMeasurement.identifier)
+            storedMeasurement.time = mockMeasurement.time
+
+            try context.save()
+        }
+        let mockUpload = MockUploadFactory().upload(for: mockMeasurement)
+
+        // Act
+        try oocut.register(upload: mockUpload)
+        try oocut.record(
+            upload: mockUpload,
+            RequestType.prerequest,
+            httpStatusCode: 200,
+            message: "OK",
+            time: Date.now
+        )
+
+        // Assert
+        let storedUpload = try oocut.get(measurement: mockMeasurement)
+        let protocolCount = try coreDataStack.wrapInContextReturn { context in
+            let request = UploadSession.fetchRequest()
+            request.predicate = NSPredicate(
+                format: "measurement.identifier=%d", 
+                mockMeasurement.identifier
+            )
+            request.fetchLimit = 1
+            guard let session = try request.execute().first else {
+                throw PersistenceError.sessionNotRegistered(mockMeasurement)
+            }
+            return session.uploadProtocol?.count
+        }
+
+        XCTAssertEqual(protocolCount, 1)
+        XCTAssertEqual(storedUpload as? MockUpload, mockUpload as? MockUpload)
+    }
 }

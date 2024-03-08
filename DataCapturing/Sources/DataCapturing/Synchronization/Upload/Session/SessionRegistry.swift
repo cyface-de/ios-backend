@@ -31,6 +31,9 @@ public protocol SessionRegistry {
     /// A mapping from the measurement identifier to the REST resource that session is available at.
     mutating func get(measurement: FinishedMeasurement) throws -> (any Upload)?
 
+    /// Record a step in this session. This can be used to track errors or the sequence of requests that caused them.
+    mutating func record(upload: any Upload, _ requestType: RequestType, httpStatusCode: Int16, message: String, time: Date) throws
+
     /// Register a `session`for the provided `Measurement`
     /// - Parameter upload: The ``Upload`` to register this session for.
     /// - Returns: The universal unique identifier that session has been stored under

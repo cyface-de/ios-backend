@@ -20,23 +20,45 @@
 import Foundation
 import UIKit
 
+/**
+ Delegate receiving background URL session events.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 public protocol BackgroundURLSessionEventDelegate {
     func received(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void)
 }
 
+/**
+ A builder for ``BackgroundUploadProcess`` instances. Since each upload needs its own process. This builder allows to inject the creation into objects, that are synchronizing data to a Cyface data collector service.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 public class BackgroundUploadProcessBuilder {
     // MARK: - Attributes
-    let sessionREgistry: SessionRegistry
+    let sessionRegistry: SessionRegistry
     let collectorUrl: URL
     let uploadFactory: UploadFactory
+    let dataStoreStack: DataStoreStack
+    let authenticator: Authenticator
     // TODO: Maybe put this into its own class. Has nothing really to do with building.
     var completionHandler: (() -> Void)?
 
     // MARK: - Initializers
-    public init(sessionRegistry: SessionRegistry, collectorUrl: URL, uploadFactory: UploadFactory) {
-        self.sessionREgistry = sessionRegistry
+    public init(
+        sessionRegistry: SessionRegistry,
+        collectorUrl: URL,
+        uploadFactory: UploadFactory,
+        dataStoreStack: DataStoreStack,
+        authenticator: Authenticator
+    ) {
+        self.sessionRegistry = sessionRegistry
         self.collectorUrl = collectorUrl
         self.uploadFactory = uploadFactory
+        self.dataStoreStack = dataStoreStack
+        self.authenticator = authenticator
     }
 }
 
@@ -44,9 +66,11 @@ extension BackgroundUploadProcessBuilder: UploadProcessBuilder {
     public func build() -> UploadProcess {
         return BackgroundUploadProcess(
             builder: self,
-            sessionRegistry: sessionREgistry,
-            collectorUrl: collectorUrl, 
-            uploadFactory: uploadFactory
+            sessionRegistry: sessionRegistry,
+            collectorUrl: collectorUrl,
+            uploadFactory: uploadFactory,
+            dataStoreStack: dataStoreStack,
+            authenticator: authenticator
         )
     }
 }

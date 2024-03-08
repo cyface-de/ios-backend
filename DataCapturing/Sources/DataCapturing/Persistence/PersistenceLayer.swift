@@ -701,6 +701,8 @@ public enum PersistenceError: Error {
     case inconsistentState
     /// On trying to load a not yet synchronized `Measurement`. This is usually a `Measurement` with en `objectId` of `nil`.
     case unsynchronizedMeasurement(identifier: UInt64)
+    /// Thrown if interaction happened with an ``UploadSession`` that was not registered and thus not available. The provided ``FinishedMeasurement``is the measurement the session tried to synchronize.
+    case sessionNotRegistered(FinishedMeasurement)
 }
 
 extension PersistenceError: LocalizedError {
@@ -775,6 +777,14 @@ extension PersistenceError: LocalizedError {
                 """
             )
             return String.localizedStringWithFormat(errorMessage)
+        case .sessionNotRegistered(let measurement):
+            let errorMessage = NSLocalizedString(
+                "de.cyface.error.PersistenceError.sessionNotRegistered",
+                comment: """
+                Something happended while trying to save to or load from an UploadSession that was stored to the database. The identifier of the affected measurement is provided as the first parameter.
+                """
+            )
+            return String.localizedStringWithFormat(errorMessage, measurement.identifier)
         }
     }
 }
