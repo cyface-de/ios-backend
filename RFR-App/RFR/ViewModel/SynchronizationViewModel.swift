@@ -88,6 +88,7 @@ class SynchronizationViewModel: NSObject, ObservableObject {
     }
 }
 
+// TODO: Delete these two types as soon as they are integrated with the SDK
 /**
  A mapping between a local measurement identifier and and its current upload status.
 
