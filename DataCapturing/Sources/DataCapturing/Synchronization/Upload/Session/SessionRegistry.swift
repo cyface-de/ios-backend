@@ -34,6 +34,9 @@ public protocol SessionRegistry {
     /// Record a step in this session. This can be used to track errors or the sequence of requests that caused them.
     mutating func record(upload: any Upload, _ requestType: RequestType, httpStatusCode: Int16, message: String, time: Date) throws
 
+    /// Record an erroneous step in this session.
+    mutating func record(upload: any Upload, _ requestType: RequestType, httpStatusCode: Int16, error: Error) throws
+
     /// Register a `session`for the provided `Measurement`
     /// - Parameter upload: The ``Upload`` to register this session for.
     /// - Returns: The universal unique identifier that session has been stored under

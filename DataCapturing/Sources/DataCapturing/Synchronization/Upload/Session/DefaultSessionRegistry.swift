@@ -28,7 +28,6 @@ import Foundation
  - version: 1.0.0
  */
 public struct DefaultSessionRegistry: SessionRegistry {
-
     // MARK: - Properties
     /// A mapping from the measurement identifier to the REST resource that session is available at.
     var openSessions = [UInt64: any Upload]()
@@ -61,6 +60,10 @@ public struct DefaultSessionRegistry: SessionRegistry {
         } else {
             protocols[upload.measurement.identifier] = [requestType]
         }
+    }
+
+    public mutating func record(upload: any Upload, _ requestType: RequestType, httpStatusCode: Int16, error: any Error) throws {
+        try record(upload: upload, requestType, httpStatusCode: httpStatusCode, message: error.localizedDescription, time: Date.now)
     }
 }
 

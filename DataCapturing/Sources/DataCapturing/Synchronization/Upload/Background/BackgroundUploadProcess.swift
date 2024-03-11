@@ -72,10 +72,11 @@ class BackgroundUploadProcess: NSObject {
     }
 
     // MARK: - Methods
-    private func onReceivedStatusRequest(httpStatusCode: Int16, upload: any Upload) throws {
+    private func onReceivedStatusRequest(httpStatusCode: Int16, upload: any Upload) async throws {
         switch httpStatusCode {
         case 200: // Upload abgeschlossen. Ignorieren
             os_log("200", log: OSLog.synchronization, type: .debug)
+            try sessionRegistry.record(upload: upload, .status, httpStatusCode: httpStatusCode, message: "OK", time: Date.now)
             try sessionRegistry.remove(upload: upload)
 
         case 308: // Upload fortsetzen
@@ -86,14 +87,12 @@ class BackgroundUploadProcess: NSObject {
                 httpStatusCode: httpStatusCode,
                 message: "Permanent Redirect",
                 time: Date.now)
-            Task {
-                let uploadRequest = BackgroundUploadRequest(
-                    session: discretionaryUrlSession,
-                    authToken: try await authenticator.authenticate(),
-                    upload: upload
-                )
-                try uploadRequest.send()
-            }
+            let uploadRequest = BackgroundUploadRequest(
+                session: discretionaryUrlSession,
+                authToken: try await authenticator.authenticate(),
+                upload: upload
+            )
+            try uploadRequest.send()
 
         case 404: // Upload neu starten
             os_log("404", log: OSLog.synchronization, type: .debug)
@@ -104,24 +103,23 @@ class BackgroundUploadProcess: NSObject {
                 message: "Not Found",
                 time: Date.now
             )
-            Task {
-                let preRequest = BackgroundPreRequest(
-                    collectorUrl: collectorUrl,
-                    session: discretionaryUrlSession,
-                    upload: upload,
-                    authToken: try await authenticator.authenticate(),
-                    sessionRegistry: sessionRegistry)
-                try preRequest.send()
-            }
+            let preRequest = BackgroundPreRequest(
+                collectorUrl: collectorUrl,
+                session: discretionaryUrlSession,
+                upload: upload,
+                authToken: try await authenticator.authenticate(),
+                sessionRegistry: sessionRegistry)
+            try preRequest.send()
 
         default:
             os_log("Error: %{PUBLIC}d", log: OSLog.synchronization, type: .debug, httpStatusCode)
-            try sessionRegistry.remove(upload: upload)
-            throw ServerConnectionError.requestFailed(httpStatusCode: Int(httpStatusCode))
+            let error = ServerConnectionError.requestFailed(httpStatusCode: Int(httpStatusCode))
+            try sessionRegistry.record(upload: upload, .status, httpStatusCode: httpStatusCode, error: error)
+            throw error
         }
     }
 
-    private func onReceivedPreRequest(httpStatusCode: Int16, upload: any Upload) throws {
+    private func onReceivedPreRequest(httpStatusCode: Int16, upload: any Upload) async throws {
         switch httpStatusCode {
         case 200: // Send Upload Request
             os_log("200", log: OSLog.synchronization, type: .debug)
@@ -133,37 +131,41 @@ class BackgroundUploadProcess: NSObject {
                 message: "OK",
                 time: Date.now
             )
-            Task {
-                let uploadRequest = BackgroundUploadRequest(
-                    session: discretionaryUrlSession, 
-                    authToken: try await authenticator.authenticate(),
-                    upload: upload
-                )
-                try uploadRequest.send()
-            }
+            let uploadRequest = BackgroundUploadRequest(
+                session: discretionaryUrlSession,
+                authToken: try await authenticator.authenticate(),
+                upload: upload
+            )
+            try uploadRequest.send()
         case 409: // Upload exists: Cancel and mark as finished
             os_log("409", log: OSLog.synchronization, type: .debug)
+            try sessionRegistry.record(upload: upload, .prerequest, httpStatusCode: httpStatusCode, message: "Conflict", time: Date.now)
             try sessionRegistry.remove(upload: upload)
 
         case 412: // Server does not accept this upload. Cancel and mark as finished
             os_log("412", log: OSLog.synchronization, type: .debug)
+            try sessionRegistry.record(upload: upload, .prerequest, httpStatusCode: httpStatusCode, message: "Precondition Failed", time: Date.now)
             try sessionRegistry.remove(upload: upload)
 
         default:
             os_log("Error: %{PUBLIC}d", log: OSLog.synchronization, type: .debug, httpStatusCode)
-            try sessionRegistry.remove(upload: upload)
-            throw ServerConnectionError.requestFailed(httpStatusCode: Int(httpStatusCode))
+            let error = ServerConnectionError.requestFailed(httpStatusCode: Int(httpStatusCode))
+            try sessionRegistry.record(upload: upload, .prerequest, httpStatusCode: httpStatusCode, error: error)
+            throw error
         }
     }
 
-    private func onReceivedUploadResponse(httpStatusCode: Int, upload: any Upload) throws {
+    private func onReceivedUploadResponse(httpStatusCode: Int16, upload: any Upload) throws {
         switch httpStatusCode {
         case 201:
             os_log("201", log: OSLog.synchronization, type: .debug)
+            try sessionRegistry.record(upload: upload, .upload, httpStatusCode: httpStatusCode, message: "Created", time: Date.now)
             try sessionRegistry.remove(upload: upload)
         default:
             os_log("Error: %{PUBLIC}d", log: OSLog.synchronization, type: .error, httpStatusCode)
-            try sessionRegistry.remove(upload: upload)
+            let error = ServerConnectionError.requestFailed(httpStatusCode: Int(httpStatusCode))
+            try sessionRegistry.record(upload: upload, .upload, httpStatusCode: httpStatusCode, error: error)
+            throw error
         }
     }
 }
@@ -254,15 +256,18 @@ extension BackgroundUploadProcess: URLSessionDelegate, URLSessionDataDelegate, U
                 }
                 return try FinishedMeasurement(managedObject: storedMeasurement)
             }
-            guard var upload = try sessionRegistry.get(measurement: measurement) else {
-                throw PersistenceError.sessionNotRegistered(measurement)
-            }
 
+            // Loading the Upload from the session three times is no accident. This is necessary due to multi threading constraints. Do not try to refactor this.
+            // See: https://stackoverflow.com/questions/69556237/use-reference-to-captured-variable-in-concurrently-executing-code
             switch responseType {
             case "STATUS":
                 os_log("STATUS: %{PUBLIC}@", log: OSLog.synchronization, type: .debug, url.absoluteString)
-                // TODO: Add proper error handling here
-                try? onReceivedStatusRequest(httpStatusCode: Int16(response.statusCode), upload: upload)
+                Task {
+                    guard let upload = try sessionRegistry.get(measurement: measurement) else {
+                        throw PersistenceError.sessionNotRegistered(measurement)
+                    }
+                    try await onReceivedStatusRequest(httpStatusCode: Int16(response.statusCode), upload: upload)
+                }
             case "PREREQUEST":
                 os_log("PREREQUEST: %{PUBLIC}@", log: OSLog.synchronization, type: .debug, url.absoluteString)
                 let locationValue = response.value(forHTTPHeaderField: "Location") ?? "No Location"
@@ -270,11 +275,20 @@ extension BackgroundUploadProcess: URLSessionDelegate, URLSessionDataDelegate, U
                 guard let locationUrl = URL(string: locationValue) else {
                     throw ServerConnectionError.invalidUploadLocation(locationValue)
                 }
-                upload.location = locationUrl
-                try? onReceivedPreRequest(httpStatusCode: Int16(response.statusCode), upload: upload)
+
+                Task {
+                    guard var upload = try sessionRegistry.get(measurement: measurement) else {
+                        throw PersistenceError.sessionNotRegistered(measurement)
+                    }
+                    upload.location = locationUrl
+                    try await onReceivedPreRequest(httpStatusCode: Int16(response.statusCode), upload: upload)
+                }
             case "UPLOAD":
                 os_log("UPLOAD", log: OSLog.synchronization, type: .debug)
-                try onReceivedUploadResponse(httpStatusCode: response.statusCode, upload: upload)
+                guard var upload = try sessionRegistry.get(measurement: measurement) else {
+                    throw PersistenceError.sessionNotRegistered(measurement)
+                }
+                try onReceivedUploadResponse(httpStatusCode: Int16(response.statusCode), upload: upload)
             default:
                 os_log("%{PUBLIC}@", log: OSLog.synchronization, type: .debug, description)
             }
