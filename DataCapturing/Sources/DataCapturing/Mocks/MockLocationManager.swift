@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cyface GmbH
+ * Copyright 2019-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -19,7 +19,6 @@
 
 import Foundation
 import CoreLocation
-@testable import DataCapturing
 
 /**
  A mock implementation of a `LocationManager` used during testing. This implementation simply does nothing, because location updates are simulated during testing. It is still required to be mocked. Otherwise the test environment throws errors, since a real `CLLocationManager` is not allowed to be used during tests.

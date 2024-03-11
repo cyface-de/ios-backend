@@ -83,66 +83,17 @@ struct StatisticsView: View {
 }
 
 #if DEBUG
-let measurements = [
-    Measurement(
-        id: 0,
-        startTime: Date(),
-        synchronizationState: .synchronizable,
-        _maxSpeed: 1.0,
-        _meanSpeed: 0.0,
-        _distance: 10.0,
-        _duration: 0.0,
-        _inclination: 0.0,
-        _lowestPoint: 0.0,
-        _highestPoint: 0.0,
-        _avoidedEmissions: 0.0,
-        heightProfile: [],
-        region: MKCoordinateRegion(),
-        track: []
-    ),
-    Measurement(
-        id: 1,
-        startTime: Date(),
-        synchronizationState: .synchronized,
-        _maxSpeed: 0.0,
-        _meanSpeed: 0.0,
-        _distance: 0.0,
-        _duration: 0.0,
-        _inclination: 0.0,
-        _lowestPoint: 0.0,
-        _highestPoint: 0.0,
-        _avoidedEmissions: 0.0,
-        heightProfile: [],
-        region: MKCoordinateRegion(),
-        track: []
-    ),
-    Measurement(
-        id: 2,
-        startTime: Date(),
-        synchronizationState: .unsynchronizable,
-        _maxSpeed: 0.0,
-        _meanSpeed: 0.0,
-        _distance: 0.0,
-        _duration: 0.0,
-        _inclination: 0.0,
-        _lowestPoint: 0.0,
-        _highestPoint: 0.0,
-        _avoidedEmissions: 0.0,
-        heightProfile: [],
-        region: MKCoordinateRegion(),
-        track: []
-    )
-]
+let measurement0 = FinishedMeasurement(identifier: 0)
 
 #Preview {
     StatisticsView(
         viewModel: MeasurementsViewModel(
             dataStoreStack: MockDataStoreStack(persistenceLayer: MockPersistenceLayer(measurements: [
-                FinishedMeasurement(identifier: 0),
+                measurement0,
                 FinishedMeasurement(identifier: 1),
                 FinishedMeasurement(identifier: 2)
             ])), 
-            uploadPublisher: Just(UploadStatus(id: 0, status: .started))
+            uploadPublisher: Just(UploadStatus(measurement: measurement0, status: .started))
         )
     )
 }

@@ -41,6 +41,8 @@ class SynchronizationViewModel: NSObject, ObservableObject {
     let authenticator: Authenticator
     /// A builder responsible for creating new ``UploadProcess`` instances on each new upload.
     let processBuilder: UploadProcessBuilder
+    /// Store the reporting of ``UploadStatus``events here, so the ``UploadProcess`` keeps reporting.
+    var uploadStatusCancellable: AnyCancellable?
 
     /// Create a new completely initialized object of this class.
     /// Nothing surprising is happening here.
@@ -57,28 +59,23 @@ class SynchronizationViewModel: NSObject, ObservableObject {
     func synchronize() async {
         // TODO: Run this on a background thread
         var uploadProcess = processBuilder.build()
+        self.uploadStatusCancellable = uploadProcess.uploadStatus.sink { [weak self] status in
+            self?.uploadStatusPublisher.send(UploadStatus(measurement: status.upload.measurement, status: status.status))
+        }
         do {
             let measurements = try dataStoreStack.persistenceLayer().loadSynchronizableMeasurements()
             os_log("Sync: Synchronizing %d measurements!", log: OSLog.synchronization, type: .debug, measurements.count)
             for measurement in measurements {
                 os_log(.debug, log: OSLog.synchronization, "Sync: Starting synchronization of measurement %d!", measurement.identifier)
-                uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .started))
                 do {
                     let authToken = try await authenticator.authenticate()
                     _ = try await uploadProcess.upload(measurement: measurement, authToken: authToken)
                     os_log(.debug, log: OSLog.synchronization, "Sync: Run synchronization of measurement %d!", measurement.identifier)
-                    uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedSuccessfully))
                 } catch {
                     SentrySDK.capture(error: error)
-                    os_log(.error, log: OSLog.synchronization, "Failed synchronizing measurement %d!", measurement.identifier)
-                    if let defaultUploadProcessBuilder = processBuilder as? DefaultUploadProcessBuilder {
-                        os_log(.error, log: OSLog.synchronization, "Data Collector API Address: %@", defaultUploadProcessBuilder.collectorUrl.absoluteString)
-                    }
-                    if let oAuthAuthenticator = authenticator as? OAuthAuthenticator {
-                        os_log(.error, log: OSLog.authorization, "Identity Provider Address: %@", oAuthAuthenticator.issuer.absoluteString)
-                    }
-                    os_log("Synchronization failed due to: %@", log: OSLog.synchronization, type: .error, error.localizedDescription)
-                    uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedWithError(cause: error)))
+                    os_log(.error, log: OSLog.synchronization, "Sync: Failed synchronizing measurement %d!", measurement.identifier)
+                    os_log("Sync: Synchronization failed due to: %@", log: OSLog.synchronization, type: .error, error.localizedDescription)
+                    uploadStatusPublisher.send(UploadStatus(measurement: measurement, status: .finishedWithError(cause: error)))
                 }
             }
         } catch {
@@ -88,44 +85,7 @@ class SynchronizationViewModel: NSObject, ObservableObject {
     }
 }
 
-// TODO: Delete these two types as soon as they are integrated with the SDK
-/**
- A mapping between a local measurement identifier and and its current upload status.
-
- - Author: Klemens Muthmann
- - Version: 1.0.0
- - Since: 3.1.2
- */
 struct UploadStatus {
-    /// The measurement identifier of this status.
-    let id: UInt64
-    /// The current status.
+    let measurement: FinishedMeasurement
     let status: UploadStatusType
-}
-
-/**
- The current status of an upload to a Cyface Data Collector service.
-
- - Author: Klemens Muthmann
- - Version: 1.0.0
- - Since: 3.1.2
- */
-enum UploadStatusType: CustomStringConvertible {
-    /// Upload has been started
-    case started
-    /// Upload was finished successfully.
-    case finishedSuccessfully
-    /// Upload failed because of the provided error.
-    case finishedWithError(cause: Error)
-
-    var description: String {
-        switch(self) {
-        case .started:
-            "started"
-        case .finishedSuccessfully:
-            "finishedSuccessfully"
-        case .finishedWithError(cause: let error):
-            "finishedWithError: \(error.localizedDescription)"
-        }
-    }
 }

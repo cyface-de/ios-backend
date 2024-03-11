@@ -45,6 +45,9 @@ public protocol Upload: Equatable {
 
     /// A function carried out on a successful upload.
     func onSuccess() throws
+
+    /// Called if this upload has failed and is unrecoverable.
+    func onFailed() throws
 }
 
 /**
@@ -140,6 +143,7 @@ public class CoreDataBackedUpload: Upload {
         try dataStoreStack.wrapInContext { context in
             let request = MeasurementMO.fetchRequest()
             request.predicate = NSPredicate(format: "identifier == %d", measurement.identifier)
+            request.fetchLimit = 1
             let response = try request.execute()
             guard response.count == 1 else {
                 throw MeasurementError.inconsistentState
@@ -151,6 +155,21 @@ public class CoreDataBackedUpload: Upload {
 
             databaseMeasurement.synchronizable = false
             databaseMeasurement.synchronized = true
+            try context.save()
+        }
+    }
+
+    public func onFailed() throws {
+        try dataStoreStack.wrapInContext { context in
+            let request = MeasurementMO.fetchRequest()
+            request.predicate = NSPredicate(format: "identifier == %d", measurement.identifier)
+            request.fetchLimit = 1
+            guard let databaseMeasurement = try request.execute().first else {
+                throw MeasurementError.notAvailable(measurement: measurement)
+            }
+
+            databaseMeasurement.synchronizable = false
+            databaseMeasurement.synchronized = false
             try context.save()
         }
     }
@@ -190,6 +209,7 @@ public class CoreDataBackedUpload: Upload {
         return (endLocation.latitude, endLocation.longitude, endLocation.time)
     }
 }
+
 
 /**
  Errors thrown while accessing measurement data to upload.

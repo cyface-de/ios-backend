@@ -17,8 +17,8 @@
  * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
 import OSLog
+import Combine
 
 /**
  An `UploadProcess` that keeps running in the background even after the app was terminated.
@@ -53,6 +53,7 @@ class BackgroundUploadProcess: NSObject {
     let uploadFactory: UploadFactory
     let dataStoreStack: DataStoreStack
     let authenticator: Authenticator
+    let uploadStatus = PassthroughSubject<UploadStatus, Never>()
 
     // MARK: - Initializers
     init(
@@ -78,8 +79,11 @@ class BackgroundUploadProcess: NSObject {
             os_log("200", log: OSLog.synchronization, type: .debug)
             try sessionRegistry.record(upload: upload, .status, httpStatusCode: httpStatusCode, message: "OK", time: Date.now)
             try sessionRegistry.remove(upload: upload)
+            uploadStatus.send(UploadStatus(upload: upload, status: .finishedSuccessfully))
+            try upload.onSuccess()
 
         case 308: // Upload fortsetzen
+            // TODO: Header zum Fortsetzen setzen
             os_log("308", log: OSLog.synchronization, type: .debug)
             try sessionRegistry.record(
                 upload: upload,
@@ -115,6 +119,8 @@ class BackgroundUploadProcess: NSObject {
             os_log("Error: %{PUBLIC}d", log: OSLog.synchronization, type: .debug, httpStatusCode)
             let error = ServerConnectionError.requestFailed(httpStatusCode: Int(httpStatusCode))
             try sessionRegistry.record(upload: upload, .status, httpStatusCode: httpStatusCode, error: error)
+            uploadStatus.send(UploadStatus(upload: upload, status: .finishedWithError(cause: error)))
+            try upload.onFailed()
             throw error
         }
     }
@@ -137,20 +143,48 @@ class BackgroundUploadProcess: NSObject {
                 upload: upload
             )
             try uploadRequest.send()
+        case 401: // Authentication was not successful. Retry later
+            os_log("401", log: OSLog.synchronization, type: .error)
+            try sessionRegistry.record(
+                upload: upload,
+                .prerequest,
+                httpStatusCode: httpStatusCode, 
+                message: "Unauthorized",
+                time: Date.now
+            )
+            uploadStatus.send(UploadStatus(upload: upload, status: .finishedUnsuccessfully))
         case 409: // Upload exists: Cancel and mark as finished
             os_log("409", log: OSLog.synchronization, type: .debug)
-            try sessionRegistry.record(upload: upload, .prerequest, httpStatusCode: httpStatusCode, message: "Conflict", time: Date.now)
+            try sessionRegistry.record(
+                upload: upload, 
+                .prerequest,
+                httpStatusCode: httpStatusCode, 
+                message: "Conflict",
+                time: Date.now
+            )
             try sessionRegistry.remove(upload: upload)
+            try upload.onSuccess()
+            uploadStatus.send(UploadStatus(upload: upload, status: .finishedSuccessfully))
 
         case 412: // Server does not accept this upload. Cancel and mark as finished
             os_log("412", log: OSLog.synchronization, type: .debug)
-            try sessionRegistry.record(upload: upload, .prerequest, httpStatusCode: httpStatusCode, message: "Precondition Failed", time: Date.now)
+            try sessionRegistry.record(
+                upload: upload,
+                .prerequest,
+                httpStatusCode: httpStatusCode,
+                message: "Precondition Failed",
+                time: Date.now
+            )
             try sessionRegistry.remove(upload: upload)
+            try upload.onSuccess()
+            uploadStatus.send(UploadStatus(upload: upload, status: .finishedSuccessfully))
 
         default:
             os_log("Error: %{PUBLIC}d", log: OSLog.synchronization, type: .debug, httpStatusCode)
             let error = ServerConnectionError.requestFailed(httpStatusCode: Int(httpStatusCode))
             try sessionRegistry.record(upload: upload, .prerequest, httpStatusCode: httpStatusCode, error: error)
+            try upload.onFailed()
+            uploadStatus.send(UploadStatus(upload: upload, status: .finishedWithError(cause: error)))
             throw error
         }
     }
@@ -159,12 +193,22 @@ class BackgroundUploadProcess: NSObject {
         switch httpStatusCode {
         case 201:
             os_log("201", log: OSLog.synchronization, type: .debug)
-            try sessionRegistry.record(upload: upload, .upload, httpStatusCode: httpStatusCode, message: "Created", time: Date.now)
+            try sessionRegistry.record(
+                upload: upload,
+                .upload,
+                httpStatusCode: httpStatusCode,
+                message: "Created",
+                time: Date.now
+            )
             try sessionRegistry.remove(upload: upload)
+            try upload.onSuccess()
+            uploadStatus.send(UploadStatus(upload: upload, status: .finishedSuccessfully))
         default:
             os_log("Error: %{PUBLIC}d", log: OSLog.synchronization, type: .error, httpStatusCode)
             let error = ServerConnectionError.requestFailed(httpStatusCode: Int(httpStatusCode))
             try sessionRegistry.record(upload: upload, .upload, httpStatusCode: httpStatusCode, error: error)
+            uploadStatus.send(UploadStatus(upload: upload, status: .finishedWithError(cause: error)))
+            try upload.onFailed()
             throw error
         }
     }
@@ -174,8 +218,9 @@ class BackgroundUploadProcess: NSObject {
 extension BackgroundUploadProcess: UploadProcess {
     func upload(measurement: FinishedMeasurement, authToken: String) async throws -> any Upload {
         /// Check for an open session.
-        if let upload = try sessionRegistry.get(measurement: measurement) {
+        if let upload = try sessionRegistry.get(measurement: measurement), upload.location != nil {
             /// If there is an open session continue by sending a status request
+            uploadStatus.send(UploadStatus(upload: upload, status: .started))
             let statusRequest = BackgroundStatusRequest(
                 session: discretionaryUrlSession,
                 bearerAuthToken: try await authenticator.authenticate(),
@@ -188,6 +233,7 @@ extension BackgroundUploadProcess: UploadProcess {
         } else {
             /// If there is no open session continue by sending a pre request
             let upload = uploadFactory.upload(for: measurement)
+            uploadStatus.send(UploadStatus(upload: upload, status: .started))
             try sessionRegistry.register(upload: upload)
             let preRequest = BackgroundPreRequest(
                 collectorUrl: collectorUrl,
@@ -295,11 +341,6 @@ extension BackgroundUploadProcess: URLSessionDelegate, URLSessionDataDelegate, U
         } catch {
             os_log("%{PUBLIC}d", log: OSLog.synchronization, type: .error, error.localizedDescription)
         }
-
-
-        // TODO
-        //lastUploadStatus = httpResponse.statusCode
-        //delegate?.errorInvalid()
     }
 
     @objc(URLSessionDidFinishEventsForBackgroundURLSession:) public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {

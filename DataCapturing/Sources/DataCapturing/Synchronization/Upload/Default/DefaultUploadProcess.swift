@@ -1,11 +1,24 @@
-//
-//  File.swift
-//  
-//
-//  Created by Klemens Muthmann on 27.02.24.
-//
+/*
+ * Copyright 2024 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import Foundation
+import Combine
 
 // TODO: Repeat Request after Authentication has failed
 /**
@@ -25,6 +38,7 @@ public struct DefaultUploadProcess {
     /// A `URLSession` to use for sending requests and receiving responses, probably in the background.
     var urlSession = URLSession.shared
     let uploadFactory: UploadFactory
+    public let uploadStatus = PassthroughSubject<UploadStatus, Never>()
     // MARK: - Static Properties
     public static let discretionaryUrlSessionIdentifier = "de.cyface.urlsession.discretionary"
 
@@ -121,23 +135,37 @@ extension DefaultUploadProcess: UploadProcess {
 
     public mutating func upload(measurement: FinishedMeasurement, authToken: String) async throws -> any Upload {
         if let upload = try openSessions.get(measurement: measurement) {
-            let statusRequest = StatusRequest(apiUrl: apiUrl, session: urlSession, authToken: authToken)
+            do {
+                uploadStatus.send(UploadStatus(upload: upload, status: .started))
+                let statusRequest = StatusRequest(apiUrl: apiUrl, session: urlSession, authToken: authToken)
 
-            let response = try await statusRequest.request(upload: upload)
+                let response = try await statusRequest.request(upload: upload)
 
-            let result = try await handleStatus(response: response, authToken, upload)
-            try openSessions.remove(upload: result)
-            return result
+                let result = try await handleStatus(response: response, authToken, upload)
+                uploadStatus.send(UploadStatus(upload: upload, status: .finishedSuccessfully))
+                try openSessions.remove(upload: result)
+                return result
+            } catch {
+                uploadStatus.send(UploadStatus(upload: upload, status: .finishedWithError(cause: error)))
+                throw error
+            }
         } else {
             let preRequest = PreRequest(apiUrl: apiUrl, session: urlSession)
             var upload = uploadFactory.upload(for: measurement)
-            try openSessions.register(upload: upload)
+            do {
+                uploadStatus.send(UploadStatus(upload: upload, status: .started))
+                try openSessions.register(upload: upload)
 
-            let response = try await preRequest.request(authToken: authToken, upload: upload)
+                let response = try await preRequest.request(authToken: authToken, upload: upload)
 
-            let result = try await handlePreRequest(response: response, authToken, &upload)
-            try openSessions.remove(upload: result)
-            return result
+                let result = try await handlePreRequest(response: response, authToken, &upload)
+                uploadStatus.send(UploadStatus(upload: upload, status: .finishedSuccessfully))
+                try openSessions.remove(upload: result)
+                return result
+            } catch {
+                uploadStatus.send(UploadStatus(upload: upload, status: .finishedWithError(cause: error)))
+                throw error
+            }
         }
     }
 }

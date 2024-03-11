@@ -17,6 +17,8 @@
  * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Combine
+
 /**
  Implementations of this `protocol` provide a process to upload ``FinishedMeasurement`` instances to a server.
 
@@ -27,6 +29,8 @@
  - Version: 1.0.0
  */
 public protocol UploadProcess {
+    /// Reports a constant stream of ``UploadStatus`` information about the currently ongoing uploads.
+    var uploadStatus: PassthroughSubject<UploadStatus, Never> { get }
     /// Start the upload process for the provided ``FinishedMeasurement``.
     /// Called after authentication with the Cyface data collector service was successful.
     /// - returns: The successful upload

@@ -18,6 +18,8 @@
  */
 
 import XCTest
+import Combine
+import Mocks
 @testable import DataCapturing
 @testable import Ready_for_Robots_Development
 
@@ -62,61 +64,4 @@ final class SynchronizationViewModelTest: XCTestCase {
             }
         }
     }
-}
-
-class MockUploadProcessBuilder: UploadProcessBuilder {
-
-    let apiEndpoint: URL
-    let sessionRegistry: SessionRegistry
-
-    init(apiEndpoint: URL, sessionRegistry: SessionRegistry) {
-        self.apiEndpoint = apiEndpoint
-        self.sessionRegistry = sessionRegistry
-    }
-
-    func build() -> DataCapturing.UploadProcess {
-        return MockUploadProcess()
-    }
-}
-
-class MockUploadProcess: UploadProcess {
-    func upload(measurement: DataCapturing.FinishedMeasurement, authToken: String) async throws -> any DataCapturing.Upload {
-        return MockUpload(measurement: measurement)
-    }
-}
-
-struct MockUpload: Upload {
-    var failedUploadsCounter: Int = 0
-
-    var measurement: DataCapturing.FinishedMeasurement
-    
-    var location: URL?
-    
-    func metaData() throws -> DataCapturing.MetaData {
-        return DataCapturing.MetaData(
-            locationCount: 10,
-            formatVersion: 4,
-            startLocLat: nil,
-            startLocLon: nil,
-            startLocTS: nil,
-            endLocLat: nil,
-            endLocLon: nil,
-            endLocTS: nil,
-            measurementId: measurement.identifier,
-            osVersion: "mock",
-            applicationVersion: "mock",
-            length: 10.0,
-            modality: "BICYCLE"
-        )
-    }
-    
-    func data() throws -> Data {
-        return Data()
-    }
-    
-    func onSuccess() throws {
-        // Nothing to do here
-    }
-    
-
 }

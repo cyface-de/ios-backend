@@ -208,11 +208,20 @@ enum SynchronizationState {
 
     /// Convert a database `MeasurementMO` to its `SynchronizationState`
     static func from(measurement: MeasurementMO) -> SynchronizationState {
-        if measurement.synchronized {
-            return .synchronized
-        } else if measurement.synchronizable {
-            return .synchronizable
-        } else {
+        let request = UploadSession.fetchRequest()
+        request.predicate = NSPredicate(format: "measurement.identifier=%d", measurement.identifier)
+        request.fetchLimit = 1
+        do {
+            if try request.execute().first != nil {
+                return .synchronizing
+            } else if measurement.synchronized {
+                return .synchronized
+            } else if measurement.synchronizable {
+                return .synchronizable
+            } else {
+                return .unsynchronizable
+            }
+        } catch {
             return .unsynchronizable
         }
     }

@@ -29,7 +29,6 @@ public class PersistentSessionRegistry: SessionRegistry {
     // MARK: - Properties
     let dataStoreStack: DataStoreStack
     let uploadFactory: UploadFactory
-    let uploadStatus = PassthroughSubject<UploadStatus, Never>()
 
     // MARK: - Initializers
     public init(dataStoreStack: DataStoreStack, uploadFactory: UploadFactory) {
@@ -53,7 +52,6 @@ public class PersistentSessionRegistry: SessionRegistry {
 
             try context.save()
         }
-        uploadStatus.send(UploadStatus(upload: upload, status: .started))
     }
 
     public func record(upload: any Upload, _ requestType: RequestType, httpStatusCode: Int16, message: String, time: Date) throws {
@@ -73,11 +71,6 @@ public class PersistentSessionRegistry: SessionRegistry {
             uploadSession.addToUploadProtocol(uploadTask)
 
             try context.save()
-        }
-
-        if case requestType = .upload, httpStatusCode == 201 {
-            uploadStatus.send(UploadStatus(upload: upload, status: .finishedSuccessfully))
-            try upload.onSuccess()
         }
     }
 
@@ -100,7 +93,6 @@ public class PersistentSessionRegistry: SessionRegistry {
 
             try context.save()
         }
-        uploadStatus.send(UploadStatus(upload: upload, status: .finishedWithError(cause: error)))
     }
 
     public func remove(upload: any Upload) throws {
@@ -151,11 +143,16 @@ public enum RequestType: Int16 {
  - Version: 2.0.0
  - Since: 3.1.2
  */
-struct UploadStatus {
+public struct UploadStatus {
     /// The measurement identifier of this status.
-    let upload: any Upload
+    public let upload: any Upload
     /// The current status.
-    let status: UploadStatusType
+    public let status: UploadStatusType
+
+    public init(upload: any Upload, status: UploadStatusType) {
+        self.upload = upload
+        self.status = status
+    }
 }
 
 /**
@@ -165,20 +162,24 @@ struct UploadStatus {
  - Version: 1.0.0
  - Since: 3.1.2
  */
-enum UploadStatusType: CustomStringConvertible {
+public enum UploadStatusType: CustomStringConvertible {
     /// Upload has been started
     case started
     /// Upload was finished successfully.
     case finishedSuccessfully
+    /// Encountered an issue but a retry is advisable.
+    case finishedUnsuccessfully
     /// Upload failed because of the provided error.
     case finishedWithError(cause: Error)
 
-    var description: String {
+    public var description: String {
         switch(self) {
         case .started:
             "started"
         case .finishedSuccessfully:
             "finishedSuccessfully"
+        case .finishedUnsuccessfully:
+            "finishedUnsuccessfully"
         case .finishedWithError(cause: let error):
             "finishedWithError: \(error.localizedDescription)"
         }
