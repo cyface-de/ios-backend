@@ -32,6 +32,7 @@ extension OSLog {
     static let sensor = OSLog(subsystem: subsystem, category: "sensor")
     /// Messages related to the workings of a measurement.
     static let measurement = OSLog(subsystem: subsystem, category: "measurement")
+    /// Messages related to captured data synchronization.
     static let synchronization = OSLog(subsystem: subsystem, category: "synchronization")
     /// Messages related to authorization with a Cyface server.
     static let authorization = OSLog(subsystem: subsystem, category: "authorization")

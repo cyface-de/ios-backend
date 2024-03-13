@@ -23,6 +23,8 @@ import OSLog
 /**
  A request to send the data from a ``FinishedMeasurement`` to a Cyface Collector Server.
 
+ Before sending such a request a ``BackgroundPreRequest`` must have finished successfully, setting the ``Upload/location`` to the correct session for this request.
+
  - Author: Klemens Muthmann
  - Version: 1.0.0
  */
@@ -32,13 +34,17 @@ struct BackgroundUploadRequest {
     let session: URLSession
     /// The logger used by objects of this class.
     let log: OSLog = OSLog(subsystem: "UploadRequest", category: "de.cyface")
-    let authToken: String
+    /// The ``Upload`` to send to the Cyface Collector Server.
     let upload: any Upload
+    /// Start the upload from this byte in the upload data.
+    ///
+    /// The default is 0. If a ``BackgroundStatusRequest`` provides a different value, the upload may start from there.
+    /// This is usually the case if some data was uploaded previously and this is a continuation upload.
     let continueOnByte: Int = 0
 
     /// Send the request for the provided `upload`.
     func send() throws {
-        os_log("Uploading measurement %{public}d to %{public}@.", log: log, type: .debug, upload.measurement.identifier, upload.location?.absoluteString ?? "Location Missing!")
+        os_log("Upload Request: Uploading measurement %{public}d to %{public}@.", log: log, type: .debug, upload.measurement.identifier, upload.location?.absoluteString ?? "Location Missing!")
         let metaData = try upload.metaData()
         let data = try upload.data()
 
@@ -56,7 +62,7 @@ struct BackgroundUploadRequest {
         request.setValue(String(data.count-continueOnByte), forHTTPHeaderField: "Content-Length")
         request.setValue("bytes \(continueOnByte)-\(data.count-1)/\(data.count)", forHTTPHeaderField: "Content-Range")
 
-        var uploadTask = session.uploadTask(with: request, fromFile: tempDataFile)
+        let uploadTask = session.uploadTask(with: request, fromFile: tempDataFile)
         uploadTask.countOfBytesClientExpectsToSend = Int64(dataToUpload.count) + headerBytes(request)
         uploadTask.countOfBytesClientExpectsToReceive = minimumBytesInAnHTTPResponse
         uploadTask.taskDescription = "UPLOAD:\(upload.measurement.identifier)"

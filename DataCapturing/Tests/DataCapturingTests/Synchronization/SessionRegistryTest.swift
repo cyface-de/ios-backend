@@ -21,19 +21,28 @@ import XCTest
 import CoreData
 @testable import DataCapturing
 
+/**
+ Tests that ``SessionRegistry`` implementations work as expected.
+
+ This test runs against an actual database.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 class SessionRegistryTest: XCTestCase {
+    /// Data storage used for testing.
     private var coreDataStack: CoreDataStack!
 
+    /// Setup data storage before testing.
     open override func setUp() async throws{
-        print("setting up")
         try await super.setUp()
 
         coreDataStack = try CoreDataStack()
         try await coreDataStack.setup()
     }
 
+    /// Empty data storage after testing.
     override func tearDown() async throws {
-        print("tearing down")
         try coreDataStack.wrapInContext { context in
             try context.persistentStoreCoordinator?.managedObjectModel.entities.forEach { entity in
                 let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: entity.name!)
@@ -46,6 +55,7 @@ class SessionRegistryTest: XCTestCase {
         try await super.tearDown()
     }
 
+    /// Test that the data schema is working correctly.
     func testSessionRegistrySerialization() async throws {
         try coreDataStack.wrapInContext { context in
             let session = UploadSession(context: context)
@@ -80,6 +90,7 @@ class SessionRegistryTest: XCTestCase {
         XCTAssertEqual(mockUpload, try oocut.get(measurement: mockUpload.measurement) as? MockUpload)
     }
 
+    /// Test that adding protocol records to a session works as expected.
     func testUpdateExistingSession() async throws {
         // Arrange
         let uploadFactory = MockUploadFactory()

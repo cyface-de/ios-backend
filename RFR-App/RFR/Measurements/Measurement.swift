@@ -193,7 +193,7 @@ extension Measurement: Hashable {
  Each measurement start as synchronizable, switches to synchronizing as soon as the upload is running and ends as synchronized.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.1
  */
 enum SynchronizationState {

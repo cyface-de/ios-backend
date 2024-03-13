@@ -19,12 +19,28 @@
 
 import Foundation
 
+/**
+ A wrapper for scheduling a Google media upload protocol status request to a Cyface data collector.
+
+ For resumable uploads the status request tells the client where to continue with the upload.
+ It can also be used to find out if an upload was successfully completed.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 struct BackgroundStatusRequest {
+    // MARK: - Properties
+    /// The iOS `URLSession` used to upload data to the Data collector server.
     let session: URLSession
-    let bearerAuthToken: String
+    /// A bearer authentication token to authenticate and authorize this request with the Data collector server.
+    let authToken: String
+    /// The ``Upload`` to send to the Data collector server.
     let upload: any Upload
 
+    // MARK: - Methods
     /**
+     Schedules the status request for a time, when it is convenient for the provided `URLSession`.
+
      - Throws: `ServerConnectionError.invalidUploadLocation` if the provided `sessionIdentifier` is invalid.
      */
     func send() throws {
@@ -42,7 +58,7 @@ struct BackgroundStatusRequest {
 
         var request = URLRequest(url: requestLocation)
         metaData.add(to: &request)
-        request.setValue("Bearer \(bearerAuthToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
         request.setValue("gzip", forHTTPHeaderField: "Accept-Encoding")
         request.setValue("Google-HTTP-Java-Client/1.39.2 (gzip)", forHTTPHeaderField: "User-Agent")
         request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")

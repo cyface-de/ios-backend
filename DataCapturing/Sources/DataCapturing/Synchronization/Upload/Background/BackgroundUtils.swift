@@ -22,6 +22,7 @@ import Foundation
 /// The bytes within the most simple HTTP reponse, which only consists of the HTTP Status line, without any headers or a body.
 let minimumBytesInAnHTTPResponse = Int64(45)
 
+/// Calculate the size in bytes of an `URLRequest` header.
 func headerBytes(_ request: URLRequest) -> Int64 {
     if let fields = request.allHTTPHeaderFields {
         return fields.map { (key:String, value:String) in
@@ -32,6 +33,9 @@ func headerBytes(_ request: URLRequest) -> Int64 {
     }
 }
 
+/// Copy the provided data to a temporary file with the provided `filename`.
+///
+/// This is used to store data for background uploads, as they are only valid from files.
 func copyToTemp(data: Data, filename: String) throws -> URL {
     // It is ok to store this to temporary storage, since iOS takes control of the file as soon as we hand it to the
     // upload task. This means premature removal of the file does not stop the output.

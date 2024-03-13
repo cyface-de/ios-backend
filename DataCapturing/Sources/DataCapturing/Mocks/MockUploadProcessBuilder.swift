@@ -19,16 +19,30 @@
 
 import Foundation
 
-public class MockUploadProcessBuilder: UploadProcessBuilder {
+/**
+ A ``UploadProcessBuilder`` creating a ``MockUploadProcess``.
 
+ Such a builder is useful during testing and for displaying *SwiftUI* previews.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
+public class MockUploadProcessBuilder: UploadProcessBuilder {
+    // MARK: - Properties
+    /// The endpoint for the created process, which is ignored in this case.
     let apiEndpoint: URL
+    /// The ``SessionRegistry``, which is ignored for the created ``Upload`` instances.
     let sessionRegistry: SessionRegistry
 
+    // MARK: - Initializers
+    /// Create a new, fully initialized instance of this class.
     public init(apiEndpoint: URL, sessionRegistry: SessionRegistry) {
         self.apiEndpoint = apiEndpoint
         self.sessionRegistry = sessionRegistry
     }
 
+    // MARK: - Methods
+    /// Start the creation process
     public func build() -> DataCapturing.UploadProcess {
         return MockUploadProcess()
     }

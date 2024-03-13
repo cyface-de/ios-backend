@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots App.
  *
@@ -27,7 +27,7 @@ import Sentry
  View Model used as an interface to synchronize measurements and keep the UI up to date about synchronization progress.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 class SynchronizationViewModel: NSObject, ObservableObject {
@@ -85,7 +85,15 @@ class SynchronizationViewModel: NSObject, ObservableObject {
     }
 }
 
+/**
+A wrapper for grouping a ``FinishedMeasurement`` together with its current ``UploadStatusType``.
+
+ - Author: Klemens Muthmann
+ - Version 1.0.0
+ */
 struct UploadStatus {
+    /// The measurement the status belongs to.
     let measurement: FinishedMeasurement
+    /// The status of the measurement.
     let status: UploadStatusType
 }

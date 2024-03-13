@@ -29,23 +29,18 @@ public protocol Upload: Equatable {
     // MARK: - Properties
     /// The amount of failed uploads before retrying is stopped.
     var failedUploadsCounter: Int {get set}
-
     /// The ``FinishedMeasurement`` to upload.
     var measurement: FinishedMeasurement { get }
-
     /// The location to send the data to or `nil` if no location was requested from the server yet.
     var location: URL? {get set}
 
     // MARK: - Methods
     /// Provide the upload meta data of the measurement to upload.
     func metaData() throws -> MetaData
-
     /// Provide the actual data of the measurement to upload.
     func data() throws -> Data
-
     /// A function carried out on a successful upload.
     func onSuccess() throws
-
     /// Called if this upload has failed and is unrecoverable.
     func onFailed() throws
 }
@@ -62,12 +57,14 @@ public class CoreDataBackedUpload: Upload {
     public var measurement: FinishedMeasurement
     /// A counter of the number of failed attempts to run this upload. This can be used to stop retrying after a certain amount of retries.
     public var failedUploadsCounter = 0
+    /// The location of the active session for this upload or `nil` if no successful pre request has been send and received yet.
     public var location: URL?
     // MARK: - Internal Properties
     /// A wrapper for the `NSPersistentContainer` and the corresponding initialization code.
     var dataStoreStack: DataStoreStack
     /// A cache for the measurements metadata, so we don't have to reload it from the database all the time.
     var dataCache: Data?
+    /// The identiier of the measurement to send with this upload.
     var identifier: UInt64 {
         measurement.identifier
     }

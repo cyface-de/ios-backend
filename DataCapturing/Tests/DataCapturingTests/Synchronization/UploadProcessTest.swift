@@ -26,7 +26,7 @@ import Mocker
 A complete integration test for the whole process of uploading a `Measurement` to a Cyface server. All tests are mocking the network calls by either using the *Mocker* library or a custom `URLProtocol`.
 
  - author: Klemens Muthmann
- - version: 1.0.1
+ - version: 1.0.2
  */
 class UploadProcessTest: XCTestCase {
 

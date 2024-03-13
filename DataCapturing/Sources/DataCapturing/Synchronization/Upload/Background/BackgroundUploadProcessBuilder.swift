@@ -38,12 +38,20 @@ public protocol BackgroundURLSessionEventDelegate {
  */
 public class BackgroundUploadProcessBuilder {
     // MARK: - Attributes
+    /// The registry of active upload session.
     let sessionRegistry: SessionRegistry
+    /// The location of a Cyface collector server, used by the created ``UploadProcess`` to send data to.
     let collectorUrl: URL
+    /// Factory to create ``Upload`` instances by the ``UploadProcess`` instances.
     let uploadFactory: UploadFactory
+    /// Storage to keep session data of running uploads while this application is in suspended or killed.
     let dataStoreStack: DataStoreStack
+    /// Used by the created ``UploadProcess`` to authenticate and authorize uploads with the Cyface data collector.
     let authenticator: Authenticator
     // TODO: Maybe put this into its own class. Has nothing really to do with building.
+    /// Central place to store the bakcground session completion handler.
+    ///
+    /// For additional information please refer to the [Apple documentation](https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_in_the_background).
     var completionHandler: (() -> Void)?
 
     // MARK: - Initializers

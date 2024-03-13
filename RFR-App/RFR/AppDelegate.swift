@@ -15,14 +15,10 @@ import DataCapturing
  - Version: 1.0.0
  */
 class AppDelegate: NSObject, UIApplicationDelegate {
-
+    /// A delegate called, when this app is created to repeat or start upload of a background `URLSession`.
     var delegate: BackgroundURLSessionEventDelegate?
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        print("Your code here")
-        return true
-    }
-
+    /// Called after waking up for handling a background `URLSession`.
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
         delegate?.received(application, handleEventsForBackgroundURLSession: identifier, completionHandler: completionHandler)
     }

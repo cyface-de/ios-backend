@@ -27,22 +27,29 @@ import Combine
  */
 public class PersistentSessionRegistry: SessionRegistry {
     // MARK: - Properties
+    /// Provide access to the background storage.
     let dataStoreStack: DataStoreStack
+    /// Factory to create new ``Upload`` instances from the background storage.
     let uploadFactory: UploadFactory
 
     // MARK: - Initializers
+    /// Create a new completely initializerd object of this class.
+    /// - Parameter dataStoreStack: Provide access to the background storage.
+    /// - Parameter uploadFactory: Factory to create new ``Upload`` instances from the background storage.
     public init(dataStoreStack: DataStoreStack, uploadFactory: UploadFactory) {
         self.dataStoreStack = dataStoreStack
         self.uploadFactory = uploadFactory
     }
 
     // MARK: - Methods
+    /// Provide the ``Upload`` for the session stored for the provided ``FinishedMeasurement`` or `nil` if no open session exists for that `FinishedMeasurement`.
     public func get(measurement: FinishedMeasurement) throws -> (any Upload)? {
         return try dataStoreStack.wrapInContextReturn { context in
             return try uploadFromCoreData(measurement: measurement)
         }
     }
 
+    /// Register a new session for the provided ``Upload``.
     public func register(upload: any Upload) throws {
         try dataStoreStack.wrapInContext { context in
             let uploadSession = UploadSession(context: context)
@@ -54,6 +61,7 @@ public class PersistentSessionRegistry: SessionRegistry {
         }
     }
 
+    /// Record a response within a session.
     public func record(upload: any Upload, _ requestType: RequestType, httpStatusCode: Int16, message: String, time: Date) throws {
         try dataStoreStack.wrapInContext { context in
             let request = UploadSession.fetchRequest()
@@ -74,6 +82,7 @@ public class PersistentSessionRegistry: SessionRegistry {
         }
     }
 
+    /// Record an error within a session.
     public func record(upload: any Upload, _ requestType: RequestType, httpStatusCode: Int16, error: Error) throws {
         try dataStoreStack.wrapInContext { context in
             let request = UploadSession.fetchRequest()
@@ -95,6 +104,7 @@ public class PersistentSessionRegistry: SessionRegistry {
         }
     }
 
+    /// Remove the active session for the provided ``Upload``.
     public func remove(upload: any Upload) throws {
         try dataStoreStack.wrapInContext { context in
             let request = UploadSession.fetchRequest()
@@ -108,6 +118,7 @@ public class PersistentSessionRegistry: SessionRegistry {
         }
     }
 
+    /// Create an upload for the provided ``FinishedMeasurement`` from a persistet session.
     private func uploadFromCoreData(measurement: FinishedMeasurement) throws -> (any Upload)? {
         let request = UploadSession.fetchRequest()
         request.predicate = NSPredicate(format: "measurement.identifier=%d", measurement.identifier)
@@ -119,6 +130,8 @@ public class PersistentSessionRegistry: SessionRegistry {
         }
     }
 
+    /// Create a managed measurement object from *CoreData*.
+    /// - Throws: PersistenceError.measurmementNotLoadable if there is no measurement with the provided identifier.
     private func measurementFromCoreData(_ identifier: UInt64, _ context: NSManagedObjectContext) throws -> MeasurementMO {
         let request = MeasurementMO.fetchRequest()
         request.predicate = NSPredicate(format: "identifier=%d", identifier)
@@ -130,9 +143,21 @@ public class PersistentSessionRegistry: SessionRegistry {
     }
 }
 
+/**
+ An enumeration of all the HTTP request types used by the Google Media Uploda protocol.
+
+ This type serves to make a list of all the interactions with the Cyface Data Collector server during a single session as well as a mapping from enumeration to number.
+ The number is used to store this enumeration to persistent data storage.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 public enum RequestType: Int16 {
+    /// A Google Media Upload Protocol status request.
     case status = 0
+    /// A Google Media Upload Protocol pre request.
     case prerequest = 1
+    /// A Google Media Upload Protocol upload request.
     case upload = 2
 }
 
@@ -141,7 +166,6 @@ public enum RequestType: Int16 {
 
  - Author: Klemens Muthmann
  - Version: 2.0.0
- - Since: 3.1.2
  */
 public struct UploadStatus {
     /// The measurement identifier of this status.
@@ -149,6 +173,7 @@ public struct UploadStatus {
     /// The current status.
     public let status: UploadStatusType
 
+    /// Create a new completely initialized object of this class.
     public init(upload: any Upload, status: UploadStatusType) {
         self.upload = upload
         self.status = status
@@ -160,7 +185,6 @@ public struct UploadStatus {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
- - Since: 3.1.2
  */
 public enum UploadStatusType: CustomStringConvertible {
     /// Upload has been started

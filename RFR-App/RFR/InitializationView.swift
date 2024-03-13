@@ -26,7 +26,7 @@ import AppAuthCore
  The first view shown after starting the application. This should usually be the login link or some error message if startup failed.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 struct InitializationView: View {

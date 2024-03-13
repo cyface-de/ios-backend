@@ -28,7 +28,7 @@ import OSLog
  This ensures, that the application does not get the login information from the user and cannot be missused.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 3.1.2
  */
 public class OAuthAuthenticator {

@@ -19,11 +19,21 @@
 
 import Foundation
 
+/**
+ An ``UploadFactory`` for testing classes requiring one as a dependency.
+
+ Instances of this class produce instances of ``MockUpload``.
+
+ - Author: Klemens Muthmann
+ - Version: 10.0
+ */
 public struct MockUploadFactory: UploadFactory {
+    // MARK: - Initialiezrs
     public init() {
         // Nothing to do here.
     }
 
+    // MARK: - Methods
     public func upload(for measurement: DataCapturing.FinishedMeasurement) -> any DataCapturing.Upload {
         return MockUpload(measurement: measurement)
     }

@@ -24,7 +24,7 @@ import DataCapturing
  The main application view allowing to switch subviews using a `TabView`.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 struct MainView: View {

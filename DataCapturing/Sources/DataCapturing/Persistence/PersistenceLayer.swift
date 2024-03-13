@@ -683,7 +683,7 @@ extension CoreDataPersistenceLayer: PersistenceLayer {
  A structure for all the errors thrown by the `PersistenceLayer`.
 
  - Author: Klemens Muthmann
- - Version: 3.1.0
+ - Version: 3.2.0
  - Since: 2.3.0
  */
 public enum PersistenceError: Error {

@@ -22,18 +22,30 @@ import Foundation
 /**
  A Google Media Upload Protocol pre request, that can be run in the background, as soon as that is convenient for the system.
 
+ Calling this requests ``BackgroundPreRequest/send`` method prepares the request.
+ The system is going to send the actual request as soon as that becomes convenient, decided by the provided `URLSession`.
+
  - Author: Klemens Muthmann
  - Version: 1.0.0
  */
 struct BackgroundPreRequest {
+    /// The location of a Cyface data collector service to send the request to.
     let collectorUrl: URL
+    /// An iOS `URLSession` used to communicate with the server.
     let session: URLSession
+    /// The ``Upload`` to send this pre request for.
     let upload: any Upload
+    /// An authentication token used to authenticate and authorize the request with the server.
     let authToken: String
     /// Encoder to write the meta data as JSON into the requests body.
     let jsonEncoder = JSONEncoder()
+    /// The registry with all the current active upload sessions.
     var sessionRegistry: SessionRegistry
 
+    /// Schedule sending this request.
+    ///
+    /// The operation system decides when to actually send it.
+    /// Depending on the provided session this will be instantaeous or happens if connected to a WiFi and a plug.
     func send() throws {
         let metaData = try upload.metaData()
         let data = try upload.data()
@@ -71,25 +83,6 @@ struct BackgroundPreRequest {
 
         preRequestTask.taskDescription = "PREREQUEST:\(upload.measurement.identifier)"
         preRequestTask.resume()
-        /*guard let response = response as? HTTPURLResponse else {
-                throw ServerConnectionError.noResponse
-        }
-
-        let status = response.statusCode
-
-        if status == 200 {
-            guard let location = response.value(forHTTPHeaderField: "Location") else {
-                throw ServerConnectionError.noLocation
-            }
-
-            return .success(location: location)
-        } else if status == 409 {
-            return .exists
-        } else if status == 412 {
-            throw ServerConnectionError.uploadNotAccepted(upload: upload)
-        } else {
-            throw ServerConnectionError.requestFailed(httpStatusCode: status)
-        }*/
     }
 
 }

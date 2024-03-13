@@ -19,10 +19,15 @@
 
 import XCTest
 import Combine
-import Mocks
 @testable import DataCapturing
 @testable import Ready_for_Robots_Development
 
+/**
+ Tests that the synchronization view model correctly synchronizes measurements and provides the current state of that synchronization.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 final class SynchronizationViewModelTest: XCTestCase {
 
     func test() async throws {
@@ -48,7 +53,7 @@ final class SynchronizationViewModelTest: XCTestCase {
         )
 
         // Collect all the status updates via Combine
-        var statii = [UploadStatus]()
+        var statii = [Ready_for_Robots_Development.UploadStatus]()
         let sinkCancellable = oocut.uploadStatusPublisher.sink { status in
             statii.append(status)
         }

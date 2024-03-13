@@ -48,14 +48,21 @@ class BackgroundUploadProcess: NSObject {
     }()
     /// The `UploadProcessBuilder` that created this `UploadProcess`.
     let builder: BackgroundUploadProcessBuilder
+    /// The ``SessionRegistry`` storing the currently active upload sessions.
     var sessionRegistry: SessionRegistry
+    /// The location of a Cyface data collector server, to send the data to.
     let collectorUrl: URL
+    /// A factory to create
     let uploadFactory: UploadFactory
+    /// The connection to the data store, to persist data between putting the app into the background.
     let dataStoreStack: DataStoreStack
+    /// Used to authenticate each request.
     let authenticator: Authenticator
+    /// A *Combine* publisher to send information about the status of all the uploads.
     let uploadStatus = PassthroughSubject<UploadStatus, Never>()
 
     // MARK: - Initializers
+    /// Create a new complete instance of this class.
     init(
         builder: BackgroundUploadProcessBuilder,
         sessionRegistry: SessionRegistry,
@@ -73,6 +80,7 @@ class BackgroundUploadProcess: NSObject {
     }
 
     // MARK: - Methods
+    /// Handle the response to a Google Media Upload status request.
     private func onReceivedStatusRequest(httpStatusCode: Int16, upload: any Upload) async throws {
         switch httpStatusCode {
         case 200: // Upload abgeschlossen. Ignorieren
@@ -93,7 +101,6 @@ class BackgroundUploadProcess: NSObject {
                 time: Date.now)
             let uploadRequest = BackgroundUploadRequest(
                 session: discretionaryUrlSession,
-                authToken: try await authenticator.authenticate(),
                 upload: upload
             )
             try uploadRequest.send()
@@ -125,6 +132,7 @@ class BackgroundUploadProcess: NSObject {
         }
     }
 
+    /// Handle the response to a Google Media Upload Protocol pre request.
     private func onReceivedPreRequest(httpStatusCode: Int16, upload: any Upload) async throws {
         switch httpStatusCode {
         case 200: // Send Upload Request
@@ -139,7 +147,6 @@ class BackgroundUploadProcess: NSObject {
             )
             let uploadRequest = BackgroundUploadRequest(
                 session: discretionaryUrlSession,
-                authToken: try await authenticator.authenticate(),
                 upload: upload
             )
             try uploadRequest.send()
@@ -189,6 +196,7 @@ class BackgroundUploadProcess: NSObject {
         }
     }
 
+    /// Handle the response to a Google Media Upload Protocol upload request.
     private func onReceivedUploadResponse(httpStatusCode: Int16, upload: any Upload) throws {
         switch httpStatusCode {
         case 201:
@@ -223,7 +231,7 @@ extension BackgroundUploadProcess: UploadProcess {
             uploadStatus.send(UploadStatus(upload: upload, status: .started))
             let statusRequest = BackgroundStatusRequest(
                 session: discretionaryUrlSession,
-                bearerAuthToken: try await authenticator.authenticate(),
+                authToken: try await authenticator.authenticate(),
                 upload: upload
             )
             try statusRequest.send()
@@ -331,7 +339,7 @@ extension BackgroundUploadProcess: URLSessionDelegate, URLSessionDataDelegate, U
                 }
             case "UPLOAD":
                 os_log("UPLOAD", log: OSLog.synchronization, type: .debug)
-                guard var upload = try sessionRegistry.get(measurement: measurement) else {
+                guard let upload = try sessionRegistry.get(measurement: measurement) else {
                     throw PersistenceError.sessionNotRegistered(measurement)
                 }
                 try onReceivedUploadResponse(httpStatusCode: Int16(response.statusCode), upload: upload)

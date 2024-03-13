@@ -25,10 +25,11 @@ A mocked upload that does not get data from a CoreData store or something simila
  The test data provided via this upload is randomly generated. The numbers have no meaning.
 
  - author: Klemens Muthmann
- - version: 2.1.0
+ - version: 2.1.1
  */
 class MockUpload: Upload {
-
+    // MARK: Properties
+    /// Compare two of these for equality.
     static func == (lhs: MockUpload, rhs: MockUpload) -> Bool {
         return lhs.measurement == rhs.measurement
         }
@@ -45,6 +46,7 @@ class MockUpload: Upload {
     /// An optionally empty location to store the upload at.
     var location: URL?
 
+    // MARK: - Initializers
     /// Initialize this class with a simulated measurement identifier.
     init(measurement: FinishedMeasurement) {
         self.measurement = measurement
