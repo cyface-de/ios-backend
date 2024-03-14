@@ -29,9 +29,8 @@ import Sentry
  */
 @main
 struct RFRApp: App {
-
     /// The application, which is required to store and load the authentication state of this application.
-    @StateObject var appModel = AppModel()
+    @ObservedObject var appModel = AppModel()
 
     init() {
         let enableTracing = try! appModel.config.getEnableSentryTracing()
@@ -71,7 +70,7 @@ struct RFRApp: App {
  Those errors are published via the ``error`` property of this class.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 class AppModel: ObservableObject {
@@ -80,6 +79,9 @@ class AppModel: ObservableObject {
     @Published var viewModel: DataCapturingViewModel?
     /// Tells the view about errors occuring during initialization.
     @Published var error: Error?
+    /// The UIKit Application Delegate required for functionality not yet ported to SwiftUI.
+    /// Especially reacting to backround network requests needs to be handled here.
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     /// This applications configuration file.
     var config: Config = try! ConfigLoader.load()
     /// The internet address of the root of the incentives API.
@@ -95,13 +97,31 @@ class AppModel: ObservableObject {
             let apiEndpoint = try config.getApiEndpoint()
             self.incentivesUrl = try config.getIncentivesUrl()
 
-            let authenticator = createAuthenticator(
-                issuer: issuer,
-                redirectURI: redirectURI,
-                apiEndpoint: apiEndpoint,
-                clientId: clientId
-            )
-            self.viewModel = try DataCapturingViewModel(authenticator: authenticator, uploadEndpoint: uploadEndpoint)
+            let dataStoreStack = try CoreDataStack()
+            Task {
+                do {
+                    try await dataStoreStack.setup()
+
+                    let authenticator = createAuthenticator(
+                        issuer: issuer,
+                        redirectURI: redirectURI,
+                        apiEndpoint: apiEndpoint,
+                        clientId: clientId
+                    )
+                    let uploadFactory = CoreDataBackedUploadFactory(dataStoreStack: dataStoreStack)
+                    let uploadProcessBuilder = BackgroundUploadProcessBuilder(
+                        sessionRegistry: PersistentSessionRegistry(dataStoreStack: dataStoreStack, uploadFactory: uploadFactory),
+                        collectorUrl: uploadEndpoint,
+                        uploadFactory: uploadFactory,
+                        dataStoreStack: dataStoreStack,
+                        authenticator: authenticator
+                    )
+                    appDelegate.delegate = uploadProcessBuilder
+                    self.viewModel = try DataCapturingViewModel(authenticator: authenticator, uploadProcessBuilder: uploadProcessBuilder, dataStoreStack: dataStoreStack)
+                } catch {
+                    self.error = error
+                }
+            }
         } catch {
             self.error = error
         }

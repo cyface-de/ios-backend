@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -17,14 +17,24 @@
  * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- A protocol to describe the creation of an ``UploadProcess``.
+import Combine
 
- By using such a protocol, it becomes much easier to exchange ``UploadProcess`` implementations for example for testing.
+/**
+ An ``UploadProcess`` used for testing or SwiftUI previews.
+
+ This upload process does nothing. It sends no status updates and calls no network code.
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
  */
-public protocol UploadProcessBuilder {
-    func build() -> UploadProcess
+class MockUploadProcess: UploadProcess {
+    // MARK: - Properties
+    /// An implementation of the `uploadStatus` that never sends any updates.
+    var uploadStatus = PassthroughSubject<DataCapturing.UploadStatus, Never>()
+
+    // MARK: - Methods
+    /// This upload method simply returns a ``MockUpload`` for the provided ``FinishedMeasurement``, without ever calling any network code.
+    func upload(measurement: DataCapturing.FinishedMeasurement, authToken: String) async throws -> any DataCapturing.Upload {
+        return MockUpload(measurement: measurement)
+    }
 }

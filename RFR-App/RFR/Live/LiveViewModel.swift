@@ -445,7 +445,6 @@ class LiveViewModel: ObservableObject {
                 self?.altitudes.removeAll(keepingCapacity: true)
             }
             .store(in: &cancellables)
-
     }
 }
 

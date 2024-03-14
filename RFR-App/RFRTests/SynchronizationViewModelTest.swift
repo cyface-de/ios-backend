@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots iOS App.
  *
@@ -18,16 +18,23 @@
  */
 
 import XCTest
+import Combine
 @testable import DataCapturing
 @testable import Ready_for_Robots_Development
 
+/**
+ Tests that the synchronization view model correctly synchronizes measurements and provides the current state of that synchronization.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 final class SynchronizationViewModelTest: XCTestCase {
 
     func test() async throws {
         // Arrange
         let mockAuthenticator = MockAuthenticator()
         let testEndpoint = URL(string: "http://localhost:8080/api")!
-        let sessionRegistry = SessionRegistry()
+        let sessionRegistry = DefaultSessionRegistry()
         let mockPersistenceLayer = MockPersistenceLayer(
             measurements: [
                 FinishedMeasurement(identifier: 0, synchronizable: true),
@@ -46,7 +53,7 @@ final class SynchronizationViewModelTest: XCTestCase {
         )
 
         // Collect all the status updates via Combine
-        var statii = [UploadStatus]()
+        var statii = [Ready_for_Robots_Development.UploadStatus]()
         let sinkCancellable = oocut.uploadStatusPublisher.sink { status in
             statii.append(status)
         }
@@ -61,26 +68,5 @@ final class SynchronizationViewModelTest: XCTestCase {
                 XCTFail()
             }
         }
-    }
-}
-
-class MockUploadProcessBuilder: UploadProcessBuilder {
-
-    let apiEndpoint: URL
-    let sessionRegistry: SessionRegistry
-
-    init(apiEndpoint: URL, sessionRegistry: SessionRegistry) {
-        self.apiEndpoint = apiEndpoint
-        self.sessionRegistry = sessionRegistry
-    }
-
-    func build() -> DataCapturing.UploadProcess {
-        return MockUploadProcess()
-    }
-}
-
-class MockUploadProcess: UploadProcess {
-    func upload(authToken: String, _ upload: DataCapturing.Upload) async throws -> DataCapturing.Upload {
-        return upload
     }
 }

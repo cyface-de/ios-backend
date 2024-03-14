@@ -193,7 +193,7 @@ extension Measurement: Hashable {
  Each measurement start as synchronizable, switches to synchronizing as soon as the upload is running and ends as synchronized.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.1
  */
 enum SynchronizationState {
@@ -208,11 +208,20 @@ enum SynchronizationState {
 
     /// Convert a database `MeasurementMO` to its `SynchronizationState`
     static func from(measurement: MeasurementMO) -> SynchronizationState {
-        if measurement.synchronized {
-            return .synchronized
-        } else if measurement.synchronizable {
-            return .synchronizable
-        } else {
+        let request = UploadSession.fetchRequest()
+        request.predicate = NSPredicate(format: "measurement.identifier=%d", measurement.identifier)
+        request.fetchLimit = 1
+        do {
+            if try request.execute().first != nil {
+                return .synchronizing
+            } else if measurement.synchronized {
+                return .synchronized
+            } else if measurement.synchronizable {
+                return .synchronizable
+            } else {
+                return .unsynchronizable
+            }
+        } catch {
             return .unsynchronizable
         }
     }

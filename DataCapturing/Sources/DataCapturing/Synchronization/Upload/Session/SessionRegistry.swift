@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -25,26 +25,23 @@ import Foundation
  This implementation stores sessions in memory and allows continuation as long as the app was not terminated.
 
  - author: Klemens Muthmann
- - version: 1.0.0
+ - version: 2.0.0
  */
-public struct SessionRegistry {
+public protocol SessionRegistry {
     /// A mapping from the measurement identifier to the REST resource that session is available at.
-    var openSessions = [UInt64: String]()
+    mutating func get(measurement: FinishedMeasurement) throws -> (any Upload)?
 
-    /// Provide a public initializer, which is required to use this framework
-    public init() {
-        // Nothing to do here
-    }
+    /// Record a step in this session. This can be used to track errors or the sequence of requests that caused them.
+    mutating func record(upload: any Upload, _ requestType: RequestType, httpStatusCode: Int16, message: String, time: Date) throws
 
-    /// Provide the session for the ``Upload`` or `nil` if no open session is available.
-    func session(for upload: Upload) -> String? {
-        return openSessions[upload.measurement.identifier]
-    }
+    /// Record an erroneous step in this session.
+    mutating func record(upload: any Upload, _ requestType: RequestType, httpStatusCode: Int16, error: Error) throws
 
     /// Register a `session`for the provided `Measurement`
-    /// - Parameter session: The complete REST URL to the session.
     /// - Parameter upload: The ``Upload`` to register this session for.
-    mutating func register(session: String, upload: Upload) {
-        openSessions[upload.measurement.identifier] = session
-    }
+    /// - Returns: The universal unique identifier that session has been stored under
+    mutating func register(upload: any Upload) throws
+
+    ///Remove the provided ``Upload`` from this registry.
+    mutating func remove(upload: any Upload) throws 
 }

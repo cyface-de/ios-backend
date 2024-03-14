@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2022 Cyface GmbH
+ * Copyright 2019 - 2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -17,19 +17,43 @@
  * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Foundation
 import CoreData
 import OSLog
 
+/**
+ Protocol for objects talking to a data storage.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 public protocol DataStoreStack {
+    // TODO: The following two methods are not really an abstraction, as they provide an `NSManagedObjectContext`. This should be handled differently.
+    /// All the code carried out inside the provided block can use the provided `NSManagedObjectContext` and be sure, that this context is valid at that time.
+    ///
+    /// This is the version of the method that returns nothing.
+    /// It may be used to store away data.
+    /// The block is executed synchronously and thus requires no handling of multi threading.
+    /// Everything called after this call is also executed after this call.
     func wrapInContext(_ block: (NSManagedObjectContext) throws -> Void) throws
+    /// This is a version of ``DataStoreStack/wrapInContext(_:)`` that returns a generic value.
+    ///
+    /// This method should be used to load data from storage or return status reports based on operations within the storage.
     func wrapInContextReturn<T>(_ block: (NSManagedObjectContext) throws -> T) throws -> T
+    /// A method carrying out asynchronous initialization work.
+    ///
+    /// This method must be called shortly after initialization and before any other interaction with a newly created `DataStoreStack`.
     func setup() async throws
+    /// Provide an underlaying ``PersistenceLayer``.
+    ///
+    /// This method is only here for backwards compatibility.
+    /// `PersistenceLayer` is scheduled to die pretty soon.
+    @available(*, deprecated, message: "PersistenceLayer should not be used any longer. Please write your own data interaction code using `wrapInContext` and `wrapInContextReturn`.")
     func persistenceLayer() -> PersistenceLayer
-    /// This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. This is required to handle legacy data and installations, that still have measurements with falsely generated data.
+    /// This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. 
+    /// This is required to handle legacy data and installations, that still have measurements with falsely generated data.
     func nextValidIdentifier() throws -> UInt64
 }
-// TODO: Rename this to CoreDataStack and move it to the Persistence group.
+
 /**
  A class for objects representing a *CoreData* stack.
 
@@ -38,7 +62,7 @@ public protocol DataStoreStack {
  So it might be a good idea to run `setup(bundle:completionClosure:)` on a background thread.
 
  - Author: Klemens Muthmann
- - Version: 3.1.0
+ - Version: 4.0.0
  - Since: 4.0.0
  - Attention: You must call `setup(bundle:completionClosure:)` only once in your application. Usually this should happen in AddDelegate.application. Do not load or save any data before the call to `setup(bundle:completionClosure:)` has finished.
  */
@@ -112,22 +136,6 @@ public class CoreDataStack: DataStoreStack {
     }
 
     // MARK: - SetUp
-
-    /**
-     Connects this `CoreDataManager` to the underlying storage, possibly migrating the data model to the current version.
-
-     - Parameter bundle: The bundle containing the data model.
-     - Throws: `CoreDataError.missingModelUrl`
-     */
-    @available(iOS, obsoleted: 13.0, deprecated, message: "Only use this before iOS 13. Use the async/await version of this method on newer systems.")
-    public func setup(bundle: Bundle, completionClosure: @escaping (Error?) -> Void) throws {
-        try migrateStoreIfNeeded(bundle: bundle)
-        self.persistentContainer.loadPersistentStores { _, error in
-            completionClosure(error)
-        }
-    }
-
-    @available(iOS 13.0, *)
     public func setup() async throws {
         // TODO: Remove this parameter as soon as deprecated setup method has been deleted.
         try migrateStoreIfNeeded(bundle: self.bundle)

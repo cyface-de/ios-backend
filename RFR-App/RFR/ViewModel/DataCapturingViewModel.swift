@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots App.
  *
@@ -25,13 +25,11 @@ import DataCapturing
  The view model backing views that need to interact with the
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 3.1.2
  */
 class DataCapturingViewModel: ObservableObject {
     // MARK: - Properties
-    /// A flag that is set as soon as tje datastore connection is up and running.
-    @Published var isInitialized = false
     /// The stack used to access the data store.
     var dataStoreStack: DataStoreStack?
     /// The view model used by the view for controlling the live measurement.
@@ -43,14 +41,11 @@ class DataCapturingViewModel: ObservableObject {
     // TODO: All of this only concerns the `SynchronizationViewModel` and thus should only appear there.
     /// The authenticator used to authenticate for data uploads
     let authenticator: Authenticator
-    /// The location to upload data to.
-    private let uploadEndpoint: URL
 
     // MARK: - Initializers
-    init(authenticator: Authenticator, uploadEndpoint: URL) throws {
-        self.uploadEndpoint = uploadEndpoint
+    init(authenticator: Authenticator, uploadProcessBuilder: UploadProcessBuilder, dataStoreStack: DataStoreStack) throws {
         self.authenticator = authenticator
-        let dataStoreStack = try CoreDataStack()
+
         liveViewModel = LiveViewModel(
             dataStoreStack: dataStoreStack,
             dataStorageInterval: 5.0
@@ -58,10 +53,7 @@ class DataCapturingViewModel: ObservableObject {
         syncViewModel = SynchronizationViewModel(
             authenticator: authenticator,
             dataStoreStack: dataStoreStack,
-            uploadProcessBuilder: DefaultUploadProcessBuilder(
-                apiEndpoint: uploadEndpoint,
-                sessionRegistry: SessionRegistry()
-            )
+            uploadProcessBuilder: uploadProcessBuilder
         )
         measurementsViewModel = MeasurementsViewModel(
             dataStoreStack: dataStoreStack,
@@ -69,34 +61,25 @@ class DataCapturingViewModel: ObservableObject {
         )
         measurementsViewModel.subscribe(to: liveViewModel.$message)
         self.dataStoreStack = dataStoreStack
-        Task {
-            try await dataStoreStack.setup()
-            try dataStoreStack.wrapInContext { context in
-                let request = MeasurementMO.fetchRequest()
-                request.predicate = NSPredicate(format: "synchronized=false AND synchronizable=false")
-                let result = try request.execute()
-                for measurementModelObject in result {
-                    measurementModelObject.synchronizable = true
-                }
-                try context.save()
+        try dataStoreStack.wrapInContext { context in
+            let request = MeasurementMO.fetchRequest()
+            request.predicate = NSPredicate(format: "synchronized=false AND synchronizable=false")
+            let result = try request.execute()
+            for measurementModelObject in result {
+                measurementModelObject.synchronizable = true
             }
-            try measurementsViewModel.setup()
-            DispatchQueue.main.async { [weak self] in
-                self?.isInitialized = true
-            }
+            try context.save()
         }
+        try measurementsViewModel.setup()
     }
 
     init(
-        isInitialized: Bool,
         showError: Bool,
         dataStoreStack: DataStoreStack,
         authenticator: Authenticator,
-        uploadEndpoint: URL
+        collectorUrl: URL
     ) {
-        self.uploadEndpoint = uploadEndpoint
         self.authenticator = authenticator
-        self.isInitialized = isInitialized
         self.dataStoreStack = dataStoreStack
         liveViewModel = LiveViewModel(
             dataStoreStack: dataStoreStack,
@@ -104,10 +87,11 @@ class DataCapturingViewModel: ObservableObject {
         )
         syncViewModel = SynchronizationViewModel(
             authenticator: authenticator,
-            dataStoreStack: dataStoreStack, 
+            dataStoreStack: dataStoreStack,
             uploadProcessBuilder: DefaultUploadProcessBuilder(
-                apiEndpoint: uploadEndpoint,
-                sessionRegistry: SessionRegistry()
+                collectorUrl: collectorUrl,
+                sessionRegistry: DefaultSessionRegistry(),
+                uploadFactory: CoreDataBackedUploadFactory(dataStoreStack: dataStoreStack)
             )
         )
         measurementsViewModel = MeasurementsViewModel(

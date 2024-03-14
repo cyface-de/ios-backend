@@ -28,6 +28,7 @@ import Foundation
  - version: 1.0.0
  */
 class PreRequest {
+    // MARK: - Properties
     /// A URL running an appropriate Cyface Server
     let apiUrl: URL
     /// The Alamofire `Session` to use for uploading the data.
@@ -35,16 +36,18 @@ class PreRequest {
     /// Encoder to write the meta data as JSON into the requests body.
     let jsonEncoder = JSONEncoder()
 
+    // MARK: - Initializers
     /// Make a new pre request from a Cyface API URL and an Alamofire `Session`.
     init(apiUrl: URL, session: URLSession) {
         self.apiUrl = apiUrl
         self.session = session
     }
 
+    // MARK: - Methods
     /// Send the request
     /// - Parameter authToken: Get this JWT token from an `Authenticator`.
     /// - Parameter upload: The upload information
-    func request(authToken: String, upload: Upload) async throws -> Response {
+    func request(authToken: String, upload: any Upload) async throws -> Response {
         let metaData = try upload.metaData()
         let data = try upload.data()
 

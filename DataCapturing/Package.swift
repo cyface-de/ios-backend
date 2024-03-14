@@ -58,11 +58,19 @@ let package = Package(
                 "DataCompression",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 .product(name: "AppAuth", package: "AppAuth-iOS"),
+            ],
+            exclude: ["Support/Info.plist"],
+            resources: [
+                .process("Synchronization/Upload/Background/SessionRegistry.xcdatamodeld"),
+                .process("Model/Migrations/V3toV4/V3toV4.xcmappingmodel"),
+                .process("Model/CyfaceModel.xcdatamodeld"),
+                .process("Model/Migrations/V10toV11/V10toV11.xcmappingmodel"),
+                .process("Model/Migrations/V7toV8/V7toV8.xcmappingmodel"),
             ]),
         .testTarget(
             name: "DataCapturingTests",
             dependencies: ["DataCapturing", "Mocker"],
-            exclude: ["Resources/README.md"],
+            exclude: ["Resources/README.md", "Info.plist"],
             resources: [
                 .process("Resources"),
             ]),

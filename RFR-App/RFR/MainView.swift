@@ -24,7 +24,7 @@ import DataCapturing
  The main application view allowing to switch subviews using a `TabView`.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 struct MainView: View {
@@ -183,7 +183,6 @@ struct MainView: View {
 
     return MainView(
         viewModel: DataCapturingViewModel(
-            isInitialized: false,
             showError: false,
             dataStoreStack: MockDataStoreStack(
                 persistenceLayer: MockPersistenceLayer(
@@ -195,7 +194,7 @@ struct MainView: View {
                 )
             ),
             authenticator: MockAuthenticator(),
-            uploadEndpoint: try! config.getUploadEndpoint()
+            collectorUrl: try! config.getUploadEndpoint()
         ), incentivesUrl: try! config.getIncentivesUrl()
     )
 }
@@ -206,7 +205,6 @@ struct MainView: View {
     return MainView(
         error: DataCapturingError.notRunning,
         viewModel: DataCapturingViewModel(
-            isInitialized: false,
             showError: false,
             dataStoreStack: MockDataStoreStack(
                 persistenceLayer: MockPersistenceLayer(
@@ -218,7 +216,7 @@ struct MainView: View {
                 )
             ),
             authenticator: MockAuthenticator(),
-            uploadEndpoint: try! config.getUploadEndpoint()
+            collectorUrl: try! config.getUploadEndpoint()
         ),
         incentivesUrl: try! config.getIncentivesUrl()
     )

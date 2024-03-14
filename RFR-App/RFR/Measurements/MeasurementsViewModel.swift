@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots App.
  *
@@ -33,10 +33,10 @@ import SwiftUI
 
  It also provides an optional ``error``, in case anything unforseen has happened.
 
- **ATTENTION:** It is important to call `setup after creation of an instance of this class, before actually using it. Otherwise `isLoading` will never become `true`.`
+ **ATTENTION:** It is important to call `setup after creation of an instance of this class, before actually using it. Otherwise `isLoading` will never become `false`.`
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 class MeasurementsViewModel: ObservableObject {
@@ -72,13 +72,15 @@ class MeasurementsViewModel: ObservableObject {
         uploadSubscription = uploadPublisher
             .receive(on: DispatchQueue.main).sink { [weak self] status in
                 self?.measurements.filter { measurement in
-                    measurement.id == status.id
+                    measurement.id == status.measurement.identifier
                 }.forEach { measurement in
                     switch status.status {
                     case .started:
                         measurement.synchronizationState = .synchronizing
                     case .finishedWithError(cause: _):
                         measurement.synchronizationState = .unsynchronizable
+                    case .finishedUnsuccessfully:
+                        measurement.synchronizationState = .synchronizable
                     default:
                         measurement.synchronizationState = .synchronized
                     }
@@ -162,10 +164,11 @@ class MeasurementsViewModel: ObservableObject {
         )
         let northSouthReach = southWestCorner.distance(from: northWestCorner)
         let eastWestReach = northWestCorner.distance(from: northEastCorner)
+        let synchronizationState = SynchronizationState.from(measurement: measurement)
         return Measurement(
             id: UInt64(measurement.identifier),
             startTime: measurement.time ?? Date(),
-            synchronizationState: SynchronizationState.from(measurement: measurement),
+            synchronizationState: synchronizationState,
             _maxSpeed: maxSpeed,
             _meanSpeed: sumSpeed / Double(locationCount),
             _distance: distance,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots App.
  *
@@ -27,10 +27,10 @@ import Sentry
  View Model used as an interface to synchronize measurements and keep the UI up to date about synchronization progress.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
-class SynchronizationViewModel: ObservableObject {
+class SynchronizationViewModel: NSObject, ObservableObject {
     /// Showing an error dialog if not `nil`.
     @Published var error: Error?
     /// A publisher about changes to the ``UploadStatus`` of the currently synchronizing measurements.
@@ -41,6 +41,8 @@ class SynchronizationViewModel: ObservableObject {
     let authenticator: Authenticator
     /// A builder responsible for creating new ``UploadProcess`` instances on each new upload.
     let processBuilder: UploadProcessBuilder
+    /// Store the reporting of ``UploadStatus``events here, so the ``UploadProcess`` keeps reporting.
+    var uploadStatusCancellable: AnyCancellable?
 
     /// Create a new completely initialized object of this class.
     /// Nothing surprising is happening here.
@@ -56,30 +58,24 @@ class SynchronizationViewModel: ObservableObject {
     /// Start synchronization for all local but not yet synchronized measurements.
     func synchronize() async {
         // TODO: Run this on a background thread
-        let uploadProcess = processBuilder.build()
+        var uploadProcess = processBuilder.build()
+        self.uploadStatusCancellable = uploadProcess.uploadStatus.sink { [weak self] status in
+            self?.uploadStatusPublisher.send(UploadStatus(measurement: status.upload.measurement, status: status.status))
+        }
         do {
             let measurements = try dataStoreStack.persistenceLayer().loadSynchronizableMeasurements()
-            os_log("Synchronizing %d measurements!", log: OSLog.synchronization, type: .debug, measurements.count)
+            os_log("Sync: Synchronizing %d measurements!", log: OSLog.synchronization, type: .debug, measurements.count)
             for measurement in measurements {
-                os_log(.debug, log: OSLog.synchronization, "Starting synchronization of measurement %d!", measurement.identifier)
-                uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .started))
+                os_log(.debug, log: OSLog.synchronization, "Sync: Starting synchronization of measurement %d!", measurement.identifier)
                 do {
-                    let upload = CoreDataBackedUpload(dataStoreStack: dataStoreStack, measurement: measurement)
                     let authToken = try await authenticator.authenticate()
-                    _ = try await uploadProcess.upload(authToken: authToken, upload)
-                    os_log(.debug, log: OSLog.synchronization, "Successfully finished synchronization of measurement %d!", measurement.identifier)
-                    uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedSuccessfully))
+                    _ = try await uploadProcess.upload(measurement: measurement, authToken: authToken)
+                    os_log(.debug, log: OSLog.synchronization, "Sync: Run synchronization of measurement %d!", measurement.identifier)
                 } catch {
                     SentrySDK.capture(error: error)
-                    os_log(.error, log: OSLog.synchronization, "Failed synchronizing measurement %d!", measurement.identifier)
-                    if let defaultUploadProcessBuilder = processBuilder as? DefaultUploadProcessBuilder {
-                        os_log(.error, log: OSLog.synchronization, "Data Collector API Address: %@", defaultUploadProcessBuilder.apiEndpoint.absoluteString)
-                    }
-                    if let oAuthAuthenticator = authenticator as? OAuthAuthenticator {
-                        os_log(.error, log: OSLog.authorization, "Identity Provider Address: %@", oAuthAuthenticator.issuer.absoluteString)
-                    }
-                    os_log("Synchronization failed due to: %@", log: OSLog.synchronization, type: .error, error.localizedDescription)
-                    uploadStatusPublisher.send(UploadStatus(id: measurement.identifier, status: .finishedWithError(cause: error)))
+                    os_log(.error, log: OSLog.synchronization, "Sync: Failed synchronizing measurement %d!", measurement.identifier)
+                    os_log("Sync: Synchronization failed due to: %@", log: OSLog.synchronization, type: .error, error.localizedDescription)
+                    uploadStatusPublisher.send(UploadStatus(measurement: measurement, status: .finishedWithError(cause: error)))
                 }
             }
         } catch {
@@ -90,42 +86,14 @@ class SynchronizationViewModel: ObservableObject {
 }
 
 /**
- A mapping between a local measurement identifier and and its current upload status.
+A wrapper for grouping a ``FinishedMeasurement`` together with its current ``UploadStatusType``.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
- - Since: 3.1.2
+ - Version 1.0.0
  */
 struct UploadStatus {
-    /// The measurement identifier of this status.
-    let id: UInt64
-    /// The current status.
+    /// The measurement the status belongs to.
+    let measurement: FinishedMeasurement
+    /// The status of the measurement.
     let status: UploadStatusType
-}
-
-/**
- The current status of an upload to a Cyface Data Collector service.
-
- - Author: Klemens Muthmann
- - Version: 1.0.0
- - Since: 3.1.2
- */
-enum UploadStatusType: CustomStringConvertible {
-    /// Upload has been started
-    case started
-    /// Upload was finished successfully.
-    case finishedSuccessfully
-    /// Upload failed because of the provided error.
-    case finishedWithError(cause: Error)
-
-    var description: String {
-        switch(self) {
-        case .started:
-            "started"
-        case .finishedSuccessfully:
-            "finishedSuccessfully"
-        case .finishedWithError(cause: let error):
-            "finishedWithError: \(error.localizedDescription)"
-        }
-    }
 }

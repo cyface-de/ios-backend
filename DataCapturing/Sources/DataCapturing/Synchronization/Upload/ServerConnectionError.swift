@@ -44,9 +44,7 @@ public enum ServerConnectionError: Error {
     /// The upload location provided by a status request was no a valid URL.
     case invalidUploadLocation(String)
     /// Thrown if the server did not accept the upload of a measurement for some reason
-    case uploadNotAccepted(upload: Upload)
-    /// Caused by an invalidly formatted server session identifier. This must be a valid URL pointing to the address of the session on the server.
-    case sessionIdentifierFormatInvalid(String)
+    case uploadNotAccepted(upload: any Upload)
 }
 
 extension ServerConnectionError: LocalizedError {
@@ -133,16 +131,6 @@ There are several possible reasons for that, which are server specific.
 One example would be a measurement without any location data.
 """)
             return String.localizedStringWithFormat(errorMessage, upload.measurement.identifier)
-        case .sessionIdentifierFormatInvalid(let sessionIdentifier):
-            let errorMessage = NSLocalizedString(
-                "de.cyface.error.ServerConnectionError.sessionIdentifierFormatInvalid",
-                value: "Wrongly formatted identifier of the an upload session. Expected a valid URL but got %@!",
-                comment: """
-Tell the user that the upload session was not correctly formatted and thus an uplod was not possible. The true session is provided as the first parameter.
-The expected format is the URL of the session resource on the server.
-"""
-            )
-            return String.localizedStringWithFormat(errorMessage, sessionIdentifier)
         }
     }
 }

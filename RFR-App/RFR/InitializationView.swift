@@ -26,7 +26,7 @@ import AppAuthCore
  The first view shown after starting the application. This should usually be the login link or some error message if startup failed.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 struct InitializationView: View {
@@ -42,14 +42,14 @@ struct InitializationView: View {
     @State var loginNavigationState: [String] = []
 
     var body: some View {
-        if viewModel.isInitialized && loginStatus.isLoggedIn {
+        if loginStatus.isLoggedIn {
             MainView(
                 viewModel: viewModel,
                 incentivesUrl: incentivesEndpoint
             )
             .environmentObject(loginStatus)
 
-        } else if viewModel.isInitialized && !loginStatus.isLoggedIn {
+        } else {
             NavigationStack(path: $loginNavigationState) {
                 OAuthLoginView(
                     authenticator: viewModel.authenticator,
@@ -67,8 +67,6 @@ struct InitializationView: View {
                     ErrorTextView(errorMessage: errorMessage)
                 }
             }
-        } else {
-            LoadinScreen()
         }
     }
 }
@@ -79,7 +77,6 @@ let config = try! ConfigLoader.load()
 #Preview("Standard") {
     return InitializationView(
         viewModel: DataCapturingViewModel(
-            isInitialized: true,
             showError: false,
             dataStoreStack: MockDataStoreStack(
                 persistenceLayer: MockPersistenceLayer(measurements: [
@@ -89,7 +86,7 @@ let config = try! ConfigLoader.load()
                 ])
             ),
             authenticator: MockAuthenticator(),
-            uploadEndpoint: try! config.getUploadEndpoint()
+            collectorUrl: try! config.getUploadEndpoint()
         ),
         incentivesEndpoint: try! config.getIncentivesUrl()
     )
@@ -98,7 +95,6 @@ let config = try! ConfigLoader.load()
 #Preview("Error") {
     return InitializationView(
         viewModel: DataCapturingViewModel(
-            isInitialized: true,
             showError: false,
             dataStoreStack: MockDataStoreStack(
                 persistenceLayer: MockPersistenceLayer(
@@ -106,7 +102,7 @@ let config = try! ConfigLoader.load()
                 )
             ),
             authenticator: MockAuthenticator(),
-            uploadEndpoint: try! config.getUploadEndpoint()),
+            collectorUrl: try! config.getUploadEndpoint()),
         incentivesEndpoint: try! config.getIncentivesUrl(),
         loginNavigationState: ["test"]
     )
