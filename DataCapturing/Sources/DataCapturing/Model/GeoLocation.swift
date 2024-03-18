@@ -139,18 +139,3 @@ extension GeoLocation: Equatable {
         }
     }
 }
-
-// TODO: Move this to Double.swift
-public extension Double {
-    public func equal(_ value: Double, precise: Int) -> Bool {
-        let denominator: Double = pow(10.0, Double(precise))
-        let maxDiff: Double = 1 / denominator
-        let realDiff: Double = self - value
-
-        if fabs(realDiff) <= maxDiff {
-            return true
-        } else {
-            return false
-        }
-    }
-}
