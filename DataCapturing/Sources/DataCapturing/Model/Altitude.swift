@@ -24,6 +24,7 @@ import CoreData
  A struct to wrap all the information associated with a measured altitude provided by an altimeter.
 
  - Author: Klemens Muthmann
+ - version: 1.0.0
  */
 public class Altitude: CustomStringConvertible {
     /// The relative altitude change since the last measured value, in meters.
@@ -45,5 +46,17 @@ public class Altitude: CustomStringConvertible {
         self.relativeAltitude = relativeAltitude
         self.pressure = pressure
         self.time = time
+    }
+}
+
+extension Altitude: Equatable {
+    public static func == (lhs: Altitude, rhs: Altitude) -> Bool {
+        if lhs===rhs {
+            return true
+        } else {
+            return lhs.relativeAltitude.equal(rhs.relativeAltitude, precise: 3) &&
+            lhs.pressure.equal(rhs.pressure, precise: 3) &&
+            lhs.time == rhs.time
+        }
     }
 }

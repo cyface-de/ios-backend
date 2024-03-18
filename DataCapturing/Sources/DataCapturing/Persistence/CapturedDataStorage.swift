@@ -116,7 +116,7 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                             )
                             return
                         }
-                        guard let measurement = try measurementRequest.execute().first as? MeasurementMO else {
+                        guard let measurementMO = try measurementRequest.execute().first as? MeasurementMO else {
                             os_log(
                                 "Unable to load measurement to store to",
                                 log: OSLog.persistence,
@@ -127,15 +127,15 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
 
                         let accelerationsFile = self?.sensorValueFileFactory.create(
                             fileType: SensorValueFileType.accelerationValueType,
-                            qualifier: String(measurement.unsignedIdentifier)
+                            qualifier: String(measurementMO.unsignedIdentifier)
                         )
                         let rotationsFile = self?.sensorValueFileFactory.create(
                             fileType: SensorValueFileType.rotationValueType,
-                            qualifier: String(measurement.unsignedIdentifier)
+                            qualifier: String(measurementMO.unsignedIdentifier)
                         )
                         let directionsFile = self?.sensorValueFileFactory.create(
                             fileType: SensorValueFileType.directionValueType,
-                            qualifier: String(measurement.unsignedIdentifier)
+                            qualifier: String(measurementMO.unsignedIdentifier)
                         )
 
                         try messages.forEach { message in
@@ -146,11 +146,11 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                                     log: OSLog.persistence,
                                     type: .debug
                                 )
-                                if let lastTrack = measurement.typedTracks().last {
+                                if let lastTrack = measurementMO.typedTracks().last {
                                     lastTrack.addToLocations(GeoLocationMO(location: location, context: context))
                                 }
                             case .capturedAltitude(let altitude):
-                                if let lastTrack = measurement.typedTracks().last {
+                                if let lastTrack = measurementMO.typedTracks().last {
                                     lastTrack.addToAltitudes(AltitudeMO(altitude: altitude, context: context))
                                 }
                             case .capturedRotation(let rotation):
@@ -176,17 +176,18 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                                 }
                             case .started(timestamp: let time):
                                 os_log("Storing started event to database.", log: OSLog.persistence, type: .debug)
-                                measurement.addToTracks(TrackMO(context: context))
-                                measurement.addToEvents(EventMO(event: Event(time: time, type: .lifecycleStart), context: context))
+                                measurementMO.addToTracks(TrackMO(context: context))
+                                measurementMO.addToEvents(EventMO(event: Event(time: time, type: .lifecycleStart), context: context))
                             case .resumed(timestamp: let time):
-                                measurement.addToTracks(TrackMO(context: context))
-                                measurement.addToEvents(EventMO(event: Event(time: time, type: .lifecycleResume), context: context))
+                                measurementMO.addToTracks(TrackMO(context: context))
+                                measurementMO.addToEvents(EventMO(event: Event(time: time, type: .lifecycleResume), context: context))
                             case .paused(timestamp: let time):
-                                measurement.addToEvents(EventMO(event: Event(time: time, type: .lifecyclePause), context: context))
+                                measurementMO.addToEvents(EventMO(event: Event(time: time, type: .lifecyclePause), context: context))
                             case .stopped(timestamp: let time):
                                 os_log("Storing stopped event to database.", log: OSLog.persistence, type: .debug)
-                                measurement.addToEvents(EventMO(event: Event(time: time, type: .lifecycleStop), context: context))
-                                measurement.synchronizable = true
+                                measurementMO.addToEvents(EventMO(event: Event(time: time, type: .lifecycleStop), context: context))
+                                measurementMO.synchronizable = true
+                                defer { measurement.measurementMessages.send(Message.finished(timestamp: Date.now)) }
                             default:
                                 os_log("Message %{PUBLIC}@ irrelevant for data storage and thus ignored.",log: OSLog.persistence, type: .debug, message.description)
                             }

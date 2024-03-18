@@ -123,3 +123,34 @@ public class GeoLocation: CustomStringConvertible {
         return distance(from: CLLocation(latitude: previousLocation.latitude, longitude: previousLocation.longitude))
     }
 }
+
+extension GeoLocation: Equatable {
+    public static func == (lhs: GeoLocation, rhs: GeoLocation) -> Bool {
+        if lhs === rhs {
+            return true
+        } else {
+            return lhs.latitude.equal(rhs.latitude, precise: 6) && 
+            lhs.longitude.equal(rhs.longitude, precise: 6) &&
+            lhs.speed.equal(rhs.speed, precise: 2) &&
+            lhs.accuracy.equal(rhs.accuracy, precise: 3) &&
+            lhs.time == rhs.time &&
+            lhs.altitude.equal(rhs.altitude, precise: 3) &&
+            lhs.verticalAccuracy.equal(rhs.verticalAccuracy, precise: 3)
+        }
+    }
+}
+
+// TODO: Move this to Double.swift
+public extension Double {
+    public func equal(_ value: Double, precise: Int) -> Bool {
+        let denominator: Double = pow(10.0, Double(precise))
+        let maxDiff: Double = 1 / denominator
+        let realDiff: Double = self - value
+
+        if fabs(realDiff) <= maxDiff {
+            return true
+        } else {
+            return false
+        }
+    }
+}

@@ -94,6 +94,7 @@ public class MeasurementImpl {
      */
     private let lifecycleQueue: DispatchQueue
     private var messageCancellable: AnyCancellable? = nil
+    private var finishedEventCancellable: AnyCancellable? = nil
 
     // MARK: - Initializers
 
@@ -126,6 +127,18 @@ public class MeasurementImpl {
 
         self.isRunning = false
         self.isPaused = false
+
+        finishedEventCancellable = measurementMessages.filter {
+            switch $0 {
+            case .finished(timestamp: _):
+                return true
+            default:
+                return false
+            }
+        }.sink {[weak self] _ in
+            self?.measurementMessages.send(completion: .finished)
+            self?.finishedEventCancellable = nil
+        }
     }
 
 
@@ -219,7 +232,6 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             isPaused = false
 
             measurementMessages.send(.stopped(timestamp: Date()))
-            measurementMessages.send(completion: .finished)
         }
     }
 
