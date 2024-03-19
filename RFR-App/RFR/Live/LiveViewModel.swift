@@ -67,137 +67,38 @@ class LiveViewModel: ObservableObject {
                 return measurement
             } else {
                 let measurement = MeasurementImpl()
-                measurement.measurementMessages
-                    .receive(on: DispatchQueue.main)
-                    .assign(to: &$message)
 
-                registerLifecycleFlows(measurement)
-                // Only location captured events
-                let locationsFlow = measurement.measurementMessages.filter { if case Message.capturedLocation = $0 { return true } else { return false } }.compactMap {if case let Message.capturedLocation(location) = $0 { return location } else { return nil }}
-                // Use the most recent location to provide the speed value
-                locationsFlow.filter {location in location.speed >= 0.0 }.compactMap { location in "\(speedFormatter.string(from: location.speed as NSNumber) ?? "0.0") km/h" }.receive(on: RunLoop.main).assign(to: &$speed)
+                // Forward finished messages so the UI can update accordingly.
+                let finishedMessages = finishedFlow()
+                let locationFlow = locationFlow()
+                let altitudeFlow = altitudeFlow()
+                let startedFlow = startFlow()
+                let stoppedFlow = stopFlow()
+                let pausedFlow = pauseFlow()
+                let resumedFlow = resumeFlow()
 
-                // Organize all received locations into the local locations array, and stream that array for further processing
-                let trackFlow = locationsFlow
-                    .compactMap { [weak self] location in
-                        let endIndex = max((self?.locations.count ?? 0)-1, 0)
-                        self?.locations[endIndex].append(location)
-                        return self?.locations
+                // Send each received message to the correct stream
+                measurement.measurementMessages.sink { message in
+                    switch message {
+                    case .capturedLocation(let location):
+                        locationFlow.send(location)
+                    case .capturedAltitude(let altitude):
+                        altitudeFlow.send(altitude)
+                    case .started(timestamp: _):
+                        startedFlow.send(MeasurementState.running)
+                    case .stopped(timestamp: _):
+                        stoppedFlow.send(MeasurementState.stopped)
+                    case .paused(timestamp: _):
+                        pausedFlow.send(MeasurementState.paused)
+                    case .resumed(timestamp: _):
+                        resumedFlow.send(MeasurementState.running)
+                    case .finished(timestamp: _):
+                        os_log("Routing finished event", log: OSLog.capturingEvent, type: .debug)
+                        finishedMessages.send(message)
+                    default:
+                        os_log("Encountered unhandled message %@", log: OSLog.capturingEvent, type: .debug, message.description)
                     }
-                // Calculate and store distance covered, by all the tracks from the current measurement.
-                let distanceFlow = trackFlow.map {(tracks: [[GeoLocation]]) in
-                    return tracks
-                        .map { track in
-                            var trackLength = 0.0
-                            var prevLocation: GeoLocation? = nil
-                            for location in track {
-                                if let prevLocation = prevLocation {
-                                    trackLength += location.distance(from: prevLocation)
-                                }
-                                prevLocation = location
-                            }
-                            return trackLength
-                        }
-                        .reduce(0.0) { accumulator, next in
-                            accumulator + next
-                        }
-                }
-                distanceFlow.compactMap {
-                    distanceFormatter.string(from: $0 as NSNumber)
-                }.map { formattedDistance in
-                    "\(formattedDistance) km"
-                }
-                .receive(on: RunLoop.main)
-                .assign(to: &$distance)
-
-                // Calculate and store average speed over all the tracks from this measurement.
-                trackFlow.map { tracks in
-                    Statistics.averageSpeed(timelines: tracks)
-                }
-                .filter { $0 >= 0.0}
-                .compactMap {
-                    speedFormatter.string(from: $0 as NSNumber)
-                }
-                .map { formattedSpeed in
-                    "\(formattedSpeed) km/h"
-                }
-                .receive(on: RunLoop.main)
-                .assign(to: &$averageSpeed)
-
-                // Calculate and store the total duration for all the tracks in this measurement.
-                trackFlow
-                    .map { tracks in
-                        return Statistics.duration(timelines: tracks)
-                    }
-                    .compactMap {
-                        timeFormatter.string(from: $0)
-                    }
-                    .receive(on: RunLoop.main)
-                    .assign(to: &$duration)
-
-                // Calculate the total rise for all the tracks in this measurement.
-                measurement.measurementMessages
-                    .filter {
-                        if case Message.capturedAltitude = $0 {
-                            return true
-                        } else {
-                            return false
-                        }
-                    }
-                    .compactMap { message in
-                        if case let Message.capturedAltitude(altitude) = message {
-                            return altitude
-                        } else {
-                            return nil
-                        }
-                    }
-                    .compactMap { [weak self] (altitude: DataCapturing.Altitude) in
-                        let endIndex = max((self?.altitudes.count ?? 0)-1, 0)
-                        self?.altitudes[endIndex].append(altitude)
-                        return self?.altitudes
-                    }
-                    .map { (tracks: [[DataCapturing.Altitude]]) in
-                        return tracks.map { track in
-                            os_log("Using altimeter values to calculate accumulated height.", log: OSLog.measurement, type: .debug)
-                            var previousAltitude: Double? = nil
-                            var sum = 0.0
-                            for altitude in track {
-                                if let previousAltitude = previousAltitude {
-                                    let relativeAltitudeChange = altitude.relativeAltitude - previousAltitude
-                                    if relativeAltitudeChange > 0.1 {
-                                        sum += relativeAltitudeChange
-                                    }
-                                }
-                                previousAltitude = altitude.relativeAltitude
-                            }
-                            return sum
-                            //}
-                        }
-                        .reduce(0.0) { accumulator, next in
-                            accumulator + next
-                        }
-                    }
-                    .compactMap {
-                        riseFormatter.string(from: $0 as NSNumber)
-                    }
-                    .map { formattedRise in
-                        "\(formattedRise) m"
-                    }
-                    .receive(on: RunLoop.main)
-                    .assign(to: &$inclination)
-
-                // 
-                distanceFlow.map {
-                    Statistics.avoidedEmissions($0)
-                }
-                .compactMap {
-                    emissionsFormatter.string(from: $0 as NSNumber)
-                }
-                .map { formattedEmissions in
-                    "\(formattedEmissions) g CO₂"
-                }
-                .receive(on: RunLoop.main)
-                .assign(to: &$avoidedEmissions)
+                }.store(in: &cancellables)
 
                 self._measurement = measurement
                 return measurement
@@ -212,8 +113,8 @@ class LiveViewModel: ObservableObject {
     private var cancellables = [AnyCancellable]()
     /// Captures and publishes any error produced by this model.
     @Published var error: Error?
-    /// Always contains the most recent message received from the Cyface SDK.
-    @Published var message: Message = Message.receivedNothingYet
+    /// Always contains the most recent message received from the Cyface SDK. The measurements view listenes to this property to show updates to the live measurement if necessary.
+    @Published var finishedMessages: Message = Message.receivedNothingYet
 
     /**
      Initialize an object of this class.
@@ -331,12 +232,6 @@ class LiveViewModel: ObservableObject {
     func onStopPressed() throws {
         if measurement.isRunning || measurement.isPaused {
             try measurement.stop()
-            self.cancellables.forEach {
-                $0.cancel()
-            }
-            self.cancellables.removeAll(keepingCapacity: true)
-            self._measurement = nil
-            self.dataStorageProcess.unsubscribe()
         }
     }
 
@@ -373,71 +268,64 @@ class LiveViewModel: ObservableObject {
         }
     }
 
-    /// Register all the Combine flows required to capture lifecycle events such as `start`, `stop`, `pause` and `resume`.
-    private func registerLifecycleFlows(_ measurement: DataCapturing.Measurement) {
-        startFlow(measurement)
-        pauseFlow(measurement)
-        resumeFlow(measurement)
-        stopFlow(measurement)
-
-    }
-
     /// Setup Combine flow to handle ``Measurement`` start events.
-    private func startFlow(_ measurement: DataCapturing.Measurement) {
-        // Setting state
-        let startedFlow = measurement.measurementMessages
-            .filter { if case Message.started = $0 { return true } else { return false }}
-            .map { _ in MeasurementState.running }
-        startedFlow
+    private func startFlow() -> PassthroughSubject<MeasurementState, Never> {
+        let startFlow = PassthroughSubject<MeasurementState, Never>()
+        // Setting State
+        startFlow
             .receive(on: RunLoop.main)
             .assign(to: &$measurementState)
         // Append collections for the first track
-        startedFlow
+        startFlow
             .sink { [weak self] _ in
                 self?.locations.append([GeoLocation]())
                 self?.altitudes.append([DataCapturing.Altitude]())
             }
             .store(in: &cancellables)
+
+        return startFlow
     }
 
     /// Setup Combine flow to handle ``Measurement`` pause events.
-    private func pauseFlow(_ measurement: DataCapturing.Measurement) {
+    private func pauseFlow() -> PassthroughSubject<MeasurementState, Never> {
         // Handle pause event
-        measurement.measurementMessages
-            .filter { if case Message.paused = $0 { return true } else { return false }}
-            .map { _ in MeasurementState.paused}
+        let pauseFlow = PassthroughSubject<MeasurementState, Never>()
+        // Setting state
+        pauseFlow
             .receive(on: RunLoop.main)
             .assign(to: &$measurementState)
+
+        return pauseFlow
     }
 
     /// Setup Combine flow to handle ``Measurement`` resume events.
-    private func resumeFlow(_ measurement: DataCapturing.Measurement) {
-        let resumedFlow = measurement.measurementMessages
-            .filter { if case Message.resumed = $0 { return true } else { return false }}
-            .map { _ in MeasurementState.running}
-        resumedFlow
-            .receive(on: RunLoop.main).assign(to: &$measurementState)
+    private func resumeFlow() -> PassthroughSubject<MeasurementState, Never> {
+        let resumeFlow = PassthroughSubject<MeasurementState, Never>()
+        // Setting state
+        resumeFlow
+            .receive(on: RunLoop.main)
+            .assign(to: &$measurementState)
         // Append collections for the next track
-        resumedFlow
+        resumeFlow
             .sink { [weak self] _ in
                 self?.locations.append([GeoLocation]())
                 self?.altitudes.append([DataCapturing.Altitude]())
             }
             .store(in: &cancellables)
+
+        return resumeFlow
     }
 
     /// Setup Combine flow to handle ``Measurement`` stop events.
-    private func stopFlow(_ measurement: DataCapturing.Measurement) {
-        let stoppedEvents = measurement.measurementMessages
-            .filter { if case Message.stopped = $0 { return true} else { return false }}
-            .map { _ in MeasurementState.stopped}
+    private func stopFlow() -> PassthroughSubject<MeasurementState, Never> {
+        let stoppedFlow = PassthroughSubject<MeasurementState, Never>()
         // Setting state
-        stoppedEvents
+        stoppedFlow
             .receive(on: RunLoop.main)
             .assign(to: &$measurementState)
         // Clean state of this model.
         // Clear storage for altitudes and locations.
-        stoppedEvents
+        stoppedFlow
             .sink {[weak self] _ in
                 os_log("Cleanup after Stop.")
 
@@ -445,6 +333,141 @@ class LiveViewModel: ObservableObject {
                 self?.altitudes.removeAll(keepingCapacity: true)
             }
             .store(in: &cancellables)
+
+        return stoppedFlow
+    }
+
+    private func finishedFlow() -> PassthroughSubject<Message, Never> {
+        let finishedMessages = PassthroughSubject<Message, Never>()
+        finishedMessages
+            .receive(on: RunLoop.main)
+            .assign(to: &$finishedMessages)
+        finishedMessages.sink { _ in
+            os_log("Cleanup after measurement has finished", log: OSLog.measurement, type: .debug)
+            /*self.cancellables.forEach {
+                $0.cancel()
+            }*/
+            self.cancellables.removeAll(keepingCapacity: true)
+            self._measurement = nil
+            self.dataStorageProcess.unsubscribe()
+        }.store(in: &cancellables)
+
+        return finishedMessages
+    }
+
+    private func locationFlow() -> PassthroughSubject<GeoLocation, Never> {
+        let locationFlow = PassthroughSubject<GeoLocation, Never>()
+        // Use the most recent location to provide the speed value
+        locationFlow.filter {location in location.speed >= 0.0 }.compactMap { location in "\(speedFormatter.string(from: location.speed as NSNumber) ?? "0.0") km/h" }.receive(on: RunLoop.main).assign(to: &$speed)
+        // Organize all received locations into the local locations array, and stream that array for further processing
+        let trackFlow = locationFlow
+            .compactMap { [weak self] location in
+                let endIndex = max((self?.locations.count ?? 0)-1, 0)
+                self?.locations[endIndex].append(location)
+                return self?.locations
+            }
+        // Calculate and store distance covered, by all the tracks from the current measurement.
+        let distanceFlow = trackFlow.map {(tracks: [[GeoLocation]]) in
+            return tracks
+                .map { track in
+                    var trackLength = 0.0
+                    var prevLocation: GeoLocation? = nil
+                    for location in track {
+                        if let prevLocation = prevLocation {
+                            trackLength += location.distance(from: prevLocation)
+                        }
+                        prevLocation = location
+                    }
+                    return trackLength
+                }
+                .reduce(0.0) { accumulator, next in
+                    accumulator + next
+                }
+        }
+        distanceFlow.compactMap {
+            distanceFormatter.string(from: $0 as NSNumber)
+        }.map { formattedDistance in
+            "\(formattedDistance) km"
+        }
+        .receive(on: RunLoop.main)
+        .assign(to: &$distance)
+        // Calculate and store average speed over all the tracks from this measurement.
+        trackFlow.map { tracks in
+            Statistics.averageSpeed(timelines: tracks)
+        }
+        .filter { $0 >= 0.0}
+        .compactMap {
+            speedFormatter.string(from: $0 as NSNumber)
+        }
+        .map { formattedSpeed in
+            "\(formattedSpeed) km/h"
+        }
+        .receive(on: RunLoop.main)
+        .assign(to: &$averageSpeed)
+        // Calculate avoided emissions
+        distanceFlow.map {
+            Statistics.avoidedEmissions($0)
+        }
+        .compactMap {
+            emissionsFormatter.string(from: $0 as NSNumber)
+        }
+        .map { formattedEmissions in
+            "\(formattedEmissions) g CO₂"
+        }
+        .receive(on: RunLoop.main)
+        .assign(to: &$avoidedEmissions)
+        // Calculate and store the total duration for all the tracks in this measurement.
+        trackFlow
+            .map { tracks in
+                return Statistics.duration(timelines: tracks)
+            }
+            .compactMap {
+                timeFormatter.string(from: $0)
+            }
+            .receive(on: RunLoop.main)
+            .assign(to: &$duration)
+
+        return locationFlow
+    }
+
+    private func altitudeFlow() -> PassthroughSubject<DataCapturing.Altitude, Never> {
+        let altitudeFlow = PassthroughSubject<DataCapturing.Altitude, Never>()
+        altitudeFlow
+            .compactMap { [weak self] (altitude: DataCapturing.Altitude) in
+                let endIndex = max((self?.altitudes.count ?? 0)-1, 0)
+                self?.altitudes[endIndex].append(altitude)
+                return self?.altitudes
+            }
+            .map { (tracks: [[DataCapturing.Altitude]]) in
+                return tracks.map { track in
+                    os_log("Using altimeter values to calculate accumulated height.", log: OSLog.measurement, type: .debug)
+                    var previousAltitude: Double? = nil
+                    var sum = 0.0
+                    for altitude in track {
+                        if let previousAltitude = previousAltitude {
+                            let relativeAltitudeChange = altitude.relativeAltitude - previousAltitude
+                            if relativeAltitudeChange > 0.1 {
+                                sum += relativeAltitudeChange
+                            }
+                        }
+                        previousAltitude = altitude.relativeAltitude
+                    }
+                    return sum
+                }
+                .reduce(0.0) { accumulator, next in
+                    accumulator + next
+                }
+            }
+            .compactMap {
+                riseFormatter.string(from: $0 as NSNumber)
+            }
+            .map { formattedRise in
+                "\(formattedRise) m"
+            }
+            .receive(on: RunLoop.main)
+            .assign(to: &$inclination)
+
+        return altitudeFlow
     }
 }
 

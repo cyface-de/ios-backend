@@ -209,10 +209,11 @@ enum SynchronizationState {
     /// Convert a database `MeasurementMO` to its `SynchronizationState`
     static func from(measurement: MeasurementMO) -> SynchronizationState {
         let request = UploadSession.fetchRequest()
-        request.predicate = NSPredicate(format: "measurement.identifier=%d", measurement.identifier)
+        request.predicate = NSPredicate(format: "measurement=%@", measurement)
         request.fetchLimit = 1
         do {
-            if try request.execute().first != nil {
+            let sessions = try request.execute()
+            if !sessions.isEmpty {
                 return .synchronizing
             } else if measurement.synchronized {
                 return .synchronized

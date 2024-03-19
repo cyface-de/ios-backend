@@ -127,18 +127,6 @@ public class MeasurementImpl {
 
         self.isRunning = false
         self.isPaused = false
-
-        finishedEventCancellable = measurementMessages.filter {
-            switch $0 {
-            case .finished(timestamp: _):
-                return true
-            default:
-                return false
-            }
-        }.sink {[weak self] _ in
-            self?.measurementMessages.send(completion: .finished)
-            self?.finishedEventCancellable = nil
-        }
     }
 
 

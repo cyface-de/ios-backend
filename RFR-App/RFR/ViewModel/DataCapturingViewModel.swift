@@ -38,7 +38,7 @@ class DataCapturingViewModel: ObservableObject {
     let measurementsViewModel: MeasurementsViewModel
     /// The view model used to handle measurement synchronization.
     let syncViewModel: SynchronizationViewModel
-    // TODO: All of this only concerns the `SynchronizationViewModel` and thus should only appear there.
+    // TODO: All of this only concerns the `SynchronizationViewModel` and thus should only appear there. --> Actually this class seems to have become unnecessary. Putting stuff together should happen in the AppModel only. Further down only dependency injection should be necessary.
     /// The authenticator used to authenticate for data uploads
     let authenticator: Authenticator
 
@@ -59,7 +59,7 @@ class DataCapturingViewModel: ObservableObject {
             dataStoreStack: dataStoreStack,
             uploadPublisher: syncViewModel.uploadStatusPublisher
         )
-        measurementsViewModel.subscribe(to: liveViewModel.$message)
+        measurementsViewModel.subscribe(to: liveViewModel.$finishedMessages)
         self.dataStoreStack = dataStoreStack
         try dataStoreStack.wrapInContext { context in
             let request = MeasurementMO.fetchRequest()
