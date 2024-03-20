@@ -26,6 +26,9 @@ import Combine
 
  It orchestrates the different requests required by the Cyface Upload Protocol.
 
+ Information about the current upload are distributed using the *Combine* Publisher ``DefaultUploadProcess/uploadStatus``.
+ For possible events see ``UploadStatusType``.
+
  - author: Klemens Muthmann
  - version: 1.0.0
  */
