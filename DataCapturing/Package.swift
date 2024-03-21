@@ -61,7 +61,6 @@ let package = Package(
             ],
             exclude: ["Support/Info.plist"],
             resources: [
-                .process("Synchronization/Upload/Background/SessionRegistry.xcdatamodeld"),
                 .process("Model/Migrations/V3toV4/V3toV4.xcmappingmodel"),
                 .process("Model/CyfaceModel.xcdatamodeld"),
                 .process("Model/Migrations/V10toV11/V10toV11.xcmappingmodel"),
