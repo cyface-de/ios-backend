@@ -56,11 +56,17 @@ public class CapturedCoreDataStorage {
     let interval: TimeInterval
     /// The *Combine* cancellables used so new values are transmitted.
     var cancellables = [AnyCancellable]()
+    /// Creator for storing sensor values to a file.
+    let sensorValueFileFactory: SensorValueFileFactory
 
     /**
      - Parameter interval: The time interval to wait until the next batch of data is stored to the data storage. Increasing this time should improve performance but increases memory usage.
      */
-    public init(_ dataStoreStack: DataStoreStack, _ interval: TimeInterval) {
+    public init(
+        _ dataStoreStack: DataStoreStack,
+        _ interval: TimeInterval,
+        _ sensorValueFileFactory: SensorValueFileFactory = DefaultSensorValueFileFactory()
+    ) {
         self.dataStoreStack = dataStoreStack
         self.interval = interval
     }
@@ -85,6 +91,115 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
         }
     }
 
+<<<<<<< Updated upstream
+=======
+    private func load(measurement identifier: UInt64, from context: NSManagedObjectContext) throws -> MeasurementMO {
+        guard let measurementRequest = context.persistentStoreCoordinator?.managedObjectModel.fetchRequestFromTemplate(
+            withName: "measurementByIdentifier",
+            substitutionVariables: ["identifier": identifier]
+        ) else {
+            os_log(
+                "Unable to load measurement fetch request.",
+                log: OSLog.persistence,
+                type: .debug
+            )
+            throw PersistenceError.measurementNotLoadable(identifier)
+        }
+        guard let measurementMO = try measurementRequest.execute().first as? MeasurementMO else {
+            os_log(
+                "Unable to load measurement to store to",
+                log: OSLog.persistence,
+                type: .debug
+            )
+            throw PersistenceError.measurementNotLoadable(identifier)
+        }
+
+        return measurementMO
+    }
+
+    private func handle(messages: [Message], measurement identifier: UInt64) throws {
+        try self.dataStoreStack.wrapInContext { context in
+            let measurementMo = try self.load(measurement: identifier, from: context)
+
+            let accelerationsFile = sensorValueFileFactory.create(
+                fileType: SensorValueFileType.accelerationValueType,
+                qualifier: String(measurementMo.unsignedIdentifier)
+            )
+            let rotationsFile = sensorValueFileFactory.create(
+                fileType: SensorValueFileType.rotationValueType,
+                qualifier: String(measurementMo.unsignedIdentifier)
+            )
+            let directionsFile = sensorValueFileFactory.create(
+                fileType: SensorValueFileType.directionValueType,
+                qualifier: String(measurementMo.unsignedIdentifier)
+            )
+
+            try messages.forEach { message in
+                switch message {
+                case .capturedLocation(let location):
+                    self.store(location: location, to: measurementMo, context)
+                case .capturedAltitude(let altitude):
+                    self.store(altitude: altitude, to: measurementMo, context)
+                case .capturedRotation(let rotation):
+                    try self.store(rotation, to: rotationsFile)
+                case .capturedDirection(let direction):
+                    try self.store(direction, to: directionsFile)
+                case .capturedAcceleration(let acceleration):
+                    try self.store(acceleration, to: accelerationsFile)
+                case .started(timestamp: let time):
+                    os_log("Storing started event to database.", log: OSLog.persistence, type: .debug)
+                    measurementMo.addToTracks(TrackMO(context: context))
+                    measurementMo.addToEvents(EventMO(event: Event(time: time, type: .lifecycleStart), context: context))
+                case .resumed(timestamp: let time):
+                    measurementMo.addToTracks(TrackMO(context: context))
+                    measurementMo.addToEvents(EventMO(event: Event(time: time, type: .lifecycleResume), context: context))
+                case .paused(timestamp: let time):
+                    measurementMo.addToEvents(EventMO(event: Event(time: time, type: .lifecyclePause), context: context))
+                case .stopped(timestamp: let time):
+                    try self.onStop(measurement: measurementMo, context, time)
+                default:
+                    os_log("Message %{PUBLIC}@ irrelevant for data storage and thus ignored.",log: OSLog.persistence, type: .debug, message.description)
+                }
+            }
+        }
+    }
+
+    private func store(location: GeoLocation, to measurementMo: MeasurementMO, _ context: NSManagedObjectContext) {
+        os_log("Storing location to database.", log: OSLog.persistence, type: .debug)
+        if let lastTrack = measurementMo.typedTracks().last {
+            lastTrack.addToLocations(GeoLocationMO(location: location, context: context))
+        }
+    }
+
+    private func store(altitude: Altitude, to measurementMo: MeasurementMO, _ context: NSManagedObjectContext) {
+        if let lastTrack = measurementMo.typedTracks().last {
+            lastTrack.addToAltitudes(AltitudeMO(altitude: altitude, context: context))
+        }
+    }
+
+    private func store(_ value: SensorValue, to file: SensorValueFile) throws {
+        do {
+            _ = try file.write(serializable: [value])
+        } catch {
+            debugPrint("Unable to write data to file \(file.fileName)!")
+            throw error
+        }
+    }
+
+    private func onStop(measurement measurementMo: MeasurementMO, _ context: NSManagedObjectContext, _ time: Date) throws {
+        os_log("Storing stopped event to database.", log: OSLog.persistence, type: .debug)
+        measurementMo.addToEvents(EventMO(event: Event(time: time, type: .lifecycleStop), context: context))
+        measurementMo.synchronizable = true
+        try context.save()
+        os_log("Stored finished measurement.", log: OSLog.persistence, type: .debug)
+    }
+
+}
+
+// MARK: - Implementation of CapturedDataStorage Protocol
+extension CapturedCoreDataStorage: CapturedDataStorage {
+
+>>>>>>> Stashed changes
     /// Recievie updates from the provided ``Measurement`` and store the data to a ``DataStoreStack``.
     public func subscribe(
         to measurement: Measurement,
@@ -120,15 +235,15 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                             return
                         }
 
-                        let accelerationsFile = SensorValueFile(
+                        let accelerationsFile = sensorValueFileFactory.create(
                             fileType: SensorValueFileType.accelerationValueType,
                             qualifier: String(measurement.unsignedIdentifier)
                         )
-                        let rotationsFile = SensorValueFile(
+                        let rotationsFile = sensorValueFileFactory.create(
                             fileType: SensorValueFileType.rotationValueType,
                             qualifier: String(measurement.unsignedIdentifier)
                         )
-                        let directionsFile = SensorValueFile(
+                        let directionsFile = sensorValueFileFactory.create(
                             fileType: SensorValueFileType.directionValueType,
                             qualifier: String(measurement.unsignedIdentifier)
                         )

@@ -52,7 +52,7 @@ public class FinishedMeasurement: Hashable, Equatable {
                 ret += prevLocation?.distance(from: location) ?? 0.0
                 prevLocation = location
             }
-            return 0.0
+            return ret
         }
         .reduce(0.0) { accumulator, partSum in
             accumulator + partSum
