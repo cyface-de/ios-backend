@@ -28,8 +28,11 @@
  - Version: 1.0.0
  */
 public protocol SensorValueFileFactory {
+    associatedtype Serializable
+    associatedtype SpecificSerializer
+    associatedtype FileType: FileSupport where FileType.Serializable == Serializable, FileType.SpecificSerializer == SpecificSerializer
     /// Create the actual file for a certain type
-    func create(fileType: SensorValueFileType, qualifier: String) -> SensorValueFile
+    func create(fileType: SensorValueFileType, qualifier: String) -> FileType
 }
 
 /**
@@ -39,10 +42,24 @@ public protocol SensorValueFileFactory {
  - Version: 1.0.0
  */
 public struct DefaultSensorValueFileFactory: SensorValueFileFactory {
+    public typealias Serializable = [SensorValue]
+
+    public typealias SpecificSerializer = SensorValueSerializer
+    
+    public typealias FileType = SensorValueFile
+
+    //public typealias Serializable = SensorValue
+
+    //public typealias SpecificSerializer = SensorValueSerializer
+
+    public init() {
+        // Nothing to do here.
+    }
+
     public func create(fileType: SensorValueFileType, qualifier: String) -> SensorValueFile {
         return SensorValueFile(
             fileType: SensorValueFileType.accelerationValueType,
-            qualifier: String(measurementMo.unsignedIdentifier)
+            qualifier: qualifier
         )
     }
 }
