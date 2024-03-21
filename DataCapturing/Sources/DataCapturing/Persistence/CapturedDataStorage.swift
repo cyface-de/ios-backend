@@ -30,13 +30,12 @@ import CoreData
  - version: 1.0.0
  */
 public protocol CapturedDataStorage {
-    /// Create a new measurement within the data store.
-    func createMeasurement(_ initialMode: String) throws -> UInt64
     /// Subscribe to a running measurement and store the data produced by that measurement.
+    ///  - Returns: The application wide unique identifier under which the new measurement is stored in the database.
     func subscribe(
         to measurement: Measurement,
-        _ identifier: UInt64,
-        _ receiveCompletion: @escaping (() -> Void)) throws
+        _ initialMode: String,
+        _ receiveCompletion: @escaping ((_ databaseIdentifier: UInt64) async -> Void)) throws -> UInt64
     /// Stop receiving updates from the currently subscribed measurement or do nothing if this was not subscribed at the moment.
     func unsubscribe()
 }
@@ -48,6 +47,7 @@ public protocol CapturedDataStorage {
  - version: 1.0.1
  */
 public class CapturedCoreDataStorage<SVFF: SensorValueFileFactory> where SVFF.Serializable == [SensorValue] {
+    // MARK: - Properties
     /// The `DataStoreStack` to write the captured data to.
     let dataStoreStack: DataStoreStack
     /// A queue used to buffer received data until writing it as a bulk for performance reasons.
@@ -61,6 +61,7 @@ public class CapturedCoreDataStorage<SVFF: SensorValueFileFactory> where SVFF.Se
     /// A Publisher of messages sent by the persistence layer on storage events.
     let persistenceMessages = PassthroughSubject<Message, Never>()
 
+    // MARK: - Initializers
     /**
      - Parameter interval: The time interval to wait until the next batch of data is stored to the data storage. Increasing this time should improve performance but increases memory usage.
      */
@@ -72,6 +73,23 @@ public class CapturedCoreDataStorage<SVFF: SensorValueFileFactory> where SVFF.Se
         self.dataStoreStack = dataStoreStack
         self.interval = interval
         self.sensorValueFileFactory = sensorValueFileFactory
+    }
+
+    // MARK: - Private Methods
+    /// Create a new measurement within the data store.
+    private func createMeasurement(_ initialMode: String) throws -> UInt64 {
+        return try dataStoreStack.wrapInContextReturn { context in
+            let time = Date()
+            let measurementMO = MeasurementMO(context: context)
+            measurementMO.time = time
+            let identifier = try dataStoreStack.nextValidIdentifier()
+            measurementMO.identifier = Int64(identifier)
+            measurementMO.synchronized = false
+            measurementMO.synchronizable = false
+            measurementMO.addToEvents(EventMO(event: Event(time: time, type: .modalityTypeChange, value: initialMode), context: context))
+            try context.save()
+            return identifier
+        }
     }
 
     private func load(measurement identifier: UInt64, from context: NSManagedObjectContext) throws -> MeasurementMO {
@@ -173,51 +191,47 @@ public class CapturedCoreDataStorage<SVFF: SensorValueFileFactory> where SVFF.Se
         measurementMo.synchronizable = true
         try context.save()
         os_log("Stored finished measurement.", log: OSLog.persistence, type: .debug)
-        persistenceMessages.send(Message.finished(timestamp: Date.now))
     }
 
 }
 
+// MARK: - Implementation of CapturedDataStorage Protocol
 extension CapturedCoreDataStorage: CapturedDataStorage {
-
-    public func createMeasurement(_ initialMode: String) throws -> UInt64 {
-        return try dataStoreStack.wrapInContextReturn { context in
-            let time = Date()
-            let measurementMO = MeasurementMO(context: context)
-            measurementMO.time = time
-            let identifier = try dataStoreStack.nextValidIdentifier()
-            measurementMO.identifier = Int64(identifier)
-            measurementMO.synchronized = false
-            measurementMO.synchronizable = false
-            measurementMO.addToEvents(EventMO(event: Event(time: time, type: .modalityTypeChange, value: initialMode), context: context))
-            try context.save()
-            return identifier
-        }
-    }
 
     /// Recievie updates from the provided ``Measurement`` and store the data to a ``DataStoreStack``.
     public func subscribe(
         to measurement: Measurement,
-        _ identifier: UInt64,
-        _ receiveCompletion: @escaping (() -> Void)
-    ) throws {
+        _ initialMode: String,
+        _ receiveCompletion: @escaping ((_ databaseIdentifier: UInt64) async -> Void)
+    ) throws -> UInt64 {
+        let measurementIdentifier = try createMeasurement(initialMode)
+
         let cachedFlow = measurement.measurementMessages.collect(.byTime(cachingQueue, 1.0))
         cachedFlow
-            .sink(receiveCompletion: { _ in
-                os_log(
-                    "Completing storage flow.",
-                    log: OSLog.persistence,
-                    type: .debug
-                )
-                receiveCompletion()
+            .sink(receiveCompletion: { status in
+                switch status {
+                case .finished:
+                    os_log(
+                        "Completing storage flow.",
+                        log: OSLog.persistence,
+                        type: .debug
+                    )
+                    Task {
+                        await receiveCompletion(measurementIdentifier)
+                    }
+                case .failure(let error):
+                    os_log("Unable to complete measurement %@", log: OSLog.persistence, type: .error, error.localizedDescription)
+                }
             }
             ) { [weak self] (messages: [Message]) in
                 do {
-                    try self?.handle(messages: messages, measurement: identifier)
+                    try self?.handle(messages: messages, measurement: measurementIdentifier)
                 } catch {
                     os_log("Unable to store data! Error %{PUBLIC}@",log: OSLog.persistence ,type: .error, error.localizedDescription)
                 }
             }.store(in: &cancellables)
+
+        return measurementIdentifier
     }
 
     public func unsubscribe() {
