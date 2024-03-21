@@ -752,7 +752,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.4;
+				MARKETING_VERSION = 3.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "Ready for Robots";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -875,7 +875,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.4;
+				MARKETING_VERSION = 3.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.staging;
 				PRODUCT_NAME = "Ready for Robots Staging";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -992,7 +992,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.4;
+				MARKETING_VERSION = 3.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.staging;
 				PRODUCT_NAME = "Ready for Robots Staging";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1109,7 +1109,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.4;
+				MARKETING_VERSION = 3.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "Ready for Robots";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1734,7 +1734,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.4;
+				MARKETING_VERSION = 3.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.dev;
 				PRODUCT_NAME = "Ready for Robots Development";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1772,7 +1772,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.4;
+				MARKETING_VERSION = 3.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.dev;
 				PRODUCT_NAME = "Ready for Robots Development";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

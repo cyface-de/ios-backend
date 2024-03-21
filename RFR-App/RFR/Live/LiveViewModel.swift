@@ -240,24 +240,11 @@ class LiveViewModel: ObservableObject {
      */
     func onPlayPressed() throws {
         if measurement.isPaused {
-            if let identifier = identifier {
-                try dataStorageProcess.subscribe(
-                    to: measurement,
-                    identifier
-                ) {}
-
-                try measurement.resume()
-            }
+            try measurement.resume()
         } else if !measurement.isPaused && !measurement.isRunning{ // Is stopped
-            identifier = try dataStorageProcess.createMeasurement("BICYCLE")
-            if let identifier = identifier {
-                try dataStorageProcess.subscribe(
-                    to: measurement,
-                    identifier
-                ) {}
-                measurementName = String(localized: "measurement \(identifier)", comment: "Title label of a running measurement.")
-                try measurement.start()
-            }
+            let identifier  = try dataStorageProcess.subscribe(to: measurement,"BICYCLE", onFinishedMeasurement)
+            measurementName = String(localized: "measurement \(identifier)", comment: "Title label of a running measurement.")
+            try measurement.start()
         }
     }
 
@@ -266,6 +253,14 @@ class LiveViewModel: ObservableObject {
         if measurement.isRunning {
             try measurement.pause()
         }
+    }
+
+    private func onFinishedMeasurement(_ databaseIdentifier: UInt64) {
+        os_log("Cleanup after measurement has finished", log: OSLog.measurement, type: .debug)
+        self.cancellables.removeAll(keepingCapacity: true)
+        self._measurement = nil
+        self.dataStorageProcess.unsubscribe()
+        finishedMessages = Message.finished(timestamp: Date.now)
     }
 
     /// Setup Combine flow to handle ``Measurement`` start events.

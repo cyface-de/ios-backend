@@ -63,7 +63,11 @@ class SynchronizationViewModel: NSObject, ObservableObject {
             self?.uploadStatusPublisher.send(UploadStatus(measurement: status.upload.measurement, status: status.status))
         }
         do {
-            let measurements = try dataStoreStack.persistenceLayer().loadSynchronizableMeasurements()
+            let measurements = try dataStoreStack.wrapInContextReturn { context in
+                let request = MeasurementMO.fetchRequest()
+                request.predicate = NSPredicate(format: "synchronizable=%@ AND synchronized=%@", NSNumber(booleanLiteral: true), NSNumber(booleanLiteral: false))
+                return try request.execute().map { try FinishedMeasurement(managedObject: $0)}
+            }
             os_log("Sync: Synchronizing %d measurements!", log: OSLog.synchronization, type: .debug, measurements.count)
             for measurement in measurements {
                 os_log(.debug, log: OSLog.synchronization, "Sync: Starting synchronization of measurement %d!", measurement.identifier)
