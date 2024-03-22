@@ -47,7 +47,7 @@ An implementation of `CapturedDataStorage` for storing the data to a CoreData da
  - author: Klemens Muthmann
  - version: 1.0.1
  */
-public class CapturedCoreDataStorage {
+public class CapturedCoreDataStorage<SVFF: SensorValueFileFactory> where SVFF.Serializable == [SensorValue] {
     /// The `DataStoreStack` to write the captured data to.
     let dataStoreStack: DataStoreStack
     /// A queue used to buffer received data until writing it as a bulk for performance reasons.
@@ -56,16 +56,21 @@ public class CapturedCoreDataStorage {
     let interval: TimeInterval
     /// The *Combine* cancellables used so new values are transmitted.
     var cancellables = [AnyCancellable]()
+    /// Creator for storing sensor values to a file.
+    let sensorValueFileFactory: SVFF
 
     /**
      - Parameter interval: The time interval to wait until the next batch of data is stored to the data storage. Increasing this time should improve performance but increases memory usage.
      */
-    public init(_ dataStoreStack: DataStoreStack, _ interval: TimeInterval) {
+    public init(
+        _ dataStoreStack: DataStoreStack,
+        _ interval: TimeInterval,
+        _ sensorValueFileFactory: SVFF = DefaultSensorValueFileFactory()
+    ) {
         self.dataStoreStack = dataStoreStack
         self.interval = interval
+        self.sensorValueFileFactory = sensorValueFileFactory
     }
-
-
 }
 
 extension CapturedCoreDataStorage: CapturedDataStorage {
@@ -120,15 +125,15 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                             return
                         }
 
-                        let accelerationsFile = SensorValueFile(
+                        let accelerationsFile = self?.sensorValueFileFactory.create(
                             fileType: SensorValueFileType.accelerationValueType,
                             qualifier: String(measurement.unsignedIdentifier)
                         )
-                        let rotationsFile = SensorValueFile(
+                        let rotationsFile = self?.sensorValueFileFactory.create(
                             fileType: SensorValueFileType.rotationValueType,
                             qualifier: String(measurement.unsignedIdentifier)
                         )
-                        let directionsFile = SensorValueFile(
+                        let directionsFile = self?.sensorValueFileFactory.create(
                             fileType: SensorValueFileType.directionValueType,
                             qualifier: String(measurement.unsignedIdentifier)
                         )
@@ -150,23 +155,23 @@ extension CapturedCoreDataStorage: CapturedDataStorage {
                                 }
                             case .capturedRotation(let rotation):
                                 do {
-                                    _ = try rotationsFile.write(serializable: [rotation])
+                                    _ = try rotationsFile?.write(serializable: [rotation])
                                 } catch {
-                                    debugPrint("Unable to write data to file \(rotationsFile.fileName)!")
+                                    debugPrint("Unable to write data to file \(String(describing: rotationsFile?.fileName))!")
                                     throw error
                                 }
                             case .capturedDirection(let direction):
                                 do {
-                                    _ = try directionsFile.write(serializable: [direction])
+                                    _ = try directionsFile?.write(serializable: [direction])
                                 } catch {
-                                    debugPrint("Unable to write data to file \(directionsFile.fileName)!")
+                                    debugPrint("Unable to write data to file \(String(describing: directionsFile?.fileName))!")
                                     throw error
                                 }
                             case .capturedAcceleration(let acceleration):
                                 do {
-                                    _ = try accelerationsFile.write(serializable: [acceleration])
+                                    _ = try accelerationsFile?.write(serializable: [acceleration])
                                 } catch {
-                                    debugPrint("Unable to write data to file \(accelerationsFile.fileName)!")
+                                    debugPrint("Unable to write data to file \(String(describing: accelerationsFile?.fileName))!")
                                     throw error
                                 }
                             case .started(timestamp: let time):

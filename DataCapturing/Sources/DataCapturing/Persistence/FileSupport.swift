@@ -144,20 +144,20 @@ extension FileSupport {
  - Since: 2.0.0
  - Note: This class was called `AccelerationsFile` prior to SDK version 6.0.0.
  */
-struct SensorValueFile: FileSupport {
+public struct SensorValueFile: FileSupport {
 
     // MARK: - Properties
 
     /// A serializer to transform between sensor values and the Cyface Binary Format.
-    let serializer = SensorValueSerializer()
+    public let serializer = SensorValueSerializer()
 
     /// The file name for the file containing the sensor values for one measurement.
-    let fileName = "accel"
+    public let fileName = "accel"
 
     /// File extension used for files containing accelerations.
-    let fileExtension: String
+    public let fileExtension: String
     let fileType: SensorValueFileType
-    let qualifier: String
+    public let qualifier: String
 
     // MARK: - Initializers
 
@@ -181,7 +181,7 @@ struct SensorValueFile: FileSupport {
      - Throws: `BinarySerializationError.emptyData` if the provided `serializable` array is empty.
      - Throws: `BinaryEncodingError` if encoding fails.
      */
-    func write(serializable: [SensorValue]) throws -> URL {
+    public func write(serializable: [SensorValue]) throws -> URL {
         let sensorValueData = try serializer.serialize(serializable: serializable)
         let sensorValueFilePath = try path(qualifier: qualifier)
 

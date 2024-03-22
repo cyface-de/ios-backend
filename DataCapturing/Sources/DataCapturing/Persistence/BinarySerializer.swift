@@ -224,7 +224,7 @@ class MeasurementSerializer: BinarySerializer {
  - Version: 2.0.1
  - Note: This class was called `AccelerationSerializer` in SDK version prior to 6.0.0.
  */
-class SensorValueSerializer: BinarySerializer {
+public class SensorValueSerializer: BinarySerializer {
     /// A constant used to convert between millimeters and meters.
     private static let millimetersInAMeter = 1_000.0
 
