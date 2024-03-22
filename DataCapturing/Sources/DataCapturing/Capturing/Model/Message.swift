@@ -43,8 +43,6 @@ public enum Message: CustomStringConvertible {
             return "Started measurement at \(time)"
         case .stopped(let time):
             return "Stopped measurement at \(time)"
-        case .finished(let time):
-            return "Finished measurement at \(time)"
         case .paused(let time):
             return "Paused measurement at \(time)"
         case .resumed(let time):
@@ -73,8 +71,6 @@ public enum Message: CustomStringConvertible {
     case started(timestamp: Date)
     /// Sent after all sensor have stopped capturing data.
     case stopped(timestamp: Date)
-    /// A message sent after a measurement was successfully stopped and persistet to permanent storage.
-    case finished(timestamp: Date)
     case paused(timestamp: Date)
     case resumed(timestamp: Date)
     case hasFix
@@ -99,8 +95,6 @@ extension Message: Equatable {
         case (.started(let timestampLhs), .started(let timestampRhs)):
             return timestampLhs == timestampRhs
         case (.stopped(let timestampLhs), .stopped(let timestampRhs)):
-            return timestampLhs == timestampRhs
-        case (.finished(let timestampLhs), .finished(let timestampRhs)):
             return timestampLhs == timestampRhs
         case (.paused(let timestampLhs), .paused(let timestampRhs)):
             return timestampLhs == timestampRhs
