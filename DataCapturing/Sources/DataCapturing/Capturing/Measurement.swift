@@ -35,8 +35,9 @@ This protocol defines a measurements data together with its lifecycle during dat
  - Since: 12.0.0
  */
 public protocol Measurement {
+    // TODO: It should not be possible to send messages via this variable. So this should be a publisher instead of a PasstroughSubject
     /// A combine subject used to receive messages during data capturing and forwarding them, to whoever wants to listen.
-    var measurementMessages: PassthroughSubject<Message, Never> { get }
+    var measurementMessages: AnyPublisher<Message, Never> { get }
     /// A flag to get information about whether this measurement is currently running (`true`) or not (`false`).
     var isRunning: Bool { get }
     /// A flag to get information about whether this measurement is currently paused (`true`) or not (`false`).
@@ -75,7 +76,6 @@ public class MeasurementImpl {
     /// `true` if data capturing was running but is currently paused; `false` otherwise.
     public var isPaused:Bool
 
-    // TODO: This should probably be carried out using an actor: See the talk "Protect mutable state with Swift actors" from WWDC 2021
     /// The background queue used to capture data.
     private let capturingQueue: DispatchQueue
 
@@ -85,15 +85,15 @@ public class MeasurementImpl {
     private let locationCapturer: LocationCapturer
 
     // TODO: Switch to Combine --> Make this a publisher on its own. Will have to read up on how to achieve this.
-    public var measurementMessages: PassthroughSubject<Message, Never>
+    public var messagesSubject: PassthroughSubject<Message, Never>
 
-    // TODO: This should probably be carried out using an actor: See the talk "Protect mutable state with Swift actors" from WWDC 2021
     /**
      A queue used to synchronize calls to the lifecycle methods `start`, `pause`, `resume` and `stop`.
      Using such a queue prevents successiv calls to these methods to interrupt each other.
      */
     private let lifecycleQueue: DispatchQueue
     private var messageCancellable: AnyCancellable? = nil
+    private var finishedEventCancellable: AnyCancellable? = nil
 
     // MARK: - Initializers
 
@@ -114,7 +114,6 @@ public class MeasurementImpl {
             manager.activityType = .other
             manager.showsBackgroundLocationIndicator = true
             manager.distanceFilter = kCLDistanceFilterNone
-            //manager.requestAlwaysAuthorization()
             return manager
         }
     ) {
@@ -122,7 +121,7 @@ public class MeasurementImpl {
         self.lifecycleQueue = DispatchQueue(label: "lifecycle")
         self.sensorCapturer = SensorCapturer(capturingQueue: capturingQueue)
         self.locationCapturer = LocationCapturer(lifecycleQueue: lifecycleQueue, locationManagerFactory: locationManagerFactory)
-        measurementMessages = PassthroughSubject<Message, Never>()
+        messagesSubject = PassthroughSubject<Message, Never>()
 
         self.isRunning = false
         self.isPaused = false
@@ -152,7 +151,7 @@ public class MeasurementImpl {
 
         messageCancellable = locationCapturer.start().receive(on: lifecycleQueue).merge(
             with: sensorCapturer.start()
-        ).subscribe(measurementMessages)
+        ).subscribe(messagesSubject)
 
         self.isRunning = true
     }
@@ -174,6 +173,10 @@ public class MeasurementImpl {
 // MARK: - Measurement
 
 extension MeasurementImpl: Measurement {
+    public var measurementMessages: AnyPublisher<Message, Never> {
+        return messagesSubject.eraseToAnyPublisher()
+    }
+    
     /**
      Starts the capturing process.
 
@@ -194,7 +197,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             }
 
             try startCapturing()
-            measurementMessages.send(.started(timestamp: Date()))
+            messagesSubject.send(.started(timestamp: Date()))
         }
     }
 
@@ -218,8 +221,8 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             stopCapturing()
             isPaused = false
 
-            measurementMessages.send(.stopped(timestamp: Date()))
-            measurementMessages.send(completion: .finished)
+            messagesSubject.send(.stopped(timestamp: Date()))
+            messagesSubject.send(completion: .finished)
         }
     }
 
@@ -242,7 +245,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             stopCapturing()
             isPaused = true
 
-            measurementMessages.send(.paused(timestamp: Date()))
+            messagesSubject.send(.paused(timestamp: Date()))
         }
     }
 
@@ -267,7 +270,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
             isPaused = false
             isRunning = true
 
-            measurementMessages.send(.resumed(timestamp: Date()))
+            messagesSubject.send(.resumed(timestamp: Date()))
         }
     }
 
@@ -279,7 +282,7 @@ Starting data capturing on paused service. Finishing paused measurements and sta
      */
     public func changeModality(to modality: String) {
         lifecycleQueue.sync {
-            measurementMessages.send(.modalityChanged(to: modality))
+            messagesSubject.send(.modalityChanged(to: modality))
         }
     }
 }

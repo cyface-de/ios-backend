@@ -43,13 +43,7 @@ public protocol DataStoreStack {
     ///
     /// This method must be called shortly after initialization and before any other interaction with a newly created `DataStoreStack`.
     func setup() async throws
-    /// Provide an underlaying ``PersistenceLayer``.
-    ///
-    /// This method is only here for backwards compatibility.
-    /// `PersistenceLayer` is scheduled to die pretty soon.
-    @available(*, deprecated, message: "PersistenceLayer should not be used any longer. Please write your own data interaction code using `wrapInContext` and `wrapInContextReturn`.")
-    func persistenceLayer() -> PersistenceLayer
-    /// This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement. 
+    /// This checks if a measurement with that identifier already exists and generates a new identifier until it finds one with no corresponding measurement.
     /// This is required to handle legacy data and installations, that still have measurements with falsely generated data.
     func nextValidIdentifier() throws -> UInt64
 }
@@ -149,10 +143,6 @@ public class CoreDataStack: DataStoreStack {
                 }
             }
         }
-    }
-
-    public func persistenceLayer() -> PersistenceLayer {
-        return CoreDataPersistenceLayer(onManager: self)
     }
 
     /// Load the specified `NSManagedObjectModel` from disk.

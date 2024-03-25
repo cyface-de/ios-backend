@@ -123,3 +123,19 @@ public class GeoLocation: CustomStringConvertible {
         return distance(from: CLLocation(latitude: previousLocation.latitude, longitude: previousLocation.longitude))
     }
 }
+
+extension GeoLocation: Equatable {
+    public static func == (lhs: GeoLocation, rhs: GeoLocation) -> Bool {
+        if lhs === rhs {
+            return true
+        } else {
+            return lhs.latitude.equal(rhs.latitude, precise: 6) && 
+            lhs.longitude.equal(rhs.longitude, precise: 6) &&
+            lhs.speed.equal(rhs.speed, precise: 2) &&
+            lhs.accuracy.equal(rhs.accuracy, precise: 3) &&
+            lhs.time == rhs.time &&
+            lhs.altitude.equal(rhs.altitude, precise: 3) &&
+            lhs.verticalAccuracy.equal(rhs.verticalAccuracy, precise: 3)
+        }
+    }
+}

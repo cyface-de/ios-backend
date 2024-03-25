@@ -184,7 +184,7 @@ class MeasurementsViewModel: ObservableObject {
                 longitudinalMeters: eastWestReach + eastWestReach * 0.15
             ),
             track: coordinates
-            )
+        )
     }
 
     /// Causes a reload and redrawn each time measurement data changes.
@@ -192,6 +192,7 @@ class MeasurementsViewModel: ObservableObject {
         try dataStoreStack.wrapInContext { context in
             let measurementRequest = MeasurementMO.fetchRequest()
             let storedMeasurements = try measurementRequest.execute()
+            os_log("Loaded changed measurements", log: OSLog.measurement, type: .debug)
 
             storedMeasurements.filter { storedMeasurement in
                 for measurement in measurements {
@@ -201,9 +202,10 @@ class MeasurementsViewModel: ObservableObject {
                 }
                 return true
             }.forEach { filtered in
+                let measurement = self.load(measurement: filtered)
                 DispatchQueue.main.async { [weak self] in
                     if let self = self {
-                        self.measurements.append(self.load(measurement: filtered))
+                        self.measurements.append(measurement)
                         updateStatistics()
                     }
                 }
@@ -292,23 +294,19 @@ extension MeasurementsViewModel: DataCapturingMessageSubscriber {
     func subscribe(to messages: some Publisher<Message, Never>) {
         Task {
             os_log("Subscribing measurements view model to updates from live view!", log: OSLog.measurement, type: .debug)
-            measurementEventsSubscription = messages.filter {
-                os_log("Filtering for messages for stopped event! Received %@", log: OSLog.measurement, type: .debug, $0.description)
-                if case Message.stopped(timestamp: _) = $0 {
-                    os_log("Receiving stopped event", log: OSLog.measurement, type: .debug)
-                    return true
-                } else {
-                    return false
-
-                }
-            }.sink { [weak self] message in
+            measurementEventsSubscription = messages.sink { [weak self] message in
+                switch message {
+                case .finished(timestamp: _):
                     os_log("Updating view model with new measurement.")
                     do {
                         try self?.onMeasurementsChanged()
                     } catch {
                         self?.error = error
                     }
+                default:
+                    os_log("Received invalid message %@", log: OSLog.measurement, type: .debug, message.description)
                 }
+            }
         }
     }
 }

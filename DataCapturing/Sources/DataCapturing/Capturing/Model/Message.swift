@@ -69,6 +69,7 @@ public enum Message: CustomStringConvertible {
     /// The message sent if a new direction was captured.
     case capturedDirection(SensorValue)
     case started(timestamp: Date)
+    /// Sent after all sensor have stopped capturing data.
     case stopped(timestamp: Date)
     case paused(timestamp: Date)
     case resumed(timestamp: Date)
@@ -76,4 +77,39 @@ public enum Message: CustomStringConvertible {
     case fixLost
     case modalityChanged(to: String)
     case receivedNothingYet
+}
+
+extension Message: Equatable {
+    public static func == (lhs: Message, rhs: Message) -> Bool {
+        switch (lhs, rhs) {
+        case (.capturedLocation(let geoLocationLhs), .capturedLocation(let geoLocationRhs)):
+            return geoLocationLhs == geoLocationRhs
+        case (.capturedAltitude(let altitudeLhs), .capturedAltitude(let altitudeRhs)):
+            return altitudeLhs == altitudeRhs
+        case (.capturedAcceleration(let sensorValueLhs), .capturedAcceleration(let sensorValueRhs)):
+            return sensorValueLhs == sensorValueRhs
+        case (.capturedRotation(let sensorValueLhs), .capturedRotation(let sensorValueRhs)):
+            return sensorValueLhs == sensorValueRhs
+        case (.capturedDirection(let sensorValueLhs), .capturedDirection(let sensorValueRhs)):
+            return sensorValueLhs == sensorValueRhs
+        case (.started(let timestampLhs), .started(let timestampRhs)):
+            return timestampLhs == timestampRhs
+        case (.stopped(let timestampLhs), .stopped(let timestampRhs)):
+            return timestampLhs == timestampRhs
+        case (.paused(let timestampLhs), .paused(let timestampRhs)):
+            return timestampLhs == timestampRhs
+        case (.resumed(let timestampLhs), .resumed(let timestampRhs)):
+            return timestampLhs == timestampRhs
+        case (.hasFix, .hasFix):
+            return true
+        case (.fixLost, .fixLost):
+            return true
+        case (.modalityChanged(let toLhs), .modalityChanged(to: let toRhs)):
+            return toLhs == toRhs
+        case (.receivedNothingYet, .receivedNothingYet):
+            return true
+        default:
+            return false
+        }
+    }
 }

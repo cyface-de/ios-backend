@@ -74,7 +74,7 @@ public class FinishedMeasurement: Hashable, Equatable {
      - parameter managedObject: The managed CoreData object to initialize this `Measurement` from.
      - throws: `InconstantData.locationOrderViolation` if the timestamps of the locations in this measurement are not strongly monotonically increasing.
      */
-    convenience init(managedObject: MeasurementMO) throws {
+    public convenience init(managedObject: MeasurementMO) throws {
         let accelerationFile = SensorValueFile(fileType: .accelerationValueType, qualifier: String(managedObject.unsignedIdentifier))
         let directionFile = SensorValueFile(fileType: .directionValueType, qualifier: String(managedObject.unsignedIdentifier))
         let rotationFile = SensorValueFile(fileType: .rotationValueType, qualifier: String(managedObject.unsignedIdentifier))
