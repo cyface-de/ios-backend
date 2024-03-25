@@ -120,15 +120,15 @@ public class CapturedCoreDataStorage<SVFF: SensorValueFileFactory> where SVFF.Se
         try self.dataStoreStack.wrapInContext { context in
             let measurementMo = try self.load(measurement: identifier, from: context)
 
-            let accelerationsFile = self?.sensorValueFileFactory.create(
+            let accelerationsFile = self.sensorValueFileFactory.create(
                  fileType: SensorValueFileType.accelerationValueType,
                  qualifier: String(measurementMo.unsignedIdentifier)
             )
-            let rotationsFile = self?.sensorValueFileFactory.create(
+            let rotationsFile = self.sensorValueFileFactory.create(
                  fileType: SensorValueFileType.rotationValueType,
                  qualifier: String(measurementMo.unsignedIdentifier)
             )
-            let directionsFile = self?.sensorValueFileFactory.create(
+            let directionsFile = self.sensorValueFileFactory.create(
                 fileType: SensorValueFileType.directionValueType,
                 qualifier: String(measurementMo.unsignedIdentifier)
             )
@@ -176,7 +176,7 @@ public class CapturedCoreDataStorage<SVFF: SensorValueFileFactory> where SVFF.Se
         }
     }
 
-    private func store(_ value: SensorValue, to file: SensorValueFile) throws {
+    private func store<SVF: FileSupport>(_ value: SensorValue, to file: SVF) throws where SVF.Serializable == SVFF.Serializable {
         do {
             _ = try file.write(serializable: [value])
         } catch {

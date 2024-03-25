@@ -48,10 +48,6 @@ public struct DefaultSensorValueFileFactory: SensorValueFileFactory {
     
     public typealias FileType = SensorValueFile
 
-    //public typealias Serializable = SensorValue
-
-    //public typealias SpecificSerializer = SensorValueSerializer
-
     public init() {
         // Nothing to do here.
     }

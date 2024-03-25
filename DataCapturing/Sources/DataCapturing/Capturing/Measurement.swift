@@ -219,10 +219,10 @@ Starting data capturing on paused service. Finishing paused measurements and sta
 
             // Inform about stopped event
             stopCapturing()
-            messagesSubject.send(completion: .finished)
             isPaused = false
 
             messagesSubject.send(.stopped(timestamp: Date()))
+            messagesSubject.send(completion: .finished)
         }
     }
 
