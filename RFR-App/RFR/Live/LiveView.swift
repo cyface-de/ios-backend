@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots iOS App.
  *
@@ -61,37 +61,29 @@ struct LiveView: View {
 
 #if DEBUG
 #Preview("Stopped") {
-    LiveView(viewModel: LiveViewModel(
+    let mockDataStoreStack = MockDataStoreStack()
+    let measurementsViewModel = MeasurementsViewModel(dataStoreStack: mockDataStoreStack)
+
+    return LiveView(viewModel: LiveViewModel(
         speed: 21.0,
         averageSpeed: 15.0,
         measurementState: .stopped,
-        dataStoreStack: MockDataStoreStack(
-            persistenceLayer: MockPersistenceLayer(
-                measurements: [
-                    FinishedMeasurement(identifier: 0),
-                    FinishedMeasurement(identifier: 1),
-                    FinishedMeasurement(identifier: 2)
-                ]
-            )
-        ),
-        dataStorageInterval: 5.0
+        dataStoreStack: MockDataStoreStack(),
+        dataStorageInterval: 5.0, 
+        measurementsViewModel: measurementsViewModel
     )
     )
 }
 
 #Preview("Running") {
-    LiveView(viewModel: LiveViewModel(
+    let mockDataStoreStack = MockDataStoreStack()
+    let measurementsViewModel = MeasurementsViewModel(dataStoreStack: mockDataStoreStack)
+
+    return LiveView(viewModel: LiveViewModel(
         measurementState: .running,
-        dataStoreStack: MockDataStoreStack(
-            persistenceLayer: MockPersistenceLayer(
-                measurements: [
-                    FinishedMeasurement(identifier: 0),
-                    FinishedMeasurement(identifier: 1),
-                    FinishedMeasurement(identifier: 2)
-                ]
-            )
-        ),
-        dataStorageInterval: 5.0
+        dataStoreStack: MockDataStoreStack(),
+        dataStorageInterval: 5.0, 
+        measurementsViewModel: measurementsViewModel
     ))
 }
 #endif

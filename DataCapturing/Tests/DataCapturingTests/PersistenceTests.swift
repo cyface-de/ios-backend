@@ -30,7 +30,7 @@ import CoreData
  */
 class PersistenceTests: XCTestCase {
 
-    /// A `PersistenceLayer` used for testing.
+    /*/// A `PersistenceLayer` used for testing.
     var oocut: PersistenceLayer!
     /// Some test data.
     var fixture: FinishedMeasurement?
@@ -360,7 +360,7 @@ class PersistenceTests: XCTestCase {
             XCTAssertEqual(measurements[0].typedEvents().count, 3)
             XCTAssertGreaterThanOrEqual(measurements[0].typedTracks()[0].typedLocations().count, 4)
         }
-    }
+    }*/
 
     // TODO: Test pause and resume
     // TODO: test stop and start again

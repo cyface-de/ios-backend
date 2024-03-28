@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots iOS App.
  *
@@ -30,33 +30,41 @@ import AppAuthCore
  - Since: 3.1.2
  */
 struct InitializationView: View {
-    /// The central view model forking of all the sub models.
-    @StateObject var viewModel: DataCapturingViewModel
     /// The applications login status, which is a wrapped boolean for easy storage to the environment.
     /// Based on this flag, this view either shows the login link or forwards to the ``MainView``.
     @StateObject var loginStatus = LoginStatus()
-    // TODO: This should probably loaded from config at the MeasurementsView.
-    /// The internet address of the root of the incentives API
-    let incentivesEndpoint: URL
     /// Allows the login process to deep link back to the login page.
     @State var loginNavigationState: [String] = []
+    /// A view model to handle all the locally captured measurements
+    let measurementsViewModel: MeasurementsViewModel
+    /// A view model to handle uploading local measurements to a Cyface Data Collector Server
+    let synchronizationViewModel: SynchronizationViewModel
+    /// A view model to handle live data capturing.
+    let liveViewModel: LiveViewModel
+    /// A view model to manage voucher creation and display.
+    let voucherViewModel: VoucherViewModel
+    /// An authenticator to authenticate and authorize a user for communication with the Data Collector and the Voucher service.
+    let authenticator: Authenticator
 
     var body: some View {
         if loginStatus.isLoggedIn {
             MainView(
-                viewModel: viewModel,
-                incentivesUrl: incentivesEndpoint
+                measurementsViewModel: measurementsViewModel,
+                syncViewModel: synchronizationViewModel,
+                liveViewModel: liveViewModel,
+                voucherViewModel: voucherViewModel,
+                authenticator: authenticator
             )
             .environmentObject(loginStatus)
 
         } else {
             NavigationStack(path: $loginNavigationState) {
                 OAuthLoginView(
-                    authenticator: viewModel.authenticator,
+                    authenticator: authenticator,
                     errors: $loginNavigationState
                 )
                 .onOpenURL(perform: { url in
-                    viewModel.authenticator.callback(url: url)
+                    authenticator.callback(url: url)
                 })
                 .environmentObject(loginStatus)
                 .navigationTitle(String(
@@ -73,38 +81,54 @@ struct InitializationView: View {
 
 #if DEBUG
 let config = try! ConfigLoader.load()
+let mockDataStoreStack = MockDataStoreStack()
+let measurementsViewModel = MeasurementsViewModel(dataStoreStack: mockDataStoreStack)
+let mockUploadFactory = MockUploadFactory()
+let authenticator = StaticAuthenticator()
+let incentivesUrl = URL(string: config.incentivesUrl)!
+let uploadProcessBuilder = DefaultUploadProcessBuilder(
+    collectorUrl: URL(string: "https://localhost:8080/api/v4")!,
+    sessionRegistry: DefaultSessionRegistry(),
+    uploadFactory: MockUploadFactory(),
+    authenticator: authenticator
+)
+
+let synchronizationViewModel = SynchronizationViewModel(
+    dataStoreStack: mockDataStoreStack,
+    uploadProcessBuilder: uploadProcessBuilder,
+    measurementsViewModel: measurementsViewModel
+)
+
+let liveViewModel = LiveViewModel(
+    dataStoreStack: mockDataStoreStack,
+    dataStorageInterval: 5.0,
+    measurementsViewModel: measurementsViewModel
+)
+
+let voucherViewModel2 = VoucherViewModel(
+    authenticator: authenticator,
+    url: incentivesUrl,
+    dataStoreStack: mockDataStoreStack
+)
 
 #Preview("Standard") {
     return InitializationView(
-        viewModel: DataCapturingViewModel(
-            showError: false,
-            dataStoreStack: MockDataStoreStack(
-                persistenceLayer: MockPersistenceLayer(measurements: [
-                    FinishedMeasurement(identifier: 0),
-                    FinishedMeasurement(identifier: 1),
-                    FinishedMeasurement(identifier: 2)
-                ])
-            ),
-            authenticator: MockAuthenticator(),
-            collectorUrl: try! config.getUploadEndpoint()
-        ),
-        incentivesEndpoint: try! config.getIncentivesUrl()
+        measurementsViewModel: measurementsViewModel,
+        synchronizationViewModel: synchronizationViewModel,
+        liveViewModel: liveViewModel,
+        voucherViewModel: voucherViewModel2,
+        authenticator: authenticator
     )
 }
 
 #Preview("Error") {
     return InitializationView(
-        viewModel: DataCapturingViewModel(
-            showError: false,
-            dataStoreStack: MockDataStoreStack(
-                persistenceLayer: MockPersistenceLayer(
-                    measurements: []
-                )
-            ),
-            authenticator: MockAuthenticator(),
-            collectorUrl: try! config.getUploadEndpoint()),
-        incentivesEndpoint: try! config.getIncentivesUrl(),
-        loginNavigationState: ["test"]
+        loginNavigationState: ["test"], 
+        measurementsViewModel: measurementsViewModel,
+        synchronizationViewModel: synchronizationViewModel,
+        liveViewModel: liveViewModel,
+        voucherViewModel: voucherViewModel2,
+        authenticator: authenticator
     )
 }
 #endif

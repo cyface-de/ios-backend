@@ -335,7 +335,7 @@ public class SensorValueSerializer: BinarySerializer {
      - author: Klemens Muthmann
      - version: 1.0.0
      */
-    public enum BinarySerializationError: Error {
+    enum BinarySerializationError: Error {
         /// Thrown if no data was provided, where some was expected.
         case emptyData
     }

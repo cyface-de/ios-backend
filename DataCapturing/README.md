@@ -1,312 +1,414 @@
 #  Cyface iOS - SDK
-[![CI: Bitrise](https://app.bitrise.io/app/45ec21fd3b5a664b/status.svg?token=aE1ZWjYUkjxhAtYMX8bcCg)](https://bitrise.io/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Swift 5.0](https://img.shields.io/badge/Swift-5.0-blue.svg)](https://swift.org)
 
 ## Introduction
 
-This is the Cyface SDK for iOS. It provides a framework you can use to continuously measure localized (i.e. annotated with GPS coordinates) sensor data from devices running iOS (i.e. iPhone).
+This Repository contains the Cyface SDK for iOS. 
+It enables iOS applications to continuously measure positioned sensor data from devices running iOS (i.e. iPhone).
 It is mostly used to measure traffic data for different modalities, like walking, cycling or driving.
-The framework is developed by the Cyface GmbH and mostly used to measure cycling behaviour with the purpose of improving the cycling infrastructure based on the measured data.
+The framework is developed by the [Cyface GmbH](https://cyface.de) and mostly used to measure cycling behaviour with the purpose of improving the cycling infrastructure based on the measured data.
 
-The framework provides three core features, which are *capturing data*, *accessing captured data for local display* and *transmitting captured data to a [Cyface server](https://github.com/cyface-de/data-collector)*.
+The measured data are the Global Navigation Sattelite System (GNSS) information, height data from the barometer if available as well as data provide by the phones inertial measurement unit (IMU).
+IMU timeline data comes from the accelerometer, gyroscope and compass, each with 3 axis in space.
 
-The core concept used in this framework is the *Measurement*. 
-A measurement is one sequence of locations and sensor data and usually associated with a purpose like commute from or to work.
-A measurement might contain pauses and therefore is structured into several tracks.
-There is an API to control the capturing lifecycle via the `DataCapturingService` class.
-There is also an API to access captured data via the `PersistenceLayer` class.
-The `ServerConnection` class is responsible for transmitting captured data to a Cyface server, while the Synchronizer makes sure this happens at convenient times and in regular intervals.
+The framework provides three core features, which are *capturing data*, *accessing captured data for local display* and *transmitting captured data to a [Cyface Data Collector Server](https://github.com/cyface-de/data-collector)*.
 
-## General Architecture
-- Two areas of interest: ``Measurement`` during data capturing and ``FinishedMeasurement`` for information about all previous measurements from the device.
-- Measurement captures all information required during a measurement and writes it through to the database. It informes clients via Combine about newly arrived information (Locations, Altitudes, UserInteractions).
-- FinishedMeasurement is a read only object hierarchy, which provides information about captured data.
-- The persistence layer provides convenience methods to avoid loading whole object hierarchies into storage
-- Updates to finished measurements are also only possible via methods within the `PersistenceLayer.
-
-Neue iOS DataCapturing Architektur
-
-Der DataCapturingService wird abgeschafft.
-Es gibt die Measurement Klasse (oder besser struct). Diese dient als Schnittstelle zur App und kann immer neu angelegt werden, wenn eine neue Messung startet.
-Measurement bietet die Funktionen einer Messung
-* start
-* pause
-* resume
-* stop
-* synchronize --> Übertragung auf Server.
-* distance
-* averageSpeed
-* duration
-* accumulatedHeight
-* Track --> Array aus Subtracks jeder Subtrack enthält die entsprechenden GeoLocations
-* Alle Metadaten ()
-
-Ein Measurement ist ein ObservableObject. Bei Änderungen an einem Attribut wird diese Änderung publiziert. Es gibt einen Subscriber der solche Änderungen in die Datenbank schreibt (Combine Framework). Messungen können nur als ganzes aus der Datenbank geladen werden. Notwenige Optimierungen passieren im Hintergrund aber zunächst mal gar nicht.
-
-## Integration in your App
-
-### Integration
-
-
-### Permissions
-
-To use the Cyface SDK permissions to capture the users location while using the app and additionally in the background are required.
+## Permissions
+The Cyface SDK requires permissions to use location services and data uploads in the background.
 These permissions have to be declared as part of the App using the Cyface SDK.
 
-How to allow background location updates is described in the [Apple Developer Documentation](https://developer.apple.com/documentation/corelocation/getting_the_user_s_location/handling_location_events_in_the_background).
+Allowing background location updates is described in the [Apple Developer Documentation](https://developer.apple.com/documentation/corelocation/getting_the_user_s_location/handling_location_events_in_the_background).
 
-Asking for the proper location capturing permissions is described in the [Apple Developer Documentation](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services) as well. 
-The App using the Cyface SDK is only required to provide the proper entries in the Info.plist.
-The code to ask for the proper permissions is executed by the SDK the first time it wants to fetch locations.
-This usually happens on the first call to `start()`.
-An App using the Cyface SDK requires at least "Location When In Use Usage Description" and "Location Always and When In Use Usage Description".
+Asking for the proper permissions is described in the [Apple Developer Documentation](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services) as well. 
+Applications using the Cyface SDK require at least "Location When In Use Usage Description" and "Location Always and When In Use Usage Description".
+Code to ask the user to grant these permissions is included with the SDK and executed on the first call to ``Measurement/start()``.
 
-### Setup an Application
+Please refer to the example applications distributed with the Cyface SDK to see the correct setup in action.
+Basically you need to enable background modes like shown in the following image:
 
-To store and retrieve data it is necessary to initialize the Cyface CoreDataStack.
-You should do this as early as possible during your application lifecycle.
-The most convenient place is inside your Applications `AppDelegate.application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool` method.
-There you should call:
+![Settings enabled for Background Modes](Documentation.docc/Resources/BackgroundModes@2x.png)
 
-```swift
-// 1
-import DataCapturing
-// 2
-import CoreData
-// 3
-let manager = CoreDataManager()
-// 4
-let bundle = Bundle(for: type(of: manager))
-// 5
-try manager.setup(bundle: bundle) {
-    // 6
+There are also some settings required in the *Info.plist* file, like shown here:
+
+![An example of a working Info.plist file](Documentation.docc/Resources/Infoplist@2x.png)
+
+## The Measurement Lifecycle - Starting and Stopping Data Capturing
+
+The concept of a `Measurement` forms the heart of continuous capturing position and sensor data from a mobile device, using the Cyface SDK.
+The measurement lifecycle is quite simple, following the cycle of ``Measurement/start()`` and ``Measurement/stop()``.
+It is possible to pause and resume a running measurement using ``Measurement/pause()`` and ``Measurement/resume()``.
+The lifecycle follows the ``Measurement`` protocol, which looks like:
+
+```Swift
+public protocol Measurement {
+    var measurementMessages: PassthroughSubject<Message, Never> { get }
+    var isRunning: Bool { get }
+    var isPaused: Bool { get }
+    func start() throws
+    func stop() throws
+    func pause() throws
+    func resume() throws
+    func changeModality(to modality: String)
 }
 ```
 
-1. Import the *Cyface SDK*
-2. Import the *CoreData* Framework
-3. Create the *CoreData* stack in the form of a `CoreDataManager`. 
-   Usually there should be only one instance of `CoreDataManager`. 
-   You may optionally provide the store type and a `CoreDataMigrator`. 
-   The store type should be an `NSSQLiteStoreType` (default) in production and might be an `NSInMemoryStoreType` in a test environment. 
-   Please have a look at that classes documentation if you need to change the type of the storage for example.
-4. Get a handle on the bundle the `CoreDataManager` belongs to.
-5. Call setup on the `CoreDataManager`.
-   If the `CoreDataManager` encounters an old data store it will migrate this data store to the current version. 
-   If there is much data to convert, this can take some time and probably should be wrapped into a background thread. 
-   **Be especially careful to avoid calling the `setup(bundle:, completionClosure:)` method on different threads concurrently. 
-   This might leave your data storage in a corrupted state or at least crash your app.** 
-6. When the setup of the `CoreDataManager` was successfully completed this callback closure is called.
-   You should use it to continue with your application execution and for example present your main UI now.
+You can see the four lifecycle methods mentioned above.
 
-### Creating a `DataCapturingService`
+The two flags `isRunning` and `isPaused` must be set correctly by implementations of `Measurement`.
+Both provide information about the current state of the measurement itself.
 
-As explained above before using any data capturing the integrating App must have the appropriate permissions to use location tracking in the background.
-See the Apple documentation about background location updates for more information.
-There must also be a `manager` instance of type `CoreDataManager` (see last section).
+The `measurementMessages` is a *Combine* publisher sending information about the current state of the measurement.
+A subscriber to this publisher can expect to receive the following messages in the form of ``Message`` objects:
 
-To integrate the Cyface SDK for iOS into your own app you need to either create a `DataCapturingService` or a `MovebisDataCapturingService`.
-This should look similar to:
+* **capturedLocation(GeoLocation):** This message is sent everytime a new position was captured.
+* **capturedAltitude(Altitude):** This message is sent everytime a new altitude value was captured.
+* **capturedAcceleration(SensorValue):** This message is sent everytime a new acceleration value was captured.
+* **capturedRotation(SensorValue):** This message is sent everytime a new rotation value was captured.
+* **capturedDirection(SensorValue):** This message is sent everytime a new direction value was captured.
+* **started(timestamp: Date):** This message is sent once after a measurement was successfully started.
+* **stopped(timestamp: Date):** This message is sent once after a measurement was successfully stopped.
+* **paused(timestamp: Date):** This message is sent everytime a measurement was successfully paused.
+* **resumed(timestamp: Date):** This message is sent everytime a measurement was successfully resumed.
+* **hasFix:** This message is sent everytime the system has acquired a GNSS fix.
+* **fixLost:** This message is sent everytime the system has lost its GNSS fix.
+* **modalityChanged(to: String):** This message is sent everytime the system changed the modality of the current measurement. This is the mode of transportation used at the moment like BICYCLE, CAR, etc.
 
-```swift
-// 1
-import CoreMotion
-// 2
-import DataCapturing
-...
-// 3 
-let sensorManager = CMMotionManager()
-// 4
-let updateInterval = 100
-// 5
-let savingInterval = 10
-// 6
-let handler = handler
-// 7
-let dcs = try MovebisDataCapturingService(sensorManager: sensorManager, updateInterval: updateInterval, savingInterval: savingInterval, dataManager: manager, eventHandler: handler)
-```
+The Cyface SDK provides one default adoption of the `Measurement` protocol.
+This is called ``MeasurementImpl``.
 
-1. Import Apples *CoreMotion* framework, to be able to create a motion manager.
-2. Import the *Cyface SDK*, to be able to create a `DataCapturingService`.
-3. Create `CMMotionManager` from the *CoreMotion* framework. This is responsible for capturing sensor data from your device.
-4. Set a sensor data update interval in Hertz. The value 100 for example means that your sensors are going to capture 100 values per second. This is the maximum for most devices. If you use higher values CoreMotion will tread them as 100. The value 100 is also the default if you do not set this value.
-5. Create a saving interval in seconds. The value 10 for example means that your data is saved to persistent storage every 10 seconds. This also means your currently captured measurement is updated every 10 seconds. Values like the measurement length are updated at this point as well. If you need to update your UI frequently you should set this to a low value. This however also puts a higher load on your database.
-6. Provide a handler for events occuring during data capturing. Possible events are explained below.
-7. Finally create the `DataCapturingService` or `MovebisDataCapturingService` as shown, providing the required parameters.
+Creating a ``Measurement`` and controlling its lifecycle should look like this:
 
-### The Data Capturing Lifecycle
+```Swift
+let measurement = MeasurementImpl()
 
-The lifecycle of capturing a measurement is controlled by the four methods `start(inMode:)`, `pause()`, `resume()` and `stop()`.
-They may be called in arbitrary order and will do as their name promises.
-
-#### Setting and Changing Transportation Modes
-
-The mode of transporation used to capture a measurement must be provided to the `start(inMode:)` method.
-This is a simple string that is transferred as is to the server.
-Typical transporation modes are "BICYCLE", "CAR" and "MOTORBIKE".
-
-To change the transportation mode during a measurement, call `changeModality(to:)`.
-For example call `dataCapturingService.changeModality(to: "CAR")`, to change the used transportation mode to a car.
-
-#### Configuring a DataCapturingService
-
-The `DataCapturingService` tries to get as many updates from a devices geo location sensor as possible.
-This usually means it will receive one update per second.
-If your UI does some heavy work on each update, you probably would like to receive fewer of them.
-This can be controlled by setting the `DataCapturingService.locationUpdateSkipRate` to an appropriate value.
-With a value of 2 for example it will only report every second update.
-Notice however that internally it will still run with the highest possible update rate.
-
-### Getting the currently captured measurement
-
-If there is an active data capturing process - after a call to `DataCapturingService.start()` or  `DataCapturingService.resume()`, you can access the current measurement via:
-
-```swift
-if let currentMeasurementIdentifier = dcs.currentMeasurement?.identifier {
-    let currentMeasurement = persistenceLayer.load(measurementIdentifiedBy: currentMeasurementIdentifier)
-    // Use the measurement
-}
-```
-
-### Getting Track information from a measurement
-
-Each measurement is organized into multiple tracks, which are split if the `DataCapturingService.pause()` and  `DataCapturingService.resume()` is called.
-Each track contains an ordered list of geo locations.
-Accessing this information to display it on the screen should follow the pattern below:
-
-```swift
-do {
-    let persistenceLayer = PersistenceLayer(onManager: manager)
-    let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurement.identifier)
-
-    for track in measurement.tracks {
-
-        guard !track.locations.isEmpty else {
-            os_log("No locations to display!")
-            continue
-        }
-
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-            // Draw or refresh the UI.
-        }
+let messagesCancellable = measurement.measurementMessages.sink(receiveCompletion: { status in
+    switch status {
+        case .finished:
+            // Do everything necessary after the last message was receiveid
+        case .failure(_):
+            // This should probably not happen, but if it does something is seriously wrong. At least log the error so it becomes possible to debug.
     }
-} catch {
-    os_log("Unable to load locations!")
-}
-```
 
-### Getting the length of a measurement
-
-The Cyface SDK for iOS is capable of providing the length of a measurement in meters.
-To get access to this value you should either use the instance of `PersistenceLayer` that you have created, for the `DataCapturingService` or create a new one on demand.
-Using that `PersistenceLayer` you can access the track length by loading a measurement, which looks similar to:
-
-```swift
-let measurement = try persistenceLayer.load(measurementIdentifiedBy: identifier) 
-let trackLength = measurement.trackLength
-```
-
-### Getting a cleaned track
-
-The Cyface SDK for iOS is capable of providing a track where locations with too much noise are cleaned away.
-Currently these are locations with an accuracy above 20.0 meters or a speed below 1 m/s (3.6 km/h) or above 100 m/s (360 km/h). 
-This is currently hard coded into the SDK but might change in a future release.
-
-```swift
-let persistenceLayer = PersistenceLayer(onManager: coreDataStack)
-let measurement = persistenceLayer.load(measurementIdentifiedBy: identifier)
-for track in measurement.tracks {
-    let cleanTrack = try persistenceLayer.loadClean(track: track)
-}
-```
-
-The `cleanTrack` is an array of `GeoLocation` instances.
-
-### Using an Authenticator
-
-The Cyface SDK for iOS transmits measurement data to a server. 
-To authenticate with this server, the SDK uses an implementation of the `Authenticator`  class.
-There are two `Authenticator` implementations available.
-
-The `StaticAuthenticator` should be used if you have your own way of obtaining an authentication token.
-It should be supplied with an appropriate JWT token prior to the first authentication call.
-
-The `CredentialsAuthenticator` retrieves a JWT token from the server directly and tries to refresh that token, if it has become invalid.
-
-### Getting a track of locations
-
-As explained above each measurement contains one or several tracks. 
-On each use of the `pause` and `resume` lifecycle methods a new track is created. 
-To access the locations from a track, do something like the following.
-
-```swift
-let persistenceLayer = PersistenceLayer(onManager: manager)
-let measurement = try persistenceLayer.load(measurementIdentifiedBy: measurementIdentifier)
-if let tracks = measurement.tracks {
-    if let locations = tracks[0].locations {
-        for location in locations {
-            print(\(location))
-        }
+}) { message in
+    switch message {
+        case .capturedLocation(let location):
+            // handle new geo locations here!
+        case .capturedAltitude(let altitude):
+            // handle new altitudes here!
+        case .capturedAcceleration(let acceleration):
+            // handle new accelerations here!
+        case .capturedRotation(let rotation):
+            // handle new rotations here!
+        case .capturedDirection(let direction):
+            // handle new directions here!
+        case .started(timestamp: let timestamp):
+            // handle startup of a measurement here!
+        case .stopped(timestamp: let timestamp):
+            // handle a stopped measurement here!
+        case .paused(timestamp: let timestamp):
+            // handle pausing a measurement here!
+        case .resumed(timestamp: let timestamp):
+            // handle resuming a measurement here!
+        case .hasFix:
+            // handle getting a GNSS fix here!
+        case .fixLost:
+            // handle loosing the GNSS fix here!
+        case .modalityChanged(to: let modality):
+            // handle a change in movement mode here!
     }
 }
+
+try measurement.start()
+
+// Repeat the following two lines as often as desired
+try measurement.pause()
+try measurement.resume()
+
+try measurement.stop()
 ```
 
-### Getting a log of lifecycle events
+After creating `MeasurementImpl` at first a sink is registered with the publisher of `measurementMessages`.
+Here all the updates from the measurement should be handled.
+For example on each new `.capturedLocation` event, the app updates the current track on some map view.
+**ATTENTION:** Do not forget to store the `Cancellable`, returned by sink in this case, in a scope that stays active for as long as you need updates from the measurement.
+If the `Cancellable` is not referenced from an active scope the *Combine* pipeline stops.
 
-If you need to know about past start, pause, resume and stop events you may retrieve them, by loading a measurement from a `PersistenceLayer`.
-The measurement provides the events as follows:
+Afterwards the measurement can start, pause, resume and stop.
+These four methods are thread safe.
+However if they are called in the wrong order, they are going to throw.
 
-```swift
-let loadedEvents = loadedMeasurement.events
-```
+## Data Storage
+You can use the captured data directly in your app, display it on screen and transmit it to a Cyface Data Collector Server or your own data storage.
+If you need to keep the measured data in between application restarts, you may save it on the device.
 
-The list is ordered by the occurence time of the events.
-Each event provides a type, best retrieved from `Event.type` and the time of its occurrences as a `Date`.
+You can implement your own data storage if you like by reacting to the messages sent from a running `Measurement` and storing the captured data however you like.
 
-### Continuous synchronization
+For convenience, the Cyface SDK provides its own data storage layer, which is designed to receive sensor data from a `Measurement` and store it to a permanent storage area.
+The default implmentations provided with the SDK uses Apples *CoreData* framework.
+Two protocols describe the core of the Cyface SDK data storage layer.
+The first is the `DataStoreStack` forming an abstraction for storage management, including setup and data migration from an older to a newer version.
+It follows the following protocol:
 
-To keep measurements synchronized without user interaction, the Cyface SDK provides the `Synchronizer`.
-It is advised to create a synchronizer after successful authentication.
-Do not forget to call `Synchronizer.activate()`.
-This starts a background process, that monitors the devices connectivity state and watches for an active WiFi connection.
-If one is found, synchronization for all unsynchronized measurements is executed.
-Creating a synchronizer should look something like:
-
-```swift
-// 1.
-let url = URL(string: "http://localhost/api")!
-// 2.
-let synchronizer = try Synchronizer(
-// 3.
-apiURL: url,
-// 4.
-coreDataStack: manager, 
-// 5.
-cleaner: AccelerationPointRemovalCleaner(), 
-// 6.
-sessionRegistry: registry,
-// 7.
-authenticator: authenticator) { event, status in 
-	// Handle .synchronizationFinished event for example by checking status for .success or .failure
+```Swift
+public protocol DataStoreStack {
+    func setup() async throws                                                               // 1
+    func wrapInContext(_ block: (NSManagedObjectContext) throws -> Void) throws             // 2
+    func wrapInContextReturn<T>(_ block: (NSManagedObjectContext) throws -> T) throws -> T  // 3
+    func nextValidIdentifier() throws -> UInt64                                             // 4
 }
 ```
 
-1. Create the URL where your server is ready to receive data.
-2. Create the `Synchronizer` based on the following parameters.
-3. The URL to the Cyface data collector API.
-4. Preferrably use the same `CoreDataManager` as described under setting up the `DataCapturingService`.
-5. Create a `Cleaner` which cleanes the database after successful synchronization.
-6. A session registry to store interrupted but still open sessions.
-7. An authenticator using the same API URL as this synchronizer.
+It is recommended to have exactly one object of this type per application.
+The recommended way to achive this is to instantiate it as a property to `UIApplication` for *UIKit* applications or as part of the struct adopting the `App` protocol for *SwiftUI*.
+It would probably work to use multiple instances, but this is not guaranteed and unsupported.
 
-## API Documentation
+**1:** Since the setup of a `DataStoreStack` can be a rather lengthy process, it is put into its own method.
+An application must call this method before any other method from this interface.
+If that is not done, hard to trace and hard to understand errors might occur from within seemingly random places in your application.
+This is especially true if the Cyface SDK default implementation of this interface - which uses *CoreData* - is employed.
+
+**2 and 3:** These two methods realize interaction of application code with persistent code. 
+They provide a context, from which it is safe to work on persistent data objects.
+Data objects may never leave this context.
+Especially if using *CoreData*, managed objects leaving this context, will cause hard to understand errors from seemingly random places in your app.
+One way to avoid this, is to copy all the data required into your own, non managed data structures.
+Be especially careful with forwarding to other thread contexts such as the main thread (i.e. `DispatchQueue.main.async`).
+These are leaving the current context and will lead to errors if they use captured managed objects.
+**4:** Is used as a central entry point to generate storage wide unique identifiers usable by new measurements.
+
+The data is stored following a *CoreData* schema file, which is currently available in Version 13.
+The supported entities are displayed in the following figure:
+
+![Type Diagram showing all the entities used in the Cyface SDK *CoreData* schema.](Documentation.docc/Resources/Cyface-iOS-SDK-Datenbankschema-V13@2x.png)
+
+* **Measurement:** Represent a single measurement in the database. It has two attributes `synchronizable` and `synchronized`, tracking if it is possible and necessary to synchronize this measurement with a storage server. Each measurement also gets a device wide unique `identifier`, which is implemented as a counter.
+* **Track:** A measurement contains one or more tracks. A track is created when the measurement is resumed after a pause.
+* **Event:** This tracks user interactions like putton presses to manipulate an active measurement. Start, stop, pause and resume events are recorded as this entity as well as modality changes.
+* **GeoLocation:** Each captured location is stored as a `GeoLocation` in the data store.
+* **Altitude:** Each captured barometric altitude value is stored as an `Altitude` in the data store. This is empty if the device has no barometer.
+* **UploadSession:** If the `BackgroundUploadProcess` is used, active sessions are stored here, to resume them when the app is waken up for transmission by the system.
+* **UploadTask:** A protocol of the responses received so far in an upload session. This enables the Cyface SDK to repeat uploads even if the app was suspended.
+
+These entities are usable to get and manipulate data in the data storage.
+For example to get the state on whether a measurement is synchronizable (finished but not synchronized yet), query the storage as follows:
+
+```Swift
+let dataStoreStack = CoreDataStack()
+let identifier = 1
+try await dataStoreStack.setup()
+let measurementIdentifier = try dataStoreStack.wrapInContextReturn { context in
+    guard let measurementRequest = context.persistentStoreCoordinator?.managedObjectModel.fetchRequestFromTemplate(
+        withName: "measurementByIdentifier",
+        substitutionVariables: ["identifier": identifier]
+    ) else {
+        throw PersistenceError.measurementNotLoadable(identifier)
+    }
+    guard let measurementMO = try measurementRequest.execute().first as? MeasurementMO else {
+        throw PersistenceError.measurementNotLoadable(identifier)
+    }
+
+    return measurementMO.synchronizable
+}
+```
+
+**ATTENTION:** It is important to never use any model object (marked with MO in their model name) outside the thread in which the `NSManagedObjectContext` was created.
+Doing so is going to cause strange, meaningless errors at random places througout the application!
+Therefore always get the data you need from the model object from within either `wrapInContext` or `wrapInContextReturn` and return only the required data to proceed.
+Working with an `NSManagedObjectContext` and model objects is explained in [Apples *CoreData* Documentation](https://developer.apple.com/documentation/coredata).
+
+The second protocol `CapturedDataStorage` connects to a running `Measurement` and stores captured data to an underlying storage layer, such as the one provided by an implementation of `DataStoreStack`.
+It looks like:
+
+```Swift
+public protocol CapturedDataStorage {
+    func subscribe(to measurement: Measurement, _ initialMode: String, _ receiveCompletion: @escaping ((_ databaseIdentifier: UInt64) async -> Void)) throws -> UInt64
+    func unsubscribe()
+}
+```
+
+It can subsribe to a `Measurement` and unsubscribe from all measurements like so:
+
+```Swift
+let storage = CapturedCoreDataStorage(dataStoreStack, 1)
+
+let databaseIdentifier = storage.subscribe(to: measurement, "BICYCLE") { databaseIdentifier in
+    // Handle storage for measurement was complete. For example refresh the user interface here.
+}
+
+storage.unsubscribe()
+```
+
+Subscribing to a measurement provides an application wide unique identifier, used to identify that measurement inside the data store.
+
+If the measurement is finished, no additional events are expected.
+After this happens, the completion handler `receiveCompletion` gets called.
+
+## Data Synchronization
+
+The Cyface SDK allows to synchronize the measured data to a server for permanent storage.
+The default way to store data is to a [Cyface Data Collector Server](https://github.com/cyface-de/data-collector).
+But the SDK is extensible and allows injection of a custom upload process, for synchronizing to different servers supporting different data formats and communication protocols.
+Extensions are discussed in *Provide a Customized Upload Process*.
+
+### The Cyface Data Collector
+
+Upload to the Cyface Data Collector is the default way to upload data.
+The Collector expects to receive a binary format specified using [Protobuf](https://protobuf.dev/).
+The specification is available from [Github](https://github.com/cyface-de/protos).
+
+To send the data the Data Collector implements the [Google Media Upload Protocol](https://developers.google.com/drive/api/guides/manage-uploads?hl=de#resumable).
+Two implementations are available:
+
+* `DefaultUploadProcess`
+* `BackgroundUploadProcess`
+
+Additional processes are possible, as described under *Provide a Customized Upload Process* below.
+
+To exchange the different ``UploadProcess`` instances, there is a builder for objects adopting that protocol.
+The ``UploadProcessBuilder`` creates the correct instance depending on its implementation.
+Methods requiring an UploadProcess forward the creation to an implementation of builder, to create the correct type, while also leaving the type interchangeable.
+
+### Authentication
+
+Applications transmitting data to a Cyface Data Collector or a custom collector service usually require authentication and authorization.
+The SDK supports two authentication variants, implemented by `OAuthAuthenticator` and `StaticAuthenticator`.
+Both adopt the `Authenticator` protocol which looks like:
+
+```Swift
+public protocol Authenticator {
+    func authenticate() async throws -> String
+    func delete() async throws
+    func logout() async throws
+    func callback(url: URL)
+}
+```
+
+The method `authenticate` is the core of an `Authenticator`, providing a valid auth token in case of success or throwing an error if failed.
+The `delete` method deletes a user account.
+This is only possible if the server supports this via API.
+The `logout` method can be used to logout a user.
+What this means depends on the authentication method.
+An application should usually forward back to the login screen in case of a successful logout.
+The `callback` method 
+
+The simplest is the `StaticAuthenticator`.
+It is provided with an authentication token, used during an upload process.
+If a new token is required a new istance of this class is necessary.
+This implementation only supports `authenticate`.
+Other functions are going to throw ``AuthenticationError/notImplemented`` if called.
+The `StaticAuthenticator` is not the recommended way of authentication.
+
+The `OAuthAuthenticator` implements authentication using OpenID / OAuth 2.0 using Auth Flow with PCKE.
+It has been tested with a Keycloak Identity provider (Version 22.0.0), but should work with all Identity Providers supporting the same standards.
+Using an `OAuthAuthenticator` is as easy as calling:
+
+```Swift
+let authenticator = OAuthAuthenticator(issuer: issuer, redirectUri: redirectURI, apiEndpoint: apiEndpoint, clientId: clientId)
+
+let token = try await authenticator.authenticate()
+```
+
+The values for `issuer`, `redirectURI`, `clientId` and `apiEndpoint` depend on the server setup.
+The first three are subject to the identity provider (i.e. Keycloak).
+The `apiEndpoint` is used to communicate with the resource server for user deletion.
+If the resource server provides an endpoint to send an HTTP `DELETE` request, the `delete` method is supported that way.
+
+If neither of the two provided `Authenticator` implementations satisfies an applications needs for authentication and authorization, that application could easily adopt the `Authenticator` protocol, to provide custom authentication and authorization.
+
+
+### Synchronizing Measurement Data
+To use the default upload process simply call it with a `FinishedMeasurement`, like so:
+
+```Swift
+let urlSession = URLSession(configuration: configuration)
+
+let sessionRegistry = DefaultSessionRegistry()
+let uploadFactory = CoreDataBackedUploadFactory(dataStoreStack: dataStoreStack)
+
+var uploadProcess = DefaultUploadProcess(openSessions: sessionRegistry, apiUrl: apiURL, urlSession: mockedSession, uploadFactory: uploadFactory, authenticator: authenticator)
+
+let result = try await oocut.upload(measurement: mockMeasurement)
+```
+
+Note that this method expects an `Authenticator` a `SessionRegistry` and an `UploadFactory` from the Cyface SDK as well as a `URLSession` and an API URL.
+
+Acquiring an `Authenticator` is described above.
+
+A `SessionRegistry` is used to store information about the progress of an upload session.
+This allows for the continuation of cancelled or failed uploads.
+The default implementation stores sessions only in memory.
+This means updates need to start from the beginning if the application was closed.
+The `PersistentSessionRegistry` allows to load sessions from permanent storage and thus to continue uploads, even if the application was suspended or closed.
+
+An `UploadFactory` is responsible for the creation of new `Upload` instances.
+It is required for the injection of different `Upload` implementations, which is useful for mocking `Upload` instances during testing and for SwiftUI previews.
+
+### Synchronizing Data in the Background
+
+The `DefaultUploadProcess` fails if the application is put to the background or suspended by the system.
+To avoid this fate, there is also a `BackgroundUploadProcess`.
+This one is capable to handle a background upload.
+
+Create one using a ``BackgroundUploadProcessBuilder``, then simply call ``BackgroundUploadProcess/upload(measurement:)`` to start the upload.
+This could look something like:
+
+```Swift
+let registry = PersistentSessionRegistry(dataStoreStack: dataStoreStack, uploadFactory: uploadFactory)
+
+let processBuilder = init(
+        sessionRegistry: registry,
+        collectorUrl: url,
+        uploadFactory: uploadFactory,
+        dataStoreStack: dataStoreStack,
+        authenticator: authenticator
+    )
+let process = processBuilder.create()
+process.upload(measurement: measurement) async throws -> any Upload
+```
+
+To ensure, that uploads are continued after the app was suspended a `PersistentSessionRegistry` is required.
+
+## Provide a Customized Upload Process
+
+In case an Application sends its data to a Server, which does not implement the Cyface Data Collector API and file format, it is possible to adopt the ``UploadProcess`` protocol.
+The ``UploadProcess`` protocol looks like:
+
+```Swift
+public protocol UploadProcess {
+    
+    var uploadStatus: PassthroughSubject<UploadStatus, Never> { get }                                    // 1
+
+    mutating func upload(measurement: FinishedMeasurement, authToken: String) async throws -> any Upload // 2
+}
+```
+
+The `uploadStatus` variable at (1) should be used to send information about the state of the upload.
+The inline documentation of the ``UploadStatusType`` provides details about the different states an upload can have.
+They are:
+
+* started: Which should occur right before starting the upload.
+* finishedSuccessfully: Which should occur right after uploading a measurement was successful.
+* finishedUnsuccessfully: Which should occur right after uploading a measurement was not successful.
+* finishedWithError(cause: Error): Which should occur right after an error occurred during the upload.
+
+The difference between `finishedUnsuccessfully` and `finishedWithError` being that an upload `finishedUnsuccessfully` if the server returned some error code, while `finishedWithError` indicates some local error on the client not caused by communicating with the server.
+
+The `upload` method takes the measurement and a token for authentication and initiates the upload sequence.
+The things happening in there depend on the upload protocol and data format of your application.
+In the end the method returns the processed `Upload`.
+
+## Conclusion
+
+These explanations should ease getting used to using the Cyface SDK.
+Additional documentation is available for each public member and the test - located in *Tests* - provide additional example code on how to achive certain tasks.
+
+### API Documentation
 [See](https://cyface-de.github.io/ios-backend/documentation/datacapturing/)
 
 ## Building from Source
+
+The following are some notes and remarks on releasing a new version of the Cyface Mobile SDK for iOS.
 
 ### Generate Interface to Protocol Buffer
 We use protobuf to transmit data.
@@ -320,8 +422,7 @@ If this succeeds, code generation should work automatically.
 If any hicups occur, detailed information might be available from the [Swift Protobuf Github Page](https://github.com/apple/swift-protobuf/)
 
 ### Linting
-Contains swiftlint
-See: https://github.com/realm/SwiftLint
+Contains [swiftlint](https://github.com/realm/SwiftLint).
 
 ## Releasing a new Version
 * Always work on a new branch based on main conforming to the pattern "release-<major>.<minor>.<fix>_PROJ-TASKNUMBER

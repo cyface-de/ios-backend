@@ -36,6 +36,12 @@ class UploadProcessTest: XCTestCase {
     private let measurementsURL = "http://localhost:8080/api/v3/measurements"
     /// An example for a URL for a single measurement.
     private let uploadURL = "http://localhost:8080/api/v3/measurements/(4e8508e5d5798049dc40fed3d87c7cde)/"
+    /// An authenticator returning a mock token, that can be used by the simulated ``UploadProcess``.
+    private var mockAuthenticator: Authenticator {
+        let ret = StaticAuthenticator()
+        ret.jwtToken = "mock-token"
+        return ret
+    }
 
     /// This test carries out a happy path upload process. It uses the *Mocker* framework to avoid actual network requests.
     func testUpload_HappyPath() async throws {
@@ -55,12 +61,12 @@ class UploadProcessTest: XCTestCase {
 
         let sessionRegistry = DefaultSessionRegistry()
 
-        var oocut = DefaultUploadProcess(openSessions: sessionRegistry, apiUrl: apiURL, urlSession: mockedSession, uploadFactory: MockUploadFactory())
+        var oocut = DefaultUploadProcess(openSessions: sessionRegistry, apiUrl: apiURL, urlSession: mockedSession, uploadFactory: MockUploadFactory(), authenticator: mockAuthenticator)
 
         let mockMeasurement = FinishedMeasurement(identifier: 1)
 
         // Act
-        let result = try await oocut.upload(measurement: mockMeasurement, authToken: "mock-token")
+        let result = try await oocut.upload(measurement: mockMeasurement)
 
 
         // Assert
@@ -90,10 +96,10 @@ class UploadProcessTest: XCTestCase {
         // Mock Successful Upload
         URLProtocolStub.loadingHandler.append({(request: URLRequest) in (HTTPURLResponse(url: request.url!, statusCode: 201, httpVersion: "HTTP/1.1", headerFields: [String: String]())!, Data())})
 
-        var uploadProcess = DefaultUploadProcess(openSessions: sessionRegistry, apiUrl: apiURL, urlSession: mockedSession, uploadFactory: MockUploadFactory())
+        var uploadProcess = DefaultUploadProcess(openSessions: sessionRegistry, apiUrl: apiURL, urlSession: mockedSession, uploadFactory: MockUploadFactory(), authenticator: mockAuthenticator)
 
         // Act
-        let result = try await uploadProcess.upload(measurement: mockMeasurement, authToken: "mock-token")
+        let result = try await uploadProcess.upload(measurement: mockMeasurement)
 
         // Assert
         XCTAssertTrue(result is MockUpload)

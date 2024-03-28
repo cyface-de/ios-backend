@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots App.
  *
@@ -22,6 +22,12 @@ import DataCapturing
 import CoreData
 import OSLog
 
+/**
+ An authenticator that does not communicate with any server and only provides a fake authentication token.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
 class MockAuthenticator: Authenticator {
     func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
         onSuccess("fake-token")
@@ -44,11 +50,16 @@ class MockAuthenticator: Authenticator {
     }
 }
 
-class MockDataStoreStack: DataStoreStack {
-    let mockPersistenceLayer: MockPersistenceLayer
+/**
+ A ``DataStoreStack`` not accessing any data store.
 
-    init(persistenceLayer: MockPersistenceLayer) {
-        self.mockPersistenceLayer = persistenceLayer
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
+class MockDataStoreStack: DataStoreStack {
+
+    init() {
+        // Nothing to do here.
     }
 
     func wrapInContextReturn<T>(_ block: (NSManagedObjectContext) throws -> T) throws -> T {
@@ -63,92 +74,11 @@ class MockDataStoreStack: DataStoreStack {
     }
 
     func wrapInContext(_ block: (NSManagedObjectContext) throws -> Void) throws {
-
+        try block(NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType))
     }
 
     func setup() async throws {
         // Nothing to do here!
-    }
-
-    func persistenceLayer() -> DataCapturing.PersistenceLayer {
-        return mockPersistenceLayer
-    }
-}
-
-class MockPersistenceLayer: PersistenceLayer {
-
-    var measurements = [FinishedMeasurement]()/*[
-        DataCapturing.FinishedMeasurement(identifier: 0),
-        DataCapturing.FinishedMeasurement(identifier: 1),
-        DataCapturing.FinishedMeasurement(identifier: 2)
-    ]*/
-
-    init(measurements: [FinishedMeasurement]) {
-        self.measurements.append(contentsOf: measurements)
-    }
-
-    func delete(measurement: UInt64) throws {
-
-    }
-
-    func delete(event: DataCapturing.Event) throws {
-
-    }
-
-    func delete() throws {
-        
-    }
-
-    func clean(measurement: UInt64) throws {
-
-    }
-
-    func createMeasurement(at time: Date, inMode mode: String) throws -> DataCapturing.FinishedMeasurement {
-        return DataCapturing.FinishedMeasurement(identifier: 0)
-    }
-
-    func createEvent(of type: DataCapturing.EventType, withValue: String?, time: Date, parent: inout DataCapturing.FinishedMeasurement) throws -> DataCapturing.Event {
-        return DataCapturing.Event(type: .lifecycleStart)
-    }
-
-    func appendNewTrack(to measurement: inout DataCapturing.FinishedMeasurement) throws {
-
-    }
-
-    func save(measurement: DataCapturing.FinishedMeasurement) throws -> DataCapturing.FinishedMeasurement {
-        return DataCapturing.FinishedMeasurement(identifier: 0)
-    }
-
-    func save(locations: [DataCapturing.GeoLocation], in measurement: inout DataCapturing.FinishedMeasurement) throws {
-
-    }
-
-    func save(accelerations: [DataCapturing.SensorValue], rotations: [DataCapturing.SensorValue], directions: [DataCapturing.SensorValue], in measurement: inout DataCapturing.Measurement) throws {
-
-    }
-
-    func load(measurementIdentifiedBy identifier: UInt64) throws -> DataCapturing.FinishedMeasurement {
-        return DataCapturing.FinishedMeasurement(identifier: 0)
-    }
-
-    func loadMeasurements() throws -> [DataCapturing.FinishedMeasurement] {
-        return [DataCapturing.FinishedMeasurement]()
-    }
-
-    func loadEvents(typed type: DataCapturing.EventType, forMeasurement measurement: DataCapturing.FinishedMeasurement) throws -> [DataCapturing.Event] {
-        return [DataCapturing.Event]()
-    }
-
-    func loadSynchronizableMeasurements() throws -> [DataCapturing.FinishedMeasurement] {
-        return measurements.filter { $0.synchronizable}
-    }
-
-    func loadClean(track: inout DataCapturing.Track) throws -> [DataCapturing.GeoLocation] {
-        return [DataCapturing.GeoLocation]()
-    }
-
-    func countGeoLocations(forMeasurement measurement: DataCapturing.FinishedMeasurement) throws -> Int {
-        return 0
     }
 }
 

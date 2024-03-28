@@ -40,8 +40,12 @@ public struct DefaultUploadProcess {
     let apiUrl: URL
     /// A `URLSession` to use for sending requests and receiving responses, probably in the background.
     var urlSession = URLSession.shared
+    /// Creates new uploads from measurements on each new call to ``upload(measurement:)``.
     let uploadFactory: UploadFactory
+    /// Publisher for events happening during the upload.
     public let uploadStatus = PassthroughSubject<UploadStatus, Never>()
+    /// Used to authenticate with the data collector service.
+    let authenticator: Authenticator
     // MARK: - Static Properties
     public static let discretionaryUrlSessionIdentifier = "de.cyface.urlsession.discretionary"
 
@@ -136,10 +140,11 @@ public struct DefaultUploadProcess {
 // MARK: - Upload Process Implementation
 extension DefaultUploadProcess: UploadProcess {
 
-    public mutating func upload(measurement: FinishedMeasurement, authToken: String) async throws -> any Upload {
+    public mutating func upload(measurement: FinishedMeasurement) async throws -> any Upload {
         if let upload = try openSessions.get(measurement: measurement) {
             do {
                 uploadStatus.send(UploadStatus(upload: upload, status: .started))
+                let authToken = try await authenticator.authenticate()
                 let statusRequest = StatusRequest(apiUrl: apiUrl, session: urlSession, authToken: authToken)
 
                 let response = try await statusRequest.request(upload: upload)
@@ -159,6 +164,7 @@ extension DefaultUploadProcess: UploadProcess {
                 uploadStatus.send(UploadStatus(upload: upload, status: .started))
                 try openSessions.register(upload: upload)
 
+                let authToken = try await authenticator.authenticate()
                 let response = try await preRequest.request(authToken: authToken, upload: upload)
 
                 let result = try await handlePreRequest(response: response, authToken, &upload)

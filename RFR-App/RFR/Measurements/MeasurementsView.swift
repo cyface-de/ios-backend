@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots iOS App.
  *
@@ -69,16 +69,7 @@ struct MeasurementsView: View {
 #if DEBUG
     var viewModel: MeasurementsViewModel {
         let ret = MeasurementsViewModel(
-            dataStoreStack: MockDataStoreStack(
-                persistenceLayer: MockPersistenceLayer(
-                    measurements: [
-                        FinishedMeasurement(identifier: 0),
-                        FinishedMeasurement(identifier: 1),
-                        FinishedMeasurement(identifier: 2)
-                    ]
-                )
-            ),
-            uploadPublisher: PassthroughSubject<UploadStatus, Never>()
+            dataStoreStack: MockDataStoreStack()
         )
         ret.measurements = [
             Measurement(
@@ -107,15 +98,7 @@ struct MeasurementsView: View {
         let ret = VoucherViewModel(
             authenticator: MockAuthenticator(),
             url: try! ConfigLoader.load().getIncentivesUrl(),
-            dataStoreStack: MockDataStoreStack(
-                persistenceLayer: MockPersistenceLayer(
-                    measurements: [
-                        FinishedMeasurement(identifier: 0),
-                        FinishedMeasurement(identifier: 1),
-                        FinishedMeasurement(identifier: 2)
-                    ]
-                )
-            )
+            dataStoreStack: MockDataStoreStack()
         )
         return ret
     }

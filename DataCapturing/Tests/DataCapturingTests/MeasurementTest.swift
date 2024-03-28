@@ -1,53 +1,87 @@
-//
-//  MeasurementTest.swift
-//  
-//
-//  Created by Klemens Muthmann on 02.02.23.
-//
-
+/*
+ * Copyright 2023-2024 Cyface GmbH
+ *
+ * This file is part of the Cyface SDK for iOS.
+ *
+ * The Cyface SDK for iOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface SDK for iOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface SDK for iOS. If not, see <http://www.gnu.org/licenses/>.
+ */
 import XCTest
+import OSLog
 @testable import DataCapturing
 
 final class MeasurementTest: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
+    let NSEC_PER_SEC = 1_000_000_000
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
+    func test() async throws {
+        let oocut = MeasurementImpl() {
+            return MockLocationManager()
+        }
+        var messages = [Message]()
+        var finished = false
+        let cancellable = oocut.measurementMessages.sink(receiveCompletion: { status in
+            switch status {
+            case .finished:
+                finished = true
+            case .failure(_):
+                os_log("Measurement messages not finished correctly", log: OSLog.test, type: .error)
+                finished = false
+            }
 
-    func testExample() async throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-        /*let coreDataStack = await CoreDataStack()
-        let oocut = try await Measurement(coreDataStack)
-        oocut.subscribe(testSubscriber)
+        }) { message in
+            messages.append(message)
+        }
 
-        try await oocut.start()
+        try oocut.start()
 
-        try await oocut.pause()
+        try await Task.sleep(nanoseconds: UInt64(2 * Double(NSEC_PER_SEC)))
 
-        try await oocut.resume()
+        try oocut.pause()
 
-        try await oocut.stop()
+        try await Task.sleep(nanoseconds: UInt64(2 * Double(NSEC_PER_SEC)))
+
+        try oocut.resume()
+
+        try await Task.sleep(nanoseconds: UInt64(2 * Double(NSEC_PER_SEC)))
+
+        try oocut.stop()
 
         // TODO. There should probably be some fix and geo location events as well.
-        XCTAssertEqual(testSubscriber.events[0], DataCapturingEvent.serviceStarted)
-        XCTAssertEqual(testSubscriber.events[1], DataCapturingEvent.servicePaused)
-        XCTAssertEqual(testSubscriber.events[2], DataCapturingEvent.serviceResumed)
-        XCTAssertEqual(testSubscriber.events[3], DataCapturingEvent.serviceStopped)*/
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+        var firstIsStarted = false
+        var pausedAfterStarted = false
+        var pausedIndex = 0
+        var resumedAfterPaused = false
+        var stopIsLast = false
+        for (index, message) in messages.enumerated() {
+            switch message {
+            case .started(timestamp: _):
+                firstIsStarted = index == 0
+            case .paused(timestamp: _):
+                pausedAfterStarted = index > 0
+                pausedIndex = index
+            case .resumed(timestamp: _):
+                resumedAfterPaused = index > pausedIndex
+            case .stopped(timestamp: _):
+                stopIsLast = index == messages.count-1
+            default:
+                print(message)
+            }
         }
+        XCTAssertTrue(firstIsStarted)
+        XCTAssertTrue(pausedAfterStarted)
+        XCTAssertTrue(resumedAfterPaused)
+        XCTAssertTrue(stopIsLast)
+        XCTAssertTrue(finished)
     }
-
 }
