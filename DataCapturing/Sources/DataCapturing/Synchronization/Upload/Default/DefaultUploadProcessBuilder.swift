@@ -33,18 +33,21 @@ public struct DefaultUploadProcessBuilder {
     let sessionRegistry: SessionRegistry
     /// A factory to create ``Upload`` instances on execution of the created ``UploadProcess``.
     let uploadFactory: UploadFactory
+    /// Authenticator to use for ``UploadProcess`` instances created by this builder.
+    let authenticator: Authenticator
 
     // MARK: - Initializers
-    public init(collectorUrl: URL, sessionRegistry: SessionRegistry, uploadFactory: UploadFactory) {
+    public init(collectorUrl: URL, sessionRegistry: SessionRegistry, uploadFactory: UploadFactory, authenticator: Authenticator) {
         self.collectorUrl = collectorUrl
         self.sessionRegistry = sessionRegistry
         self.uploadFactory = uploadFactory
+        self.authenticator = authenticator
     }
 }
 
 // MARK: - Implementation of UploadProcessBuilder
 extension DefaultUploadProcessBuilder: UploadProcessBuilder {
     public func build() -> UploadProcess {
-        return DefaultUploadProcess(openSessions: sessionRegistry, apiUrl: collectorUrl, uploadFactory: uploadFactory)
+        return DefaultUploadProcess(openSessions: sessionRegistry, apiUrl: collectorUrl, uploadFactory: uploadFactory, authenticator: authenticator)
     }
 }

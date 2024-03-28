@@ -36,7 +36,7 @@ import os.log
  - Version: 3.0.0
  - Since: 6.0.0
  */
-public class SensorCapturer {
+class SensorCapturer {
 
     // MARK: - Properties
     /// The timestamp of the previously captured acceleration. This is stored to make sure all accelerations are captured in increasing order.

@@ -31,7 +31,7 @@ import CoreLocation
  The most important connections are the ones to the published properties, used by the ``LiveView`` and the ones to a ``CapturedDataStorage`` for saving all captured data to the provided ``DataStoreStack``.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 2.0.0
  - Since: 3.1.2
  - SeeAlso: ``LiveView``
  */
@@ -69,7 +69,6 @@ class LiveViewModel: ObservableObject {
                 let measurement = MeasurementImpl()
 
                 // Forward finished messages so the UI can update accordingly.
-                let finishedMessages = finishedFlow()
                 let locationFlow = locationFlow()
                 let altitudeFlow = altitudeFlow()
                 let startedFlow = startFlow()
@@ -92,9 +91,6 @@ class LiveViewModel: ObservableObject {
                         pausedFlow.send(MeasurementState.paused)
                     case .resumed(timestamp: _):
                         resumedFlow.send(MeasurementState.running)
-                    case .finished(timestamp: _):
-                        os_log("Routing finished event", log: OSLog.capturingEvent, type: .debug)
-                        finishedMessages.send(message)
                     default:
                         os_log("Encountered unhandled message %@", log: OSLog.capturingEvent, type: .debug, message.description)
                     }
@@ -114,7 +110,8 @@ class LiveViewModel: ObservableObject {
     /// Captures and publishes any error produced by this model.
     @Published var error: Error?
     /// Always contains the most recent message received from the Cyface SDK. The measurements view listenes to this property to show updates to the live measurement if necessary.
-    @Published var finishedMessages: Message = Message.receivedNothingYet
+    //@Published var finishedMessages: MeasurementState = Message.receivedNothingYet
+    private let measurementsViewModel: MeasurementsViewModel
 
     /**
      Initialize an object of this class.
@@ -143,7 +140,8 @@ class LiveViewModel: ObservableObject {
         inclination: Double = 0.0,
         avoidedEmissions: Double = 0.0,
         dataStoreStack: DataStoreStack,
-        dataStorageInterval: Double
+        dataStorageInterval: Double,
+        measurementsViewModel: MeasurementsViewModel
     ) {
         self.dataStorageProcess = CapturedCoreDataStorage(dataStoreStack, dataStorageInterval)
         self.dataStoreStack = dataStoreStack
@@ -179,6 +177,7 @@ class LiveViewModel: ObservableObject {
         self.duration = formattedDuration
         self.inclination = "\(formattedInclination) m"
         self.avoidedEmissions = "\(formattedAvoidedEmissions) g CO₂"
+        self.measurementsViewModel = measurementsViewModel
     }
 
     /// Formats all the live statistics so they can be displayed nicely.
@@ -255,12 +254,13 @@ class LiveViewModel: ObservableObject {
         }
     }
 
+    /// Called if the measurement identified by the provided identifier has finished data capturing.
     private func onFinishedMeasurement(_ databaseIdentifier: UInt64) {
         os_log("Cleanup after measurement has finished", log: OSLog.measurement, type: .debug)
         self.cancellables.removeAll(keepingCapacity: true)
         self._measurement = nil
         self.dataStorageProcess.unsubscribe()
-        finishedMessages = Message.finished(timestamp: Date.now)
+        measurementsViewModel.onMeasurementsChanged()
     }
 
     /// Setup Combine flow to handle ``Measurement`` start events.
@@ -332,24 +332,7 @@ class LiveViewModel: ObservableObject {
         return stoppedFlow
     }
 
-    private func finishedFlow() -> PassthroughSubject<Message, Never> {
-        let finishedMessages = PassthroughSubject<Message, Never>()
-        finishedMessages
-            .receive(on: RunLoop.main)
-            .assign(to: &$finishedMessages)
-        finishedMessages.sink { _ in
-            os_log("Cleanup after measurement has finished", log: OSLog.measurement, type: .debug)
-            /*self.cancellables.forEach {
-                $0.cancel()
-            }*/
-            self.cancellables.removeAll(keepingCapacity: true)
-            self._measurement = nil
-            self.dataStorageProcess.unsubscribe()
-        }.store(in: &cancellables)
-
-        return finishedMessages
-    }
-
+    /// Setup the flow capturing data locations with all the algorithms working on geo locations.
     private func locationFlow() -> PassthroughSubject<GeoLocation, Never> {
         let locationFlow = PassthroughSubject<GeoLocation, Never>()
         // Use the most recent location to provide the speed value
@@ -425,6 +408,7 @@ class LiveViewModel: ObservableObject {
         return locationFlow
     }
 
+    /// The flow for processing altitude values from the local barometer.
     private func altitudeFlow() -> PassthroughSubject<DataCapturing.Altitude, Never> {
         let altitudeFlow = PassthroughSubject<DataCapturing.Altitude, Never>()
         altitudeFlow

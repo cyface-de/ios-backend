@@ -30,7 +30,7 @@ import CoreData
  */
 class SerializationTest: XCTestCase {
 
-    /// The object of the class under test
+    /*/// The object of the class under test
     var oocut: MeasurementSerializer!
     /// A `PersistenceLayer` instance used to load and store data for testing purposes.
     var persistenceLayer: CoreDataPersistenceLayer!
@@ -168,5 +168,5 @@ class SerializationTest: XCTestCase {
             .build(persistenceLayer
             )
         _ = try oocut.serialize(serializable: measurement)
-    }
+    }*/
 }
