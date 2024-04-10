@@ -7,7 +7,7 @@
       buildImplicitDependencies = "YES">
       <BuildActionEntries>
          <BuildActionEntry
-            buildForTesting = "YES"
+            buildForTesting = "NO"
             buildForRunning = "YES"
             buildForProfiling = "YES"
             buildForArchiving = "YES"
@@ -20,6 +20,62 @@
                ReferencedContainer = "container:RFR.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "NO"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AA87D0772982ADE9002F6B3B"
+               BuildableName = "RFRTests.xctest"
+               BlueprintName = "RFRTests"
+               ReferencedContainer = "container:RFR.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "NO"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AA87D0812982ADE9002F6B3B"
+               BuildableName = "RFRUITests.xctest"
+               BlueprintName = "RFRUITests"
+               ReferencedContainer = "container:RFR.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "NO"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AA6239982B0CA8DF007875BF"
+               BuildableName = "Ready for Robots DevelopmentTests.xctest"
+               BlueprintName = "Ready for Robots DevelopmentTests"
+               ReferencedContainer = "container:RFR.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "NO"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AA1E40622B17EAF100CACBE6"
+               BuildableName = "Ready for Robots UITests.xctest"
+               BlueprintName = "Ready for Robots UITests"
+               ReferencedContainer = "container:RFR.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -28,50 +84,6 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AA87D0772982ADE9002F6B3B"
-               BuildableName = "RFRTests.xctest"
-               BlueprintName = "RFRTests"
-               ReferencedContainer = "container:RFR.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AA87D0812982ADE9002F6B3B"
-               BuildableName = "RFRUITests.xctest"
-               BlueprintName = "RFRUITests"
-               ReferencedContainer = "container:RFR.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AA6239982B0CA8DF007875BF"
-               BuildableName = "Ready for Robots DevelopmentTests.xctest"
-               BlueprintName = "Ready for Robots DevelopmentTests"
-               ReferencedContainer = "container:RFR.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AA1E40622B17EAF100CACBE6"
-               BuildableName = "Ready for Robots UITests.xctest"
-               BlueprintName = "Ready for Robots UITests"
-               ReferencedContainer = "container:RFR.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -23,8 +23,12 @@
 		AA3C062A2A3AF8B9002BD585 /* ControlBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06292A3AF8B9002BD585 /* ControlBar.swift */; };
 		AA3C062D2A3B03C8002BD585 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA3C062B2A3B03C8002BD585 /* InfoPlist.strings */; };
 		AA3C06302A3B03C8002BD585 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA3C062E2A3B03C8002BD585 /* Localizable.strings */; };
-		AA3C06512A40ED57002BD585 /* VoucherOverviewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06502A40ED57002BD585 /* VoucherOverviewModel.swift */; };
 		AA3C06562A4180DC002BD585 /* MainMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C06552A4180DC002BD585 /* MainMap.swift */; };
+		AA4054EA2BBEDC4E00370D81 /* VoucherRequirements.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4054E92BBEDC4E00370D81 /* VoucherRequirements.swift */; };
+		AA4054EC2BC434BF00370D81 /* MailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4054EB2BC434BF00370D81 /* MailView.swift */; };
+		AA4054EF2BC56F7C00370D81 /* DataCapturing in Frameworks */ = {isa = PBXBuildFile; productRef = AA4054EE2BC56F7C00370D81 /* DataCapturing */; };
+		AA40552A2BC6891200370D81 /* NoVoucher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4055292BC6891200370D81 /* NoVoucher.swift */; };
+		AA40552C2BC6895F00370D81 /* Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA40552B2BC6895F00370D81 /* Events.swift */; };
 		AA45BDA22AE6B420003FCB17 /* LoginStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA45BDA12AE6B420003FCB17 /* LoginStatus.swift */; };
 		AA4C48F02B5812C900164175 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = AA4C48EF2B5812C900164175 /* Sentry */; };
 		AA6C48962A93629800C3633D /* OAuthLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6C48952A93629800C3633D /* OAuthLoginView.swift */; };
@@ -48,7 +52,6 @@
 		AAA1AABA29E6FAE0002CBC91 /* SynchronizationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAB929E6FAE0002CBC91 /* SynchronizationViewModel.swift */; };
 		AAA1AABE29E8895A002CBC91 /* Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AABD29E8895A002CBC91 /* Formatter.swift */; };
 		AAA1AAC129ED4544002CBC91 /* Statistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA1AAC029ED4544002CBC91 /* Statistics.swift */; };
-		AAA1AAC429EED663002CBC91 /* HCaptcha in Frameworks */ = {isa = PBXBuildFile; productRef = AAA1AAC329EED663002CBC91 /* HCaptcha */; };
 		AAA5CEB02AC56E090088AFA6 /* ImpressumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA5CEAF2AC56E090088AFA6 /* ImpressumView.swift */; };
 		AAA5CEB22AC56E4A0088AFA6 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA5CEB12AC56E4A0088AFA6 /* ProfileView.swift */; };
 		AAC610642B231B070083AED5 /* DeleteAccountConfirmationDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC610632B231B070083AED5 /* DeleteAccountConfirmationDialog.swift */; };
@@ -63,7 +66,6 @@
 		AACB768329BF639F00A9DB6F /* DataCapturing in Frameworks */ = {isa = PBXBuildFile; productRef = AACB768229BF639F00A9DB6F /* DataCapturing */; };
 		AACB768929C0989300A9DB6F /* RFRError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768829C0989300A9DB6F /* RFRError.swift */; };
 		AACB768C29C1C24B00A9DB6F /* InitializationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACB768B29C1C24B00A9DB6F /* InitializationView.swift */; };
-		AAE8E46D2A2A33BB005AA4F1 /* VoucherOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E46C2A2A33BB005AA4F1 /* VoucherOverview.swift */; };
 		AAE8E46F2A2A33E3005AA4F1 /* VoucherReached.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E46E2A2A33E3005AA4F1 /* VoucherReached.swift */; };
 		AAE8E4712A2A33F5005AA4F1 /* VoucherEnabled.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE8E4702A2A33F5005AA4F1 /* VoucherEnabled.swift */; };
 		AAEF3B492B3425C800BDE7FE /* COPYING-APPENDIX-DE in Resources */ = {isa = PBXBuildFile; fileRef = AAEF3B482B3425C800BDE7FE /* COPYING-APPENDIX-DE */; };
@@ -106,8 +108,11 @@
 		AA3C06292A3AF8B9002BD585 /* ControlBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBar.swift; sourceTree = "<group>"; };
 		AA3C062C2A3B03C8002BD585 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		AA3C062F2A3B03C8002BD585 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
-		AA3C06502A40ED57002BD585 /* VoucherOverviewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherOverviewModel.swift; sourceTree = "<group>"; };
 		AA3C06552A4180DC002BD585 /* MainMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMap.swift; sourceTree = "<group>"; };
+		AA4054E92BBEDC4E00370D81 /* VoucherRequirements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherRequirements.swift; sourceTree = "<group>"; };
+		AA4054EB2BC434BF00370D81 /* MailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailView.swift; sourceTree = "<group>"; };
+		AA4055292BC6891200370D81 /* NoVoucher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoVoucher.swift; sourceTree = "<group>"; };
+		AA40552B2BC6895F00370D81 /* Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Events.swift; sourceTree = "<group>"; };
 		AA45BDA12AE6B420003FCB17 /* LoginStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginStatus.swift; sourceTree = "<group>"; };
 		AA6C48952A93629800C3633D /* OAuthLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthLoginView.swift; sourceTree = "<group>"; };
 		AA6C489E2A938EDB00C3633D /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
@@ -147,7 +152,6 @@
 		AACB768029BF626500A9DB6F /* DataCapturing */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = DataCapturing; path = ../DataCapturing; sourceTree = "<group>"; };
 		AACB768829C0989300A9DB6F /* RFRError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFRError.swift; sourceTree = "<group>"; };
 		AACB768B29C1C24B00A9DB6F /* InitializationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitializationView.swift; sourceTree = "<group>"; };
-		AAE8E46C2A2A33BB005AA4F1 /* VoucherOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherOverview.swift; sourceTree = "<group>"; };
 		AAE8E46E2A2A33E3005AA4F1 /* VoucherReached.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherReached.swift; sourceTree = "<group>"; };
 		AAE8E4702A2A33F5005AA4F1 /* VoucherEnabled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoucherEnabled.swift; sourceTree = "<group>"; };
 		AAEF3B482B3425C800BDE7FE /* COPYING-APPENDIX-DE */ = {isa = PBXFileReference; lastKnownFileType = text; path = "COPYING-APPENDIX-DE"; sourceTree = "<group>"; };
@@ -170,8 +174,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA4C48F02B5812C900164175 /* Sentry in Frameworks */,
+				AA4054EF2BC56F7C00370D81 /* DataCapturing in Frameworks */,
 				AA6C48992A9365B200C3633D /* AppAuth in Frameworks */,
-				AAA1AAC429EED663002CBC91 /* HCaptcha in Frameworks */,
 				AACB768329BF639F00A9DB6F /* DataCapturing in Frameworks */,
 				AA6C489B2A9365B200C3633D /* AppAuthCore in Frameworks */,
 			);
@@ -220,12 +224,14 @@
 		AA3C064B2A3E4621002BD585 /* Voucher */ = {
 			isa = PBXGroup;
 			children = (
-				AAE8E46C2A2A33BB005AA4F1 /* VoucherOverview.swift */,
 				AAE8E46E2A2A33E3005AA4F1 /* VoucherReached.swift */,
 				AAE8E4702A2A33F5005AA4F1 /* VoucherEnabled.swift */,
 				AA8FC7642A2CE82B006D52F3 /* Voucher.swift */,
 				AA8FC7682A2DB438006D52F3 /* VoucherViewModel.swift */,
-				AA3C06502A40ED57002BD585 /* VoucherOverviewModel.swift */,
+				AA4054E92BBEDC4E00370D81 /* VoucherRequirements.swift */,
+				AA4054EB2BC434BF00370D81 /* MailView.swift */,
+				AA4055292BC6891200370D81 /* NoVoucher.swift */,
+				AA40552B2BC6895F00370D81 /* Events.swift */,
 			);
 			path = Voucher;
 			sourceTree = "<group>";
@@ -425,10 +431,10 @@
 			name = RFR;
 			packageProductDependencies = (
 				AACB768229BF639F00A9DB6F /* DataCapturing */,
-				AAA1AAC329EED663002CBC91 /* HCaptcha */,
 				AA6C48982A9365B200C3633D /* AppAuth */,
 				AA6C489A2A9365B200C3633D /* AppAuthCore */,
 				AA4C48EF2B5812C900164175 /* Sentry */,
+				AA4054EE2BC56F7C00370D81 /* DataCapturing */,
 			);
 			productName = RFR;
 			productReference = AA87D0682982ADE8002F6B3B /* Ready for Robots Development.app */;
@@ -492,6 +498,7 @@
 				AAA1AAC229EED663002CBC91 /* XCRemoteSwiftPackageReference "HCaptcha-ios-sdk" */,
 				AA6C48972A9365B200C3633D /* XCRemoteSwiftPackageReference "AppAuth-iOS" */,
 				AA4C48EE2B5812C800164175 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+				AA4054ED2BC56F7C00370D81 /* XCLocalSwiftPackageReference "../DataCapturing" */,
 			);
 			productRefGroup = AA87D0692982ADE8002F6B3B /* Products */;
 			projectDirPath = "";
@@ -587,7 +594,6 @@
 			files = (
 				AAE8E4712A2A33F5005AA4F1 /* VoucherEnabled.swift in Sources */,
 				AA6C489F2A938EDB00C3633D /* LoginViewController.swift in Sources */,
-				AA3C06512A40ED57002BD585 /* VoucherOverviewModel.swift in Sources */,
 				AAC9D2E82983DEC3003C4CC7 /* LiveViewModel.swift in Sources */,
 				AAA1AAAE29D6FB8D002CBC91 /* OSLog.swift in Sources */,
 				AAC9D2EF29840651003C4CC7 /* LabelledDivider.swift in Sources */,
@@ -597,13 +603,15 @@
 				AA6C48962A93629800C3633D /* OAuthLoginView.swift in Sources */,
 				AA2ACAC92B8CDA33007ADE14 /* AppDelegate.swift in Sources */,
 				AAEF3B4B2B3590AA00BDE7FE /* ErrorTextView.swift in Sources */,
+				AA40552A2BC6891200370D81 /* NoVoucher.swift in Sources */,
+				AA40552C2BC6895F00370D81 /* Events.swift in Sources */,
 				AA3C062A2A3AF8B9002BD585 /* ControlBar.swift in Sources */,
 				AA87D0972982B3ED002F6B3B /* MeasurementsView.swift in Sources */,
-				AAE8E46D2A2A33BB005AA4F1 /* VoucherOverview.swift in Sources */,
 				AAA1AAB429E540D0002CBC91 /* MeasurementsViewModel.swift in Sources */,
 				AA1E405B2B1764C900CACBE6 /* DataProtection.swift in Sources */,
 				AAA1AABE29E8895A002CBC91 /* Formatter.swift in Sources */,
 				AA87D0992982B43F002F6B3B /* StatisticsView.swift in Sources */,
+				AA4054EC2BC434BF00370D81 /* MailView.swift in Sources */,
 				AA9AF31D2AEA8E9E0003BE54 /* Config.swift in Sources */,
 				AAA1AAB829E6E729002CBC91 /* ErrorView.swift in Sources */,
 				AA1E40592B175C5300CACBE6 /* WebView.swift in Sources */,
@@ -626,6 +634,7 @@
 				AAA1AABA29E6FAE0002CBC91 /* SynchronizationViewModel.swift in Sources */,
 				AA119BBC2BB57022002D1DC8 /* SubmitDataButton.swift in Sources */,
 				AAC9D2FF29895D16003C4CC7 /* KeyValueView.swift in Sources */,
+				AA4054EA2BBEDC4E00370D81 /* VoucherRequirements.swift in Sources */,
 				AAFB60992A31BFA9008AEC76 /* UIKitMapView.swift in Sources */,
 				AA8FC7692A2DB438006D52F3 /* VoucherViewModel.swift in Sources */,
 				AAC610642B231B070083AED5 /* DeleteAccountConfirmationDialog.swift in Sources */,
@@ -765,7 +774,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.5;
+				MARKETING_VERSION = 3.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "Ready for Robots";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -890,7 +899,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.5;
+				MARKETING_VERSION = 3.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.staging;
 				PRODUCT_NAME = "Ready for Robots Staging";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1009,7 +1018,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.5;
+				MARKETING_VERSION = 3.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.staging;
 				PRODUCT_NAME = "Ready for Robots Staging";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1127,7 +1136,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.5;
+				MARKETING_VERSION = 3.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "Ready for Robots";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1753,7 +1762,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.5;
+				MARKETING_VERSION = 3.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.dev;
 				PRODUCT_NAME = "Ready for Robots Development";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1791,7 +1800,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1.5;
+				MARKETING_VERSION = 3.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.dev;
 				PRODUCT_NAME = "Ready for Robots Development";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1912,6 +1921,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		AA4054ED2BC56F7C00370D81 /* XCLocalSwiftPackageReference "../DataCapturing" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../DataCapturing;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		AA4C48EE2B5812C800164175 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -1950,6 +1966,10 @@
 			package = AA6C48972A9365B200C3633D /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
 			productName = AppAuth;
 		};
+		AA4054EE2BC56F7C00370D81 /* DataCapturing */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DataCapturing;
+		};
 		AA4C48EF2B5812C900164175 /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AA4C48EE2B5812C800164175 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
@@ -1964,11 +1984,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AA6C48972A9365B200C3633D /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
 			productName = AppAuthCore;
-		};
-		AAA1AAC329EED663002CBC91 /* HCaptcha */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AAA1AAC229EED663002CBC91 /* XCRemoteSwiftPackageReference "HCaptcha-ios-sdk" */;
-			productName = HCaptcha;
 		};
 		AACB768229BF639F00A9DB6F /* DataCapturing */ = {
 			isa = XCSwiftPackageProductDependency;

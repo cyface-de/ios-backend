@@ -19,6 +19,7 @@
 import Foundation
 import DataCapturing
 import SwiftUI
+import MessageUI
 
 /**
  View model used for the view showing the voucher.
@@ -31,30 +32,35 @@ class VoucherViewModel: ObservableObject {
     // MARK: - Private Properties
     /// A retrieved voucher is stored to user defaults under this key.
     private static let userDefaultsKey = "de.cyface.rfr.voucher"
-    /// This is the amount of kilometers the participant must have driven, to acquire a voucher.
-    static let requiredKilometers = 15.0
     // MARK: - Properties
-    /// The currently accumulated kilometers by the participant.
-    @Published var accumulatedKilometers = 0.0
     /// The acquired voucher or `nil` if no voucher has been acquired yet.
     @Published var voucher: Voucher?
     /// The number of available fouchers, shown as long as the current user did not acquire a voucher already.
     @Published var voucherCount: Int = 0
-    /// The authenticator to authenticate with the Ready for Robots identity provider.
-    private let authenticator: Authenticator
-    /// The internet address of the root of the voucher API used by this application.
-    private let url: URL
-    /// Stack to a data store to retrieve measurement information for calculating the covered distance by this user.
-    private let dataStoreStack: DataStoreStack
+    @Published var showMailView: Bool = false
+    @Published var mailData: ComposeMailData?
+    /// A handle to the `Vouchers` API, for retrieving voucher information from the server.
+    private let vouchers: Vouchers
+    /// An algorithm to calculate whether a user is eligleble for a voucher or not.
+    private var voucherRequirements: VoucherRequirements
+    private var voucherRedeemable: Bool {
+        var redeemDate = DateComponents()
+        redeemDate.year = 2024
+        redeemDate.month = 6
+        redeemDate.day = 1
+        redeemDate.timeZone = TimeZone(abbreviation: "CEST")
+        redeemDate.hour = 23
+        redeemDate.minute = 59
+        redeemDate.second = 59
+
+        return Date.now <= Calendar.current.date(from: redeemDate)!
+    }
 
     // MARK: - Initializers
-    /// Create a new object of this class, communicating with the voucher API at the provided `url`, authenticating with the provided `authenticator`.
-    /// - Parameter dataStoreStack: Used to retrieve the covered distance by this user.
-    init(authenticator: Authenticator, url: URL, dataStoreStack: DataStoreStack) {
-
-        self.authenticator = authenticator
-        self.url = url
-        self.dataStoreStack = dataStoreStack
+    /// Create a new object of this class, communicating with the voucher API  via the provided `Vouchers` instance`.
+    init(vouchers: Vouchers, voucherRequirements: VoucherRequirements) {
+        self.vouchers = vouchers
+        self.voucherRequirements = voucherRequirements
         let decoder = JSONDecoder()
         if let voucherData = UserDefaults.standard.data(forKey: VoucherViewModel.userDefaultsKey) {
             DispatchQueue.main.async { [weak self] in
@@ -73,7 +79,6 @@ class VoucherViewModel: ObservableObject {
     /// - Throws: If communication with the server fails or no vouchers are available anymore.
     /// Please have a look a the voucher API documentation and ``VoucherRequestError`` to get information about the meaning of the different HTTP Status codes returned.
     func onPressLoadVoucherButton() async throws {
-        let vouchers = Vouchers(authenticator: authenticator, url: url)
         let voucher = try await vouchers.requestVoucher()
 
         let encoder = JSONEncoder()
@@ -85,6 +90,50 @@ class VoucherViewModel: ObservableObject {
         }
     }
 
+    // The following send E-Mail functionality is based on code from the following StackOverflowThread: https://stackoverflow.com/questions/25981422/how-to-open-mail-app-from-swift
+
+    func onSendEMailButtonPressed() {
+        guard let voucher = voucher else {
+            return
+        }
+
+        // Modify following variables with your text / recipient
+        let recipientEmail = "gewinnspiel@ready-for-robots.de"
+        let subject = "Gewinnlos: \(voucher.code)"
+        let body = ""
+
+        if MFMailComposeViewController.canSendMail() {
+            mailData = ComposeMailData(subject: subject, recipients: [recipientEmail], message: body, attachments: [])
+            self.showMailView.toggle()
+        } else if let emailUrl = createEmailUrl(to: recipientEmail, subject: subject, body: body) {
+            UIApplication.shared.open(emailUrl)
+        }
+    }
+
+
+    private func createEmailUrl(to: String, subject: String, body: String) -> URL? {
+        let subjectEncoded = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+        let bodyEncoded = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+
+        let gmailUrl = URL(string: "googlegmail://co?to=\(to)&subject=\(subjectEncoded)&body=\(bodyEncoded)")
+        let outlookUrl = URL(string: "ms-outlook://compose?to=\(to)&subject=\(subjectEncoded)&body=\(bodyEncoded)")
+        let yahooMail = URL(string: "ymail://mail/compose?to=\(to)&subject=\(subjectEncoded)&body=\(bodyEncoded)")
+        let sparkUrl = URL(string: "readdle-spark://compose?recipient=\(to)&subject=\(subjectEncoded)&body=\(bodyEncoded)")
+        let defaultUrl = URL(string: "mailto:\(to)?subject=\(subjectEncoded)&body=\(bodyEncoded)")
+
+        if let gmailUrl = gmailUrl, UIApplication.shared.canOpenURL(gmailUrl) {
+            return gmailUrl
+        } else if let outlookUrl = outlookUrl, UIApplication.shared.canOpenURL(outlookUrl) {
+            return outlookUrl
+        } else if let yahooMail = yahooMail, UIApplication.shared.canOpenURL(yahooMail) {
+            return yahooMail
+        } else if let sparkUrl = sparkUrl, UIApplication.shared.canOpenURL(sparkUrl) {
+            return sparkUrl
+        }
+
+        return defaultUrl
+    }
+
     /// Refresh the state from user defaults and the local database.
     ///
     /// - Throws: If the local storage was not available.
@@ -92,23 +141,14 @@ class VoucherViewModel: ObservableObject {
     /// It is usually not possible to recover from such an error.
     @MainActor
     func refreshModel() async throws {
-        if accumulatedKilometers >= VoucherViewModel.requiredKilometers {
+        if voucherRequirements.isQualifiedForVoucher() {
             if let data = UserDefaults.standard.data(forKey: VoucherViewModel.userDefaultsKey) {
                 let decoder = JSONDecoder()
                 voucher = try? decoder.decode(Voucher.self, from: data)
             }
         } else {
-            try dataStoreStack.wrapInContext { context in
-                let request = MeasurementMO.fetchRequest()
-                try request.execute().forEach { measurement in
-                    let distanceInMeters = Statistics.coveredDistance(tracks: measurement.typedTracks())
-                    let distanceInKilometers = distanceInMeters / 1_000
-                    accumulatedKilometers += distanceInKilometers
-                }
-            }
+            try await voucherRequirements.refreshProgress()
         }
-
-        let vouchers = Vouchers(authenticator: authenticator, url: url)
 
         Task {
             self.voucherCount = (try? await vouchers.count) ?? 0
@@ -120,21 +160,14 @@ class VoucherViewModel: ObservableObject {
     /// Thereafter show a button to acquire a voucher and finally show the voucher itself if one was still available.
     @ViewBuilder
     func view() -> some View {
-        if voucherCount > 0 && accumulatedKilometers < VoucherViewModel.requiredKilometers {
-            Spacer()
-            VoucherOverview(
-                viewModel: VoucherOverviewModel(
-                    accumulatedKilometers: accumulatedKilometers,
-                    kilometersToAcquire: VoucherViewModel.requiredKilometers,
-                    voucherCount: voucherCount
-                )
-            )
-        } else if voucherCount > 0 && accumulatedKilometers >= VoucherViewModel.requiredKilometers && voucher == nil {
-            Spacer()
-            VoucherReached(viewModel: self)
-        } else if voucher != nil {
-            Spacer()
-            VoucherEnabled(viewModel: self)
+        if voucherCount > 0 && !voucherRequirements.isQualifiedForVoucher() {
+            voucherRequirements.progressView(voucherCount: voucherCount).padding([.top, .bottom])
+        } else if voucherCount > 0 && voucherRequirements.isQualifiedForVoucher() && voucher == nil {
+            VoucherReached(viewModel: self).padding([.top, .bottom])
+        } else if voucherCount == 0 && voucher == nil {
+            NoVoucher(voucherRedeemable: voucherRedeemable).padding([.top, .bottom])
+        } else if voucher != nil && voucherRedeemable {
+            VoucherEnabled(viewModel: self).padding([.top, .bottom])
         } else {
             EmptyView()
         }

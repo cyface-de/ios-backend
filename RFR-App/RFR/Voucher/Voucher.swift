@@ -20,15 +20,24 @@ import Foundation
 import DataCapturing
 
 /**
-Model object representing the collection of vouchers on the server.
+ Model object representing the collection of vouchers on the server.
 
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ */
+protocol Vouchers {
+    var count: Int { get async throws }
+    func requestVoucher() async throws -> Voucher
+}
+/**
  This class is responsible for creating the connection to the voucher API, retrieving vouchers and that state of the collection of vouchers.
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
  - Since: 3.1.2
  */
-class Vouchers {
+class VouchersApi: Vouchers {
+    
     // MARK: - Static Properties
     /// Used to decode JSON server responses.
     private static let decoder = JSONDecoder()
@@ -86,7 +95,7 @@ class Vouchers {
                 throw VoucherRequestError.requestFailed(statusCode: response.statusCode)
             }
 
-            let voucher = try Vouchers.decoder.decode(Voucher.self, from: data)
+            let voucher = try VouchersApi.decoder.decode(Voucher.self, from: data)
 
             self._voucher = voucher
 
@@ -119,7 +128,7 @@ class Vouchers {
                 throw VoucherRequestError.requestFailed(statusCode: response.statusCode)
             }
 
-            let voucherCount = try Vouchers.decoder.decode(Count.self, from: data)
+            let voucherCount = try VouchersApi.decoder.decode(Count.self, from: data)
             self._count = voucherCount.vouchers
 
             return voucherCount.vouchers
@@ -139,7 +148,6 @@ class Vouchers {
  */
 struct Voucher: Codable {
     let code: String
-    let until: String
 }
 
 /**

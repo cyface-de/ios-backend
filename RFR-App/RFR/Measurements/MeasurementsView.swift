@@ -56,7 +56,7 @@ struct MeasurementsView: View {
                     .headerProminence(.increased)
                 }.clipped()
 
-                voucherViewModel.view()
+                voucherViewModel.view().padding([.bottom])
             }
         }.onAppear {
             Task {
@@ -96,9 +96,11 @@ struct MeasurementsView: View {
 
     var voucherViewModel: VoucherViewModel {
         let ret = VoucherViewModel(
-            authenticator: MockAuthenticator(),
-            url: try! ConfigLoader.load().getIncentivesUrl(),
-            dataStoreStack: MockDataStoreStack()
+            vouchers: MockVouchers(count: 3, voucher: Voucher(code: "test-code")),
+            voucherRequirements: VoucherRequirements(
+                dataStoreStack: MockDataStoreStack(),
+                daysInSpecialRegionFullFilled: 2
+            )
         )
         return ret
     }

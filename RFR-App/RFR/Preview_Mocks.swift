@@ -82,4 +82,13 @@ class MockDataStoreStack: DataStoreStack {
     }
 }
 
+struct MockVouchers: Vouchers {
+    var count: Int
+    let voucher: Voucher
+
+    func requestVoucher() async throws -> Voucher {
+        return voucher
+    }
+}
+
 #endif

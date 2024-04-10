@@ -43,8 +43,8 @@ struct VoucherReached: View {
                 Divider()
                 HStack {
                     Image(systemName: "checkmark.seal.fill")
-                    Text("nextbike Gutschein freigeschaltet")
-                        .padding()
+                    Text("Gewinnspiellos freigeschaltet")
+                        .padding([.top, .bottom])
                 }
                 Button(action: {
                     Task {
@@ -55,7 +55,7 @@ struct VoucherReached: View {
                         }
                     }
                 }, label: {
-                    Text("Gutschein anzeigen")
+                    Text("Gewinnspiellos anzeigen".uppercased(with: .autoupdatingCurrent))
                         .frame(maxWidth: .infinity)
                         .foregroundColor(Color("ButtonText"))
                     
@@ -72,9 +72,11 @@ struct VoucherReached: View {
 #Preview {
     VoucherReached(
         viewModel: VoucherViewModel(
-            authenticator: MockAuthenticator(),
-            url: try! ConfigLoader.load().getIncentivesUrl(),
-            dataStoreStack: MockDataStoreStack()
+            vouchers: MockVouchers(count: 4, voucher: Voucher(code: "test-voucher")),
+            voucherRequirements: VoucherRequirements(
+                dataStoreStack: MockDataStoreStack(),
+                daysInSpecialRegionFullFilled: 3
+            )
         )
     )
 }

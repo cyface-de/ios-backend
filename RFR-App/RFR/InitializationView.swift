@@ -106,9 +106,8 @@ let liveViewModel = LiveViewModel(
 )
 
 let voucherViewModel2 = VoucherViewModel(
-    authenticator: authenticator,
-    url: incentivesUrl,
-    dataStoreStack: mockDataStoreStack
+    vouchers: MockVouchers(count: 3, voucher: Voucher(code: "test-voucher")),
+    voucherRequirements: VoucherRequirements(dataStoreStack: mockDataStoreStack)
 )
 
 #Preview("Standard") {

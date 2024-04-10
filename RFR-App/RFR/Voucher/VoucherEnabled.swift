@@ -36,12 +36,24 @@ struct VoucherEnabled: View {
         if
             let voucher = viewModel.voucher {
             VStack {
-                Divider()
                 Text("Gutscheincode: \(voucher.code)")
                     .padding()
-                Text("1x 15 Freiminuten auf die nächste Ausleihe in Schkeuditz - nextbike Nordsachsen")
+                Rectangle().frame(height: 1, alignment: .center).padding([.leading, .trailing]).foregroundColor(.gray)
+                Text("Diesen Code an gewinnspiel@ready-for-robots.de schicken und an der Verlosung teilnehmen.")
                     .padding()
-                //Text("gültig bis: \(dateFormatter.string(from: voucher.until))")
+                Button(action: {
+                    viewModel.onSendEMailButtonPressed()
+                }, label: {
+                    Text("E-Mail Senden")
+                })
+                .sheet(isPresented: $viewModel.showMailView, content: {
+                    if let mailData = viewModel.mailData {
+                        MailView(data: mailData) {_ in
+                            print("E-Mail send successfully!")
+                            viewModel.showMailView.toggle()
+                        }
+                    }
+                })
             }
         } else {
             // TODO: Better make this an error alert
@@ -53,13 +65,13 @@ struct VoucherEnabled: View {
 #if DEBUG
 var previewVoucherViewModel: VoucherViewModel {
     let ret = VoucherViewModel(
-        authenticator: MockAuthenticator(),
-        url: try! ConfigLoader.load().getIncentivesUrl(),
-        dataStoreStack: MockDataStoreStack()
+        vouchers: MockVouchers(count: 2, voucher: Voucher(code: "test-voucher")),
+        voucherRequirements: VoucherRequirements(
+            dataStoreStack: MockDataStoreStack()
+        )
     )
     ret.voucher = Voucher(
-        code: "abcdefg",
-        until: "2023-12-31T23:59:59Z"
+        code: "abcdefg"
     )
 
     return ret
