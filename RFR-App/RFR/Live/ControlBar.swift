@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots App.
  *
@@ -94,71 +94,55 @@ struct ControlBar: View {
 
 #if DEBUG
 #Preview("Stopped") {
-    ControlBar(
+    let mockDataStoreStack = MockDataStoreStack()
+    let measurementsViewModel = MeasurementsViewModel(dataStoreStack: mockDataStoreStack)
+
+    return ControlBar(
         viewModel: LiveViewModel(
-            dataStoreStack: MockDataStoreStack(
-                persistenceLayer: MockPersistenceLayer(
-                    measurements: [
-                        FinishedMeasurement(identifier: 0),
-                        FinishedMeasurement(identifier: 1),
-                        FinishedMeasurement(identifier: 2)
-                    ]
-                )
-            ),
-            dataStorageInterval: 5.0
+            dataStoreStack: mockDataStoreStack,
+            dataStorageInterval: 5.0,
+            measurementsViewModel: measurementsViewModel
         )
     )
 }
 
 #Preview("Running") {
-    ControlBar(
+    let mockDataStoreStack = MockDataStoreStack()
+    let measurementsViewModel = MeasurementsViewModel(dataStoreStack: mockDataStoreStack)
+
+    return ControlBar(
         viewModel: LiveViewModel(
             measurementState: .running,
-            dataStoreStack: MockDataStoreStack(
-                persistenceLayer: MockPersistenceLayer(
-                    measurements: [
-                        FinishedMeasurement(identifier: 0),
-                        FinishedMeasurement(identifier: 1),
-                        FinishedMeasurement(identifier: 2)
-                    ]
-                )
-            ),
-            dataStorageInterval: 5.0
+            dataStoreStack: MockDataStoreStack(),
+            dataStorageInterval: 5.0,
+            measurementsViewModel: measurementsViewModel
         )
     )
 }
 
 #Preview("Paused") {
-    ControlBar(
+    let mockDataStoreStack = MockDataStoreStack()
+    let measurementsViewModel = MeasurementsViewModel(dataStoreStack: mockDataStoreStack)
+
+    return ControlBar(
         viewModel: LiveViewModel(
             measurementState: .paused,
-            dataStoreStack: MockDataStoreStack(
-                persistenceLayer: MockPersistenceLayer(
-                    measurements: [
-                        FinishedMeasurement(identifier: 0),
-                        FinishedMeasurement(identifier: 1),
-                        FinishedMeasurement(identifier: 2)
-                    ]
-                )
-            ),
-            dataStorageInterval: 5.0
+            dataStoreStack: MockDataStoreStack(),
+            dataStorageInterval: 5.0,
+            measurementsViewModel: measurementsViewModel
         )
     )
 }
 
 #Preview("Showing Error") {
-    ControlBar(
+    let mockDataStoreStack = MockDataStoreStack()
+    let measurementsViewModel = MeasurementsViewModel(dataStoreStack: mockDataStoreStack)
+
+    return ControlBar(
         viewModel: LiveViewModel(
-            dataStoreStack: MockDataStoreStack(
-                persistenceLayer: MockPersistenceLayer(
-                    measurements: [
-                        FinishedMeasurement(identifier: 0),
-                        FinishedMeasurement(identifier: 1),
-                        FinishedMeasurement(identifier: 2)
-                    ]
-                )
-            ),
-            dataStorageInterval: 5.0
+            dataStoreStack: MockDataStoreStack(),
+            dataStorageInterval: 5.0,
+            measurementsViewModel: measurementsViewModel
         ),
         error: DataCapturingError.isPaused
     )

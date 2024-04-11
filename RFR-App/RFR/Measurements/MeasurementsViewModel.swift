@@ -43,11 +43,10 @@ class MeasurementsViewModel: ObservableObject {
     // MARK: - Properties
     /// The measurements displayed by this view.
     @Published var measurements: [Measurement]
+    /// A flag that is set to false as soon as all the measurements have been loaded. The UI should show a spinner until then.
     @Published var isLoading = true
+    /// Contains the last error, that occurred or `nil` if everything is fine.
     @Published var error: Error? = nil
-    let syncQueue = DispatchQueue(label: "measurements-view-operations")
-    var uploadSubscription: AnyCancellable?
-    var measurementEventsSubscription: AnyCancellable?
     let dataStoreStack: DataStoreStack
     // Statistics
     @Published var distance: String = ""
@@ -60,49 +59,37 @@ class MeasurementsViewModel: ObservableObject {
     @Published var meanAvoidedEmissions: String = ""
 
     // MARK: - Initializers
-    // TODO: Why is it not possible to call this async? It is going to take some time for larger amounts of measurements.
     /// Create a new object of this class.
     /// It gets data from the provided `dataStoreStack` and receives data upload information from the provided `uploadPublisher`.
     init(
-        dataStoreStack: DataStoreStack,
-        uploadPublisher: some Publisher<UploadStatus, Never>
+        dataStoreStack: DataStoreStack
     ) {
         self.measurements = [Measurement]()
         self.dataStoreStack = dataStoreStack
-        uploadSubscription = uploadPublisher
-            .receive(on: DispatchQueue.main).sink { [weak self] status in
-                self?.measurements.filter { measurement in
-                    measurement.id == status.measurement.identifier
-                }.forEach { measurement in
-                    switch status.status {
-                    case .started:
-                        measurement.synchronizationState = .synchronizing
-                    case .finishedWithError(cause: _):
-                        measurement.synchronizationState = .unsynchronizable
-                    case .finishedUnsuccessfully:
-                        measurement.synchronizationState = .synchronizable
-                    default:
-                        measurement.synchronizationState = .synchronized
-                    }
-                }
-            }
     }
 
     /// Load the measurement data from the database asynchronously and update all the published properties.
     /// This finishes object initialization and causes the `isLoading` property to become `true`, which should trigger a redraw of the UI with the actual valid data.
-    func setup() throws {
-        try dataStoreStack.wrapInContext { context in
-            let request = MeasurementMO.fetchRequest()
-            try request.execute().forEach { measurement in
-                measurements.append(load(measurement: measurement))
-            }
-            DispatchQueue.main.async { [weak self] in
-                self?.updateStatistics()
-                self?.isLoading = false
+    func setup() async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            do {
+                try dataStoreStack.wrapInContext { context in
+                    let request = MeasurementMO.fetchRequest()
+                    try request.execute().forEach { measurement in
+                        measurements.append(load(measurement: measurement))
+                    }
+
+                    DispatchQueue.main.async { [weak self] in
+                        self?.updateStatistics()
+                        self?.isLoading = false
+                        continuation.resume()
+                    }
+                }
+            } catch {
+                continuation.resume(throwing: error)
             }
         }
     }
-
 
     /// Convert a database measurement into its representation as required by the user interface.
     private func load(measurement: MeasurementMO) -> Measurement {
@@ -156,7 +143,6 @@ class MeasurementsViewModel: ObservableObject {
 
         let southWestCorner = CLLocation(latitude: minimumLatitude, longitude: minimumLongitude)
         let northWestCorner = CLLocation(latitude: maximumLatitude, longitude: minimumLongitude)
-        //let southEastCorner = CLLocation(latitude: minimumLatitude, longitude: maximumLongitude)
         let northEastCorner = CLLocation(latitude: maximumLatitude, longitude: maximumLongitude)
         let center = CLLocationCoordinate2D(
             latitude: northWestCorner.coordinate.latitude - latitudeDistance/2,
@@ -188,28 +174,33 @@ class MeasurementsViewModel: ObservableObject {
     }
 
     /// Causes a reload and redrawn each time measurement data changes.
-    private func onMeasurementsChanged() throws {
-        try dataStoreStack.wrapInContext { context in
-            let measurementRequest = MeasurementMO.fetchRequest()
-            let storedMeasurements = try measurementRequest.execute()
-            os_log("Loaded changed measurements", log: OSLog.measurement, type: .debug)
+    public func onMeasurementsChanged() {
+        do {
+            try dataStoreStack.wrapInContext { context in
+                let measurementRequest = MeasurementMO.fetchRequest()
+                let storedMeasurements = try measurementRequest.execute()
+                os_log("Loaded changed measurements", log: OSLog.measurement, type: .debug)
 
-            storedMeasurements.filter { storedMeasurement in
-                for measurement in measurements {
-                    if measurement.id == storedMeasurement.identifier {
-                        return false
+                storedMeasurements.filter { storedMeasurement in
+                    for measurement in measurements {
+                        if measurement.id == storedMeasurement.identifier {
+                            return false
+                        }
                     }
-                }
-                return true
-            }.forEach { filtered in
-                let measurement = self.load(measurement: filtered)
-                DispatchQueue.main.async { [weak self] in
-                    if let self = self {
-                        self.measurements.append(measurement)
-                        updateStatistics()
+                    return true
+                }.forEach { filtered in
+                    let measurement = self.load(measurement: filtered)
+                    DispatchQueue.main.async { [weak self] in
+                        if let self = self {
+                            self.measurements.append(measurement)
+                            updateStatistics()
+                        }
                     }
                 }
             }
+        } catch {
+            os_log("%@", log: OSLog.measurement, type: .error, error.localizedDescription)
+            self.error = error
         }
     }
 
@@ -285,28 +276,5 @@ class MeasurementsViewModel: ObservableObject {
     /// Search for the avoided emissions of the captured measurement with the most avoided emissions in gram.
     private func calculateMaxAvoidedEmissions() -> Double {
         return measurements.map { $0._avoidedEmissions }.max() ?? 0.0
-    }
-}
-
-extension MeasurementsViewModel: DataCapturingMessageSubscriber {
-
-    /// Subscribe to changes received from the ``LiveView`` of this model. This ensures, that new measurements acquired during the current session, appear on screen if finished.
-    func subscribe(to messages: some Publisher<Message, Never>) {
-        Task {
-            os_log("Subscribing measurements view model to updates from live view!", log: OSLog.measurement, type: .debug)
-            measurementEventsSubscription = messages.sink { [weak self] message in
-                switch message {
-                case .finished(timestamp: _):
-                    os_log("Updating view model with new measurement.")
-                    do {
-                        try self?.onMeasurementsChanged()
-                    } catch {
-                        self?.error = error
-                    }
-                default:
-                    os_log("Received invalid message %@", log: OSLog.measurement, type: .debug, message.description)
-                }
-            }
-        }
     }
 }

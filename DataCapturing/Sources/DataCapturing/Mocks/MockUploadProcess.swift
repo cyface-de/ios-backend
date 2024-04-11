@@ -34,7 +34,7 @@ class MockUploadProcess: UploadProcess {
 
     // MARK: - Methods
     /// This upload method simply returns a ``MockUpload`` for the provided ``FinishedMeasurement``, without ever calling any network code.
-    func upload(measurement: DataCapturing.FinishedMeasurement, authToken: String) async throws -> any DataCapturing.Upload {
+    func upload(measurement: DataCapturing.FinishedMeasurement) async throws -> any DataCapturing.Upload {
         return MockUpload(measurement: measurement)
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots iOS App.
  *
@@ -18,10 +18,6 @@
  */
 import SwiftUI
 import DataCapturing
-#if DEBUG
-import MapKit
-import Combine
-#endif
 
 /**
  A view showing statistics about all the measurements captured by this device.
@@ -83,17 +79,10 @@ struct StatisticsView: View {
 }
 
 #if DEBUG
-let measurement0 = FinishedMeasurement(identifier: 0)
-
 #Preview {
     StatisticsView(
         viewModel: MeasurementsViewModel(
-            dataStoreStack: MockDataStoreStack(persistenceLayer: MockPersistenceLayer(measurements: [
-                measurement0,
-                FinishedMeasurement(identifier: 1),
-                FinishedMeasurement(identifier: 2)
-            ])), 
-            uploadPublisher: Just(UploadStatus(measurement: measurement0, status: .started))
+            dataStoreStack: MockDataStoreStack()
         )
     )
 }

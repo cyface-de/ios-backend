@@ -34,6 +34,6 @@ public protocol UploadProcess {
     /// Start the upload process for the provided ``FinishedMeasurement``.
     /// Called after authentication with the Cyface data collector service was successful.
     /// - returns: The successful upload
-    mutating func upload(measurement: FinishedMeasurement, authToken: String) async throws -> any Upload
+    mutating func upload(measurement: FinishedMeasurement) async throws -> any Upload
 }
 

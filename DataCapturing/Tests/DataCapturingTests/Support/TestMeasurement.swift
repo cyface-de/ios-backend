@@ -31,7 +31,11 @@ import OSLog
  - Since: 4.0.0
  */
 class TestMeasurement: DataCapturing.Measurement {
-    var measurementMessages = PassthroughSubject<DataCapturing.Message, Never>()
+    var measurementMessages: AnyPublisher<DataCapturing.Message, Never> {
+        measurementSubject.eraseToAnyPublisher()
+    }
+
+    var measurementSubject = PassthroughSubject<DataCapturing.Message, Never>()
 
     var isRunning: Bool = false
 
@@ -47,18 +51,18 @@ class TestMeasurement: DataCapturing.Measurement {
 
         timer?.setEventHandler { [weak self] in
             let location = TestFixture.randomLocation()
-            self?.measurementMessages.send(Message.capturedLocation(location))
+            self?.measurementSubject.send(Message.capturedLocation(location))
         }
         altitudeTimer?.setEventHandler { [weak self] in
             let altitude = TestFixture.randomAltitude()
-            self?.measurementMessages.send(Message.capturedAltitude(altitude))
+            self?.measurementSubject.send(Message.capturedAltitude(altitude))
         }
 
         timer?.schedule(deadline: .now(), repeating: 1)
         altitudeTimer?.schedule(deadline: .now(), repeating: 0.5)
         isRunning = true
         isPaused = false
-        self.measurementMessages.send(Message.started(timestamp: Date()))
+        self.measurementSubject.send(Message.started(timestamp: Date()))
         timer?.resume()
         altitudeTimer?.resume()
     }
@@ -71,8 +75,8 @@ class TestMeasurement: DataCapturing.Measurement {
         isRunning = false
         isPaused = false
         os_log("Sending stop event", log: OSLog.test, type: .debug)
-        self.measurementMessages.send(Message.stopped(timestamp: Date()))
-        self.measurementMessages.send(completion: .finished)
+        self.measurementSubject.send(Message.stopped(timestamp: Date()))
+        self.measurementSubject.send(completion: .finished)
     }
 
     func pause() throws {
@@ -80,8 +84,8 @@ class TestMeasurement: DataCapturing.Measurement {
         altitudeTimer?.suspend()
         isPaused = true
         isRunning = false
-        self.measurementMessages.send(Message.paused(timestamp: Date()))
-        self.measurementMessages.send(completion: .finished)
+        self.measurementSubject.send(Message.paused(timestamp: Date()))
+        self.measurementSubject.send(completion: .finished)
     }
 
     func resume() throws {
@@ -89,10 +93,10 @@ class TestMeasurement: DataCapturing.Measurement {
         altitudeTimer?.resume()
         isPaused = false
         isRunning = true
-        self.measurementMessages.send(Message.resumed(timestamp: Date()))
+        self.measurementSubject.send(Message.resumed(timestamp: Date()))
     }
 
     func changeModality(to modality: String) {
-        self.measurementMessages.send(Message.modalityChanged(to: modality))
+        self.measurementSubject.send(Message.modalityChanged(to: modality))
     }
 }

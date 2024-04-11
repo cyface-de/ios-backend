@@ -224,7 +224,7 @@ class BackgroundUploadProcess: NSObject {
 
 // MARK: - Implementation of UploadProcess
 extension BackgroundUploadProcess: UploadProcess {
-    func upload(measurement: FinishedMeasurement, authToken: String) async throws -> any Upload {
+    func upload(measurement: FinishedMeasurement) async throws -> any Upload {
         /// Check for an open session.
         if let upload = try sessionRegistry.get(measurement: measurement), upload.location != nil {
             /// If there is an open session continue by sending a status request

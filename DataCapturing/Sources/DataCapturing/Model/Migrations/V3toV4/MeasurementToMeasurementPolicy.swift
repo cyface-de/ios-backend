@@ -79,7 +79,6 @@ class MeasurementToMeasurementPolicy: NSEntityMigrationPolicy {
      */
     func calcLength(ofLocations locations: NSOrderedSet) -> NSNumber {
         var trackLength = 0.0
-        let distanceCalculationStrategy = DefaultDistanceCalculationStrategy()
         var lastLocation: CLLocation?
         for location in locations {
             guard let location = location as? NSManagedObject else {
@@ -93,7 +92,7 @@ class MeasurementToMeasurementPolicy: NSEntityMigrationPolicy {
 
             let geoLocation = CLLocation(latitude: lat, longitude: lon)
             if let lastLocation = lastLocation {
-                trackLength += distanceCalculationStrategy.calculateDistance(from: geoLocation, to: lastLocation)
+                trackLength += geoLocation.distance(from: lastLocation)
             }
             lastLocation = geoLocation
         }

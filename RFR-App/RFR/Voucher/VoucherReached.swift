@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots App.
  *
@@ -74,15 +74,7 @@ struct VoucherReached: View {
         viewModel: VoucherViewModel(
             authenticator: MockAuthenticator(),
             url: try! ConfigLoader.load().getIncentivesUrl(),
-            dataStoreStack: MockDataStoreStack(
-                persistenceLayer: MockPersistenceLayer(
-                    measurements: [
-                        FinishedMeasurement(identifier: 0),
-                        FinishedMeasurement(identifier: 1),
-                        FinishedMeasurement(identifier: 2)
-                    ]
-                )
-            )
+            dataStoreStack: MockDataStoreStack()
         )
     )
 }

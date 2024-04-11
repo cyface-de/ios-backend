@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots iOS App.
  *
@@ -24,7 +24,7 @@ import Sentry
  Entry point to the application showing the first view.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 @main
@@ -32,8 +32,9 @@ struct RFRApp: App {
     /// The application, which is required to store and load the authentication state of this application.
     @ObservedObject var appModel = AppModel()
 
+    /// Setup Sentry tracing for the whole application.
     init() {
-        let enableTracing = try! appModel.config.getEnableSentryTracing()
+        let enableTracing = (try? appModel.config.getEnableSentryTracing()) ?? false
         SentrySDK.start { options in
             options.dsn = "https://cfb4e7e71da45d9d7fc312d2d350c951@o4506585719439360.ingest.sentry.io/4506585723437056"
             options.debug = false // Enabled debug when first installing is always helpful
@@ -47,8 +48,13 @@ struct RFRApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if let viewModel = appModel.viewModel, let incentivesUrl = appModel.incentivesUrl {
-                InitializationView(viewModel: viewModel, incentivesEndpoint: incentivesUrl)
+            if appModel.initialized {
+                InitializationView(
+                    measurementsViewModel: appModel.measurementsViewModel,
+                    synchronizationViewModel: appModel.syncViewModel,
+                    liveViewModel: appModel.liveViewModel,
+                    voucherViewModel: appModel.voucherViewModel,
+                    authenticator: appModel.authenticator)
                 #if DEBUG
                     .transaction { transaction in
                     if CommandLine.arguments.contains("enable-testing") {
@@ -75,19 +81,32 @@ struct RFRApp: App {
  */
 class AppModel: ObservableObject {
     // MARK: - Properties
-    /// The central view model branching of all the other view models required by the application.
-    @Published var viewModel: DataCapturingViewModel?
+    /// This applications configuration file.
+    var config: Config = try! ConfigLoader.load()
+    /// The view model used by the live view displayed while capturing data on the main view.
+    let liveViewModel: LiveViewModel
+    /// View model used to synchronize data to a Cyface Data Collector service.
+    let syncViewModel: SynchronizationViewModel
+    /// View model used to manage information about the complete collection of local measurements.
+    let measurementsViewModel: MeasurementsViewModel
+    /// View model used to manage voucher progress and download vouchers from a voucher server.
+    let voucherViewModel: VoucherViewModel
+    /// The authenticator used by this application to communicate with the Cyface Data Collector and the voucher server.
+    let authenticator: Authenticator
     /// Tells the view about errors occuring during initialization.
     @Published var error: Error?
+    /// A flag that is set to `true` if the initial setup process has completed.
+    ///
+    /// This flag is useful to avoid having an asynchronous initializer, which SwiftUI can not handle.
+    @Published var initialized = false
     /// The UIKit Application Delegate required for functionality not yet ported to SwiftUI.
     /// Especially reacting to backround network requests needs to be handled here.
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    /// This applications configuration file.
-    var config: Config = try! ConfigLoader.load()
-    /// The internet address of the root of the incentives API.
-    var incentivesUrl: URL?
 
     // MARK: - Initializers
+    /// Start the setup process.
+    ///
+    /// Please refer to ``initialized`` to see if initialization has actually finished.
     init() {
         do {
             let clientId = config.clientId
@@ -95,41 +114,72 @@ class AppModel: ObservableObject {
             let issuer = try config.getIssuerUri()
             let redirectURI = try config.getRedirectUri()
             let apiEndpoint = try config.getApiEndpoint()
-            self.incentivesUrl = try config.getIncentivesUrl()
+            let incentivesUrl = try config.getIncentivesUrl()
 
+            self.authenticator = AppModel.createAuthenticator(
+                issuer: issuer,
+                redirectURI: redirectURI,
+                apiEndpoint: apiEndpoint,
+                clientId: clientId
+            )
             let dataStoreStack = try CoreDataStack()
+            let uploadFactory = CoreDataBackedUploadFactory(dataStoreStack: dataStoreStack)
+            let uploadProcessBuilder = BackgroundUploadProcessBuilder(
+                sessionRegistry: PersistentSessionRegistry(dataStoreStack: dataStoreStack, uploadFactory: uploadFactory),
+                collectorUrl: uploadEndpoint,
+                uploadFactory: uploadFactory,
+                dataStoreStack: dataStoreStack,
+                authenticator: authenticator
+            )
+
+            measurementsViewModel = MeasurementsViewModel(
+                dataStoreStack: dataStoreStack
+            )
+            liveViewModel = LiveViewModel(
+                dataStoreStack: dataStoreStack,
+                dataStorageInterval: 5.0,
+                measurementsViewModel: measurementsViewModel
+            )
+            syncViewModel = SynchronizationViewModel(
+                dataStoreStack: dataStoreStack,
+                uploadProcessBuilder: uploadProcessBuilder,
+                measurementsViewModel: measurementsViewModel
+            )
+            voucherViewModel = VoucherViewModel(
+                authenticator: authenticator,
+                url: incentivesUrl,
+                dataStoreStack: dataStoreStack
+            )
+
             Task {
                 do {
                     try await dataStoreStack.setup()
-
-                    let authenticator = createAuthenticator(
-                        issuer: issuer,
-                        redirectURI: redirectURI,
-                        apiEndpoint: apiEndpoint,
-                        clientId: clientId
-                    )
-                    let uploadFactory = CoreDataBackedUploadFactory(dataStoreStack: dataStoreStack)
-                    let uploadProcessBuilder = BackgroundUploadProcessBuilder(
-                        sessionRegistry: PersistentSessionRegistry(dataStoreStack: dataStoreStack, uploadFactory: uploadFactory),
-                        collectorUrl: uploadEndpoint,
-                        uploadFactory: uploadFactory,
-                        dataStoreStack: dataStoreStack,
-                        authenticator: authenticator
-                    )
                     appDelegate.delegate = uploadProcessBuilder
-                    self.viewModel = try DataCapturingViewModel(authenticator: authenticator, uploadProcessBuilder: uploadProcessBuilder, dataStoreStack: dataStoreStack)
+
+                    // Workaround to reupload previously failed uploads.
+                    try dataStoreStack.wrapInContext { context in
+                        let request = MeasurementMO.fetchRequest()
+                        request.predicate = NSPredicate(format: "synchronized=false AND synchronizable=false")
+                        let result = try request.execute()
+                        for measurementModelObject in result {
+                            measurementModelObject.synchronizable = true
+                        }
+                        try context.save()
+                    }
+                    try await measurementsViewModel.setup()
+                    initialized = true
                 } catch {
                     self.error = error
                 }
             }
         } catch {
-            self.error = error
+            fatalError("Unable to load Application")
         }
     }
 
     // MARK: - Methods
     /// A method to create the correct authenticator for either a testing or a production environment.
-    private func createAuthenticator(issuer: URL, redirectURI: URL, apiEndpoint: URL, clientId: String) -> Authenticator {
+    private static func createAuthenticator(issuer: URL, redirectURI: URL, apiEndpoint: URL, clientId: String) -> Authenticator {
         #if DEBUG
         if CommandLine.arguments.contains("enable-testing") {
             return MockAuthenticator()

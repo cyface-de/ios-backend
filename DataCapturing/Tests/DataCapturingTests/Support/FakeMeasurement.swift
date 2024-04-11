@@ -39,7 +39,7 @@ public class FakeMeasurementImpl: FakeMeasurement {
         self.identifier = identifier
     }
 
-    public func build(_ persistenceLayer: PersistenceLayer) throws -> FinishedMeasurement {
+    public func build(_ dataStoreStack: DataStoreStack) throws -> FinishedMeasurement {
         let measurement = FinishedMeasurement(
             identifier: identifier,
             synchronizable: false,
@@ -47,10 +47,19 @@ public class FakeMeasurementImpl: FakeMeasurement {
             time: Date(),
             events: [], tracks: [])
 
-        var synchronizedMeasurement = try persistenceLayer.save(measurement: measurement)
-        try persistenceLayer.save(accelerations: accelerations, in: &synchronizedMeasurement)
-        return synchronizedMeasurement
+        return try dataStoreStack.wrapInContextReturn { context in
+            let newMeasurement = MeasurementMO(context: context)
+            newMeasurement.identifier = Int64(identifier)
+            newMeasurement.synchronizable = false
+            newMeasurement.synchronized = false
+            newMeasurement.time = Date.now
 
+            try SensorValueFile(fileType: .accelerationValueType, qualifier: "\(identifier)").write(serializable: accelerations)
+
+            try context.save()
+
+            return measurement
+        }
     }
 
     public func addGeoLocations(countOfGeoLocations: Int) throws -> FakeMeasurement {
@@ -147,10 +156,10 @@ public protocol FakeMeasurement {
      Create the product of this builder.
      Finishes the creation of the fake measurement by storing it to the database.
 
-     - Parameter persistenceLayer: A `PersistenceLayer` used to store the created measurement
+     - Parameter dataStoreStack: Used to store the created measurement
      - Returns: A completely intialized fake measurement
      */
-    func build(_ persistenceLayer: PersistenceLayer) throws -> FinishedMeasurement
+    func build(_ dataStoreStack: DataStoreStack) throws -> FinishedMeasurement
 }
 
 /**
