@@ -145,7 +145,7 @@ If you need to keep the measured data in between application restarts, you may s
 You can implement your own data storage if you like by reacting to the messages sent from a running `Measurement` and storing the captured data however you like.
 
 For convenience, the Cyface SDK provides its own data storage layer, which is designed to receive sensor data from a `Measurement` and store it to a permanent storage area.
-The default implmentations provided with the SDK uses Apples *CoreData* framework.
+The default implementation provided with the SDK uses Apples *CoreData* framework.
 Two protocols describe the core of the Cyface SDK data storage layer.
 The first is the `DataStoreStack` forming an abstraction for storage management, including setup and data migration from an older to a newer version.
 It follows the following protocol:
@@ -184,7 +184,7 @@ The supported entities are displayed in the following figure:
 
 * **Measurement:** Represent a single measurement in the database. It has two attributes `synchronizable` and `synchronized`, tracking if it is possible and necessary to synchronize this measurement with a storage server. Each measurement also gets a device wide unique `identifier`, which is implemented as a counter.
 * **Track:** A measurement contains one or more tracks. A track is created when the measurement is resumed after a pause.
-* **Event:** This tracks user interactions like putton presses to manipulate an active measurement. Start, stop, pause and resume events are recorded as this entity as well as modality changes.
+* **Event:** This tracks user interactions like button presses to manipulate an active measurement. Start, stop, pause and resume events are recorded as this entity as well as modality changes.
 * **GeoLocation:** Each captured location is stored as a `GeoLocation` in the data store.
 * **Altitude:** Each captured barometric altitude value is stored as an `Altitude` in the data store. This is empty if the device has no barometer.
 * **UploadSession:** If the `BackgroundUploadProcess` is used, active sessions are stored here, to resume them when the app is waken up for transmission by the system.
