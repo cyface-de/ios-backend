@@ -26,6 +26,7 @@ import Foundation
 
  - author: Klemens Muthmann
  - version: 2.0.0
+ - Since: 12.0.0
  */
 public protocol SessionRegistry {
     /// A mapping from the measurement identifier to the REST resource that session is available at.

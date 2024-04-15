@@ -25,6 +25,7 @@ import UIKit
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public protocol BackgroundURLSessionEventDelegate {
     func received(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void)
@@ -35,6 +36,7 @@ public protocol BackgroundURLSessionEventDelegate {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public class BackgroundUploadProcessBuilder {
     // MARK: - Attributes

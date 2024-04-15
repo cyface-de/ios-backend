@@ -26,6 +26,7 @@
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public protocol UploadFactory {
     /// Create the requested ``Upload`` from the provided ``FinishedMeasurement``.
@@ -43,6 +44,7 @@ public protocol UploadFactory {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public struct CoreDataBackedUploadFactory: UploadFactory {
     // MARK: - Properties

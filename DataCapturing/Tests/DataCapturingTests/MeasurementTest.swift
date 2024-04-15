@@ -20,6 +20,13 @@ import XCTest
 import OSLog
 @testable import DataCapturing
 
+/**
+ Tests that the measurement lifecycle works as expected.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 12.0.0
+ */
 final class MeasurementTest: XCTestCase {
 
     let NSEC_PER_SEC = 1_000_000_000

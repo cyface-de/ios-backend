@@ -26,6 +26,7 @@ A mocked upload that does not get data from a CoreData store or something simila
 
  - author: Klemens Muthmann
  - version: 2.1.1
+ - since: 12.0.0
  */
 class MockUpload: Upload {
     // MARK: Properties

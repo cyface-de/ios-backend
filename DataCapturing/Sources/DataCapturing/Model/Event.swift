@@ -24,7 +24,7 @@ import CoreData
 A single user initiated event during the capturing of a `Measurement`.
 
  - Author: Klemens Muthmann
- - Version 1.0.0
+ - Version 2.0.0
  - since: 11.0.0
  */
 public struct Event: CustomStringConvertible {

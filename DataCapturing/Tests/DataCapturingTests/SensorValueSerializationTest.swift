@@ -26,6 +26,7 @@ import CoreData
 
  - author: Klemens Muthmann
  - version: 1.0.0
+ - Since: 12.0.0
  */
 class SensorValueSerializationTest: XCTestCase {
     /// Test the serialization of batches of sensor values.

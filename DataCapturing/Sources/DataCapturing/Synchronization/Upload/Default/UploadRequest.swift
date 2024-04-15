@@ -25,6 +25,7 @@ import OSLog
 
  - author: Klemens Muthmann
  - version: 1.0.0
+ - Since: 12.0.0
  */
 class UploadRequest {
     /// The URL to the Cyface API receiving the data.

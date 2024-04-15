@@ -25,6 +25,7 @@ import OSLog
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public protocol DataStoreStack {
     // TODO: The following two methods are not really an abstraction, as they provide an `NSManagedObjectContext`. This should be handled differently.

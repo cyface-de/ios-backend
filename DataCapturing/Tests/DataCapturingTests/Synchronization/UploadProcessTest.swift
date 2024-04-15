@@ -27,6 +27,7 @@ A complete integration test for the whole process of uploading a `Measurement` t
 
  - author: Klemens Muthmann
  - version: 1.0.2
+ - since: 12.0.0
  */
 class UploadProcessTest: XCTestCase {
 
@@ -116,6 +117,7 @@ A `URLProtocol` implementation that catches request before hitting the actual ne
 
  - author: Klemens Muthmann
  - version: 1.0.0
+ - Since: 12.0.0
  */
 public class URLProtocolStub: URLProtocol {
 

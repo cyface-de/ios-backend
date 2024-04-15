@@ -29,7 +29,7 @@ import Foundation
  If this is not the case, API calls based on this authenticator are going to fail!
 
  - Author: Klemens Muthmann
- - Version: 1.3.0
+ - Version: 2.0.0
  - Since: 2.0.0
  */
 public class StaticAuthenticator: Authenticator {

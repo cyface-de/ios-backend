@@ -26,11 +26,13 @@ import Foundation
 
  - author: Klemens Muthmann
  - version: 1.0.0
+ - Since: 12.0.0
  */
 public struct DefaultSessionRegistry: SessionRegistry {
     // MARK: - Properties
     /// A mapping from the measurement identifier to the REST resource that session is available at.
     var openSessions = [UInt64: any Upload]()
+    /// Event protocols for the currently open sessions.
     var protocols = [UInt64: [RequestType]]()
 
     // MARK: - Initializers
