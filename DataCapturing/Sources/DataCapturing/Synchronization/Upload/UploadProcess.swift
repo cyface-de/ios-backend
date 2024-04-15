@@ -27,6 +27,7 @@ import Combine
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public protocol UploadProcess {
     /// Reports a constant stream of ``UploadStatus`` information about the currently ongoing uploads.

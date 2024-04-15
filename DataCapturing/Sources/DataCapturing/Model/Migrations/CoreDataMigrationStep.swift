@@ -24,7 +24,7 @@ import CoreData
  One step in a data model migration, migrating the database from one version to the following one.
 
  - Author: Klemens Muthmann
- - Version: 1.1.0
+ - Version: 2.0.0
  - Since: 4.0.0
  */
 struct CoreDataMigrationStep {

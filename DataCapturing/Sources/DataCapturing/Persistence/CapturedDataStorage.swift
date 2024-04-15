@@ -28,6 +28,7 @@ import CoreData
 
  - author: Klemens Muthmann
  - version: 1.0.0
+ - Since: 12.0.0
  */
 public protocol CapturedDataStorage {
     /// Subscribe to a running measurement and store the data produced by that measurement.
@@ -45,6 +46,7 @@ public protocol CapturedDataStorage {
 
  - author: Klemens Muthmann
  - version: 1.0.1
+ - Since: 12.0.0
  */
 public class CapturedCoreDataStorage<SVFF: SensorValueFileFactory> where SVFF.Serializable == [SensorValue] {
     // MARK: - Properties

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -24,6 +24,7 @@ import Foundation
 
  - author: Klemens Muthmann
  - version: 1.0.0
+ - Since: 12.0.0
  */
 enum DiffValueError<T: FixedWidthInteger>: Error {
     /// Thrown on a number overflow during a subraction.

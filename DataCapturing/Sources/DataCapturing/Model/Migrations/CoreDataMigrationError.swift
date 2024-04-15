@@ -24,6 +24,7 @@ import Foundation
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public enum CoreDataMigrationError: Error {
     /// Occurs if the file containing the data model was missing from the bundle of the current app.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -25,6 +25,7 @@ import CoreData
 
  - Author: Klemens Muthmann
  - version: 1.0.0
+ - Since: 12.0.0
  */
 public class Altitude: CustomStringConvertible {
     /// The relative altitude change since the last measured value, in meters.

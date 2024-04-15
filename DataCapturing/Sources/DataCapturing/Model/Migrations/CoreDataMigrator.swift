@@ -54,7 +54,7 @@ public protocol CoreDataMigratorProtocol {
  An implementation of the `CoreDataMigratorProtocol` for the Cyface data model, as used by the Cyface iOS SDK.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 2.0.0
  - Since: 4.0.0
  */
 public class CoreDataMigrator: CoreDataMigratorProtocol {

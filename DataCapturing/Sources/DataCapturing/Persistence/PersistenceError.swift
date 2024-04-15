@@ -19,7 +19,7 @@
 import Foundation
 
 /**
- A structure for all the errors thrown by the `PersistenceLayer`.
+ A structure for all the errors thrown from saving data to permanent storage..
 
  - Author: Klemens Muthmann
  - Version: 3.2.0

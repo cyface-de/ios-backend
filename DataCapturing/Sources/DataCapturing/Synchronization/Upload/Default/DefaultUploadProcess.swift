@@ -31,6 +31,7 @@ import Combine
 
  - author: Klemens Muthmann
  - version: 1.0.0
+ - Since: 12.0.0
  */
 public struct DefaultUploadProcess {
     // MARK: - Properties

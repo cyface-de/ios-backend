@@ -26,6 +26,7 @@
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public protocol SensorValueFileFactory {
     associatedtype Serializable
@@ -40,6 +41,7 @@ public protocol SensorValueFileFactory {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public struct DefaultSensorValueFileFactory: SensorValueFileFactory {
     public typealias Serializable = [SensorValue]

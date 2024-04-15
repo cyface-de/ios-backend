@@ -24,6 +24,7 @@ import Combine
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public class PersistentSessionRegistry: SessionRegistry {
     // MARK: - Properties
@@ -151,6 +152,7 @@ public class PersistentSessionRegistry: SessionRegistry {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public enum RequestType: Int16 {
     /// A Google Media Upload Protocol status request.
@@ -166,6 +168,7 @@ public enum RequestType: Int16 {
 
  - Author: Klemens Muthmann
  - Version: 2.0.0
+ - Since: 12.0.0
  */
 public struct UploadStatus {
     /// The measurement identifier of this status.
@@ -185,6 +188,7 @@ public struct UploadStatus {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public enum UploadStatusType: CustomStringConvertible {
     /// Upload has been started

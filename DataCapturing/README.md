@@ -426,13 +426,9 @@ Contains [swiftlint](https://github.com/realm/SwiftLint).
 
 ## Releasing a new Version
 * Always work on a new branch based on main conforming to the pattern "release-<major>.<minor>.<fix>_PROJ-TASKNUMBER
-* Increase Version for DataCapturing Target and DataCapturing.podspec
-* If a new release to the AppStore should happen also increase version for example App
 * Create PR into release branch
 * Check Version and Since Tags on all added and changed files
-* Build Documentation: https://maxxfrazer.medium.com/deploying-docc-with-github-actions-218c5ca6cad5
-    * Build DocC Archive: `xcodebuild docbuild -scheme DataCapturing -derivedDataPath docc -destination 'generic/platform=iOS'`
-    * Transform created archive for static hosting: `$(xcrun --find docc) process-archive transform-for-static-hosting ./docc/Build/Products/Debug-iphoneos/DataCapturing.doccarchive --output-path ./docs --hosting-base-path ios-backend;`
+* Add `Since` Tag with new version number to all newly added classes.
 * Check Readme (Is it up to date with the most recent changes?)
 * After approval merge into release and tag the merge commit with `git tag - <major>.<minor>.<fix>` appropriately
 * Make the tag to a release on Github and explain the changes following "Keeping a Changelog"

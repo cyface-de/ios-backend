@@ -89,7 +89,7 @@ extension BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 3.0.0
+ - Version: 4.0.0
  */
 class MeasurementSerializer: BinarySerializer {
     /// The number of centimeters in a meter.
@@ -221,7 +221,7 @@ class MeasurementSerializer: BinarySerializer {
  
  - Author: Klemens Muthmann
  - Since: 2.0.0
- - Version: 2.0.1
+ - Version: 3.0.0
  - Note: This class was called `AccelerationSerializer` in SDK version prior to 6.0.0.
  */
 public class SensorValueSerializer: BinarySerializer {
@@ -229,12 +229,8 @@ public class SensorValueSerializer: BinarySerializer {
     private static let millimetersInAMeter = 1_000.0
 
     /**
-     Serializes an array of sensor values into binary format of the form:
-     - 8 Bytes: timestamp as long
-     - 8 Bytes: x as double
-     - 8 Bytes: y as double
-     - 8 Bytes: z as double
-     
+     Serializes an array of sensor values into binary format, using Protobuf.
+
      - Parameter serializable: The array of sensor values to serialize.
      - Returns: An array of serialized bytes.
      - Throws: `BinarySerializationError.emptyData` if the provided `serializable` array is empty.
@@ -334,6 +330,7 @@ public class SensorValueSerializer: BinarySerializer {
 
      - author: Klemens Muthmann
      - version: 1.0.0
+     - Since: 12.0.0
      */
     enum BinarySerializationError: Error {
         /// Thrown if no data was provided, where some was expected.
@@ -348,6 +345,7 @@ public class SensorValueSerializer: BinarySerializer {
 
  - author: Klemens Muthmann
  - version: 1.0.0
+ - Since: 12.0.0
  */
 class DiffValue<T: FixedWidthInteger> {
     /// The value to calculate the differential for.

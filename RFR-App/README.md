@@ -1,10 +1,10 @@
 #  Ready-for-Robots App
 
-This is the project realising an iOS App for the Ready-for-Robots research project. Currently it is only a rump showing a UI with no actual actions.
+This is the project realising an iOS App for the [Ready-for-Robots research project](https://ready-for-robots.de/).
 
 ## License
 
-Copyright 2023 Cyface GmbH
+Copyright 2023-2024 Cyface GmbH
 
 This file is part of the Read-for-Robots iOS App.
 

@@ -45,6 +45,7 @@ var installationIdentifier: String {
 
  - author: Klemens Muthmann
  - version: 1.0.0
+ - Since: 12.0.0
  */
 public struct MetaData: Encodable {
     /// The number of locations of the transmittable measurement.

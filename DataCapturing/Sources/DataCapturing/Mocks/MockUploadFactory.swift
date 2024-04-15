@@ -26,6 +26,7 @@ import Foundation
 
  - Author: Klemens Muthmann
  - Version: 10.0
+ - Since: 12.0.0
  */
 public struct MockUploadFactory: UploadFactory {
     // MARK: - Initialiezrs

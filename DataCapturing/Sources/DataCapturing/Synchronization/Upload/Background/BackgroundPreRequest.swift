@@ -27,6 +27,7 @@ import Foundation
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 struct BackgroundPreRequest {
     /// The location of a Cyface data collector service to send the request to.

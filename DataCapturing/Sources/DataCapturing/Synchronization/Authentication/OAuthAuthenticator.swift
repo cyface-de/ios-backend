@@ -29,7 +29,7 @@ import OSLog
 
  - Author: Klemens Muthmann
  - Version: 1.0.2
- - Since: 3.1.2
+ - Since: 12.0.0
  */
 public class OAuthAuthenticator {
     // MARK: - Static Properties
@@ -185,7 +185,7 @@ public class OAuthAuthenticator {
 
      - Author: Klemens Muthmann
      - Version: 1.0.0
-     - Since: 3.1.2
+     - Since: 12.0.0
      */
     struct JWTToken {
         private static let jsonDecoder = JSONDecoder()
@@ -397,6 +397,7 @@ extension OAuthAuthenticator: Authenticator {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 12.0.0
  */
 public enum OAuthAuthenticatorError: Error {
     case tokenMissing

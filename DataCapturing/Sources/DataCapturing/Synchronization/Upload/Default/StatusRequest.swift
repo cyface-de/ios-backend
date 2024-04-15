@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -23,6 +23,7 @@ import Foundation
  
  - author: Klemens Muthmann
  - version: 1.0.0
+ - Since: 12.0.0
  */
 class StatusRequest {
     /// The Cyface API URL to send the request to.
@@ -89,6 +90,13 @@ class StatusRequest {
         }
     }
     
+    /**
+     An enumeration of all the different responses possible to receive from a status request.
+
+     - Author: Klemens Muthmann
+     - Version: 1.0.0
+     - Since: 12.0.0
+     */
     enum Response {
         /// When the status was that the request has been finished.
         case finished

@@ -22,8 +22,9 @@ import Foundation
 /**
  An upload to a Cyface Data Collector server.
 
- - author: Klemens Muthmann
- - version: 1.2.0
+ - Author: Klemens Muthmann
+ - Version: 1.2.0
+ - Since: 12.0.0
  */
 public protocol Upload: Equatable {
     // MARK: - Properties
@@ -48,8 +49,9 @@ public protocol Upload: Equatable {
 /**
  An upload to a Cyface Data Collector taking data from a CoreData source.
 
- - author: Klemens Muthmann
- - version 1.2.0
+ - Author: Klemens Muthmann
+ - Version: 1.2.0
+ - Since: 12.0.0
  */
 public class CoreDataBackedUpload: Upload {
     // MARK: - Public Properties
@@ -211,8 +213,9 @@ public class CoreDataBackedUpload: Upload {
 /**
  Errors thrown while accessing measurement data to upload.
 
- - author: Klemens Muthmann
- - version: 1.0.0
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 12.0.0
  */
 enum MeasurementError: Error {
     /// Thrown if the managed object loaded from the database is currently a fault.

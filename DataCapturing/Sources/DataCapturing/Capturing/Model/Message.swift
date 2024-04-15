@@ -23,7 +23,8 @@ import Foundation
  An enumeration of all the messages required during a measurement.
 
  - Author: Klemens Muthmann
- - Version 1.0.0
+ - Version: 1.0.0
+ - Since: 12.0.0
  */
 public enum Message: CustomStringConvertible {
     /// A human readable description for each message type.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Cyface GmbH
+ * Copyright 2022-2024 Cyface GmbH
  *
  * This file is part of the Cyface SDK for iOS.
  *
@@ -23,7 +23,7 @@ import Foundation
  A structure encapsulating errors used by server connections.
 
  - Author: Klemens Muthmann
- - Version: 5.0.0
+ - Version: 6.0.0
  - Since: 1.0.0
  */
 public enum ServerConnectionError: Error {
