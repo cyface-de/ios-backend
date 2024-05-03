@@ -25,7 +25,7 @@ import MapKit
  A view showing the lists of measurements capture by this device.
  
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 struct MeasurementsView: View {

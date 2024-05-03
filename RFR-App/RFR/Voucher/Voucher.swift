@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots App.
  *
@@ -23,7 +23,8 @@ import DataCapturing
  Model object representing the collection of vouchers on the server.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
+ - Since: 3.2.2
  */
 protocol Vouchers {
     var count: Int { get async throws }
@@ -33,7 +34,7 @@ protocol Vouchers {
  This class is responsible for creating the connection to the voucher API, retrieving vouchers and that state of the collection of vouchers.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 class VouchersApi: Vouchers {

@@ -25,7 +25,7 @@ import DataCapturing
  This view shows the actual voucher code.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 struct VoucherEnabled: View {
@@ -36,20 +36,28 @@ struct VoucherEnabled: View {
         if
             let voucher = viewModel.voucher {
             VStack {
-                Text("Gutscheincode: \(voucher.code)")
-                    .padding()
+                Text(
+                    String.localizedStringWithFormat(
+                        NSLocalizedString(
+                            "de.cyface.rfr.text.VoucherEnabled.code",
+                            comment: "A label containing the active voucher code, which is provided as the first argument."
+                        ), voucher.code
+                    )
+                ).padding()
                 Rectangle().frame(height: 1, alignment: .center).padding([.leading, .trailing]).foregroundColor(.gray)
-                Text("Diesen Code an gewinnspiel@ready-for-robots.de schicken und an der Verlosung teilnehmen.")
+                Text(
+                    "de.cyface.rfr.text.VoucherEnabled.game_explanation",
+                    comment: "Tell the where to send a voucher code and what happens after sending it there."
+                )
                     .padding()
                 Button(action: {
                     viewModel.onSendEMailButtonPressed()
                 }, label: {
-                    Text("E-Mail Senden")
+                    Text("de.cyface.rfr.text.VoucherEnabled.send_mail", comment: "Button label for sending an E-Mail.") // E-Mail Senden
                 })
                 .sheet(isPresented: $viewModel.showMailView, content: {
                     if let mailData = viewModel.mailData {
                         MailView(data: mailData) {_ in
-                            print("E-Mail send successfully!")
                             viewModel.showMailView.toggle()
                         }
                     }

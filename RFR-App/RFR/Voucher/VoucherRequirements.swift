@@ -21,19 +21,32 @@ import CoreLocation
 import SwiftUI
 import DataCapturing
 
+/**
+ A wrapper for the requirements for getting a voucher.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.2.2
+ */
 struct VoucherRequirements {
     // MARK: - Properties
+    /// The number of days to have at least one measurement in the special region
     let daysInSpecialRegion = 3
+    /// The coordinates of the special region.
     let specialRegion = CLCircularRegion(
         center: CLLocationCoordinate2D(latitude: 12.220760571276312, longitude: 51.395503403504705),
         radius: CLLocationDistance(150),
         identifier: "Schkeuditz Town Hall"
     )
+    /// Access to the apps data storage to store load progress from.
     let dataStoreStack: DataStoreStack
+    /// The number of days the user already did drive through the special region.
     var daysInSpecialRegionFullFilled = 0
+    /// The number of valid measurements already uploaded.
     var uploaded = 0
 
     // MARK: - Methods
+    /// The view showing the progress towards the challenge goal.
     @ViewBuilder
     func progressView(voucherCount: Int) -> some View {
         VStack {
@@ -41,19 +54,42 @@ struct VoucherRequirements {
                 Image(systemName: "rosette")
                 VStack {
                     if daysInSpecialRegionFullFilled < daysInSpecialRegion {
-                        Text("Bitte fahren Sie \(daysInSpecialRegion - daysInSpecialRegionFullFilled) mal am Rathaus vorbei, um ein Gewinnlos zu erhalten!")
+                        Text(
+                            String.localizedStringWithFormat(
+                                NSLocalizedString(
+                                    "de.cyface.rfr.text.VoucherRequirements.condition_town_hall",
+                                    comment: "Tell the user how often they should pass town hall. The number is provided as the first argument"
+                                ),
+                                daysInSpecialRegion - daysInSpecialRegionFullFilled
+                            )
+                            //"Bitte fahren Sie \() mal am Rathaus vorbei, um ein Gewinnlos zu erhalten!"
+                        )
                     } else {
-                        Text("Laden Sie bitte noch \(daysInSpecialRegion - uploaded) von \(daysInSpecialRegionFullFilled) Messungen hoch, um ein Gewinnlos zu erhalten!")
+                        Text(
+                            String.localizedStringWithFormat(
+                                NSLocalizedString(
+                                    "de.cyface.rfr.text.VoucherRequirements.condition_upload",
+                                    comment: """
+Tell the user how many of their measurements they are still required to upload. The number of uploads required is provided as the first parameter. The second parameter are the uploads required alltogether.
+"""
+                                ),
+                                daysInSpecialRegion - uploaded,
+                                daysInSpecialRegionFullFilled
+                            )
+                            //"Laden Sie bitte noch \(daysInSpecialRegion - uploaded) von \(daysInSpecialRegionFullFilled) Messungen hoch, um ein Gewinnlos zu erhalten!"
+                        )
                     }
                 }
             }
         }
     }
 
+    /// This is `true` if the user is qualified to recieve a new voucher.
     func isQualifiedForVoucher() -> Bool {
         return daysInSpecialRegionFullFilled >= daysInSpecialRegion
     }
 
+    /// Refresh the progress from the measurements currently stored on the device.
     mutating func refreshProgress() async throws {
         try await withCheckedThrowingContinuation { continuation in
             do {
@@ -93,6 +129,7 @@ struct VoucherRequirements {
     }
 
     // MARK: - Private Methods
+    /// Calculate the covered distance for one single track.
     private func toDistance(track: TrackMO) -> Double {
         return toDistance(
             locations: track.typedLocations().sorted {
@@ -101,6 +138,7 @@ struct VoucherRequirements {
         )
     }
 
+    /// Calculate the distance between an array of geo locations ordered by time.
     private func toDistance(locations: [GeoLocationMO]) -> Double {
         var previousLocation: GeoLocationMO? = nil
         var accumulatedDistance = 0.0
@@ -113,16 +151,28 @@ struct VoucherRequirements {
         return accumulatedDistance
     }
 
+    /// Calculate the distance covered by a measurement.
     private func toDistance(measurement: MeasurementMO) -> Double {
         return measurement.typedTracks().map { track in
             toDistance(track: track)
         }.reduce(0.0) { $0 + $1 }
     }
 
+    /**
+     Since the natie date structure always requires a time component (and that time component will change the date based on the users time zone), this struct provides us the possibility to only store a date.
+
+     - Author: Klemens Muthmann
+     - Version: 1.0.0
+     - Since: 3.2.2
+     */
     private struct DateWithOutTime: Equatable, Hashable {
+        /// The day in the month.
         let day: Int
+        /// The month in the year.
         let month: Int
+        /// The year AD.
         let year: Int
+        /// Whether the measurement with that date was synchronized.
         let synchronized: Bool
 
         static func == (lhs: DateWithOutTime, rhs: DateWithOutTime) -> Bool {

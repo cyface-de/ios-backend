@@ -46,33 +46,6 @@
 /* No comment provided by engineer. */
 "Datenschutzbestimmungen" = "Datenschutzbestimmungen";
 
-/* Tell the user, that the OAuth discovery failed for some reason.
-The actual reason is provided as a String message, as the first argument. */
-"de.cyface.error.oauthauthenticationerror.discoveryFailed" = "Es war nicht möglich die Einstellungen für die Authentifizierung vom Identitätsanbieter zu laden. Dies wurde durch %s verursacht. Dies kann auftreten, wenn der Identitätsanbieter gewartet wird oder derzeit nicht erreichbar ist, weil Ihr Telefon zum Beispiel keine funktionsfähige Internetverbindung hat. Bitte stellen Sie sicher, dass sie mit dem Internet verbunden sind und wiederholen Sie den Vorgang später. Falls das Problem auch nach einiger Zeit noch auftritt, wenden Sie sich an den Anbieter dieser Anwendung.";
-
-/* Tell the user, that the wrong HTTP status code was recieved. It should be 200. The actual value is provided as the first argument. */
-"de.cyface.error.oauthauthenticationerror.errorResponse" = "HTTP Status Code %d empfangen. Erwartet war 200 OK. Dieser Fehler kann zum Beispiel durch eine Serverwartung auftreten. Bitte wiederholen Sie den Vorgang zu einem späteren Zeitpunkt. Falls der Fehler über längere Zeit auftritt, wenden Sie sich bitte an den Anbieter dieser Anwendung.";
-
-/* Tell the user, that the response was not an HTTP response. This should not happen unless there is some serious implemenetation error. */
-"de.cyface.error.oauthauthenticationerror.invalidResponse" = "Die Antwort war keine gültige HTTP Antwort. Dieser Fehler sollte normalerweise nicht passieren. Es kann sein, dass Sie eine fehlerbehaftete Zwischenversion verwenden. Bitte aktualisieren Sie die Anwendung oder warten Sie auf die neueste Version.";
-
-/* Tell the user that an invalid JWT token was encountered! */
-"de.cyface.error.oauthauthenticationerror.invalidtoken" = "Es wurde eine falsch formatierte Authentifizierung empfangen. Dies lässt sich meistens auf einen Fehler bei der Einstellung des Identitätsanbieters zurückführen. Bitte wenden Sie sich an den Anbieter dieser Anwendung, um weitere Hinweise zu erhalten.";
-
-/* Tell the user, that the internal auth state did not exist.
-Since it is gracefully initialized before used for the first time, this is an error, that should not happen in production.
-The cause of this error is provided as the first parameter. */
-"de.cyface.error.oauthauthenticationerror.missingAuthState" = "Die Anwendung konnte den Stand der Authentifizierung nicht ermitteln. Dies deutet auf einen ernsthaften Fehler in der Umsetzung der Anwendung hin. Es könnte sein, dass Sie eine fehlerbehaftete Zwischenversion haben. Bitte aktualisieren Sie die Anwendung oder warten Sie auf die nächste Aktualisierung. Falls Sie Hilfe brauchen, wenden Sie sich bitte an den Anbieter dieser Anwendung.";
-
-/* Tell the user, that OAuth was called in a wrong state. Namely there was no ViewController provided to return to, after successful authentication. */
-"de.cyface.error.oauthauthenticationerror.missingCallackController" = "Authentifizierung schlug fehl, weil die Anwendung nicht weiß, welchen Bildschirm sie nach Abschluss der Anmeldung anzeigen soll. Dies sollte nur auftreten, wenn Sie eine fehlerbehaftete Zwischenversion verwenden. Bitte aktualisieren Sie die Anwendung. Falls Sie Hilfe benötigen, wenden Sie sich bitte an den Anbieter dieser Anwendung.";
-
-/* This error should not happen on a properly developed system. Tell the user to call for support! */
-"de.cyface.error.oauthauthenticationerror.missingresponse" = "Authentifizierungsanfrage wurde ohne Antwort aber auch ohne Fehler abgebrochen. Es ist unmöglich mit einem der beiden Fälle fortzufahren. Dies deutet auf eine fehlerhafte Zwischenversion der Anwendung hin. Bitte aktualisieren Sie die Anwendung und wenden Sie sich an den Anbieter dieser Anwendung, wenn Sie Unterstützung benötigen.";
-
-/* Tell the user that you received no valid auth token on a refresh request. This should actually not happen and points to some serious implementation mistakes. */
-"de.cyface.error.oauthauthenticatorerror.tokenMissing" = "Die Authentifizierung konnte nicht erneuert werden.";
-
 /* Tell the user that the e-mail address used for registration is not available anymore.
 In such cases the user either uses an e-mail address not belonging to her/him/them or tries to reregister, which is not permitted.
 To reset the password, the user needs to contact the Cyface support. */
@@ -125,14 +98,44 @@ The returned status code is provided as an Int as the first parameter! */
 /* Explain that no valid voucher information was found for the current user. */
 "de.cyface.error.rfrerror.missingVoucher" = "Ihr Gutschein konnte nicht geladen werden.";
 
-/* The system was unable to get a valid authentication token from the server. Either the server is not available or the user used invalid Credentials. */
-"de.cyface.error.rfrerror.unableToAuthenticate" = "Ihr Benutzerkonto konnte nicht authentifiziert werden. Möglicherweise ist der Authentifizierungsserver ausgefallen oder Sie haben ungültige Anmeldeinformationen angegeben. Bitte melden Sie sich ab und wieder an.";
-
 /* Tell the user that a measurement could not be loaded. The device wide unique identifier of the measurement is provided as the first parameter. */
 "de.cyface.error.rfrerror.unableToLoadMeasurement" = "Messung %@ konnte nicht geladen werden!";
 
 /* Explain to the user, that the system was unable to load the voucher overview. */
 "de.cyface.error.rfrerror.voucherOverviewFailed" = "Gutscheinübersicht konnte nicht geladen werden.";
+
+/* The subject of the participation E-Mail when sending a voucher. */
+"de.cyface.rfr.label.VoucherViewModel.mail_subject" = "Gewinnlos: \\(voucher.code)";
+
+/* Label telling the user when the next event happens. The date is provided as the first arguemnt. */
+"de.cyface.rfr.text.NoVoucher.next_event" = "Nächste Gewinnaktion ab %@";
+
+/* Label telling the user that there are no events at the moment. */
+"de.cyface.rfr.text.NoVoucher.no_events" = "Derzeit sind keine Gewinnaktionen verfügbar";
+
+/* Label telling the user that there are no events planned. */
+"de.cyface.rfr.text.NoVoucher.nothing_planned" = "Derzeit sind keine Gewinnaktionen geplant";
+
+/* A label containing the active voucher code, which is provided as the first argument. */
+"de.cyface.rfr.text.VoucherEnabled.code" = "Gutscheincode: %@";
+
+/* Tell the where to send a voucher code and what happens after sending it there. */
+"de.cyface.rfr.text.VoucherEnabled.game_explanation" = "Diesen Code an gewinnspiel@ready-for-robots.de schicken und an der Verlosung teilnehmen.";
+
+/* Button label for sending an E-Mail. */
+"de.cyface.rfr.text.VoucherEnabled.send_mail" = "E-Mail Senden";
+
+/* No comment provided by engineer. */
+"de.cyface.rfr.text.VoucherReached.show_voucher" = "Gewinnspiellos anzeigen";
+
+/* Tell the user that they achieved all goals to get the next voucher */
+"de.cyface.rfr.text.VoucherReached.voucher_active" = "Gewinnspiellos freigeschaltet";
+
+/* Tell the user how often they should pass town hall. The number is provided as the first argument */
+"de.cyface.rfr.text.VoucherRequirements.condition_town_hall" = "Bitte fahren Sie %d mal am Rathaus vorbei, um ein Gewinnlos zu erhalten!";
+
+/* Tell the user how many of their measurements they are still required to upload. The number of uploads required is provided as the first parameter. The second parameter are the uploads required alltogether. */
+"de.cyface.rfr.text.VoucherRequirements.condition_upload" = "Laden Sie bitte noch %d von %d Messungen hoch, um ein Gewinnlos zu erhalten!";
 
 /* No comment provided by engineer. */
 "E-Mail Adresse" = "E-Mail Adresse";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Ready for Robots App.
  *
@@ -25,7 +25,7 @@ import MessageUI
  View model used for the view showing the voucher.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 2.0.0
  - Since: 3.1.2
  */
 class VoucherViewModel: ObservableObject {
@@ -37,12 +37,15 @@ class VoucherViewModel: ObservableObject {
     @Published var voucher: Voucher?
     /// The number of available fouchers, shown as long as the current user did not acquire a voucher already.
     @Published var voucherCount: Int = 0
+    /// `true` if the view to send the acquired voucher via E-Mail should display; `false` otherwise.
     @Published var showMailView: Bool = false
+    /// The information making up an E-Mail.
     @Published var mailData: ComposeMailData?
     /// A handle to the `Vouchers` API, for retrieving voucher information from the server.
     private let vouchers: Vouchers
     /// An algorithm to calculate whether a user is eligleble for a voucher or not.
     private var voucherRequirements: VoucherRequirements
+    /// `true` if a voucher is redeemable at the moment; `false` if the competition period is over.
     private var voucherRedeemable: Bool {
         var redeemDate = DateComponents()
         redeemDate.year = 2024
@@ -91,7 +94,7 @@ class VoucherViewModel: ObservableObject {
     }
 
     // The following send E-Mail functionality is based on code from the following StackOverflowThread: https://stackoverflow.com/questions/25981422/how-to-open-mail-app-from-swift
-
+    /// This function is called if the user presses the send E-Mail button.
     func onSendEMailButtonPressed() {
         guard let voucher = voucher else {
             return
@@ -99,7 +102,7 @@ class VoucherViewModel: ObservableObject {
 
         // Modify following variables with your text / recipient
         let recipientEmail = "gewinnspiel@ready-for-robots.de"
-        let subject = "Gewinnlos: \(voucher.code)"
+        let subject = String(format: NSLocalizedString("de.cyface.rfr.label.VoucherViewModel.mail_subject", comment: "The subject of the participation E-Mail when sending a voucher."), voucher.code) //"Gewinnlos: \(voucher.code)"
         let body = ""
 
         if MFMailComposeViewController.canSendMail() {
@@ -110,7 +113,9 @@ class VoucherViewModel: ObservableObject {
         }
     }
 
-
+    /// Create a URL to send the E-Mail if the native mail application is not available.
+    ///
+    /// This tries to start GMail, Outlook, YahooMail, Spark or the default program registered for the mailto scheme.
     private func createEmailUrl(to: String, subject: String, body: String) -> URL? {
         let subjectEncoded = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
         let bodyEncoded = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
@@ -160,7 +165,9 @@ class VoucherViewModel: ObservableObject {
     /// Thereafter show a button to acquire a voucher and finally show the voucher itself if one was still available.
     @ViewBuilder
     func view() -> some View {
-        if voucherCount > 0 && !voucherRequirements.isQualifiedForVoucher() {
+        if !thereIsCurrentEvent() {
+          NoVoucher(voucherRedeemable: voucherRedeemable)
+        } else if voucherCount > 0 && !voucherRequirements.isQualifiedForVoucher() {
             voucherRequirements.progressView(voucherCount: voucherCount).padding([.top, .bottom])
         } else if voucherCount > 0 && voucherRequirements.isQualifiedForVoucher() && voucher == nil {
             VoucherReached(viewModel: self).padding([.top, .bottom])

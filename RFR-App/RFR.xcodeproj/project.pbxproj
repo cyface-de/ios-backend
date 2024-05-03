@@ -560,7 +560,6 @@
 		};
 		AA2B0B6E2B7530B100756DBD /* Highlight TODO and FIXME as warnings */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -755,7 +754,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
@@ -774,7 +773,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.1;
+				MARKETING_VERSION = 3.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "Ready for Robots";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -880,7 +879,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
@@ -899,7 +898,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.1;
+				MARKETING_VERSION = 3.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.staging;
 				PRODUCT_NAME = "Ready for Robots Staging";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -999,7 +998,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
@@ -1018,7 +1017,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.1;
+				MARKETING_VERSION = 3.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.staging;
 				PRODUCT_NAME = "Ready for Robots Staging";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1117,7 +1116,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
@@ -1136,7 +1135,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.1;
+				MARKETING_VERSION = 3.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR;
 				PRODUCT_NAME = "Ready for Robots";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1743,7 +1742,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
@@ -1762,7 +1761,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.1;
+				MARKETING_VERSION = 3.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.dev;
 				PRODUCT_NAME = "Ready for Robots Development";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1781,7 +1780,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"RFR/Resources/Preview Content\"";
 				DEVELOPMENT_TEAM = 45GZ5C9N64;
@@ -1800,7 +1799,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.1;
+				MARKETING_VERSION = 3.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = de.cyface.RFR.dev;
 				PRODUCT_NAME = "Ready for Robots Development";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

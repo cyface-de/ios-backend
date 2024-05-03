@@ -76,7 +76,7 @@ struct RFRApp: App {
  Those errors are published via the ``error`` property of this class.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 3.1.2
  */
 class AppModel: ObservableObject {
