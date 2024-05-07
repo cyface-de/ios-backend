@@ -33,8 +33,9 @@ func createEvents() -> [ClosedRange<Date>] {
     end.month = 5
     end.day = 31
     end.timeZone = TimeZone(abbreviation: "CEST")
-    end.hour = 0
-    end.minute = 0
+    end.hour = 23
+    end.minute = 59
+    end.second = 59
 
     return [Calendar.current.date(from: start)!...Calendar.current.date(from: end)!]
 }
