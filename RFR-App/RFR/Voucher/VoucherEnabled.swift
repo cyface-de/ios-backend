@@ -25,7 +25,7 @@ import DataCapturing
  This view shows the actual voucher code.
 
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 struct VoucherEnabled: View {
@@ -36,12 +36,32 @@ struct VoucherEnabled: View {
         if
             let voucher = viewModel.voucher {
             VStack {
-                Divider()
-                Text("Gutscheincode: \(voucher.code)")
+                Text(
+                    String.localizedStringWithFormat(
+                        NSLocalizedString(
+                            "de.cyface.rfr.text.VoucherEnabled.code",
+                            comment: "A label containing the active voucher code, which is provided as the first argument."
+                        ), voucher.code
+                    )
+                ).padding()
+                Rectangle().frame(height: 1, alignment: .center).padding([.leading, .trailing]).foregroundColor(.gray)
+                Text(
+                    "de.cyface.rfr.text.VoucherEnabled.game_explanation",
+                    comment: "Tell the where to send a voucher code and what happens after sending it there."
+                )
                     .padding()
-                Text("1x 15 Freiminuten auf die nächste Ausleihe in Schkeuditz - nextbike Nordsachsen")
-                    .padding()
-                //Text("gültig bis: \(dateFormatter.string(from: voucher.until))")
+                Button(action: {
+                    viewModel.onSendEMailButtonPressed()
+                }, label: {
+                    Text("de.cyface.rfr.text.VoucherEnabled.send_mail", comment: "Button label for sending an E-Mail.") // E-Mail Senden
+                })
+                .sheet(isPresented: $viewModel.showMailView, content: {
+                    if let mailData = viewModel.mailData {
+                        MailView(data: mailData) {_ in
+                            viewModel.showMailView.toggle()
+                        }
+                    }
+                })
             }
         } else {
             // TODO: Better make this an error alert
@@ -53,13 +73,13 @@ struct VoucherEnabled: View {
 #if DEBUG
 var previewVoucherViewModel: VoucherViewModel {
     let ret = VoucherViewModel(
-        authenticator: MockAuthenticator(),
-        url: try! ConfigLoader.load().getIncentivesUrl(),
-        dataStoreStack: MockDataStoreStack()
+        vouchers: MockVouchers(count: 2, voucher: Voucher(code: "test-voucher")),
+        voucherRequirements: VoucherRequirements(
+            dataStoreStack: MockDataStoreStack()
+        )
     )
     ret.voucher = Voucher(
-        code: "abcdefg",
-        until: "2023-12-31T23:59:59Z"
+        code: "abcdefg"
     )
 
     return ret

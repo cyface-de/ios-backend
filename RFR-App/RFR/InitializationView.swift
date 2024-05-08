@@ -26,7 +26,7 @@ import AppAuthCore
  The first view shown after starting the application. This should usually be the login link or some error message if startup failed.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 3.1.2
  */
 struct InitializationView: View {
@@ -106,9 +106,8 @@ let liveViewModel = LiveViewModel(
 )
 
 let voucherViewModel2 = VoucherViewModel(
-    authenticator: authenticator,
-    url: incentivesUrl,
-    dataStoreStack: mockDataStoreStack
+    vouchers: MockVouchers(count: 3, voucher: Voucher(code: "test-voucher")),
+    voucherRequirements: VoucherRequirements(dataStoreStack: mockDataStoreStack)
 )
 
 #Preview("Standard") {

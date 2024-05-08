@@ -92,6 +92,39 @@ The returned status code is provided as an Int as the first parameter! */
 /* Tell the user that a measurement could not be loaded. The device wide unique identifier of the measurement is provided as the first parameter. */
 "de.cyface.error.rfrerror.unableToLoadMeasurement" = "Measurement %@ could not be loaded!";
 
+/* The subject of the participation E-Mail when sending a voucher. */
+"de.cyface.rfr.label.VoucherViewModel.mail_subject" = "Raffle Ticket: %@";
+
+/* Label telling the user when the next event happens. The date is provided as the first arguemnt. */
+"de.cyface.rfr.text.NoVoucher.next_event" = "Next giveaway starting at %s";
+
+/* Label telling the user that there are no events at the moment. */
+"de.cyface.rfr.text.NoVoucher.no_events" = "Currently, there are no giveaways available";
+
+/* Label telling the user that there are no events planned. */
+"de.cyface.rfr.text.NoVoucher.nothing_planned" = "Currently, there are no giveaways planned";
+
+/* A label containing the active voucher code, which is provided as the first argument. */
+"de.cyface.rfr.text.VoucherEnabled.code" = "Raffle Ticket: %@";
+
+/* Tell the where to send a voucher code and what happens after sending it there. */
+"de.cyface.rfr.text.VoucherEnabled.game_explanation" = "Send this Code to gewinnspiel@ready-for-robots.de for a chance to win!";
+
+/* Button label for sending an E-Mail. */
+"de.cyface.rfr.text.VoucherEnabled.send_mail" = "Send E-Mail";
+
+/* No comment provided by engineer. */
+"de.cyface.rfr.text.VoucherReached.show_voucher" = "Show Raffle Ticket";
+
+/* Tell the user that they achieved all goals to get the next voucher */
+"de.cyface.rfr.text.VoucherReached.voucher_active" = "Raffle Ticket Unlocked";
+
+/* Tell the user how often they should pass town hall. The number is provided as the first argument */
+"de.cyface.rfr.text.VoucherRequirements.condition_town_hall" = "Please cycle on %d days near the town hall to unlock the raffle ticket";
+
+/* Tell the user how many of their measurements they are still required to upload. The number of uploads required is provided as the first parameter. The second parameter are the uploads required alltogether. */
+"de.cyface.rfr.text.VoucherRequirements.condition_upload" = "Please upload %d of %d measurements, for a chance to a raffle ticket!";
+
 /* No comment provided by engineer. */
 "E-Mail Adresse" = "E-Mail Address";
 

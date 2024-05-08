@@ -25,7 +25,7 @@ import DataCapturing
  It allows the user to actually claim one of the vouchers, if available.
  
  - Author: Klemens Muthmann
- - Version: 1.0.0
+ - Version: 1.0.1
  - Since: 3.1.2
  */
 struct VoucherReached: View {
@@ -43,8 +43,11 @@ struct VoucherReached: View {
                 Divider()
                 HStack {
                     Image(systemName: "checkmark.seal.fill")
-                    Text("nextbike Gutschein freigeschaltet")
-                        .padding()
+                    Text(
+                        "de.cyface.rfr.text.VoucherReached.voucher_active",
+                        comment: "Tell the user that they achieved all goals to get the next voucher"
+                    )
+                        .padding([.top, .bottom])
                 }
                 Button(action: {
                     Task {
@@ -55,11 +58,11 @@ struct VoucherReached: View {
                         }
                     }
                 }, label: {
-                    Text("Gutschein anzeigen")
+                    Text(String(localized: "de.cyface.rfr.text.VoucherReached.show_voucher").uppercased(with: .autoupdatingCurrent))
                         .frame(maxWidth: .infinity)
                         .foregroundColor(Color("ButtonText"))
                     
-                }
+                    }
                 )
             }
             .buttonStyle(.borderedProminent)
@@ -72,9 +75,11 @@ struct VoucherReached: View {
 #Preview {
     VoucherReached(
         viewModel: VoucherViewModel(
-            authenticator: MockAuthenticator(),
-            url: try! ConfigLoader.load().getIncentivesUrl(),
-            dataStoreStack: MockDataStoreStack()
+            vouchers: MockVouchers(count: 4, voucher: Voucher(code: "test-voucher")),
+            voucherRequirements: VoucherRequirements(
+                dataStoreStack: MockDataStoreStack(),
+                daysInSpecialRegionFullFilled: 3
+            )
         )
     )
 }

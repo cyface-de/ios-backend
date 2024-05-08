@@ -76,7 +76,7 @@ struct RFRApp: App {
  Those errors are published via the ``error`` property of this class.
 
  - Author: Klemens Muthmann
- - Version: 1.0.1
+ - Version: 1.0.2
  - Since: 3.1.2
  */
 class AppModel: ObservableObject {
@@ -90,7 +90,7 @@ class AppModel: ObservableObject {
     /// View model used to manage information about the complete collection of local measurements.
     let measurementsViewModel: MeasurementsViewModel
     /// View model used to manage voucher progress and download vouchers from a voucher server.
-    let voucherViewModel: VoucherViewModel
+    var voucherViewModel: VoucherViewModel
     /// The authenticator used by this application to communicate with the Cyface Data Collector and the voucher server.
     let authenticator: Authenticator
     /// Tells the view about errors occuring during initialization.
@@ -145,10 +145,15 @@ class AppModel: ObservableObject {
                 uploadProcessBuilder: uploadProcessBuilder,
                 measurementsViewModel: measurementsViewModel
             )
-            voucherViewModel = VoucherViewModel(
-                authenticator: authenticator,
-                url: incentivesUrl,
+            let voucherRequirements = VoucherRequirements(
                 dataStoreStack: dataStoreStack
+            )
+            voucherViewModel = VoucherViewModel(
+                vouchers: VouchersApi(
+                        authenticator: authenticator,
+                        url: incentivesUrl
+                    ),
+                voucherRequirements: voucherRequirements
             )
 
             Task {
@@ -167,6 +172,7 @@ class AppModel: ObservableObject {
                         try context.save()
                     }
                     try await measurementsViewModel.setup()
+
                     initialized = true
                 } catch {
                     self.error = error

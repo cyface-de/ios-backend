@@ -27,6 +27,7 @@ import OSLog
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.2.2
  */
 class MockAuthenticator: Authenticator {
     func authenticate(onSuccess: @escaping (String) -> Void, onFailure: @escaping (Error) -> Void) {
@@ -55,6 +56,7 @@ class MockAuthenticator: Authenticator {
 
  - Author: Klemens Muthmann
  - Version: 1.0.0
+ - Since: 3.2.2
  */
 class MockDataStoreStack: DataStoreStack {
 
@@ -79,6 +81,27 @@ class MockDataStoreStack: DataStoreStack {
 
     func setup() async throws {
         // Nothing to do here!
+    }
+}
+
+/**
+ A mock for the vouchers interface avoiding actual network communication.
+
+ This should be used during testing and for previews.
+
+ - Author: Klemens Muthmann
+ - Version: 1.0.0
+ - Since: 3.2.2
+ */
+struct MockVouchers: Vouchers {
+    /// The amount of simulated vouchers available.
+    var count: Int
+    /// The voucher currently enabled for the active user.
+    let voucher: Voucher
+
+    /// Simulate requesting a voucher from the server. This will always return the hard coded voucher provided on initialization.
+    func requestVoucher() async throws -> Voucher {
+        return voucher
     }
 }
 
