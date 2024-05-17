@@ -148,8 +148,8 @@ class MeasurementsViewModel: ObservableObject {
             latitude: northWestCorner.coordinate.latitude - latitudeDistance/2,
             longitude: northWestCorner.coordinate.longitude + longitudeDistance/2
         )
-        let northSouthReach = min(southWestCorner.distance(from: northWestCorner), 0.1)
-        let eastWestReach = min(northWestCorner.distance(from: northEastCorner), 0.1)
+        let northSouthReach = max(southWestCorner.distance(from: northWestCorner), 0.1)
+        let eastWestReach = max(northWestCorner.distance(from: northEastCorner), 0.1)
         let synchronizationState = SynchronizationState.from(measurement: measurement)
         return Measurement(
             id: UInt64(measurement.identifier),
