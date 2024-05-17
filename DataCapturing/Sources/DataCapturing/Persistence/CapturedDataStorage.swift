@@ -162,6 +162,8 @@ public class CapturedCoreDataStorage<SVFF: SensorValueFileFactory> where SVFF.Se
                     os_log("Message %{PUBLIC}@ irrelevant for data storage and thus ignored.",log: OSLog.persistence, type: .debug, message.description)
                 }
             }
+
+            try context.save()
         }
     }
 
