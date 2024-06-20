@@ -23,8 +23,6 @@ import Foundation
  A structure encapsulating errors used by server connections.
 
  - Author: Klemens Muthmann
- - Version: 6.0.0
- - Since: 1.0.0
  */
 public enum ServerConnectionError: Error {
     /// If authentication was carried out but was not successful. The username of the failed authentication attempt is provided as a parameter.

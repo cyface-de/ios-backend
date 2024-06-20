@@ -28,8 +28,6 @@ import OSLog
  A `Measurement` can be synchronized to a Cyface server via an instance of `Synchronizer`.
 
  - Author: Klemens Muthmann
- - Version: 2.0.0
- - since: 11.0.0
  */
 public class FinishedMeasurement: Hashable, Equatable {
     /// A device wide unique identifier for this measurement. Usually set by incrementing a counter.
@@ -75,9 +73,19 @@ public class FinishedMeasurement: Hashable, Equatable {
      - throws: `InconstantData.locationOrderViolation` if the timestamps of the locations in this measurement are not strongly monotonically increasing.
      */
     public convenience init(managedObject: MeasurementMO) throws {
-        let accelerationFile = SensorValueFile(fileType: .accelerationValueType, qualifier: String(managedObject.unsignedIdentifier))
-        let directionFile = SensorValueFile(fileType: .directionValueType, qualifier: String(managedObject.unsignedIdentifier))
-        let rotationFile = SensorValueFile(fileType: .rotationValueType, qualifier: String(managedObject.unsignedIdentifier))
+        let sensorValueFileFactory = DefaultSensorValueFileFactory()
+        let accelerationFile = try sensorValueFileFactory.create(
+            fileType: .accelerationValueType,
+            qualifier: String(managedObject.unsignedIdentifier)
+        )
+        let directionFile = try sensorValueFileFactory.create(
+            fileType: .directionValueType,
+            qualifier: String(managedObject.unsignedIdentifier)
+        )
+        let rotationFile = try sensorValueFileFactory.create(
+            fileType: .rotationValueType,
+            qualifier: String(managedObject.unsignedIdentifier)
+        )
 
         self.init(
             identifier: managedObject.unsignedIdentifier,
